@@ -1,0 +1,9 @@
+.idea
+venv/
+__pycache__
+.nef
+.manifest.json
+.avmdbgnfo
+.abi.json
+dist
+/build
