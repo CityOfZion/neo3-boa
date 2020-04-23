@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  unit_test:
+    working_directory: ~
+    docker:
+      - image: circleci/python:3.7.2
+    #environment:
+    steps:
+      - checkout
+      - run:
+          command: |
+            echo "Hello COZ!"
+
+#workflows:
+#  version: 2
+#  test:
+#    jobs:
+#      - unit_test:
+#          filters:
