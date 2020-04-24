@@ -1,0 +1,6 @@
+[run]
+source = boa3
+
+[report]
+omit =
+  boa3_test/*
