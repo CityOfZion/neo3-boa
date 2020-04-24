@@ -18,7 +18,7 @@ setup(
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
 
-    description='A Python compiler for the Neo Virtual Machine',
+    description='A Python compiler for the Neo3 Virtual Machine',
     long_description=long_description,
 
     # The project's main homepage.
