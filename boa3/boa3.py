@@ -1,4 +1,5 @@
 from boa3.compiler.compiler import Compiler
+from boa3.exception.InvalidPathException import InvalidPathException
 
 
 class Boa3:
@@ -8,13 +9,16 @@ class Boa3:
     """
 
     @staticmethod
-    def compile(path: str) -> bytearray:
+    def compile(path: str) -> bytes:
         """
         Load a Python file to be compiled but don't write the result into a file
 
         :param path: the path of the Python file to compile
         :return: the bytecode of the compiled .nef file
         """
+        if not path.endswith('.py'):
+            raise InvalidPathException(path)
+
         return Compiler().compile(path)
 
     @staticmethod
@@ -27,4 +31,12 @@ class Boa3:
         :param path: the path of the Python file to compile
         :param output_path: Optional path to save the generated files
         """
+        if not path.endswith('.py'):
+            raise InvalidPathException(path)
+
+        if output_path is None:
+            output_path = path.replace('.py', '.nef')
+        elif not output_path.endswith('.nef'):
+            raise InvalidPathException(path)
+
         Compiler().compile_and_save(path, output_path)

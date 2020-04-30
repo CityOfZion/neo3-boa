@@ -1,4 +1,5 @@
 from boa3.model.expression import IExpression
+from boa3.model.type.type import IType
 
 
 class Variable(IExpression):
@@ -7,9 +8,10 @@ class Variable(IExpression):
 
     :ivar var_type: the type of the variable.
     """
-    def __init__(self, var_type: type):
-        self.var_type: type = var_type
+
+    def __init__(self, var_type: IType):
+        self.var_type: IType = var_type
 
     @property
-    def type(self) -> type:
+    def type(self) -> IType:
         return self.var_type

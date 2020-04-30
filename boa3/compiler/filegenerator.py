@@ -1,4 +1,4 @@
-class Generator:
+class FileGenerator:
     """
     This class is responsible for generating the files.
     """
