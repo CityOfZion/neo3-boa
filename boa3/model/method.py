@@ -14,12 +14,20 @@ class Method(IExpression):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = {}, return_type: IType = None):
+    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = None):
+        if args is None:
+            args = {}
         self.args: Dict[str, Variable] = args
         self.return_type: IType = return_type
         self.locals: Dict[str, Variable] = {}
 
     def include_variable(self, var_id: str, var: Variable):
+        """
+        Includes a variable into the list of locals
+
+        :param var_id: variable identifier
+        :param var: variable to be included
+        """
         if var_id not in self.symbols:
             self.locals[var_id] = var
 

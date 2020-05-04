@@ -13,8 +13,20 @@ from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class CodeGenerator:
+    """
+    This class is responsible for generating the Neo VM bytecode
+
+    :ivar symbol_table: a dictionary that maps the global symbols.
+    """
+
     @staticmethod
     def generate_code(analyser: Analyser) -> bytes:
+        """
+        Generates the Neo VM bytecode using of the analysed Python code
+
+        :param analyser: semantic analyser it tge Python code
+        :return: the Neo VM bytecode
+        """
         from boa3.compiler.codegeneratorvisitor import VisitorCodeGenerator
 
         generator = CodeGenerator(analyser.symbol_table)
@@ -83,7 +95,7 @@ class CodeGenerator:
         elif isinstance(value, bool):
             self.convert_bool_literal(value)
         else:
-            # TODO
+            # TODO: convert other python literals as they are implemented
             pass
 
     def convert_integer_literal(self, value: int):

@@ -28,10 +28,24 @@ class TypeAnalyser(NodeVisitor, IAstAnalyser):
         raise error
 
     def visit_Module(self, module: ast.Module):
+        """
+        Visitor of the module node
+
+        Performs the type checking in the body of the method
+
+        :param module: the python ast module node
+        """
         for stmt in module.body:
             self.visit(stmt)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
+        """
+        Visitor of the function node
+
+        Performs the type checking in the body of the function
+
+        :param function: the python ast function definition node
+        """
         self.visit(function.args)
         if function.returns is not None:
             if isinstance(function.returns, ast.Name):
@@ -44,6 +58,11 @@ class TypeAnalyser(NodeVisitor, IAstAnalyser):
         self.visiting_function_return = None
 
     def visit_arguments(self, arguments: ast.arguments):
+        """
+        Verifies if each argument of a function has a type annotation
+
+        :param arguments: the python ast function arguments node
+        """
         for arg in arguments.args:
             self.visit(arg)
 
@@ -91,7 +110,7 @@ class TypeAnalyser(NodeVisitor, IAstAnalyser):
         """
         Verifies if the number is an integer
 
-        :param num: the python ast num node
+        :param num: the python ast number node
         :return: returns the value of the number
         """
         if not isinstance(num.n, int):

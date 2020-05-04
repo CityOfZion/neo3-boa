@@ -11,6 +11,7 @@ class IType(ISymbol):
 
 class Type(Enum):
     int = IType('int')
+    bool = IType('bool')
     str = IType('str')
     none = IType('none')
 

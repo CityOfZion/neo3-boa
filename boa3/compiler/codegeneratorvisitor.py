@@ -22,7 +22,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of the function definition node
 
-        :param function:
+        Generates the Neo VM code for the function
+
+        :param function: the python ast function definition node
         """
         fun_args: Dict[str, Variable] = self.visit(function.args)
         if function.returns is not None:
@@ -44,7 +46,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of the function arguments node
 
-        :param arguments:
+        :param arguments: the python ast function arguments node
         :return: a dictionary that maps each argument to its identifier
         """
         args: Dict[str, Variable] = {}
@@ -58,7 +60,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of a function argument node
 
-        :param arg:
+        :param arg: the python ast arg node
         :return: a tuple with the identifier and the argument
         """
         var_id = arg.arg
@@ -70,8 +72,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of a function return node
 
-        :param ret:
-        :return:
+        :param ret: the python ast return node
         """
         if ret.value is not None:
             value = self.visit(ret.value)
@@ -85,7 +86,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of a name node
 
-        :param name:
+        :param name: the python ast name identifier node
         :return: the identifier of the name
         """
         return name.id
@@ -94,7 +95,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of constant names node
 
-        :param constant:
+        :param constant: the python ast name constant node
         :return: the value of the constant
         """
         return constant.value
@@ -103,7 +104,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of literal number node
 
-        :param num:
+        :param num: the python ast number node
         :return: the value of the number
         """
         return num.n
@@ -112,7 +113,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of literal string node
 
-        :param str:
+        :param str: the python ast string node
         :return: the value of the string
         """
         return str.s

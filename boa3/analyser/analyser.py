@@ -34,12 +34,16 @@ class Analyser(object):
             ast_tree = ast.parse(source.read())
 
         analyser = Analyser(ast_tree)
+        # TODO: Include other analysis as they are implemented
         analyser.__check_types()
         analyser.is_analysed = True  # TODO
 
         return analyser
 
     def __include_builtins_symbols(self):
+        """
+        Include the Python builtins in the global symbol table
+        """
         for type in Type:
             self.symbol_table[type.name] = type.symbol
 
