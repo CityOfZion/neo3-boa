@@ -12,6 +12,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
     """
     This class is responsible for walk through the ast.
 
+    The methods with the name starting with 'visit_' are implementations of methods from the :class:`NodeVisitor` class.
+    These methods are used to walk through the Python abstract syntax tree.
+
     :ivar generator:
     """
 

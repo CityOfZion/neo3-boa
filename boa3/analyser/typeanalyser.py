@@ -1,6 +1,6 @@
 import ast
 from ast import NodeVisitor
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception.CompilerError import *
@@ -10,6 +10,9 @@ from boa3.model.module import Module
 class TypeAnalyser(NodeVisitor, IAstAnalyser):
     """
     This class is responsible for the type checking of the code
+
+    The methods with the name starting with 'visit_' are implementations of methods from the :class:`NodeVisitor` class.
+    These methods are used to walk through the Python abstract syntax tree.
 
     :ivar type_errors: a list with the found type errors. Empty by default.
     """
