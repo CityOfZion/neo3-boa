@@ -2,8 +2,12 @@
 venv/
 __pycache__
 .nef
+*.nef
 .manifest.json
+*.manifest.json
 .avmdbgnfo
+*.avmdbgnfo
 .abi.json
+*.abi.json
 dist
 /build
