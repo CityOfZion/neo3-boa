@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, Optional
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
@@ -7,7 +7,7 @@ from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
-from boa3.model.type.type import IType, Type
+from boa3.model.type.type import IType
 from boa3.model.variable import Variable
 
 
@@ -87,6 +87,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if method_id not in self.__current_module.symbols:
             self.__current_module.include_method(method_id, method)
 
+    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+        if symbol_id in self.__current_scope.symbols:
+            # the symbol exists in the local scope
+            return self.__current_scope.symbols[symbol_id]
+        elif symbol_id in self.__current_module.symbols:
+            # the symbol exists in the module scope
+            return self.__current_module.symbols[symbol_id]
+        elif symbol_id in self.symbols:
+            # the symbol exists in the global scope
+            return self.symbols[symbol_id]
+        else:
+            return None
+
     def visit_Module(self, module: ast.Module):
         """
         Visitor of the module node
@@ -150,6 +163,23 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return var_id, Variable(var_type)
 
+    def visit_Return(self, ret: ast.Return):
+        """
+        Visitor of the function return node
+
+        If the return is a name, verifies if the symbol is defined
+
+        :param ret: the python ast return node
+        """
+        if isinstance(ret.value, ast.Name):
+            symbol_id = self.visit(ret.value)
+            symbol = self.get_symbol(symbol_id)
+            if symbol is None:
+                # the symbol doesn't exists
+                self._log_error(
+                    CompilerError.UnresolvedReference(ret.value.lineno, ret.value.col_offset, symbol_id)
+                )
+
     def visit_Assign(self, assign: ast.Assign):
         """
         Visitor of the variable assignment node
@@ -160,16 +190,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         var_id = self.visit(assign.targets[0])
         var_value = self.visit(assign.value)
-        if not isinstance(assign.value, ast.Name):
-            # is python builtin type
-            if var_value is None:
-                var_type_id = Type.none.identifier
-            else:
-                var_type_id = type(var_value).__name__
-        elif var_value is None:
-            var_type_id = Type.none.identifier
+        if isinstance(assign.value, ast.Name):
+            symbol = self.get_symbol(var_value)
+            if symbol is None:
+                # the symbol doesn't exists
+                self._log_error(
+                    CompilerError.UnresolvedReference(assign.value.lineno, assign.value.col_offset, var_value)
+                )
+            var_type_id = self.get_type(symbol).identifier
         else:
-            var_type_id = var_value
+            var_type_id = self.get_type(var_value).identifier
+
         self.__include_variable(var_id, var_type_id)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):

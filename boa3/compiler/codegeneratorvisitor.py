@@ -37,8 +37,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         # the default return of the name visitor is the name string
         if isinstance(node, ast.Name):
-            # TODO: validate variables and function calls
-            raise NotImplementedError
+            # TODO: validate function calls
+            self.generator.convert_load_symbol(result)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -104,14 +104,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
     def store_variable(self, var_id: str, value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
-            if isinstance(value, ast.Name):
-                value_id: str = self.visit(value)
-                var_value = self.symbols[var_id]
-                # TODO: implement conversion of variable and function calls
-            else:
-                # visit to convert the expression of the assignment
-                self.visit(value)
-
+            self.visit_to_generate(value)
             self.generator.convert_store_variable(var_id)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):

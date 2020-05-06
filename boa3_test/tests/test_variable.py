@@ -141,3 +141,61 @@ class TestVariable(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_return_arg_value(self):
+        expected_output = (
+            Opcode.INITSLOT.value       # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0.value       # variable address
+            + Opcode.RET.value
+        )
+
+        path = '%s/boa3_test/example/variable_test/ReturnArgument.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_return_local_var_value(self):
+        expected_output = (
+            Opcode.INITSLOT.value       # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.PUSH1.value
+            + Opcode.STLOC0.value
+            + Opcode.LDLOC0.value       # variable address
+            + Opcode.RET.value
+        )
+
+        path = '%s/boa3_test/example/variable_test/ReturnLocalVariable.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_assign_local_with_arg_value(self):
+        expected_output = (
+            Opcode.INITSLOT.value       # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0.value
+            + Opcode.STLOC0.value
+            + Opcode.LDLOC0.value       # variable address
+            + Opcode.RET.value
+        )
+
+        path = '%s/boa3_test/example/variable_test/AssignLocalWithArgument.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_using_undeclared_variable(self):
+        path = '%s/boa3_test/example/variable_test/UsingUndeclaredVariable.py' % self.dirname
+
+        with self.assertRaises(UnresolvedReference):
+            output = Boa3.compile(path)
+
+    def test_return_undeclared_variable(self):
+        path = '%s/boa3_test/example/variable_test/ReturnUndeclaredVariable.py' % self.dirname
+
+        with self.assertRaises(UnresolvedReference):
+            output = Boa3.compile(path)

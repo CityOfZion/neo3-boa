@@ -53,6 +53,32 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             index = list(self.symbols.values()).index(self.__current_method)
             return list(self.symbols.keys())[index]
 
+    @property
+    def __modules_symbols(self) -> Dict[str, ISymbol]:
+        """
+        Gets all the symbols in the modules scopes.
+
+        :return: Returns a dictionary that maps the modules symbols.
+        """
+        symbols = {}
+        for module in self.modules.values():
+            symbols.update(module.symbols)
+        return symbols
+
+    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+        if self.__current_method is not None and symbol_id in self.__current_method.symbols:
+            # the symbol exists in the local scope
+            return self.__current_method.symbols[symbol_id]
+        elif symbol_id in self.modules:
+            # the symbol exists in the modules scope
+            return self.modules[symbol_id]
+        elif symbol_id in self.symbols:
+            # the symbol exists in the global scope
+            return self.symbols[symbol_id]
+        else:
+            # the symbol was not found
+            return None
+
     def visit_Module(self, module: ast.Module):
         """
         Visitor of the module node

@@ -2,10 +2,11 @@ from typing import Dict
 
 from boa3.model.expression import IExpression
 from boa3.model.method import Method
+from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
 
 
-class Module:
+class Module(ISymbol):
     """
     A class used to represent a Python module
 
