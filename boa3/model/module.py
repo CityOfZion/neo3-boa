@@ -12,8 +12,14 @@ class Module:
     :ivar variables: a dictionary that maps each variable with its name. Empty by default.
     :ivar methods: a dictionary that maps each method with its name. Empty by default.
     """
-    def __init__(self, variables: Dict[str, Variable] = {}, methods: Dict[str, Method] = {}):
+
+    def __init__(self, variables: Dict[str, Variable] = None, methods: Dict[str, Method] = None):
+        if variables is None:
+            variables = {}
         self.variables = variables
+
+        if methods is None:
+            methods = {}
         self.methods = methods
 
     @property

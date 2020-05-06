@@ -1,4 +1,7 @@
-from boa3.compiler.generator import Generator
+from boa3.analyser.analyser import Analyser
+from boa3.compiler.codegenerator import CodeGenerator
+from boa3.compiler.filegenerator import FileGenerator
+from boa3.exception.NotLoadedException import NotLoadedException
 
 
 class Compiler:
@@ -11,9 +14,10 @@ class Compiler:
 
     def __init__(self):
         self.bytecode: bytearray = bytearray()
-        self.__generator: Generator = Generator()
+        self.__generator: FileGenerator = FileGenerator()
+        self.__analyser: Analyser
 
-    def compile(self, path: str) -> bytearray:
+    def compile(self, path: str) -> bytes:
         """
         Load a Python file and tries to compile it
 
@@ -31,25 +35,27 @@ class Compiler:
         :param output_path: the path to save the generated files
         """
         self.__analyse(path)
-        self.__compile()
+        self.bytecode = self.__compile()
         self.__save(output_path)
 
     def __analyse(self, path: str):
         """
-        Load a Python file and analysis its syntax
+        Load a Python file and analyses its syntax
 
         :param path: the path of the Python file to compile
         """
-        pass
+        self.__analyser = Analyser.analyse(path)
 
-    def __compile(self) -> bytearray:
+    def __compile(self) -> bytes:
         """
         Compile the analysed Python file.
 
         :return: the compiled file as a bytecode.
         :raise NotLoadedException: raised if none file were analysed
         """
-        pass
+        if not self.__analyser.is_analysed:
+            raise NotLoadedException
+        return CodeGenerator.generate_code(self.__analyser)
 
     def __save(self, output_path: str):
         """
