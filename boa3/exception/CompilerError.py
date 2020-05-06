@@ -39,6 +39,24 @@ class InvalidType(CompilerError):
         super().__init__(line, col, message)
 
 
+class NotSupportedOperation(CompilerError):
+    """
+    An error raised when an operation that is not supported by Neo VM is used
+    """
+    def __init__(self, line: int, col: int, symbol_id: str):
+        message = "The following operation is not supported: '%s'" % symbol_id
+        super().__init__(line, col, message)
+
+
+class UnresolvedReference(CompilerError):
+    """
+    An error raised when an undefined symbol is used
+    """
+    def __init__(self, line: int, col: int, symbol_id: str):
+        message = "Unresolved reference '%s'" % symbol_id
+        super().__init__(line, col, message)
+
+
 class MismatchedTypes(CompilerError):
     """
     An error raised when the evaluated and expected types are not the same

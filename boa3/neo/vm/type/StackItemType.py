@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class StackItemType(Enum):
+class StackItemType(bytes, Enum):
     Any = b'\x00'
     Pointer = b'\x10'
     Boolean = b'\x20'

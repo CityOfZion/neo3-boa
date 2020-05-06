@@ -1,8 +1,10 @@
 import sys
 from enum import Enum
 
+from boa3.neo.vm.type.Integer import Integer
 
-class Opcode(Enum):
+
+class Opcode(bytes, Enum):
 
     # Constants
 
@@ -34,8 +36,8 @@ class Opcode(Enum):
         :rtype: Opcode or None
         """
         if -1 <= integer <= 16:
-            opcode_value = int.from_bytes(Opcode.PUSH0.value, sys.byteorder) + integer
-            return Opcode(bytes([opcode_value]))
+            opcode_value = int.from_bytes(Opcode.PUSH0, sys.byteorder) + integer
+            return Opcode(Integer(opcode_value).to_byte_array())
         else:
             return None
 
@@ -209,6 +211,64 @@ class Opcode(Enum):
     # Initialize the argument slot and the local variable list for the current execution context.
     INITSLOT = b'\x57'
     # Loads the static field at index 0 onto the evaluation stack.
+
+    @staticmethod
+    def get_store(index: int, local: bool, is_arg: bool = False):
+        """
+        Gets the opcode to store the variable
+
+        :param index: index of the variable
+        :param local: identifies if the variable is local or global
+        :param is_arg: identifies if the variable is an argument of a function. False if local is False.
+        :return: the respective opcode
+        :rtype: Opcode
+        """
+        if not local:
+            is_arg = False
+
+        if 0 <= index <= 6:
+            if is_arg:
+                opcode_value = int.from_bytes(Opcode.STARG0, sys.byteorder) + index
+            elif local:
+                opcode_value = int.from_bytes(Opcode.STLOC0, sys.byteorder) + index
+            else:
+                opcode_value = int.from_bytes(Opcode.STSFLD0, sys.byteorder) + index
+            return Opcode(Integer(opcode_value).to_byte_array())
+        else:
+            if is_arg:
+                return Opcode.STARG
+            elif local:
+                return Opcode.STLOC
+            else:
+                return Opcode.STSFLD
+
+    @staticmethod
+    def get_load(index: int, local: bool, is_arg: bool = False):
+        """
+        Gets the opcode to load the variable
+
+        :param index: index of the variable
+        :param local: identifies if the variable is local or global
+        :param is_arg: identifies if the variable is an argument of a function. False if local is False.
+        :return: the respective opcode
+        :rtype: Opcode
+        """
+        if 0 <= index <= 6:
+            if is_arg:
+                opcode_value = int.from_bytes(Opcode.LDARG0, sys.byteorder) + index
+            elif local:
+                opcode_value = int.from_bytes(Opcode.LDLOC0, sys.byteorder) + index
+            else:
+                opcode_value = int.from_bytes(Opcode.LDSFLD0, sys.byteorder) + index
+            return Opcode(Integer(opcode_value).to_byte_array())
+        else:
+            if is_arg:
+                return Opcode.LDARG
+            elif local:
+                return Opcode.LDLOC
+            else:
+                return Opcode.LDSFLD
+
     LDSFLD0 = b'\x58'
     # Loads the static field at index 1 onto the evaluation stack.
     LDSFLD1 = b'\x59'
