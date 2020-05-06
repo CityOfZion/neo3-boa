@@ -3,6 +3,8 @@ from typing import Dict, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.model.method import Method
+from boa3.model.operation.binaryop import BinaryOp
+from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type, IType
 from boa3.model.variable import Variable
@@ -122,6 +124,27 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         var_id = self.visit(assign.targets[0])
         self.store_variable(var_id, assign.value)
 
+    def visit_BinOp(self, bin_op: ast.BinOp):
+        """
+        Visitor of a binary operation node
+
+        :param bin_op: the python ast binary operation node
+        """
+        if isinstance(bin_op.op, BinaryOp):
+            self.visit(bin_op.left)
+            self.visit(bin_op.right)
+            self.generator.convert_operation(bin_op.op)
+
+    def visit_UnaryOp(self, un_op: ast.UnaryOp):
+        """
+        Visitor of a binary operation node
+
+        :param un_op: the python ast binary operation node
+        """
+        if isinstance(un_op.op, UnaryOp):
+            self.visit(un_op.operand)
+            self.generator.convert_operation(un_op.op)
+
     def visit_Name(self, name: ast.Name) -> str:
         """
         Visitor of a name node
@@ -145,7 +168,6 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         Visitor of literal number node
 
         :param num: the python ast number node
-        :return: the value of the number
         """
         self.generator.convert_literal(num.n)
 
@@ -154,6 +176,5 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         Visitor of literal string node
 
         :param str: the python ast string node
-        :return: the value of the string
         """
         self.generator.convert_literal(str.s)
