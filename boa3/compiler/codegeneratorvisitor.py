@@ -147,6 +147,21 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             self.visit_to_generate(un_op.operand)
             self.generator.convert_operation(un_op.op)
 
+    def visit_Compare(self, compare: ast.Compare):
+        """
+        Visitor of a compare operation node
+
+        :param compare: the python ast compare operation node
+        """
+        left = compare.left
+        for index, op in enumerate(compare.ops):
+            right = compare.comparators[index]
+            if isinstance(op, BinaryOperation):
+                self.visit(left)
+                self.visit(right)
+                self.generator.convert_operation(op)
+            left = right
+
     def visit_Name(self, name: ast.Name) -> str:
         """
         Visitor of a name node

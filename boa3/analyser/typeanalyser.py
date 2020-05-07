@@ -300,6 +300,70 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             expected_type: str = expected_op.operand_type.identifier
             raise CompilerError.MismatchedTypes(0, 0, expected_type, actual_type)
 
+    def visit_Compare(self, compare: ast.Compare) -> Optional[IType]:
+        """
+        Verifies if the types of the operands are valid to the compare operations
+
+        If the operations are valid, changes de Python operator by the Boa operator in the syntax tree
+
+        :param compare: the python ast compare operation node
+        :return: the type of the result of the operation if the operation is valid. Otherwise, returns None
+        :rtype: IType or None
+        """
+        if len(compare.ops) > 1:
+            # TODO: implement when logical operations are implemented
+            raise NotImplementedError
+
+        if len(compare.comparators) != len(compare.ops):
+            self._log_error(
+                CompilerError.IncorrectNumberOfOperands(
+                    compare.lineno,
+                    compare.col_offset,
+                    len(compare.ops),
+                    len(compare.comparators) + 1    # num comparators + compare.left
+                )
+            )
+
+        lineno = compare.lineno
+        col_offset = compare.col_offset
+        try:
+            return_type = None
+            l_operand = self.visit(compare.left)
+            for index, op in enumerate(compare.ops):
+                operator: Operator = self.visit(op)
+                r_operand = self.visit(compare.comparators[index])
+
+                if not isinstance(operator, Operator):
+                    # the operator is invalid or it was not implemented yet
+                    self._log_error(
+                        CompilerError.UnresolvedReference(lineno, col_offset, type(operator).__name__)
+                    )
+
+                operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
+                if operation is None:
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(lineno, col_offset, operator)
+                    )
+                elif BinaryOp.get_operation(operation) in [BinaryOp.Is, BinaryOp.IsNot, BinaryOp.Eq]:
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(lineno, col_offset, operator)
+                    )
+                else:
+                    compare.ops[index] = operation
+                    return_type = operation.result
+
+                lineno = compare.comparators[index].lineno
+                col_offset = compare.comparators[index].col_offset
+                l_operand = r_operand
+
+            return return_type
+        except CompilerError.MismatchedTypes as raised_error:
+            expected_types = raised_error.args[2]
+            actual_types = raised_error.args[3]
+            self._log_error(
+                CompilerError.MismatchedTypes(lineno, col_offset, expected_types, actual_types)
+            )
+
     def visit_Add(self, add: ast.Add) -> Operator:
         """
         Returns the operator equivalent to Python add operator
@@ -362,6 +426,78 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: returns the equivalent Boa :class:`Operator`
         """
         return Operator.Minus
+
+    def visit_Eq(self, eq: ast.Eq) -> Operator:
+        """
+        Returns the operator equivalent to Python equality operator
+
+        :param eq: the python ast '==' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.Eq
+
+    def visit_NotEq(self, noteq: ast.NotEq) -> Operator:
+        """
+        Returns the operator equivalent to Python inequality operator
+
+        :param noteq: the python ast '!=' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.NotEq
+
+    def visit_Lt(self, lt: ast.Lt) -> Operator:
+        """
+        Returns the operator equivalent to Python less than operator
+
+        :param lt: the python ast '<' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.Lt
+
+    def visit_LtE(self, lte: ast.LtE) -> Operator:
+        """
+        Returns the operator equivalent to Python less or equal than operator
+
+        :param lte: the python ast '<=' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.LtE
+
+    def visit_Gt(self, gt: ast.Gt) -> Operator:
+        """
+        Returns the operator equivalent to Python less than operator
+
+        :param gt: the python ast '>' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.Gt
+
+    def visit_GtE(self, gte: ast.GtE) -> Operator:
+        """
+        Returns the operator equivalent to Python less or equal than operator
+
+        :param gte: the python ast '>=' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.GtE
+
+    def visit_Is(self, is_node: ast.Is) -> Operator:
+        """
+        Returns the operator equivalent to Python less or equal than operator
+
+        :param is_node: the python ast 'is' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.Is
+
+    def visit_IsNot(self, isnot: ast.IsNot) -> Operator:
+        """
+        Returns the operator equivalent to Python less or equal than operator
+
+        :param isnot: the python ast 'is' operand node
+        :return: returns the equivalent Boa :class:`Operator`
+        """
+        return Operator.IsNot
 
     def visit_Num(self, num: ast.Num) -> int:
         """
