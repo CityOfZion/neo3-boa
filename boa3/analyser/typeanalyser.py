@@ -8,8 +8,10 @@ from boa3.model.method import Method
 from boa3.model.expression import IExpression
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
+from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operator import Operator
+from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.type.type import Type, IType
 
@@ -196,20 +198,20 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         try:
-            operation: BinaryOp = self.get_bin_op(operator, r_operand, l_operand)
+            operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
             if operation is None:
                 self._log_error(
                     CompilerError.NotSupportedOperation(bin_op.lineno, bin_op.col_offset, operator)
                 )
-            elif operation in [BinaryOp.Concat, BinaryOp.Pow, BinaryOp.Div]:
-                # TODO: concat and exponentiation not implemented yet
+            elif BinaryOp.get_operation(operation) in [BinaryOp.Concat, BinaryOp.Pow, BinaryOp.Div]:
+                # TODO: concat and power not implemented yet
                 # number float division is not supported by the Neo VM
                 self._log_error(
                     CompilerError.NotSupportedOperation(bin_op.lineno, bin_op.col_offset, operator)
                 )
             else:
                 bin_op.op = operation
-                return operation.result_type
+                return operation.result
         except CompilerError.MismatchedTypes as raised_error:
             expected_types = raised_error.args[2]
             actual_types = raised_error.args[3]
@@ -217,7 +219,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.MismatchedTypes(bin_op.lineno, bin_op.col_offset, expected_types, actual_types)
             )
 
-    def get_bin_op(self, operator: Operator, right: Any, left: Any) -> BinaryOp:
+    def get_bin_op(self, operator: Operator, right: Any, left: Any) -> BinaryOperation:
         """
         Returns the binary operation specified by the operator and the types of the operands
 
@@ -225,67 +227,21 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param right: right operand
         :param left: left operand
 
-        :return: Returns the corresponding :class:`BinaryOp` if the types are valid.
+        :return: Returns the corresponding :class:`BinaryOperation` if the types are valid.
         :raise MismatchedTypes: raised if the types aren't valid for the operator
         """
         l_type: IType = self.get_type(left)
         r_type: IType = self.get_type(right)
 
         actual_types: str = "%s', '%s" % (l_type.identifier, r_type.identifier)
-        operation = None
-        expected_op = None
+        operation: BinaryOperation = BinaryOp.validate_type(operator, l_type, r_type)
 
-        # Arithmetic operators
-        if operator == Operator.Plus:
-            if r_type == Type.int and l_type == Type.int:
-                # number addition
-                operation = BinaryOp.Add
-            elif r_type == Type.str and l_type == Type.str:
-                # string concatenation
-                operation = BinaryOp.Concat
-            else:
-                expected_op = BinaryOp.Add
-        elif operator == Operator.Minus:
-            if r_type == Type.int and l_type == Type.int:
-                # number subtraction
-                operation = BinaryOp.Sub
-            else:
-                expected_op = BinaryOp.Sub
-        elif operator == Operator.Mult:
-            if r_type == Type.int and l_type == Type.int:
-                # number multiplication
-                operation = BinaryOp.Mul
-            else:
-                expected_op = BinaryOp.Mul
-        elif operator == Operator.IntDiv:
-            if r_type == Type.int and l_type == Type.int:
-                # number integer division
-                operation = BinaryOp.IntDiv
-            else:
-                expected_op = BinaryOp.IntDiv
-        elif operator == Operator.Div:
-            if r_type == Type.int and l_type == Type.int:
-                # number integer division
-                operation = BinaryOp.IntDiv
-            else:
-                expected_op = BinaryOp.IntDiv
-        elif operator == Operator.Mod:
-            if r_type == Type.int and l_type == Type.int:
-                # number modulo
-                operation = BinaryOp.Mod
-            else:
-                expected_op = BinaryOp.Mod
-        elif operator == Operator.Pow:
-            if r_type == Type.int and l_type == Type.int:
-                # number exponentiation
-                operation = BinaryOp.Pow
-            else:
-                expected_op = BinaryOp.Pow
-
-        if expected_op is not None:
-            expected_types: str = "%s', '%s" % (expected_op.left_op_type.identifier, expected_op.right_op_type.identifier)
+        if operation is not None:
+            return operation
+        else:
+            expected_op: BinaryOperation = BinaryOp.get_operation_by_operator(operator)
+            expected_types: str = "%s', '%s" % (expected_op.left_type.identifier, expected_op.right_type.identifier)
             raise CompilerError.MismatchedTypes(0, 0, expected_types, actual_types)
-        return operation
 
     def visit_UnaryOp(self, un_op: ast.UnaryOp) -> Optional[IType]:
         """
@@ -301,14 +257,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         operand = self.visit(un_op.operand)
 
         try:
-            operation: UnaryOp = self.get_un_op(operator, operand)
+            operation: UnaryOperation = self.get_un_op(operator, operand)
             if operation is None:
                 self._log_error(
                     CompilerError.NotSupportedOperation(un_op.lineno, un_op.col_offset, operator)
                 )
             else:
                 un_op.op = operation
-                return operation.result_type
+                return operation.result
         except CompilerError.MismatchedTypes as raised_error:
             expected_types = raised_error.args[2]
             actual_types = raised_error.args[3]
@@ -317,39 +273,27 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.MismatchedTypes(un_op.lineno, un_op.col_offset, expected_types, actual_types)
             )
 
-    def get_un_op(self, operator: Operator, operand: Any) -> UnaryOp:
+    def get_un_op(self, operator: Operator, operand: Any) -> UnaryOperation:
         """
         Returns the binary operation specified by the operator and the types of the operands
 
         :param operator: the operator
         :param operand: the operand
 
-        :return: Returns the corresponding :class:`UnaryOp` if the types are valid.
+        :return: Returns the corresponding :class:`UnaryOperation` if the types are valid.
         :raise MismatchedTypes: raised if the types aren't valid for the operator
         """
         op_type: IType = self.get_type(operand)
 
         actual_type: str = op_type.identifier
-        operation = None
-        expected_op = None
+        operation: UnaryOperation = UnaryOp.validate_type(operator, op_type)
 
-        if operator == Operator.Plus:
-            if op_type == Type.int:
-                # number positive operation
-                operation = UnaryOp.Positive
-            else:
-                expected_op = UnaryOp.Positive
-        elif operator == Operator.Minus:
-            if op_type == Type.int:
-                # number negative operation
-                operation = UnaryOp.Negative
-            else:
-                expected_op = UnaryOp.Negative
-
-        if expected_op is not None:
-            expected_type: str = expected_op.result_type.identifier
+        if operation is not None:
+            return operation
+        else:
+            expected_op: UnaryOperation = UnaryOp.get_operation_by_operator(operator)
+            expected_type: str = expected_op.operand_type.identifier
             raise CompilerError.MismatchedTypes(0, 0, expected_type, actual_type)
-        return operation
 
     def visit_Add(self, add: ast.Add) -> Operator:
         """

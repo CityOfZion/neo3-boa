@@ -5,7 +5,8 @@ from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
-from boa3.model.operation.operation import IOperation
+from boa3.model.operation.ioperation import IOperation
+from boa3.model.operation.operation import Operation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
@@ -221,13 +222,14 @@ class CodeGenerator:
         else:
             self.__insert1(opcode)
 
-    def convert_operation(self, operation: IOperation):
+    def convert_operation(self, op: IOperation):
         """
         Converts an operation
 
-        :param operation: the operation that will be converted
+        :param op: the operation that will be converted
         """
         opcode: Opcode = None
+        operation = Operation.get_operation(op)
 
         # Arithmetic operations
         if operation is BinaryOp.Add:

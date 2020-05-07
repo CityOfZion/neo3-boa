@@ -1,18 +1,23 @@
-import ast
+from typing import Optional
 
-from boa3.model.operation.operator import Operator
-from boa3.model.type.type import IType
+from boa3.model.operation.binary.binaryoperation import BinaryOperation
+from boa3.model.operation.binaryop import BinaryOp
+from boa3.model.operation.ioperation import IOperation
+from boa3.model.operation.unary.unaryoperation import UnaryOperation
+from boa3.model.operation.unaryop import UnaryOp
 
 
-class IOperation(ast.operator):
-    """
-    An interface user to represent operations
-    """
-    def __init__(self, operator: Operator, result_type: IType, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._fields = (
-            'operator',
-            'result_type'
-        )
-        self.operator = operator
-        self.result_type = result_type
+class Operation:
+    @classmethod
+    def get_operation(cls, operation: IOperation) -> Optional[IOperation]:
+        """
+        Gets an enum operation given another operations.
+
+        :param operation: an operation
+        :return: The operation if exists. None otherwise;
+        :rtype: IOperation or None
+        """
+        if isinstance(operation, BinaryOperation):
+            return BinaryOp.get_operation(operation)
+        elif isinstance(operation, UnaryOperation):
+            return UnaryOp.get_operation(operation)
