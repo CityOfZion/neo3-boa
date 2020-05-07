@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import NotSupportedOperation, MismatchedTypes
+from boa3.exception.CompilerError import NotSupportedOperation
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
@@ -131,10 +131,20 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_boolean_inequality_operation(self):
-        path = '%s/boa3_test/example/relational_test/BoolInequality.py' % self.dirname
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.NUMNOTEQUAL
+            + Opcode.RET
+        )
 
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        path = '%s/boa3_test/example/relational_test/BoolInequality.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
 
     def test_string_equality_operation(self):
         path = '%s/boa3_test/example/relational_test/StrEquality.py' % self.dirname
@@ -143,7 +153,21 @@ class TestRelational(BoaTest):
             output = Boa3.compile(path)
 
     def test_multiple_comparisons(self):
-        path = '%s/boa3_test/example/relational_test/NumRange.py' % self.dirname
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x03'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.LE
+            + Opcode.LDARG0
+            + Opcode.LDARG2
+            + Opcode.LE
+            + Opcode.BOOLAND
+            + Opcode.RET
+        )
 
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        path = '%s/boa3_test/example/relational_test/NumRange.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)

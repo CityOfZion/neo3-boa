@@ -6,19 +6,19 @@ from boa3.model.type.type import IType, Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class NumericInequality(BinaryOperation):
+class BooleanOr(BinaryOperation):
     """
-    A class used to represent a numeric inequality comparison
+    A class used to represent the boolean or operation
 
     :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
     :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.int, Type.bool]
+    _valid_types: List[IType] = [Type.bool]
 
     def __init__(self, left: IType = Type.int, right: IType = Type.int):
-        self.operator: Operator = Operator.NotEq
+        self.operator: Operator = Operator.Or
         super().__init__(left, right)
 
     def validate_type(self, *types: IType) -> bool:
@@ -39,4 +39,4 @@ class NumericInequality(BinaryOperation):
 
     @property
     def opcode(self) -> Optional[Opcode]:
-        return Opcode.NUMNOTEQUAL
+        return Opcode.BOOLOR

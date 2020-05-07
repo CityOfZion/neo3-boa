@@ -4,6 +4,7 @@ from typing import Dict, Tuple
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
+from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
@@ -153,6 +154,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param compare: the python ast compare operation node
         """
+        converted: bool = False
         left = compare.left
         for index, op in enumerate(compare.ops):
             right = compare.comparators[index]
@@ -160,7 +162,25 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.visit_to_generate(left)
                 self.visit_to_generate(right)
                 self.generator.convert_operation(op)
+                # if it's more than two comparators, must include AND between the operations
+                if not converted:
+                    converted = True
+                else:
+                    self.generator.convert_operation(BinaryOp.And)
             left = right
+
+    def visit_BoolOp(self, bool_op: ast.BoolOp):
+        """
+        Visitor of a compare operation node
+
+        :param bool_op: the python ast boolean operation node
+        """
+        if isinstance(bool_op.op, BinaryOperation):
+            left = bool_op.values[0]
+            self.visit_to_generate(left)
+            for index, right in enumerate(bool_op.values[1:]):
+                self.visit_to_generate(right)
+                self.generator.convert_operation(bool_op.op)
 
     def visit_While(self, while_node: ast.While):
         """
