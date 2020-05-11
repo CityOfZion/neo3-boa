@@ -5,7 +5,6 @@ from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
 from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.method import Method
-from boa3.model.expression import IExpression
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -53,26 +52,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if self.__current_method in self.symbols.values():
             index = list(self.symbols.values()).index(self.__current_method)
             return list(self.symbols.keys())[index]
-
-    def get_type(self, value: Any) -> IType:
-        """
-        Returns the type of the given value.
-
-        :param value: value to get the type
-        :return: Returns the :class:`IType` of the the type of the value. `Type.none` by default.
-        """
-        if isinstance(value, IType):
-            return value
-        elif isinstance(value, IExpression):
-            return value.type
-        elif isinstance(value, bool):
-            return Type.bool
-        elif isinstance(value, int):
-            return Type.int
-        elif isinstance(value, str):
-            return Type.str
-
-        return Type.none
 
     def visit_Module(self, module: ast.Module):
         """
