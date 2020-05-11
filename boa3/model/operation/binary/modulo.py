@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType, Type
+from boa3.neo.vm.Opcode import Opcode
 
 
 class Modulo(BinaryOperation):
@@ -28,3 +29,6 @@ class Modulo(BinaryOperation):
         else:
             return Type.none
 
+    @property
+    def opcode(self) -> Optional[Opcode]:
+        return Opcode.MOD

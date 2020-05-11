@@ -4,10 +4,7 @@ from typing import Dict, List, Any
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.method import Method
-from boa3.model.operation.binaryop import BinaryOp
-from boa3.model.operation.ioperation import IOperation
-from boa3.model.operation.operation import Operation
-from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
 from boa3.neo.vm.Opcode import Opcode
@@ -222,31 +219,13 @@ class CodeGenerator:
         else:
             self.__insert1(opcode)
 
-    def convert_operation(self, op: IOperation):
+    def convert_operation(self, operation: IOperation):
         """
         Converts an operation
 
-        :param op: the operation that will be converted
+        :param operation: the operation that will be converted
         """
-        opcode: Opcode = None
-        operation = Operation.get_operation(op)
-
-        # Arithmetic operations
-        if operation is BinaryOp.Add:
-            opcode = Opcode.ADD
-        elif operation is BinaryOp.Sub:
-            opcode = Opcode.SUB
-        elif operation is BinaryOp.Mul:
-            opcode = Opcode.MUL
-        elif operation is BinaryOp.IntDiv:
-            opcode = Opcode.DIV
-        elif operation is BinaryOp.Mod:
-            opcode = Opcode.MOD
-        elif operation is UnaryOp.Positive:
-            # it is the identity function, so there is no need of including another opcode
-            opcode = None
-        elif operation is UnaryOp.Negative:
-            opcode = Opcode.NEGATE
+        opcode: Opcode = operation.opcode
 
         if opcode is not None:
             self.__insert1(opcode)

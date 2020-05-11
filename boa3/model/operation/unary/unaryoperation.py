@@ -1,11 +1,18 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from boa3.model.operation.ioperation import IOperation
+from boa3.model.operation.operation import IOperation
 from boa3.model.type.type import IType
 
 
 class UnaryOperation(IOperation, ABC):
+    """
+    An interface used to represent binary operations
+
+    :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
+    :ivar operand: the operand type.
+    :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
+    """
     _valid_types: List[IType] = []
 
     def __init__(self, operand: IType):

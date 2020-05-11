@@ -6,6 +6,14 @@ from boa3.model.type.type import IType, Type
 
 
 class Division(BinaryOperation):
+    """
+    A class used to represent a floating-point division operation
+
+    :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
+    :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
+    :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
+    :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
+    """
     _valid_types: List[IType] = [Type.int]
 
     def __init__(self, left: IType = Type.int, right: IType = Type.int):

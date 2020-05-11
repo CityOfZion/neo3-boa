@@ -1,11 +1,20 @@
-from typing import List
+from typing import List, Optional
 
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType, Type
+from boa3.neo.vm.Opcode import Opcode
 
 
 class Concat(BinaryOperation):
+    """
+    A class used to represent a string concatenation operation
+
+    :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
+    :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
+    :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
+    :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
+    """
     _valid_types: List[IType] = [Type.str]
 
     def __init__(self, left: IType = Type.str, right: IType = Type.str):
@@ -26,3 +35,6 @@ class Concat(BinaryOperation):
         else:
             return Type.none
 
+    @property
+    def opcode(self) -> Optional[Opcode]:
+        return Opcode.CAT

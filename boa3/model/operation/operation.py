@@ -1,23 +1,60 @@
+from abc import ABC, abstractmethod
 from typing import Optional
 
-from boa3.model.operation.binary.binaryoperation import BinaryOperation
-from boa3.model.operation.binaryop import BinaryOp
-from boa3.model.operation.ioperation import IOperation
-from boa3.model.operation.unary.unaryoperation import UnaryOperation
-from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.operation.operator import Operator
+from boa3.model.type.type import IType
+from boa3.neo.vm.Opcode import Opcode
 
 
-class Operation:
-    @classmethod
-    def get_operation(cls, operation: IOperation) -> Optional[IOperation]:
+class IOperation(ABC):
+    """
+    An interface used to represent operations
+
+    :ivar operator: the operator of the operation
+    :ivar result: the result type of the operation
+    """
+    def __init__(self, operator: Operator, result_type: IType):
+        self.operator: Operator = operator
+        self.result: IType = result_type
+
+    @property
+    def opcode(self) -> Optional[Opcode]:
         """
-        Gets an enum operation given another operations.
+        Gets the operation opcode in Neo Vm
 
-        :param operation: an operation
-        :return: The operation if exists. None otherwise;
-        :rtype: IOperation or None
+        :return: the opcode if exists. None otherwise.
         """
-        if isinstance(operation, BinaryOperation):
-            return BinaryOp.get_operation(operation)
-        elif isinstance(operation, UnaryOperation):
-            return UnaryOp.get_operation(operation)
+        return None
+
+    @property
+    @abstractmethod
+    def _get_number_of_operands(self) -> int:
+        """
+        Gets the number of operands required for this operations
+
+        :return: Number of operands
+        """
+        pass
+
+    @abstractmethod
+    def validate_type(self, *types: IType) -> bool:
+        """
+        Verifies if the given operands are valid to the operation
+
+        :param types: types of the operand
+        :return: True if all arguments are valid. False otherwise.
+        """
+        pass
+
+    def is_valid(self, operator: Operator, *types: IType) -> bool:
+        """
+        Verifies if the given operator and operands are valid to the operation
+
+        :param operator:
+        :param types: types of the operand
+        :return: True if all arguments are valid. False otherwise.
+        """
+        if len(types) != self._get_number_of_operands:
+            return False
+
+        return operator is self.operator and self.validate_type(*types)

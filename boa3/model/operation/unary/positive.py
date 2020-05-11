@@ -1,11 +1,19 @@
-from typing import List
+from typing import List, Optional
 
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.type.type import IType, Type
+from boa3.neo.vm.Opcode import Opcode
 
 
 class Positive(UnaryOperation):
+    """
+    A class used to represent a numeric positive operation
+
+    :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
+    :ivar operand: the operand type. Inherited from :class:`UnaryOperation`
+    :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
+    """
     _valid_types: List[IType] = [Type.int]
 
     def __init__(self, operand: IType = Type.int):
@@ -24,3 +32,8 @@ class Positive(UnaryOperation):
             return operand
         else:
             return Type.none
+
+    @property
+    def opcode(self) -> Optional[Opcode]:
+        # it is the identity function, so there is no need of including another opcode
+        return None
