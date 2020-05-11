@@ -1,13 +1,13 @@
 import sys
-from typing import Dict, Any
+from typing import Dict, List, Any
 
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
-from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.Opcode import Opcode
+from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItemType import StackItemType
 
@@ -39,6 +39,8 @@ class CodeGenerator:
         self.__address: int = 0
         self.__vm_codes: Dict[int, VMCode] = {}
 
+        self.__current_method: Method = None
+
     @property
     def bytecode(self) -> bytes:
         """
@@ -48,10 +50,44 @@ class CodeGenerator:
         """
         bytecode = bytearray()
         for code in self.__vm_codes.values():
-            bytecode += code.opcode.value
+            bytecode += code.opcode
             if code.data is not None:
                 bytecode += code.data
         return bytes(bytecode)
+
+    @property
+    def __args(self) -> List[str]:
+        """
+        Gets a list with the arguments names of the current method
+
+        :return: A list with the arguments names
+        """
+        if self.__current_method is not None:
+            return list(self.__current_method.args.keys())
+        else:
+            return []
+
+    @property
+    def __locals(self) -> List[str]:
+        """
+        Gets a list with the variables names in the scope of the current method
+
+        :return: A list with the variables names
+        """
+        if self.__current_method is not None:
+            return list(self.__current_method.locals.keys())
+        else:
+            return []
+
+    @property
+    def __globals(self) -> List[str]:
+        """
+        Gets a list with the variables name in the global scope
+
+        :return: A list with the variables names
+        """
+        # TODO: Global scope not implemented yet
+        return []
 
     def get_symbol(self, identifier: str) -> ISymbol:
         """
@@ -62,7 +98,7 @@ class CodeGenerator:
         """
         if identifier in self.symbol_table:
             return self.symbol_table[identifier]
-        return Type.none.symbol
+        return Type.none
 
     def convert_begin_method(self, method: Method):
         """
@@ -75,12 +111,14 @@ class CodeGenerator:
 
         init_data = bytearray([num_vars, num_args])
         self.__insert1(Opcode.INITSLOT, init_data)
+        self.__current_method = method
 
     def convert_end_method(self):
         """
         Converts the end of the method
         """
         self.__insert1(Opcode.RET)
+        self.__current_method = None
 
     def convert_literal(self, value: Any):
         """
@@ -88,15 +126,15 @@ class CodeGenerator:
 
         :param value: the value to be converted
         """
-        if isinstance(value, int):
+        if isinstance(value, bool):
+            self.convert_bool_literal(value)
+        elif isinstance(value, int):
             self.convert_integer_literal(value)
         elif isinstance(value, str):
             self.convert_string_literal(value)
-        elif isinstance(value, bool):
-            self.convert_bool_literal(value)
         else:
             # TODO: convert other python literals as they are implemented
-            pass
+            raise NotImplementedError
 
     def convert_integer_literal(self, value: int):
         """
@@ -112,7 +150,7 @@ class CodeGenerator:
             array = Integer(value).to_byte_array()
             self.convert_byte_array(array)
             # cast the value to integer
-            self.__insert1(Opcode.CONVERT, StackItemType.Integer.value)
+            self.__insert1(Opcode.CONVERT, StackItemType.Integer)
         pass
 
     def convert_string_literal(self, value: str):
@@ -154,6 +192,31 @@ class CodeGenerator:
 
         data = data_len.to_bytes(prefix_len, sys.byteorder) + array
         self.__insert1(code, data)
+
+    def convert_store_variable(self, var_id: str):
+        """
+        Converts the assignment of a variable
+
+        :param var_id: the value to be converted
+        """
+        is_arg = False
+        local = var_id in self.__current_method.symbols
+        if local:
+            is_arg = var_id in self.__args
+            if is_arg:
+                scope = self.__args
+            else:
+                scope = self.__locals
+        else:
+            scope = self.__globals
+
+        index: int = scope.index(var_id)
+        opcode = Opcode.get_store(index, local, is_arg)
+
+        if opcode in [Opcode.STARG, Opcode.STLOC, Opcode.STSFLD]:
+            self.__insert1(opcode, Integer(index).to_byte_array())
+        else:
+            self.__insert1(opcode)
 
     def __insert1(self, opcode: Opcode, data: bytes = None):
         """

@@ -22,6 +22,26 @@ class Module:
             methods = {}
         self.methods = methods
 
+    def include_variable(self, var_id: str, var: Variable):
+        """
+        Includes a variable into the scope of the module
+
+        :param var_id: variable identifier
+        :param var: variable to be included
+        """
+        if var_id not in self.symbols:
+            self.variables[var_id] = var
+
+    def include_method(self, method_id: str, method: Method):
+        """
+        Includes a method into the scope of the module
+
+        :param method_id: method identifier
+        :param method: method to be included
+        """
+        if method_id not in self.symbols:
+            self.methods[method_id] = method
+
     @property
     def symbols(self) -> Dict[str, IExpression]:
         """
