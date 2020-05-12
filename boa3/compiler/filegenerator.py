@@ -4,7 +4,8 @@ from typing import Dict, Any, List, Tuple, Optional
 
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
-from boa3.model.type.type import IType, Type
+from boa3.model.type.itype import IType
+from boa3.model.type.type import Type
 from boa3.neo import to_hex_str
 from boa3.neo.smart_contract.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
@@ -177,17 +178,7 @@ class FileGenerator:
 
         :return: the identifier of the abi type
         """
-        if type is Type.int:
-            return AbiType.Integer
-        elif type is Type.str:
-            return AbiType.String
-        elif type is Type.bool:
-            return AbiType.Boolean
-        elif type is Type.none:
-            return AbiType.Void
-        else:
-            # TODO: Include more as new Boa types are implemented
-            return AbiType.Any
+        return type.abi_type
 
     def __get_abi_events(self) -> List[Dict[str, Any]]:
         """

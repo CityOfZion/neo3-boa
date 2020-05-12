@@ -1,5 +1,5 @@
 from boa3.model.expression import IExpression
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 
 
 class Variable(IExpression):

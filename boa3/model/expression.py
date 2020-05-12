@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from boa3.model.symbol import ISymbol
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 
 
 class IExpression(ISymbol):

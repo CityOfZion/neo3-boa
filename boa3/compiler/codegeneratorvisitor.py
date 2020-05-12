@@ -6,7 +6,8 @@ from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
-from boa3.model.type.type import Type, IType
+from boa3.model.type.itype import IType
+from boa3.model.type.type import Type
 from boa3.model.variable import Variable
 
 

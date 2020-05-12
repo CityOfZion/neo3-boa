@@ -7,7 +7,7 @@ from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 
