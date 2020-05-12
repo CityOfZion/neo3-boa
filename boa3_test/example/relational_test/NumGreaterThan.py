@@ -1,2 +1,2 @@
-def Main() -> bool:
-    return 4 > 2
+def Main(a: int, b: int) -> bool:
+    return a > b

@@ -1,2 +1,2 @@
-def Main() -> int:
-    return 4 + 2
+def Main(a: int, b: int) -> int:
+    return a + b

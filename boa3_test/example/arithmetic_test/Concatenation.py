@@ -1,2 +1,2 @@
-def Main() -> str:
-    return 'unit_' + '_test'
+def Main(a: str, b: str) -> str:
+    return a + b

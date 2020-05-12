@@ -530,3 +530,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the constant
         """
         return constant.value
+
+    def visit_Name(self, name: ast.Name) -> ast.Name:
+        """
+        Visitor of a name node
+
+        :param name:
+        :return: the object with the name node information
+        """
+        return name

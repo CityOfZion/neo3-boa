@@ -1,2 +1,2 @@
-def Main() -> str:
-    return -'4'
+def Main(a: str) -> str:
+    return -a

@@ -1,2 +1,2 @@
-def Main() -> bool:
-    return True == False
+def Main(a: bool, b: bool) -> bool:
+    return a == b

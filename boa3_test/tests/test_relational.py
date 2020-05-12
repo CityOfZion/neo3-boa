@@ -10,9 +10,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.NUMEQUAL
             + Opcode.RET
         )
@@ -26,9 +26,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.NUMNOTEQUAL
             + Opcode.RET
         )
@@ -48,9 +48,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.LT
             + Opcode.RET
         )
@@ -64,9 +64,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.LE
             + Opcode.RET
         )
@@ -80,9 +80,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.GT
             + Opcode.RET
         )
@@ -96,9 +96,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.GE
             + Opcode.RET
         )
@@ -118,9 +118,9 @@ class TestRelational(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH1
-            + Opcode.PUSH0
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.NUMEQUAL
             + Opcode.RET
         )

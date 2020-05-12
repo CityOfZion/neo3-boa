@@ -1,2 +1,2 @@
-def Main() -> int:
-    return 1 + 3 * (5 - (-4)) // 2
+def Main(a: int, b: int, c: int, d: int, e: int) -> int:
+    return a + c * (e - (-d)) // b

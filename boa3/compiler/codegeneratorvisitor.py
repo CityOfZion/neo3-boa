@@ -157,8 +157,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for index, op in enumerate(compare.ops):
             right = compare.comparators[index]
             if isinstance(op, BinaryOperation):
-                self.visit(left)
-                self.visit(right)
+                self.visit_to_generate(left)
+                self.visit_to_generate(right)
                 self.generator.convert_operation(op)
             left = right
 

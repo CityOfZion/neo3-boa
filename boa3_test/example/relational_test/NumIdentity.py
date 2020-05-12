@@ -1,2 +1,2 @@
-def Main() -> bool:
-    return 4 is 2
+def Main(a: int, b: int) -> bool:
+    return a is b
