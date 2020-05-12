@@ -4,6 +4,7 @@ from typing import Dict, List, Any
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.method import Method
+from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
 from boa3.neo.vm.Opcode import Opcode
@@ -216,6 +217,17 @@ class CodeGenerator:
         if opcode in [Opcode.STARG, Opcode.STLOC, Opcode.STSFLD]:
             self.__insert1(opcode, Integer(index).to_byte_array())
         else:
+            self.__insert1(opcode)
+
+    def convert_operation(self, operation: IOperation):
+        """
+        Converts an operation
+
+        :param operation: the operation that will be converted
+        """
+        opcode: Opcode = operation.opcode
+
+        if opcode is not None:
             self.__insert1(opcode)
 
     def __insert1(self, opcode: Opcode, data: bytes = None):

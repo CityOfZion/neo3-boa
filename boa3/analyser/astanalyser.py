@@ -1,9 +1,10 @@
 import ast
 from abc import ABC
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from boa3.exception.CompilerError import CompilerError
 from boa3.exception.CompilerWarning import CompilerWarning
+from boa3.model.expression import IExpression
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import IType, Type
 
@@ -31,22 +32,31 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     def _log_warning(self, warning: CompilerWarning):
         self.warnings.append(warning)
 
-    def get_type(self, node: ast.AST) -> IType:
+    def get_type(self, value: Any) -> IType:
         """
-        Get the type of the value stored in the node
+        Returns the type of the given value.
 
-        :param node: ast node that represents a value to be evaluated
-        :return: the type of the evaluated value. None by default.
+        :param value: value to get the type
+        :return: Returns the :class:`IType` of the the type of the value. `Type.none` by default.
         """
-        if node is not None:
-            fun_rtype_id: str = ast.NodeVisitor.visit(self, node)
-        else:
-            fun_rtype_id: str = Type.none.identifier
+        if isinstance(value, ast.AST):
+            fun_rtype_id: str = ast.NodeVisitor.visit(self, value)
+            if fun_rtype_id not in self.symbols:
+                return Type.none
 
-        if fun_rtype_id not in self.symbols:
+            symbol = self.symbols[fun_rtype_id]
+            if isinstance(symbol, IType):
+                return symbol
             return Type.none
+        elif isinstance(value, IType):
+            return value
+        elif isinstance(value, IExpression):
+            return value.type
+        elif isinstance(value, bool):
+            return Type.bool
+        elif isinstance(value, int):
+            return Type.int
+        elif isinstance(value, str):
+            return Type.str
 
-        symbol = self.symbols[fun_rtype_id]
-        if isinstance(symbol, IType):
-            return symbol
         return Type.none

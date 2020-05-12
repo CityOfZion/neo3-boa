@@ -3,6 +3,8 @@ from typing import Dict, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.model.method import Method
+from boa3.model.operation.binary.binaryoperation import BinaryOperation
+from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type, IType
 from boa3.model.variable import Variable
@@ -24,6 +26,19 @@ class VisitorCodeGenerator(ast.NodeVisitor):
     @property
     def symbols(self) -> Dict[str, ISymbol]:
         return self.generator.symbol_table
+
+    def visit_to_generate(self, node: ast.AST):
+        """
+        Visitor to generate the nodes that the primary visitor is used to retrieve value
+
+        :param node: an ast node
+        """
+        result = self.visit(node)
+
+        # the default return of the name visitor is the name string
+        if isinstance(node, ast.Name):
+            # TODO: validate variables and function calls
+            raise NotImplementedError
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -84,12 +99,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param ret: the python ast return node
         """
         if ret.value is not None:
-            value = self.visit(ret.value)
-            if ret.value is not ast.Name and value is not None:
-                self.generator.convert_literal(value)
-            else:
-                # TODO: validate variables and function calls
-                pass
+            self.visit_to_generate(ret.value)
 
     def store_variable(self, var_id: str, value: ast.AST):
         # if the value is None, it is a variable declaration
@@ -122,6 +132,27 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         var_id = self.visit(assign.targets[0])
         self.store_variable(var_id, assign.value)
 
+    def visit_BinOp(self, bin_op: ast.BinOp):
+        """
+        Visitor of a binary operation node
+
+        :param bin_op: the python ast binary operation node
+        """
+        if isinstance(bin_op.op, BinaryOperation):
+            self.visit_to_generate(bin_op.left)
+            self.visit_to_generate(bin_op.right)
+            self.generator.convert_operation(bin_op.op)
+
+    def visit_UnaryOp(self, un_op: ast.UnaryOp):
+        """
+        Visitor of a binary operation node
+
+        :param un_op: the python ast binary operation node
+        """
+        if isinstance(un_op.op, UnaryOperation):
+            self.visit_to_generate(un_op.operand)
+            self.generator.convert_operation(un_op.op)
+
     def visit_Name(self, name: ast.Name) -> str:
         """
         Visitor of a name node
@@ -145,7 +176,6 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         Visitor of literal number node
 
         :param num: the python ast number node
-        :return: the value of the number
         """
         self.generator.convert_literal(num.n)
 
@@ -154,6 +184,5 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         Visitor of literal string node
 
         :param str: the python ast string node
-        :return: the value of the string
         """
         self.generator.convert_literal(str.s)
