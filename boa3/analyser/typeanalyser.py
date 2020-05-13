@@ -227,6 +227,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in while_node.orelse:
             self.visit(stmt)
 
+    def visit_If(self, if_node: ast.If):
+        """
+        Verifies if the type of if test is valid
+
+        :param if_node: the python ast if statement node
+        """
+        # TODO: remove when implement if statement
+        raise NotImplementedError
+
     def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
         """
         Verifies if the types of the operands are valid to the operation
@@ -474,3 +483,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the name node information
         """
         return name
+
+    def visit_Break(self, break_node: ast.Break):
+        """
+        :param break_node: the python ast break statement node
+        """
+        # TODO: remove when implement break statement
+        raise NotImplementedError
+
+    def visit_Continue(self, continue_node: ast.Continue):
+        """
+        :param continue_node: the python ast continue statement node
+        """
+        # TODO: remove when implement continue statement
+        raise NotImplementedError

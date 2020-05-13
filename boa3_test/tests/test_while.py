@@ -152,3 +152,83 @@ class TestWhile(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_while_relational_condition(self):
+        jmpif_address = Integer(10).to_byte_array(min_length=1)
+        jmp_address = Integer(-11).to_byte_array(min_length=1)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x02'
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC0
+            + Opcode.PUSH0      # b = 0
+            + Opcode.STLOC1
+            + Opcode.JMP        # begin while
+            + jmpif_address
+                + Opcode.LDLOC0     # a = a + 2
+                + Opcode.PUSH2
+                + Opcode.ADD
+                + Opcode.STLOC0
+                + Opcode.LDLOC1     # b = b + 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.PUSH10
+            + Opcode.LT
+            + Opcode.JMPIF      # end while b < 10
+            + jmp_address
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/while_test/RelationalCondition.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_boa2_while_test(self):
+        path = '%s/boa3_test/example/while_test/WhileBoa2Test.py' % self.dirname
+
+        # TODO: change test when 'if' and 'break' are implemented
+        with self.assertRaises(NotImplementedError):
+            output = Boa3.compile(path)
+
+    def test_boa2_while_test1(self):
+        jmpif_address = Integer(6).to_byte_array(min_length=1)
+        jmp_address = Integer(-7).to_byte_array(min_length=1)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH3          # j = 3
+            + Opcode.STLOC0
+            + Opcode.JMP            # while
+            + jmpif_address
+                + Opcode.LDLOC0         # j = j + 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC0
+            + Opcode.LDLOC0         # while j < 6
+            + Opcode.PUSH6
+            + Opcode.LT
+            + Opcode.JMPIF
+            + jmp_address
+            + Opcode.LDLOC0         # return j
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/while_test/WhileBoa2Test1.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_boa2_while_test2(self):
+        path = '%s/boa3_test/example/while_test/WhileBoa2Test2.py' % self.dirname
+
+        # TODO: change test when 'if' and 'break' are implemented
+        with self.assertRaises(NotImplementedError):
+            output = Boa3.compile(path)
