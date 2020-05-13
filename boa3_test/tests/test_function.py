@@ -99,6 +99,3 @@ class TestFunction(BoaTest):
 
         with self.assertRaises(TooManyReturns):
             output = Boa3.compile(path)
-
-
-

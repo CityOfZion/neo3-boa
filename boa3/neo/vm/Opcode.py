@@ -36,7 +36,7 @@ class Opcode(bytes, Enum):
         :rtype: Opcode or None
         """
         if -1 <= integer <= 16:
-            opcode_value = int.from_bytes(Opcode.PUSH0, sys.byteorder) + integer
+            opcode_value: int = Integer.from_bytes(Opcode.PUSH0) + integer
             return Opcode(Integer(opcode_value).to_byte_array())
         else:
             return None
@@ -79,6 +79,36 @@ class Opcode(bytes, Enum):
     PUSH16 = b'\x20'
     # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
     NOP = b'\x21'
+
+    @staticmethod
+    def get_large_jump(opcode: bytes):
+        """
+        Gets the large jump opcode to the standard jump
+
+        :param opcode: opcode standard jump value
+        :return: the respective opcode
+        :rtype: Opcode or None
+        """
+        if Opcode.is_large_jump(opcode):
+            return opcode
+        elif Opcode.is_small_jump(opcode):
+            opcode_value: int = Integer.from_bytes(opcode) + 1
+            return Opcode(Integer(opcode_value).to_byte_array())
+        else:
+            return None
+
+    @staticmethod
+    def is_small_jump(opcode: bytes) -> bool:
+        return opcode in [Opcode.JMP, Opcode.JMPIF, Opcode.JMPIFNOT,
+                          Opcode.JMPEQ, Opcode.JMPNE, Opcode.JMPGT,
+                          Opcode.JMPGE, Opcode.JMPLT, Opcode.JMPLE]
+
+    @staticmethod
+    def is_large_jump(opcode: bytes) -> bool:
+        return opcode in [Opcode.JMP_L, Opcode.JMPIF_L, Opcode.JMPIFNOT_L,
+                          Opcode.JMPEQ_L, Opcode.JMPNE_L, Opcode.JMPGT_L,
+                          Opcode.JMPGE_L, Opcode.JMPLT_L, Opcode.JMPLE_L]
+
     # Unconditionally transfers control to a target instruction. The target instruction is represented as a 1-byte
     # signed offset from the beginning of the current instruction.
     JMP = b'\x22'
@@ -228,11 +258,11 @@ class Opcode(bytes, Enum):
 
         if 0 <= index <= 6:
             if is_arg:
-                opcode_value = int.from_bytes(Opcode.STARG0, sys.byteorder) + index
+                opcode_value: int = Integer.from_bytes(Opcode.STARG0) + index
             elif local:
-                opcode_value = int.from_bytes(Opcode.STLOC0, sys.byteorder) + index
+                opcode_value: int = Integer.from_bytes(Opcode.STLOC0) + index
             else:
-                opcode_value = int.from_bytes(Opcode.STSFLD0, sys.byteorder) + index
+                opcode_value: int = Integer.from_bytes(Opcode.STSFLD0) + index
             return Opcode(Integer(opcode_value).to_byte_array())
         else:
             if is_arg:
@@ -258,11 +288,11 @@ class Opcode(bytes, Enum):
 
         if 0 <= index <= 6:
             if is_arg:
-                opcode_value = int.from_bytes(Opcode.LDARG0, sys.byteorder) + index
+                opcode_value: int = Integer.from_bytes(Opcode.LDARG0) + index
             elif local:
-                opcode_value = int.from_bytes(Opcode.LDLOC0, sys.byteorder) + index
+                opcode_value: int = Integer.from_bytes(Opcode.LDLOC0) + index
             else:
-                opcode_value = int.from_bytes(Opcode.LDSFLD0, sys.byteorder) + index
+                opcode_value: int = Integer.from_bytes(Opcode.LDSFLD0) + index
             return Opcode(Integer(opcode_value).to_byte_array())
         else:
             if is_arg:

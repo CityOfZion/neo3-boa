@@ -4,13 +4,14 @@ import sys
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.neo.smart_contract.neffile import NefFile
+from boa3.neo.vm.type.AbiType import AbiType
 from boa3_test.tests.boa_test import BoaTest
 
 
 class TestFileGeneration(BoaTest):
 
     def test_generate_files(self):
-        path = '%s/boa3_test/example/function_test/StringFunction.py' % self.dirname
+        path = '%s/boa3_test/example/arithmetic_test/Addition.py' % self.dirname
 
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
@@ -20,7 +21,7 @@ class TestFileGeneration(BoaTest):
         self.assertTrue(os.path.exists(expected_manifest_output))
 
     def test_generate_nef_file(self):
-        path = '%s/boa3_test/example/function_test/StringFunction.py' % self.dirname
+        path = '%s/boa3_test/example/arithmetic_test/Addition.py' % self.dirname
 
         expected_nef_output = path.replace('.py', '.nef')
         Boa3.compile_and_save(path)
@@ -49,7 +50,7 @@ class TestFileGeneration(BoaTest):
             self.assertEqual(int.from_bytes(byte_field, sys.byteorder), field)
 
     def test_generate_manifest_file(self):
-        path = '%s/boa3_test/example/function_test/StringFunction.py' % self.dirname
+        path = '%s/boa3_test/example/arithmetic_test/Addition.py' % self.dirname
 
         expected_manifest_output = path.replace('.py', '.manifest.json')
         Boa3.compile_and_save(path)
@@ -66,9 +67,22 @@ class TestFileGeneration(BoaTest):
         self.assertIn('name', abi['entryPoint'])
         self.assertEqual(abi['entryPoint']['name'], 'Main')
         self.assertIn('returnType', abi['entryPoint'])
-        self.assertEqual(abi['entryPoint']['returnType'], 'String')
+        self.assertEqual(abi['entryPoint']['returnType'], AbiType.Integer)
+        
         self.assertIn('parameters', abi['entryPoint'])
-        self.assertEqual(len(abi['entryPoint']['parameters']), 0)
+        self.assertEqual(len(abi['entryPoint']['parameters']), 2)
+
+        arg0 = abi['entryPoint']['parameters'][0]
+        self.assertIn('name', arg0)
+        self.assertEqual(arg0['name'], 'a')
+        self.assertIn('type', arg0)
+        self.assertEqual(arg0['type'], AbiType.Integer)
+
+        arg1 = abi['entryPoint']['parameters'][1]
+        self.assertIn('name', arg1)
+        self.assertEqual(arg1['name'], 'b')
+        self.assertIn('type', arg1)
+        self.assertEqual(arg1['type'], AbiType.Integer)
 
         self.assertIn('methods', abi)
         self.assertEqual(len(abi['methods']), 0)

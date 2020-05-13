@@ -201,6 +201,32 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
 
+        # continue to walk through the tree
+        self.generic_visit(assign)
+
+    def visit_While(self, while_node: ast.While):
+        """
+        Verifies if the type of while test is valid
+
+        :param while_node: the python ast while statement node
+        """
+        test = self.visit(while_node.test)
+        test_type: IType = self.get_type(test)
+
+        if test_type is not Type.bool:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    while_node.lineno, while_node.col_offset,
+                    actual_type_id=test_type.identifier,
+                    expected_type_id=Type.bool.identifier)
+            )
+
+        # continue to walk through the tree
+        for stmt in while_node.body:
+            self.visit(stmt)
+        for stmt in while_node.orelse:
+            self.visit(stmt)
+
     def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
         """
         Verifies if the types of the operands are valid to the operation

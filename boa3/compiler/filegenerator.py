@@ -164,21 +164,13 @@ class FileGenerator:
         for arg_id, arg in method.args.items():
             params.append({
                 "name": arg_id,
-                "type": arg.type
+                "type": arg.type.abi_type
             })
         return {
             "name": method_id,
             "parameters": params,
-            "returnType": self.__get_abi_type(method.type)
+            "returnType": method.type.abi_type
         }
-
-    def __get_abi_type(self, type: IType) -> str:
-        """
-        Gets the abi type of the given Boa type
-
-        :return: the identifier of the abi type
-        """
-        return type.abi_type
 
     def __get_abi_events(self) -> List[Dict[str, Any]]:
         """
