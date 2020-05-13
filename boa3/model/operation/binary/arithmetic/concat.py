@@ -38,3 +38,8 @@ class Concat(BinaryOperation):
     @property
     def opcode(self) -> Optional[Opcode]:
         return Opcode.CAT
+
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when concat is supported
+        return False

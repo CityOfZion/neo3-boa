@@ -40,3 +40,8 @@ class ObjectEquality(BinaryOperation):
     @property
     def opcode(self) -> Optional[Opcode]:
         return Opcode.EQUAL
+
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when non-numeric equal is supported
+        return False

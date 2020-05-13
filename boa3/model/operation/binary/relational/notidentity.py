@@ -35,3 +35,8 @@ class NotIdentity(BinaryOperation):
             return Type.bool
         else:
             return Type.none
+
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when 'is not' is supported
+        return False

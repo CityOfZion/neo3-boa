@@ -36,3 +36,7 @@ class Division(BinaryOperation):
         else:
             return Type.none
 
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when float division is supported
+        return False

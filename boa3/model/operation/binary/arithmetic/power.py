@@ -36,3 +36,7 @@ class Power(BinaryOperation):
         else:
             return Type.none
 
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when power is supported
+        return False
