@@ -184,6 +184,26 @@ class CodeGenerator:
         end_jmp_to: int = while_body - self.address
         self.__insert_jump(OpcodeInfo.JMPIF, end_jmp_to)
 
+    def convert_begin_if(self) -> int:
+        """
+        Converts the beginning of the if statement
+
+        :return: the address of the if first opcode
+        """
+        # it will be updated when the if ends
+        self.__insert_jump(OpcodeInfo.JMPIFNOT, 0)
+        return self.__last_code.start_address
+
+    def convert_end_if(self, start_address: int):
+        """
+        Converts the end of the if statement
+
+        :param start_address: the address of the if first opcode
+        """
+        # updates the begin jmp with the target address
+        jmp_to: int = self.address - start_address
+        self.__update_jump(start_address, jmp_to)
+
     def convert_literal(self, value: Any):
         """
         Converts a literal value
@@ -245,11 +265,11 @@ class CodeGenerator:
         """
         data_len: int = len(array)
         if data_len <= ONE_BYTE_MAX_VALUE:
-            op_info = OpcodeInfo.get_info(Opcode.PUSHDATA1)
+            op_info = OpcodeInfo.PUSHDATA1
         elif data_len <= TWO_BYTES_MAX_VALUE:
-            op_info = OpcodeInfo.get_info(Opcode.PUSHDATA2)
+            op_info = OpcodeInfo.PUSHDATA2
         else:
-            op_info = OpcodeInfo.get_info(Opcode.PUSHDATA4)
+            op_info = OpcodeInfo.PUSHDATA4
 
         data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
         self.__insert1(op_info, data)

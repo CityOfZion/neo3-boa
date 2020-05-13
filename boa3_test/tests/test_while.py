@@ -192,7 +192,7 @@ class TestWhile(BoaTest):
     def test_boa2_while_test(self):
         path = '%s/boa3_test/example/while_test/WhileBoa2Test.py' % self.dirname
 
-        # TODO: change test when 'if' and 'break' are implemented
+        # TODO: change test when 'break' are implemented
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
@@ -229,6 +229,6 @@ class TestWhile(BoaTest):
     def test_boa2_while_test2(self):
         path = '%s/boa3_test/example/while_test/WhileBoa2Test2.py' % self.dirname
 
-        # TODO: change test when 'if' and 'break' are implemented
+        # TODO: change test when 'break' are implemented
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)

@@ -1,4 +1,4 @@
-# TODO: include test when 'if' and 'break' are implemented
+# TODO: include test when 'break' are implemented
 
 
 def Main() -> int:

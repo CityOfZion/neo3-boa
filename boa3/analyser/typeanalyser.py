@@ -233,8 +233,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param if_node: the python ast if statement node
         """
-        # TODO: remove when implement if statement
-        raise NotImplementedError
+        test = self.visit(if_node.test)
+        test_type: IType = self.get_type(test)
+
+        if test_type is not Type.bool:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    if_node.lineno, if_node.col_offset,
+                    actual_type_id=test_type.identifier,
+                    expected_type_id=Type.bool.identifier)
+            )
+
+        # continue to walk through the tree
+        for stmt in if_node.body:
+            self.visit(stmt)
+
+        if len(if_node.orelse) > 0:
+            # TODO: remove when implement else statement
+            raise NotImplementedError
 
     def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
         """
