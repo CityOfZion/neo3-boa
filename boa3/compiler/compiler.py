@@ -9,13 +9,11 @@ class Compiler:
     The main compiler class.
 
     :ivar bytecode: the compiled file as a byte array. Empty by default.
-    :ivar __generator: the object that generates the files
     """
 
     def __init__(self):
         self.bytecode: bytearray = bytearray()
-        self.__generator: FileGenerator = FileGenerator()
-        self.__analyser: Analyser
+        self.__analyser: Analyser = None
 
     def compile(self, path: str) -> bytes:
         """
@@ -64,4 +62,20 @@ class Compiler:
         :param output_path: the path to save the generated files
         :raise NotLoadedException: raised if no file were compiled
         """
-        pass
+        if (self.__analyser is None
+                or not self.__analyser.is_analysed
+                or len(self.bytecode) == 0):
+            raise NotLoadedException
+
+        generator = FileGenerator(self.bytecode, self.__analyser.symbol_table)
+
+        nef_bytes = generator.generate_nef_file()
+        with open(output_path, 'wb+') as nef_file:
+            nef_file.write(nef_bytes)
+            nef_file.close()
+
+        manifest_path = output_path.replace('.nef', '.manifest.json')
+        manifest_bytes = generator.generate_manifest_file()
+        with open(manifest_path, 'wb+') as manifest_file:
+            manifest_file.write(manifest_bytes)
+            manifest_file.close()

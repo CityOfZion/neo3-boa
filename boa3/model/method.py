@@ -1,7 +1,7 @@
 from typing import Dict
 
 from boa3.model.expression import IExpression
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 

@@ -49,8 +49,7 @@ class Analyser(object):
         """
         Include the Python builtins in the global symbol table
         """
-        for type in Type:
-            self.symbol_table[type.name] = type
+        self.symbol_table.update(Type.values())
 
     def __check_types(self) -> bool:
         """
