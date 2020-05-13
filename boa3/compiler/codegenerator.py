@@ -7,6 +7,7 @@ from boa3.model.method import Method
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
+from boa3.model.variable import Variable
 from boa3.neo.vm.Opcode import Opcode
 from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.type.Integer import Integer
@@ -99,6 +100,8 @@ class CodeGenerator:
         """
         if identifier in self.symbol_table:
             return self.symbol_table[identifier]
+        elif self.__current_method is not None and identifier in self.__current_method.symbols:
+            return self.__current_method.symbols[identifier]
         return Type.none
 
     def convert_begin_method(self, method: Method):
@@ -193,6 +196,45 @@ class CodeGenerator:
 
         data = data_len.to_bytes(prefix_len, sys.byteorder) + array
         self.__insert1(code, data)
+
+    def convert_load_symbol(self, symbol_id: str):
+        """
+        Converts the load of a symbol
+
+        :param symbol_id: the symbol identifier
+        """
+        symbol = self.get_symbol(symbol_id)
+        if symbol is not Type.none:
+            if isinstance(symbol, Variable):
+                self.convert_load_variable(symbol_id)
+            else:
+                # TODO: implement conversion of function calls
+                raise NotImplementedError()
+
+    def convert_load_variable(self, var_id: str):
+        """
+        Converts the assignment of a variable
+
+        :param var_id: the value to be converted
+        """
+        is_arg = False
+        local = var_id in self.__current_method.symbols
+        if local:
+            is_arg = var_id in self.__args
+            if is_arg:
+                scope = self.__args
+            else:
+                scope = self.__locals
+        else:
+            scope = self.__globals
+
+        index: int = scope.index(var_id)
+        opcode = Opcode.get_load(index, local, is_arg)
+
+        if opcode in [Opcode.LDARG, Opcode.LDLOC, Opcode.LDSFLD]:
+            self.__insert1(opcode, Integer(index).to_byte_array())
+        else:
+            self.__insert1(opcode)
 
     def convert_store_variable(self, var_id: str):
         """

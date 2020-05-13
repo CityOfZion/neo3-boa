@@ -1,6 +1,6 @@
 import ast
-from abc import ABC
-from typing import List, Dict, Any
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any, Optional
 
 from boa3.exception.CompilerError import CompilerError
 from boa3.exception.CompilerWarning import CompilerWarning
@@ -60,3 +60,14 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             return Type.str
 
         return Type.none
+
+    @abstractmethod
+    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+        """
+        Tries to get the symbol by its id name
+
+        :param symbol_id: the id name of the symbol
+        :return: the symbol if found. None otherwise.
+        :rtype: ISymbol or None
+        """
+        pass

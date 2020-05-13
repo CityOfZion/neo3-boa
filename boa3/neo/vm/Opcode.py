@@ -253,6 +253,9 @@ class Opcode(bytes, Enum):
         :return: the respective opcode
         :rtype: Opcode
         """
+        if not local:
+            is_arg = False
+
         if 0 <= index <= 6:
             if is_arg:
                 opcode_value = int.from_bytes(Opcode.LDARG0, sys.byteorder) + index
