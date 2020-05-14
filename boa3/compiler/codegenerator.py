@@ -194,6 +194,22 @@ class CodeGenerator:
         self.__insert_jump(OpcodeInfo.JMPIFNOT, 0)
         return self.__last_code.start_address
 
+    def convert_begin_else(self, start_address: int) -> int:
+        """
+        Converts the beginning of the if else statement
+
+        :param start_address: the address of the if first opcode
+        :return: the address of the if else first opcode
+        """
+        # it will be updated when the if ends
+        self.__insert_jump(OpcodeInfo.JMP, 0)
+
+        # updates the begin jmp with the target address
+        begin_jmp_to: int = self.address - start_address
+        self.__update_jump(start_address, begin_jmp_to)
+
+        return self.__last_code.start_address
+
     def convert_end_if(self, start_address: int):
         """
         Converts the end of the if statement

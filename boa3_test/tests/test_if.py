@@ -65,6 +65,12 @@ class TestIf(BoaTest):
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
+    def test_if_no_body(self):
+        path = '%s/boa3_test/example/if_test/IfWithoutBody.py' % self.dirname
+
+        with self.assertRaises(SyntaxError):
+            output = Boa3.compile(path)
+
     def test_nested_if(self):
         expected_output = (
             Opcode.INITSLOT
@@ -102,12 +108,44 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_if_else(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x01'
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC0
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # if arg0
+            + Integer(8).to_byte_array(min_length=1)
+                + Opcode.LDLOC0     # a = a + 2
+                + Opcode.PUSH2
+                + Opcode.ADD
+                + Opcode.STLOC0
+            + Opcode.JMP        # else
+            + Integer(4).to_byte_array(min_length=1)
+                + Opcode.PUSH10     # a = 10
+                + Opcode.STLOC0
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
         path = '%s/boa3_test/example/if_test/IfElse.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_else_no_body(self):
+        path = '%s/boa3_test/example/if_test/ElseWithoutBody.py' % self.dirname
+
+        with self.assertRaises(SyntaxError):
+            output = Boa3.compile(path)
+
+    def test_if_elif(self):
+        path = '%s/boa3_test/example/if_test/IfElif.py' % self.dirname
 
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
-    def test_while_relational_condition(self):
+    def test_if_relational_condition(self):
         jmp_address = Integer(6).to_byte_array(min_length=1)
 
         expected_output = (
@@ -133,3 +171,30 @@ class TestIf(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_if_expression_variable_condition(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # a = 2 if arg0 else 3
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.PUSH2      # 2
+            + Opcode.JMP        # else
+            + Integer(3).to_byte_array(min_length=1)
+                + Opcode.PUSH3      # 3
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/if_test/IfExpVariableCondition.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_if_expression_without_else_branch(self):
+        path = '%s/boa3_test/example/if_test/IfExpWithoutElse.py' % self.dirname
+
+        with self.assertRaises(SyntaxError):
+            output = Boa3.compile(path)
