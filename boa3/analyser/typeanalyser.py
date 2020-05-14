@@ -282,11 +282,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         # continue to walk through the tree
         for stmt in if_node.body:
             self.visit(stmt)
-
-        if len(if_node.orelse) == 1 and isinstance(if_node.orelse[0], ast.If):
-            # TODO: remove when implement elif statement
-            raise NotImplementedError
-
         for stmt in if_node.orelse:
             self.visit(stmt)
 
