@@ -6,12 +6,12 @@ from boa3.exception import CompilerError
 from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.method import Method
 from boa3.model.module import Module
-from boa3.model.symbol import ISymbol
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type, IType
 
 

@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional
 
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.negative import Negative

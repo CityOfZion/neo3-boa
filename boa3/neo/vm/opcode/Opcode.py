@@ -1,4 +1,3 @@
-import sys
 from enum import Enum
 
 from boa3.neo.vm.type.Integer import Integer
@@ -6,7 +5,7 @@ from boa3.neo.vm.type.Integer import Integer
 
 class Opcode(bytes, Enum):
 
-    # Constants
+    # region Constants
 
     PUSHINT8 = b'\x00'
     PUSHINT16 = b'\x01'
@@ -77,37 +76,40 @@ class Opcode(bytes, Enum):
     PUSH15 = b'\x1F'
     # The number 16 is pushed onto the stack.
     PUSH16 = b'\x20'
+
+    # endregion
+
+    # region Flow control
+
     # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
     NOP = b'\x21'
 
-    @staticmethod
-    def get_large_jump(opcode: bytes):
+    def get_large_jump(self):
         """
         Gets the large jump opcode to the standard jump
 
-        :param opcode: opcode standard jump value
         :return: the respective opcode
         :rtype: Opcode or None
         """
-        if Opcode.is_large_jump(opcode):
-            return opcode
-        elif Opcode.is_small_jump(opcode):
-            opcode_value: int = Integer.from_bytes(opcode) + 1
+        if self.is_large_jump:
+            return self
+        elif self.is_small_jump:
+            opcode_value: int = Integer.from_bytes(self) + 1
             return Opcode(Integer(opcode_value).to_byte_array())
         else:
             return None
 
-    @staticmethod
-    def is_small_jump(opcode: bytes) -> bool:
-        return opcode in [Opcode.JMP, Opcode.JMPIF, Opcode.JMPIFNOT,
-                          Opcode.JMPEQ, Opcode.JMPNE, Opcode.JMPGT,
-                          Opcode.JMPGE, Opcode.JMPLT, Opcode.JMPLE]
+    @property
+    def is_small_jump(self) -> bool:
+        return self in [Opcode.JMP, Opcode.JMPIF, Opcode.JMPIFNOT,
+                        Opcode.JMPEQ, Opcode.JMPNE, Opcode.JMPGT,
+                        Opcode.JMPGE, Opcode.JMPLT, Opcode.JMPLE]
 
-    @staticmethod
-    def is_large_jump(opcode: bytes) -> bool:
-        return opcode in [Opcode.JMP_L, Opcode.JMPIF_L, Opcode.JMPIFNOT_L,
-                          Opcode.JMPEQ_L, Opcode.JMPNE_L, Opcode.JMPGT_L,
-                          Opcode.JMPGE_L, Opcode.JMPLT_L, Opcode.JMPLE_L]
+    @property
+    def is_large_jump(self) -> bool:
+        return self in [Opcode.JMP_L, Opcode.JMPIF_L, Opcode.JMPIFNOT_L,
+                        Opcode.JMPEQ_L, Opcode.JMPNE_L, Opcode.JMPGT_L,
+                        Opcode.JMPGE_L, Opcode.JMPLT_L, Opcode.JMPLE_L]
 
     # Unconditionally transfers control to a target instruction. The target instruction is represented as a 1-byte
     # signed offset from the beginning of the current instruction.
@@ -201,7 +203,9 @@ class Opcode(bytes, Enum):
     # Calls to an interop service.
     SYSCALL = b'\x41'
 
-    # Stack
+    # endregion
+
+    # region Stack
 
     # Puts the number of stack items onto the stack.
     DEPTH = b'\x43'
@@ -234,7 +238,9 @@ class Opcode(bytes, Enum):
     # Pop the number N on the stack, and reverse the order of the top N items on the stack.
     REVERSEN = b'\x55'
 
-    # Slot
+    # endregion
+
+    # region Slot
 
     # Initialize the static field list for the current execution context.
     INITSSLOT = b'\x56'
@@ -404,10 +410,12 @@ class Opcode(bytes, Enum):
     # represented as a 1-byte unsigned integer. 
     STARG = b'\x87'
 
-    # Splice
+    # endregion
 
-    NEWBUFFER = 0x88,
-    MEMCPY = 0x89,
+    # region Splice
+
+    NEWBUFFER = b'\x88',
+    MEMCPY = b'\x89',
     # Concatenates two strings.
     CAT = b'\x8B'
     # Returns a section of a string.
@@ -417,7 +425,9 @@ class Opcode(bytes, Enum):
     # Keeps only characters right of the specified point in a string.
     RIGHT = b'\x8E'
 
-    # Bitwise logic
+    # endregion
+
+    # region Bitwise logic
 
     # Flips all of the bits in the input.
     INVERT = b'\x90'
@@ -432,7 +442,9 @@ class Opcode(bytes, Enum):
     # Returns 1 if the inputs are not equal, 0 otherwise.
     NOTEQUAL = b'\x98'
 
-    # Arithmetic
+    # endregion
+
+    # region Arithmetic
 
     # Puts the sign of top stack item on top of the main stack. If value is negative, put -1; if positive, 
     # put 1; if value is zero, put 0. 
@@ -486,7 +498,9 @@ class Opcode(bytes, Enum):
     # Returns 1 if x is within the specified range (left-inclusive), 0 otherwise.
     WITHIN = b'\xBB'
 
-    # Compound-type
+    # endregion
+
+    # region Compound-type
 
     # A value n is taken from top of main stack. The next n items on main stack are removed, put inside n-sized array
     # and this array is put on top of the main stack. 
@@ -531,7 +545,9 @@ class Opcode(bytes, Enum):
     # Remove all the items from the compound-type.
     CLEARITEMS = b'\xD3'
 
-    # Types
+    # endregion
+
+    # region Types
 
     # Returns true if the input is null. Returns false otherwise.
     ISNULL = b'\xD8'
@@ -539,3 +555,5 @@ class Opcode(bytes, Enum):
     ISTYPE = b'\xD9'
     # Converts the top item to the specified type.
     CONVERT = b'\xDB'
+
+    # endregion

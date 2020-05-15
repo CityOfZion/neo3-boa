@@ -8,8 +8,10 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
 from boa3.model.variable import Variable
-from boa3.neo.vm.Opcode import Opcode
 from boa3.neo.vm.VMCode import VMCode
+from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
+from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItemType import StackItemType
 
@@ -145,14 +147,14 @@ class CodeGenerator:
         num_vars: int = len(method.locals)
 
         init_data = bytearray([num_vars, num_args])
-        self.__insert1(Opcode.INITSLOT, init_data)
+        self.__insert1(OpcodeInfo.INITSLOT, init_data)
         self.__current_method = method
 
     def convert_end_method(self):
         """
         Converts the end of the method
         """
-        self.__insert1(Opcode.RET)
+        self.__insert1(OpcodeInfo.RET)
         self.__current_method = None
 
     def convert_begin_while(self) -> int:
@@ -162,7 +164,7 @@ class CodeGenerator:
         :return: the address of the while first opcode
         """
         # it will be updated when the while ends
-        self.__insert_jump(Opcode.JMP, 0)
+        self.__insert_jump(OpcodeInfo.JMP, 0)
         return self.__last_code.start_address
 
     def convert_end_while(self, start_address: int, test_address: int):
@@ -180,7 +182,7 @@ class CodeGenerator:
         while_begin: VMCode = self.__vm_codes_map[start_address]
         while_body: int = while_begin.end_address + 1
         end_jmp_to: int = while_body - self.address
-        self.__insert_jump(Opcode.JMPIF, end_jmp_to)
+        self.__insert_jump(OpcodeInfo.JMPIF, end_jmp_to)
 
     def convert_literal(self, value: Any):
         """
@@ -207,13 +209,13 @@ class CodeGenerator:
         if -1 <= value <= 16:
             opcode = Opcode.get_literal_push(value)
             if opcode is not None:
-                self.__insert1(opcode)
+                op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
+                self.__insert1(op_info)
         else:
             array = Integer(value).to_byte_array()
             self.convert_byte_array(array)
             # cast the value to integer
-            self.__insert1(Opcode.CONVERT, StackItemType.Integer)
-        pass
+            self.__insert1(OpcodeInfo.CONVERT, StackItemType.Integer)
 
     def convert_string_literal(self, value: str):
         """
@@ -231,9 +233,9 @@ class CodeGenerator:
         :param value: the value to be converted
         """
         if value:
-            self.__insert1(Opcode.PUSH1)
+            self.__insert1(OpcodeInfo.PUSH1)
         else:
-            self.__insert1(Opcode.PUSH0)
+            self.__insert1(OpcodeInfo.PUSH0)
 
     def convert_byte_array(self, array: bytes):
         """
@@ -243,17 +245,14 @@ class CodeGenerator:
         """
         data_len: int = len(array)
         if data_len <= ONE_BYTE_MAX_VALUE:
-            prefix_len = 1
-            code = Opcode.PUSHDATA1
+            op_info = OpcodeInfo.get_info(Opcode.PUSHDATA1)
         elif data_len <= TWO_BYTES_MAX_VALUE:
-            prefix_len = 2
-            code = Opcode.PUSHDATA2
+            op_info = OpcodeInfo.get_info(Opcode.PUSHDATA2)
         else:
-            prefix_len = 4
-            code = Opcode.PUSHDATA4
+            op_info = OpcodeInfo.get_info(Opcode.PUSHDATA4)
 
-        data = data_len.to_bytes(prefix_len, sys.byteorder) + array
-        self.__insert1(code, data)
+        data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
+        self.__insert1(op_info, data)
 
     def convert_load_symbol(self, symbol_id: str):
         """
@@ -288,11 +287,12 @@ class CodeGenerator:
 
         index: int = scope.index(var_id)
         opcode = Opcode.get_load(index, local, is_arg)
+        op_info = OpcodeInfo.get_info(opcode)
 
-        if opcode in [Opcode.LDARG, Opcode.LDLOC, Opcode.LDSFLD]:
-            self.__insert1(opcode, Integer(index).to_byte_array())
+        if op_info.data_len > 0:
+            self.__insert1(op_info, Integer(index).to_byte_array())
         else:
-            self.__insert1(opcode)
+            self.__insert1(op_info)
 
     def convert_store_variable(self, var_id: str):
         """
@@ -313,11 +313,12 @@ class CodeGenerator:
 
         index: int = scope.index(var_id)
         opcode = Opcode.get_store(index, local, is_arg)
+        op_info = OpcodeInfo.get_info(opcode)
 
-        if opcode in [Opcode.STARG, Opcode.STLOC, Opcode.STSFLD]:
-            self.__insert1(opcode, Integer(index).to_byte_array())
+        if op_info.data_len > 0:
+            self.__insert1(op_info, Integer(index).to_byte_array())
         else:
-            self.__insert1(opcode)
+            self.__insert1(op_info)
 
     def convert_operation(self, operation: IOperation):
         """
@@ -328,29 +329,30 @@ class CodeGenerator:
         opcode: Opcode = operation.opcode
 
         if opcode is not None:
-            self.__insert1(opcode)
+            op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
+            self.__insert1(op_info)
 
-    def __insert1(self, opcode: Opcode, data: bytes = None):
+    def __insert1(self, op_info: OpcodeInformation, data: bytes = bytes()):
         """
         Inserts one opcode into the bytecode
 
-        :param opcode: opcode that will be inserted
+        :param op_info: info of the opcode  that will be inserted
         :param data: data of the opcode, if needed
         """
         last_code = self.__last_code
-        vm_code = VMCode(opcode, last_code, data)
+        vm_code = VMCode(op_info, last_code, data)
 
         self.__vm_codes.append(vm_code)
 
-    def __insert_jump(self, opcode: Opcode, jump_to: int):
+    def __insert_jump(self, op_info: OpcodeInformation, jump_to: int):
         """
         Inserts a jump opcode into the bytecode
 
-        :param opcode: opcode that will be inserted
+        :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
         """
-        opcode, data = self.__get_jump_data(opcode, jump_to)    # type:Tuple[Opcode, bytes]
-        self.__insert1(opcode, data)
+        op_info, data = self.__get_jump_data(op_info, jump_to)    # type:Tuple[OpcodeInformation, bytes]
+        self.__insert1(op_info, data)
 
     def __update_jump(self, jump_address: int, updated_jump_to: int):
         """
@@ -361,21 +363,20 @@ class CodeGenerator:
         """
         vmcode: VMCode = self.__vm_codes_map[jump_address]
         if vmcode is not None:
-            opcode, data = self.__get_jump_data(vmcode.opcode, updated_jump_to)     # type:Tuple[Opcode, bytes]
-            vmcode.opcode = opcode
-            vmcode.data = data
+            op_info, data = self.__get_jump_data(vmcode.info, updated_jump_to)  # type:Tuple[OpcodeInformation, bytes]
+            vmcode.update(op_info, data)
 
-    def __get_jump_data(self, opcode: Opcode, jump_to: int) -> Tuple[Opcode, bytes]:
-        data: bytes = None
+    def __get_jump_data(self, op_info: OpcodeInformation, jump_to: int) -> Tuple[OpcodeInformation, bytes]:
+        data: bytes = bytes()
         jmp_data: Integer = Integer(jump_to)
 
-        if Opcode.is_small_jump(opcode):
-            if len(jmp_data.to_byte_array(min_length=1)) == 1:
-                data = jmp_data.to_byte_array(min_length=1)
-            else:
-                opcode = Opcode.get_large_jump(opcode)
+        if op_info.opcode.is_small_jump:
+            data = jmp_data.to_byte_array()
+            if len(data) > op_info.data_len:
+                opcode: Opcode = op_info.opcode.get_large_jump()
+                op_info = OpcodeInfo.get_info(opcode)
 
-        if Opcode.is_large_jump(opcode):
-            data = jmp_data.to_byte_array(min_length=4)
+        elif op_info.opcode.is_large_jump:
+            data = jmp_data.to_byte_array()
 
-        return opcode, data
+        return op_info, data
