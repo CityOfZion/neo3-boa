@@ -6,11 +6,19 @@ from boa3.model.type.type import IType, Type
 from boa3.neo.vm.Opcode import Opcode
 
 
-class Modulo(BinaryOperation):
+class GreaterThanOrEqual(BinaryOperation):
+    """
+    A class used to represent a numeric greater than or equal comparison
+
+    :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
+    :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
+    :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
+    :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
+    """
     _valid_types: List[IType] = [Type.int]
 
     def __init__(self, left: IType = Type.int, right: IType = Type.int):
-        self.operator: Operator = Operator.Mod
+        self.operator: Operator = Operator.GtE
         super().__init__(left, right)
 
     def validate_type(self, *types: IType) -> bool:
@@ -23,12 +31,12 @@ class Modulo(BinaryOperation):
         return left == right and left in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
-        # TODO: change the logic of the return type when implement other numeric types
+        # TODO: change the logic of the validation when implement other numeric types
         if self.validate_type(left, right):
-            return left
+            return Type.bool
         else:
             return Type.none
 
     @property
     def opcode(self) -> Optional[Opcode]:
-        return Opcode.MOD
+        return Opcode.GE

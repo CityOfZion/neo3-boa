@@ -5,9 +5,9 @@ from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType, Type
 
 
-class Division(BinaryOperation):
+class NotIdentity(BinaryOperation):
     """
-    A class used to represent a floating-point division operation
+    A class used to represent an is not comparison
 
     :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
     :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
@@ -17,7 +17,7 @@ class Division(BinaryOperation):
     _valid_types: List[IType] = [Type.int]
 
     def __init__(self, left: IType = Type.int, right: IType = Type.int):
-        self.operator: Operator = Operator.Div
+        self.operator: Operator = Operator.IsNot
         super().__init__(left, right)
 
     def validate_type(self, *types: IType) -> bool:
@@ -30,9 +30,13 @@ class Division(BinaryOperation):
         return left == right and left in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
-        # TODO: change the logic of the return type when implement other numeric types
+        # TODO: change the logic of the validation when implement other numeric types
         if self.validate_type(left, right):
-            return left
+            return Type.bool
         else:
             return Type.none
 
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when 'is not' is supported
+        return False

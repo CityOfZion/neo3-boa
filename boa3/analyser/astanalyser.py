@@ -40,16 +40,15 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         :param value: value to get the type
         :return: Returns the :class:`IType` of the the type of the value. `Type.none` by default.
         """
+        # visits if it is a node
         if isinstance(value, ast.AST):
             fun_rtype_id: str = ast.NodeVisitor.visit(self, value)
-            if fun_rtype_id not in self.symbols:
-                return Type.none
+            if isinstance(fun_rtype_id, ast.Name):
+                fun_rtype_id = fun_rtype_id.id
 
-            symbol = self.symbols[fun_rtype_id]
-            if isinstance(symbol, IType):
-                return symbol
-            return Type.none
-        elif isinstance(value, IType):
+            value = self.get_symbol(fun_rtype_id)
+
+        if isinstance(value, IType):
             return value
         elif isinstance(value, IExpression):
             return value.type

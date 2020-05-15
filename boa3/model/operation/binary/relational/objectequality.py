@@ -6,9 +6,9 @@ from boa3.model.type.type import IType, Type
 from boa3.neo.vm.Opcode import Opcode
 
 
-class Concat(BinaryOperation):
+class ObjectEquality(BinaryOperation):
     """
-    A class used to represent a string concatenation operation
+    A class used to represent a equality comparison
 
     :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
     :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
@@ -18,7 +18,7 @@ class Concat(BinaryOperation):
     _valid_types: List[IType] = [Type.str]
 
     def __init__(self, left: IType = Type.str, right: IType = Type.str):
-        self.operator: Operator = Operator.Plus
+        self.operator: Operator = Operator.Eq
         super().__init__(left, right)
 
     def validate_type(self, *types: IType) -> bool:
@@ -27,14 +27,21 @@ class Concat(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
+        # TODO: change the logic of the validation when implement other types
         return left == right and left in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
+        # TODO: change the logic of the return type when implement other types
         if self.validate_type(left, right):
-            return left
+            return Type.bool
         else:
             return Type.none
 
     @property
     def opcode(self) -> Optional[Opcode]:
-        return Opcode.CAT
+        return Opcode.EQUAL
+
+    @property
+    def is_supported(self) -> bool:
+        # TODO: change when non-numeric equal is supported
+        return False

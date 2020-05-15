@@ -1,40 +1,48 @@
 from typing import Optional, Dict
 
-from boa3.model.operation.binary.addition import Addition
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
-from boa3.model.operation.binary.concat import Concat
-from boa3.model.operation.binary.division import Division
-from boa3.model.operation.binary.floordivision import FloorDivision
-from boa3.model.operation.binary.modulo import Modulo
-from boa3.model.operation.binary.multiplication import Multiplication
-from boa3.model.operation.binary.power import Power
-from boa3.model.operation.binary.subtraction import Subtraction
+from boa3.model.operation.binary.arithmetic.addition import Addition
+from boa3.model.operation.binary.arithmetic.concat import Concat
+from boa3.model.operation.binary.arithmetic.division import Division
+from boa3.model.operation.binary.arithmetic.floordivision import FloorDivision
+from boa3.model.operation.binary.arithmetic.modulo import Modulo
+from boa3.model.operation.binary.arithmetic.multiplication import Multiplication
+from boa3.model.operation.binary.arithmetic.power import Power
+from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
+from boa3.model.operation.binary.relational.greaterthan import GreaterThan
+from boa3.model.operation.binary.relational.greaterthanorequal import GreaterThanOrEqual
+from boa3.model.operation.binary.relational.identity import Identity
+from boa3.model.operation.binary.relational.LessThan import LessThan
+from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
+from boa3.model.operation.binary.relational.notidentity import NotIdentity
+from boa3.model.operation.binary.relational.numericequality import NumericEquality
+from boa3.model.operation.binary.relational.numericinequality import NumericInequality
+from boa3.model.operation.binary.relational.objectequality import ObjectEquality
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType
 
 
 class BinaryOp:
-    __operations: Dict[str, BinaryOperation] = {
-        # Arithmetic operations
-        'Add': Addition(),
-        'Sub': Subtraction(),
-        'Mul': Multiplication(),
-        'Div': Division(),
-        'IntDiv': FloorDivision(),
-        'Mod': Modulo(),
-        'Pow': Power(),
-        'Concat': Concat()
-    }
-
     # Arithmetic operations
-    Add = __operations['Add']
-    Sub = __operations['Sub']
-    Mul = __operations['Mul']
-    Div = __operations['Div']
-    IntDiv = __operations['IntDiv']
-    Mod = __operations['Mod']
-    Pow = __operations['Pow']
-    Concat = __operations['Concat']
+    Add = Addition()
+    Sub = Subtraction()
+    Mul = Multiplication()
+    Div = Division()
+    IntDiv = FloorDivision()
+    Mod = Modulo()
+    Pow = Power()
+    Concat = Concat()
+
+    # Relational operations
+    NumEq = NumericEquality()
+    NumNotEq = NumericInequality()
+    Lt = LessThan()
+    LtE = LessThanOrEqual()
+    Gt = GreaterThan()
+    GtE = GreaterThanOrEqual()
+    Is = Identity()
+    IsNot = NotIdentity()
+    Eq = ObjectEquality()
 
     @classmethod
     def validate_type(cls, operator: Operator, left: IType, right: IType) -> Optional[BinaryOperation]:
@@ -47,8 +55,8 @@ class BinaryOp:
         :return: The operation if exists. None otherwise;
         :rtype: BinaryOperation or None
         """
-        for id, op in cls.__operations.items():
-            if op.is_valid(operator, left, right):
+        for id, op in vars(cls).items():
+            if isinstance(op, BinaryOperation) and op.is_valid(operator, left, right):
                 return op.build(left, right)
 
     @classmethod
@@ -61,8 +69,8 @@ class BinaryOp:
         found. None otherwise;
         :rtype: BinaryOperation or None
         """
-        for id, op in cls.__operations.items():
-            if op.operator is operator:
+        for id, op in vars(cls).items():
+            if isinstance(op, BinaryOperation) and op.operator is operator:
                 return op
 
     @classmethod
@@ -74,6 +82,6 @@ class BinaryOp:
         :return: The operation if exists. None otherwise;
         :rtype: BinaryOperation or None
         """
-        for id, op in cls.__operations.items():
+        for id, op in vars(cls).items():
             if type(operation) == type(op):
                 return op

@@ -73,3 +73,12 @@ class TooManyReturns(CompilerError):
     def __init__(self, line: int, col: int):
         message = "Too many returns"
         super().__init__(line, col, message)
+
+
+class IncorrectNumberOfOperands(CompilerError):
+    """
+    An error raised when an operation is used with the wrong number of operands
+    """
+    def __init__(self, line: int, col: int, expected_count: int, actual_count: int):
+        message = "Incorrect number of operands: expected '%s', got '%s' instead" % (expected_count, actual_count)
+        super().__init__(line, col, message)

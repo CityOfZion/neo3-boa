@@ -10,9 +10,9 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.RET
         )
@@ -26,9 +26,9 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.SUB
             + Opcode.RET
         )
@@ -42,9 +42,9 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.MUL
             + Opcode.RET
         )
@@ -64,9 +64,9 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.DIV
             + Opcode.RET
         )
@@ -80,9 +80,9 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH4
-            + Opcode.PUSH2
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
             + Opcode.MOD
             + Opcode.RET
         )
@@ -96,8 +96,8 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH8
+            + b'\x01'
+            + Opcode.LDARG0
             + Opcode.RET
         )
 
@@ -110,8 +110,8 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH8
+            + b'\x01'
+            + Opcode.LDARG0
             + Opcode.NEGATE
             + Opcode.RET
         )
@@ -149,11 +149,11 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH8
+            + b'\x02'
             + Opcode.PUSH4
+            + Opcode.LDARG1
             + Opcode.ADD
-            + Opcode.PUSH2
+            + Opcode.LDARG0
             + Opcode.ADD
             + Opcode.RET
         )
@@ -167,15 +167,15 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PUSH5
+            + b'\x05'
+            + Opcode.LDARG0
+            + Opcode.LDARG2
+            + Opcode.LDARG4
             + Opcode.MUL        # multiplicative operations
             + Opcode.ADD        # additive operations
-            + Opcode.PUSH4
+            + Opcode.LDARG3
             + Opcode.NEGATE     # parentheses
-            + Opcode.PUSH2
+            + Opcode.LDARG1
             + Opcode.DIV        # multiplicative
             + Opcode.SUB        # additive
             + Opcode.RET
@@ -190,15 +190,15 @@ class TestArithmetic(BoaTest):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PUSH5
-            + Opcode.PUSH4
+            + b'\x05'
+            + Opcode.LDARG0
+            + Opcode.LDARG2
+            + Opcode.LDARG4
+            + Opcode.LDARG3
             + Opcode.NEGATE     # inside parentheses
             + Opcode.SUB        # parentheses
             + Opcode.MUL        # multiplicative operations
-            + Opcode.PUSH2
+            + Opcode.LDARG1
             + Opcode.DIV        # multiplicative
             + Opcode.ADD        # additive operations
             + Opcode.RET

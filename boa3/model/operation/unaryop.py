@@ -8,15 +8,9 @@ from boa3.model.type.type import IType
 
 
 class UnaryOp:
-    __operations: Dict[str, UnaryOperation] = {
-        # Arithmetic operations
-        'Positive': Positive(),
-        'Negative': Negative()
-    }
-
     # Arithmetic operations
-    Positive = __operations['Positive']
-    Negative = __operations['Negative']
+    Positive = Positive()
+    Negative = Negative()
 
     @classmethod
     def validate_type(cls, operator: Operator, operand: IType) -> Optional[UnaryOperation]:
@@ -28,8 +22,8 @@ class UnaryOp:
         :return: The operation if exists. None otherwise;
         :rtype: UnaryOperation or None
         """
-        for id, op in cls.__operations.items():
-            if op.is_valid(operator, operand):
+        for id, op in vars(cls).items():
+            if isinstance(op, UnaryOperation) and op.is_valid(operator, operand):
                 return op.build(operand)
 
     @classmethod
@@ -42,8 +36,8 @@ class UnaryOp:
         found. None otherwise.
         :rtype: UnaryOperation or None
         """
-        for id, op in cls.__operations.items():
-            if op.operator is operator:
+        for id, op in vars(cls).items():
+            if isinstance(op, UnaryOperation) and op.operator is operator:
                 return op
 
     @classmethod
@@ -55,6 +49,6 @@ class UnaryOp:
         :return: The operation if exists. None otherwise;
         :rtype: UnaryOperation or None
         """
-        for id, op in cls.__operations.items():
+        for id, op in vars(cls).items():
             if type(operation) == type(op):
                 return op

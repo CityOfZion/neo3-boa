@@ -58,3 +58,12 @@ class IOperation(ABC):
             return False
 
         return operator is self.operator and self.validate_type(*types)
+
+    @property
+    def is_supported(self) -> bool:
+        """
+        Verifies if the operation is supported by the compiler
+
+        :return: True if it is supported. False otherwise.
+        """
+        return True
