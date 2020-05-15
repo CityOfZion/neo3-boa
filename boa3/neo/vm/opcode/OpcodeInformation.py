@@ -9,13 +9,21 @@ class OpcodeInformation:
     :ivar data_len: the size in bytes of the expected operand. Zero by default.
     :ivar max_data_len: the max size in bytes of the operand. Same value as data_len if size is constant.
     """
-    def __init__(self, opcode: Opcode, min_data_len: int = 0, max_data_len: int = 0):
+    def __init__(self, opcode: Opcode, min_data_len: int = 0, extra_data_max_len: int = 0):
         self.opcode: Opcode = opcode
 
         if min_data_len < 0:
             min_data_len = 0
         self.data_len: int = min_data_len
 
-        if max_data_len < min_data_len:
-            max_data_len = min_data_len
-        self.max_data_len: int = max_data_len
+        if extra_data_max_len < 0:
+            extra_data_max_len = 0
+        self.max_data_len: int = min_data_len + extra_data_max_len
+
+    def get_large(self):
+        large_op = self.opcode.get_large
+        if large_op is None:
+            return None
+
+        from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
+        return OpcodeInfo.get_info(large_op)

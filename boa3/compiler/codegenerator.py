@@ -370,13 +370,12 @@ class CodeGenerator:
         data: bytes = bytes()
         jmp_data: Integer = Integer(jump_to)
 
-        if op_info.opcode.is_small_jump:
-            data = jmp_data.to_byte_array()
-            if len(data) > op_info.data_len:
-                opcode: Opcode = op_info.opcode.get_large_jump()
-                op_info = OpcodeInfo.get_info(opcode)
+        if len(jmp_data.to_byte_array()) > op_info.data_len:
+            opcode: Opcode = op_info.opcode.get_large_jump()
+            if opcode is None:
+                return op_info, data
 
-        elif op_info.opcode.is_large_jump:
-            data = jmp_data.to_byte_array()
+            op_info = OpcodeInfo.get_info(opcode)
+        data = jmp_data.to_byte_array()
 
         return op_info, data

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Dict
 
 from boa3.neo.vm.type.Integer import Integer
 
@@ -81,9 +82,6 @@ class Opcode(bytes, Enum):
 
     # region Flow control
 
-    # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
-    NOP = b'\x21'
-
     def get_large_jump(self):
         """
         Gets the large jump opcode to the standard jump
@@ -91,26 +89,41 @@ class Opcode(bytes, Enum):
         :return: the respective opcode
         :rtype: Opcode or None
         """
-        if self.is_large_jump:
-            return self
-        elif self.is_small_jump:
-            opcode_value: int = Integer.from_bytes(self) + 1
-            return Opcode(Integer(opcode_value).to_byte_array())
+        if self in self.__larger_jump:
+            return self.__larger_jump[self]
         else:
             return None
 
     @property
-    def is_small_jump(self) -> bool:
-        return self in [Opcode.JMP, Opcode.JMPIF, Opcode.JMPIFNOT,
-                        Opcode.JMPEQ, Opcode.JMPNE, Opcode.JMPGT,
-                        Opcode.JMPGE, Opcode.JMPLT, Opcode.JMPLE]
+    def __larger_jump(self) -> Dict[bytes, bytes]:
+        """
+        A map of each jump with its larger equivalent
 
-    @property
-    def is_large_jump(self) -> bool:
-        return self in [Opcode.JMP_L, Opcode.JMPIF_L, Opcode.JMPIFNOT_L,
-                        Opcode.JMPEQ_L, Opcode.JMPNE_L, Opcode.JMPGT_L,
-                        Opcode.JMPGE_L, Opcode.JMPLT_L, Opcode.JMPLE_L]
+        :return: a dictionary that maps each jump opcode to its larger equivalent.
+        """
+        return {
+            self.JMP: self.JMP_L,
+            self.JMP_L: self.JMP_L,
+            self.JMPIF: self.JMPIF_L,
+            self.JMPIF_L: self.JMPIF_L,
+            self.JMPIFNOT: self.JMPIFNOT_L,
+            self.JMPIFNOT_L: self.JMPIFNOT_L,
+            self.JMPEQ: self.JMPEQ_L,
+            self.JMPEQ_L: self.JMPEQ_L,
+            self.JMPNE: self.JMPNE_L,
+            self.JMPNE_L: self.JMPNE_L,
+            self.JMPGT: self.JMPGT_L,
+            self.JMPGT_L: self.JMPGT_L,
+            self.JMPGE: self.JMPGE_L,
+            self.JMPGE_L: self.JMPGE_L,
+            self.JMPLT: self.JMPLT_L,
+            self.JMPLT_L: self.JMPLT_L,
+            self.JMPLE: self.JMPLE_L,
+            self.JMPLE_L: self.JMPLE_L
+        }
 
+    # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
+    NOP = b'\x21'
     # Unconditionally transfers control to a target instruction. The target instruction is represented as a 1-byte
     # signed offset from the beginning of the current instruction.
     JMP = b'\x22'
@@ -167,6 +180,7 @@ class Opcode(bytes, Enum):
     # Transfers control to a target instruction if the first value is less than or equal to the second value. The 
     # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
     JMPLE_L = b'\x33'
+
     # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of 
     # the current instruction. 
     CALL = b'\x34'
@@ -246,7 +260,6 @@ class Opcode(bytes, Enum):
     INITSSLOT = b'\x56'
     # Initialize the argument slot and the local variable list for the current execution context.
     INITSLOT = b'\x57'
-    # Loads the static field at index 0 onto the evaluation stack.
 
     @staticmethod
     def get_store(index: int, local: bool, is_arg: bool = False):
@@ -308,6 +321,7 @@ class Opcode(bytes, Enum):
             else:
                 return Opcode.LDSFLD
 
+    # Loads the static field at index 0 onto the evaluation stack.
     LDSFLD0 = b'\x58'
     # Loads the static field at index 1 onto the evaluation stack.
     LDSFLD1 = b'\x59'
