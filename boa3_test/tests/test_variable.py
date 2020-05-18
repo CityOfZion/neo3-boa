@@ -27,7 +27,7 @@ class TestVariable(BoaTest):
             + Opcode.RET        # return
         )
         compiler_output = compiler.compile(path)
-        self.assertEqual(compiler_output, expected_compiler_output)
+        self.assertEqual(expected_compiler_output, compiler_output)
 
         main_symbol_table: Dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
         # the variable is local to a method, so it shouldn't be in the main symbol table

@@ -37,7 +37,7 @@ class UnaryOperation(IOperation, ABC):
     @classmethod
     def build(cls, operand: IType):
         """
-        Creates a binary operation with the given operands types
+        Creates a unary operation with the given operand type
 
         :param operand: operand type
         :return: The built operation if the operands are valid. None otherwise

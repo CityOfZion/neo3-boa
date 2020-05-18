@@ -1,5 +1,5 @@
 .idea
-venv/
+venv
 __pycache__
 .nef
 *.nef
@@ -10,4 +10,5 @@ __pycache__
 .abi.json
 *.abi.json
 dist
-/build
+build
+neo3_boa.egg-info
