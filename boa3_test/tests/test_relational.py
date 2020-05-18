@@ -1,6 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import NotSupportedOperation, MismatchedTypes
-from boa3.neo.vm.Opcode import Opcode
+from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
 

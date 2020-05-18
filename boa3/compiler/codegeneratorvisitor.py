@@ -162,6 +162,23 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.generator.convert_operation(op)
             left = right
 
+    def visit_While(self, while_node: ast.While):
+        """
+        Verifies if the type of while test is valid
+
+        :param while_node: the python ast while statement node
+        """
+        start_addr: int = self.generator.convert_begin_while()
+        for stmt in while_node.body:
+            self.visit_to_generate(stmt)
+
+        test_address: int = self.generator.address
+        self.visit_to_generate(while_node.test)
+        self.generator.convert_end_while(start_addr, test_address)
+
+        for stmt in while_node.orelse:
+            self.visit_to_generate(stmt)
+
     def visit_Name(self, name: ast.Name) -> str:
         """
         Visitor of a name node

@@ -1,6 +1,5 @@
-from typing import Optional, Dict
+from typing import Optional
 
-from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binary.arithmetic.addition import Addition
 from boa3.model.operation.binary.arithmetic.concat import Concat
 from boa3.model.operation.binary.arithmetic.division import Division
@@ -9,11 +8,12 @@ from boa3.model.operation.binary.arithmetic.modulo import Modulo
 from boa3.model.operation.binary.arithmetic.multiplication import Multiplication
 from boa3.model.operation.binary.arithmetic.power import Power
 from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
+from boa3.model.operation.binary.binaryoperation import BinaryOperation
+from boa3.model.operation.binary.relational.LessThan import LessThan
+from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
 from boa3.model.operation.binary.relational.greaterthan import GreaterThan
 from boa3.model.operation.binary.relational.greaterthanorequal import GreaterThanOrEqual
 from boa3.model.operation.binary.relational.identity import Identity
-from boa3.model.operation.binary.relational.LessThan import LessThan
-from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
 from boa3.model.operation.binary.relational.notidentity import NotIdentity
 from boa3.model.operation.binary.relational.numericequality import NumericEquality
 from boa3.model.operation.binary.relational.numericinequality import NumericInequality

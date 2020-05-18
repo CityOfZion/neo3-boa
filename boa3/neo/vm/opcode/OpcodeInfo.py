@@ -1,511 +1,469 @@
-import sys
-from enum import Enum
+from typing import Optional
 
-from boa3.neo.vm.type.Integer import Integer
+from boa3 import constants
+from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 
 
-class Opcode(bytes, Enum):
+class OpcodeInfo:
+    @classmethod
+    def get_info(cls, opcode: Opcode) -> Optional[OpcodeInformation]:
+        """
+        Gets a binary operation given the operator.
 
-    # Constants
+        :param opcode: Neo VM opcode
+        :return: The opcode info if it exists. None otherwise
+        :rtype: OpcodeInformation or None
+        """
+        for id, op in vars(cls).items():
+            if isinstance(op, OpcodeInformation) and op.opcode is opcode:
+                return op
 
-    PUSHINT8 = b'\x00'
-    PUSHINT16 = b'\x01'
-    PUSHINT32 = b'\x02'
-    PUSHINT64 = b'\x03'
-    PUSHINT128 = b'\x04'
-    PUSHINT256 = b'\x05'
+    # region Constants
+
+    PUSHINT8 = OpcodeInformation(Opcode.PUSHINT8)
+    PUSHINT16 = OpcodeInformation(Opcode.PUSHINT16)
+    PUSHINT32 = OpcodeInformation(Opcode.PUSHINT32)
+    PUSHINT64 = OpcodeInformation(Opcode.PUSHINT64)
+    PUSHINT128 = OpcodeInformation(Opcode.PUSHINT128)
+    PUSHINT256 = OpcodeInformation(Opcode.PUSHINT256)
 
     # Convert the next four bytes to an address, and push the address onto the stack.
-    PUSHA = b'\x0A'
+    PUSHA = OpcodeInformation(Opcode.PUSHA, 4)
     # The item null is pushed onto the stack.
-    PUSHNULL = b'\x0B'
+    PUSHNULL = OpcodeInformation(Opcode.PUSHNULL)
     # The next byte contains the number of bytes to be pushed onto the stack.
-    PUSHDATA1 = b'\x0C'
+    PUSHDATA1 = OpcodeInformation(Opcode.PUSHDATA1, 1, constants.ONE_BYTE_MAX_VALUE)
     # The next two bytes contain the number of bytes to be pushed onto the stack.
-    PUSHDATA2 = b'\x0D'
+    PUSHDATA2 = OpcodeInformation(Opcode.PUSHDATA2, 2, constants.TWO_BYTES_MAX_VALUE)
     # The next four bytes contain the number of bytes to be pushed onto the stack.
-    PUSHDATA4 = b'\x0E'
-
-    @staticmethod
-    def get_literal_push(integer: int):
-        """
-        Gets the push opcode to the respective integer
-
-        :param integer: value that will be pushed
-        :return: the respective opceode
-        :rtype: Opcode or None
-        """
-        if -1 <= integer <= 16:
-            opcode_value = int.from_bytes(Opcode.PUSH0, sys.byteorder) + integer
-            return Opcode(Integer(opcode_value).to_byte_array())
-        else:
-            return None
+    PUSHDATA4 = OpcodeInformation(Opcode.PUSHDATA4, 4, constants.FOUR_BYTES_MAX_VALUE)
 
     # The number -1 is pushed onto the stack.
-    PUSHM1 = b'\x0F'
+    PUSHM1 = OpcodeInformation(Opcode.PUSHM1)
     # The number 0 is pushed onto the stack.
-    PUSH0 = b'\x10'
+    PUSH0 = OpcodeInformation(Opcode.PUSH0)
     # The number 1 is pushed onto the stack.
-    PUSH1 = b'\x11'
+    PUSH1 = OpcodeInformation(Opcode.PUSH1)
     # The number 2 is pushed onto the stack.
-    PUSH2 = b'\x12'
+    PUSH2 = OpcodeInformation(Opcode.PUSH2)
     # The number 3 is pushed onto the stack.
-    PUSH3 = b'\x13'
+    PUSH3 = OpcodeInformation(Opcode.PUSH3)
     # The number 4 is pushed onto the stack.
-    PUSH4 = b'\x14'
+    PUSH4 = OpcodeInformation(Opcode.PUSH4)
     # The number 5 is pushed onto the stack.
-    PUSH5 = b'\x15'
+    PUSH5 = OpcodeInformation(Opcode.PUSH5)
     # The number 6 is pushed onto the stack.
-    PUSH6 = b'\x16'
+    PUSH6 = OpcodeInformation(Opcode.PUSH6)
     # The number 7 is pushed onto the stack.
-    PUSH7 = b'\x17'
+    PUSH7 = OpcodeInformation(Opcode.PUSH7)
     # The number 8 is pushed onto the stack.
-    PUSH8 = b'\x18'
+    PUSH8 = OpcodeInformation(Opcode.PUSH8)
     # The number 9 is pushed onto the stack.
-    PUSH9 = b'\x19'
+    PUSH9 = OpcodeInformation(Opcode.PUSH9)
     # The number 10 is pushed onto the stack.
-    PUSH10 = b'\x1A'
+    PUSH10 = OpcodeInformation(Opcode.PUSH10)
     # The number 11 is pushed onto the stack.
-    PUSH11 = b'\x1B'
+    PUSH11 = OpcodeInformation(Opcode.PUSH11)
     # The number 12 is pushed onto the stack.
-    PUSH12 = b'\x1C'
+    PUSH12 = OpcodeInformation(Opcode.PUSH12)
     # The number 13 is pushed onto the stack.
-    PUSH13 = b'\x1D'
+    PUSH13 = OpcodeInformation(Opcode.PUSH13)
     # The number 14 is pushed onto the stack.
-    PUSH14 = b'\x1E'
+    PUSH14 = OpcodeInformation(Opcode.PUSH14)
     # The number 15 is pushed onto the stack.
-    PUSH15 = b'\x1F'
+    PUSH15 = OpcodeInformation(Opcode.PUSH15)
     # The number 16 is pushed onto the stack.
-    PUSH16 = b'\x20'
+    PUSH16 = OpcodeInformation(Opcode.PUSH16)
+
+    # endregion
+
+    # region Flow control
+
     # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
-    NOP = b'\x21'
+    NOP = OpcodeInformation(Opcode.NOP)
     # Unconditionally transfers control to a target instruction. The target instruction is represented as a 1-byte
     # signed offset from the beginning of the current instruction.
-    JMP = b'\x22'
+    JMP = OpcodeInformation(Opcode.JMP, 1)
     # Unconditionally transfers control to a target instruction. The target instruction is represented as a 4-bytes
     # signed offset from the beginning of the current instruction.
-    JMP_L = b'\x23'
+    JMP_L = OpcodeInformation(Opcode.JMP_L, 4)
     # Transfers control to a target instruction if the value is True, not null, or non-zero. The target instruction
     # is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPIF = b'\x24'
+    JMPIF = OpcodeInformation(Opcode.JMPIF, 1)
     # Transfers control to a target instruction if the value is True, not null, or non-zero. The target instruction
     # is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPIF_L = b'\x25'
+    JMPIF_L = OpcodeInformation(Opcode.JMPIF_L, 4)
     # Transfers control to a target instruction if the value is False, a null reference,
     # or zero. The target instruction is represented as a 1-byte signed offset from the beginning of the current
     # instruction.
-    JMPIFNOT = b'\x26'
+    JMPIFNOT = OpcodeInformation(Opcode.JMPIFNOT, 1)
     # Transfers control to a target instruction if the value is False, a null reference,
     # or zero. The target instruction is represented as a 4-bytes signed offset from the beginning of the current
     # instruction.
-    JMPIFNOT_L = b'\x27'
+    JMPIFNOT_L = OpcodeInformation(Opcode.JMPIFNOT_L, 4)
     # Transfers control to a target instruction if two values are equal. The target instruction is represented as a
     # 1-byte signed offset from the beginning of the current instruction.
-    JMPEQ = b'\x28'
+    JMPEQ = OpcodeInformation(Opcode.JMPEQ, 1)
     # Transfers control to a target instruction if two values are equal. The target instruction is represented as a
     # 4-bytes signed offset from the beginning of the current instruction.
-    JMPEQ_L = b'\x29'
+    JMPEQ_L = OpcodeInformation(Opcode.JMPEQ_L, 4)
     # Transfers control to a target instruction when two values are not equal. The target instruction is represented
     # as a 1-byte signed offset from the beginning of the current instruction.
-    JMPNE = b'\x2A'
+    JMPNE = OpcodeInformation(Opcode.JMPNE, 1)
     # Transfers control to a target instruction when two values are not equal. The target instruction is represented
     # as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPNE_L = b'\x2B'
+    JMPNE_L = OpcodeInformation(Opcode.JMPNE_L, 4)
     # Transfers control to a target instruction if the first value is greater than the second value. The target
     # instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPGT = b'\x2C'
+    JMPGT = OpcodeInformation(Opcode.JMPGT, 1)
     # Transfers control to a target instruction if the first value is greater than the second value. The target
     # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPGT_L = b'\x2D'
-    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The 
-    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction. 
-    JMPGE = b'\x2E'
-    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The 
-    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
-    JMPGE_L = b'\x2F'
-    # Transfers control to a target instruction if the first value is less than the second value. The target 
-    # instruction is represented as a 1-byte signed offset from the beginning of the current instruction. 
-    JMPLT = b'\x30'
-    # Transfers control to a target instruction if the first value is less than the second value. The target 
-    # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
-    JMPLT_L = b'\x31'
-    # Transfers control to a target instruction if the first value is less than or equal to the second value. The 
-    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction. 
-    JMPLE = b'\x32'
-    # Transfers control to a target instruction if the first value is less than or equal to the second value. The 
-    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
-    JMPLE_L = b'\x33'
-    # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of 
-    # the current instruction. 
-    CALL = b'\x34'
-    # Calls the function at the target address which is represented as a 4-bytes signed offset from the beginning of 
-    # the current instruction. 
-    CALL_L = b'\x35'
+    JMPGT_L = OpcodeInformation(Opcode.JMPGT_L, 4)
+    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The
+    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
+    JMPGE = OpcodeInformation(Opcode.JMPGE, 1)
+    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The
+    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
+    JMPGE_L = OpcodeInformation(Opcode.JMPGE_L, 4)
+    # Transfers control to a target instruction if the first value is less than the second value. The target
+    # instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
+    JMPLT = OpcodeInformation(Opcode.JMPLT, 1)
+    # Transfers control to a target instruction if the first value is less than the second value. The target
+    # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
+    JMPLT_L = OpcodeInformation(Opcode.JMPLT_L, 4)
+    # Transfers control to a target instruction if the first value is less than or equal to the second value. The
+    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
+    JMPLE = OpcodeInformation(Opcode.JMPLE, 1)
+    # Transfers control to a target instruction if the first value is less than or equal to the second value. The
+    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
+    JMPLE_L = OpcodeInformation(Opcode.JMPLE_L, 4)
+    # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of
+    # the current instruction.
+    CALL = OpcodeInformation(Opcode.CALL, 1)
+    # Calls the function at the target address which is represented as a 4-bytes signed offset from the beginning of
+    # the current instruction.
+    CALL_L = OpcodeInformation(Opcode.CALL_L, 4)
     # Pop the address of a function from the stack, and call the function.
-    CALLA = b'\x36'
+    CALLA = OpcodeInformation(Opcode.CALLA)
     # It turns the vm state to FAULT immediately, and cannot be caught.
-    ABORT = b'\x37'
+    ABORT = OpcodeInformation(Opcode.ABORT)
     # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT.
-    ASSERT = b'\x38'
+    ASSERT = OpcodeInformation(Opcode.ASSERT)
     # Pop the top value of the stack, and throw it.
-    THROW = b'\x3A'
+    THROW = OpcodeInformation(Opcode.THROW)
     # TRY CatchOffset(sbyte) FinallyOffset(sbyte). If there's no catch body, set CatchOffset 0. If there's no finally
     # body, set FinallyOffset 0.
-    TRY = b'\x3B'
+    TRY = OpcodeInformation(Opcode.TRY)
     # TRY_L CatchOffset(int) FinallyOffset(int). If there's no catch body, set CatchOffset 0. If there's no finally
     # body, set FinallyOffset 0.
-    TRY_L = b'\x3C'
+    TRY_L = OpcodeInformation(Opcode.TRY_L)
     # Ensures that the appropriate surrounding finally blocks are executed. And then unconditionally transfers
     # control to the specific target instruction, represented as a 1-byte signed offset from the beginning of the
     # current instruction.
-    ENDTRY = b'\x3D'
+    ENDTRY = OpcodeInformation(Opcode.ENDTRY)
     # Ensures that the appropriate surrounding finally blocks are executed. And then unconditionally transfers
     # control to the specific target instruction, represented as a 4-byte signed offset from the beginning of the
     # current instruction.
-    ENDTRY_L = b'\x3E'
+    ENDTRY_L = OpcodeInformation(Opcode.ENDTRY_L)
     # End finally, If no exception happen or be catched, vm will jump to the target instruction of ENDTRY/ENDTRY_L.
     # Otherwise vm will rethrow the exception to upper layer.
-    ENDFINALLY = b'\x3F'
+    ENDFINALLY = OpcodeInformation(Opcode.ENDFINALLY)
     # Returns from the current method.
-    RET = b'\x40'
+    RET = OpcodeInformation(Opcode.RET)
     # Calls to an interop service.
-    SYSCALL = b'\x41'
+    SYSCALL = OpcodeInformation(Opcode.SYSCALL)
 
-    # Stack
+    # endregion
+
+    # region Stack
 
     # Puts the number of stack items onto the stack.
-    DEPTH = b'\x43'
+    DEPTH = OpcodeInformation(Opcode.DEPTH)
     # Removes the top stack item.
-    DROP = b'\x45'
+    DROP = OpcodeInformation(Opcode.DROP)
     # Removes the second-to-top stack item.
-    NIP = b'\x46'
+    NIP = OpcodeInformation(Opcode.NIP)
     # The item n back in the main stack is removed.
-    XDROP = b'\x48'
+    XDROP = OpcodeInformation(Opcode.XDROP)
     # Clear the stack
-    CLEAR = b'\x49'
+    CLEAR = OpcodeInformation(Opcode.CLEAR)
     # Duplicates the top stack item.
-    DUP = b'\x4A'
+    DUP = OpcodeInformation(Opcode.DUP)
     # Copies the second-to-top stack item to the top.
-    OVER = b'\x4B'
+    OVER = OpcodeInformation(Opcode.OVER)
     # The item n back in the stack is copied to the top.
-    PICK = b'\x4D'
+    PICK = OpcodeInformation(Opcode.PICK)
     # The item at the top of the stack is copied and inserted before the second-to-top item.
-    TUCK = b'\x4E'
+    TUCK = OpcodeInformation(Opcode.TUCK)
     # The top two items on the stack are swapped.
-    SWAP = b'\x50'
+    SWAP = OpcodeInformation(Opcode.SWAP)
     # The top three items on the stack are rotated to the left.
-    ROT = b'\x51'
+    ROT = OpcodeInformation(Opcode.ROT)
     # The item n back in the stack is moved to the top.
-    ROLL = b'\x52'
+    ROLL = OpcodeInformation(Opcode.ROLL)
     # Reverse the order of the top 3 items on the stack.
-    REVERSE3 = b'\x53'
+    REVERSE3 = OpcodeInformation(Opcode.REVERSE3)
     # Reverse the order of the top 4 items on the stack.
-    REVERSE4 = b'\x54'
+    REVERSE4 = OpcodeInformation(Opcode.REVERSE4)
     # Pop the number N on the stack, and reverse the order of the top N items on the stack.
-    REVERSEN = b'\x55'
+    REVERSEN = OpcodeInformation(Opcode.REVERSEN)
 
-    # Slot
+    # endregion
+
+    # region Slot
 
     # Initialize the static field list for the current execution context.
-    INITSSLOT = b'\x56'
+    INITSSLOT = OpcodeInformation(Opcode.INITSSLOT, 1)
     # Initialize the argument slot and the local variable list for the current execution context.
-    INITSLOT = b'\x57'
+    INITSLOT = OpcodeInformation(Opcode.INITSLOT, 2)
     # Loads the static field at index 0 onto the evaluation stack.
-
-    @staticmethod
-    def get_store(index: int, local: bool, is_arg: bool = False):
-        """
-        Gets the opcode to store the variable
-
-        :param index: index of the variable
-        :param local: identifies if the variable is local or global
-        :param is_arg: identifies if the variable is an argument of a function. False if local is False.
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        if not local:
-            is_arg = False
-
-        if 0 <= index <= 6:
-            if is_arg:
-                opcode_value = int.from_bytes(Opcode.STARG0, sys.byteorder) + index
-            elif local:
-                opcode_value = int.from_bytes(Opcode.STLOC0, sys.byteorder) + index
-            else:
-                opcode_value = int.from_bytes(Opcode.STSFLD0, sys.byteorder) + index
-            return Opcode(Integer(opcode_value).to_byte_array())
-        else:
-            if is_arg:
-                return Opcode.STARG
-            elif local:
-                return Opcode.STLOC
-            else:
-                return Opcode.STSFLD
-
-    @staticmethod
-    def get_load(index: int, local: bool, is_arg: bool = False):
-        """
-        Gets the opcode to load the variable
-
-        :param index: index of the variable
-        :param local: identifies if the variable is local or global
-        :param is_arg: identifies if the variable is an argument of a function. False if local is False.
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        if not local:
-            is_arg = False
-
-        if 0 <= index <= 6:
-            if is_arg:
-                opcode_value = int.from_bytes(Opcode.LDARG0, sys.byteorder) + index
-            elif local:
-                opcode_value = int.from_bytes(Opcode.LDLOC0, sys.byteorder) + index
-            else:
-                opcode_value = int.from_bytes(Opcode.LDSFLD0, sys.byteorder) + index
-            return Opcode(Integer(opcode_value).to_byte_array())
-        else:
-            if is_arg:
-                return Opcode.LDARG
-            elif local:
-                return Opcode.LDLOC
-            else:
-                return Opcode.LDSFLD
-
-    LDSFLD0 = b'\x58'
+    LDSFLD0 = OpcodeInformation(Opcode.LDSFLD0)
     # Loads the static field at index 1 onto the evaluation stack.
-    LDSFLD1 = b'\x59'
+    LDSFLD1 = OpcodeInformation(Opcode.LDSFLD1)
     # Loads the static field at index 2 onto the evaluation stack.
-    LDSFLD2 = b'\x5A'
+    LDSFLD2 = OpcodeInformation(Opcode.LDSFLD2)
     # Loads the static field at index 3 onto the evaluation stack.
-    LDSFLD3 = b'\x5B'
+    LDSFLD3 = OpcodeInformation(Opcode.LDSFLD3)
     # Loads the static field at index 4 onto the evaluation stack.
-    LDSFLD4 = b'\x5C'
+    LDSFLD4 = OpcodeInformation(Opcode.LDSFLD4)
     # Loads the static field at index 5 onto the evaluation stack.
-    LDSFLD5 = b'\x5D'
+    LDSFLD5 = OpcodeInformation(Opcode.LDSFLD5)
     # Loads the static field at index 6 onto the evaluation stack.
-    LDSFLD6 = b'\x5E'
-    # Loads the static field at a specified index onto the evaluation stack. The index is represented as a 1-byte 
-    # unsigned integer. 
-    LDSFLD = b'\x5F'
+    LDSFLD6 = OpcodeInformation(Opcode.LDSFLD6)
+    # Loads the static field at a specified index onto the evaluation stack. The index is represented as a 1-byte
+    # unsigned integer.
+    LDSFLD = OpcodeInformation(Opcode.LDSFLD, 1)
     # Stores the value on top of the evaluation stack in the static field list at index 0.
-    STSFLD0 = b'\x60'
+    STSFLD0 = OpcodeInformation(Opcode.STSFLD0)
     # Stores the value on top of the evaluation stack in the static field list at index 1.
-    STSFLD1 = b'\x61'
+    STSFLD1 = OpcodeInformation(Opcode.STSFLD1)
     # Stores the value on top of the evaluation stack in the static field list at index 2.
-    STSFLD2 = b'\x62'
+    STSFLD2 = OpcodeInformation(Opcode.STSFLD2)
     # Stores the value on top of the evaluation stack in the static field list at index 3.
-    STSFLD3 = b'\x63'
+    STSFLD3 = OpcodeInformation(Opcode.STSFLD3)
     # Stores the value on top of the evaluation stack in the static field list at index 4.
-    STSFLD4 = b'\x64'
+    STSFLD4 = OpcodeInformation(Opcode.STSFLD4)
     # Stores the value on top of the evaluation stack in the static field list at index 5.
-    STSFLD5 = b'\x65'
+    STSFLD5 = OpcodeInformation(Opcode.STSFLD5)
     # Stores the value on top of the evaluation stack in the static field list at index 6.
-    STSFLD6 = b'\x66'
-    # Stores the value on top of the evaluation stack in the static field list at a specified index. The index is 
-    # represented as a 1-byte unsigned integer. 
-    STSFLD = b'\x67'
+    STSFLD6 = OpcodeInformation(Opcode.STSFLD6)
+    # Stores the value on top of the evaluation stack in the static field list at a specified index. The index is
+    # represented as a 1-byte unsigned integer.
+    STSFLD = OpcodeInformation(Opcode.STSFLD, 1)
     # Loads the local variable at index 0 onto the evaluation stack.
-    LDLOC0 = b'\x68'
+    LDLOC0 = OpcodeInformation(Opcode.LDLOC0)
     # Loads the local variable at index 1 onto the evaluation stack.
-    LDLOC1 = b'\x69'
+    LDLOC1 = OpcodeInformation(Opcode.LDLOC1)
     # Loads the local variable at index 2 onto the evaluation stack.
-    LDLOC2 = b'\x6A'
+    LDLOC2 = OpcodeInformation(Opcode.LDLOC2)
     # Loads the local variable at index 3 onto the evaluation stack.
-    LDLOC3 = b'\x6B'
+    LDLOC3 = OpcodeInformation(Opcode.LDLOC3)
     # Loads the local variable at index 4 onto the evaluation stack.
-    LDLOC4 = b'\x6C'
+    LDLOC4 = OpcodeInformation(Opcode.LDLOC4)
     # Loads the local variable at index 5 onto the evaluation stack.
-    LDLOC5 = b'\x6D'
+    LDLOC5 = OpcodeInformation(Opcode.LDLOC5)
     # Loads the local variable at index 6 onto the evaluation stack.
-    LDLOC6 = b'\x6E'
-    # Loads the local variable at a specified index onto the evaluation stack. The index is represented as a 1-byte 
-    # unsigned integer. 
-    LDLOC = b'\x6F'
+    LDLOC6 = OpcodeInformation(Opcode.LDLOC6)
+    # Loads the local variable at a specified index onto the evaluation stack. The index is represented as a 1-byte
+    # unsigned integer.
+    LDLOC = OpcodeInformation(Opcode.LDLOC, 1)
     # Stores the value on top of the evaluation stack in the local variable list at index 0.
-    STLOC0 = b'\x70'
+    STLOC0 = OpcodeInformation(Opcode.STLOC0)
     # Stores the value on top of the evaluation stack in the local variable list at index 1.
-    STLOC1 = b'\x71'
+    STLOC1 = OpcodeInformation(Opcode.STLOC1)
     # Stores the value on top of the evaluation stack in the local variable list at index 2.
-    STLOC2 = b'\x72'
+    STLOC2 = OpcodeInformation(Opcode.STLOC2)
     # Stores the value on top of the evaluation stack in the local variable list at index 3.
-    STLOC3 = b'\x73'
+    STLOC3 = OpcodeInformation(Opcode.STLOC3)
     # Stores the value on top of the evaluation stack in the local variable list at index 4.
-    STLOC4 = b'\x74'
+    STLOC4 = OpcodeInformation(Opcode.STLOC4)
     # Stores the value on top of the evaluation stack in the local variable list at index 5.
-    STLOC5 = b'\x75'
+    STLOC5 = OpcodeInformation(Opcode.STLOC5)
     # Stores the value on top of the evaluation stack in the local variable list at index 6.
-    STLOC6 = b'\x76'
-    # Stores the value on top of the evaluation stack in the local variable list at a specified index. The index is 
-    # represented as a 1-byte unsigned integer. 
-    STLOC = b'\x77'
+    STLOC6 = OpcodeInformation(Opcode.STLOC6)
+    # Stores the value on top of the evaluation stack in the local variable list at a specified index. The index is
+    # represented as a 1-byte unsigned integer.
+    STLOC = OpcodeInformation(Opcode.STLOC, 1)
     # Loads the argument at index 0 onto the evaluation stack.
-    LDARG0 = b'\x78'
+    LDARG0 = OpcodeInformation(Opcode.LDARG0)
     # Loads the argument at index 1 onto the evaluation stack.
-    LDARG1 = b'\x79'
+    LDARG1 = OpcodeInformation(Opcode.LDARG1)
     # Loads the argument at index 2 onto the evaluation stack.
-    LDARG2 = b'\x7A'
+    LDARG2 = OpcodeInformation(Opcode.LDARG2)
     # Loads the argument at index 3 onto the evaluation stack.
-    LDARG3 = b'\x7B'
+    LDARG3 = OpcodeInformation(Opcode.LDARG3)
     # Loads the argument at index 4 onto the evaluation stack.
-    LDARG4 = b'\x7C'
+    LDARG4 = OpcodeInformation(Opcode.LDARG4)
     # Loads the argument at index 5 onto the evaluation stack.
-    LDARG5 = b'\x7D'
+    LDARG5 = OpcodeInformation(Opcode.LDARG5)
     # Loads the argument at index 6 onto the evaluation stack.
-    LDARG6 = b'\x7E'
-    # Loads the argument at a specified index onto the evaluation stack. The index is represented as a 1-byte 
-    # unsigned integer. 
-    LDARG = b'\x7F'
+    LDARG6 = OpcodeInformation(Opcode.LDARG6)
+    # Loads the argument at a specified index onto the evaluation stack. The index is represented as a 1-byte
+    # unsigned integer.
+    LDARG = OpcodeInformation(Opcode.LDARG, 1)
     # Stores the value on top of the evaluation stack in the argument slot at index 0.
-    STARG0 = b'\x80'
+    STARG0 = OpcodeInformation(Opcode.STARG0)
     # Stores the value on top of the evaluation stack in the argument slot at index 1.
-    STARG1 = b'\x81'
+    STARG1 = OpcodeInformation(Opcode.STARG1)
     # Stores the value on top of the evaluation stack in the argument slot at index 2.
-    STARG2 = b'\x82'
+    STARG2 = OpcodeInformation(Opcode.STARG2)
     # Stores the value on top of the evaluation stack in the argument slot at index 3.
-    STARG3 = b'\x83'
+    STARG3 = OpcodeInformation(Opcode.STARG3)
     # Stores the value on top of the evaluation stack in the argument slot at index 4.
-    STARG4 = b'\x84'
+    STARG4 = OpcodeInformation(Opcode.STARG4)
     # Stores the value on top of the evaluation stack in the argument slot at index 5.
-    STARG5 = b'\x85'
+    STARG5 = OpcodeInformation(Opcode.STARG5)
     # Stores the value on top of the evaluation stack in the argument slot at index 6.
-    STARG6 = b'\x86'
-    # Stores the value on top of the evaluation stack in the argument slot at a specified index. The index is 
-    # represented as a 1-byte unsigned integer. 
-    STARG = b'\x87'
+    STARG6 = OpcodeInformation(Opcode.STARG6)
+    # Stores the value on top of the evaluation stack in the argument slot at a specified index. The index is
+    # represented as a 1-byte unsigned integer.
+    STARG = OpcodeInformation(Opcode.STARG, 1)
 
-    # Splice
+    # endregion
 
-    NEWBUFFER = 0x88,
-    MEMCPY = 0x89,
+    # region Splice
+
+    NEWBUFFER = OpcodeInformation(Opcode.NEWBUFFER),
+    MEMCPY = OpcodeInformation(Opcode.MEMCPY),
     # Concatenates two strings.
-    CAT = b'\x8B'
+    CAT = OpcodeInformation(Opcode.CAT)
     # Returns a section of a string.
-    SUBSTR = b'\x8C'
+    SUBSTR = OpcodeInformation(Opcode.SUBSTR)
     # Keeps only characters left of the specified point in a string.
-    LEFT = b'\x8D'
+    LEFT = OpcodeInformation(Opcode.LEFT)
     # Keeps only characters right of the specified point in a string.
-    RIGHT = b'\x8E'
+    RIGHT = OpcodeInformation(Opcode.RIGHT)
 
-    # Bitwise logic
+    # endregion
+
+    # region Bitwise logic
 
     # Flips all of the bits in the input.
-    INVERT = b'\x90'
+    INVERT = OpcodeInformation(Opcode.INVERT)
     # Boolean and between each bit in the inputs.
-    AND = b'\x91'
+    AND = OpcodeInformation(Opcode.AND)
     # Boolean or between each bit in the inputs.
-    OR = b'\x92'
+    OR = OpcodeInformation(Opcode.OR)
     # Boolean exclusive or between each bit in the inputs.
-    XOR = b'\x93'
+    XOR = OpcodeInformation(Opcode.XOR)
     # Returns 1 if the inputs are exactly equal, 0 otherwise.
-    EQUAL = b'\x97'
+    EQUAL = OpcodeInformation(Opcode.EQUAL)
     # Returns 1 if the inputs are not equal, 0 otherwise.
-    NOTEQUAL = b'\x98'
+    NOTEQUAL = OpcodeInformation(Opcode.NOTEQUAL)
 
-    # Arithmetic
+    # endregion
 
-    # Puts the sign of top stack item on top of the main stack. If value is negative, put -1; if positive, 
-    # put 1; if value is zero, put 0. 
-    SIGN = b'\x99'
+    # region Arithmetic
+
+    # Puts the sign of top stack item on top of the main stack. If value is negative, put -1; if positive,
+    # put 1; if value is zero, put 0.
+    SIGN = OpcodeInformation(Opcode.SIGN)
     # The input is made positive.
-    ABS = b'\x9A'
+    ABS = OpcodeInformation(Opcode.ABS)
     # The sign of the input is flipped.
-    NEGATE = b'\x9B'
+    NEGATE = OpcodeInformation(Opcode.NEGATE)
     # 1 is added to the input.
-    INC = b'\x9C'
+    INC = OpcodeInformation(Opcode.INC)
     # 1 is subtracted from the input.
-    DEC = b'\x9D'
+    DEC = OpcodeInformation(Opcode.DEC)
     # a is added to b.
-    ADD = b'\x9E'
+    ADD = OpcodeInformation(Opcode.ADD)
     # b is subtracted from a.
-    SUB = b'\x9F'
+    SUB = OpcodeInformation(Opcode.SUB)
     # a is multiplied by b.
-    MUL = b'\xA0'
+    MUL = OpcodeInformation(Opcode.MUL)
     # a is divided by b.
-    DIV = b'\xA1'
+    DIV = OpcodeInformation(Opcode.DIV)
     # Returns the remainder after dividing a by b.
-    MOD = b'\xA2'
+    MOD = OpcodeInformation(Opcode.MOD)
     # Shifts a left b bits, preserving sign.
-    SHL = b'\xA8'
+    SHL = OpcodeInformation(Opcode.SHL)
     # Shifts a right b bits, preserving sign.
-    SHR = b'\xA9'
+    SHR = OpcodeInformation(Opcode.SHR)
     # If the input is 0 or 1, it is flipped. Otherwise the output will be 0.
-    NOT = b'\xAA'
+    NOT = OpcodeInformation(Opcode.NOT)
     # If both a and b are not 0, the output is 1. Otherwise 0.
-    BOOLAND = b'\xAB'
+    BOOLAND = OpcodeInformation(Opcode.BOOLAND)
     # If a or b is not 0, the output is 1. Otherwise 0.
-    BOOLOR = b'\xAC'
+    BOOLOR = OpcodeInformation(Opcode.BOOLOR)
     # Returns 0 if the input is 0. 1 otherwise.
-    NZ = b'\xB1'
+    NZ = OpcodeInformation(Opcode.NZ)
     # Returns 1 if the numbers are equal, 0 otherwise.
-    NUMEQUAL = b'\xB3'
+    NUMEQUAL = OpcodeInformation(Opcode.NUMEQUAL)
     # Returns 1 if the numbers are not equal, 0 otherwise.
-    NUMNOTEQUAL = b'\xB4'
+    NUMNOTEQUAL = OpcodeInformation(Opcode.NUMNOTEQUAL)
     # Returns 1 if a is less than b, 0 otherwise.
-    LT = b'\xB5'
+    LT = OpcodeInformation(Opcode.LT)
     # Returns 1 if a is less than or equal to b, 0 otherwise.
-    LE = b'\xB6'
+    LE = OpcodeInformation(Opcode.LE)
     # Returns 1 if a is greater than b, 0 otherwise.
-    GT = b'\xB7'
+    GT = OpcodeInformation(Opcode.GT)
     # Returns 1 if a is greater than or equal to b, 0 otherwise.
-    GE = b'\xB8'
+    GE = OpcodeInformation(Opcode.GE)
     # Returns the smaller of a and b.
-    MIN = b'\xB9'
+    MIN = OpcodeInformation(Opcode.MIN)
     # Returns the larger of a and b.
-    MAX = b'\xBA'
+    MAX = OpcodeInformation(Opcode.MAX)
     # Returns 1 if x is within the specified range (left-inclusive), 0 otherwise.
-    WITHIN = b'\xBB'
+    WITHIN = OpcodeInformation(Opcode.WITHIN)
 
-    # Compound-type
+    # endregion
+
+    # region Compound-type
 
     # A value n is taken from top of main stack. The next n items on main stack are removed, put inside n-sized array
-    # and this array is put on top of the main stack. 
-    PACK = b'\xC0'
-    # An array is removed from top of the main stack. Its elements are put on top of the main stack (in reverse 
-    # order) and the array size is also put on main stack. 
-    UNPACK = b'\xC1'
+    # and this array is put on top of the main stack.
+    PACK = OpcodeInformation(Opcode.PACK)
+    # An array is removed from top of the main stack. Its elements are put on top of the main stack (in reverse
+    # order) and the array size is also put on main stack.
+    UNPACK = OpcodeInformation(Opcode.UNPACK)
     # An empty array (with size 0) is put on top of the main stack.
-    NEWARRAY0 = b'\xC2'
+    NEWARRAY0 = OpcodeInformation(Opcode.NEWARRAY0)
     # A value n is taken from top of main stack. A null-filled array with size n is put on top of the main stack.
-    NEWARRAY = b'\xC3'
+    NEWARRAY = OpcodeInformation(Opcode.NEWARRAY)
     # A value n is taken from top of main stack. An array of type T with size n is put on top of the main stack.
-    NEWARRAY_T = b'\xC4'
+    NEWARRAY_T = OpcodeInformation(Opcode.NEWARRAY_T, 1)
     # An empty struct (with size 0) is put on top of the main stack.
-    NEWSTRUCT0 = b'\xC5'
+    NEWSTRUCT0 = OpcodeInformation(Opcode.NEWSTRUCT0)
     # A value n is taken from top of main stack. A zero-filled struct with size n is put on top of the main stack.
-    NEWSTRUCT = b'\xC6'
+    NEWSTRUCT = OpcodeInformation(Opcode.NEWSTRUCT)
     # A Map is created and put on top of the main stack.
-    NEWMAP = b'\xC8'
+    NEWMAP = OpcodeInformation(Opcode.NEWMAP)
     # An array is removed from top of the main stack. Its size is put on top of the main stack.
-    SIZE = b'\xCA'
+    SIZE = OpcodeInformation(Opcode.SIZE)
     # An input index n (or key) and an array (or map) are removed from the top of the main stack. Puts True on top of
-    # main stack if array[n] (or map[n]) exist, and False otherwise. 
-    HASKEY = b'\xCB'
+    # main stack if array[n] (or map[n]) exist, and False otherwise.
+    HASKEY = OpcodeInformation(Opcode.HASKEY)
     # A map is taken from top of the main stack. The keys of this map are put on top of the main stack.
-    KEYS = b'\xCC'
+    KEYS = OpcodeInformation(Opcode.KEYS)
     # A map is taken from top of the main stack. The values of this map are put on top of the main stack.
-    VALUES = b'\xCD'
-    # An input index n (or key) and an array (or map) are taken from main stack. Element array[n] (or map[n]) is put 
-    # on top of the main stack. 
-    PICKITEM = b'\xCE'
+    VALUES = OpcodeInformation(Opcode.VALUES)
+    # An input index n (or key) and an array (or map) are taken from main stack. Element array[n] (or map[n]) is put
+    # on top of the main stack.
+    PICKITEM = OpcodeInformation(Opcode.PICKITEM)
     # The item on top of main stack is removed and appended to the second item on top of the main stack.
-    APPEND = b'\xCF'
+    APPEND = OpcodeInformation(Opcode.APPEND)
     # A value v, index n (or key) and an array (or map) are taken from main stack. Attribution array[n]=v
     # (or map[n]=v) is performed.
-    SETITEM = b'\xD0'
+    SETITEM = OpcodeInformation(Opcode.SETITEM)
     # An array is removed from the top of the main stack and its elements are reversed.
-    REVERSEITEMS = b'\xD1'
+    REVERSEITEMS = OpcodeInformation(Opcode.REVERSEITEMS)
     # An input index n (or key) and an array (or map) are removed from the top of the main stack. Element array[n]
     # (or map[n]) is removed.
-    REMOVE = b'\xD2'
+    REMOVE = OpcodeInformation(Opcode.REMOVE)
     # Remove all the items from the compound-type.
-    CLEARITEMS = b'\xD3'
+    CLEARITEMS = OpcodeInformation(Opcode.CLEARITEMS)
 
-    # Types
+    # endregion
+
+    # region Types
 
     # Returns true if the input is null. Returns false otherwise.
-    ISNULL = b'\xD8'
+    ISNULL = OpcodeInformation(Opcode.ISNULL)
     # Returns true if the top item is of the specified type.
-    ISTYPE = b'\xD9'
+    ISTYPE = OpcodeInformation(Opcode.ISTYPE, 1)
     # Converts the top item to the specified type.
-    CONVERT = b'\xDB'
+    CONVERT = OpcodeInformation(Opcode.CONVERT, 1)
+
+    # endregion

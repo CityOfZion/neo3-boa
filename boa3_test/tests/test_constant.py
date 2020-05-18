@@ -1,7 +1,7 @@
 import sys
 
 from boa3.compiler.codegenerator import CodeGenerator
-from boa3.neo.vm.Opcode import Opcode
+from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItemType import StackItemType
 from boa3_test.tests.boa_test import BoaTest

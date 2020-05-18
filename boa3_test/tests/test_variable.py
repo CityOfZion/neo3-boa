@@ -7,7 +7,7 @@ from boa3.exception.CompilerError import NotSupportedOperation, UnresolvedRefere
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
-from boa3.neo.vm.Opcode import Opcode
+from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
 

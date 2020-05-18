@@ -3,7 +3,7 @@ from typing import Optional
 
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType
-from boa3.neo.vm.Opcode import Opcode
+from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class IOperation(ABC):

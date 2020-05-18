@@ -6,12 +6,12 @@ from boa3.exception import CompilerError
 from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.method import Method
 from boa3.model.module import Module
-from boa3.model.symbol import ISymbol
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type, IType
 
 
@@ -200,6 +200,41 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_error(
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
+
+        # continue to walk through the tree
+        self.generic_visit(assign)
+
+    def visit_While(self, while_node: ast.While):
+        """
+        Verifies if the type of while test is valid
+
+        :param while_node: the python ast while statement node
+        """
+        test = self.visit(while_node.test)
+        test_type: IType = self.get_type(test)
+
+        if test_type is not Type.bool:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    while_node.lineno, while_node.col_offset,
+                    actual_type_id=test_type.identifier,
+                    expected_type_id=Type.bool.identifier)
+            )
+
+        # continue to walk through the tree
+        for stmt in while_node.body:
+            self.visit(stmt)
+        for stmt in while_node.orelse:
+            self.visit(stmt)
+
+    def visit_If(self, if_node: ast.If):
+        """
+        Verifies if the type of if test is valid
+
+        :param if_node: the python ast if statement node
+        """
+        # TODO: remove when implement if statement
+        raise NotImplementedError
 
     def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
         """
@@ -448,3 +483,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the name node information
         """
         return name
+
+    def visit_Break(self, break_node: ast.Break):
+        """
+        :param break_node: the python ast break statement node
+        """
+        # TODO: remove when implement break statement
+        raise NotImplementedError
+
+    def visit_Continue(self, continue_node: ast.Continue):
+        """
+        :param continue_node: the python ast continue statement node
+        """
+        # TODO: remove when implement continue statement
+        raise NotImplementedError
