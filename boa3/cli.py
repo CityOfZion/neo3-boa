@@ -1,6 +1,7 @@
 import argparse
-import sys
 import os
+import sys
+
 from boa3.boa3 import Boa3
 
 

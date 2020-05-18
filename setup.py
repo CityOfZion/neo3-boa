@@ -1,8 +1,10 @@
-# Always prefer setuptools over distutils
-from setuptools import setup, find_packages
-# To use a consistent encoding
 from codecs import open
 from os import path
+
+# Always prefer setuptools over distutils
+# To use a consistent encoding
+from setuptools import setup, find_packages
+
 from boa3 import __version__ as version
 
 here = path.abspath(path.dirname(__file__))

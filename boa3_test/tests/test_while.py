@@ -189,6 +189,46 @@ class TestWhile(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    def test_while_multiple_relational_condition(self):
+        jmpif_address = Integer(10).to_byte_array(min_length=1)
+        jmp_address = Integer(-15).to_byte_array(min_length=1)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x02'
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC0
+            + Opcode.PUSH0      # b = 0
+            + Opcode.STLOC1
+            + Opcode.JMP        # begin while
+            + jmpif_address
+                + Opcode.LDLOC0     # a = a + 2
+                + Opcode.PUSH2
+                + Opcode.ADD
+                + Opcode.STLOC0
+                + Opcode.LDLOC1     # b = b + 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.PUSH10
+            + Opcode.LT
+            + Opcode.PUSH10
+            + Opcode.LDARG1
+            + Opcode.LT
+            + Opcode.BOOLAND
+            + Opcode.JMPIF      # end while b < 10 < arg1
+            + jmp_address
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/while_test/MultipleRelationalCondition.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
     def test_boa2_while_test(self):
         path = '%s/boa3_test/example/while_test/WhileBoa2Test.py' % self.dirname
 

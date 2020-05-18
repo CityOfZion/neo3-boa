@@ -9,6 +9,8 @@ from boa3.model.operation.binary.arithmetic.multiplication import Multiplication
 from boa3.model.operation.binary.arithmetic.power import Power
 from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
+from boa3.model.operation.binary.logical.booleanand import BooleanAnd
+from boa3.model.operation.binary.logical.booleanor import BooleanOr
 from boa3.model.operation.binary.relational.LessThan import LessThan
 from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
 from boa3.model.operation.binary.relational.greaterthan import GreaterThan
@@ -43,6 +45,10 @@ class BinaryOp:
     Is = Identity()
     IsNot = NotIdentity()
     Eq = ObjectEquality()
+
+    # Logical operations
+    And = BooleanAnd()
+    Or = BooleanOr()
 
     @classmethod
     def validate_type(cls, operator: Operator, left: IType, right: IType) -> Optional[BinaryOperation]:

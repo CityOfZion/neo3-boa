@@ -21,5 +21,10 @@ class Operator(str, Enum):
     Is = 'is'
     IsNot = 'is not'
 
+    # Logical operators
+    And = 'and'
+    Or = 'or'
+    Not = 'not'
+
     def __str__(self) -> str:
         return self.value

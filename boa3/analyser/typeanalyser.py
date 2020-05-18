@@ -53,7 +53,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         ast.Gt: Operator.Gt,
         ast.GtE: Operator.GtE,
         ast.Is: Operator.Is,
-        ast.IsNot: Operator.IsNot
+        ast.IsNot: Operator.IsNot,
+        ast.And: Operator.And,
+        ast.Or: Operator.Or,
+        ast.Not: Operator.Not
     }
 
     def _log_error(self, error: Error):
@@ -390,10 +393,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the type of the result of the operation if the operation is valid. Otherwise, returns None
         :rtype: IType or None
         """
-        if len(compare.ops) > 1:
-            # TODO: implement when logical operations are implemented
-            raise NotImplementedError
-
         if len(compare.comparators) != len(compare.ops):
             self._log_error(
                 CompilerError.IncorrectNumberOfOperands(
@@ -443,6 +442,55 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             actual_types = raised_error.args[3]
             self._log_error(
                 CompilerError.MismatchedTypes(line, col, expected_types, actual_types)
+            )
+
+    def visit_BoolOp(self, bool_op: ast.BoolOp) -> Optional[IType]:
+        """
+        Verifies if the types of the operands are valid to the boolean operations
+
+        If the operations are valid, changes de Python operator by the Boa operator in the syntax tree
+
+        :param bool_op: the python ast boolean operation node
+        :return: the type of the result of the operation if the operation is valid. Otherwise, returns None
+        :rtype: IType or None
+        """
+        lineno: int = bool_op.lineno
+        col_offset: int = bool_op.col_offset
+        try:
+            return_type: IType = None
+            bool_operation: BinaryOperation = None
+            operator: Operator = self.get_operator(bool_op.op)
+
+            if not isinstance(operator, Operator):
+                # the operator is invalid or it was not implemented yet
+                self._log_error(
+                    CompilerError.UnresolvedReference(lineno, col_offset, type(operator).__name__)
+                )
+
+            l_operand = self.visit(bool_op.values[0])
+            for index, operand in enumerate(bool_op.values[1:]):
+                r_operand = self.visit(operand)
+
+                operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
+                if operation is None:
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(lineno, col_offset, operator)
+                    )
+                elif bool_operation is None:
+                    return_type = operation.result
+                    bool_operation = operation
+
+                lineno = operand.lineno
+                col_offset = operand.col_offset
+                l_operand = r_operand
+
+            bool_op.op = bool_operation
+            return return_type
+        except CompilerError.MismatchedTypes as raised_error:
+            expected_types = raised_error.args[2]
+            actual_types = raised_error.args[3]
+            self._log_error(
+                CompilerError.MismatchedTypes(lineno, col_offset, expected_types, actual_types)
             )
 
     def get_operator(self, node: ast.AST) -> Optional[Operator]:
