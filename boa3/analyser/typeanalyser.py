@@ -278,6 +278,33 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param if_node: the python ast if statement node
         """
+        self.validate_if(if_node)
+        # continue to walk through the tree
+        for stmt in if_node.body:
+            self.visit(stmt)
+
+        if len(if_node.orelse) == 1 and isinstance(if_node.orelse[0], ast.If):
+            # TODO: remove when implement elif statement
+            raise NotImplementedError
+
+        for stmt in if_node.orelse:
+            self.visit(stmt)
+
+    def visit_IfExp(self, if_node: ast.IfExp):
+        """
+        Verifies if the type of if test is valid
+
+        :param if_node: the python ast if expression node
+        """
+        self.validate_if(if_node)
+
+    def validate_if(self, if_node: ast.AST):
+        """
+        Verifies if the type of if test is valid
+
+        :param if_node: the python ast if statement node
+        :type if_node: ast.If or ast.IfExp
+        """
         test = self.visit(if_node.test)
         test_type: IType = self.get_type(test)
 
@@ -288,14 +315,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     actual_type_id=test_type.identifier,
                     expected_type_id=Type.bool.identifier)
             )
-
-        # continue to walk through the tree
-        for stmt in if_node.body:
-            self.visit(stmt)
-
-        if len(if_node.orelse) > 0:
-            # TODO: remove when implement else statement
-            raise NotImplementedError
 
     def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
         """

@@ -242,6 +242,27 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in if_node.body:
             self.visit_to_generate(stmt)
 
+        if len(if_node.orelse) > 0:
+            start_addr = self.generator.convert_begin_else(start_addr)
+            for stmt in if_node.orelse:
+                self.visit_to_generate(stmt)
+
+        self.generator.convert_end_if(start_addr)
+
+    def visit_IfExp(self, if_node: ast.IfExp):
+        """
+        Verifies if the type of if test is valid
+
+        :param if_node: the python ast if statement node
+        """
+        self.visit_to_generate(if_node.test)
+
+        start_addr: int = self.generator.convert_begin_if()
+        self.visit_to_generate(if_node.body)
+
+        start_addr = self.generator.convert_begin_else(start_addr)
+        self.visit_to_generate(if_node.orelse)
+
         self.generator.convert_end_if(start_addr)
 
     def visit_Name(self, name: ast.Name) -> str:
