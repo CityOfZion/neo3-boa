@@ -26,5 +26,8 @@ class Operator(str, Enum):
     Or = 'or'
     Not = 'not'
 
+    # Other operators
+    Subscript = '[]'
+
     def __str__(self) -> str:
         return self.value

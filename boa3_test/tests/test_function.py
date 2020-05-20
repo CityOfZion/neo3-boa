@@ -99,3 +99,9 @@ class TestFunction(BoaTest):
 
         with self.assertRaises(TooManyReturns):
             output = Boa3.compile(path)
+
+    def test_tuple_function(self):
+        path = '%s/boa3_test/example/function_test/TupleFunction.py' % self.dirname
+
+        with self.assertRaises(TooManyReturns):
+            output = Boa3.compile(path)

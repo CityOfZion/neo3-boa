@@ -8,6 +8,8 @@ from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
+from boa3.model.type.sequencetype import SequenceType
+from boa3.model.type.type import Type
 from boa3.model.variable import Variable
 
 
@@ -63,7 +65,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return global_symbols
 
-    def __include_variable(self, var_id: str, var_type_id: str):
+    def __include_variable(self, var_id: str, var_type_id: str, var_enumerate_type: IType = Type.none):
         """
         Includes the variable in the symbol table if the id was not used
 
@@ -74,6 +76,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             var_type: ISymbol = self.symbols[var_type_id]
 
             if isinstance(var_type, IType):
+                if isinstance(var_type, SequenceType):
+                    var_type = var_type.build_sequence(var_enumerate_type)
                 var = Variable(var_type)
                 self.__current_scope.include_variable(var_id, var)
 
@@ -197,11 +201,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._log_error(
                     CompilerError.UnresolvedReference(assign.value.lineno, assign.value.col_offset, var_value)
                 )
-            var_type_id = self.get_type(symbol).identifier
+            var_type_id = self.get_type(symbol)
         else:
-            var_type_id = self.get_type(var_value).identifier
+            var_type_id = self.get_type(var_value)
 
-        self.__include_variable(var_id, var_type_id)
+        var_enumerate_type_id = var_type_id.value_type if isinstance(var_type_id, SequenceType) else Type.none
+        self.__include_variable(var_id, var_type_id.identifier, var_enumerate_type_id)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -234,6 +239,54 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._log_error(
                     CompilerError.UnresolvedReference(expr.value.lineno, expr.value.col_offset, value)
                 )
+
+    def visit_Subscript(self, subscript: ast.Subscript) -> IType:
+        """
+        Verifies if it is the types in the subscription are valid
+
+        :param subscript: the python ast subscription node
+        :return: if the subscript is not a symbol, returns its type. Otherwise returns the symbol id.
+        :rtype: IType or str
+        """
+        value = self.visit(subscript.value)
+        symbol = self.get_symbol(value)
+
+        if symbol is None:
+            symbol = self.get_symbol(value.lower())
+            subscript.value.id = value.lower() if symbol is not None else subscript.value
+
+        if isinstance(symbol, SequenceType):
+            values_type: IType = self.get_values_type(subscript.slice.value)
+            return symbol.build_sequence(values_type)
+
+        return value
+
+    def get_values_type(self, value: ast.AST):
+        """
+        Verifies if it is a multiple assignments statement
+
+        :param value: the python ast subscription node
+        """
+        value_type: Optional[IType] = None
+
+        if isinstance(value, ast.Subscript):
+            # index is another subscription
+            value_type = self.visit(value)
+        elif isinstance(value, ast.Name):
+            # index is an identifier
+            value_type = self.get_symbol(value.id)
+            if value_type is None:
+                value_type = self.get_symbol(value.id.lower())
+                value.id = value.id.lower() if value_type is not None else value.id
+
+        if not isinstance(value_type, IType):
+            # type hint not using identifiers or using identifiers that are not types
+            index = self.visit(value)
+            self._log_error(
+                CompilerError.UnresolvedReference(value.lineno, value.col_offset, index)
+            )
+
+        return value_type
 
     def visit_Name(self, name: ast.Name) -> str:
         """
@@ -270,3 +323,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the string
         """
         return str.s
+
+    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any]:
+        """
+        Visitor of literal tuple node
+
+        :param tup_node: the python ast string node
+        :return: the value of the tuple
+        """
+        tup = [self.visit(value) for value in tup_node.elts]
+        return tuple(tup)

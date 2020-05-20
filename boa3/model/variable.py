@@ -10,8 +10,8 @@ class Variable(IExpression):
     """
 
     def __init__(self, var_type: IType):
-        self.var_type: IType = var_type
+        self.__var_type: IType = var_type
 
     @property
     def type(self) -> IType:
-        return self.var_type
+        return self.__var_type

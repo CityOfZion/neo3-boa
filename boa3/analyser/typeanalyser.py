@@ -1,5 +1,5 @@
 import ast
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
@@ -12,6 +12,7 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
+from boa3.model.type.sequencetype import SequenceType
 from boa3.model.type.type import Type, IType
 
 
@@ -206,6 +207,47 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # continue to walk through the tree
         self.generic_visit(assign)
+
+    def visit_Subscript(self, subscript: ast.Subscript) -> IType:
+        """
+        Verifies if the subscribed value is a sequence
+
+        :param subscript: the python ast subscript node
+        :return: the type of the accessed value if it is valid. Type.none otherwise.
+        """
+        value = self.visit(subscript.value)
+        index = self.visit(subscript.slice)
+
+        if isinstance(value, ast.Name):
+            value = self.get_symbol(value.id)
+        if isinstance(index, ast.Name):
+            index = self.get_symbol(index.id)
+
+        # if it is a type hint, returns the outer type
+        if isinstance(value, IType) and isinstance(index, IType):
+            return value
+
+        symbol_type: IType = self.get_type(value)
+        index_type: IType = self.get_type(index)
+
+        # only sequence types can be subscribed
+        if not isinstance(symbol_type, SequenceType):
+            self._log_error(
+                CompilerError.UnresolvedOperation(
+                    subscript.lineno, subscript.col_offset,
+                    type_id=symbol_type.identifier,
+                    operation_id=Operator.Subscript)
+            )
+        # the sequence can't use the given type as index
+        elif not symbol_type.is_valid_key(index_type):
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    subscript.lineno, subscript.col_offset,
+                    actual_type_id=index_type.identifier,
+                    expected_type_id=symbol_type.valid_key.identifier)
+            )
+
+        return symbol_type.value_type
 
     def visit_While(self, while_node: ast.While):
         """
@@ -493,14 +535,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.MismatchedTypes(lineno, col_offset, expected_types, actual_types)
             )
 
-    def get_operator(self, node: ast.AST) -> Optional[Operator]:
+    def get_operator(self, node: ast.operator) -> Optional[Operator]:
         """
         Gets the :class:`Operator` equivalent to given Python ast operator
 
         :param node: Python ast node
+        :type node: ast.operator or Operator
         :return: the Boa operator equivalent to the node. None if it doesn't exit.
         :rtype: Operator or None
         """
+        if isinstance(node, Operator):
+            # the node has already been visited
+            return node
+
         node_type = type(node)
         if node_type in self.__operators:
             return self.__operators[node_type]
@@ -530,6 +577,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return str.s
 
+    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any]:
+        """
+        Visitor of literal tuple node
+
+        :param tup_node: the python ast string node
+        :return: the value of the tuple
+        """
+        return tuple(value for value in tup_node.elts)
+
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """
         Visitor of constant names node
@@ -547,6 +603,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the name node information
         """
         return name
+
+    def visit_Index(self, index: ast.Index) -> Any:
+        """
+        Visitor of an index node
+
+        :param index:
+        :return: the object with the index value information
+        """
+        return self.visit(index.value)
 
     def visit_Break(self, break_node: ast.Break):
         """

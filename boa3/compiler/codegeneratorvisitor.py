@@ -103,11 +103,19 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         if ret.value is not None:
             self.visit_to_generate(ret.value)
 
-    def store_variable(self, var_id: str, value: ast.AST):
+    def store_variable(self, var_id: str, value: ast.AST, index: ast.AST = None):
         # if the value is None, it is a variable declaration
         if value is not None:
-            self.visit_to_generate(value)
-            self.generator.convert_store_variable(var_id)
+            if index is None:
+                # if index is None, then it is a variable assignment
+                self.visit_to_generate(value)
+                self.generator.convert_store_variable(var_id)
+            else:
+                # if not, it is an array assignment
+                self.generator.convert_load_symbol(var_id)
+                self.visit_to_generate(index)
+                self.visit_to_generate(value)
+                self.generator.convert_set_array_item()
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -124,8 +132,31 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param assign: the python ast variable assignment node
         """
+        var_index = None
         var_id = self.visit(assign.targets[0])
-        self.store_variable(var_id, assign.value)
+
+        # if it is a tuple, then it is an array assignment
+        if isinstance(var_id, tuple):
+            var_index = var_id[1]
+            var_id: str = var_id[0]
+
+        self.store_variable(var_id, assign.value, var_index)
+
+    def visit_Subscript(self, subscript: ast.Subscript):
+        """
+        Visitor of a subscript node
+
+        :param subscript: the python ast subscript node
+        """
+        if isinstance(subscript.ctx, ast.Load):
+            # get item
+            self.visit_to_generate(subscript.value)
+            self.visit_to_generate(subscript.slice.value)
+            self.generator.convert_get_array_item()
+        else:
+            # set item
+            var_id = self.visit(subscript.value)
+            return var_id, subscript.slice.value
 
     def visit_BinOp(self, bin_op: ast.BinOp):
         """
@@ -246,3 +277,18 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param str: the python ast string node
         """
         self.generator.convert_literal(str.s)
+
+    def visit_Tuple(self, tup_node: ast.Tuple):
+        """
+        Visitor of literal tuple node
+
+        :param tup_node: the python ast string node
+        :return: the value of the tuple
+        """
+        tup = tuple([value for value in tup_node.elts])
+        length = len(tup_node.elts)
+        self.generator.convert_new_array(length)
+        for index, value in enumerate(tup_node.elts):
+            self.generator.convert_set_new_array_item_at(index)
+            self.visit_to_generate(value)
+            self.generator.convert_set_array_item()

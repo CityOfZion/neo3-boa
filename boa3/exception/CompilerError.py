@@ -57,6 +57,15 @@ class UnresolvedReference(CompilerError):
         super().__init__(line, col, message)
 
 
+class UnresolvedOperation(CompilerError):
+    """
+    An error raised when an undefined symbol is used
+    """
+    def __init__(self, line: int, col: int, type_id: str, operation_id: str):
+        message = "Unresolved reference '%s' does not have a definition of '%s' operator" % (type_id, operation_id)
+        super().__init__(line, col, message)
+
+
 class MismatchedTypes(CompilerError):
     """
     An error raised when the evaluated and expected types are not the same

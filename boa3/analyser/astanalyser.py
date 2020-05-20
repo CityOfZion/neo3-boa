@@ -46,20 +46,17 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             if isinstance(fun_rtype_id, ast.Name):
                 fun_rtype_id = fun_rtype_id.id
 
-            value = self.get_symbol(fun_rtype_id)
+            if isinstance(fun_rtype_id, str):
+                value = self.get_symbol(fun_rtype_id)
+            else:
+                value = fun_rtype_id
 
         if isinstance(value, IType):
             return value
         elif isinstance(value, IExpression):
             return value.type
-        elif isinstance(value, bool):
-            return Type.bool
-        elif isinstance(value, int):
-            return Type.int
-        elif isinstance(value, str):
-            return Type.str
-
-        return Type.none
+        else:
+            return Type.get_type(value)
 
     @abstractmethod
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:

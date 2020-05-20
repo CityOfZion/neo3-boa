@@ -274,6 +274,39 @@ class CodeGenerator:
         data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
         self.__insert1(op_info, data)
 
+    def convert_new_array(self, length: int):
+        """
+        Converts the creation of a new array
+
+        :param length: the size of the new array
+        """
+        if length <= 0:
+            self.__insert1(OpcodeInfo.NEWARRAY0)
+        else:
+            self.convert_literal(length)
+            self.__insert1(OpcodeInfo.NEWARRAY)
+
+    def convert_set_new_array_item_at(self, index: int):
+        """
+        Converts the beginning of setting af a value in an array
+
+        :param index: the index of the array that will be set
+        """
+        self.__insert1(OpcodeInfo.DUP)
+        self.convert_literal(index)
+
+    def convert_set_array_item(self):
+        """
+        Converts the end of setting af a value in an array
+        """
+        self.__insert1(OpcodeInfo.SETITEM)
+
+    def convert_get_array_item(self):
+        """
+        Converts the end of get a value in an array
+        """
+        self.__insert1(OpcodeInfo.PICKITEM)
+
     def convert_load_symbol(self, symbol_id: str):
         """
         Converts the load of a symbol
