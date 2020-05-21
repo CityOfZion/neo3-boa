@@ -265,6 +265,17 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         self.generator.convert_end_if(start_addr)
 
+    def visit_Call(self, call: ast.Call):
+        """
+        Visitor of a function call node
+
+        :param call: the python ast function call node
+        """
+        for arg in call.args:
+            self.visit_to_generate(arg)
+        function_id = self.visit(call.func)
+        self.generator.convert_load_symbol(function_id)
+
     def visit_Name(self, name: ast.Name) -> str:
         """
         Visitor of a name node

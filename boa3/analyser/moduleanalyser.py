@@ -4,6 +4,8 @@ from typing import Dict, Tuple, Any, Optional
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
 from boa3.exception.CompilerError import CompilerError as Error
+from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
@@ -29,6 +31,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
+        self.__builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self.__current_module: Module = None
         self.__current_method: Method = None
 
@@ -102,7 +105,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             # the symbol exists in the global scope
             return self.symbols[symbol_id]
         else:
-            return None
+            # the symbol may be a built in. If not, returns None
+            return Builtin.get_symbol(symbol_id)
 
     def visit_Module(self, module: ast.Module):
         """
@@ -116,6 +120,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.__current_module = mod
         for stmt in module.body:
             self.visit(stmt)
+        # TODO: include the body of the builtin methods to the ast
         # TODO: get module name
         self.modules['main'] = mod
         self.__current_module = None
@@ -287,6 +292,27 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         return value_type
+
+    def visit_Call(self, call: ast.Call) -> IType:
+        """
+        Visitor of a function call node
+
+        :param call: the python ast function call node
+        :return: the result type of the called function
+        """
+        func_id = self.visit(call.func)
+        func_symbol = self.get_symbol(func_id)
+
+        # TODO: change when all user function call is implemented
+        if not isinstance(func_symbol, IBuiltinMethod):
+            # the symbol doesn't exists
+            self._log_error(
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
+            )
+        if func_symbol.body is not None:
+            self.__builtin_functions_to_visit[func_id] = func_symbol
+
+        return self.get_type(call.func)
 
     def visit_Name(self, name: ast.Name) -> str:
         """
