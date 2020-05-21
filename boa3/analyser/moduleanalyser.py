@@ -1,9 +1,10 @@
 import ast
 import logging
-from typing import Dict, Tuple, Any, Optional
+from typing import Dict, Tuple, Any, Optional, Union
 
+from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.exception import CompilerError
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
@@ -64,15 +65,29 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return global_symbols
 
-    def __include_variable(self, var_id: str, var_type_id: str, var_enumerate_type: IType = Type.none):
+    def __include_variable(self, var_id: str, var_type_id: Union[str, IType], source_node: ast.AST, var_enumerate_type: IType = Type.none):
         """
         Includes the variable in the symbol table if the id was not used
 
         :param var_id: variable id
         :param var_type_id: variable type id
+        :type var_type_id: str or IType
+        :param var_enumerate_type: variable value type id if var_type_id is a SequenceType
         """
         if var_id not in self.__current_scope.symbols:
-            var_type: ISymbol = self.symbols[var_type_id]
+            outer_symbol = self.get_symbol(var_id)
+            if outer_symbol is not None:
+                self._log_warning(
+                    CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
+                )
+
+            if isinstance(var_type_id, SequenceType):
+                var_type = var_type_id
+                var_enumerate_type = self.get_enumerate_type(var_type)
+            else:
+                if isinstance(var_type_id, IType):
+                    var_type_id = var_type_id.identifier
+                var_type = self.symbols[var_type_id]
 
             if isinstance(var_type, IType):
                 if isinstance(var_type, SequenceType):
@@ -192,6 +207,27 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(ret.value.lineno, ret.value.col_offset, symbol_id)
                 )
 
+    def visit_type(self, target: ast.AST) -> IType:
+        """
+        Gets the type by its identifier
+
+        :param target: ast node to be evaluated
+        :return: the type of the value inside the node. Type.none by default
+        """
+        target_type = self.visit(target)  # Type:str or IType
+        if isinstance(target_type, str) and not isinstance(target, ast.Str):
+            symbol = self.get_symbol(target_type)
+            if symbol is None:
+                # the symbol doesn't exists
+                self._log_error(
+                    CompilerError.UnresolvedReference(target.lineno, target.col_offset, target_type)
+                )
+            target_type = symbol
+        return self.get_type(target_type)
+
+    def get_enumerate_type(self, var_type: IType) -> IType:
+        return var_type.value_type if isinstance(var_type, SequenceType) else Type.none
+
     def visit_Assign(self, assign: ast.Assign):
         """
         Visitor of the variable assignment node
@@ -201,20 +237,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param assign:
         """
         var_id = self.visit(assign.targets[0])
-        var_value = self.visit(assign.value)
-        if isinstance(assign.value, ast.Name):
-            symbol = self.get_symbol(var_value)
-            if symbol is None:
-                # the symbol doesn't exists
-                self._log_error(
-                    CompilerError.UnresolvedReference(assign.value.lineno, assign.value.col_offset, var_value)
-                )
-            var_type_id = self.get_type(symbol)
-        else:
-            var_type_id = self.get_type(var_value)
+        var_type = self.visit_type(assign.value)
 
-        var_enumerate_type_id = var_type_id.value_type if isinstance(var_type_id, SequenceType) else Type.none
-        self.__include_variable(var_id, var_type_id.identifier, var_enumerate_type_id)
+        self.__include_variable(var_id, var_type, source_node=assign)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -225,8 +250,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param ann_assign:
         """
         var_id: str = self.visit(ann_assign.target)
-        var_type_id: str = self.visit(ann_assign.annotation)
-        self.__include_variable(var_id, var_type_id)
+        var_type: IType = self.visit_type(ann_assign.annotation)
+
+        # TODO: check if the annotated type and the value type are the same
+        self.__include_variable(var_id, var_type, source_node=ann_assign)
 
     def visit_Expr(self, expr: ast.Expr):
         """
@@ -248,7 +275,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(expr.value.lineno, expr.value.col_offset, value)
                 )
 
-    def visit_Subscript(self, subscript: ast.Subscript) -> IType:
+    def visit_Subscript(self, subscript: ast.Subscript):
         """
         Verifies if it is the types in the subscription are valid
 
@@ -263,9 +290,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = self.get_symbol(value.lower())
             subscript.value.id = value.lower() if symbol is not None else subscript.value
 
-        if isinstance(symbol, SequenceType):
-            values_type: IType = self.get_values_type(subscript.slice.value)
-            return symbol.build_sequence(values_type)
+        if isinstance(subscript.ctx, ast.Load):
+            if isinstance(symbol, SequenceType):
+                values_type: IType = self.get_values_type(subscript.slice.value)
+                return symbol.build_sequence(values_type)
+
+            symbol_type = self.get_type(symbol)
+            if isinstance(symbol_type, SequenceType):
+                return symbol_type.value_type
 
         return value
 
@@ -316,6 +348,32 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.__builtin_functions_to_visit[func_id] = func_symbol
 
         return self.get_type(call.func)
+
+    def visit_For(self, for_node: ast.For):
+        """
+        Visitor of for statement node
+
+        :param for_node: the python ast for node
+        """
+        iter_type = self.get_type(for_node.iter)
+        targets = self.visit(for_node.target)
+
+        if isinstance(iter_type, SequenceType):
+            if isinstance(targets, str):
+                self.__include_variable(targets, iter_type.value_type, source_node=for_node.target)
+            else:
+                for target in targets:
+                    if isinstance(target, str):
+                        self.__include_variable(target, iter_type.value_type, source_node=for_node.target)
+
+            for_iter_id = helpers.get_auxiliary_name(for_node, 'iter')
+            for_index_id = helpers.get_auxiliary_name(for_node, 'index')
+
+            self.__include_variable(for_iter_id, iter_type, source_node=for_node.iter)
+            self.__include_variable(for_index_id, iter_type.valid_key, source_node=for_node)
+
+        # continue to walk through the tree
+        self.generic_visit(for_node)
 
     def visit_Name(self, name: ast.Name) -> str:
         """

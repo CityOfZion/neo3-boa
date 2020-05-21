@@ -1,6 +1,7 @@
 import ast
 from typing import Dict
 
+from boa3.analyser.constructanalyser import ConstructAnalyser
 from boa3.analyser.moduleanalyser import ModuleAnalyser
 from boa3.analyser.typeanalyser import TypeAnalyser
 from boa3.model.symbol import ISymbol
@@ -35,6 +36,7 @@ class Analyser(object):
             ast_tree = ast.parse(source.read())
 
         analyser = Analyser(ast_tree)
+        analyser.__pre_execute()
         # fill symbol table
         if not analyser.__analyse_modules():
             return analyser
@@ -66,6 +68,12 @@ class Analyser(object):
 
         :return: a boolean value that represents if the analysis was successful
         """
-        type_analyser = ModuleAnalyser(self.ast_tree, self.symbol_table)
-        self.symbol_table.update(type_analyser.global_symbols)
-        return not type_analyser.has_errors
+        module_analyser = ModuleAnalyser(self.ast_tree, self.symbol_table)
+        self.symbol_table.update(module_analyser.global_symbols)
+        return not module_analyser.has_errors
+
+    def __pre_execute(self):
+        """
+        Pre executes the instructions of the ast for optimization
+        """
+        self.ast_tree = ConstructAnalyser(self.ast_tree).tree

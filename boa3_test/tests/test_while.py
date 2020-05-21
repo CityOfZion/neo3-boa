@@ -8,8 +8,8 @@ from boa3_test.tests.boa_test import BoaTest
 class TestWhile(BoaTest):
 
     def test_while_constant_condition(self):
-        jmpif_address = Integer(6).to_byte_array(min_length=1)
-        jmp_address = Integer(-5).to_byte_array(min_length=1)
+        jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -36,8 +36,8 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_while_variable_condition(self):
-        jmpif_address = Integer(6).to_byte_array(min_length=1)
-        jmp_address = Integer(-5).to_byte_array(min_length=1)
+        jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -74,11 +74,11 @@ class TestWhile(BoaTest):
             output = Boa3.compile(path)
 
     def test_nested_while(self):
-        outer_jmpif_address = Integer(19).to_byte_array(min_length=1)
-        outer_jmp_address = Integer(-18).to_byte_array(min_length=1)
+        outer_jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
+        outer_jmp_address = Integer(-18).to_byte_array(min_length=1, signed=True)
 
-        inner_jmpif_address = Integer(6).to_byte_array(min_length=1)
-        inner_jmp_address = Integer(-5).to_byte_array(min_length=1)
+        inner_jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        inner_jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -120,8 +120,8 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_while_else(self):
-        jmpif_address = Integer(6).to_byte_array(min_length=1)
-        jmp_address = Integer(-5).to_byte_array(min_length=1)
+        jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -152,8 +152,8 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_while_relational_condition(self):
-        jmpif_address = Integer(10).to_byte_array(min_length=1)
-        jmp_address = Integer(-11).to_byte_array(min_length=1)
+        jmpif_address = Integer(10).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-11).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -188,8 +188,8 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_while_multiple_relational_condition(self):
-        jmpif_address = Integer(10).to_byte_array(min_length=1)
-        jmp_address = Integer(-15).to_byte_array(min_length=1)
+        jmpif_address = Integer(10).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-15).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -235,8 +235,8 @@ class TestWhile(BoaTest):
             output = Boa3.compile(path)
 
     def test_boa2_while_test1(self):
-        jmpif_address = Integer(6).to_byte_array(min_length=1)
-        jmp_address = Integer(-7).to_byte_array(min_length=1)
+        jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-7).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT

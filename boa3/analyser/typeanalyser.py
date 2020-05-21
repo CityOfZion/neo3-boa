@@ -271,6 +271,32 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in while_node.orelse:
             self.visit(stmt)
 
+    def visit_For(self, for_node: ast.For):
+        """
+        Verifies if the type of for iterator is valid
+
+        :param for_node: the python ast for node
+        """
+        iterator = self.visit(for_node.iter)
+        iterator_type: IType = self.get_type(iterator)
+
+        if not isinstance(iterator_type, SequenceType):
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    for_node.lineno, for_node.col_offset,
+                    actual_type_id=iterator_type.identifier,
+                    expected_type_id=Type.sequence.identifier)
+            )
+        elif iterator_type is Type.str:
+            # TODO: remove when iteration in strings is implemented
+            raise NotImplementedError
+
+        # continue to walk through the tree
+        for stmt in for_node.body:
+            self.visit(stmt)
+        for stmt in for_node.orelse:
+            self.visit(stmt)
+
     def visit_If(self, if_node: ast.If):
         """
         Verifies if the type of if test is valid
@@ -346,11 +372,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 bin_op.op = operation
                 return operation.result
         except CompilerError.MismatchedTypes as raised_error:
-            expected_types = raised_error.args[2]
-            actual_types = raised_error.args[3]
-            self._log_error(
-                CompilerError.MismatchedTypes(bin_op.lineno, bin_op.col_offset, expected_types, actual_types)
-            )
+            raised_error.line = bin_op.lineno
+            raised_error.col = bin_op.col_offset
+            # raises the exception with the line/col info
+            self._log_error(raised_error)
 
     def get_bin_op(self, operator: Operator, right: Any, left: Any) -> BinaryOperation:
         """
@@ -409,12 +434,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 un_op.op = operation
                 return operation.result
         except CompilerError.MismatchedTypes as raised_error:
-            expected_types = raised_error.args[2]
-            actual_types = raised_error.args[3]
+            raised_error.line = un_op.lineno
+            raised_error.col = un_op.col_offset
             # raises the exception with the line/col info
-            self._log_error(
-                CompilerError.MismatchedTypes(un_op.lineno, un_op.col_offset, expected_types, actual_types)
-            )
+            self._log_error(raised_error)
 
     def get_un_op(self, operator: Operator, operand: Any) -> UnaryOperation:
         """
@@ -493,11 +516,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             return return_type
         except CompilerError.MismatchedTypes as raised_error:
-            expected_types = raised_error.args[2]
-            actual_types = raised_error.args[3]
-            self._log_error(
-                CompilerError.MismatchedTypes(line, col, expected_types, actual_types)
-            )
+            raised_error.line = line
+            raised_error.col = col
+            # raises the exception with the line/col info
+            self._log_error(raised_error)
 
     def visit_BoolOp(self, bool_op: ast.BoolOp) -> Optional[IType]:
         """
@@ -542,11 +564,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             bool_op.op = bool_operation
             return return_type
         except CompilerError.MismatchedTypes as raised_error:
-            expected_types = raised_error.args[2]
-            actual_types = raised_error.args[3]
-            self._log_error(
-                CompilerError.MismatchedTypes(lineno, col_offset, expected_types, actual_types)
-            )
+            raised_error.line = lineno
+            raised_error.col = col_offset
+            # raises the exception with the line/col info
+            self._log_error(raised_error)
 
     def get_operator(self, node: ast.operator) -> Optional[Operator]:
         """
@@ -633,7 +654,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param tup_node: the python ast string node
         :return: the value of the tuple
         """
-        return tuple(value for value in tup_node.elts)
+        return tuple(self.visit(value) for value in tup_node.elts)
 
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """

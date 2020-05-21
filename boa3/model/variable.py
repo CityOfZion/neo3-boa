@@ -13,5 +13,9 @@ class Variable(IExpression):
         self.__var_type: IType = var_type
 
     @property
+    def shadowing_name(self) -> str:
+        return 'variable'
+
+    @property
     def type(self) -> IType:
         return self.__var_type
