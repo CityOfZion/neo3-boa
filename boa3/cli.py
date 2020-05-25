@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import sys
 
@@ -11,7 +12,7 @@ def main():
     args = parser.parse_args()
 
     if not args.input.endswith(".py") or not os.path.isfile(args.input):
-        print("Input file is not .py")
+        logging.error("Input file is not .py")
         sys.exit(1)
 
     fullpath = os.path.realpath(args.input)
@@ -19,9 +20,9 @@ def main():
 
     try:
         Boa3.compile_and_save(args.input)
-        print(f"Wrote {filename.replace('.py', '.nef')} to {path}")
+        logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
     except Exception as e:
-        print(e)
+        logging.exception(e)
 
 
 if __name__ == "__main__":

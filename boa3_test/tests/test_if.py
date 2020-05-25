@@ -56,9 +56,7 @@ class TestIf(BoaTest):
 
     def test_if_mismatched_type_condition(self):
         path = '%s/boa3_test/example/if_test/MismatchedTypeCondition.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_if_no_condition(self):
         path = '%s/boa3_test/example/if_test/IfWithoutCondition.py' % self.dirname

@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation, UnresolvedReference
+from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
@@ -56,9 +56,7 @@ class TestArithmetic(BoaTest):
 
     def test_division_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/Division.py' % self.dirname
-
-        with self.assertRaises(UnresolvedReference):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_integer_division_operation(self):
         expected_output = (
@@ -123,27 +121,19 @@ class TestArithmetic(BoaTest):
 
     def test_concatenation_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/Concatenation.py' % self.dirname
-
-        with self.assertRaises(NotSupportedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_exponentiation_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/Exponentiation.py' % self.dirname
-
-        with self.assertRaises(UnresolvedReference):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_mismatched_type_binary_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/MismatchedOperandBinary.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_unary_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/MismatchedOperandUnary.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_sequence_addition(self):
         expected_output = (

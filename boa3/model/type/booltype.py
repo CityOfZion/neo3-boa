@@ -8,6 +8,7 @@ class BoolType(IType):
     """
     A class used to represent Python bool type
     """
+
     def __init__(self):
         identifier = 'bool'
         super().__init__(identifier)

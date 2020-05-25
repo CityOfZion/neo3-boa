@@ -110,9 +110,7 @@ class TestRelational(BoaTest):
 
     def test_identity_operation(self):
         path = '%s/boa3_test/example/relational_test/NumIdentity.py' % self.dirname
-
-        with self.assertRaises(NotSupportedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_boolean_equality_operation(self):
         expected_output = (
@@ -148,9 +146,7 @@ class TestRelational(BoaTest):
 
     def test_string_equality_operation(self):
         path = '%s/boa3_test/example/relational_test/StrEquality.py' % self.dirname
-
-        with self.assertRaises(NotSupportedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_multiple_comparisons(self):
         expected_output = (

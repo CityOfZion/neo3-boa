@@ -8,6 +8,7 @@ class IntType(IType):
     """
     A class used to represent Python int type
     """
+
     def __init__(self):
         identifier = 'int'
         super().__init__(identifier)

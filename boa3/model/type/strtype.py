@@ -9,6 +9,7 @@ class StrType(SequenceType):
     """
     A class used to represent Python str type
     """
+
     def __init__(self):
         identifier = 'str'
         super().__init__(identifier, [self])

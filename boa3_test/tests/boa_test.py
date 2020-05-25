@@ -17,3 +17,16 @@ class BoaTest(TestCase):
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._Compiler__analyser
+
+    def assertCompilerLogs(self, expected_logged_exception, path):
+        with self.assertLogs() as log:
+            from boa3.exception.NotLoadedException import NotLoadedException
+            try:
+                from boa3.boa3 import Boa3
+                output = Boa3.compile(path)
+            except NotLoadedException:
+                # when an compiler error is logged this exception is raised.
+                pass
+
+        if len([exception for exception in log.records if isinstance(exception.msg, expected_logged_exception)]) <= 0:
+            raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))

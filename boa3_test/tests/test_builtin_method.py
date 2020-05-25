@@ -61,18 +61,12 @@ class TestVariable(BoaTest):
 
     def test_len_of_no_collection(self):
         path = '%s/boa3_test/example/built_in_methods_test/LenMismatchedType.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_len_too_many_parameters(self):
         path = '%s/boa3_test/example/built_in_methods_test/LenTooManyParameters.py' % self.dirname
-
-        with self.assertRaises(UnexpectedArgument):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_len_too_few_parameters(self):
         path = '%s/boa3_test/example/built_in_methods_test/LenTooFewParameters.py' % self.dirname
-
-        with self.assertRaises(UnfilledArgument):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnfilledArgument, path)

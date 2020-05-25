@@ -55,15 +55,15 @@ class TestLogical(BoaTest):
 
     def test_sequence_boolean_or(self):
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x00'
-                + b'\x03'
-                + Opcode.LDARG0
-                + Opcode.LDARG1
-                + Opcode.BOOLOR
-                + Opcode.LDARG2
-                + Opcode.BOOLOR
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x03'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.BOOLOR
+            + Opcode.LDARG2
+            + Opcode.BOOLOR
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/example/logical_test/BoolOrThreeElements.py' % self.dirname
@@ -73,15 +73,11 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_binary_operation(self):
         path = '%s/boa3_test/example/logical_test/MismatchedOperandAnd.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_unary_operation(self):
         path = '%s/boa3_test/example/logical_test/MismatchedOperandNot.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_operations(self):
         expected_output = (

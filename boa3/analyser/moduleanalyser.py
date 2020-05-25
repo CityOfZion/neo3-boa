@@ -1,9 +1,9 @@
 import ast
+import logging
 from typing import Dict, Tuple, Any, Optional
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
-from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
@@ -36,10 +36,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.__current_method: Method = None
 
         self.visit(self._tree)
-
-    def _log_error(self, error: Error):
-        self.errors.append(error)
-        raise error
 
     @property
     def __current_scope(self):
@@ -138,6 +134,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
 
         fun_return: IType = fun_rtype_symbol
+
+        if function.name in ['main', 'Main']:
+            arg_types = ', '.join(['{0}: {1}'.format(arg, var.type.identifier) for arg, var in fun_args.items()])
+            logging.info("Main method found at {0}:{1}: '{2}({3}) -> {4}'"
+                         .format(function.lineno, function.col_offset, function.name, arg_types, fun_return.identifier))
+
         method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
         self.__current_method = method
 
