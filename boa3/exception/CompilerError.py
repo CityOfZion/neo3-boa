@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Union, Iterable
 
 
 class CompilerError(ABC, Exception):
@@ -70,8 +71,16 @@ class MismatchedTypes(CompilerError):
     """
     An error raised when the evaluated and expected types are not the same
     """
-    def __init__(self, line: int, col: int, expected_type_id: str, actual_type_id: str):
-        message = "Expected type '%s', got '%s' instead" % (expected_type_id, actual_type_id)
+    def __init__(self, line: int, col: int, expected_type_id: Union[str, Iterable[str]], actual_type_id: Union[str, Iterable[str]]):
+        if isinstance(expected_type_id, str):
+            expected_type_id = [expected_type_id]
+        if isinstance(actual_type_id, str):
+            actual_type_id = [actual_type_id]
+
+        expected_types = join_args(expected_type_id)
+        actual_types = join_args(actual_type_id)
+
+        message = "Expected type '%s', got '%s' instead" % (expected_types, actual_types)
         super().__init__(line, col, message)
 
 
@@ -91,3 +100,25 @@ class IncorrectNumberOfOperands(CompilerError):
     def __init__(self, line: int, col: int, expected_count: int, actual_count: int):
         message = "Incorrect number of operands: expected '%s', got '%s' instead" % (expected_count, actual_count)
         super().__init__(line, col, message)
+
+
+class UnexpectedArgument(CompilerError):
+    """
+    An error thrown when more arguments are used in a function than the number of arguments in the function's signature
+    """
+    def __init__(self, line: int, col: int):
+        message = "Unexpected argument"
+        super().__init__(line, col, message)
+
+
+class UnfilledArgument(CompilerError):
+    """
+    An error thrown when less arguments are used in a function than the number of arguments in the function's signature
+    """
+    def __init__(self, line: int, col: int, param: str):
+        message = "Parameter '%s' unfilled" % param
+        super().__init__(line, col, message)
+
+
+def join_args(iterable: Iterable[str]) -> str:
+    return str.join("', '", iterable)

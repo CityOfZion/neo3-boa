@@ -4,6 +4,7 @@ from typing import List, Dict, Optional, Any, Tuple
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
 from boa3.exception.CompilerError import CompilerError as Error
+from boa3.model.builtin.builtin import Builtin
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -99,8 +100,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # the symbol exists in the global scope
             return self.symbols[symbol_id]
         else:
-            # the symbol was not found
-            return None
+            # the symbol may be a built in. If not, returns None
+            return Builtin.get_symbol(symbol_id)
 
     def visit_Module(self, module: ast.Module):
         """
@@ -372,14 +373,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         l_type: IType = self.get_type(left)
         r_type: IType = self.get_type(right)
 
-        actual_types: str = "%s', '%s" % (l_type.identifier, r_type.identifier)
+        actual_types = (l_type.identifier, r_type.identifier)
         operation: BinaryOperation = BinaryOp.validate_type(operator, l_type, r_type)
 
         if operation is not None:
             return operation
         else:
             expected_op: BinaryOperation = BinaryOp.get_operation_by_operator(operator)
-            expected_types: str = "%s', '%s" % (expected_op.left_type.identifier, expected_op.right_type.identifier)
+            expected_types = (expected_op.left_type.identifier, expected_op.right_type.identifier)
             raise CompilerError.MismatchedTypes(0, 0, expected_types, actual_types)
 
     def visit_UnaryOp(self, un_op: ast.UnaryOp) -> Optional[IType]:
@@ -572,6 +573,41 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return self.__operators[node_type]
         else:
             return None
+
+    def visit_Call(self, call: ast.Call):
+        """
+        Verifies if the number of arguments is correct
+
+        :param call: the python ast function call node
+        :return: the result type of the called function
+        """
+        function = None
+        if isinstance(call.func, ast.Name):
+            function_id: str = call.func.id
+            function = self.get_symbol(function_id)
+
+            # TODO: change when kwargs is implemented
+            if len(call.args) > len(function.args):
+                unexpected_arg = call.args[len(function.args)]
+                self._log_error(
+                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+                )
+            elif len(call.args) < len(function.args):
+                missed_arg = list(function.args)[len(call.args)]
+                self._log_error(
+                    CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
+                )
+            for index, (arg_id, arg_value) in enumerate(function.args.items()):
+                param = call.args[index]
+                param_type = self.get_type(param)
+                if not arg_value.type.is_type_of(param_type):
+                    self._log_error(
+                        CompilerError.MismatchedTypes(
+                            param.lineno, param.col_offset,
+                            arg_value.type.identifier,
+                            param_type.identifier
+                        ))
+        return self.get_type(function)
 
     def visit_Num(self, num: ast.Num) -> int:
         """

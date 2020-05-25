@@ -6,7 +6,7 @@ from boa3.model.type.type import Type
 from boa3_test.tests.boa_test import BoaTest
 
 
-class TestConstant(BoaTest):
+class TestTypes(BoaTest):
 
     def test_small_integer_constant(self):
         input = 42

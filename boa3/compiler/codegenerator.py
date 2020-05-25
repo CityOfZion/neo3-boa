@@ -3,6 +3,8 @@ from typing import Dict, List, Any, Optional, Tuple
 
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
+from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
@@ -135,7 +137,10 @@ class CodeGenerator:
             return self.symbol_table[identifier]
         elif self.__current_method is not None and identifier in self.__current_method.symbols:
             return self.__current_method.symbols[identifier]
-        return Type.none
+
+        # the symbol may be a built in. If not, returns None
+        symbol = Builtin.get_symbol(identifier)
+        return symbol if symbol is not None else Type.none
 
     def convert_begin_method(self, method: Method):
         """
@@ -333,6 +338,8 @@ class CodeGenerator:
         if symbol is not Type.none:
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id)
+            elif isinstance(symbol, IBuiltinMethod) and symbol.opcode is not None:
+                self.convert_builtin_method_call(symbol)
             else:
                 # TODO: implement conversion of function calls
                 raise NotImplementedError()
@@ -387,6 +394,16 @@ class CodeGenerator:
         if op_info.data_len > 0:
             self.__insert1(op_info, Integer(index).to_byte_array())
         else:
+            self.__insert1(op_info)
+
+    def convert_builtin_method_call(self, function: IBuiltinMethod):
+        """
+        Converts a builtin method function call
+
+        :param function: the function to be converted
+        """
+        if function.opcode is not None:
+            op_info = OpcodeInfo.get_info(function.opcode)
             self.__insert1(op_info)
 
     def convert_operation(self, operation: IOperation):
