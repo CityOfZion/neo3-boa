@@ -35,11 +35,7 @@ class FileGenerator:
 
         :return: a dictionary that maps each method with its identifier
         """
-        methods: Dict[str, Method] = {}
-        for symbol_id, symbol in self.__symbols.items():
-            if isinstance(symbol, Method):
-                methods[symbol_id] = symbol
-        return methods
+        return {name: method for name, method in self.__symbols.items() if isinstance(method, Method) and method.is_public}
 
     @property
     def __entry_point(self) -> Optional[Tuple[str, Method]]:
@@ -54,8 +50,6 @@ class FileGenerator:
             method_id = 'main'
         elif 'Main' in self.__methods:
             method_id = 'Main'
-        elif len(self.__methods) > 0:
-            method_id = list(self.__methods)[0]
 
         if method_id is None:
             return None

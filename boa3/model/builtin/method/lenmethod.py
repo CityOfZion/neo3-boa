@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from boa3.model.builtin.builtinmethod import IBuiltinMethod
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.sequencetype import SequenceType
 from boa3.model.variable import Variable

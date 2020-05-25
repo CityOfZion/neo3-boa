@@ -5,7 +5,7 @@ from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
 from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.builtin.builtin import Builtin
-from boa3.model.builtin.builtinmethod import IBuiltinMethod
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
@@ -135,9 +135,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         fun_args = self.visit(function.args)
         fun_rtype_symbol = self.get_type(function.returns)
+        fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
 
         fun_return: IType = fun_rtype_symbol
-        method = Method(fun_args, fun_return)
+        method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
         self.__current_method = method
 
         for stmt in function.body:

@@ -11,14 +11,16 @@ class Method(IExpression):
 
     :ivar args: a dictionary that maps each arg with its name. Empty by default.
     :ivar locals: a dictionary that maps each local variable with its name. Empty by default.
+    :ivar is_public: a boolean value that specifies if the method is public. False by default.
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = None):
+    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = None, is_public: bool = False):
         if args is None:
             args = {}
         self.args: Dict[str, Variable] = args
         self.return_type: IType = return_type
+        self.is_public: bool = is_public
         self.locals: Dict[str, Variable] = {}
 
     def include_variable(self, var_id: str, var: Variable):
