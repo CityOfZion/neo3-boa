@@ -11,7 +11,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestFileGeneration(BoaTest):
 
     def test_generate_files(self):
-        path = '%s/boa3_test/example/arithmetic_test/Addition.py' % self.dirname
+        path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
 
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
@@ -21,7 +21,7 @@ class TestFileGeneration(BoaTest):
         self.assertTrue(os.path.exists(expected_manifest_output))
 
     def test_generate_nef_file(self):
-        path = '%s/boa3_test/example/arithmetic_test/Addition.py' % self.dirname
+        path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
 
         expected_nef_output = path.replace('.py', '.nef')
         Boa3.compile_and_save(path)
@@ -49,8 +49,8 @@ class TestFileGeneration(BoaTest):
             byte_field = version[begin:begin + constants.SIZE_OF_INT32]
             self.assertEqual(int.from_bytes(byte_field, sys.byteorder), field)
 
-    def test_generate_manifest_file(self):
-        path = '%s/boa3_test/example/arithmetic_test/Addition.py' % self.dirname
+    def test_generate_manifest_file_with_decorator(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
 
         expected_manifest_output = path.replace('.py', '.manifest.json')
         Boa3.compile_and_save(path)
@@ -83,6 +83,29 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(arg1['name'], 'b')
         self.assertIn('type', arg1)
         self.assertEqual(arg1['type'], AbiType.Integer)
+
+        self.assertIn('methods', abi)
+        self.assertEqual(len(abi['methods']), 1)
+
+        self.assertIn('events', abi)
+        self.assertEqual(len(abi['events']), 0)
+
+    def test_generate_manifest_file_without_decorator(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithoutDecorator.py' % self.dirname
+
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        Boa3.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        with open(expected_manifest_output, 'r') as manifest_output:
+            import json
+            manifest = json.loads(manifest_output.read())
+
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('entryPoint', abi)
+        self.assertEqual(len(abi['entryPoint']), 0)
 
         self.assertIn('methods', abi)
         self.assertEqual(len(abi['methods']), 0)

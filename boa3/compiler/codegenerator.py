@@ -4,7 +4,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.builtin.builtin import Builtin
-from boa3.model.builtin.builtinmethod import IBuiltinMethod
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
