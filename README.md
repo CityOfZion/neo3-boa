@@ -26,9 +26,9 @@ The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `
     foo: int = 42
     bar = foo
     ```
-- Convert Number Arithmetic Operations (`+`, `-`, `*`, `/`, `//`, `%`, `**`)
+- Convert Number Arithmetic Operations (`+`, `-`, `*`, `//`, `%`)
 
-- Convert Number Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`, `is`, `is not`)
+- Convert Number Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`)
 
 - Convert Boolean Logic Operations and chained comparisons (`and`, `or`, `not`)
 
@@ -65,6 +65,10 @@ else:
 - `continue`, `break` and `pass`
 
 - Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `/=`, `//=`, `%=`)
+
+- Convert Number Arithmetic Operations (`/`, `**`)
+
+- Convert Number Relational Operations (`is`, `is not`)
 
 - Convert List type
 
