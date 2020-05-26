@@ -164,7 +164,7 @@ class CodeGenerator:
 
         init_data = bytearray([num_vars, num_args])
         self.__insert1(OpcodeInfo.INITSLOT, init_data)
-        method.init_bytecode = self.__last_code
+        method.init_bytecode = self.last_code
         self.__current_method = method
 
         # updates each call to this method with its address
@@ -189,7 +189,7 @@ class CodeGenerator:
         method = self.__current_method
         if method is not None and method.is_main_method:
             main_first_code = self.__vm_codes_map[method.bytecode_address]
-            main_last_code = self.__last_code
+            main_last_code = self.last_code
             first_code = self.__vm_codes[0]
 
             if first_code.start_address != main_first_code.start_address:
@@ -453,7 +453,7 @@ class CodeGenerator:
         """
         if not self.__is_entry_point_converted or function.init_bytecode is None:
             self.__insert1(OpcodeInfo.CALL)
-            self.__function_calls.append((self.__last_code, function))
+            self.__function_calls.append((self.last_code, function))
         else:
             function_address = Integer(function.bytecode_address - self.address)
             op_info = OpcodeInfo.CALL

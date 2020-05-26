@@ -123,8 +123,8 @@ class TestArithmetic(BoaTest):
         path = '%s/boa3_test/example/arithmetic_test/Concatenation.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
-    def test_exponentiation_operation(self):
-        path = '%s/boa3_test/example/arithmetic_test/Exponentiation.py' % self.dirname
+    def test_power_operation(self):
+        path = '%s/boa3_test/example/arithmetic_test/Power.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_mismatched_type_binary_operation(self):
@@ -198,3 +198,96 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_addition_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/AdditionAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_subtraction_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.SUB
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/SubtractionAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_multiplication_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.MUL
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/MultiplicationAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_division_augmented_assignment(self):
+        path = '%s/boa3_test/example/arithmetic_test/DivisionAugmentedAssignment.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_integer_division_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.DIV
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/IntegerDivisionAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_modulo_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.MOD
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/ModuloAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_power_augmented_assignment(self):
+        path = '%s/boa3_test/example/arithmetic_test/PowerAugmentedAssignment.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)

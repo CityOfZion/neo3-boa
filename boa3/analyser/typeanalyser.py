@@ -206,6 +206,23 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         # continue to walk through the tree
         self.generic_visit(assign)
 
+    def visit_AugAssign(self, aug_assign: ast.AugAssign):
+        """
+        Verifies if the types of the target variable and the value are compatible with the operation
+
+        If the operation is valid, changes de Python operator by the Boa operator in the syntax tree
+
+        :param aug_assign: the python ast augmented assignment node
+        """
+        operation = self.validate_binary_operation(aug_assign, aug_assign.target, aug_assign.value)
+        if operation is not None:
+            # TODO: remove when other augmented assignment operations are implemented
+            if operation.result is not Type.int:
+                raise NotImplementedError
+
+            aug_assign.op = operation
+            return operation.result
+
     def visit_Subscript(self, subscript: ast.Subscript) -> IType:
         """
         Verifies if the subscribed value is a sequence
@@ -346,34 +363,50 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the type of the result of the operation if the operation is valid. Otherwise, returns None
         :rtype: IType or None
         """
-        operator: Operator = self.get_operator(bin_op.op)
-        r_operand = self.visit(bin_op.right)
-        l_operand = self.visit(bin_op.left)
+        operation = self.validate_binary_operation(bin_op, bin_op.left, bin_op.right)
+        if operation is not None:
+            bin_op.op = operation
+            return operation.result
+
+    def validate_binary_operation(self, node: ast.AST, left_op: ast.AST, right_op: ast.AST) -> Optional[BinaryOperation]:
+        """
+        Validates a ast node that represents a binary operation
+
+        :param node: ast node that represents a binary operation
+        :param left_op: ast node that represents the left operand of the operation
+        :param right_op: ast node that represents the right operand of the operation
+        :return: the corresponding :class:`BinaryOperation` if is valid. None otherwise.
+        """
+        if not hasattr(node, 'op'):
+            return
+
+        operator: Operator = self.get_operator(node.op)
+        l_operand = self.visit(left_op)
+        r_operand = self.visit(right_op)
 
         if not isinstance(operator, Operator):
             # the operator is invalid or it was not implemented yet
             self._log_error(
-                CompilerError.UnresolvedReference(bin_op.lineno, bin_op.col_offset, type(bin_op.op).__name__)
+                CompilerError.UnresolvedReference(node.lineno, node.col_offset, type(node.op).__name__)
             )
 
         try:
             operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
             if operation is None:
                 self._log_error(
-                    CompilerError.NotSupportedOperation(bin_op.lineno, bin_op.col_offset, operator)
+                    CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
                 )
             elif not operation.is_supported:
                 # TODO: concat and power not implemented yet
                 # number float division is not supported by Neo VM
                 self._log_error(
-                    CompilerError.NotSupportedOperation(bin_op.lineno, bin_op.col_offset, operator)
+                    CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
                 )
             else:
-                bin_op.op = operation
-                return operation.result
+                return operation
         except CompilerError.MismatchedTypes as raised_error:
-            raised_error.line = bin_op.lineno
-            raised_error.col = bin_op.col_offset
+            raised_error.line = node.lineno
+            raised_error.col = node.col_offset
             # raises the exception with the line/col info
             self._log_error(raised_error)
 

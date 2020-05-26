@@ -152,9 +152,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
 
         if function.name in ['main', 'Main']:
+            # don't show return when the function is void
+            return_type = ' -> {0}'.format(fun_return.identifier) if fun_return is not Type.none else ''
             arg_types = ', '.join(['{0}: {1}'.format(arg, var.type.identifier) for arg, var in fun_args.items()])
-            logging.info("Main method found at {0}:{1}: '{2}({3}) -> {4}'"
-                         .format(function.lineno, function.col_offset, function.name, arg_types, fun_return.identifier))
+
+            logging.info("Main method found at {0}:{1}: '{2}({3}){4}'"
+                         .format(function.lineno, function.col_offset, function.name, arg_types, return_type))
             # main method is always public
             method.set_as_main_method()
 

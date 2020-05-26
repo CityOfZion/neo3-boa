@@ -1,3 +1,6 @@
+import logging
+import os
+
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.compiler.filegenerator import FileGenerator
@@ -22,6 +25,10 @@ class Compiler:
         :param path: the path of the Python file to compile
         :return: the bytecode of the compiled .nef file
         """
+        fullpath = os.path.realpath(path)
+        filepath, filename = os.path.split(fullpath)
+
+        logging.info('Started compiling\t{0}'.format(filename))
         self.__analyse(path)
         return self.__compile()
 
@@ -32,8 +39,7 @@ class Compiler:
         :param path: the path of the Python file to compile
         :param output_path: the path to save the generated files
         """
-        self.__analyse(path)
-        self.bytecode = self.__compile()
+        self.bytecode = self.compile(path)
         self.__save(output_path)
 
     def __analyse(self, path: str):
