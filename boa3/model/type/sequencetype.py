@@ -8,6 +8,7 @@ class SequenceType(IType, ABC):
     """
     An interface used to represent Python sequence type
     """
+
     def __init__(self, identifier: str, values_type: List[IType]):
         self.value_type: IType = self.__initialize_sequence_type(values_type)
         super().__init__(identifier)

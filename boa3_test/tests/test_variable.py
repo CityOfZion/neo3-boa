@@ -43,9 +43,7 @@ class TestVariable(BoaTest):
 
     def test_declaration_without_type(self):
         path = '%s/boa3_test/example/variable_test/DeclarationWithoutType.py' % self.dirname
-
-        with self.assertRaises(UnresolvedReference):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_assignment_with_type(self):
         input = 'unit_test'
@@ -85,14 +83,14 @@ class TestVariable(BoaTest):
         input = 'unit_test'
         byte_input = bytes(input, sys.getdefaultencoding())
         expected_output = (
-                Opcode.INITSLOT         # function signature
-                + b'\x00'
-                + b'\x01'
-                + Opcode.PUSHDATA1      # assignment value
-                + len(byte_input).to_bytes(1, sys.byteorder)
-                + byte_input
-                + Opcode.STARG0         # variable address
-                + Opcode.RET
+            Opcode.INITSLOT         # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.PUSHDATA1      # assignment value
+            + len(byte_input).to_bytes(1, sys.byteorder)
+            + byte_input
+            + Opcode.STARG0         # variable address
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/example/variable_test/ArgumentAssignment.py' % self.dirname
@@ -102,15 +100,11 @@ class TestVariable(BoaTest):
 
     def test_multiple_assignments(self):
         path = '%s/boa3_test/example/variable_test/MultipleAssignments.py' % self.dirname
-
-        with self.assertRaises(NotSupportedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_tuple_multiple_assignments(self):
         path = '%s/boa3_test/example/variable_test/AssignmentWithTuples.py' % self.dirname
-
-        with self.assertRaises(NotSupportedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_many_assignments(self):
         expected_output = (
@@ -190,12 +184,8 @@ class TestVariable(BoaTest):
 
     def test_using_undeclared_variable(self):
         path = '%s/boa3_test/example/variable_test/UsingUndeclaredVariable.py' % self.dirname
-
-        with self.assertRaises(UnresolvedReference):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_return_undeclared_variable(self):
         path = '%s/boa3_test/example/variable_test/ReturnUndeclaredVariable.py' % self.dirname
-
-        with self.assertRaises(UnresolvedReference):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnresolvedReference, path)

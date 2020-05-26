@@ -11,6 +11,7 @@ class IType(ISymbol):
 
     :ivar identifier: the name identifier of the type
     """
+
     def __init__(self, identifier: str):
         self.identifier: str = identifier
 

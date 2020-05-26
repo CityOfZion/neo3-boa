@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 from typing import Dict, Any, List, Tuple, Optional
 
@@ -135,6 +136,7 @@ class FileGenerator:
         methods = []
         for method_id, method in self.__methods.items():
             if method_id != entry_point:
+                logging.info("'{0}' method included in the ABI".format(method_id))
                 methods.append(self.__construct_abi_method(method_id, method))
         return methods
 

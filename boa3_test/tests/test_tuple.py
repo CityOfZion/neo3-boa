@@ -148,9 +148,7 @@ class TestTuple(BoaTest):
 
     def test_non_sequence_get_value(self):
         path = '%s/boa3_test/example/tuple_test/MismatchedTypeGetValue.py' % self.dirname
-
-        with self.assertRaises(UnresolvedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_tuple_set_value(self):
         path = '%s/boa3_test/example/tuple_test/SetValue.py' % self.dirname
@@ -171,15 +169,11 @@ class TestTuple(BoaTest):
 
     def test_non_sequence_set_value(self):
         path = '%s/boa3_test/example/tuple_test/MismatchedTypeSetValue.py' % self.dirname
-
-        with self.assertRaises(UnresolvedOperation):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_tuple_index_mismatched_type(self):
         path = '%s/boa3_test/example/tuple_test/MismatchedTypeTupleIndex.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_tuple_of_tuple(self):
         path = '%s/boa3_test/example/tuple_test/TupleOfTuple.py' % self.dirname

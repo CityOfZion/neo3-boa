@@ -8,6 +8,7 @@ class NoneType(IType):
     """
     A class used to represent Python None value
     """
+
     def __init__(self):
         identifier = 'none'
         super().__init__(identifier)

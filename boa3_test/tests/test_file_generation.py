@@ -68,7 +68,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(abi['entryPoint']['name'], 'Main')
         self.assertIn('returnType', abi['entryPoint'])
         self.assertEqual(abi['entryPoint']['returnType'], AbiType.Integer)
-        
+
         self.assertIn('parameters', abi['entryPoint'])
         self.assertEqual(len(abi['entryPoint']['parameters']), 2)
 

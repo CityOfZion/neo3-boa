@@ -13,6 +13,7 @@ class IOperation(ABC):
     :ivar operator: the operator of the operation
     :ivar result: the result type of the operation
     """
+
     def __init__(self, operator: Operator, result_type: IType):
         self.operator: Operator = operator
         self.result: IType = result_type

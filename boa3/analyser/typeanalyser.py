@@ -3,7 +3,6 @@ from typing import List, Dict, Optional, Any, Tuple
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
-from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -44,8 +43,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         ast.Add: Operator.Plus,
         ast.Sub: Operator.Minus,
         ast.Mult: Operator.Mult,
+        ast.Div: Operator.Div,
         ast.FloorDiv: Operator.IntDiv,
         ast.Mod: Operator.Mod,
+        ast.Pow: Operator.Pow,
         ast.UAdd: Operator.Plus,
         ast.USub: Operator.Minus,
         ast.Eq: Operator.Eq,
@@ -60,10 +61,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         ast.Or: Operator.Or,
         ast.Not: Operator.Not
     }
-
-    def _log_error(self, error: Error):
-        self.errors.append(error)
-        raise error
 
     @property
     def __current_method_id(self) -> str:
@@ -247,8 +244,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     actual_type_id=index_type.identifier,
                     expected_type_id=symbol_type.valid_key.identifier)
             )
-
-        return symbol_type.value_type
+        else:
+            return symbol_type.value_type
+        return Type.none
 
     def visit_While(self, while_node: ast.While):
         """
@@ -592,16 +590,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._log_error(
                     CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
-            for index, (arg_id, arg_value) in enumerate(function.args.items()):
-                param = call.args[index]
-                param_type = self.get_type(param)
-                if not arg_value.type.is_type_of(param_type):
-                    self._log_error(
-                        CompilerError.MismatchedTypes(
-                            param.lineno, param.col_offset,
-                            arg_value.type.identifier,
-                            param_type.identifier
-                        ))
+            else:
+                for index, (arg_id, arg_value) in enumerate(function.args.items()):
+                    param = call.args[index]
+                    param_type = self.get_type(param)
+                    if not arg_value.type.is_type_of(param_type):
+                        self._log_error(
+                            CompilerError.MismatchedTypes(
+                                param.lineno, param.col_offset,
+                                arg_value.type.identifier,
+                                param_type.identifier
+                            ))
         return self.get_type(function)
 
     def visit_Num(self, num: ast.Num) -> int:

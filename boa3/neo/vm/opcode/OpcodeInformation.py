@@ -9,6 +9,7 @@ class OpcodeInformation:
     :ivar data_len: the size in bytes of the expected operand. Zero by default.
     :ivar max_data_len: the max size in bytes of the operand. Same value as data_len if size is constant.
     """
+
     def __init__(self, opcode: Opcode, min_data_len: int = 0, extra_data_max_len: int = 0):
         self.opcode: Opcode = opcode
 

@@ -8,6 +8,7 @@ class Serializer:
     """
     This class is responsible for serialize Python primitive types into bytes
     """
+
     def __init__(self):
         self.__result = bytearray()
 

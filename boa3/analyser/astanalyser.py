@@ -1,4 +1,5 @@
 import ast
+import logging
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
 
@@ -17,6 +18,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     :ivar errors: a list that contains all the errors raised by the compiler. Empty by default.
     :ivar warnings: a list that contains all the warnings found by the compiler. Empty by default.
     """
+
     def __init__(self, ast_tree: ast.AST):
         self.errors: List[CompilerError] = []
         self.warnings: List[CompilerWarning] = []
@@ -29,9 +31,11 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
     def _log_error(self, error: CompilerError):
         self.errors.append(error)
+        logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
         self.warnings.append(warning)
+        logging.warning(warning)
 
     def get_type(self, value: Any) -> IType:
         """

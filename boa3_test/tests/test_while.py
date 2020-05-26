@@ -65,9 +65,7 @@ class TestWhile(BoaTest):
 
     def test_while_mismatched_type_condition(self):
         path = '%s/boa3_test/example/while_test/MismatchedTypeCondition.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_while_no_condition(self):
         path = '%s/boa3_test/example/while_test/NoCondition.py' % self.dirname

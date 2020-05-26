@@ -11,6 +11,7 @@ class VMCode:
     :ivar opcode: the opcode of the code
     :ivar data: the data in bytes of the code. Empty byte array by default.
     """
+
     def __init__(self, op_info: OpcodeInformation, last_code=None, data: bytes = bytes()):
         """
         :param op_info: information of the opcode of the code

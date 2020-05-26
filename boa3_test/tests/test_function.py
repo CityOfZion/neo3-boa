@@ -58,9 +58,7 @@ class TestFunction(BoaTest):
 
     def test_arg_without_type_hint(self):
         path = '%s/boa3_test/example/function_test/ArgWithoutTypeHintFunction.py' % self.dirname
-
-        with self.assertRaises(TypeHintMissing):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(TypeHintMissing, path)
 
     def test_no_return_hint_function_with_empty_return_statement(self):
         expected_output = (
@@ -90,18 +88,12 @@ class TestFunction(BoaTest):
 
     def test_return_type_hint_function_with_empty_return(self):
         path = '%s/boa3_test/example/function_test/ExpectingReturnFunction.py' % self.dirname
-
-        with self.assertRaises(MismatchedTypes):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_multiple_return_function(self):
         path = '%s/boa3_test/example/function_test/MultipleReturnFunction.py' % self.dirname
-
-        with self.assertRaises(TooManyReturns):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(TooManyReturns, path)
 
     def test_tuple_function(self):
         path = '%s/boa3_test/example/function_test/TupleFunction.py' % self.dirname
-
-        with self.assertRaises(TooManyReturns):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(TooManyReturns, path)

@@ -9,6 +9,7 @@ class GenericSequenceType(SequenceType):
     """
     An class used to represent a generic Python sequence type
     """
+
     def __init__(self, values_type: List[IType]):
         identifier: str = 'sequence'
         values_type = self.filter_types(values_type)
