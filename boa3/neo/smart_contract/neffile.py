@@ -29,7 +29,7 @@ class NefFile:
         :param script_bytes: the script of the smart contract
         """
         self.__magic: int = 0x3346454E              # NEO Executable Format 3 (NEF3)
-        self.compiler: str = "neo3-boa"             # Compiler Name
+        self.compiler: str = "neo3-boa by COZ"      # Compiler Name
         self.version: str = boa3.__version__        # Compiler Version
         self.check_sum: int = 0
 
