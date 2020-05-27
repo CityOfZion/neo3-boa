@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes, TypeHintMissing, TooManyReturns
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -97,3 +98,227 @@ class TestFunction(BoaTest):
     def test_tuple_function(self):
         path = '%s/boa3_test/example/function_test/TupleFunction.py' % self.dirname
         self.assertCompilerLogs(TooManyReturns, path)
+
+    def test_call_void_function_without_args(self):
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x02'
+            + Opcode.CALL           # TestFunction()
+            + called_function_address
+            + Opcode.PUSH1          # return True
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH1          # a = 1
+            + Opcode.STLOC0
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/example/function_test/CallVoidFunctionWithoutArgs.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_function_without_args(self):
+        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x01'
+            + b'\x02'
+            + Opcode.CALL           # a = TestFunction()
+            + called_function_address
+            + Opcode.STLOC0
+            + Opcode.LDLOC0         # return a
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x00'
+            + b'\x00'
+            + Opcode.PUSH1          # return 1
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/function_test/CallReturnFunctionWithoutArgs.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_void_function_with_literal_args(self):
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x02'
+            + Opcode.PUSH2          # TestAdd(1, 2)
+            + Opcode.PUSH1
+            + Opcode.CALL
+            + called_function_address
+            + Opcode.PUSH1          # return True
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x01'
+            + b'\x02'
+            + Opcode.LDARG0         # c = a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/example/function_test/CallVoidFunctionWithLiteralArgs.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_function_with_literal_args(self):
+        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH2          # a = TestAdd(1, 2)
+            + Opcode.PUSH1
+            + Opcode.CALL
+            + called_function_address
+            + Opcode.STLOC0
+            + Opcode.LDLOC0         # return a
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/example/function_test/CallReturnFunctionWithLiteralArgs.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_void_function_with_variable_args(self):
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x02'
+            + b'\x02'
+            + Opcode.PUSH1          # a = 1
+            + Opcode.STLOC0
+            + Opcode.PUSH2          # b = 2
+            + Opcode.STLOC1
+            + Opcode.LDLOC1         # TestAdd(a, b)
+            + Opcode.LDLOC0
+            + Opcode.CALL
+            + called_function_address
+            + Opcode.PUSH1          # return True
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x01'
+            + b'\x02'
+            + Opcode.LDARG0         # c = a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/example/function_test/CallVoidFunctionWithVariableArgs.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_function_with_variable_args(self):
+        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x03'
+            + b'\x02'
+            + Opcode.PUSH1          # a = 1
+            + Opcode.STLOC0
+            + Opcode.PUSH2          # b = 2
+            + Opcode.STLOC1
+            + Opcode.LDLOC1         # c = TestAdd(a, b)
+            + Opcode.LDLOC0
+            + Opcode.CALL
+            + called_function_address
+            + Opcode.STLOC2
+            + Opcode.LDLOC2         # return c
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/example/function_test/CallReturnFunctionWithVariableArgs.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_function_with_on_return(self):
+        called_function_address = Integer(3).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x02'
+            + b'\x02'
+            + Opcode.PUSH1          # a = 1
+            + Opcode.STLOC0
+            + Opcode.PUSH2          # b = 2
+            + Opcode.STLOC1
+            + Opcode.LDLOC1         # return TestAdd(a, b)
+            + Opcode.LDLOC0
+            + Opcode.CALL
+            + called_function_address
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/example/function_test/CallReturnFunctionOnReturn.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_function_written_before_caller(self):
+        called_function_address = Integer(3).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x02'
+            + Opcode.PUSH2          # return TestAdd(a, b)
+            + Opcode.PUSH1
+            + Opcode.CALL
+            + called_function_address
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/function_test/CallFunctionWrittenBefore.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)

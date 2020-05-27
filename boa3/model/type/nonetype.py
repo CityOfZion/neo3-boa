@@ -25,4 +25,5 @@ class NoneType(IType):
 
     @classmethod
     def is_type_of(cls, value: Any):
-        return value is None
+        from boa3.model.type.type import Type
+        return value is None or value is Type.none

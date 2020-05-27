@@ -42,9 +42,11 @@ class CodeGenerator:
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
         self.symbol_table: Dict[str, ISymbol] = symbol_table
-        self.__vm_codes: List[VMCode] = []
+        self.__vm_codes_without_order: List[VMCode] = []
 
         self.__current_method: Method = None
+        self.__function_calls: List[Tuple[VMCode, Method]] = []  # calls of functions that haven't been converted yet
+        self.__is_entry_point_converted: bool = False
 
     @property
     def bytecode(self) -> bytes:
@@ -59,6 +61,15 @@ class CodeGenerator:
             if code.data is not None:
                 bytecode += code.data
         return bytes(bytecode)
+
+    @property
+    def __vm_codes(self) -> List[VMCode]:
+        """
+        Gets an ordered list of the vm codes
+
+        :return: a list of vm codes ordered by the code address
+        """
+        return sorted(self.__vm_codes_without_order, key=lambda code: code.start_address)
 
     @property
     def __vm_codes_map(self) -> Dict[int, VMCode]:
@@ -153,14 +164,43 @@ class CodeGenerator:
 
         init_data = bytearray([num_vars, num_args])
         self.__insert1(OpcodeInfo.INITSLOT, init_data)
+        method.init_bytecode = self.__last_code
         self.__current_method = method
+
+        # updates each call to this method with its address
+        if self.__is_entry_point_converted:
+            for address, method in [call for call in self.__function_calls if call[1] is method]:
+                self.__update_call(address, method)
 
     def convert_end_method(self):
         """
         Converts the end of the method
         """
         self.__insert1(OpcodeInfo.RET)
+
+        if self.__current_method.is_main_method:
+            self.__move_entry_point_to_beginning()
         self.__current_method = None
+
+    def __move_entry_point_to_beginning(self):
+        """
+        Move the vm codes of the smart contract entry point to the beginning of the bytecode
+        """
+        method = self.__current_method
+        if method is not None and method.is_main_method:
+            main_first_code = self.__vm_codes_map[method.bytecode_address]
+            main_last_code = self.__last_code
+            first_code = self.__vm_codes[0]
+
+            if first_code.start_address != main_first_code.start_address:
+                main_first_code._last_code = None
+                first_code._last_code = main_last_code
+
+                for vmcode, function in self.__function_calls:
+                    if function.bytecode_address is not None:
+                        self.__update_call(vmcode, function)
+
+            self.__is_entry_point_converted = True
 
     def convert_begin_while(self) -> int:
         """
@@ -341,8 +381,7 @@ class CodeGenerator:
             elif isinstance(symbol, IBuiltinMethod) and symbol.opcode is not None:
                 self.convert_builtin_method_call(symbol)
             else:
-                # TODO: implement conversion of function calls
-                raise NotImplementedError()
+                self.convert_method_call(symbol)
 
     def convert_load_variable(self, var_id: str):
         """
@@ -406,6 +445,39 @@ class CodeGenerator:
             op_info = OpcodeInfo.get_info(function.opcode)
             self.__insert1(op_info)
 
+    def convert_method_call(self, function: Method):
+        """
+        Converts a builtin method function call
+
+        :param function: the function to be converted
+        """
+        if not self.__is_entry_point_converted or function.init_bytecode is None:
+            self.__insert1(OpcodeInfo.CALL)
+            self.__function_calls.append((self.__last_code, function))
+        else:
+            function_address = Integer(function.bytecode_address - self.address)
+            op_info = OpcodeInfo.CALL
+            if len(function_address.to_byte_array(signed=True)) > op_info.max_data_len:
+                op_info = OpcodeInfo.CALL_L
+
+            data: bytes = function_address.to_byte_array(min_length=op_info.data_len, signed=True)
+            self.__insert1(op_info, data)
+
+    def __update_call(self, vmcode: VMCode, method: Method):
+        """
+        Updates the data of a jump code in the bytecode
+
+        :param vmcode: call code
+        :param method: new data of the code
+        """
+        relative_address = Integer(method.bytecode_address - vmcode.start_address)
+        op_info = vmcode.info
+        if len(relative_address.to_byte_array(signed=True)) > op_info.max_data_len:
+            op_info = OpcodeInfo.CALL_L
+
+        vmcode.update(op_info, relative_address.to_byte_array(min_length=op_info.data_len, signed=True))
+        self.__function_calls.remove((vmcode, method))
+
     def convert_operation(self, operation: IOperation):
         """
         Converts an operation
@@ -428,7 +500,7 @@ class CodeGenerator:
         last_code = self.__last_code
         vm_code = VMCode(op_info, last_code, data)
 
-        self.__vm_codes.append(vm_code)
+        self.__vm_codes_without_order.append(vm_code)
 
     def __insert_jump(self, op_info: OpcodeInformation, jump_to: int):
         """
@@ -437,7 +509,7 @@ class CodeGenerator:
         :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
         """
-        op_info, data = self.__get_jump_data(op_info, jump_to)    # type:Tuple[OpcodeInformation, bytes]
+        op_info, data = self.__get_jump_data(op_info, jump_to)    # type:OpcodeInformation, bytes
         self.__insert1(op_info, data)
 
     def __update_jump(self, jump_address: int, updated_jump_to: int):
@@ -449,14 +521,14 @@ class CodeGenerator:
         """
         vmcode: VMCode = self.__vm_codes_map[jump_address]
         if vmcode is not None:
-            op_info, data = self.__get_jump_data(vmcode.info, updated_jump_to)  # type:Tuple[OpcodeInformation, bytes]
+            op_info, data = self.__get_jump_data(vmcode.info, updated_jump_to)  # type:OpcodeInformation, bytes
             vmcode.update(op_info, data)
 
     def __get_jump_data(self, op_info: OpcodeInformation, jump_to: int) -> Tuple[OpcodeInformation, bytes]:
         data: bytes = bytes()
         jmp_data: Integer = Integer(jump_to)
 
-        if len(jmp_data.to_byte_array()) > op_info.data_len:
+        if len(jmp_data.to_byte_array()) > op_info.max_data_len:
             opcode: Opcode = op_info.opcode.get_large_jump()
             if opcode is None:
                 return op_info, data

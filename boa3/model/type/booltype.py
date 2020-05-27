@@ -25,4 +25,4 @@ class BoolType(IType):
 
     @classmethod
     def is_type_of(cls, value: Any):
-        return type(value) == bool
+        return type(value) in [bool, BoolType]

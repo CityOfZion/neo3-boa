@@ -35,7 +35,7 @@ class TupleType(SequenceType):
 
     @classmethod
     def is_type_of(cls, value: Any):
-        return type(value) == tuple
+        return type(value) in [tuple, TupleType]
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):

@@ -53,7 +53,7 @@ class FileGenerator:
             method_id = 'Main'
 
         if method_id is None:
-            return None
+            raise NotImplementedError
         else:
             return method_id, self.__methods[method_id]
 

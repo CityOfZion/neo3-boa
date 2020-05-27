@@ -579,28 +579,34 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             function_id: str = call.func.id
             function = self.get_symbol(function_id)
 
-            # TODO: change when kwargs is implemented
-            if len(call.args) > len(function.args):
-                unexpected_arg = call.args[len(function.args)]
+            if not isinstance(function, Method):
+                # the symbol doesn't exists or is not a function
                 self._log_error(
-                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
-                )
-            elif len(call.args) < len(function.args):
-                missed_arg = list(function.args)[len(call.args)]
-                self._log_error(
-                    CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
+                    CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, function_id)
                 )
             else:
-                for index, (arg_id, arg_value) in enumerate(function.args.items()):
-                    param = call.args[index]
-                    param_type = self.get_type(param)
-                    if not arg_value.type.is_type_of(param_type):
-                        self._log_error(
-                            CompilerError.MismatchedTypes(
-                                param.lineno, param.col_offset,
-                                arg_value.type.identifier,
-                                param_type.identifier
-                            ))
+                # TODO: change when kwargs is implemented
+                if len(call.args) > len(function.args):
+                    unexpected_arg = call.args[len(function.args)]
+                    self._log_error(
+                        CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+                    )
+                elif len(call.args) < len(function.args):
+                    missed_arg = list(function.args)[len(call.args)]
+                    self._log_error(
+                        CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
+                    )
+                else:
+                    for index, (arg_id, arg_value) in enumerate(function.args.items()):
+                        param = call.args[index]
+                        param_type = self.get_type(param)
+                        if not arg_value.type.is_type_of(param_type):
+                            self._log_error(
+                                CompilerError.MismatchedTypes(
+                                    param.lineno, param.col_offset,
+                                    arg_value.type.identifier,
+                                    param_type.identifier
+                                ))
         return self.get_type(function)
 
     def visit_Num(self, num: ast.Num) -> int:

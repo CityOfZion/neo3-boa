@@ -31,7 +31,7 @@ class StrType(SequenceType):
 
     @classmethod
     def is_type_of(cls, value: Any):
-        return type(value) == str
+        return type(value) in [str, StrType]
 
     def is_valid_key(self, value_type: IType) -> bool:
         return value_type == self.valid_key
