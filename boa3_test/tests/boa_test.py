@@ -27,6 +27,6 @@ class BoaTest(TestCase):
             except NotLoadedException:
                 # when an compiler error is logged this exception is raised.
                 pass
-        
+
         if len([exception for exception in log.records if isinstance(exception.msg, expected_logged_exception)]) <= 0:
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))

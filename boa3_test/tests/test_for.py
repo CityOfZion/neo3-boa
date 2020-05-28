@@ -65,7 +65,7 @@ class TestFor(BoaTest):
 
     def test_for_string_condition(self):
         path = '%s/boa3_test/example/for_test/StringCondition.py' % self.dirname
-        
+
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
@@ -285,10 +285,5 @@ class TestFor(BoaTest):
 
         path = '%s/boa3_test/example/for_test/ForElse.py' % self.dirname
         output = Boa3.compile(path)
-
-        size = min(len(expected_output), len(output))
-        for x in range(0, size - 1):
-            if expected_output[x] != output[x]:
-                print(x, '\texpected: ', expected_output[x], '\tactual: ', output[x])
 
         self.assertEqual(expected_output, output)

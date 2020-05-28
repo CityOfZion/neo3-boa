@@ -81,15 +81,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
                 )
 
+            var_type = None
             if isinstance(var_type_id, SequenceType):
                 var_type = var_type_id
                 var_enumerate_type = self.get_enumerate_type(var_type)
             else:
                 if isinstance(var_type_id, IType):
                     var_type_id = var_type_id.identifier
-                var_type = self.symbols[var_type_id]
+                    var_type = self.symbols[var_type_id]
 
-            if isinstance(var_type, IType):
+            if isinstance(var_type, IType) or var_type is None:
+                # if type is None, the variable type depends on the type of a expression
                 if isinstance(var_type, SequenceType):
                     var_type = var_type.build_sequence(var_enumerate_type)
                 var = Variable(var_type)
@@ -212,12 +214,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(ret.value.lineno, ret.value.col_offset, symbol_id)
                 )
 
-    def visit_type(self, target: ast.AST) -> IType:
+    def visit_type(self, target: ast.AST) -> Optional[IType]:
         """
         Gets the type by its identifier
 
         :param target: ast node to be evaluated
-        :return: the type of the value inside the node. Type.none by default
+        :return: the type of the value inside the node. None by default
         """
         target_type = self.visit(target)  # Type:str or IType
         if isinstance(target_type, str) and not isinstance(target, ast.Str):
@@ -228,6 +230,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(target.lineno, target.col_offset, target_type)
                 )
             target_type = symbol
+
+        if target_type is None and not isinstance(target, ast.NameConstant):
+            # the value type is invalid
+            return None
         return self.get_type(target_type)
 
     def get_enumerate_type(self, var_type: IType) -> IType:
@@ -333,25 +339,28 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return value_type
 
-    def visit_Call(self, call: ast.Call) -> IType:
+    def visit_Call(self, call: ast.Call) -> Optional[IType]:
         """
         Visitor of a function call node
 
         :param call: the python ast function call node
-        :return: the result type of the called function
+        :return: the result type of the called function. None if the function is not found
         """
         func_id = self.visit(call.func)
         func_symbol = self.get_symbol(func_id)
 
         # if func_symbol is None, the called function may be a function written after in the code
-        if func_symbol is not None:
-            if not isinstance(func_symbol, IBuiltinMethod):
-                # the symbol doesn't exists
-                self._log_error(
-                    CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
-                )
-            elif func_symbol.body is not None:
-                self.__builtin_functions_to_visit[func_id] = func_symbol
+        # that's why it shouldn't log a compiler error here
+        if func_symbol is None:
+            return None
+
+        if not isinstance(func_symbol, Method):
+            # the symbol doesn't exists
+            self._log_error(
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
+            )
+        elif isinstance(func_symbol, IBuiltinMethod) and func_symbol.body is not None:
+            self.__builtin_functions_to_visit[func_id] = func_symbol
 
         return self.get_type(call.func)
 

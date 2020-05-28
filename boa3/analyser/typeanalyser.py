@@ -1,5 +1,5 @@
 import ast
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
@@ -8,12 +8,14 @@ from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
+from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
 from boa3.model.type.sequencetype import SequenceType
 from boa3.model.type.type import Type, IType
+from boa3.model.variable import Variable
 
 
 class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
@@ -198,13 +200,29 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         # multiple assignments with tuples
-        if isinstance(assign.targets[0], ast.Tuple):
+        elif isinstance(assign.targets[0], ast.Tuple):
             self._log_error(
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
 
+        else:
+            self.validate_type_variable_assign(assign.targets[0], assign.value)
+
         # continue to walk through the tree
         self.generic_visit(assign)
+
+    def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
+        """
+        Verifies if the assigned type is the same as the variable type
+
+        :param ann_assign: the python ast variable annotated assignment node
+        """
+        # if value is None, it is a declaration
+        if ann_assign.value is not None:
+            self.validate_type_variable_assign(ann_assign.target, ann_assign.value)
+
+        # continue to walk through the tree
+        self.generic_visit(ann_assign)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """
@@ -220,8 +238,38 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if operation.result is not Type.int:
                 raise NotImplementedError
 
+            self.validate_type_variable_assign(aug_assign.target, operation)
             aug_assign.op = operation
-            return operation.result
+
+    def validate_type_variable_assign(self, target: ast.AST, value: Any) -> bool:
+        value_type: IType = self.get_type(value)
+
+        if not isinstance(target, ast.Name):
+            target_type = self.get_type(target)
+        else:
+            var: ISymbol = self.get_symbol(target.id)
+            if not isinstance(var, Variable):
+                self._log_error(
+                    CompilerError.UnresolvedReference(
+                        target.lineno, target.col_offset,
+                        symbol_id=target.id
+                    ))
+                return False
+            if var.type is None:
+                # it is an declaration with assignment and the value is neither literal nor another variable
+                var.set_type(value_type)
+            target_type = var.type
+
+        if not target_type.is_type_of(value_type):
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    target.lineno, target.col_offset,
+                    actual_type_id=value_type.identifier,
+                    expected_type_id=target_type.identifier
+                ))
+            return False
+
+        return True
 
     def visit_Subscript(self, subscript: ast.Subscript) -> IType:
         """
@@ -602,18 +650,20 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # raises the exception with the line/col info
             self._log_error(raised_error)
 
-    def get_operator(self, node: ast.operator) -> Optional[Operator]:
+    def get_operator(self, node: Union[ast.operator, Operator, IOperation]) -> Optional[Operator]:
         """
         Gets the :class:`Operator` equivalent to given Python ast operator
 
-        :param node: Python ast node
-        :type node: ast.operator or Operator
+        :param node: object with the operator data
+        :type node: ast.operator or Operator or IOperation
         :return: the Boa operator equivalent to the node. None if it doesn't exit.
         :rtype: Operator or None
         """
+        # the node has already been visited
         if isinstance(node, Operator):
-            # the node has already been visited
             return node
+        elif isinstance(node, IOperation):
+            return node.operator
 
         node_type = type(node)
         if node_type in self.__operators:
