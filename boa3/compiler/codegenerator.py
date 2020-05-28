@@ -73,7 +73,7 @@ class CodeGenerator:
         return code_dict
 
     @property
-    def __last_code(self) -> Optional[VMCode]:
+    def last_code(self) -> Optional[VMCode]:
         """
         Gets the last code in the bytecode
 
@@ -87,8 +87,8 @@ class CodeGenerator:
 
     @property
     def address(self) -> int:
-        if self.__last_code is not None:
-            return self.__last_code.end_address + 1
+        if self.last_code is not None:
+            return self.last_code.end_address + 1
         else:
             return 0
 
@@ -133,10 +133,10 @@ class CodeGenerator:
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
-        if identifier in self.symbol_table:
-            return self.symbol_table[identifier]
-        elif self.__current_method is not None and identifier in self.__current_method.symbols:
+        if self.__current_method is not None and identifier in self.__current_method.symbols:
             return self.__current_method.symbols[identifier]
+        elif identifier in self.symbol_table:
+            return self.symbol_table[identifier]
 
         # the symbol may be a built in. If not, returns None
         symbol = Builtin.get_symbol(identifier)
@@ -170,7 +170,7 @@ class CodeGenerator:
         """
         # it will be updated when the while ends
         self.__insert_jump(OpcodeInfo.JMP, 0)
-        return self.__last_code.start_address
+        return self.last_code.start_address
 
     def convert_end_while(self, start_address: int, test_address: int):
         """
@@ -197,7 +197,7 @@ class CodeGenerator:
         """
         # it will be updated when the if ends
         self.__insert_jump(OpcodeInfo.JMPIFNOT, 0)
-        return self.__last_code.start_address
+        return self.last_code.start_address
 
     def convert_begin_else(self, start_address: int) -> int:
         """
@@ -213,7 +213,7 @@ class CodeGenerator:
         begin_jmp_to: int = self.address - start_address
         self.__update_jump(start_address, begin_jmp_to)
 
-        return self.__last_code.start_address
+        return self.last_code.start_address
 
     def convert_end_if(self, start_address: int):
         """
@@ -425,7 +425,7 @@ class CodeGenerator:
         :param op_info: info of the opcode  that will be inserted
         :param data: data of the opcode, if needed
         """
-        last_code = self.__last_code
+        last_code = self.last_code
         vm_code = VMCode(op_info, last_code, data)
 
         self.__vm_codes.append(vm_code)
@@ -462,6 +462,6 @@ class CodeGenerator:
                 return op_info, data
 
             op_info = OpcodeInfo.get_info(opcode)
-        data = jmp_data.to_byte_array()
+        data = jmp_data.to_byte_array(min_length=op_info.data_len, signed=True)
 
         return op_info, data

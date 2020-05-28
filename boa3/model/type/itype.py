@@ -16,6 +16,10 @@ class IType(ISymbol):
         self.identifier: str = identifier
 
     @property
+    def shadowing_name(self) -> str:
+        return 'type'
+
+    @property
     def abi_type(self) -> AbiType:
         """
         Get the type representation for the abi

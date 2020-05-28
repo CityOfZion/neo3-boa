@@ -29,18 +29,20 @@ class VisitorCodeGenerator(ast.NodeVisitor):
     def symbols(self) -> Dict[str, ISymbol]:
         return self.generator.symbol_table
 
-    def visit_to_generate(self, node: ast.AST):
+    def visit_to_generate(self, node):
         """
         Visitor to generate the nodes that the primary visitor is used to retrieve value
 
         :param node: an ast node
         """
-        result = self.visit(node)
-
-        # the default return of the name visitor is the name string
-        if isinstance(node, ast.Name):
-            # TODO: validate function calls
-            self.generator.convert_load_symbol(result)
+        if isinstance(node, ast.AST):
+            result = self.visit(node)
+            # the default return of the name visitor is the name string
+            if isinstance(node, ast.Name):
+                # TODO: validate function calls
+                self.generator.convert_load_symbol(result)
+        else:
+            self.generator.convert_literal(node)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -215,7 +217,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
     def visit_While(self, while_node: ast.While):
         """
-        Verifies if the type of while test is valid
+        Visitor of a while statement node
 
         :param while_node: the python ast while statement node
         """
@@ -230,9 +232,27 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in while_node.orelse:
             self.visit_to_generate(stmt)
 
+    def visit_For(self, for_node: ast.For):
+        """
+        Visitor of for statement node
+
+        :param for_node: the python ast for node
+        """
+        start_address = self.generator.convert_begin_while()
+        last_code = for_node.body[-1]
+        for stmt in for_node.body[:-1]:
+            self.visit_to_generate(stmt)
+
+        test_address: int = self.generator.address
+        self.visit_to_generate(last_code)
+        self.generator.convert_end_while(start_address, test_address)
+
+        for stmt in for_node.orelse:
+            self.visit_to_generate(stmt)
+
     def visit_If(self, if_node: ast.If):
         """
-        Verifies if the type of if test is valid
+        Visitor of if statement node
 
         :param if_node: the python ast if statement node
         """
@@ -251,7 +271,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """
-        Verifies if the type of if test is valid
+        Visitor of if expression node
 
         :param if_node: the python ast if statement node
         """

@@ -17,7 +17,7 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSH1
             + Opcode.JMPIFNOT   # if True
-            + Integer(6).to_byte_array(min_length=1)
+            + Integer(6).to_byte_array(min_length=1, signed=True)
                 + Opcode.LDLOC0     # a = a + 2
                 + Opcode.PUSH2
                 + Opcode.ADD
@@ -40,7 +40,7 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(6).to_byte_array(min_length=1)
+            + Integer(6).to_byte_array(min_length=1, signed=True)
                 + Opcode.LDLOC0     # a = a + 2
                 + Opcode.PUSH2
                 + Opcode.ADD
@@ -81,14 +81,14 @@ class TestIf(BoaTest):
             + Opcode.STLOC1
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(17).to_byte_array(min_length=1)
+            + Integer(17).to_byte_array(min_length=1, signed=True)
                 + Opcode.LDLOC0     # c = c + 2
                 + Opcode.PUSH2
                 + Opcode.ADD
                 + Opcode.STLOC0
                 + Opcode.LDARG1
                 + Opcode.JMPIFNOT   # if arg1
-                + Integer(6).to_byte_array(min_length=1)
+                + Integer(6).to_byte_array(min_length=1, signed=True)
                     + Opcode.LDLOC1     # d = d + 3
                     + Opcode.PUSH3
                     + Opcode.ADD
@@ -115,13 +115,13 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(8).to_byte_array(min_length=1)
+            + Integer(8).to_byte_array(min_length=1, signed=True)
                 + Opcode.LDLOC0     # a = a + 2
                 + Opcode.PUSH2
                 + Opcode.ADD
                 + Opcode.STLOC0
             + Opcode.JMP        # else
-            + Integer(4).to_byte_array(min_length=1)
+            + Integer(4).to_byte_array(min_length=1, signed=True)
                 + Opcode.PUSH10     # a = 10
                 + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
@@ -180,7 +180,7 @@ class TestIf(BoaTest):
             output = Boa3.compile(path)
 
     def test_if_relational_condition(self):
-        jmp_address = Integer(6).to_byte_array(min_length=1)
+        jmp_address = Integer(6).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -270,10 +270,10 @@ class TestIf(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # a = 2 if arg0 else 3
-                + Integer(5).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1, signed=True)
                 + Opcode.PUSH2      # 2
             + Opcode.JMP        # else
-            + Integer(3).to_byte_array(min_length=1)
+            + Integer(3).to_byte_array(min_length=1, signed=True)
                 + Opcode.PUSH3      # 3
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a

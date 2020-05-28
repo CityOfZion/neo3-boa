@@ -23,6 +23,10 @@ class Method(IExpression):
         self.is_public: bool = is_public
         self.locals: Dict[str, Variable] = {}
 
+    @property
+    def shadowing_name(self) -> str:
+        return 'method'
+
     def include_variable(self, var_id: str, var: Variable):
         """
         Includes a variable into the list of locals

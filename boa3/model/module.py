@@ -23,6 +23,10 @@ class Module(ISymbol):
             methods = {}
         self.methods = methods
 
+    @property
+    def shadowing_name(self) -> str:
+        return 'module'
+
     def include_variable(self, var_id: str, var: Variable):
         """
         Includes a variable into the scope of the module

@@ -1,5 +1,13 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class ISymbol(ABC):
-    pass
+    @property
+    @abstractmethod
+    def shadowing_name(self) -> str:
+        """
+        Gets the type of the evaluated expression
+
+        :return: the resulting type when the expression is evaluated
+        """
+        pass

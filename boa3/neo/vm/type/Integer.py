@@ -15,7 +15,8 @@ class Integer(int):
         aux: int = bits_per_byte - 1
         if self < 0:
             signed = True
-            aux += 1  # negative numbers used an additional bit to represent the signal
+        if signed:
+            aux += 1  # signed numbers uses an additional bit to represent the signal
 
         byte_length: int = ((self.bit_length() + aux) // bits_per_byte)
         length = max(min_length, byte_length)
