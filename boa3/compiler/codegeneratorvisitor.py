@@ -144,6 +144,18 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         self.store_variable(var_id, assign.value, var_index)
 
+    def visit_AugAssign(self, aug_assign: ast.AugAssign):
+        """
+        Visitor of an augmented assignment node
+
+        :param aug_assign: the python ast augmented assignment node
+        """
+        var_id = self.visit(aug_assign.target)
+        self.generator.convert_load_symbol(var_id)
+        self.visit_to_generate(aug_assign.value)
+        self.generator.convert_operation(aug_assign.op)
+        self.generator.convert_store_variable(var_id)
+
     def visit_Subscript(self, subscript: ast.Subscript):
         """
         Visitor of a subscript node
@@ -338,7 +350,6 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param tup_node: the python ast string node
         :return: the value of the tuple
         """
-        tup = tuple([value for value in tup_node.elts])
         length = len(tup_node.elts)
         self.generator.convert_new_array(length)
         for index, value in enumerate(tup_node.elts):
