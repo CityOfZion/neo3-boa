@@ -25,4 +25,4 @@ class IntType(IType):
 
     @classmethod
     def is_type_of(cls, value: Any):
-        return type(value) == int
+        return type(value) in [int, IntType]

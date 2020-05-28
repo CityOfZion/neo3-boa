@@ -149,13 +149,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
 
         fun_return: IType = fun_rtype_symbol
+        method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
 
         if function.name in ['main', 'Main']:
             arg_types = ', '.join(['{0}: {1}'.format(arg, var.type.identifier) for arg, var in fun_args.items()])
             logging.info("Main method found at {0}:{1}: '{2}({3}) -> {4}'"
                          .format(function.lineno, function.col_offset, function.name, arg_types, fun_return.identifier))
+            # main method is always public
+            method.set_as_main_method()
 
-        method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
         self.__current_method = method
 
         for stmt in function.body:
@@ -338,14 +340,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         func_id = self.visit(call.func)
         func_symbol = self.get_symbol(func_id)
 
-        # TODO: change when all user function call is implemented
-        if not isinstance(func_symbol, IBuiltinMethod):
-            # the symbol doesn't exists
-            self._log_error(
-                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
-            )
-        if func_symbol.body is not None:
-            self.__builtin_functions_to_visit[func_id] = func_symbol
+        # if func_symbol is None, the called function may be a function written after in the code
+        if func_symbol is not None:
+            if not isinstance(func_symbol, IBuiltinMethod):
+                # the symbol doesn't exists
+                self._log_error(
+                    CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
+                )
+            elif func_symbol.body is not None:
+                self.__builtin_functions_to_visit[func_id] = func_symbol
 
         return self.get_type(call.func)
 

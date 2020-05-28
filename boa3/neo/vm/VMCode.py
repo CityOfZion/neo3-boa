@@ -19,7 +19,7 @@ class VMCode:
         :type last_code: VMCode or None
         :param data: the data in bytes of the code. Empty byte array by default.
         """
-        self.__last_code = last_code    # type:Optional[VMCode]
+        self._last_code = last_code    # type:Optional[VMCode]
         self.info: OpcodeInformation = op_info
         self.data: bytes = self.__format_data(data)
 
@@ -30,10 +30,10 @@ class VMCode:
 
         :return: the first address of the code
         """
-        if self.__last_code is None:
+        if self._last_code is None:
             return 0
         else:
-            return self.__last_code.end_address + 1
+            return self._last_code.end_address + 1
 
     @property
     def end_address(self) -> int:

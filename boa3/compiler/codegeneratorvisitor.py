@@ -291,7 +291,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param call: the python ast function call node
         """
-        for arg in call.args:
+        # the parameters are included into the stack in the reversed order
+        for arg in reversed(call.args):
             self.visit_to_generate(arg)
         function_id = self.visit(call.func)
         self.generator.convert_load_symbol(function_id)

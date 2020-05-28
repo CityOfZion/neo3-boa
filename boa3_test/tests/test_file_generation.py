@@ -105,10 +105,30 @@ class TestFileGeneration(BoaTest):
         abi = manifest['abi']
 
         self.assertIn('entryPoint', abi)
-        self.assertEqual(len(abi['entryPoint']), 0)
+        self.assertNotEqual(0, len(abi['entryPoint']))  # entry point cannot be empty
+        self.assertIn('parameters', abi['entryPoint'])
+        self.assertEqual(len(abi['entryPoint']['parameters']), 2)
+
+        arg0 = abi['entryPoint']['parameters'][0]
+        self.assertIn('name', arg0)
+        self.assertEqual(arg0['name'], 'a')
+        self.assertIn('type', arg0)
+        self.assertEqual(arg0['type'], AbiType.Integer)
+
+        arg1 = abi['entryPoint']['parameters'][1]
+        self.assertIn('name', arg1)
+        self.assertEqual(arg1['name'], 'b')
+        self.assertIn('type', arg1)
+        self.assertEqual(arg1['type'], AbiType.Integer)
 
         self.assertIn('methods', abi)
-        self.assertEqual(len(abi['methods']), 0)
+        self.assertEqual(0, len(abi['methods']))
 
         self.assertIn('events', abi)
-        self.assertEqual(len(abi['events']), 0)
+        self.assertEqual(0, len(abi['events']))
+
+    def test_generate_without_main(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithoutMain.py' % self.dirname
+
+        with self.assertRaises(NotImplementedError):
+            Boa3.compile_and_save(path)
