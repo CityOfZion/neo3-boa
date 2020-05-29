@@ -18,11 +18,11 @@ The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `
 
 - Works for Python 3.6+
 
-- Log compiler errors and warnings
+- Logs compiler errors and warnings
  
-- Log when main method is analysed
+- Logs when the main method is analysed
  
-- Log methods inclusions in `.abi` file to work with Neo Debuggers.
+- Logs method inclusions in `.abi` file to work with Neo Debuggers.
 
 - Converts Functions
 
@@ -34,7 +34,7 @@ The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `
     ```
 - Converts Number Arithmetic Operations (`+`, `-`, `*`, `//`, `%`)
 
-- Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `//=`, `%=`)
+- Converts Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `//=`, `%=`)
 
 - Converts Number Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`)
 
@@ -88,7 +88,7 @@ def foo(num: int) -> int
 
 - `continue`, `break` and `pass`
 
-- Numeric Arithmetic Augmented assignment Operators (`/=`)
+- Convert Numeric Arithmetic Augmented assignment Operators (`/=`)
 
 - Convert Number Arithmetic Operations (`/`, `**`)
 
@@ -96,6 +96,6 @@ def foo(num: int) -> int
 
 - Convert List type
 
-- String Slicing (`x = 'example'[2:4]`)
+- Convert String Slicing (`x = 'example'[2:4]`, `x = 'example'[:4]`, `x = 'example'[4:]`, `x = 'example'[:]`, `x = 'example'[2:4:2]`, `x = 'example'[::2]`)
 
-- Multiple Expressions in the same line (`i = i + h; a = 1; b = 3 + a; count = 0`)
+- Convert Multiple Expressions in the same line (`i = i + h; a = 1; b = 3 + a; count = 0`)
