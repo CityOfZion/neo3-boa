@@ -12,29 +12,37 @@
 The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `.manisfest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
 
 
-#### What does it currently do
+#### What it currently does...
 
 - Compiles a subset of the Python language to the `.nef` and `.manisfest.json` format for use in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm)
 
 - Works for Python 3.6+
 
-- Convert Functions
+- Log compiler errors and warnings
+ 
+- Log when main method is analysed
+ 
+- Log methods inclusions in `.abi` file to work with Neo Debuggers.
 
-- Convert Local Variable Declarations and Assignments 
+- Converts Functions
+
+- Converts Local Variable Declarations and Assignments 
     
     ```
     foo: int = 42
     bar = foo
     ```
-- Convert Number Arithmetic Operations (`+`, `-`, `*`, `//`, `%`)
+- Converts Number Arithmetic Operations (`+`, `-`, `*`, `//`, `%`)
 
-- Convert Number Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`)
+- Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `//=`, `%=`)
 
-- Convert Boolean Logic Operations and chained comparisons (`and`, `or`, `not`)
+- Converts Number Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`)
 
-- Convert Tuple type (`get` and `set` operations)
+- Converts Boolean Logic Operations and chained comparisons (`and`, `or`, `not`)
 
-- While Statement
+- Converts Tuple type (`get` and `set` operations)
+
+- Converts While Statement
 
  ```python
 foo = 0
@@ -45,7 +53,7 @@ foo = 0
     return foo
  ```
 
-- If, elif, else Statements
+- Converts If, elif, else Statements
 
 ```python
 if x:
@@ -56,23 +64,14 @@ else:
     bar = 2
 ```
 
-- `len()` for `str` and `tuple`
+- Converts For Statement
 
-#### What will it do
+```python
+for x in (1, 2, 3):
+    ...
+```
 
-- Log compiler errors and warnings, when main method is analysed, methods inclusions in `.abi` file to work with Neo Debuggers.
-
-- `continue`, `break` and `pass`
-
-- Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `/=`, `//=`, `%=`)
-
-- Convert Number Arithmetic Operations (`/`, `**`)
-
-- Convert Number Relational Operations (`is`, `is not`)
-
-- Convert List type
-
-- Convert Function Call
+- Converts Function Call
 
 ```python
 def Main(num: int)
@@ -83,13 +82,20 @@ def foo(num: int) -> int
     ...
 ```
 
+- Converts `len()` for `str` and `tuple`
+
+#### What it will do...
+
+- `continue`, `break` and `pass`
+
+- Numeric Arithmetic Augmented assignment Operators (`/=`)
+
+- Convert Number Arithmetic Operations (`/`, `**`)
+
+- Convert Number Relational Operations (`is`, `is not`)
+
+- Convert List type
+
 - String Slicing (`x = 'example'[2:4]`)
 
-- For Statement
-
-```python
-for x in (1, 2, 3):
-    ...
-```
-
-- Multiple Expressions in same line (`i = i + h; a = 1; b = 3 + a; count = 0`)
+- Multiple Expressions in the same line (`i = i + h; a = 1; b = 3 + a; count = 0`)
