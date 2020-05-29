@@ -29,12 +29,12 @@ class TupleType(SequenceType):
 
     @classmethod
     def build(cls, value: Any):
-        if cls.is_type_of(value):
+        if cls._is_type_of(value):
             values_types: List[IType] = cls.get_types(value)
             return cls(values_types)
 
     @classmethod
-    def is_type_of(cls, value: Any):
+    def _is_type_of(cls, value: Any):
         return type(value) in [tuple, TupleType]
 
     def __eq__(self, other) -> bool:

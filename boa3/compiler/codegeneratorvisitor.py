@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.model.method import Method
@@ -80,7 +80,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         args: Dict[str, Variable] = {}
 
         for arg in arguments.args:
-            var_id, var = self.visit_arg(arg)   # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arg)   # type:str, Variable
             args[var_id] = var
         return args
 
@@ -347,12 +347,27 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         Visitor of literal tuple node
 
-        :param tup_node: the python ast string node
-        :return: the value of the tuple
+        :param tup_node: the python ast tuple node
         """
-        length = len(tup_node.elts)
+        self.__create_array(tup_node.elts)
+
+    def visit_List(self, list_node: ast.List):
+        """
+        Visitor of literal list node
+
+        :param list_node: the python ast list node
+        """
+        self.__create_array(list_node.elts)
+
+    def __create_array(self, values: List[ast.AST]):
+        """
+        Creates a new array from a literal sequence
+
+        :param values: list of values of the new array items
+        """
+        length = len(values)
+        if length > 0:
+            for value in reversed(values):
+                self.visit_to_generate(value)
+            self.visit_to_generate(length)
         self.generator.convert_new_array(length)
-        for index, value in enumerate(tup_node.elts):
-            self.generator.convert_set_new_array_item_at(index)
-            self.visit_to_generate(value)
-            self.generator.convert_set_array_item()
