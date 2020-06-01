@@ -335,9 +335,9 @@ class CodeGenerator:
         data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
         self.__insert1(op_info, data)
 
-    def convert_new_array(self, length: int):
+    def convert_new_empty_array(self, length: int):
         """
-        Converts the creation of a new array
+        Converts the creation of a new empty array
 
         :param length: the size of the new array
         """
@@ -346,6 +346,17 @@ class CodeGenerator:
         else:
             self.convert_literal(length)
             self.__insert1(OpcodeInfo.NEWARRAY)
+
+    def convert_new_array(self, length: int):
+        """
+        Converts the creation of a new array
+
+        :param length: the size of the new array
+        """
+        if length <= 0:
+            self.convert_new_empty_array(length)
+        else:
+            self.__insert1(OpcodeInfo.PACK)
 
     def convert_set_new_array_item_at(self, index: int):
         """

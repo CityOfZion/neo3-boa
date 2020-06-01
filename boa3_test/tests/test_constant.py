@@ -108,20 +108,11 @@ class TestConstant(BoaTest):
     def test_integer_tuple_constant(self):
         input = (1, 2, 3)
         expected_output = (
-            Opcode.PUSH3        # tuple length
-            + Opcode.NEWARRAY
-            + Opcode.DUP
-            + Opcode.PUSH0      # index
-            + Opcode.PUSH1      # value
-            + Opcode.SETITEM
-            + Opcode.DUP
-            + Opcode.PUSH1      # index
-            + Opcode.PUSH2      # value
-            + Opcode.SETITEM
-            + Opcode.DUP
-            + Opcode.PUSH2      # index
-            + Opcode.PUSH3      # value
-            + Opcode.SETITEM
+            Opcode.PUSH3        # 3
+            + Opcode.PUSH2      # 2
+            + Opcode.PUSH1      # 1
+            + Opcode.PUSH3      # tuple length
+            + Opcode.PACK
         )
 
         analyser = Analyser(ast.parse(str(input)))
@@ -136,26 +127,17 @@ class TestConstant(BoaTest):
         byte_input2 = String(input[2]).to_bytes()
 
         expected_output = (
-            Opcode.PUSH3        # tuple length
-            + Opcode.NEWARRAY
-            + Opcode.DUP
-            + Opcode.PUSH0      # index
-            + Opcode.PUSHDATA1  # value
-            + Integer(len(byte_input0)).to_byte_array()
-            + byte_input0
-            + Opcode.SETITEM
-            + Opcode.DUP
-            + Opcode.PUSH1      # index
-            + Opcode.PUSHDATA1  # value
-            + Integer(len(byte_input1)).to_byte_array()
-            + byte_input1
-            + Opcode.SETITEM
-            + Opcode.DUP
-            + Opcode.PUSH2      # index
-            + Opcode.PUSHDATA1  # value
+            Opcode.PUSHDATA1    # '3'
             + Integer(len(byte_input2)).to_byte_array()
             + byte_input2
-            + Opcode.SETITEM
+            + Opcode.PUSHDATA1  # '2'
+            + Integer(len(byte_input1)).to_byte_array()
+            + byte_input1
+            + Opcode.PUSHDATA1  # '1'
+            + Integer(len(byte_input0)).to_byte_array()
+            + byte_input0
+            + Opcode.PUSH3      # tuple length
+            + Opcode.PACK
         )
 
         analyser = Analyser(ast.parse(str(input)))
@@ -168,22 +150,13 @@ class TestConstant(BoaTest):
         byte_input1 = String(input[1]).to_bytes()
 
         expected_output = (
-            Opcode.PUSH3        # tuple length
-            + Opcode.NEWARRAY
-            + Opcode.DUP
-            + Opcode.PUSH0      # index
-            + Opcode.PUSH1      # value
-            + Opcode.SETITEM
-            + Opcode.DUP
-            + Opcode.PUSH1      # index
-            + Opcode.PUSHDATA1  # value
+            Opcode.PUSH0        # True
+            + Opcode.PUSHDATA1  # '2'
             + Integer(len(byte_input1)).to_byte_array()
             + byte_input1
-            + Opcode.SETITEM
-            + Opcode.DUP
-            + Opcode.PUSH2      # index
-            + Opcode.PUSH0      # value
-            + Opcode.SETITEM
+            + Opcode.PUSH1      # 1
+            + Opcode.PUSH3      # tuple length
+            + Opcode.PACK
         )
 
         analyser = Analyser(ast.parse(str(input)))
@@ -194,51 +167,111 @@ class TestConstant(BoaTest):
     def test_tuple_of_tuple_constant(self):
         input = ((1, 2), (3, 4, 5, 6), (7,))
         expected_output = (
-            Opcode.PUSH3      # tuple length
-            + Opcode.NEWARRAY
-            + Opcode.DUP        # array[0] = (1, 2)
-            + Opcode.PUSH0
-                + Opcode.PUSH2      # tuple length
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # array[0][0] = 1
-                + Opcode.PUSH0      # index
-                + Opcode.PUSH1      # value
-                + Opcode.SETITEM
-                + Opcode.DUP        # array[0][1] = 2
-                + Opcode.PUSH1      # index
-                + Opcode.PUSH2      # value
-                + Opcode.SETITEM
-            + Opcode.SETITEM
-            + Opcode.DUP        # array[1] = (3, 4, 5, 6)
-            + Opcode.PUSH1
-                + Opcode.PUSH4      # tuple length
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # array[1][0] = 3
-                + Opcode.PUSH0      # index
-                + Opcode.PUSH3      # value
-                + Opcode.SETITEM
-                + Opcode.DUP        # array[1][1] = 4
-                + Opcode.PUSH1      # index
-                + Opcode.PUSH4      # value
-                + Opcode.SETITEM
-                + Opcode.DUP        # array[1][2] = 5
-                + Opcode.PUSH2      # index
-                + Opcode.PUSH5      # value
-                + Opcode.SETITEM
-                + Opcode.DUP        # array[1][3] = 6
-                + Opcode.PUSH3      # index
-                + Opcode.PUSH6      # value
-                + Opcode.SETITEM
-            + Opcode.SETITEM
-            + Opcode.DUP        # array[2] = (7,)
-            + Opcode.PUSH2
-                + Opcode.PUSH1      # tuple length
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # array[2][0] = 7
-                + Opcode.PUSH0      # index
-                + Opcode.PUSH7      # value
-                + Opcode.SETITEM
-            + Opcode.SETITEM
+            # tuple[2]
+            Opcode.PUSH7    # 7
+            + Opcode.PUSH1  # tuple length
+            + Opcode.PACK
+            # tuple[1]
+            + Opcode.PUSH6  # 6
+            + Opcode.PUSH5  # 7
+            + Opcode.PUSH4  # 4
+            + Opcode.PUSH3  # 3
+            + Opcode.PUSH4  # tuple length
+            + Opcode.PACK
+            # tuple[0]
+            + Opcode.PUSH2  # 2
+            + Opcode.PUSH1  # 1
+            + Opcode.PUSH2  # tuple length
+            + Opcode.PACK
+            + Opcode.PUSH3  # tuple length
+            + Opcode.PACK
+        )
+
+        analyser = Analyser(ast.parse(str(input)))
+        output = CodeGenerator.generate_code(analyser)
+
+        self.assertEqual(expected_output, output)
+
+    def test_integer_list_constant(self):
+        input = [1, 2, 3]
+        expected_output = (
+            Opcode.PUSH3    # 3
+            + Opcode.PUSH2  # 2
+            + Opcode.PUSH1  # 1
+            + Opcode.PUSH3  # list length
+            + Opcode.PACK
+        )
+
+        analyser = Analyser(ast.parse(str(input)))
+        output = CodeGenerator.generate_code(analyser)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_list_constant(self):
+        input = ['1', '2', '3']
+        byte_input0 = String(input[0]).to_bytes()
+        byte_input1 = String(input[1]).to_bytes()
+        byte_input2 = String(input[2]).to_bytes()
+
+        expected_output = (
+            Opcode.PUSHDATA1        # '2'
+            + Integer(len(byte_input2)).to_byte_array()
+            + byte_input2
+            + Opcode.PUSHDATA1      # '1'
+            + Integer(len(byte_input1)).to_byte_array()
+            + byte_input1
+            + Opcode.PUSHDATA1      # '0'
+            + Integer(len(byte_input0)).to_byte_array()
+            + byte_input0
+            + Opcode.PUSH3          # list length
+            + Opcode.PACK
+        )
+
+        analyser = Analyser(ast.parse(str(input)))
+        output = CodeGenerator.generate_code(analyser)
+
+        self.assertEqual(expected_output, output)
+
+    def test_any_list_constant(self):
+        input = [1, '2', False]
+        byte_input1 = String(input[1]).to_bytes()
+
+        expected_output = (
+            Opcode.PUSH0        # False
+            + Opcode.PUSHDATA1  # '2'
+            + Integer(len(byte_input1)).to_byte_array()
+            + byte_input1
+            + Opcode.PUSH1      # 1
+            + Opcode.PUSH3      # list length
+            + Opcode.PACK
+        )
+
+        analyser = Analyser(ast.parse(str(input)))
+        output = CodeGenerator.generate_code(analyser)
+
+        self.assertEqual(expected_output, output)
+
+    def test_list_of_list_constant(self):
+        input = [[1, 2], [3, 4, 5, 6], [7]]
+        expected_output = (
+            # list[2]
+            Opcode.PUSH7    # 7
+            + Opcode.PUSH1  # list length
+            + Opcode.PACK
+            # list[1]
+            + Opcode.PUSH6  # 6
+            + Opcode.PUSH5  # 5
+            + Opcode.PUSH4  # 4
+            + Opcode.PUSH3  # 3
+            + Opcode.PUSH4  # list length
+            + Opcode.PACK
+            # list[0]
+            + Opcode.PUSH2  # 2
+            + Opcode.PUSH1  # 1
+            + Opcode.PUSH2  # list length
+            + Opcode.PACK
+            + Opcode.PUSH3  # list length
+            + Opcode.PACK
         )
 
         analyser = Analyser(ast.parse(str(input)))

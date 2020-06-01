@@ -13,6 +13,21 @@ class SequenceType(IType, ABC):
         self.value_type: IType = self.__initialize_sequence_type(values_type)
         super().__init__(identifier)
 
+    @property
+    def identifier(self) -> str:
+        return '{0}[{1}]'.format(self._identifier, self.value_type.identifier)
+
+    def is_type_of(self, value: Any) -> bool:
+        if self._is_type_of(value):
+            if isinstance(value, SequenceType):
+                # TODO: remove this if when any type is implemented
+                from boa3.model.type.type import Type
+                if self.value_type is Type.none:
+                    return True
+                return self.value_type.is_type_of(value.value_type)
+            return True
+        return False
+
     @classmethod
     def get_types(cls, value: Any) -> List[IType]:
         from boa3.model.type.type import Type

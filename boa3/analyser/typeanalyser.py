@@ -686,14 +686,23 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return str.s
 
-    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any]:
+    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
         """
         Visitor of literal tuple node
 
-        :param tup_node: the python ast string node
+        :param tup_node: the python ast tuple node
         :return: the value of the tuple
         """
-        return tuple(self.visit(value) for value in tup_node.elts)
+        return tuple(self.get_type(value) for value in tup_node.elts)
+
+    def visit_List(self, list_node: ast.List) -> List[Any]:
+        """
+        Visitor of literal list node
+
+        :param list_node: the python ast list node
+        :return: the value of the list
+        """
+        return [self.get_type(value) for value in list_node.elts]
 
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """

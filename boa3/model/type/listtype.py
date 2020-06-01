@@ -1,17 +1,17 @@
-from typing import List, Any
+from typing import Any, List
 
 from boa3.model.type.itype import IType
 from boa3.model.type.sequencetype import SequenceType
 from boa3.neo.vm.type.AbiType import AbiType
 
 
-class GenericSequenceType(SequenceType):
+class ListType(SequenceType):
     """
-    An class used to represent a generic Python sequence type
+    A class used to represent Python list type
     """
 
-    def __init__(self, values_type: List[IType]):
-        identifier: str = 'sequence'
+    def __init__(self, values_type: List[IType] = None):
+        identifier = 'list'
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
 
@@ -35,7 +35,12 @@ class GenericSequenceType(SequenceType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, SequenceType)
+        return type(value) in [list, ListType]
+
+    def __eq__(self, other) -> bool:
+        if type(self) != type(other):
+            return False
+        return self.value_type == other.value_type
 
     def __hash__(self):
         return hash(self.identifier + self.value_type.identifier)

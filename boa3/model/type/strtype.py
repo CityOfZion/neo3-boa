@@ -15,12 +15,16 @@ class StrType(SequenceType):
         super().__init__(identifier, [self])
 
     @property
+    def identifier(self) -> str:
+        return self._identifier
+
+    @property
     def abi_type(self) -> AbiType:
         return AbiType.String
 
     @classmethod
     def build(cls, value: Any):
-        if cls.is_type_of(value):
+        if cls._is_type_of(value):
             from boa3.model.type.type import Type
             return Type.str
 
@@ -30,8 +34,11 @@ class StrType(SequenceType):
         return Type.str
 
     @classmethod
-    def is_type_of(cls, value: Any):
+    def _is_type_of(cls, value: Any) -> bool:
         return type(value) in [str, StrType]
+
+    def is_type_of(self, value: Any) -> bool:
+        return self._is_type_of(value)
 
     def is_valid_key(self, value_type: IType) -> bool:
         return value_type == self.valid_key

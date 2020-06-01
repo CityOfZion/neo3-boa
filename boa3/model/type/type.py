@@ -4,6 +4,7 @@ from boa3.model.type.booltype import BoolType
 from boa3.model.type.genericsequencetype import GenericSequenceType
 from boa3.model.type.inttype import IntType
 from boa3.model.type.itype import IType
+from boa3.model.type.listtype import ListType
 from boa3.model.type.nonetype import NoneType
 from boa3.model.type.strtype import StrType
 from boa3.model.type.tupletype import TupleType
@@ -15,7 +16,7 @@ class Type:
         value_dict = {}
         for type in vars(cls).values():
             if isinstance(type, IType):
-                value_dict[type.identifier] = type
+                value_dict[type._identifier] = type
         return value_dict
 
     @classmethod
@@ -42,6 +43,7 @@ class Type:
     str = StrType()
     none = NoneType()
     tuple = TupleType(none)
+    list = ListType(none)
 
     # Generic types
     sequence = GenericSequenceType(none)

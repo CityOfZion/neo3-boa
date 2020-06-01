@@ -14,20 +14,11 @@ class TestVariable(BoaTest):
             + b'\x02'
             + b'\x00'
             + Opcode.PUSH3      # a = (1, 2, 3)
-            + Opcode.NEWARRAY
-            + Opcode.DUP        # array[0] = 1
-            + Opcode.PUSH0
-            + Opcode.PUSH1
-            + Opcode.SETITEM
-            + Opcode.DUP        # array[1] = 2
-            + Opcode.PUSH1
             + Opcode.PUSH2
-            + Opcode.SETITEM
-            + Opcode.DUP        # array[2] = 3
-            + Opcode.PUSH2
+            + Opcode.PUSH1
             + Opcode.PUSH3
-            + Opcode.SETITEM
-            + Opcode.STLOC0     # a = array
+            + Opcode.PACK
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # b = len(a)
             + Opcode.SIZE
             + Opcode.STLOC1
@@ -35,6 +26,28 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = '%s/boa3_test/example/built_in_methods_test/LenTuple.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_len_of_list(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3      # array length
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = len(a)
+            + Opcode.SIZE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/LenList.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

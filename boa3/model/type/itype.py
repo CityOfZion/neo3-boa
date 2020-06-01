@@ -13,11 +13,15 @@ class IType(ISymbol):
     """
 
     def __init__(self, identifier: str):
-        self.identifier: str = identifier
+        self._identifier: str = identifier
 
     @property
     def shadowing_name(self) -> str:
         return 'type'
+
+    @property
+    def identifier(self) -> str:
+        return self._identifier
 
     @property
     def abi_type(self) -> AbiType:
@@ -30,15 +34,26 @@ class IType(ISymbol):
 
     @classmethod
     @abstractmethod
-    def is_type_of(cls, value: Any):
+    def _is_type_of(cls, value: Any) -> bool:
         """
-        Creates a type instance with the given value
+        Validates if this is the type of the given value
 
-        :param value: value to build the type
-        :return: The built type if the value is valid. None otherwise
+        :param value: value to check the type
+        :return: a boolean value that represents if this is the type of the value.
         :rtype: bool
         """
         pass
+
+    def is_type_of(self, value: Any) -> bool:
+        """
+        Validates if this is the type of the given value. If this is not a primitive type, validates if its attributes
+        are also valid.
+
+        :param value: value to check the type
+        :return: a boolean value that represents if this is the type of the value.
+        :rtype: bool
+        """
+        return self._is_type_of(value)
 
     @classmethod
     @abstractmethod

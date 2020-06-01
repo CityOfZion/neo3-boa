@@ -19,11 +19,11 @@ class NoneType(IType):
 
     @classmethod
     def build(cls, value: Any):
-        if cls.is_type_of(value):
+        if cls._is_type_of(value):
             from boa3.model.type.type import Type
             return Type.none
 
     @classmethod
-    def is_type_of(cls, value: Any):
+    def _is_type_of(cls, value: Any):
         from boa3.model.type.type import Type
         return value is None or value is Type.none

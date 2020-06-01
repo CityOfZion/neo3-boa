@@ -17,24 +17,15 @@ class TestFor(BoaTest):
             + b'\x00'
             + Opcode.PUSH0      # a = 0
             + Opcode.STLOC0
-                + Opcode.PUSH3      # begin for
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # array[0] = 3
-                + Opcode.PUSH0
-                + Opcode.PUSH3
-                + Opcode.SETITEM
-                + Opcode.DUP        # array[1] = 5
-                + Opcode.PUSH1
-                + Opcode.PUSH5
-                + Opcode.SETITEM
-                + Opcode.DUP        # array[2] = 15
-                + Opcode.PUSH2
-                + Opcode.PUSH15
-                + Opcode.SETITEM
-                + Opcode.STLOC1     # for_sequence = array
-                + Opcode.PUSH0
-                + Opcode.STLOC2     # for_index = 0
-            + Opcode.JMP
+            + Opcode.PUSH15     # for_sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.STLOC2
+            + Opcode.JMP        # begin for
             + jmpif_address
                 + Opcode.LDLOC1         # x = for_sequence[for_index]
                 + Opcode.LDLOC2
@@ -79,25 +70,16 @@ class TestFor(BoaTest):
             + b'\x00'
             + Opcode.PUSH0      # a = 0
             + Opcode.STLOC0
-                + Opcode.PUSH3  # sequence = (3, 5, 15)
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # sequence[0] = 3
-                + Opcode.PUSH0
-                + Opcode.PUSH3
-                + Opcode.SETITEM
-                + Opcode.DUP        # sequence[1] = 5
-                + Opcode.PUSH1
-                + Opcode.PUSH5
-                + Opcode.SETITEM
-                + Opcode.DUP        # sequence[2] = 15
-                + Opcode.PUSH2
-                + Opcode.PUSH15
-                + Opcode.SETITEM
+            + Opcode.PUSH15     # sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
             + Opcode.STLOC1
-                + Opcode.LDLOC1     # for_sequence = sequence
-                + Opcode.STLOC2
-                + Opcode.PUSH0      # for_index = 0
-                + Opcode.STLOC3
+            + Opcode.LDLOC1     # for_sequence = sequence
+            + Opcode.STLOC2
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.STLOC3
             + Opcode.JMP
             + jmpif_address
                 + Opcode.LDLOC2         # x = for_sequence[for_index]
@@ -150,25 +132,16 @@ class TestFor(BoaTest):
             + b'\x00'
             + Opcode.PUSH0      # a = 0
             + Opcode.STLOC0
-                + Opcode.PUSH3  # sequence = (3, 5, 15)
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # sequence[0] = 3
-                + Opcode.PUSH0
-                + Opcode.PUSH3
-                + Opcode.SETITEM
-                + Opcode.DUP        # sequence[1] = 5
-                + Opcode.PUSH1
-                + Opcode.PUSH5
-                + Opcode.SETITEM
-                + Opcode.DUP        # sequence[2] = 15
-                + Opcode.PUSH2
-                + Opcode.PUSH15
-                + Opcode.SETITEM
+            + Opcode.PUSH15     # sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
             + Opcode.STLOC1
-                + Opcode.LDLOC1     # outer_for_sequence = sequence
-                + Opcode.STLOC2
-                + Opcode.PUSH0      # outer_for_index = 0
-                + Opcode.STLOC3
+            + Opcode.LDLOC1     # outer_for_sequence = sequence
+            + Opcode.STLOC2
+            + Opcode.PUSH0      # outer_for_index = 0
+            + Opcode.STLOC3
             + Opcode.JMP
             + outer_jmpif_address
                 + Opcode.LDLOC2         # x = outer_for_sequence[outer_for_index]
@@ -220,10 +193,6 @@ class TestFor(BoaTest):
         path = '%s/boa3_test/example/for_test/NestedFor.py' % self.dirname
         output = Boa3.compile(path)
 
-        for x in range(0, min(len(expected_output), len(output) - 1)):
-            if expected_output[x] != output[x]:
-                print(x, '\texpected: ', expected_output[x], '\tactual: ', output[x])
-
         self.assertEqual(expected_output, output)
 
     def test_for_else(self):
@@ -236,25 +205,16 @@ class TestFor(BoaTest):
             + b'\x00'
             + Opcode.PUSH0      # a = 0
             + Opcode.STLOC0
-                + Opcode.PUSH3  # sequence = (3, 5, 15)
-                + Opcode.NEWARRAY
-                + Opcode.DUP        # sequence[0] = 3
-                + Opcode.PUSH0
-                + Opcode.PUSH3
-                + Opcode.SETITEM
-                + Opcode.DUP        # sequence[1] = 5
-                + Opcode.PUSH1
-                + Opcode.PUSH5
-                + Opcode.SETITEM
-                + Opcode.DUP        # sequence[2] = 15
-                + Opcode.PUSH2
-                + Opcode.PUSH15
-                + Opcode.SETITEM
+            + Opcode.PUSH15     # sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
             + Opcode.STLOC1
-                + Opcode.LDLOC1     # for_sequence = sequence
-                + Opcode.STLOC2
-                + Opcode.PUSH0      # for_index = 0
-                + Opcode.STLOC3
+            + Opcode.LDLOC1     # for_sequence = sequence
+            + Opcode.STLOC2
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.STLOC3
             + Opcode.JMP
             + jmpif_address
                 + Opcode.LDLOC2         # x = for_sequence[for_index]
