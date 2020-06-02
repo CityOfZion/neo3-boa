@@ -84,6 +84,8 @@ def foo(num: int) -> int:
 
 - Converts Multiple Expressions in the same line (`i = i + h; a = 1; b = 3 + a; count = 0`)
 
+- Converts String Slicing (`x = 'example'[2:4]`, `x = 'example'[:4]`, `x = 'example'[4:]`, `x = 'example'[:]`)
+
 #### What it will do...
 
 - `continue`, `break` and `pass`
@@ -94,4 +96,4 @@ def foo(num: int) -> int:
 
 - Convert Relational Operations (`is`, `is not`)
 
-- Convert String Slicing (`x = 'example'[2:4]`, `x = 'example'[:4]`, `x = 'example'[4:]`, `x = 'example'[:]`, `x = 'example'[2:4:2]`, `x = 'example'[::2]`)
+- Convert String Slicing (`x = 'example'[2:4:2]`, `x = 'example'[::2]`)
