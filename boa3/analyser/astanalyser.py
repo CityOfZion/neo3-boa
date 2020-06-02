@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional
 from boa3.exception.CompilerError import CompilerError
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.expression import IExpression
+from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
 from boa3.model.type.type import Type
@@ -50,7 +51,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             if isinstance(fun_rtype_id, ast.Name):
                 fun_rtype_id = fun_rtype_id.id
 
-            if isinstance(fun_rtype_id, str):
+            if isinstance(fun_rtype_id, str) and not isinstance(value, ast.Str):
                 value = self.get_symbol(fun_rtype_id)
             else:
                 value = fun_rtype_id
@@ -59,6 +60,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             return value
         elif isinstance(value, IExpression):
             return value.type
+        elif isinstance(value, IOperation):
+            return value.result
         else:
             return Type.get_type(value)
 

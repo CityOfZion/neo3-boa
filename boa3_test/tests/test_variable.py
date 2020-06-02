@@ -3,7 +3,7 @@ from typing import Dict
 
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
-from boa3.exception.CompilerError import NotSupportedOperation, UnresolvedReference
+from boa3.exception.CompilerError import NotSupportedOperation, UnresolvedReference, MismatchedTypes
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
@@ -189,3 +189,31 @@ class TestVariable(BoaTest):
     def test_return_undeclared_variable(self):
         path = '%s/boa3_test/example/variable_test/ReturnUndeclaredVariable.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
+
+    def test_assign_value_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignValue.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_assign_binary_operation_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignBinOp.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_assign_unary_operation_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignUnOp.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_assign_mixed_operations_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignMixedOp.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_assign_sequence_get_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignSequenceGet.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_assign_sequence_set_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignSequenceSet.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_aug_assign_mismatched_type(self):
+        path = '%s/boa3_test/example/variable_test/MismatchedTypeAugAssign.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
