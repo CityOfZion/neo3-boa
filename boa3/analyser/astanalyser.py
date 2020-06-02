@@ -69,7 +69,6 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         else:
             return Type.get_type(value)
 
-    @abstractmethod
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
         """
         Tries to get the symbol by its id name
@@ -78,4 +77,10 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         :return: the symbol if found. None otherwise.
         :rtype: ISymbol or None
         """
-        pass
+        if symbol_id in self.symbols:
+            # the symbol exists in the global scope
+            return self.symbols[symbol_id]
+        else:
+            # the symbol may be a built in. If not, returns None
+            from boa3.model.builtin.builtin import Builtin
+            return Builtin.get_symbol(symbol_id)

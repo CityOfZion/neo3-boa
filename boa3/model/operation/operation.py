@@ -29,7 +29,7 @@ class IOperation(ABC):
 
     @property
     @abstractmethod
-    def _get_number_of_operands(self) -> int:
+    def number_of_operands(self) -> int:
         """
         Gets the number of operands required for this operations
 
@@ -55,7 +55,7 @@ class IOperation(ABC):
         :param types: types of the operand
         :return: True if all arguments are valid. False otherwise.
         """
-        if len(types) != self._get_number_of_operands:
+        if len(types) != self.number_of_operands:
             return False
 
         return operator is self.operator and self.validate_type(*types)

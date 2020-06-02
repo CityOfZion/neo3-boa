@@ -188,3 +188,7 @@ class TestList(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_list_slicing_omitted(self):
+        path = '%s/boa3_test/example/list_test/ListSlicing.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

@@ -47,3 +47,7 @@ class StrType(SequenceType):
     def valid_key(self) -> IType:
         from boa3.model.type.type import Type
         return Type.int
+
+    @property
+    def can_reassign_values(self) -> bool:
+        return False

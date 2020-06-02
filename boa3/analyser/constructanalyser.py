@@ -27,9 +27,6 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         """
         return self._tree
 
-    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
-        return None
-
     def visit_For(self, for_node: ast.For):
         """
         Includes additional operations for converting the for statement into Neo VM

@@ -48,6 +48,10 @@ class SequenceType(IType, ABC):
         return False
 
     @property
+    def can_reassign_values(self) -> bool:
+        return True
+
+    @property
     @abstractmethod
     def valid_key(self) -> IType:
         pass

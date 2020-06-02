@@ -252,6 +252,27 @@ class Opcode(bytes, Enum):
     # Pop the number N on the stack, and reverse the order of the top N items on the stack.
     REVERSEN = b'\x55'
 
+    @staticmethod
+    def get_reverse(no_stack_items: int):
+        """
+        Gets the opcode to reverse n items on the stack
+
+        :param no_stack_items: index of the variable
+        :return: the respective opcode
+        :rtype: Opcode
+        """
+        reverse_stack = {
+            2: Opcode.SWAP,
+            3: Opcode.REVERSE3,
+            4: Opcode.REVERSE4
+        }
+
+        if no_stack_items > 1:
+            if no_stack_items in reverse_stack:
+                return reverse_stack[no_stack_items]
+            else:
+                return Opcode.REVERSEN
+
     # endregion
 
     # region Slot
@@ -262,7 +283,7 @@ class Opcode(bytes, Enum):
     INITSLOT = b'\x57'
 
     @staticmethod
-    def get_store(index: int, local: bool, is_arg: bool = False):
+    def get_store(index: int, local: bool, is_arg: bool = False) -> bytes:
         """
         Gets the opcode to store the variable
 

@@ -1,7 +1,8 @@
 import ast
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Any
 
 from boa3.compiler.codegenerator import CodeGenerator
+from boa3.model.builtin.builtin import Builtin
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
@@ -162,6 +163,17 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param subscript: the python ast subscript node
         """
+        if isinstance(subscript.slice, ast.Index):
+            return self.visit_Subscript_Index(subscript)
+        elif isinstance(subscript.slice, ast.Slice):
+            return self.visit_Subscript_Slice(subscript)
+
+    def visit_Subscript_Index(self, subscript: ast.Subscript):
+        """
+        Visitor of a subscript node with index
+
+        :param subscript: the python ast subscript node
+        """
         if isinstance(subscript.ctx, ast.Load):
             # get item
             self.visit_to_generate(subscript.value)
@@ -171,6 +183,39 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             # set item
             var_id = self.visit(subscript.value)
             return var_id, subscript.slice.value
+
+    def visit_Subscript_Slice(self, subscript: ast.Subscript):
+        """
+        Visitor of a subscript node with slice
+
+        :param subscript: the python ast subscript node
+        """
+        lower_omitted = subscript.slice.lower is None
+        upper_omitted = subscript.slice.upper is None
+
+        self.visit_to_generate(subscript.value)
+        # if both are explicit
+        if not lower_omitted and not upper_omitted:
+            self.visit_to_generate(subscript.slice.lower)
+            # length of slice
+            self.visit_to_generate(subscript.slice.upper)
+            self.visit_to_generate(subscript.slice.lower)
+            self.generator.convert_operation(BinaryOp.Sub)
+            self.generator.convert_get_sub_array()
+        # only one of them is omitted
+        elif lower_omitted != upper_omitted:
+            # end position is omitted
+            if lower_omitted:
+                self.visit_to_generate(subscript.slice.upper)
+                self.generator.convert_get_array_beginning()
+            # start position is omitted
+            else:
+                self.visit_to_generate(subscript.value)
+                # length of slice
+                self.generator.convert_builtin_method_call(Builtin.Len)
+                self.visit_to_generate(subscript.slice.lower)
+                self.generator.convert_operation(BinaryOp.Sub)
+                self.generator.convert_get_array_ending()
 
     def visit_BinOp(self, bin_op: ast.BinOp):
         """
@@ -349,7 +394,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param tup_node: the python ast tuple node
         """
-        self.__create_array(tup_node.elts)
+        self.__create_array(tup_node.elts, Type.tuple)
 
     def visit_List(self, list_node: ast.List):
         """
@@ -357,9 +402,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param list_node: the python ast list node
         """
-        self.__create_array(list_node.elts)
+        self.__create_array(list_node.elts, Type.list)
 
-    def __create_array(self, values: List[ast.AST]):
+    def __create_array(self, values: List[ast.AST], array_type: IType):
         """
         Creates a new array from a literal sequence
 
@@ -370,4 +415,4 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             for value in reversed(values):
                 self.visit_to_generate(value)
             self.visit_to_generate(length)
-        self.generator.convert_new_array(length)
+        self.generator.convert_new_array(length, array_type)

@@ -23,7 +23,7 @@ class BinaryOperation(IOperation, ABC):
         super().__init__(self.operator, result)
 
     @property
-    def _get_number_of_operands(self) -> int:
+    def number_of_operands(self) -> int:
         return 2
 
     @abstractmethod

@@ -21,7 +21,7 @@ class Negative(UnaryOperation):
         super().__init__(operand)
 
     def validate_type(self, *types: IType) -> bool:
-        if len(types) != self._get_number_of_operands:
+        if len(types) != self.number_of_operands:
             return False
         operand: IType = types[0]
 

@@ -8,6 +8,7 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
+from boa3.model.type.itype import IType
 from boa3.model.type.type import Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.VMCode import VMCode
@@ -47,6 +48,8 @@ class CodeGenerator:
         self.__current_method: Method = None
         self.__function_calls: List[Tuple[VMCode, Method]] = []  # calls of functions that haven't been converted yet
         self.__is_entry_point_converted: bool = False
+
+        self._stack: List[IType] = []  # simulates neo execution stack
 
     @property
     def bytecode(self) -> bytes:
@@ -182,6 +185,8 @@ class CodeGenerator:
             self.__move_entry_point_to_beginning()
         self.__current_method = None
 
+        self._stack.clear()
+
     def __move_entry_point_to_beginning(self):
         """
         Move the vm codes of the smart contract entry point to the beginning of the bytecode
@@ -297,6 +302,7 @@ class CodeGenerator:
             self.convert_byte_array(array)
             # cast the value to integer
             self.__insert1(OpcodeInfo.CONVERT, StackItemType.Integer)
+        self._stack.append(Type.int)
 
     def convert_string_literal(self, value: str):
         """
@@ -306,6 +312,8 @@ class CodeGenerator:
         """
         array = bytes(value, sys.getdefaultencoding())
         self.convert_byte_array(array)
+        self._stack.pop()
+        self._stack.append(Type.str)
 
     def convert_bool_literal(self, value: bool):
         """
@@ -317,6 +325,7 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.PUSH1)
         else:
             self.__insert1(OpcodeInfo.PUSH0)
+        self._stack.append(Type.bool)
 
     def convert_byte_array(self, array: bytes):
         """
@@ -334,29 +343,34 @@ class CodeGenerator:
 
         data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
         self.__insert1(op_info, data)
+        self._stack.append(Type.none)  # TODO: change to bytearray when implemented
 
-    def convert_new_empty_array(self, length: int):
+    def convert_new_empty_array(self, length: int, array_type: IType):
         """
         Converts the creation of a new empty array
 
         :param length: the size of the new array
+        :param array_type: the Neo Boa type of the array
         """
         if length <= 0:
             self.__insert1(OpcodeInfo.NEWARRAY0)
         else:
             self.convert_literal(length)
             self.__insert1(OpcodeInfo.NEWARRAY)
+        self._stack.append(array_type)
 
-    def convert_new_array(self, length: int):
+    def convert_new_array(self, length: int, array_type: IType):
         """
         Converts the creation of a new array
 
         :param length: the size of the new array
+        :param array_type: the Neo Boa type of the array
         """
         if length <= 0:
-            self.convert_new_empty_array(length)
+            self.convert_new_empty_array(length, array_type)
         else:
             self.__insert1(OpcodeInfo.PACK)
+            self._stack.append(array_type)
 
     def convert_set_new_array_item_at(self, index: int):
         """
@@ -364,7 +378,7 @@ class CodeGenerator:
 
         :param index: the index of the array that will be set
         """
-        self.__insert1(OpcodeInfo.DUP)
+        self.duplicate_stack_top_item()
         self.convert_literal(index)
 
     def convert_set_array_item(self):
@@ -372,12 +386,54 @@ class CodeGenerator:
         Converts the end of setting af a value in an array
         """
         self.__insert1(OpcodeInfo.SETITEM)
+        self._stack.pop()  # value
+        self._stack.pop()  # index
+        self._stack.pop()  # array
 
     def convert_get_array_item(self):
         """
         Converts the end of get a value in an array
         """
-        self.__insert1(OpcodeInfo.PICKITEM)
+        array_type: IType = self._stack[-2]  # top: index, second-to-top: array
+        if array_type is Type.str:
+            self.convert_literal(1)  # length of substring
+            self.convert_get_substring()
+        else:
+            self.__insert1(OpcodeInfo.PICKITEM)
+            self._stack.pop()
+
+    def convert_get_substring(self):
+        """
+        Converts the end of get a substring
+        """
+        self.__insert1(OpcodeInfo.SUBSTR)
+        self._stack.pop()  # length
+        self._stack.pop()  # start
+        self._stack.pop()  # original string
+
+    def convert_get_sub_array(self):
+        """
+        Converts the end of get a slice in the beginning of an array
+        """
+        # top: length, index, array
+        if len(self._stack) > 2 and self._stack[-3] is Type.str:
+            self.convert_get_substring()
+
+    def convert_get_array_beginning(self):
+        """
+        Converts the end of get a slice in the beginning of an array
+        """
+        self.__insert1(OpcodeInfo.LEFT)
+        self._stack.pop()  # length
+        self._stack.pop()  # original array
+
+    def convert_get_array_ending(self):
+        """
+        Converts the end of get a slice in the ending of an array
+        """
+        self.__insert1(OpcodeInfo.RIGHT)
+        self._stack.pop()  # length
+        self._stack.pop()  # original array
 
     def convert_load_symbol(self, symbol_id: str):
         """
@@ -388,17 +444,18 @@ class CodeGenerator:
         symbol = self.get_symbol(symbol_id)
         if symbol is not Type.none:
             if isinstance(symbol, Variable):
-                self.convert_load_variable(symbol_id)
+                self.convert_load_variable(symbol_id, symbol)
             elif isinstance(symbol, IBuiltinMethod) and symbol.opcode is not None:
                 self.convert_builtin_method_call(symbol)
             else:
                 self.convert_method_call(symbol)
 
-    def convert_load_variable(self, var_id: str):
+    def convert_load_variable(self, var_id: str, var: Variable):
         """
         Converts the assignment of a variable
 
         :param var_id: the value to be converted
+        :param var: the actual variable to be loaded
         """
         is_arg = False
         local = var_id in self.__current_method.symbols
@@ -419,6 +476,7 @@ class CodeGenerator:
             self.__insert1(op_info, Integer(index).to_byte_array())
         else:
             self.__insert1(op_info)
+        self._stack.append(var.type)
 
     def convert_store_variable(self, var_id: str):
         """
@@ -445,6 +503,7 @@ class CodeGenerator:
             self.__insert1(op_info, Integer(index).to_byte_array())
         else:
             self.__insert1(op_info)
+        self._stack.pop()
 
     def convert_builtin_method_call(self, function: IBuiltinMethod):
         """
@@ -455,6 +514,9 @@ class CodeGenerator:
         if function.opcode is not None:
             op_info = OpcodeInfo.get_info(function.opcode)
             self.__insert1(op_info)
+            for arg in function.args:
+                self._stack.pop()
+            self._stack.append(function.return_type)
 
     def convert_method_call(self, function: Method):
         """
@@ -473,6 +535,9 @@ class CodeGenerator:
 
             data: bytes = function_address.to_byte_array(min_length=op_info.data_len, signed=True)
             self.__insert1(op_info, data)
+        for arg in function.args:
+            self._stack.pop()
+        self._stack.append(function.return_type)
 
     def __update_call(self, vmcode: VMCode, method: Method):
         """
@@ -500,6 +565,10 @@ class CodeGenerator:
         if opcode is not None:
             op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
+
+        for op in range(0, operation.number_of_operands):
+            self._stack.pop()
+        self._stack.append(operation.result)
 
     def __insert1(self, op_info: OpcodeInformation, data: bytes = bytes()):
         """
@@ -548,3 +617,16 @@ class CodeGenerator:
         data = jmp_data.to_byte_array(min_length=op_info.data_len, signed=True)
 
         return op_info, data
+
+    def duplicate_stack_top_item(self):
+        self.__insert1(OpcodeInfo.DUP)
+        self._stack.append(self._stack[-1])
+
+    def swap_reverse_stack_items(self, no_items: int):
+        if no_items > 1:
+            opcode: Opcode = Opcode.get_reverse(no_items)
+            op_info = OpcodeInfo.get_info(opcode)
+            self.__insert1(op_info)
+            reverse = list(reversed(self._stack[-no_items:]))
+            self._stack = self._stack[:-no_items]
+            self._stack.extend(reverse)
