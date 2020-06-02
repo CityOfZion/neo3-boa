@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import NotSupportedOperation
+from boa3.exception.CompilerError import NotSupportedOperation, MismatchedTypes
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
@@ -144,10 +144,6 @@ class TestRelational(BoaTest):
 
         self.assertEqual(expected_output, output)
 
-    def test_string_equality_operation(self):
-        path = '%s/boa3_test/example/relational_test/StrEquality.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
-
     def test_multiple_comparisons(self):
         expected_output = (
             Opcode.INITSLOT
@@ -167,3 +163,147 @@ class TestRelational(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_string_equality_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.EQUAL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/StrEquality.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_inequality_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.NOTEQUAL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/StrInequality.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_less_than_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.LT
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/StrLessThan.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_less_or_equal_than_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.LE
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/StrLessOrEqual.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_greater_than_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.GT
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/StrGreaterThan.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_greater_or_equal_than_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.GE
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/StrGreaterOrEqual.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mixed_equality_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.EQUAL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/MixedEquality.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mixed_inequality_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.NOTEQUAL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/relational_test/MixedInequality.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mixed_less_than_operation(self):
+        path = '%s/boa3_test/example/relational_test/MixedLessThan.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_mixed_less_or_equal_than_operation(self):
+        path = '%s/boa3_test/example/relational_test/MixedLessOrEqual.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_mixed_greater_than_operation(self):
+        path = '%s/boa3_test/example/relational_test/MixedGreaterThan.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_mixed_greater_or_equal_than_operation(self):
+        path = '%s/boa3_test/example/relational_test/MixedGreaterOrEqual.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

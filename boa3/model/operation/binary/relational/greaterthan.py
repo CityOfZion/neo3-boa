@@ -15,7 +15,7 @@ class GreaterThan(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.int]
+    _valid_types: List[IType] = [Type.int, Type.str]
 
     def __init__(self, left: IType = Type.int, right: IType = Type.int):
         self.operator: Operator = Operator.Gt
@@ -31,7 +31,6 @@ class GreaterThan(BinaryOperation):
         return left == right and left in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
-        # TODO: change the logic of the validation when implement other numeric types
         if self.validate_type(left, right):
             return Type.bool
         else:

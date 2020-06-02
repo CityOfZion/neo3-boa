@@ -31,7 +31,6 @@ class BooleanOr(BinaryOperation):
         return left == right and left in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
-        # TODO: change the logic of the validation when implement other numeric types
         if self.validate_type(left, right):
             return Type.bool
         else:

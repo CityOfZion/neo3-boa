@@ -27,7 +27,6 @@ The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `
 - Converts Functions
 
 - Converts Local Variable Declarations and Assignments 
-    
     ```
     foo: int = 42
     bar = foo
@@ -36,29 +35,28 @@ The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `
 
 - Converts Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `//=`, `%=`)
 
-- Converts Number Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`)
+- Converts Relational Operations (`==`, `!=`, `<`, `<=`, `>`, `>=`)
 
 - Converts Boolean Logic Operations and chained comparisons (`and`, `or`, `not`)
 
 - Converts Tuple type (`get` and `set` operations)
 
+- Converts List type
+
 - Converts While Statement
 
- ```python
+```python
 foo = 0
-
-    while condition:
-        foo = foo + 2
-
-    return foo
- ```
+while condition:
+    foo = foo + 2
+```
 
 - Converts If, elif, else Statements
 
 ```python
-if x:
+if condition1:
     foo = 0
-elif y:
+elif condition2:
     foo = 1
 else:
     bar = 2
@@ -74,15 +72,15 @@ for x in (1, 2, 3):
 - Converts Function Call
 
 ```python
-def Main(num: int)
+def Main(num: int):
     a = foo(num)
     ...
 
-def foo(num: int) -> int
+def foo(num: int) -> int:
     ...
 ```
 
-- Converts `len()` for `str` and `tuple`
+- Converts `len()` for `str`, `tuple` and `list`
 
 #### What it will do...
 
@@ -92,9 +90,7 @@ def foo(num: int) -> int
 
 - Convert Number Arithmetic Operations (`/`, `**`)
 
-- Convert Number Relational Operations (`is`, `is not`)
-
-- Convert List type
+- Convert Relational Operations (`is`, `is not`)
 
 - Convert String Slicing (`x = 'example'[2:4]`, `x = 'example'[:4]`, `x = 'example'[4:]`, `x = 'example'[:]`, `x = 'example'[2:4:2]`, `x = 'example'[::2]`)
 
