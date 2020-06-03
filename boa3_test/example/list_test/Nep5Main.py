@@ -1,2 +1,2 @@
-def Main(operation: str, args: List[int]) -> int:
+def Main(operation: str, args: List[Any]) -> Any:
     return args[0]

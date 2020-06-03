@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Any
+from typing import List, Any, Iterable
 
 from boa3.model.type.itype import IType
 
@@ -20,10 +20,6 @@ class SequenceType(IType, ABC):
     def is_type_of(self, value: Any) -> bool:
         if self._is_type_of(value):
             if isinstance(value, SequenceType):
-                # TODO: remove this if when any type is implemented
-                from boa3.model.type.type import Type
-                if self.value_type is Type.none:
-                    return True
                 return self.value_type.is_type_of(value.value_type)
             return True
         return False
@@ -31,7 +27,15 @@ class SequenceType(IType, ABC):
     @classmethod
     def get_types(cls, value: Any) -> List[IType]:
         from boa3.model.type.type import Type
-        return list(set(map(Type.get_type, value)))  # get list of different types in the tuple
+        if isinstance(value, IType):
+            return [value]
+
+        if not isinstance(value, Iterable):
+            value = [value]
+
+        types: List[IType] = [val if isinstance(val, IType) else Type.get_type(val) for val in value]
+        types = list(set(types))  # get list of different types in the tuple
+        return cls.filter_types(types)
 
     @abstractmethod
     def is_valid_key(self, value_type: IType) -> bool:
@@ -50,10 +54,10 @@ class SequenceType(IType, ABC):
 
     def __initialize_sequence_type(self, values_type: List[IType]):
         if len(values_type) != 1:
-            from boa3.model.type.type import Type
-            val_type = Type.none  # TODO: change to any when implemented
+            from boa3.model.type.anytype import anyType
+            val_type: IType = anyType
         else:
-            val_type = values_type[0]
+            val_type: IType = values_type[0]
 
         return val_type
 
@@ -67,11 +71,22 @@ class SequenceType(IType, ABC):
         if len(values_type) > 1:
             # verifies if all the types are the same sequence with different arguments
             if all(isinstance(x, SequenceType) for x in values_type):
-                sequence_type = type(values_type[0])
+                sequence_type = type(values_type[0])  # first sequence type
+                value_type = type(values_type[0].value_type)  # first sequence values type
+
                 if all(isinstance(x, sequence_type) for x in values_type):
-                    types = list(set(value.value_type for value in values_type))
                     # if all the types are the same sequence type, build this sequence with any as parameters
+                    types = list(set(value.value_type for value in values_type))
                     values_type = [sequence_type(values_type=types)]
+                elif all(isinstance(x.value_type, value_type) for x in values_type):
+                    # the sequences doesn't have the same type but the value type is the same
+                    # for example: Tuple[int] and List[int]
+                    from boa3.model.type.type import Type
+                    values_type = [Type.sequence.build_sequence(values_type[0].value_type)]
+                else:
+                    # otherwise, built a generic sequence with any as parameters
+                    from boa3.model.type.type import Type
+                    values_type = [Type.sequence]
         return values_type
 
     @classmethod
@@ -84,3 +99,6 @@ class SequenceType(IType, ABC):
         :rtype: IType or None
         """
         return cls(values_type=[value_type])  # get list of different types in the tuple
+
+    def __hash__(self):
+        return hash(self.identifier)

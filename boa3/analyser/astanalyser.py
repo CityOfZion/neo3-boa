@@ -31,12 +31,16 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         return len(self.errors) > 0
 
     def _log_error(self, error: CompilerError):
-        self.errors.append(error)
-        logging.error(error)
+        if not any(err.message == error.message for err in self.errors):
+            # don't include duplicated errors
+            self.errors.append(error)
+            logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
-        self.warnings.append(warning)
-        logging.warning(warning)
+        if not any(warn.message == warning.message for warn in self.errors):
+            # don't include duplicated warnings
+            self.warnings.append(warning)
+            logging.warning(warning)
 
     def get_type(self, value: Any) -> IType:
         """

@@ -43,4 +43,4 @@ class ListType(SequenceType):
         return self.value_type == other.value_type
 
     def __hash__(self):
-        return hash(self.identifier + self.value_type.identifier)
+        return hash(self.identifier)
