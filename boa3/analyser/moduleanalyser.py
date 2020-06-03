@@ -90,6 +90,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     var_type_id = var_type_id.identifier
                     var_type = self.symbols[var_type_id]
 
+            # when setting a None value to a variable, set the variable as any type
+            if var_type is Type.none:
+                var_type = Type.any
+
             if isinstance(var_type, IType) or var_type is None:
                 # if type is None, the variable type depends on the type of a expression
                 if isinstance(var_type, SequenceType):
@@ -144,11 +148,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         fun_args = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
+
+        if fun_rtype_symbol is None:
+            # it is a function with None return: Main(a: int) -> None:
+            raise NotImplementedError
+
         if isinstance(fun_rtype_symbol, str):
             symbol = self.get_symbol(function.returns.id.lower())
             fun_rtype_symbol = self.get_type(symbol)
-        fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
 
+        fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
         fun_return: IType = self.get_type(fun_rtype_symbol)
         method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
 

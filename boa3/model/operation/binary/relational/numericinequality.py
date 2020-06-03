@@ -37,5 +37,5 @@ class NumericInequality(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.NUMNOTEQUAL
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.NUMNOTEQUAL]

@@ -309,6 +309,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     type_id=symbol_type.identifier,
                     operation_id=Operator.Subscript)
             )
+            return symbol_type
         # the sequence can't use the given type as index
         elif not symbol_type.is_valid_key(index_type):
             self._log_error(
@@ -498,7 +499,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             bin_op.op = operation
             return operation.result
 
-    def validate_binary_operation(self, node: ast.AST, left_op: ast.AST, right_op: ast.AST) -> Optional[BinaryOperation]:
+    def validate_binary_operation(self, node: ast.AST, left_op: ast.AST, right_op: ast.AST) -> Optional[IOperation]:
         """
         Validates a ast node that represents a binary operation
 
@@ -521,7 +522,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         try:
-            operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
+            operation: IOperation = self.get_bin_op(operator, r_operand, l_operand)
             if operation is None:
                 self._log_error(
                     CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
@@ -540,7 +541,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # raises the exception with the line/col info
             self._log_error(raised_error)
 
-    def get_bin_op(self, operator: Operator, right: Any, left: Any) -> BinaryOperation:
+    def get_bin_op(self, operator: Operator, right: Any, left: Any) -> IOperation:
         """
         Returns the binary operation specified by the operator and the types of the operands
 
@@ -555,7 +556,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         r_type: IType = self.get_type(right)
 
         actual_types = (l_type.identifier, r_type.identifier)
-        operation: BinaryOperation = BinaryOp.validate_type(operator, l_type, r_type)
+        operation: IOperation = BinaryOp.validate_type(operator, l_type, r_type)
 
         if operation is not None:
             return operation
@@ -659,7 +660,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         CompilerError.UnresolvedReference(line, col, type(op).__name__)
                     )
 
-                operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
+                operation: IOperation = self.get_bin_op(operator, r_operand, l_operand)
                 if operation is None:
                     self._log_error(
                         CompilerError.NotSupportedOperation(line, col, operator)
@@ -698,7 +699,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         col_offset: int = bool_op.col_offset
         try:
             return_type: IType = None
-            bool_operation: BinaryOperation = None
+            bool_operation: IOperation = None
             operator: Operator = self.get_operator(bool_op.op)
 
             if not isinstance(operator, Operator):
@@ -711,7 +712,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             for index, operand in enumerate(bool_op.values[1:]):
                 r_operand = self.visit(operand)
 
-                operation: BinaryOperation = self.get_bin_op(operator, r_operand, l_operand)
+                operation: IOperation = self.get_bin_op(operator, r_operand, l_operand)
                 if operation is None:
                     self._log_error(
                         CompilerError.NotSupportedOperation(lineno, col_offset, operator)

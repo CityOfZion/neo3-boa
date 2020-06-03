@@ -37,5 +37,5 @@ class GreaterThan(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.GT
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.GT]

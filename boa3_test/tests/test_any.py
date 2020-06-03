@@ -235,10 +235,10 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC1
-            + Opcode.PUSHDATA1  # any_tuple = (True, 1, 'ok')
+            + Opcode.PUSHDATA1  # any_tuple = (None, 1, 'ok')
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
-            + Opcode.PUSH1
+            + Opcode.PUSHNULL
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC2

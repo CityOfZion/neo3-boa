@@ -37,5 +37,5 @@ class BooleanOr(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.BOOLOR
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.BOOLOR]

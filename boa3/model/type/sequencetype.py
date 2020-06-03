@@ -73,6 +73,10 @@ class SequenceType(IType, ABC):
             values_type = [values_type]
 
         if len(values_type) > 1:
+            from boa3.model.type.type import Type
+            if any(t is Type.any or t is Type.none for t in values_type):
+                return [Type.any]
+
             # verifies if all the types are the same sequence with different arguments
             if all(isinstance(x, SequenceType) for x in values_type):
                 sequence_type = type(values_type[0])  # first sequence type
@@ -85,11 +89,9 @@ class SequenceType(IType, ABC):
                 elif all(isinstance(x.value_type, value_type) for x in values_type):
                     # the sequences doesn't have the same type but the value type is the same
                     # for example: Tuple[int] and List[int]
-                    from boa3.model.type.type import Type
                     values_type = [Type.sequence.build_sequence(values_type[0].value_type)]
                 else:
                     # otherwise, built a generic sequence with any as parameters
-                    from boa3.model.type.type import Type
                     values_type = [Type.sequence]
         return values_type
 

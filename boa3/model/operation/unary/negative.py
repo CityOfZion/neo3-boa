@@ -34,5 +34,5 @@ class Negative(UnaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.NEGATE
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.NEGATE]

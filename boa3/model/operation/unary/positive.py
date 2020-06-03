@@ -34,6 +34,6 @@ class Positive(UnaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
+    def opcode(self) -> List[Opcode]:
         # it is the identity function, so there is no need of including another opcode
-        return None
+        return []

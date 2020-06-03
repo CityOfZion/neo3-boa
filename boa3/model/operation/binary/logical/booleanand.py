@@ -37,5 +37,5 @@ class BooleanAnd(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.BOOLAND
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.BOOLAND]
