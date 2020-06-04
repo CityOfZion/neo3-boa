@@ -15,7 +15,7 @@ class ObjectEquality(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str]
+    _valid_types: List[IType] = [Type.str, Type.int, Type.bool]
 
     def __init__(self, left: IType = Type.str, right: IType = Type.str):
         self.operator: Operator = Operator.Eq
@@ -27,11 +27,9 @@ class ObjectEquality(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
-        # TODO: change the logic of the validation when implement other types
-        return left == right and left in self._valid_types
+        return left in self._valid_types and right in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
-        # TODO: change the logic of the return type when implement other types
         if self.validate_type(left, right):
             return Type.bool
         else:
@@ -40,8 +38,3 @@ class ObjectEquality(BinaryOperation):
     @property
     def opcode(self) -> Optional[Opcode]:
         return Opcode.EQUAL
-
-    @property
-    def is_supported(self) -> bool:
-        # TODO: change when non-numeric equal is supported
-        return False

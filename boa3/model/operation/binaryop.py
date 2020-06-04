@@ -20,6 +20,7 @@ from boa3.model.operation.binary.relational.notidentity import NotIdentity
 from boa3.model.operation.binary.relational.numericequality import NumericEquality
 from boa3.model.operation.binary.relational.numericinequality import NumericInequality
 from boa3.model.operation.binary.relational.objectequality import ObjectEquality
+from boa3.model.operation.binary.relational.objectinequality import ObjectInequality
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType
 
@@ -45,6 +46,7 @@ class BinaryOp:
     Is = Identity()
     IsNot = NotIdentity()
     Eq = ObjectEquality()
+    NotEq = ObjectInequality()
 
     # Logical operations
     And = BooleanAnd()
