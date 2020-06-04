@@ -1,2 +1,2 @@
-def Main(operation: str, args: Tuple[int]) -> int:
+def Main(operation: str, args: Tuple[Any]) -> Any:
     return args[0]

@@ -147,10 +147,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param function:
         """
         fun_args = self.visit(function.args)
-        fun_rtype_symbol = self.get_type(function.returns)
+        fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
+        if isinstance(fun_rtype_symbol, str):
+            symbol = self.get_symbol(function.returns.id.lower())
+            fun_rtype_symbol = self.get_type(symbol)
         fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
 
-        fun_return: IType = fun_rtype_symbol
+        fun_return: IType = self.get_type(fun_rtype_symbol)
         method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
 
         if function.name in ['main', 'Main']:
@@ -195,6 +198,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_id = arg.arg
         var_type: IType = self.get_type(arg.annotation)
 
+        if var_type is Type.none and isinstance(arg.annotation, ast.Name):
+            var_symbol: ISymbol = self.get_symbol(arg.annotation.id.lower())
+            var_type = self.get_type(var_symbol)
+
         return var_id, Variable(var_type)
 
     def visit_Return(self, ret: ast.Return):
@@ -224,6 +231,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         target_type = self.visit(target)  # Type:str or IType
         if isinstance(target_type, str) and not isinstance(target, ast.Str):
             symbol = self.get_symbol(target_type)
+            if symbol is None:
+                symbol = self.get_symbol(target_type.lower())
             if symbol is None:
                 # the symbol doesn't exists
                 self._log_error(

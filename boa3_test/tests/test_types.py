@@ -82,7 +82,7 @@ class TestTypes(BoaTest):
     def test_any_tuple_constant(self):
         input = (1, '2', False)
         node = ast.parse(str(input)).body[0].value
-        expected_output = TupleType(Type.none)  # TODO: change to any when implemented
+        expected_output = TupleType(Type.any)
 
         typeanalyser = TypeAnalyser(node, {})
         output = typeanalyser.get_type(input)
@@ -122,7 +122,7 @@ class TestTypes(BoaTest):
     def test_any_list_constant(self):
         input = [1, '2', False]
         node = ast.parse(str(input)).body[0].value
-        expected_output = ListType(Type.none)  # TODO: change to any when implemented
+        expected_output = ListType(Type.any)
 
         typeanalyser = TypeAnalyser(node, {})
         output = typeanalyser.get_type(input)

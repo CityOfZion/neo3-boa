@@ -3,7 +3,6 @@ from typing import Optional, Union, Sequence, List
 
 from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.exception.CompilerError import CompilerError as Error
 from boa3.model.symbol import ISymbol
 
 

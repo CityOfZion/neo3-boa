@@ -10,7 +10,7 @@ class GenericSequenceType(SequenceType):
     An class used to represent a generic Python sequence type
     """
 
-    def __init__(self, values_type: List[IType]):
+    def __init__(self, values_type: List[IType] = None):
         identifier: str = 'sequence'
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
@@ -38,4 +38,4 @@ class GenericSequenceType(SequenceType):
         return isinstance(value, SequenceType)
 
     def __hash__(self):
-        return hash(self.identifier + self.value_type.identifier)
+        return hash(self.identifier)

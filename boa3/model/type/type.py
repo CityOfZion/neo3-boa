@@ -1,5 +1,6 @@
 from typing import Dict, Any
 
+from boa3.model.type.anytype import anyType
 from boa3.model.type.booltype import BoolType
 from boa3.model.type.genericsequencetype import GenericSequenceType
 from boa3.model.type.inttype import IntType
@@ -42,8 +43,9 @@ class Type:
     bool = BoolType()
     str = StrType()
     none = NoneType()
-    tuple = TupleType(none)
-    list = ListType(none)
+    tuple = TupleType()
+    list = ListType()
 
     # Generic types
-    sequence = GenericSequenceType(none)
+    sequence = GenericSequenceType()
+    any = anyType
