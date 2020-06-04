@@ -198,13 +198,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_error(
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
-
         # multiple assignments with tuples
         elif isinstance(assign.targets[0], ast.Tuple):
             self._log_error(
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
-
         else:
             self.validate_type_variable_assign(assign.targets[0], assign.value)
 
