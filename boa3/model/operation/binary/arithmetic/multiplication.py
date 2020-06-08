@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
@@ -38,5 +38,5 @@ class Multiplication(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> List[Opcode]:
-        return [Opcode.MUL]
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return [(Opcode.MUL, b'')]

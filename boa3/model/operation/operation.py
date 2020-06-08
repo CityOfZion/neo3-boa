@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Tuple
 
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType
@@ -19,13 +19,25 @@ class IOperation(ABC):
         self.result: IType = result_type
 
     @property
-    def opcode(self) -> List[Opcode]:
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
         """
-        Gets the operation sequence of opcodes in Neo Vm
+        Gets the operation sequence of opcodes with in Neo Vm
 
         :return: the opcode if exists. Empty list otherwise.
         """
         return []
+
+    @property
+    def bytecode(self) -> bytes:
+        """
+        Gets the operation bytecode
+
+        :return: the bytecode if exists. Empty bytes otherwise.
+        """
+        str_mult_bytes = bytearray()
+        for opcode, data in self.opcode:
+            str_mult_bytes += opcode + data
+        return bytes(str_mult_bytes)
 
     @property
     @abstractmethod

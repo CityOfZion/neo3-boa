@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
@@ -43,5 +43,5 @@ class NoneIdentity(UnaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> List[Opcode]:
-        return [Opcode.ISNULL]
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return [(Opcode.ISNULL, b'')]
