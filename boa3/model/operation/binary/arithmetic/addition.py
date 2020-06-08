@@ -38,5 +38,5 @@ class Addition(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.ADD
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.ADD]

@@ -36,8 +36,8 @@ class Concat(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.CAT
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.CAT]
 
     @property
     def is_supported(self) -> bool:

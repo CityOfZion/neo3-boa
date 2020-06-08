@@ -6,6 +6,7 @@ from boa3.model.builtin.builtin import Builtin
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
+from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
@@ -54,16 +55,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param function: the python ast function definition node
         """
         method = self.symbols[function.name]
-        if function.returns is not None:
-            fun_rtype_id: str = self.visit(function.returns)
-        else:
-            fun_rtype_id: str = Type.none.identifier
-
-        symbol: ISymbol = self.generator.get_symbol(fun_rtype_id)
-        if isinstance(method, Method) and isinstance(symbol, IType):
-            fun_return: IType = symbol
-            method.return_type = fun_return
-
+        if isinstance(method, Method):
             self.generator.convert_begin_method(method)
 
             for stmt in function.body:
@@ -217,6 +209,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.generator.convert_operation(BinaryOp.Sub)
                 self.generator.convert_get_array_ending()
 
+    def __convert_unary_operation(self, operand, op):
+        self.visit_to_generate(operand)
+        self.generator.convert_operation(op)
+
+    def __convert_binary_operation(self, left, right, op):
+        self.visit_to_generate(left)
+        self.visit_to_generate(right)
+        self.generator.convert_operation(op)
+
     def visit_BinOp(self, bin_op: ast.BinOp):
         """
         Visitor of a binary operation node
@@ -224,9 +225,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param bin_op: the python ast binary operation node
         """
         if isinstance(bin_op.op, BinaryOperation):
-            self.visit_to_generate(bin_op.left)
-            self.visit_to_generate(bin_op.right)
-            self.generator.convert_operation(bin_op.op)
+            self.__convert_binary_operation(bin_op.left, bin_op.right, bin_op.op)
 
     def visit_UnaryOp(self, un_op: ast.UnaryOp):
         """
@@ -235,8 +234,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param un_op: the python ast binary operation node
         """
         if isinstance(un_op.op, UnaryOperation):
-            self.visit_to_generate(un_op.operand)
-            self.generator.convert_operation(un_op.op)
+            self.__convert_unary_operation(un_op.operand, un_op.op)
 
     def visit_Compare(self, compare: ast.Compare):
         """
@@ -248,10 +246,14 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         left = compare.left
         for index, op in enumerate(compare.ops):
             right = compare.comparators[index]
-            if isinstance(op, BinaryOperation):
-                self.visit_to_generate(left)
-                self.visit_to_generate(right)
-                self.generator.convert_operation(op)
+            if isinstance(op, IOperation):
+                if isinstance(op, BinaryOperation):
+                    self.__convert_binary_operation(left, right, op)
+                else:
+                    operand = left
+                    if isinstance(operand, ast.NameConstant) and operand.value is None:
+                        operand = right
+                    self.__convert_unary_operation(operand, op)
                 # if it's more than two comparators, must include AND between the operations
                 if not converted:
                     converted = True

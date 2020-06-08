@@ -37,5 +37,5 @@ class LessThanOrEqual(BinaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.LE
+    def opcode(self) -> List[Opcode]:
+        return [Opcode.LE]

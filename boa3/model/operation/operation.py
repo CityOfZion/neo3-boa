@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
 
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType
@@ -19,13 +19,13 @@ class IOperation(ABC):
         self.result: IType = result_type
 
     @property
-    def opcode(self) -> Optional[Opcode]:
+    def opcode(self) -> List[Opcode]:
         """
-        Gets the operation opcode in Neo Vm
+        Gets the operation sequence of opcodes in Neo Vm
 
-        :return: the opcode if exists. None otherwise.
+        :return: the opcode if exists. Empty list otherwise.
         """
-        return None
+        return []
 
     @property
     @abstractmethod
@@ -36,6 +36,15 @@ class IOperation(ABC):
         :return: Number of operands
         """
         pass
+
+    @property
+    def op_on_stack(self) -> int:
+        """
+        Gets the number of arguments that must be on stack before the opcode is called.
+
+        :return: the number of arguments. Same from `number_of_operands` by default.
+        """
+        return self.number_of_operands
 
     @abstractmethod
     def validate_type(self, *types: IType) -> bool:
@@ -68,3 +77,15 @@ class IOperation(ABC):
         :return: True if it is supported. False otherwise.
         """
         return True
+
+    @classmethod
+    @abstractmethod
+    def build(cls, *operands: IType):
+        """
+        Creates an operation with the given operands types
+
+        :param operands: operands types
+        :return: The built operation if the operands are valid. None otherwise
+        :rtype: IOperation or None
+        """
+        return None

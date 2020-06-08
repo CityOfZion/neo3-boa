@@ -21,7 +21,10 @@ from boa3.model.operation.binary.relational.numericequality import NumericEquali
 from boa3.model.operation.binary.relational.numericinequality import NumericInequality
 from boa3.model.operation.binary.relational.objectequality import ObjectEquality
 from boa3.model.operation.binary.relational.objectinequality import ObjectInequality
+from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
+from boa3.model.operation.unary.noneidentity import NoneIdentity
+from boa3.model.operation.unary.nonenotidentity import NoneNotIdentity
 from boa3.model.type.type import IType
 
 
@@ -43,6 +46,8 @@ class BinaryOp:
     LtE = LessThanOrEqual()
     Gt = GreaterThan()
     GtE = GreaterThanOrEqual()
+    IsNone = NoneIdentity()
+    IsNotNone = NoneNotIdentity()
     Is = Identity()
     IsNot = NotIdentity()
     Eq = ObjectEquality()
@@ -64,8 +69,13 @@ class BinaryOp:
         :rtype: BinaryOperation or None
         """
         for id, op in vars(cls).items():
-            if isinstance(op, BinaryOperation) and op.is_valid(operator, left, right):
-                return op.build(left, right)
+            if isinstance(op, IOperation) and op.is_valid(operator, left, right):
+                if isinstance(op, BinaryOperation):
+                    return op.build(left, right)
+                else:
+                    from boa3.model.type.type import Type
+                    operand = right if left is Type.none else left
+                    return op.build(operand)
 
     @classmethod
     def get_operation_by_operator(cls, operator: Operator) -> Optional[BinaryOperation]:

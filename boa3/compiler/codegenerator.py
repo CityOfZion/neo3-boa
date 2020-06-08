@@ -282,6 +282,8 @@ class CodeGenerator:
             self.convert_integer_literal(value)
         elif isinstance(value, str):
             self.convert_string_literal(value)
+        elif value is None:
+            self.insert_none()
         else:
             # TODO: convert other python literals as they are implemented
             raise NotImplementedError
@@ -344,6 +346,13 @@ class CodeGenerator:
         data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
         self.__insert1(op_info, data)
         self._stack.append(Type.none)  # TODO: change to bytearray when implemented
+
+    def insert_none(self):
+        """
+        Converts None literal
+        """
+        self.__insert1(OpcodeInfo.PUSHNULL)
+        self._stack.append(Type.none)
 
     def convert_new_empty_array(self, length: int, array_type: IType):
         """
@@ -560,13 +569,11 @@ class CodeGenerator:
 
         :param operation: the operation that will be converted
         """
-        opcode: Opcode = operation.opcode
-
-        if opcode is not None:
+        for opcode in operation.opcode:
             op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
 
-        for op in range(0, operation.number_of_operands):
+        for op in range(0, operation.op_on_stack):
             self._stack.pop()
         self._stack.append(operation.result)
 
