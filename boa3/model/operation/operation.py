@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List
+from typing import List
 
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType

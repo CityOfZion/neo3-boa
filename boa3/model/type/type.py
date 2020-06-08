@@ -1,14 +1,15 @@
 from typing import Dict, Any
 
 from boa3.model.type.anytype import anyType
-from boa3.model.type.booltype import BoolType
-from boa3.model.type.genericsequencetype import GenericSequenceType
-from boa3.model.type.inttype import IntType
 from boa3.model.type.itype import IType
-from boa3.model.type.listtype import ListType
-from boa3.model.type.nonetype import NoneType
-from boa3.model.type.strtype import StrType
-from boa3.model.type.tupletype import TupleType
+from boa3.model.type.primitive.booltype import BoolType
+from boa3.model.type.primitive.inttype import IntType
+from boa3.model.type.primitive.nonetype import NoneType
+from boa3.model.type.primitive.strtype import StrType
+from boa3.model.type.sequence.genericsequencetype import GenericSequenceType
+from boa3.model.type.sequence.mutable.genericmutablesequencetype import GenericMutableSequenceType
+from boa3.model.type.sequence.mutable.listtype import ListType
+from boa3.model.type.sequence.tupletype import TupleType
 
 
 class Type:
@@ -48,4 +49,5 @@ class Type:
 
     # Generic types
     sequence = GenericSequenceType()
+    mutableSequence = GenericMutableSequenceType()
     any = anyType

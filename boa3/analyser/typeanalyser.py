@@ -1,9 +1,9 @@
 import ast
-from typing import List, Dict, Optional, Any, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
-from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -13,7 +13,7 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
-from boa3.model.type.sequencetype import SequenceType
+from boa3.model.type.sequence.sequencetype import SequenceType
 from boa3.model.type.type import Type, IType
 from boa3.model.variable import Variable
 
@@ -765,36 +765,60 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(call.func, ast.Name):
             function_id: str = call.func.id
             function = self.get_symbol(function_id)
+        else:
+            arg0, function, function_id = self.visit(call.func)
+            arg0_identifier = self.visit(arg0)
+            if isinstance(arg0_identifier, ast.Name):
+                arg0_identifier = arg0_identifier.id
 
-            if not isinstance(function, Method):
-                # the symbol doesn't exists or is not a function
+            if function is not None and not isinstance(self.get_symbol(arg0_identifier), IType):
+                call.args.insert(0, arg0)
+            if len(call.args) > 0 and isinstance(function, IBuiltinMethod) and function.has_self_argument:
+                self_type: IType = self.get_type(call.args[0])
+                function = function.build(self_type)
+
+        if not isinstance(function, Method):
+            # the symbol doesn't exists or is not a function
+            self._log_error(
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, function_id)
+            )
+        else:
+            # TODO: change when kwargs is implemented
+            if len(call.args) > len(function.args):
+                unexpected_arg = call.args[len(function.args)]
                 self._log_error(
-                    CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, function_id)
+                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+                )
+            elif len(call.args) < len(function.args):
+                missed_arg = list(function.args)[len(call.args)]
+                self._log_error(
+                    CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
             else:
-                # TODO: change when kwargs is implemented
-                if len(call.args) > len(function.args):
-                    unexpected_arg = call.args[len(function.args)]
-                    self._log_error(
-                        CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
-                    )
-                elif len(call.args) < len(function.args):
-                    missed_arg = list(function.args)[len(call.args)]
-                    self._log_error(
-                        CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
-                    )
-                else:
-                    for index, (arg_id, arg_value) in enumerate(function.args.items()):
-                        param = call.args[index]
-                        param_type = self.get_type(param)
-                        if not arg_value.type.is_type_of(param_type):
-                            self._log_error(
-                                CompilerError.MismatchedTypes(
-                                    param.lineno, param.col_offset,
-                                    arg_value.type.identifier,
-                                    param_type.identifier
-                                ))
+                for index, (arg_id, arg_value) in enumerate(function.args.items()):
+                    param = call.args[index]
+                    param_type = self.get_type(param)
+                    if not arg_value.type.is_type_of(param_type):
+                        self._log_error(
+                            CompilerError.MismatchedTypes(
+                                param.lineno, param.col_offset,
+                                arg_value.type.identifier,
+                                param_type.identifier
+                            ))
         return self.get_type(function)
+
+    def visit_Attribute(self, attribute: ast.Attribute) -> Tuple[IType, Optional[ISymbol], str]:
+        """
+        Gets the attribute inside the ast node
+
+        :param attribute: the python ast attribute node
+        :return: returns the type of the value, the attribute symbol and its id if the attribute exists.
+                 Otherwise, returns None
+        """
+        value_type: IType = self.get_type(attribute.value)
+        attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
+
+        return attribute.value, attr_symbol, attribute.attr
 
     def visit_Num(self, num: ast.Num) -> int:
         """

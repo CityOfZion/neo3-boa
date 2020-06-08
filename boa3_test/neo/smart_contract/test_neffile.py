@@ -3,11 +3,17 @@ from unittest import TestCase
 
 from boa3.neo import to_script_hash
 from boa3.neo.smart_contract.neffile import NefFile
+from boa3.neo.vm.type.Integer import Integer
 
 
 class TestNefFile(TestCase):
     test_version = '1.2.3'
-    test_version_bytes = b'\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00'
+    test_version_bytes = (
+        Integer(1).to_byte_array(min_length=4)
+        + Integer(2).to_byte_array(min_length=4)
+        + Integer(3).to_byte_array(min_length=4)
+        + Integer(0).to_byte_array(min_length=4)
+    )
     test_script = b'\x01\x02\x03'
 
     def create_test_nef(self, test_script):

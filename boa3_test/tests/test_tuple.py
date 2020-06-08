@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import UnresolvedOperation, MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, UnresolvedOperation
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Any, Iterable
 
 from boa3.model.type.itype import IType
+from boa3.neo.vm.type.AbiType import AbiType
 
 
 class SequenceType(IType, ABC):
@@ -36,6 +37,10 @@ class SequenceType(IType, ABC):
         types: List[IType] = [val if isinstance(val, IType) else Type.get_type(val) for val in value]
         types = list(set(types))  # get list of different types in the tuple
         return cls.filter_types(types)
+
+    @property
+    def abi_type(self) -> AbiType:
+        return AbiType.Array  # TODO: change when 'bytes' is implemented
 
     @abstractmethod
     def is_valid_key(self, value_type: IType) -> bool:
@@ -105,6 +110,3 @@ class SequenceType(IType, ABC):
         :rtype: IType or None
         """
         return cls(values_type=[value_type])  # get list of different types in the tuple
-
-    def __hash__(self):
-        return hash(self.identifier)

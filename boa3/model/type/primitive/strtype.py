@@ -1,7 +1,7 @@
 from typing import Any
 
 from boa3.model.type.itype import IType
-from boa3.model.type.sequencetype import SequenceType
+from boa3.model.type.sequence.sequencetype import SequenceType
 from boa3.neo.vm.type.AbiType import AbiType
 
 

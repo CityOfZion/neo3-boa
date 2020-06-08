@@ -1,8 +1,8 @@
 import ast
 
 from boa3.analyser.typeanalyser import TypeAnalyser
-from boa3.model.type.listtype import ListType
-from boa3.model.type.tupletype import TupleType
+from boa3.model.type.sequence.mutable.listtype import ListType
+from boa3.model.type.sequence.tupletype import TupleType
 from boa3.model.type.type import Type
 from boa3_test.tests.boa_test import BoaTest
 

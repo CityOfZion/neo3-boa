@@ -1,23 +1,18 @@
 from typing import Any, List
 
 from boa3.model.type.itype import IType
-from boa3.model.type.sequencetype import SequenceType
-from boa3.neo.vm.type.AbiType import AbiType
+from boa3.model.type.sequence.sequencetype import SequenceType
 
 
-class ListType(SequenceType):
+class TupleType(SequenceType):
     """
-    A class used to represent Python list type
+    A class used to represent Python tuple type
     """
 
     def __init__(self, values_type: List[IType] = None):
-        identifier = 'list'
+        identifier = 'tuple'
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
-
-    @property
-    def abi_type(self) -> AbiType:
-        return AbiType.Array  # TODO: change when 'bytes' is implemented
 
     def is_valid_key(self, value_type: IType) -> bool:
         return value_type == self.valid_key
@@ -35,7 +30,7 @@ class ListType(SequenceType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return type(value) in [list, ListType]
+        return type(value) in [tuple, TupleType]
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):

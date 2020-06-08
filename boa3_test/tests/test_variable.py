@@ -3,7 +3,7 @@ from typing import Dict
 
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
-from boa3.exception.CompilerError import NotSupportedOperation, UnresolvedReference, MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation, UnresolvedReference
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable

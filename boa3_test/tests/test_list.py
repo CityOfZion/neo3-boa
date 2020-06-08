@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import UnresolvedOperation, MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, UnresolvedOperation
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -191,4 +191,81 @@ class TestList(BoaTest):
 
     def test_list_slicing_omitted(self):
         path = '%s/boa3_test/example/list_test/ListSlicing.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_list_append_int_value(self):
+        path = '%s/boa3_test/example/list_test/AppendIntValue.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.append(4)
+            + Opcode.PUSH4
+            + Opcode.APPEND
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_append_any_value(self):
+        four = String('4').to_bytes(min_length=1)
+        path = '%s/boa3_test/example/list_test/AppendAnyValue.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.append(4)
+            + Opcode.PUSHDATA1
+            + Integer(len(four)).to_byte_array()
+            + four
+            + Opcode.APPEND
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_append_mismatched_type(self):
+        path = '%s/boa3_test/example/list_test/MismatchedTypeAppendValue.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_list_append_with_builtin(self):
+        path = '%s/boa3_test/example/list_test/AppendIntWithBuiltin.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # list.append(a, 4)
+            + Opcode.PUSH4
+            + Opcode.APPEND
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_append_with_builtin_mismatched_type(self):
+        path = '%s/boa3_test/example/list_test/MismatchedTypesAppendWithBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

@@ -1,8 +1,7 @@
 from typing import List, Any
 
 from boa3.model.type.itype import IType
-from boa3.model.type.sequencetype import SequenceType
-from boa3.neo.vm.type.AbiType import AbiType
+from boa3.model.type.sequence.sequencetype import SequenceType
 
 
 class GenericSequenceType(SequenceType):
@@ -14,10 +13,6 @@ class GenericSequenceType(SequenceType):
         identifier: str = 'sequence'
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
-
-    @property
-    def abi_type(self) -> AbiType:
-        return AbiType.Array  # TODO: change when 'bytes' is implemented
 
     def is_valid_key(self, value_type: IType) -> bool:
         return value_type == self.valid_key

@@ -1,7 +1,7 @@
 import ast
 import logging
-from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from abc import ABC
+from typing import Any, Dict, List, Optional
 
 from boa3.exception.CompilerError import CompilerError
 from boa3.exception.CompilerWarning import CompilerWarning
