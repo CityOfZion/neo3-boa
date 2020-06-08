@@ -96,7 +96,7 @@ class UnresolvedOperation(CompilerError):
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "Unresolved reference '%s' does not have a definition of '%s' operator" % (self.type_id, self.operation_id)
+        return "Unresolved reference: '%s' does not have a definition of '%s' operator" % (self.type_id, self.operation_id)
 
 
 class MismatchedTypes(CompilerError):

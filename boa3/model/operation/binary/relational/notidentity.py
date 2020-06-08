@@ -21,7 +21,7 @@ class NotIdentity(BinaryOperation):
         super().__init__(left, right)
 
     def validate_type(self, *types: IType) -> bool:
-        if len(types) != self._get_number_of_operands:
+        if len(types) != self.number_of_operands:
             return False
         left: IType = types[0]
         right: IType = types[1]

@@ -114,12 +114,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif symbol_id in self.__current_module.symbols:
             # the symbol exists in the module scope
             return self.__current_module.symbols[symbol_id]
-        elif symbol_id in self.symbols:
-            # the symbol exists in the global scope
-            return self.symbols[symbol_id]
         else:
-            # the symbol may be a built in. If not, returns None
-            return Builtin.get_symbol(symbol_id)
+            return super().get_symbol(symbol_id)
 
     def visit_Module(self, module: ast.Module):
         """

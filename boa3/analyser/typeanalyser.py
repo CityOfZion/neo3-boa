@@ -95,12 +95,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif symbol_id in self.modules:
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
-        elif symbol_id in self.symbols:
-            # the symbol exists in the global scope
-            return self.symbols[symbol_id]
         else:
-            # the symbol may be a built in. If not, returns None
-            return Builtin.get_symbol(symbol_id)
+            return super().get_symbol(symbol_id)
 
     def visit_Module(self, module: ast.Module):
         """
@@ -276,8 +272,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param subscript: the python ast subscript node
         :return: the type of the accessed value if it is valid. Type.none otherwise.
         """
+        if isinstance(subscript.slice, ast.Index):
+            return self.validate_get_or_set(subscript, subscript.slice)
+        elif isinstance(subscript.slice, ast.Slice):
+            return self.validate_slice(subscript, subscript.slice)
+        return Type.none
+
+    def validate_get_or_set(self, subscript: ast.Subscript, index_node: ast.Index) -> IType:
+        """
+        Verifies if the subscribed value is a sequence and if the index is valid to this sequence
+
+        :param subscript: the python ast subscript node
+        :param index_node: the subscript index
+        :return: the type of the accessed value if it is valid. Type.none otherwise.
+        """
         value = self.visit(subscript.value)
-        index = self.visit(subscript.slice)
+        index = self.visit(index_node)
 
         if isinstance(value, ast.Name):
             value = self.get_symbol(value.id)
@@ -307,8 +317,82 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     actual_type_id=index_type.identifier,
                     expected_type_id=symbol_type.valid_key.identifier)
             )
+        # it is setting a value in a sequence that doesn't allow reassign values
+        elif isinstance(subscript.ctx, ast.Store) and not symbol_type.can_reassign_values:
+            self._log_error(
+                CompilerError.UnresolvedOperation(
+                    subscript.lineno, subscript.col_offset,
+                    type_id=symbol_type.identifier,
+                    operation_id=Operator.Subscript)
+            )
         else:
             return symbol_type.value_type
+        return Type.none
+
+    def validate_slice(self, subscript: ast.Subscript, slice_node: ast.Slice) -> IType:
+        """
+        Verifies if the subscribed value is a sequence and if the slice is valid to this sequence
+
+        :param subscript: the python ast subscript node
+        :param slice_node: the subscript slice
+        :return: the type of the accessed value if it is valid. Type.none otherwise.
+        """
+        value = self.visit(subscript.value)
+        lower, upper, step = (self.get_type(value) for value in self.visit(slice_node))
+
+        if step is not Type.none:
+            # TODO: remove when slices with stride are implemented
+            raise NotImplementedError
+        # is not allowed to store into a slice
+        if isinstance(subscript.ctx, ast.Store):
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    subscript.lineno, subscript.col_offset,
+                    symbol_id=Operator.Subscript
+                )
+            )
+
+        symbol_type: IType = self.get_type(value)
+        # only sequence types can be subscribed
+        if not isinstance(symbol_type, SequenceType):
+            self._log_error(
+                CompilerError.UnresolvedOperation(
+                    subscript.lineno, subscript.col_offset,
+                    type_id=symbol_type.identifier,
+                    operation_id=Operator.Subscript)
+            )
+            return Type.none
+
+        lower = lower if lower is not Type.none else symbol_type.valid_key
+        upper = upper if upper is not Type.none else symbol_type.valid_key
+
+        # TODO: remove when slices of other sequence types are implemented
+        if symbol_type is not Type.str:
+            expected: IType = symbol_type.valid_key
+            actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    subscript.lineno, subscript.col_offset,
+                    expected_type_id=expected.identifier,
+                    actual_type_id=[value.identifier for value in actual]
+                )
+            )
+        elif (
+            not symbol_type.is_valid_key(lower)
+            or not symbol_type.is_valid_key(upper)
+            or (step is not Type.none and not symbol_type.is_valid_key(step))
+        ):
+            actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    subscript.lineno, subscript.col_offset,
+                    expected_type_id=[symbol_type.valid_key.identifier for value in actual],
+                    actual_type_id=[value.identifier for value in actual]
+                )
+            )
+        else:
+            return symbol_type
+
         return Type.none
 
     def visit_While(self, while_node: ast.While):
@@ -556,7 +640,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     compare.lineno,
                     compare.col_offset,
                     len(compare.ops),
-                    len(compare.comparators) + 1    # num comparators + compare.left
+                    len(compare.comparators) + 1  # num comparators + compare.left
                 )
             )
 
@@ -778,6 +862,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         return self.visit(index.value)
+
+    def visit_Slice(self, slice_node: ast.Slice) -> Tuple[Any, Any, Any]:
+        """
+        Visitor of an slice node
+
+        :param slice_node:
+        :return: the object with the index value information
+        """
+        return slice_node.lower, slice_node.upper, slice_node.step
 
     def visit_Break(self, break_node: ast.Break):
         """

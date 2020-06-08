@@ -170,3 +170,7 @@ class TestTuple(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_tuple_slicing_omitted(self):
+        path = '%s/boa3_test/example/tuple_test/TupleSlicing.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
