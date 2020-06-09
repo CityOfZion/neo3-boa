@@ -3,4 +3,5 @@ def TestAdd(a: int, b: int) -> int:
 
 
 def Main(operation: str, args: Tuple[int]) -> int:
-    return TestAdd(1, 2)
+    if operation == 'TestAdd':
+        return TestAdd(1, 2)

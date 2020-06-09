@@ -18,6 +18,10 @@ class SequenceType(IType, ABC):
     def identifier(self) -> str:
         return '{0}[{1}]'.format(self._identifier, self.value_type.identifier)
 
+    @property
+    def default_value(self) -> Any:
+        return []
+
     def is_type_of(self, value: Any) -> bool:
         if self._is_type_of(value):
             if isinstance(value, SequenceType):

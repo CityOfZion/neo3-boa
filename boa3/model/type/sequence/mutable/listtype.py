@@ -14,6 +14,10 @@ class ListType(MutableSequenceType):
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
 
+    @property
+    def default_value(self) -> Any:
+        return list()
+
     def is_valid_key(self, value_type: IType) -> bool:
         return value_type == self.valid_key
 

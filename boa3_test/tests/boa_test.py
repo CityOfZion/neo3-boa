@@ -28,5 +28,9 @@ class BoaTest(TestCase):
                 # when an compiler error is logged this exception is raised.
                 pass
 
+        for logger in log.records:
+            import logging
+            logging.log(level=logger.levelno, msg=logger.msg)
+
         if len([exception for exception in log.records if isinstance(exception.msg, expected_logged_exception)]) <= 0:
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))

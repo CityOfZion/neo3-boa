@@ -14,6 +14,10 @@ class IntType(IType):
         super().__init__(identifier)
 
     @property
+    def default_value(self) -> Any:
+        return int()
+
+    @property
     def abi_type(self) -> AbiType:
         return AbiType.Integer
 
