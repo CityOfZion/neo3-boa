@@ -61,7 +61,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         ast.IsNot: Operator.IsNot,
         ast.And: Operator.And,
         ast.Or: Operator.Or,
-        ast.Not: Operator.Not
+        ast.Not: Operator.Not,
+        ast.BitAnd: Operator.BitAnd,
+        ast.BitOr: Operator.BitOr,
+        ast.BitXor: Operator.BitXor,
+        ast.Invert: Operator.BitNot,
+        ast.LShift: Operator.LeftShift,
+        ast.RShift: Operator.RightShift
     }
 
     @property
@@ -561,7 +567,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if operation is not None:
             return operation
         else:
-            expected_op: BinaryOperation = BinaryOp.get_operation_by_operator(operator)
+            expected_op: BinaryOperation = BinaryOp.get_operation_by_operator(operator, l_type)
             expected_types = (expected_op.left_type.identifier, expected_op.right_type.identifier)
             raise CompilerError.MismatchedTypes(0, 0, expected_types, actual_types)
 

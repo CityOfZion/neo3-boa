@@ -17,7 +17,7 @@ class BooleanAnd(BinaryOperation):
     """
     _valid_types: List[IType] = [Type.bool]
 
-    def __init__(self, left: IType = Type.int, right: IType = Type.int):
+    def __init__(self, left: IType = Type.bool, right: IType = None):
         self.operator: Operator = Operator.And
         super().__init__(left, right)
 

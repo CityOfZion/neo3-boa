@@ -2,6 +2,7 @@ from typing import Optional
 
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.booleannot import BooleanNot
+from boa3.model.operation.unary.logicnot import LogicNot
 from boa3.model.operation.unary.negative import Negative
 from boa3.model.operation.unary.positive import Positive
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
@@ -15,6 +16,7 @@ class UnaryOp:
 
     # Logical operations
     Not = BooleanNot()
+    BitNot = LogicNot()
 
     @classmethod
     def validate_type(cls, operator: Operator, operand: IType) -> Optional[UnaryOperation]:
