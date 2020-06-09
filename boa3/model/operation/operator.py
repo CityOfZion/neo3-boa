@@ -25,6 +25,12 @@ class Operator(str, Enum):
     And = 'and'
     Or = 'or'
     Not = 'not'
+    BitAnd = '&'
+    BitOr = '|'
+    BitNot = '~'
+    BitXor = '^'
+    LeftShift = '<<'
+    RightShift = '>>'
 
     # Other operators
     Subscript = '[]'

@@ -17,7 +17,7 @@ class Concat(BinaryOperation):
     """
     _valid_types: List[IType] = [Type.str]
 
-    def __init__(self, left: IType = Type.str, right: IType = Type.str):
+    def __init__(self, left: IType = Type.str, right: IType = None):
         self.operator: Operator = Operator.Plus
         super().__init__(left, right)
 

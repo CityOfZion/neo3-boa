@@ -17,7 +17,7 @@ class NumericEquality(BinaryOperation):
     """
     _valid_types: List[IType] = [Type.int, Type.bool]
 
-    def __init__(self, left: IType = Type.int, right: IType = Type.int):
+    def __init__(self, left: IType = Type.int, right: IType = None):
         self.operator: Operator = Operator.Eq
         super().__init__(left, right)
 
