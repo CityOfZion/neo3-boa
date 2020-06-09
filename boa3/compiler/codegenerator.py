@@ -8,8 +8,7 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
-from boa3.model.type.itype import IType
-from boa3.model.type.type import Type
+from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -179,13 +178,19 @@ class CodeGenerator:
         """
         Converts the end of the method
         """
-        self.__insert1(OpcodeInfo.RET)
-
+        if self.last_code.opcode is not Opcode.RET:
+            self.insert_return()
         if self.__current_method.is_main_method:
             self.__move_entry_point_to_beginning()
         self.__current_method = None
 
         self._stack.clear()
+
+    def insert_return(self):
+        """
+        Insert the return statement
+        """
+        self.__insert1(OpcodeInfo.RET)
 
     def __move_entry_point_to_beginning(self):
         """
@@ -596,8 +601,9 @@ class CodeGenerator:
         :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
         """
-        op_info, data = self.__get_jump_data(op_info, jump_to)    # type:OpcodeInformation, bytes
-        self.__insert1(op_info, data)
+        if self.last_code.opcode is not Opcode.RET:
+            op_info, data = self.__get_jump_data(op_info, jump_to)    # type:OpcodeInformation, bytes
+            self.__insert1(op_info, data)
 
     def __update_jump(self, jump_address: int, updated_jump_to: int):
         """

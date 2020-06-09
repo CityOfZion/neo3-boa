@@ -14,6 +14,10 @@ class BoolType(IType):
         super().__init__(identifier)
 
     @property
+    def default_value(self) -> Any:
+        return bool()
+
+    @property
     def abi_type(self) -> AbiType:
         return AbiType.Boolean
 

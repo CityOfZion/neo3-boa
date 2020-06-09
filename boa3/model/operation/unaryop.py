@@ -5,7 +5,7 @@ from boa3.model.operation.unary.booleannot import BooleanNot
 from boa3.model.operation.unary.negative import Negative
 from boa3.model.operation.unary.positive import Positive
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 
 
 class UnaryOp:

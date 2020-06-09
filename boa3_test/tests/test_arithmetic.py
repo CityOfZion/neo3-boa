@@ -2,8 +2,6 @@ from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -239,6 +237,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -256,6 +255,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.SUB
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -273,6 +273,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.MUL
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -294,6 +295,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.DIV
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -311,6 +313,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.MOD
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -328,6 +331,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.CAT
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -349,6 +353,7 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + BinaryOp.StrMul.bytecode
             + Opcode.STARG0
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 

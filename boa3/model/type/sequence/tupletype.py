@@ -14,6 +14,10 @@ class TupleType(SequenceType):
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
 
+    @property
+    def default_value(self) -> Any:
+        return tuple()
+
     def is_valid_key(self, value_type: IType) -> bool:
         return value_type == self.valid_key
 
@@ -30,7 +34,7 @@ class TupleType(SequenceType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return type(value) in [tuple, TupleType]
+        return type(value) is tuple or isinstance(value, TupleType)
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):

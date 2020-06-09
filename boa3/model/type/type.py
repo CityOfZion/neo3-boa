@@ -39,6 +39,26 @@ class Type:
             return val
         return cls.none
 
+    @classmethod
+    def get_generic_type(cls, type1: IType, type2: IType) -> IType:
+        """
+        Returns the common generic type between the given values.
+
+        :param type1: first type to be compared
+        :param type2: second type to be compared
+        :return: Returns the common generic type of the values if exist. `Type.any` otherwise.
+        """
+        if type1 == type2 or type1.is_type_of(type2):
+            return type1
+        if type2.is_type_of(type1):
+            return type2
+
+        generic_types = [cls.mutableSequence, cls.sequence]
+        for generic in generic_types:
+            if generic.is_type_of(type1) and generic.is_type_of(type2):
+                return generic
+        return Type.any
+
     # Primitive Types
     int = IntType()
     bool = BoolType()

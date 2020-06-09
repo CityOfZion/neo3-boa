@@ -8,8 +8,7 @@ from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.expression import IExpression
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
-from boa3.model.type.itype import IType
-from boa3.model.type.type import Type
+from boa3.model.type.type import IType, Type
 
 
 class IAstAnalyser(ABC, ast.NodeVisitor):

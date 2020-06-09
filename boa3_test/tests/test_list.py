@@ -21,6 +21,7 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -48,6 +49,7 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -66,6 +68,7 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -90,6 +93,7 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC3
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -127,6 +131,7 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # list length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)

@@ -24,6 +24,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         compiler_output = compiler.compile(path)
@@ -56,6 +57,7 @@ class TestVariable(BoaTest):
             + len(byte_input).to_bytes(1, sys.byteorder)
             + byte_input
             + Opcode.STLOC0     # variable address
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -71,6 +73,7 @@ class TestVariable(BoaTest):
             + b'\x00'
             + Opcode.PUSH1      # assignment value
             + Opcode.STLOC0     # variable address
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -90,6 +93,7 @@ class TestVariable(BoaTest):
             + len(byte_input).to_bytes(1, sys.byteorder)
             + byte_input
             + Opcode.STARG0         # variable address
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -128,6 +132,7 @@ class TestVariable(BoaTest):
             + Opcode.PUSH7
             + Opcode.STLOC          # variable index greater than 6 uses another opcode
             + b'\x07'
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
 

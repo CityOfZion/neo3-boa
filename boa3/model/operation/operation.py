@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 
 from boa3.model.operation.operator import Operator
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 

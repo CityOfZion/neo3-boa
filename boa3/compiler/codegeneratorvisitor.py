@@ -10,8 +10,7 @@ from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
-from boa3.model.type.itype import IType
-from boa3.model.type.type import Type
+from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
 
@@ -98,6 +97,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         if ret.value is not None:
             self.visit_to_generate(ret.value)
+            self.generator.insert_return()
 
     def store_variable(self, var_id: str, value: ast.AST, index: ast.AST = None):
         # if the value is None, it is a variable declaration

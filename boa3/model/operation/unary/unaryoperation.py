@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from boa3.model.operation.operation import IOperation
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 
 
 class UnaryOperation(IOperation, ABC):
