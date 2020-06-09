@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
@@ -34,6 +34,6 @@ class Positive(UnaryOperation):
             return Type.none
 
     @property
-    def opcode(self) -> List[Opcode]:
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
         # it is the identity function, so there is no need of including another opcode
         return []

@@ -229,7 +229,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         operation = self.validate_binary_operation(aug_assign, aug_assign.target, aug_assign.value)
         if operation is not None:
             # TODO: remove when other augmented assignment operations are implemented
-            if operation.result is not Type.int:
+            if operation.result not in [Type.int, Type.str]:
                 raise NotImplementedError
 
             self.validate_type_variable_assign(aug_assign.target, operation)

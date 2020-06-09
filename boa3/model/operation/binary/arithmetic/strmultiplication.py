@@ -6,7 +6,7 @@ from boa3.model.type.type import IType, Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class Concat(BinaryOperation):
+class StrMultiplication(BinaryOperation):
     """
     A class used to represent a string concatenation operation
 
@@ -17,8 +17,8 @@ class Concat(BinaryOperation):
     """
     _valid_types: List[IType] = [Type.str]
 
-    def __init__(self, left: IType = Type.str, right: IType = Type.str):
-        self.operator: Operator = Operator.Plus
+    def __init__(self, left: IType = Type.str, right: IType = Type.int):
+        self.operator: Operator = Operator.Mult
         super().__init__(left, right)
 
     def validate_type(self, *types: IType) -> bool:
@@ -27,7 +27,7 @@ class Concat(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
-        return left == right and left in self._valid_types
+        return left in self._valid_types and right is Type.int
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):
@@ -37,4 +37,20 @@ class Concat(BinaryOperation):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.CAT, b'')]
+        from boa3.neo.vm.type.Integer import Integer
+        return [
+            (Opcode.PUSHDATA1, Integer(0).to_byte_array(min_length=1)),  # concatString = ''
+            (Opcode.ROT, b''),
+            (Opcode.ROT, b''),
+            (Opcode.JMP, Integer(7).to_byte_array()),       # while argInt > 0
+            (Opcode.REVERSE3, b''),
+            (Opcode.OVER, b''),
+            (Opcode.CAT, b''),                                  # concatString += argString
+            (Opcode.REVERSE3, b''),
+            (Opcode.DEC, b''),                                  # argInt -= 1
+            (Opcode.DUP, b''),
+            (Opcode.PUSH0, b''),
+            (Opcode.JMPGT, Integer(-7).to_byte_array()),   # return concatString
+            (Opcode.DROP, b''),
+            (Opcode.DROP, b'')
+        ]

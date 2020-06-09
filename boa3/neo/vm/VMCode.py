@@ -68,3 +68,6 @@ class VMCode:
             data = data_len[0:max_data_len]
 
         return data
+
+    def __str__(self) -> str:
+        return self.opcode.name + ' ' + self.data.hex()

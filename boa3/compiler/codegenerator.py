@@ -569,9 +569,9 @@ class CodeGenerator:
 
         :param operation: the operation that will be converted
         """
-        for opcode in operation.opcode:
+        for opcode, data in operation.opcode:
             op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
-            self.__insert1(op_info)
+            self.__insert1(op_info, data)
 
         for op in range(operation.op_on_stack):
             self._stack.pop()

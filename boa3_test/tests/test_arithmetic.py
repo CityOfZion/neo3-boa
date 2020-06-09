@@ -1,6 +1,9 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
+from boa3.model.operation.binaryop import BinaryOp
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -120,12 +123,40 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_concatenation_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.CAT
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/example/arithmetic_test/Concatenation.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
 
     def test_power_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/Power.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_str_multiplication_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + BinaryOp.StrMul.bytecode
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/StringMultiplication.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
 
     def test_mismatched_type_binary_operation(self):
         path = '%s/boa3_test/example/arithmetic_test/MismatchedOperandBinary.py' % self.dirname
@@ -288,6 +319,40 @@ class TestArithmetic(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    def test_concatenation_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.CAT
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/ConcatenationAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
     def test_power_augmented_assignment(self):
         path = '%s/boa3_test/example/arithmetic_test/PowerAugmentedAssignment.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_str_multiplication_operation_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + BinaryOp.StrMul.bytecode
+            + Opcode.STARG0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/arithmetic_test/StringMultiplicationAugmentedAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)

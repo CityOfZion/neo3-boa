@@ -7,6 +7,7 @@ from boa3.model.operation.binary.arithmetic.floordivision import FloorDivision
 from boa3.model.operation.binary.arithmetic.modulo import Modulo
 from boa3.model.operation.binary.arithmetic.multiplication import Multiplication
 from boa3.model.operation.binary.arithmetic.power import Power
+from boa3.model.operation.binary.arithmetic.strmultiplication import StrMultiplication
 from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binary.logical.booleanand import BooleanAnd
@@ -38,6 +39,7 @@ class BinaryOp:
     Mod = Modulo()
     Pow = Power()
     Concat = Concat()
+    StrMul = StrMultiplication()
 
     # Relational operations
     NumEq = NumericEquality()
