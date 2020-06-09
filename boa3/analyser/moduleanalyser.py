@@ -1,6 +1,6 @@
 import ast
 import logging
-from typing import Dict, Tuple, Any, Optional, Union, List
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
@@ -11,7 +11,7 @@ from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
-from boa3.model.type.sequencetype import SequenceType
+from boa3.model.type.sequence.sequencetype import SequenceType
 from boa3.model.type.type import Type
 from boa3.model.variable import Variable
 

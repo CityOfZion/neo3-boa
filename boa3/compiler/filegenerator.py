@@ -1,7 +1,7 @@
 import json
 import logging
 import sys
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator

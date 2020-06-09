@@ -1,8 +1,9 @@
 import ast
-from typing import Dict, Tuple, List, Any
+from typing import Dict, List, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
@@ -351,9 +352,17 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param call: the python ast function call node
         """
         # the parameters are included into the stack in the reversed order
-        for arg in reversed(call.args):
-            self.visit_to_generate(arg)
         function_id = self.visit(call.func)
+        symbol = self.generator.get_symbol(function_id)
+
+        if isinstance(symbol, IBuiltinMethod) and symbol.push_self_first():
+            args = call.args[1:]
+            self.visit_to_generate(call.args[0])
+        else:
+            args = call.args
+
+        for arg in reversed(args):
+            self.visit_to_generate(arg)
         self.generator.convert_load_symbol(function_id)
 
     def visit_Name(self, name: ast.Name) -> str:
@@ -364,6 +373,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :return: the identifier of the name
         """
         return name.id
+
+    def visit_Attribute(self, attribute: ast.Attribute) -> str:
+        """
+        Visitor of a attribute node
+
+        :param attribute: the python ast attribute node
+        :return: the identifier of the attribute
+        """
+        return attribute.attr
 
     def visit_NameConstant(self, constant: ast.NameConstant):
         """

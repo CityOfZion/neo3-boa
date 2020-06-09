@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
@@ -573,7 +573,7 @@ class CodeGenerator:
             op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
 
-        for op in range(0, operation.op_on_stack):
+        for op in range(operation.op_on_stack):
             self._stack.pop()
         self._stack.append(operation.result)
 

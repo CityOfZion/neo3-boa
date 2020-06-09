@@ -8,6 +8,8 @@ from boa3_test.tests.boa_test import BoaTest
 
 class TestVariable(BoaTest):
 
+    # region TestLen
+
     def test_len_of_tuple(self):
         expected_output = (
             Opcode.INITSLOT
@@ -83,3 +85,69 @@ class TestVariable(BoaTest):
     def test_len_too_few_parameters(self):
         path = '%s/boa3_test/example/built_in_methods_test/LenTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
+
+    # endregion
+
+    # region TestAppend
+
+    def test_append_tuple(self):
+        path = '%s/boa3_test/example/built_in_methods_test/AppendTuple.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_append_sequence(self):
+        path = '%s/boa3_test/example/built_in_methods_test/AppendSequence.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_append_mutable_sequence(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.append(4)
+            + Opcode.PUSH4
+            + Opcode.APPEND
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/AppendMutableSequence.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_append_mutable_sequence_with_builtin(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.append(4)
+            + Opcode.PUSH4
+            + Opcode.APPEND
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/AppendMutableSequenceBuiltinCall.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_append_too_many_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/AppendTooManyParameters.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_append_too_few_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/AppendTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    # endregion

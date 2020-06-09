@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Union, Iterable, Optional
+from typing import Iterable, Optional, Union
 
 
 class CompilerError(ABC, Exception):

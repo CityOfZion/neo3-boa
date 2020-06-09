@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Dict
+from typing import Any, Dict, Optional
 
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.type.itype import IType
@@ -38,6 +38,37 @@ class IBuiltinMethod(IBuiltinDecorator, ABC):
                 return len(self.args)
             return num_args
 
+    def push_self_first(self) -> bool:
+        """
+        Verifies if the `self` value of the method needs to be pushed to the Neo execution stack before the
+        other arguments.
+
+        :return: a boolean value indicating if the `self` argument must be pushed before. Returns False if there isn't
+                 a `self` argument in the function
+        """
+        return False
+
+    def validate_self(self, self_type: IType) -> bool:
+        """
+        Verifies if the given value is valid to the function `self` argument
+
+        :param self_type: type of the value
+        :return: a boolean value that represents if the value is valid. Returns False if there isn't a `self` argument
+                 in the function
+        """
+        if not self.has_self_argument:
+            return False
+        return self.args['self'].type.is_type_of(self_type)
+
+    @property
+    def has_self_argument(self) -> bool:
+        """
+        Verifies if the function has a `self` argument.
+
+        :return: True if there is this argument. False otherwise.
+        """
+        return 'self' in self.args
+
     @property
     @abstractmethod
     def _args_on_stack(self) -> int:
@@ -69,3 +100,13 @@ class IBuiltinMethod(IBuiltinDecorator, ABC):
         :return: Return the code of the method body.
         """
         return None
+
+    def build(self, value: Any):
+        """
+        Creates a method instance with the given value as self
+
+        :param value: value to build the type
+        :return: The built method if the value is valid. The current object otherwise
+        :rtype: IBuiltinMethod
+        """
+        return self

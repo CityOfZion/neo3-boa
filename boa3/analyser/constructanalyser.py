@@ -1,9 +1,8 @@
 import ast
-from typing import Optional, Union, Sequence, List
+from typing import List, Sequence, Union
 
 from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.model.symbol import ISymbol
 
 
 class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
