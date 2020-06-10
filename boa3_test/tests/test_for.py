@@ -8,8 +8,8 @@ from boa3_test.tests.boa_test import BoaTest
 class TestFor(BoaTest):
 
     def test_for_tuple_condition(self):
-        jmpif_address = Integer(14).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-16).to_byte_array(min_length=1, signed=True)
+        jmpif_address = Integer(22).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-24).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -29,6 +29,14 @@ class TestFor(BoaTest):
             + jmpif_address
                 + Opcode.LDLOC1         # x = for_sequence[for_index]
                 + Opcode.LDLOC2
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
                 + Opcode.PICKITEM
                 + Opcode.STLOC3
                 + Opcode.LDLOC0         # a = a + x
@@ -61,8 +69,8 @@ class TestFor(BoaTest):
             output = Boa3.compile(path)
 
     def test_for_variable_condition(self):
-        jmpif_address = Integer(14).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-16).to_byte_array(min_length=1, signed=True)
+        jmpif_address = Integer(22).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-24).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -84,6 +92,14 @@ class TestFor(BoaTest):
             + jmpif_address
                 + Opcode.LDLOC2         # x = for_sequence[for_index]
                 + Opcode.LDLOC3
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
                 + Opcode.PICKITEM
                 + Opcode.STLOC4
                 + Opcode.LDLOC0         # a = a + x
@@ -120,11 +136,11 @@ class TestFor(BoaTest):
             output = Boa3.compile(path)
 
     def test_nested_for(self):
-        outer_jmpif_address = Integer(38).to_byte_array(min_length=1, signed=True)
-        outer_jmp_address = Integer(-40).to_byte_array(min_length=1, signed=True)
+        outer_jmpif_address = Integer(54).to_byte_array(min_length=1, signed=True)
+        outer_jmp_address = Integer(-56).to_byte_array(min_length=1, signed=True)
 
-        inner_jmpif_address = Integer(18).to_byte_array(min_length=1, signed=True)
-        inner_jmp_address = Integer(-20).to_byte_array(min_length=1, signed=True)
+        inner_jmpif_address = Integer(26).to_byte_array(min_length=1, signed=True)
+        inner_jmp_address = Integer(-28).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -146,6 +162,14 @@ class TestFor(BoaTest):
             + outer_jmpif_address
                 + Opcode.LDLOC2         # x = outer_for_sequence[outer_for_index]
                 + Opcode.LDLOC3
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
                 + Opcode.PICKITEM
                 + Opcode.STLOC4
                     + Opcode.LDLOC1     # inner_for_sequence = sequence
@@ -156,6 +180,14 @@ class TestFor(BoaTest):
                 + inner_jmpif_address
                     + Opcode.LDLOC5         # y = inner_for_sequence[inner_for_index]
                     + Opcode.LDLOC6
+                        + Opcode.DUP
+                        + Opcode.SIGN
+                        + Opcode.PUSHM1
+                        + Opcode.JMPNE
+                        + Integer(5).to_byte_array(min_length=1, signed=True)
+                        + Opcode.OVER
+                        + Opcode.SIZE
+                        + Opcode.ADD
                     + Opcode.PICKITEM
                     + Opcode.STLOC
                     + Integer(7).to_byte_array()
@@ -196,8 +228,8 @@ class TestFor(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_for_else(self):
-        jmpif_address = Integer(14).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-16).to_byte_array(min_length=1, signed=True)
+        jmpif_address = Integer(22).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-24).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -219,6 +251,14 @@ class TestFor(BoaTest):
             + jmpif_address
                 + Opcode.LDLOC2         # x = for_sequence[for_index]
                 + Opcode.LDLOC3
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
                 + Opcode.PICKITEM
                 + Opcode.STLOC4
                 + Opcode.LDLOC0         # a = a + x

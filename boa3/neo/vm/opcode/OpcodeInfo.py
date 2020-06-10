@@ -90,54 +90,54 @@ class OpcodeInfo:
     JMP_L = OpcodeInformation(Opcode.JMP_L, 4)
     # Transfers control to a target instruction if the value is True, not null, or non-zero. The target instruction
     # is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPIF = OpcodeInformation(Opcode.JMPIF, 1)
+    JMPIF = OpcodeInformation(Opcode.JMPIF, 1, stack_items=1)
     # Transfers control to a target instruction if the value is True, not null, or non-zero. The target instruction
     # is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPIF_L = OpcodeInformation(Opcode.JMPIF_L, 4)
+    JMPIF_L = OpcodeInformation(Opcode.JMPIF_L, 4, stack_items=1)
     # Transfers control to a target instruction if the value is False, a null reference,
     # or zero. The target instruction is represented as a 1-byte signed offset from the beginning of the current
     # instruction.
-    JMPIFNOT = OpcodeInformation(Opcode.JMPIFNOT, 1)
+    JMPIFNOT = OpcodeInformation(Opcode.JMPIFNOT, 1, stack_items=1)
     # Transfers control to a target instruction if the value is False, a null reference,
     # or zero. The target instruction is represented as a 4-bytes signed offset from the beginning of the current
     # instruction.
-    JMPIFNOT_L = OpcodeInformation(Opcode.JMPIFNOT_L, 4)
+    JMPIFNOT_L = OpcodeInformation(Opcode.JMPIFNOT_L, 4, stack_items=1)
     # Transfers control to a target instruction if two values are equal. The target instruction is represented as a
     # 1-byte signed offset from the beginning of the current instruction.
-    JMPEQ = OpcodeInformation(Opcode.JMPEQ, 1)
+    JMPEQ = OpcodeInformation(Opcode.JMPEQ, 1, stack_items=2)
     # Transfers control to a target instruction if two values are equal. The target instruction is represented as a
     # 4-bytes signed offset from the beginning of the current instruction.
-    JMPEQ_L = OpcodeInformation(Opcode.JMPEQ_L, 4)
+    JMPEQ_L = OpcodeInformation(Opcode.JMPEQ_L, 4, stack_items=2)
     # Transfers control to a target instruction when two values are not equal. The target instruction is represented
     # as a 1-byte signed offset from the beginning of the current instruction.
-    JMPNE = OpcodeInformation(Opcode.JMPNE, 1)
+    JMPNE = OpcodeInformation(Opcode.JMPNE, 1, stack_items=2)
     # Transfers control to a target instruction when two values are not equal. The target instruction is represented
     # as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPNE_L = OpcodeInformation(Opcode.JMPNE_L, 4)
+    JMPNE_L = OpcodeInformation(Opcode.JMPNE_L, 4, stack_items=2)
     # Transfers control to a target instruction if the first value is greater than the second value. The target
     # instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPGT = OpcodeInformation(Opcode.JMPGT, 1)
+    JMPGT = OpcodeInformation(Opcode.JMPGT, 1, stack_items=2)
     # Transfers control to a target instruction if the first value is greater than the second value. The target
     # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPGT_L = OpcodeInformation(Opcode.JMPGT_L, 4)
+    JMPGT_L = OpcodeInformation(Opcode.JMPGT_L, 4, stack_items=2)
     # Transfers control to a target instruction if the first value is greater than or equal to the second value. The
     # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPGE = OpcodeInformation(Opcode.JMPGE, 1)
+    JMPGE = OpcodeInformation(Opcode.JMPGE, 1, stack_items=2)
     # Transfers control to a target instruction if the first value is greater than or equal to the second value. The
     # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPGE_L = OpcodeInformation(Opcode.JMPGE_L, 4)
+    JMPGE_L = OpcodeInformation(Opcode.JMPGE_L, 4, stack_items=2)
     # Transfers control to a target instruction if the first value is less than the second value. The target
     # instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPLT = OpcodeInformation(Opcode.JMPLT, 1)
+    JMPLT = OpcodeInformation(Opcode.JMPLT, 1, stack_items=2)
     # Transfers control to a target instruction if the first value is less than the second value. The target
     # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPLT_L = OpcodeInformation(Opcode.JMPLT_L, 4)
+    JMPLT_L = OpcodeInformation(Opcode.JMPLT_L, 4, stack_items=2)
     # Transfers control to a target instruction if the first value is less than or equal to the second value. The
     # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
-    JMPLE = OpcodeInformation(Opcode.JMPLE, 1)
+    JMPLE = OpcodeInformation(Opcode.JMPLE, 1, stack_items=2)
     # Transfers control to a target instruction if the first value is less than or equal to the second value. The
     # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
-    JMPLE_L = OpcodeInformation(Opcode.JMPLE_L, 4)
+    JMPLE_L = OpcodeInformation(Opcode.JMPLE_L, 4, stack_items=2)
     # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of
     # the current instruction.
     CALL = OpcodeInformation(Opcode.CALL, 1)
@@ -185,7 +185,7 @@ class OpcodeInfo:
     # Removes the second-to-top stack item.
     NIP = OpcodeInformation(Opcode.NIP)
     # The item n back in the main stack is removed.
-    XDROP = OpcodeInformation(Opcode.XDROP)
+    XDROP = OpcodeInformation(Opcode.XDROP, stack_items=1)
     # Clear the stack
     CLEAR = OpcodeInformation(Opcode.CLEAR)
     # Duplicates the top stack item.
@@ -193,7 +193,7 @@ class OpcodeInfo:
     # Copies the second-to-top stack item to the top.
     OVER = OpcodeInformation(Opcode.OVER)
     # The item n back in the stack is copied to the top.
-    PICK = OpcodeInformation(Opcode.PICK)
+    PICK = OpcodeInformation(Opcode.PICK, stack_items=1)
     # The item at the top of the stack is copied and inserted before the second-to-top item.
     TUCK = OpcodeInformation(Opcode.TUCK)
     # The top two items on the stack are swapped.
@@ -207,7 +207,7 @@ class OpcodeInfo:
     # Reverse the order of the top 4 items on the stack.
     REVERSE4 = OpcodeInformation(Opcode.REVERSE4)
     # Pop the number N on the stack, and reverse the order of the top N items on the stack.
-    REVERSEN = OpcodeInformation(Opcode.REVERSEN)
+    REVERSEN = OpcodeInformation(Opcode.REVERSEN, stack_items=1)
 
     # endregion
 

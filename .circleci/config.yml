@@ -15,6 +15,50 @@ jobs:
           command: python -m unittest discover boa3_test
           name: Test
 
+  build_deploy: &build_deploy
+    working_directory: ~/neo-boa
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+
+      - run:
+          name: Setup Environment
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+
+      - run:
+          name: Install Deps
+          command: |
+            sudo pip install -r requirements_dev.txt
+
+      - run:
+          name: Build .pypirc
+          command: |
+            echo -e "[$PYPI_REPO]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+
+      - run:
+          name: Verify Package Name
+          command: |
+            [[ $PYPI_REPO = testpypi ]] && sed -i "s/name='neo-boa'/name='neo-boa-test'/g" setup.py
+            true
+      - run:
+          name: Build Package
+          command: |
+            python3 setup.py sdist bdist_wheel
+
+      - run:
+          name: Push to TestPyPi
+          command:
+            python3 -m twine upload --repository $PYPI_REPO dist/*
+  build_deploy_test:
+    <<: *build_deploy
+  build_deploy_prod:
+    <<: *build_deploy
+
 workflows:
   main:
     jobs:
