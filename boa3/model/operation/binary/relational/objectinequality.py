@@ -17,7 +17,7 @@ class ObjectInequality(BinaryOperation):
     """
     _valid_types: List[IType] = [Type.str, Type.int, Type.bool]
 
-    def __init__(self, left: IType = Type.str, right: IType = Type.str):
+    def __init__(self, left: IType = Type.str, right: IType = None):
         self.operator: Operator = Operator.NotEq
         super().__init__(left, right)
 

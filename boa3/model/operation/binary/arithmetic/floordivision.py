@@ -17,7 +17,7 @@ class FloorDivision(BinaryOperation):
     """
     _valid_types: List[IType] = [Type.int]
 
-    def __init__(self, left: IType = Type.int, right: IType = Type.int):
+    def __init__(self, left: IType = Type.int, right: IType = None):
         self.operator: Operator = Operator.IntDiv
         super().__init__(left, right)
 

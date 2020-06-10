@@ -97,3 +97,185 @@ class TestLogical(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_logic_and_with_bool_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.AND
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicAndBool.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_logic_and_with_int_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.AND
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicAndInt.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mismatched_type_logic_and(self):
+        path = '%s/boa3_test/example/logical_test/MismatchedOperandLogicAnd.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_logic_or_with_bool_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.OR
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicOrBool.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_logic_or_with_int_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.OR
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicOrInt.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mismatched_type_logic_or(self):
+        path = '%s/boa3_test/example/logical_test/MismatchedOperandLogicOr.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_logic_not_with_bool_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.INVERT
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicNotBool.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_logic_not_with_int_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.INVERT
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicNotInt.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mismatched_type_logic_not(self):
+        path = '%s/boa3_test/example/logical_test/MismatchedOperandLogicNot.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_logic_xor_with_bool_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.XOR
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicXorBool.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_logic_xor_with_int_operand(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.XOR
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicXorInt.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mismatched_type_logic_xor(self):
+        path = '%s/boa3_test/example/logical_test/MismatchedOperandLogicXor.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_logic_left_shift(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.SHL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicLeftShift.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mismatched_type_logic_left_shift(self):
+        path = '%s/boa3_test/example/logical_test/MismatchedOperandLogicLeftShift.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_logic_right_shift(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.SHR
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/logical_test/LogicRightShift.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_mismatched_type_logic_right_shift(self):
+        path = '%s/boa3_test/example/logical_test/MismatchedOperandLogicRightShift.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

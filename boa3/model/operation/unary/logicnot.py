@@ -6,18 +6,18 @@ from boa3.model.type.type import IType, Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class BooleanNot(UnaryOperation):
+class LogicNot(UnaryOperation):
     """
-    A class used to represent the boolean not operation
+    A class used to represent the bit not [ ~ ] operation
 
     :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
     :ivar operand: the operand type. Inherited from :class:`UnaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.bool]
+    _valid_types: List[IType] = [Type.int, Type.bool]
 
-    def __init__(self, operand: IType = Type.bool):
-        self.operator: Operator = Operator.Not
+    def __init__(self, operand: IType = Type.int):
+        self.operator: Operator = Operator.BitNot
         super().__init__(operand)
 
     def validate_type(self, *types: IType) -> bool:
@@ -35,4 +35,4 @@ class BooleanNot(UnaryOperation):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.NOT, b'')]
+        return [(Opcode.INVERT, b'')]

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from boa3.model.operation.binary.arithmetic.addition import Addition
 from boa3.model.operation.binary.arithmetic.concat import Concat
@@ -12,6 +12,11 @@ from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binary.logical.booleanand import BooleanAnd
 from boa3.model.operation.binary.logical.booleanor import BooleanOr
+from boa3.model.operation.binary.logical.leftshift import LeftShift
+from boa3.model.operation.binary.logical.logicand import LogicAnd
+from boa3.model.operation.binary.logical.logicor import LogicOr
+from boa3.model.operation.binary.logical.logicxor import LogicXor
+from boa3.model.operation.binary.logical.rightshift import RightShift
 from boa3.model.operation.binary.relational.LessThan import LessThan
 from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
 from boa3.model.operation.binary.relational.greaterthan import GreaterThan
@@ -58,6 +63,11 @@ class BinaryOp:
     # Logical operations
     And = BooleanAnd()
     Or = BooleanOr()
+    BitAnd = LogicAnd()
+    BitOr = LogicOr()
+    Xor = LogicXor()
+    LShift = LeftShift()
+    RShift = RightShift()
 
     @classmethod
     def validate_type(cls, operator: Operator, left: IType, right: IType) -> Optional[BinaryOperation]:
@@ -80,18 +90,25 @@ class BinaryOp:
                     return op.build(operand)
 
     @classmethod
-    def get_operation_by_operator(cls, operator: Operator) -> Optional[BinaryOperation]:
+    def get_operation_by_operator(cls, operator: Operator, left_operand: IType) -> Optional[BinaryOperation]:
         """
         Gets a binary operation given the operator.
 
         :param operator: binary operator
-        :return: The operation if exists. If exists more than one operation with the same operator, returns the first
-        found. None otherwise;
+        :param left_operand: left operand of the operator
+        :return: The operation if exists. If exists more than one operation with the same operator, returns the one with
+        the same left operand. If none has the same left operand, returns the first found. None otherwise;
         :rtype: BinaryOperation or None
         """
+        valid_operations: List[BinaryOperation] = []
         for id, op in vars(cls).items():
             if isinstance(op, BinaryOperation) and op.operator is operator:
-                return op
+                if left_operand in op._valid_types:
+                    return op.build(left_operand, op.right_type)
+                else:
+                    valid_operations.append(op)
+
+        return valid_operations[0] if len(valid_operations) > 0 else None
 
     @classmethod
     def get_operation(cls, operation: BinaryOperation) -> Optional[BinaryOperation]:
