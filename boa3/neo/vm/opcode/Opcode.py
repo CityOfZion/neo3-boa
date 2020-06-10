@@ -237,6 +237,27 @@ class Opcode(bytes, Enum):
     OVER = b'\x4B'
     # The item n back in the stack is copied to the top.
     PICK = b'\x4D'
+
+    @staticmethod
+    def get_dup(position: int):
+        """
+        Gets the opcode to duplicate the item n back in the stack
+
+        :param position: index of the variable
+        :return: the respective opcode
+        :rtype: Opcode
+        """
+        duplicate_item = {
+            1: Opcode.DUP,
+            2: Opcode.OVER
+        }
+
+        if position > 0:
+            if position in duplicate_item:
+                return duplicate_item[position]
+            else:
+                return Opcode.PICK
+
     # The item at the top of the stack is copied and inserted before the second-to-top item.
     TUCK = b'\x4E'
     # The top two items on the stack are swapped.

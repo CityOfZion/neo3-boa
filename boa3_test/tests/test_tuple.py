@@ -108,6 +108,14 @@ class TestTuple(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -120,20 +128,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_set_value(self):
         path = '%s/boa3_test/example/tuple_test/SetValue.py' % self.dirname
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0     # arg[0] = 1
-            + Opcode.PUSH0
-            + Opcode.PUSH1
-            + Opcode.SETITEM
-            + Opcode.PUSH1      # return 1
-            + Opcode.RET
-        )
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_non_sequence_set_value(self):
         path = '%s/boa3_test/example/tuple_test/MismatchedTypeSetValue.py' % self.dirname
@@ -152,8 +147,24 @@ class TestTuple(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0][0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -169,6 +180,14 @@ class TestTuple(BoaTest):
             + b'\x02'
             + Opcode.LDARG1     # args[0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )

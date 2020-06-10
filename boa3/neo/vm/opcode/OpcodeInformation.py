@@ -10,7 +10,7 @@ class OpcodeInformation:
     :ivar max_data_len: the max size in bytes of the operand. Same value as data_len if size is constant.
     """
 
-    def __init__(self, opcode: Opcode, min_data_len: int = 0, extra_data_max_len: int = 0):
+    def __init__(self, opcode: Opcode, min_data_len: int = 0, extra_data_max_len: int = 0, stack_items: int = 0):
         self.opcode: Opcode = opcode
 
         if min_data_len < 0:
@@ -20,6 +20,10 @@ class OpcodeInformation:
         if extra_data_max_len < 0:
             extra_data_max_len = 0
         self.max_data_len: int = min_data_len + extra_data_max_len
+
+        if stack_items < 0:
+            stack_items = 0
+        self.stack_items: int = stack_items
 
     def get_large(self):
         large_op = self.opcode.get_large

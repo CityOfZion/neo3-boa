@@ -110,6 +110,14 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.STLOC0     # items2 = array
             + Opcode.LDARG0     # value = items1[0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.STLOC1
             + Opcode.LDLOC1     # count = value + len(items2)
@@ -146,6 +154,14 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.STLOC0     # items2 = array
             + Opcode.LDARG0     # value = items1[0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.STLOC1
             + Opcode.LDLOC1     # count = value + len(items2)
