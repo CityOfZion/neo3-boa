@@ -21,6 +21,7 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -48,6 +49,7 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -66,6 +68,7 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -90,6 +93,7 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC3
+            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)

@@ -29,6 +29,8 @@ class NoneIdentity(UnaryOperation):
         return super().number_of_operands
 
     def validate_type(self, *types: IType) -> bool:
+        if len(types) == self.op_on_stack:
+            return True
         if len(types) != self.number_of_operands:
             return False
         left: IType = types[0]
@@ -38,7 +40,7 @@ class NoneIdentity(UnaryOperation):
 
     def _get_result(self, operand: IType) -> IType:
         if self.validate_type(operand):
-            return operand
+            return Type.bool
         else:
             return Type.none
 

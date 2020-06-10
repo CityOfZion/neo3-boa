@@ -24,6 +24,10 @@ class IType(ISymbol):
         return self._identifier
 
     @property
+    def default_value(self) -> Any:
+        return None
+
+    @property
     def abi_type(self) -> AbiType:
         """
         Get the type representation for the abi

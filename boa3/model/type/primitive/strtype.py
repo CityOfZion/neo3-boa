@@ -19,6 +19,10 @@ class StrType(SequenceType):
         return self._identifier
 
     @property
+    def default_value(self) -> Any:
+        return str()
+
+    @property
     def abi_type(self) -> AbiType:
         return AbiType.String
 

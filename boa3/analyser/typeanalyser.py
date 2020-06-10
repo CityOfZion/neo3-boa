@@ -14,7 +14,7 @@ from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
 from boa3.model.type.sequence.sequencetype import SequenceType
-from boa3.model.type.type import Type, IType
+from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
 
@@ -119,11 +119,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         self.visit(function.args)
         method = self.symbols[function.name]
-        self.__current_method = method
+        if isinstance(method, Method):
+            self.__current_method = method
 
-        for stmt in function.body:
-            self.visit(stmt)
-        self.__current_method = None
+            for stmt in function.body:
+                self.visit(stmt)
+
+            if len(function.body) > 0 and not isinstance(function.body[-1], ast.Return):
+                default_value: str = str(method.return_type.default_value)
+                node: ast.AST = ast.parse(default_value).body[0].value
+                function.body.append(
+                    ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
+                )
+            self.__current_method = None
 
     def visit_arguments(self, arguments: ast.arguments):
         """
@@ -157,7 +165,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param ret: the python ast return node
         """
-        if ret.value is not None:
+        ret_value: Any = self.visit(ret.value) if ret.value is not None else None
+        ret_type: IType = self.get_type(ret.value)
+        if ret.value is not None and ret_type is not Type.none:
             # multiple returns are not allowed
             if isinstance(ret.value, ast.Tuple):
                 self._log_error(
@@ -170,15 +180,23 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self.__current_method_id)
                 )
                 return
-            # TODO: check if the type of return is the same as in the type hint
-        elif self.__current_method.return_type is not Type.none:
-            # the return is None, but the type hint value type is not None
-            self._log_error(
-                CompilerError.MismatchedTypes(
-                    ret.lineno, ret.col_offset,
-                    actual_type_id=Type.none.identifier,
-                    expected_type_id=self.__current_method.return_type.identifier)
+        if not self.__current_method.return_type.is_type_of(ret_type):
+            # if the return type is a specified type sequence, is not a mismatched type when the return expression
+            # is an empty sequence
+            is_empty_sequence = (
+                isinstance(ret_type, SequenceType)
+                and ret_type.is_type_of(ret_value)  # if it is a variable or a function, this will be False
+                and not isinstance(ret_value, IType)  # if it is an IType value, the latter condition will be True
+                and len(ret_value) == 0
             )
+            if not (isinstance(self.__current_method.return_type, SequenceType) and is_empty_sequence):
+                # the return is None, but the type hint value type is not None
+                self._log_error(
+                    CompilerError.MismatchedTypes(
+                        ret.lineno, ret.col_offset,
+                        actual_type_id=ret_type.identifier,
+                        expected_type_id=self.__current_method.return_type.identifier)
+                )
 
         # continue to walk through the tree
         self.generic_visit(ret)
@@ -465,6 +483,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param if_node: the python ast if expression node
         """
         self.validate_if(if_node)
+        body = if_node.body
+        orelse = if_node.orelse
+        if_value = body[-1] if isinstance(body, list) and len(body) > 0 else body
+        else_value = orelse[-1] if isinstance(orelse, list) and len(orelse) > 0 else orelse
+
+        if_type: IType = self.get_type(if_value)
+        else_type: IType = self.get_type(else_value)
+        return Type.get_generic_type(if_type, else_type)
 
     def validate_if(self, if_node: ast.AST):
         """

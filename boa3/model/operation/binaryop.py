@@ -26,7 +26,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.noneidentity import NoneIdentity
 from boa3.model.operation.unary.nonenotidentity import NoneNotIdentity
-from boa3.model.type.type import IType
+from boa3.model.type.itype import IType
 
 
 class BinaryOp:
