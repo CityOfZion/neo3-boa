@@ -21,6 +21,10 @@ class AppendMethod(IBuiltinMethod):
         args: Dict[str, Variable] = {'self': self_arg, 'item': item_arg}
         super().__init__(identifier, args)
 
+    @property
+    def _arg_self(self) -> Variable:
+        return self.args['self']
+
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 2:
             return False
@@ -34,6 +38,12 @@ class AppendMethod(IBuiltinMethod):
         if not isinstance(sequence_type, MutableSequenceType):
             return False
         return sequence_type.value_type.is_type_of(value_type)
+
+    @property
+    def is_supported(self) -> bool:
+        # TODO: remove when bytearray.append() is implemented
+        from boa3.model.type.type import Type
+        return self._arg_self.type is not Type.bytearray
 
     @property
     def opcode(self) -> Optional[Opcode]:

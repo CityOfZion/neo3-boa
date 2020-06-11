@@ -9,8 +9,12 @@ from boa3.model.variable import Variable
 
 class IBuiltinDecorator(Method, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        self.identifier = identifier
+        self._identifier = identifier
         super().__init__(args, return_type)
+
+    @property
+    def identifier(self) -> str:
+        return self._identifier
 
     @abstractmethod
     def validate_parameters(self, *params: IExpression) -> bool:

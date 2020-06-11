@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
+from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -791,7 +792,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param call: the python ast function call node
         :return: the result type of the called function
         """
-        function = None
         if isinstance(call.func, ast.Name):
             function_id: str = call.func.id
             function = self.get_symbol(function_id)
@@ -807,6 +807,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self_type: IType = self.get_type(call.args[0])
                 function = function.build(self_type)
 
+        if not isinstance(function, Method):
+            # verifiy if it is a builtin method with its name shadowed
+            func = Builtin.get_symbol(function_id)
+            function = func if func is not None else function
         if not isinstance(function, Method):
             # the symbol doesn't exists or is not a function
             self._log_error(
@@ -825,9 +829,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
             else:
+                args = [self.get_type(param) for param in call.args]
+                if isinstance(function, IBuiltinMethod):
+                    # if the arguments are not generic, build the specified method
+                    function = function.build(args)
+                    if not function.is_supported:
+                        # TODO: implement bytearray constructor with non-bytes values
+                        # number float division is not supported by Neo VM
+                        self._log_error(
+                            CompilerError.NotSupportedOperation(call.lineno, call.col_offset, function_id)
+                        )
+                        return function.return_type
+
                 for index, (arg_id, arg_value) in enumerate(function.args.items()):
                     param = call.args[index]
                     param_type = self.get_type(param)
+                    args.append(param_type)
                     if not arg_value.type.is_type_of(param_type):
                         self._log_error(
                             CompilerError.MismatchedTypes(
@@ -835,6 +852,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                 arg_value.type.identifier,
                                 param_type.identifier
                             ))
+
+            # if the arguments are not generic, include the specified method in the symbol table
+            if (isinstance(function, IBuiltinMethod)
+                    and function.identifier != function_id
+                    and function.identifier not in self.symbols):
+                self.symbols[function.identifier] = function
+                call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
+                                     ctx=ast.Load(), id=function.identifier)
         return self.get_type(function)
 
     def visit_Attribute(self, attribute: ast.Attribute) -> Tuple[IType, Optional[ISymbol], str]:

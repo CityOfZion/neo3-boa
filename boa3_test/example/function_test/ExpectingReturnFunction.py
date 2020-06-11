@@ -1,2 +1,2 @@
 def Main(a: int) -> int:
-    return
+    return  # compiler error - expecting int value

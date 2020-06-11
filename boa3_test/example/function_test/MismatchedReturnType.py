@@ -1,2 +1,2 @@
 def Main() -> list:
-    return 2
+    return 2  # compiler error - expecting list

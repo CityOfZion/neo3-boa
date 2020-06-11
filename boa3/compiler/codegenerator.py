@@ -500,7 +500,7 @@ class CodeGenerator:
         if symbol is not Type.none:
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id, symbol)
-            elif isinstance(symbol, IBuiltinMethod) and symbol.opcode is not None:
+            elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol)
             else:
                 self.convert_method_call(symbol)
