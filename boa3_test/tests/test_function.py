@@ -1,8 +1,8 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes, TooManyReturns, TypeHintMissing
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
@@ -119,7 +119,7 @@ class TestFunction(BoaTest):
                 + Opcode.PUSHDATA1      # return 20
                 + Integer(len(twenty)).to_byte_array() + twenty
                 + Opcode.CONVERT
-                + StackItemType.Integer
+                + Type.int.stack_item
                 + Opcode.RET
             + Opcode.PUSH0          # default return
             + Opcode.RET

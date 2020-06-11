@@ -335,7 +335,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
             return symbol_type
         # the sequence can't use the given type as index
-        elif not symbol_type.is_valid_key(index_type):
+        if not symbol_type.is_valid_key(index_type):
             self._log_error(
                 CompilerError.MismatchedTypes(
                     subscript.lineno, subscript.col_offset,
@@ -350,9 +350,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     type_id=symbol_type.identifier,
                     operation_id=Operator.Subscript)
             )
-        else:
-            return symbol_type.value_type
-        return Type.none
+        return symbol_type.value_type
 
     def validate_slice(self, subscript: ast.Subscript, slice_node: ast.Slice) -> IType:
         """
@@ -866,14 +864,23 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         return num.n
 
-    def visit_Str(self, str: ast.Str) -> str:
+    def visit_Str(self, string: ast.Str) -> str:
         """
         Visitor of literal string node
 
-        :param str: the python ast string node
+        :param string: the python ast string node
         :return: the value of the string
         """
-        return str.s
+        return string.s
+
+    def visit_Bytes(self, bts: ast.Bytes) -> bytes:
+        """
+        Visitor of literal bytes node
+
+        :param bts: the python ast bytes node
+        :return: the value of the bytes
+        """
+        return bts.s
 
     def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
         """

@@ -3,9 +3,9 @@ import sys
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.codegenerator import CodeGenerator
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
@@ -30,7 +30,7 @@ class TestConstant(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.CONVERT            # convert to integer
-            + StackItemType.Integer
+            + Type.int.stack_item
         )
 
         generator = CodeGenerator({})
@@ -47,7 +47,7 @@ class TestConstant(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.CONVERT            # convert to integer
-            + StackItemType.Integer
+            + Type.int.stack_item
         )
 
         generator = CodeGenerator({})
@@ -64,7 +64,7 @@ class TestConstant(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=2)
             + byte_input
             + Opcode.CONVERT            # convert to integer
-            + StackItemType.Integer
+            + Type.int.stack_item
         )
 
         generator = CodeGenerator({})
@@ -81,7 +81,7 @@ class TestConstant(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=4)
             + byte_input
             + Opcode.CONVERT            # convert to integer
-            + StackItemType.Integer
+            + Type.int.stack_item
         )
 
         generator = CodeGenerator({})

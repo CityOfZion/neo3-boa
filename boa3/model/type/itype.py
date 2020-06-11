@@ -3,6 +3,7 @@ from typing import Any
 
 from boa3.model.symbol import ISymbol
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class IType(ISymbol):
@@ -35,6 +36,24 @@ class IType(ISymbol):
         :return: the representation for the abi. Any by default.
         """
         return AbiType.Any
+
+    @property
+    def stack_item(self) -> StackItemType:
+        """
+        Get the Neo VM stack item type representation for this type
+
+        :return: the stack item type of this type. Any by default.
+        """
+        return StackItemType.Any
+
+    @property
+    def is_generic(self) -> bool:
+        """
+        Verifies if this is a generic type
+
+        :return: True if this is a generic type. False otherwise.
+        """
+        return False
 
     @classmethod
     @abstractmethod

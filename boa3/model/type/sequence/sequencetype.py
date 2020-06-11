@@ -3,6 +3,7 @@ from typing import List, Any, Iterable
 
 from boa3.model.type.itype import IType
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class SequenceType(IType, ABC):
@@ -44,7 +45,11 @@ class SequenceType(IType, ABC):
 
     @property
     def abi_type(self) -> AbiType:
-        return AbiType.Array  # TODO: change when 'bytes' is implemented
+        return AbiType.Array
+
+    @property
+    def stack_item(self) -> StackItemType:
+        return StackItemType.Array
 
     @abstractmethod
     def is_valid_key(self, value_type: IType) -> bool:

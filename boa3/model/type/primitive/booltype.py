@@ -2,6 +2,7 @@ from typing import Any
 
 from boa3.model.type.itype import IType
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class BoolType(IType):
@@ -20,6 +21,10 @@ class BoolType(IType):
     @property
     def abi_type(self) -> AbiType:
         return AbiType.Boolean
+
+    @property
+    def stack_item(self) -> StackItemType:
+        return StackItemType.Boolean
 
     @classmethod
     def build(cls, value: Any):

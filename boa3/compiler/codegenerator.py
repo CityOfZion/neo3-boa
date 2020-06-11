@@ -16,7 +16,6 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class CodeGenerator:
@@ -301,6 +300,8 @@ class CodeGenerator:
             self.convert_string_literal(value)
         elif value is None:
             self.insert_none()
+        elif isinstance(value, (bytes, bytearray)):
+            self.convert_byte_array(value)
         else:
             # TODO: convert other python literals as they are implemented
             raise NotImplementedError
@@ -318,9 +319,9 @@ class CodeGenerator:
                 self.__insert1(op_info)
         else:
             array = Integer(value).to_byte_array()
-            self.convert_byte_array(array)
+            self.insert_push_data(array)
             # cast the value to integer
-            self.__insert1(OpcodeInfo.CONVERT, StackItemType.Integer)
+            self.convert_cast(Type.int)
         self._stack.append(Type.int)
 
     def convert_string_literal(self, value: str):
@@ -330,9 +331,8 @@ class CodeGenerator:
         :param value: the value to be converted
         """
         array = bytes(value, sys.getdefaultencoding())
-        self.convert_byte_array(array)
-        self._stack.pop()
-        self._stack.append(Type.str)
+        self.insert_push_data(array)
+        self.convert_cast(Type.str)
 
     def convert_bool_literal(self, value: bool):
         """
@@ -352,7 +352,16 @@ class CodeGenerator:
 
         :param array: the value to be converted
         """
-        data_len: int = len(array)
+        self.insert_push_data(array)
+        self.convert_cast(Type.bytes)
+
+    def insert_push_data(self, data: bytes):
+        """
+        Inserts a push data value
+
+        :param data: the value to be converted
+        """
+        data_len: int = len(data)
         if data_len <= ONE_BYTE_MAX_VALUE:
             op_info = OpcodeInfo.PUSHDATA1
         elif data_len <= TWO_BYTES_MAX_VALUE:
@@ -360,9 +369,9 @@ class CodeGenerator:
         else:
             op_info = OpcodeInfo.PUSHDATA4
 
-        data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + array
+        data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + data
         self.__insert1(op_info, data)
-        self._stack.append(Type.none)  # TODO: change to bytearray when implemented
+        self._stack.append(Type.str)  # push data pushes a ByteString value in the stack
 
     def insert_none(self):
         """
@@ -370,6 +379,19 @@ class CodeGenerator:
         """
         self.__insert1(OpcodeInfo.PUSHNULL)
         self._stack.append(Type.none)
+
+    def convert_cast(self, value_type: IType):
+        """
+        Converts casting types in Neo VM
+        """
+        stack_top_type: IType = self._stack[-1]
+        if (not value_type.is_generic
+                and not stack_top_type.is_generic
+                and value_type.stack_item != stack_top_type.stack_item
+                and value_type.stack_item is not Type.any.stack_item):
+            self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
+            self._stack.pop()
+            self._stack.append(value_type)
 
     def convert_new_empty_array(self, length: int, array_type: IType):
         """
@@ -396,17 +418,10 @@ class CodeGenerator:
             self.convert_new_empty_array(length, array_type)
         else:
             self.__insert1(OpcodeInfo.PACK)
+            self._stack.pop()  # array size
+            for x in range(length):
+                self._stack.pop()
             self._stack.append(array_type)
-
-    def convert_set_new_array_item_at(self, index: int):
-        """
-        Converts the beginning of setting af a value in an array
-
-        :param index: the index of the array that will be set
-        """
-        self.duplicate_stack_top_item()
-        self.convert_literal_index(index)
-        self.convert_literal(index)
 
     def convert_set_array_item(self):
         """
@@ -537,13 +552,14 @@ class CodeGenerator:
 
         index: int = scope.index(var_id)
         opcode = Opcode.get_store(index, local, is_arg)
-        op_info = OpcodeInfo.get_info(opcode)
+        if opcode is not None:
+            op_info = OpcodeInfo.get_info(opcode)
 
-        if op_info.data_len > 0:
-            self.__insert1(op_info, Integer(index).to_byte_array())
-        else:
-            self.__insert1(op_info)
-        self._stack.pop()
+            if op_info.data_len > 0:
+                self.__insert1(op_info, Integer(index).to_byte_array())
+            else:
+                self.__insert1(op_info)
+            self._stack.pop()
 
     def convert_builtin_method_call(self, function: IBuiltinMethod):
         """
