@@ -112,6 +112,38 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.RET        # return
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_get_value_with_negative_index(self):
+        path = '%s/boa3_test/example/list_test/GetValueNegativeIndex.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # arg[-1]
+            + Opcode.PUSH1
+            + Opcode.NEGATE
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -146,9 +178,43 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0] = 1
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
             + Opcode.PUSH1      # return 1
+            + Opcode.RET
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_set_value_with_negative_index(self):
+        path = '%s/boa3_test/example/list_test/SetValueNegativeIndex.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # arg[-1] = 1
+            + Opcode.PUSH1
+            + Opcode.NEGATE
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
+            + Opcode.PUSH1
+            + Opcode.SETITEM
+            + Opcode.LDARG0     # return a
             + Opcode.RET
         )
         output = Boa3.compile(path)
@@ -171,8 +237,24 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0][0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -188,6 +270,14 @@ class TestList(BoaTest):
             + b'\x02'
             + Opcode.LDARG1     # args[0]
             + Opcode.PUSH0
+                + Opcode.DUP
+                + Opcode.SIGN
+                + Opcode.PUSHM1
+                + Opcode.JMPNE
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER
+                + Opcode.SIZE
+                + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )

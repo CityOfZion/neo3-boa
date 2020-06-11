@@ -36,6 +36,10 @@ class TupleType(SequenceType):
     def _is_type_of(cls, value: Any):
         return type(value) is tuple or isinstance(value, TupleType)
 
+    @property
+    def can_reassign_values(self) -> bool:
+        return False
+
     def __eq__(self, other) -> bool:
         if type(self) != type(other):
             return False

@@ -6,6 +6,7 @@ from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
+from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import IType, Type
@@ -230,8 +231,7 @@ class CodeGenerator:
         :param test_address: the address of the while test fist opcode
         """
         # updates the begin jmp with the target address
-        begin_jmp_to: int = test_address - start_address
-        self.__update_jump(start_address, begin_jmp_to)
+        self.__update_jump(start_address, test_address)
 
         # inserts end jmp
         while_begin: VMCode = self.__vm_codes_map[start_address]
@@ -260,8 +260,7 @@ class CodeGenerator:
         self.__insert_jump(OpcodeInfo.JMP, 0)
 
         # updates the begin jmp with the target address
-        begin_jmp_to: int = self.address - start_address
-        self.__update_jump(start_address, begin_jmp_to)
+        self.__update_jump(start_address, self.address)
 
         return self.last_code.start_address
 
@@ -272,8 +271,21 @@ class CodeGenerator:
         :param start_address: the address of the if first opcode
         """
         # updates the begin jmp with the target address
-        jmp_to: int = self.address - start_address
-        self.__update_jump(start_address, jmp_to)
+        self.__update_jump(start_address, self.address)
+
+    def fix_negative_index(self):
+        self.duplicate_stack_top_item()
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+
+        jmp_address = self.address
+        self.__insert_jump(OpcodeInfo.JMPNE, 0)     # if index < 0
+
+        self.duplicate_stack_item(2)                    # index += len(array)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.convert_operation(BinaryOp.Add)
+
+        self.__update_jump(jmp_address, self.address)
 
     def convert_literal(self, value: Any):
         """
@@ -393,12 +405,22 @@ class CodeGenerator:
         :param index: the index of the array that will be set
         """
         self.duplicate_stack_top_item()
+        self.convert_literal_index(index)
         self.convert_literal(index)
 
     def convert_set_array_item(self):
         """
         Converts the end of setting af a value in an array
         """
+        value_code = self.last_code
+        start_address = self.address
+        index_type: IType = self._stack[-2]  # top: index
+        if index_type is Type.int:
+            self.fix_negative_index()
+
+        first_new_code = self.__vm_codes_map[start_address]
+        first_new_code._last_code, value_code._last_code = value_code._last_code, self.last_code
+
         self.__insert1(OpcodeInfo.SETITEM)
         self._stack.pop()  # value
         self._stack.pop()  # index
@@ -408,7 +430,11 @@ class CodeGenerator:
         """
         Converts the end of get a value in an array
         """
-        array_type: IType = self._stack[-2]  # top: index, second-to-top: array
+        index_type: IType = self._stack[-1]  # top: index
+        if index_type is Type.int:
+            self.fix_negative_index()
+
+        array_type: IType = self._stack[-2]  # second-to-top: array
         if array_type is Type.str:
             self.convert_literal(1)  # length of substring
             self.convert_get_substring()
@@ -604,6 +630,8 @@ class CodeGenerator:
         if self.last_code.opcode is not Opcode.RET:
             op_info, data = self.__get_jump_data(op_info, jump_to)    # type:OpcodeInformation, bytes
             self.__insert1(op_info, data)
+        for x in range(op_info.stack_items):
+            self._stack.pop()
 
     def __update_jump(self, jump_address: int, updated_jump_to: int):
         """
@@ -612,6 +640,7 @@ class CodeGenerator:
         :param jump_address: jump code start address
         :param updated_jump_to: new data of the code
         """
+        updated_jump_to -= jump_address
         vmcode: VMCode = self.__vm_codes_map[jump_address]
         if vmcode is not None:
             op_info, data = self.__get_jump_data(vmcode.info, updated_jump_to)  # type:OpcodeInformation, bytes
@@ -632,12 +661,28 @@ class CodeGenerator:
         return op_info, data
 
     def duplicate_stack_top_item(self):
-        self.__insert1(OpcodeInfo.DUP)
-        self._stack.append(self._stack[-1])
+        self.duplicate_stack_item()
+
+    def duplicate_stack_item(self, pos: int = 1):
+        """
+        Duplicates the item n back in the stack
+
+        :param pos: index of the variable
+        """
+        # n = 1 -> duplicates stack top item
+        if pos > 0:
+            opcode: Opcode = Opcode.get_dup(pos)
+            if opcode is Opcode.PICK:
+                self.convert_literal(pos)
+            op_info = OpcodeInfo.get_info(opcode)
+            self.__insert1(op_info)
+            self._stack.append(self._stack[-pos])
 
     def swap_reverse_stack_items(self, no_items: int):
         if no_items > 1:
             opcode: Opcode = Opcode.get_reverse(no_items)
+            if opcode is Opcode.REVERSEN:
+                self.convert_literal(no_items)
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
             reverse = list(reversed(self._stack[-no_items:]))
