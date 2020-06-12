@@ -10,7 +10,7 @@ from boa3 import __version__ as version
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 
@@ -24,6 +24,7 @@ setup(
 
     description='A Python compiler for the Neo3 Virtual Machine',
     long_description=long_description,
+    long_description_content_type='text/x-rst',
 
     # The project's main homepage.
     url='https://github.com/CityOfZion/neo3-boa',

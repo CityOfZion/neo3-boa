@@ -16,7 +16,7 @@ jobs:
           name: Test
 
   build_deploy: &build_deploy
-    working_directory: ~/neo-boa
+    working_directory: ~/neo3-boa
     docker:
       - image: circleci/python:3.6.4
     steps:
@@ -41,14 +41,10 @@ jobs:
             echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
 
       - run:
-          name: Verify Package Name
-          command: |
-            [[ $PYPI_REPO = testpypi ]] && sed -i "s/name='neo-boa'/name='neo-boa-test'/g" setup.py
-            true
-      - run:
           name: Build Package
           command: |
             python3 setup.py sdist bdist_wheel
+            twine check dist/*
 
       - run:
           name: Push to TestPyPi
@@ -63,3 +59,31 @@ workflows:
   main:
     jobs:
       - unit-test
+
+  build_deploy:
+    jobs:
+      - build_deploy_test:
+         context: pypi_test
+         filters:
+           tags:
+             only: /^v.*/
+           branches:
+             only: master
+      - approve-release:
+          type: approval
+          requires:
+            - build_deploy_test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
+      - build_deploy_prod:
+          context: pypi_prod
+          requires:
+            - approve-release
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
