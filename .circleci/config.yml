@@ -56,14 +56,17 @@ jobs:
     <<: *build_deploy
 
 workflows:
-  main:
+  version: 2
+  build_test_deploy:
     jobs:
-      - unit-test
-
-  build_deploy:
-    jobs:
+      - unit-test:
+         filters:
+           tags:
+             only: /.*/
       - build_deploy_test:
          context: pypi_test
+         requires:
+           - unit-test
          filters:
            tags:
              only: /^v.*/
