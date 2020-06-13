@@ -1,0 +1,6 @@
+autopep8==1.4.4
+bumpversion==0.6.0
+coverage==4.5.4
+pycodestyle==2.5.0
+twine>=1.10.0
+wheel>=0.30.0
