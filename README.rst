@@ -32,7 +32,12 @@ What it currently does...
 -  Converts Functions
 
 -  Converts Local Variable Declarations and Assignments
-    ``foo: int = 42     bar = foo``
+
+.. code:: python
+
+    foo: int = 42
+    bar = foo
+
 -  Converts Number Arithmetic Operations (``+``, ``-``, ``*``, ``//``,
    ``%``)
 
@@ -107,5 +112,3 @@ What it will do...
 
 -  Convert String Slicing (``x = 'example'[2:4:2]``,
    ``x = 'example'[::2]``)
-
-
