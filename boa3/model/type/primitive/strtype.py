@@ -3,6 +3,7 @@ from typing import Any
 from boa3.model.type.itype import IType
 from boa3.model.type.sequence.sequencetype import SequenceType
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class StrType(SequenceType):
@@ -25,6 +26,10 @@ class StrType(SequenceType):
     @property
     def abi_type(self) -> AbiType:
         return AbiType.String
+
+    @property
+    def stack_item(self) -> StackItemType:
+        return StackItemType.ByteString
 
     @classmethod
     def build(cls, value: Any):

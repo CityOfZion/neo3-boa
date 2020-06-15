@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -70,6 +71,29 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = '%s/boa3_test/example/built_in_methods_test/LenString.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_len_of_bytes(self):
+        byte_input = b'\x01\x02\x03'
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1            # push the bytes
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.SIZE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/LenBytes.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

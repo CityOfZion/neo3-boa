@@ -22,6 +22,10 @@ class GenericSequenceType(SequenceType):
         from boa3.model.type.type import Type
         return Type.int
 
+    @property
+    def is_generic(self) -> bool:
+        return True
+
     @classmethod
     def build(cls, value: Any):
         if cls._is_type_of(value):

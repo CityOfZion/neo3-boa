@@ -400,13 +400,22 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         self.generator.convert_literal(num.n)
 
-    def visit_Str(self, str: ast.Str):
+    def visit_Str(self, string: ast.Str):
         """
         Visitor of literal string node
 
-        :param str: the python ast string node
+        :param string: the python ast string node
         """
-        self.generator.convert_literal(str.s)
+        self.generator.convert_literal(string.s)
+
+    def visit_Bytes(self, bts: ast.Bytes):
+        """
+        Visitor of literal bytes node
+
+        :param bts: the python ast bytes node
+        :return: the value of the bytes
+        """
+        self.generator.convert_literal(bts.s)
 
     def visit_Tuple(self, tup_node: ast.Tuple):
         """
