@@ -23,6 +23,11 @@ class CompilerError(ABC, Exception):
     def __str__(self) -> str:
         return self.message
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self.message == other.message
+
 
 class TypeHintMissing(CompilerError):
     """
@@ -82,6 +87,11 @@ class UnresolvedReference(CompilerError):
     @property
     def _error_message(self) -> Optional[str]:
         return "Unresolved reference '%s'" % self.symbol_id
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self._error_message == other._error_message
 
 
 class UnresolvedOperation(CompilerError):

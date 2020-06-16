@@ -13,8 +13,8 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
     These methods are used to walk through the Python abstract syntax tree.
     """
 
-    def __init__(self, ast_tree: ast.AST):
-        super().__init__(ast_tree)
+    def __init__(self, ast_tree: ast.AST, log: bool = False):
+        super().__init__(ast_tree, log=log)
         self.visit(self._tree)
 
     @property

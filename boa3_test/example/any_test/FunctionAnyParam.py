@@ -1,3 +1,6 @@
+from typing import Any, Sequence
+
+
 def Main():
     bool_tuple = True, False
 

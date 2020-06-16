@@ -1,3 +1,6 @@
+from typing import Any, Sequence
+
+
 def Main():
     any_list = [True, 1, 'ok']
     int_list = [1, 2, 3]
