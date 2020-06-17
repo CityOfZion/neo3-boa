@@ -1,3 +1,6 @@
+from typing import Sequence
+
+
 def Main():
     int_list = [1, 2, 3]
     int_tuple = 10, 9, 8

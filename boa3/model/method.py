@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
 from boa3.model.expression import IExpression
+from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
@@ -11,6 +12,7 @@ class Method(IExpression):
 
     :ivar args: a dictionary that maps each arg with its name. Empty by default.
     :ivar locals: a dictionary that maps each local variable with its name. Empty by default.
+    :ivar imported_symbols: a dictionary that maps each imported symbol with its name. Empty by default.
     :ivar is_public: a boolean value that specifies if the method is public. False by default.
     :ivar return_type: the return type of the method. None by default.
     """
@@ -21,6 +23,8 @@ class Method(IExpression):
             args = {}
         self.args: Dict[str, Variable] = args
         self.return_type: IType = return_type
+
+        self.imported_symbols = {}
 
         self.is_public: bool = is_public
         self.is_main_method: bool = False
@@ -49,14 +53,28 @@ class Method(IExpression):
     @property
     def symbols(self) -> Dict[str, Variable]:
         """
-        Gets all the symbols in the module
+        Gets all the symbols in the method
 
         :return: a dictionary that maps each symbol in the module with its name
         """
         symbols = {}
+        symbols.update(self.imported_symbols)
         symbols.update(self.args)
         symbols.update(self.locals)
         return symbols
+
+    def include_symbol(self, symbol_id: str, symbol: ISymbol):
+        """
+        Includes a method into the scope of the module
+
+        :param symbol_id: method identifier
+        :param symbol: method to be included
+        """
+        if symbol_id not in self.symbols:
+            if isinstance(symbol, Variable):
+                self.include_variable(symbol_id, symbol)
+            else:
+                self.imported_symbols[symbol_id] = symbol
 
     @property
     def bytecode_address(self) -> Optional[int]:

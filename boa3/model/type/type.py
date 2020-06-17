@@ -15,7 +15,25 @@ from boa3.model.type.sequence.tupletype import TupleType
 
 class Type:
     @classmethod
-    def values(cls) -> Dict[str, IType]:
+    def builtin_types(cls) -> Dict[str, IType]:
+        """
+        Gets a dictionary that maps each type with its name
+
+        :return: A dictionary that maps each Python builtin type representation with its name
+        """
+        builtin_types = [
+            Type.int,
+            Type.bool,
+            Type.str,
+            Type.list,
+            Type.tuple,
+            Type.bytes,
+            Type.none
+        ]
+        return {tpe._identifier: tpe for tpe in builtin_types if isinstance(tpe, IType)}
+
+    @classmethod
+    def all_types(cls) -> Dict[str, IType]:
         value_dict = {}
         for type in vars(cls).values():
             if isinstance(type, IType):

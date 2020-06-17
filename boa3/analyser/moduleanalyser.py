@@ -4,9 +4,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
+from boa3.analyser.importanalyser import ImportAnalyser
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
@@ -27,8 +29,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol]):
-        super().__init__(ast_tree)
+    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol], filename: str = None, log: bool = False):
+        super().__init__(ast_tree, filename, log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
@@ -36,6 +38,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.__current_module: Module = None
         self.__current_method: Method = None
 
+        self.imported_nodes: List[ast.AST] = []
         self.visit(self._tree)
 
     @property
@@ -65,7 +68,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return global_symbols
 
-    def __include_variable(self, var_id: str, var_type_id: Union[str, IType], source_node: ast.AST, var_enumerate_type: IType = Type.none):
+    def __include_variable(self, var_id: str, var_type_id: Union[str, IType],
+                           source_node: ast.AST, var_enumerate_type: IType = Type.none):
         """
         Includes the variable in the symbol table if the id was not used
 
@@ -85,10 +89,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(var_type_id, SequenceType):
                 var_type = var_type_id
                 var_enumerate_type = self.get_enumerate_type(var_type)
-            else:
-                if isinstance(var_type_id, IType):
-                    var_type_id = var_type_id.identifier
-                    var_type = self.symbols[var_type_id]
+            elif isinstance(var_type_id, IType):
+                var_type = var_type_id
 
             # when setting a None value to a variable, set the variable as any type
             if var_type is Type.none:
@@ -120,6 +122,92 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return self.__current_module.symbols[symbol_id]
         else:
             return super().get_symbol(symbol_id)
+
+    # region Log
+
+    def _log_main_method(self, method_id: str, method: Method, node: ast.AST):
+        if self._log:
+            fun_args: Dict[str, Variable] = method.args
+            fun_return: IType = method.return_type
+
+            # don't show return when the function is void
+            return_type = ' -> {0}'.format(fun_return.identifier) if fun_return is not Type.none else ''
+            arg_types = ', '.join(['{0}: {1}'.format(arg, var.type.identifier) for arg, var in fun_args.items()])
+
+            logging.info("Main method found at {0}:{1}: '{2}({3}){4}'"
+                         .format(node.lineno, node.col_offset, method_id, arg_types, return_type))
+
+        # main method is always public
+        method.set_as_main_method()
+
+    def _log_import(self, import_from: str):
+        if self._log:
+            logging.info("Importing '{0}'".format(import_from))
+
+    def _log_unresolved_import(self, origin_node: ast.AST, import_id: str):
+        self._log_error(
+            CompilerError.UnresolvedReference(
+                line=origin_node.lineno,
+                col=origin_node.col_offset,
+                symbol_id=import_id
+            )
+        )
+
+    # endregion
+
+    # region AST
+
+    def visit_ImportFrom(self, import_from: ast.ImportFrom):
+        """
+        Includes methods and variables from other modules into the current scope
+
+        :param import_from:
+        """
+        self._log_import(import_from.module)
+        analyser = self._analyse_module_to_import(import_from, import_from.module)
+        if analyser is not None:
+            import_alias: Dict[str] = \
+                {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_from.names}
+
+            new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
+            # includes the module to be able to generate the functions
+            imported_module = Import(analyser.tree, new_symbols)
+            self.__current_scope.include_symbol(import_from.module, imported_module)
+
+            for name, alias in import_alias.items():
+                if name in new_symbols:
+                    self.__current_scope.include_symbol(alias, imported_module.symbols[name])
+                else:
+                    # if there's a symbol that couldn't be loaded, log a compiler error
+                    self._log_unresolved_import(import_from, name)
+
+    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
+        analyser = ImportAnalyser(target)
+        if analyser.can_be_imported:
+            return analyser
+        else:
+            self._log_unresolved_import(origin_node, target)
+
+    def visit_Import(self, import_node: ast.Import):
+        """
+        Includes methods and variables from other modules into the current scope
+
+        :param import_node:
+        """
+        import_alias: Dict[str] = \
+            {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_node.names}
+
+        for target, alias in import_alias.items():
+            self._log_import(target)
+            analyser = self._analyse_module_to_import(import_node, target)
+            if analyser is not None:
+                new_symbols: Dict[str, ISymbol] = analyser.export_symbols()
+                for symbol in [symbol for symbol in analyser.symbols if symbol not in new_symbols]:
+                    # if there's a symbol that couldn't be loaded, log a compiler error
+                    self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
+
+                imported_module = Import(analyser.tree, new_symbols)
+                self.__current_scope.include_symbol(alias, imported_module)
 
     def visit_Module(self, module: ast.Module):
         """
@@ -154,7 +242,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             raise NotImplementedError
 
         if isinstance(fun_rtype_symbol, str):
-            symbol = self.get_symbol(function.returns.id.lower())
+            symbol = self.get_symbol(function.returns.id)
             fun_rtype_symbol = self.get_type(symbol)
 
         fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
@@ -162,15 +250,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
 
         if function.name in ['main', 'Main']:
-            # don't show return when the function is void
-            return_type = ' -> {0}'.format(fun_return.identifier) if fun_return is not Type.none else ''
-            arg_types = ', '.join(['{0}: {1}'.format(arg, var.type.identifier) for arg, var in fun_args.items()])
-
-            logging.info("Main method found at {0}:{1}: '{2}({3}){4}'"
-                         .format(function.lineno, function.col_offset, function.name, arg_types, return_type))
-            # main method is always public
-            method.set_as_main_method()
-
+            self._log_main_method(function.name, method, function)
         self.__current_method = method
 
         for stmt in function.body:
@@ -204,7 +284,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_type: IType = self.get_type(arg.annotation)
 
         if var_type is Type.none and isinstance(arg.annotation, ast.Name):
-            var_symbol: ISymbol = self.get_symbol(arg.annotation.id.lower())
+            var_symbol: ISymbol = self.get_symbol(arg.annotation.id)
             var_type = self.get_type(var_symbol)
 
         return var_id, Variable(var_type)
@@ -236,8 +316,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         target_type = self.visit(target)  # Type:str or IType
         if isinstance(target_type, str) and not isinstance(target, ast.Str):
             symbol = self.get_symbol(target_type)
-            if symbol is None:
-                symbol = self.get_symbol(target_type.lower())
             if symbol is None:
                 # the symbol doesn't exists
                 self._log_error(
@@ -309,11 +387,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :rtype: IType or str
         """
         value = self.visit(subscript.value)
-        symbol = self.get_symbol(value)
-
-        if symbol is None:
-            symbol = self.get_symbol(value.lower())
-            subscript.value.id = value.lower() if symbol is not None else subscript.value
+        symbol = self.get_symbol(value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
             if isinstance(symbol, SequenceType):
@@ -334,15 +408,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         value_type: Optional[IType] = None
 
-        if isinstance(value, ast.Subscript):
+        if isinstance(value, (ast.Subscript, ast.Attribute)):
             # index is another subscription
             value_type = self.visit(value)
         elif isinstance(value, ast.Name):
             # index is an identifier
             value_type = self.get_symbol(value.id)
-            if value_type is None:
-                value_type = self.get_symbol(value.id.lower())
-                value.id = value.id.lower() if value_type is not None else value.id
 
         if not isinstance(value_type, IType):
             # type hint not using identifiers or using identifiers that are not types
@@ -377,6 +448,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.__builtin_functions_to_visit[func_id] = func_symbol
 
         return self.get_type(call.func)
+
+    def visit_Attribute(self, attribute: ast.Attribute) -> Union[ISymbol, str]:
+        """
+        Gets the attribute inside the ast node
+
+        :param attribute: the python ast attribute node
+        :return: returns the type of the value, the attribute symbol and its id if the attribute exists.
+                 Otherwise, returns None
+        """
+        value_id = attribute.value.id if isinstance(attribute.value, ast.Name) else None
+        value: ISymbol = self.get_symbol(value_id) if value_id is not None else self.visit(attribute.value)
+
+        if hasattr(value, 'symbols') and attribute.attr in value.symbols:
+            return value.symbols[attribute.attr]
+        elif Builtin.get_symbol(attribute.attr) is not None:
+            return Builtin.get_symbol(attribute.attr)
+        else:
+            return '{0}.{1}'.format(value_id, attribute.attr)
 
     def visit_For(self, for_node: ast.For):
         """
@@ -457,3 +546,5 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the list
         """
         return [self.get_type(value) for value in list_node.elts]
+
+    # endregion

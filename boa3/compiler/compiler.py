@@ -48,7 +48,7 @@ class Compiler:
 
         :param path: the path of the Python file to compile
         """
-        self.__analyser = Analyser.analyse(path)
+        self.__analyser = Analyser.analyse(path, log=True)
 
     def __compile(self) -> bytes:
         """

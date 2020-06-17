@@ -5,6 +5,7 @@ from boa3.analyser.analyser import Analyser
 from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
@@ -38,6 +39,10 @@ class CodeGenerator:
         generator = CodeGenerator(analyser.symbol_table)
         visitor = VisitorCodeGenerator(generator)
         visitor.visit(analyser.ast_tree)
+
+        for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
+            generator.symbol_table.update(symbol.symbols)
+            visitor.visit(symbol.ast)
         return generator.bytecode
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
@@ -153,7 +158,16 @@ class CodeGenerator:
 
         # the symbol may be a built in. If not, returns None
         symbol = Builtin.get_symbol(identifier)
-        return symbol if symbol is not None else Type.none
+        if symbol is not None:
+            return symbol
+
+        split = identifier.split('.')
+        if len(split) > 1:
+            attribute, symbol_id = '.'.join(split[:-1]), split[-1]
+            attr = self.get_symbol(attribute)
+            if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
+                return attr.symbols[symbol_id]
+        return Type.none
 
     def convert_begin_method(self, method: Method):
         """

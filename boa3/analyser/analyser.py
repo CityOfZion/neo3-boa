@@ -15,27 +15,32 @@ class Analyser(object):
     :ivar symbol_table: a dictionary used to store the identifiers
     """
 
-    def __init__(self, ast_tree: ast.AST):
+    def __init__(self, ast_tree: ast.AST, path: str = None, log: bool = False):
         self.symbol_table: Dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
         self.is_analysed: bool = False
+        self._log: bool = log
 
         self.__include_builtins_symbols()
 
+        import os
+        self.filename: str = path if path is None else os.path.split(os.path.realpath(path))[1]
+
     @staticmethod
-    def analyse(path: str):
+    def analyse(path: str, log: bool = False):
         """
         Analyses the syntax of the Python code
 
         :param path: the path of the Python file
+        :param log: if compiler errors should be logged.
         :return: a boolean value that represents if the analysis was successful
         :rtype: Analyser
         """
         with open(path, 'rb') as source:
             ast_tree = ast.parse(source.read())
 
-        analyser = Analyser(ast_tree)
+        analyser = Analyser(ast_tree, path, log)
         analyser.__pre_execute()
         # fill symbol table
         if not analyser.__analyse_modules():
@@ -43,7 +48,7 @@ class Analyser(object):
         # check is the types are correct
         if not analyser.__check_types():
             return analyser
-        analyser.is_analysed = True  # TODO
+        analyser.is_analysed = True
 
         return analyser
 
@@ -51,7 +56,7 @@ class Analyser(object):
         """
         Include the Python builtins in the global symbol table
         """
-        self.symbol_table.update(Type.values())
+        self.symbol_table.update(Type.builtin_types())
 
     def __check_types(self) -> bool:
         """
@@ -59,7 +64,7 @@ class Analyser(object):
 
         :return: a boolean value that represents if the analysis was successful
         """
-        type_analyser = TypeAnalyser(self.ast_tree, self.symbol_table)
+        type_analyser = TypeAnalyser(self.ast_tree, self.symbol_table, log=self._log)
         return not type_analyser.has_errors
 
     def __analyse_modules(self) -> bool:
@@ -68,12 +73,13 @@ class Analyser(object):
 
         :return: a boolean value that represents if the analysis was successful
         """
-        module_analyser = ModuleAnalyser(self.ast_tree, self.symbol_table)
+        module_analyser = ModuleAnalyser(self.ast_tree, self.symbol_table, log=self._log)
         self.symbol_table.update(module_analyser.global_symbols)
+        self.ast_tree.body.extend(module_analyser.imported_nodes)
         return not module_analyser.has_errors
 
     def __pre_execute(self):
         """
         Pre executes the instructions of the ast for optimization
         """
-        self.ast_tree = ConstructAnalyser(self.ast_tree).tree
+        self.ast_tree = ConstructAnalyser(self.ast_tree, log=self._log).tree

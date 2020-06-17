@@ -19,6 +19,11 @@ class CompilerWarning(ABC):
     def __str__(self) -> str:
         return self.message
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self.message == other.message
+
 
 class NameShadowing(CompilerWarning):
     """

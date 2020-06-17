@@ -1,4 +1,4 @@
-def Main(operation: str, args: Tuple[int]) -> bool:
+def Main(operation: str, args: tuple) -> bool:
     TestAdd(1, 2)
     return True
 

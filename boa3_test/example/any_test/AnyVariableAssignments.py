@@ -1,3 +1,6 @@
+from typing import Any
+
+
 def Main():
     a: Any = 1
     a = '2'

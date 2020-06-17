@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -31,13 +32,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :cvar __operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
     """
 
-    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol]):
-        super().__init__(ast_tree)
+    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol], log: bool = False):
+        super().__init__(ast_tree, log=log)
         self.type_errors: List[Exception] = []
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
-        self.__current_method: Method = None
+        self._current_method: Method = None
 
         self.visit(self._tree)
 
@@ -78,8 +79,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: The name identifier of the method. If the current method is None, returns None.
         :rtype: str or None
         """
-        if self.__current_method in self.symbols.values():
-            index = list(self.symbols.values()).index(self.__current_method)
+        if self._current_method in self.symbols.values():
+            index = list(self.symbols.values()).index(self._current_method)
             return list(self.symbols.keys())[index]
 
     @property
@@ -95,9 +96,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return symbols
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
-        if self.__current_method is not None and symbol_id in self.__current_method.symbols:
+        if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
-            return self.__current_method.symbols[symbol_id]
+            return self._current_method.symbols[symbol_id]
         elif symbol_id in self.modules:
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
@@ -126,7 +127,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.visit(function.args)
         method = self.symbols[function.name]
         if isinstance(method, Method):
-            self.__current_method = method
+            self._current_method = method
 
             for stmt in function.body:
                 self.visit(stmt)
@@ -137,7 +138,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 function.body.append(
                     ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
                 )
-            self.__current_method = None
+            self._current_method = None
 
     def visit_arguments(self, arguments: ast.arguments):
         """
@@ -181,12 +182,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
                 return
             # it is returning something, but there is no type hint for return
-            elif self.__current_method.return_type is Type.none:
+            elif self._current_method.return_type is Type.none:
                 self._log_error(
                     CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self.__current_method_id)
                 )
                 return
-        if not self.__current_method.return_type.is_type_of(ret_type):
+        if not self._current_method.return_type.is_type_of(ret_type):
             # if the return type is a specified type sequence, is not a mismatched type when the return expression
             # is an empty sequence
             is_empty_sequence = (
@@ -195,13 +196,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 and not isinstance(ret_value, IType)  # if it is an IType value, the latter condition will be True
                 and len(ret_value) == 0
             )
-            if not (isinstance(self.__current_method.return_type, SequenceType) and is_empty_sequence):
+            if not (isinstance(self._current_method.return_type, SequenceType) and is_empty_sequence):
                 # the return is None, but the type hint value type is not None
                 self._log_error(
                     CompilerError.MismatchedTypes(
                         ret.lineno, ret.col_offset,
                         actual_type_id=ret_type.identifier,
-                        expected_type_id=self.__current_method.return_type.identifier)
+                        expected_type_id=self._current_method.return_type.identifier)
                 )
 
         # continue to walk through the tree
@@ -238,9 +239,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         # if value is None, it is a declaration
         if ann_assign.value is not None:
             self.validate_type_variable_assign(ann_assign.target, ann_assign.value)
-
-        # continue to walk through the tree
-        self.generic_visit(ann_assign)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """
@@ -801,7 +799,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(arg0_identifier, ast.Name):
                 arg0_identifier = arg0_identifier.id
 
-            if function is not None and not isinstance(self.get_symbol(arg0_identifier), IType):
+            if function is not None and not isinstance(self.get_symbol(arg0_identifier), (IType, Import)):
                 call.args.insert(0, arg0)
             if len(call.args) > 0 and isinstance(function, IBuiltinMethod) and function.has_self_argument:
                 self_type: IType = self.get_type(call.args[0])
@@ -837,7 +835,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                             ))
         return self.get_type(function)
 
-    def visit_Attribute(self, attribute: ast.Attribute) -> Tuple[IType, Optional[ISymbol], str]:
+    def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Tuple[ast.AST, Optional[ISymbol], str]]:
         """
         Gets the attribute inside the ast node
 
@@ -845,8 +843,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: returns the type of the value, the attribute symbol and its id if the attribute exists.
                  Otherwise, returns None
         """
-        value_type: IType = self.get_type(attribute.value)
-        attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
+        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id) \
+            if isinstance(attribute.value, ast.Name) else self.visit(attribute.value)
+
+        if value is None and isinstance(attribute.value, ast.Name):
+            return '{0}.{1}'.format(attribute.value.id, attribute.attr)
+
+        symbol = None
+        if isinstance(value, str):
+            symbol = self.get_symbol(value)
+            if symbol is None:
+                return '{0}.{1}'.format(value, attribute.attr)
+        if isinstance(value, ISymbol):
+            symbol = value
+
+        if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
+            attr_symbol = symbol.symbols[attribute.attr]
+        else:
+            attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
         return attribute.value, attr_symbol, attribute.attr
 

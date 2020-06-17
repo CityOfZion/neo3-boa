@@ -381,6 +381,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param attribute: the python ast attribute node
         :return: the identifier of the attribute
         """
+        if self.generator.get_symbol(attribute.attr) is not Type.none:
+            return attribute.attr
+
+        value = attribute.value
+        if isinstance(value, ast.Attribute):
+            value = self.visit(value)
+        if isinstance(value, (ast.Name, str)):
+            value_id = value.id if isinstance(value, ast.Name) else value
+            return '{0}.{1}'.format(value_id, attribute.attr)
         return attribute.attr
 
     def visit_NameConstant(self, constant: ast.NameConstant):
