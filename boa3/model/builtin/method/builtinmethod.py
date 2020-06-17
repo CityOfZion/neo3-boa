@@ -9,7 +9,6 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class IBuiltinMethod(IBuiltinDecorator, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        self.identifier = identifier
         super().__init__(identifier, args, return_type)
 
     @property
@@ -20,6 +19,15 @@ class IBuiltinMethod(IBuiltinDecorator, ABC):
         :return: the opcode if exists. None otherwise.
         """
         return None
+
+    @property
+    def is_supported(self) -> bool:
+        """
+        Verifies if the builtin method is supported by the compiler
+
+        :return: True if it is supported. False otherwise.
+        """
+        return True
 
     @property
     def args_on_stack(self) -> int:

@@ -48,8 +48,7 @@ class BytesType(SequenceType):
 
     @classmethod
     def build_sequence(cls, value_type: IType):
-        from boa3.model.type.type import Type
-        return Type.bytes
+        return cls.build(value_type)
 
     @classmethod
     def _is_type_of(cls, value: Any):

@@ -1,2 +1,2 @@
 def Main(a: int, b: int):
-    a **= b
+    a **= b  # not supported yet

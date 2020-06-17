@@ -440,6 +440,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return None
 
         if not isinstance(func_symbol, Method):
+            # verifiy if it is a builtin method with its name shadowed
+            func = Builtin.get_symbol(func_id)
+            func_symbol = func if func is not None else func_symbol
+        if not isinstance(func_symbol, Method):
             # the symbol doesn't exists
             self._log_error(
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)

@@ -19,3 +19,7 @@ class MutableSequenceType(SequenceType, ABC):
                 return self.value_type.is_type_of(value.value_type)
             return True
         return False
+
+    @property
+    def can_reassign_values(self) -> bool:
+        return True

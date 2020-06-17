@@ -3,6 +3,7 @@ from typing import Optional
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
+from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
@@ -26,6 +27,9 @@ class Builtin:
 
     # builtin method
     Len = LenMethod()
+
+    # python builtin class constructor
+    ByteArray = ByteArrayMethod()
 
     # python class method
     Append = AppendMethod()
