@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 from boa3.model.expression import IExpression
 from boa3.model.symbol import ISymbol
-from boa3.model.type.itype import IType
+from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
 
@@ -17,7 +17,7 @@ class Method(IExpression):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = None, is_public: bool = False):
+    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none, is_public: bool = False):
         from boa3.neo.vm.VMCode import VMCode
         if args is None:
             args = {}

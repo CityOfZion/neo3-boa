@@ -48,8 +48,7 @@ class ImportAnalyser(IAstAnalyser):
                 except FileNotFoundError:
                     self.can_be_imported = False
 
-                if ('boa3' in path and 'interop' in path
-                        and all(symbol in Builtin.interop_methods() for symbol in self.symbols)):
+                if 'boa3' in path and 'interop' in path:
                     self.symbols = self._get_interop_methods(list(self.symbols.keys()))
                     updated_tree = None
 

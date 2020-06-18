@@ -581,8 +581,7 @@ class CodeGenerator:
 
         :param function: the function to be converted
         """
-        if function.opcode is not None:
-            opcode, data = function.opcode
+        for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info, data)
             for arg in function.args:
