@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -23,8 +23,8 @@ class LenMethod(IBuiltinMethod):
         return isinstance(params[0].type, SequenceType)
 
     @property
-    def opcode(self) -> Optional[Tuple[Opcode, bytes]]:
-        return Opcode.SIZE, b''
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return [(Opcode.SIZE, b'')]
 
     @property
     def _args_on_stack(self) -> int:

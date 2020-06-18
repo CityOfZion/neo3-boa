@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -46,8 +46,8 @@ class AppendMethod(IBuiltinMethod):
         return self._arg_self.type is not Type.bytearray
 
     @property
-    def opcode(self) -> Optional[Tuple[Opcode, bytes]]:
-        return Opcode.APPEND, b''
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return [(Opcode.APPEND, b'')]
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

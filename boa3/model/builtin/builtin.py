@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
-from boa3.model.builtin.interopmethods.interop import Interop
+from boa3.model.builtin.interopmethod.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
