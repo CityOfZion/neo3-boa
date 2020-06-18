@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Dict, List, Optional
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
+from boa3.model.builtin.interopmethods.interop import Interop
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.method import Method
@@ -18,7 +20,6 @@ class Builtin:
 
     @classmethod
     def get_by_self(cls, symbol_id: str, self_type: IType) -> Optional[Method]:
-        from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
         for name, method in vars(cls).items():
             if (isinstance(method, IBuiltinMethod)
                     and method.identifier == symbol_id
@@ -36,3 +37,10 @@ class Builtin:
 
     # builtin decorator
     Public = PublicDecorator()
+
+    @classmethod
+    def interop_methods(cls) -> Dict[str, Method]:
+        return {method.identifier: method for method in cls._interop_methods}
+
+    # interop methods
+    _interop_methods: List[IBuiltinMethod] = Interop.interop_methods()

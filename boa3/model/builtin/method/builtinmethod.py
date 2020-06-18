@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.type.itype import IType
@@ -12,11 +12,11 @@ class IBuiltinMethod(IBuiltinDecorator, ABC):
         super().__init__(identifier, args, return_type)
 
     @property
-    def opcode(self) -> Optional[Opcode]:
+    def opcode(self) -> Optional[Tuple[Opcode, bytes]]:
         """
         Gets the opcode for the method.
 
-        :return: the opcode if exists. None otherwise.
+        :return: the opcode and its data if exists. None otherwise.
         """
         return None
 

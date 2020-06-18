@@ -219,8 +219,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         mod: Module = Module()
         self.__current_module = mod
+
+        # don't evaluate constant expression - for example: string for documentation
+        module.body = [stmt for stmt in module.body
+                       if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
         for stmt in module.body:
             self.visit(stmt)
+
         # TODO: include the body of the builtin methods to the ast
         # TODO: get module name
         self.modules['main'] = mod
@@ -253,6 +258,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_main_method(function.name, method, function)
         self.__current_method = method
 
+        # don't evaluate constant expression - for example: string for documentation
+        function.body = [stmt for stmt in function.body
+                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
         for stmt in function.body:
             self.visit(stmt)
 

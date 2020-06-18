@@ -1,9 +1,10 @@
 import ast
 import importlib.util
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from boa3.analyser.astanalyser import IAstAnalyser
+from boa3.model.builtin.builtin import Builtin
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
 
@@ -29,6 +30,7 @@ class ImportAnalyser(IAstAnalyser):
             import re
             inside_python_folder = any(re.search(r'python(\d\.?)*', folder.lower()) for folder in path)
 
+            updated_tree = None
             if not (inside_python_folder and 'lib' in path) or 'boa3' in path:
                 # TODO: only user modules and typing lib imports are implemented
                 try:
@@ -41,10 +43,18 @@ class ImportAnalyser(IAstAnalyser):
                             {symbol_id: symbol for symbol_id, symbol in analyser.symbol_table.items()
                              if symbol_id not in Type.all_types()
                              })
-                    self._tree = analyser.ast_tree
+                    updated_tree = analyser.ast_tree
                     self.can_be_imported = analyser.is_analysed
                 except FileNotFoundError:
                     self.can_be_imported = False
+
+                if ('boa3' in path and 'interop' in path
+                        and all(symbol in Builtin.interop_methods() for symbol in self.symbols)):
+                    self.symbols = self._get_interop_methods(list(self.symbols.keys()))
+                    updated_tree = None
+
+                if updated_tree is not None:
+                    self._tree = updated_tree
 
     @property
     def tree(self) -> ast.AST:
@@ -69,11 +79,11 @@ class ImportAnalyser(IAstAnalyser):
                    if symbol_id in identifiers and symbol is not None}
         return symbols
 
-    def _get_types_from_typing_lib(self) -> Dict[str, Optional[ISymbol]]:
+    def _get_types_from_typing_lib(self) -> Dict[str, ISymbol]:
         import typing
         from types import FunctionType
 
-        type_symbols: Dict[str, Optional[ISymbol]] = {}
+        type_symbols: Dict[str, ISymbol] = {}
         all_types: List[str] = typing.__all__
 
         for t_id in all_types:
@@ -84,3 +94,6 @@ class ImportAnalyser(IAstAnalyser):
                     type_symbols[t_id] = Type.all_types()[type_id]
 
         return type_symbols
+
+    def _get_interop_methods(self, methods: List[str]) -> Dict[str, ISymbol]:
+        return {method_id: method for method_id, method in Builtin.interop_methods().items() if method_id in methods}
