@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -49,7 +49,7 @@ class ByteArrayMethod(IBuiltinMethod):
                      ))
 
     @property
-    def opcode(self) -> Optional[Opcode]:
+    def opcode(self) -> Optional[Tuple[Opcode, bytes]]:
         return None
 
     @property

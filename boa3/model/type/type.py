@@ -29,6 +29,7 @@ class Type:
             Type.list,
             Type.tuple,
             Type.bytes,
+            Type.bytearray,
             Type.none
         ]
         return {tpe._identifier: tpe for tpe in builtin_types if isinstance(tpe, IType)}

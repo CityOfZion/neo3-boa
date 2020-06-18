@@ -27,5 +27,7 @@ class Integer(int):
             return int.to_bytes(self, 1 + length, sys.byteorder, signed=signed)
 
     @classmethod
-    def from_bytes(cls, bts: bytes, signed: bool = False) -> int:
+    def from_bytes(cls, bts: bytes, signed: bool = False, byte_size: int = 0) -> int:
+        if byte_size > 0:
+            bts = bts[:byte_size]
         return int.from_bytes(bts, sys.byteorder, signed=signed)

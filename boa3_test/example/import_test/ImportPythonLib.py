@@ -2,4 +2,4 @@ import os  # it only supports user modules compiled with neo3-boa or Python typi
 
 
 def Main():
-    a = 1
+    a = os.name
