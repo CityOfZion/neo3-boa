@@ -1,8 +1,11 @@
 import os
 import sys
+from typing import Dict
 
 from boa3 import constants
 from boa3.boa3 import Boa3
+from boa3.compiler.compiler import Compiler
+from boa3.model.method import Method
 from boa3.neo.smart_contract.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3_test.tests.boa_test import BoaTest
@@ -132,3 +135,38 @@ class TestFileGeneration(BoaTest):
 
         with self.assertRaises(NotImplementedError):
             Boa3.compile_and_save(path)
+
+    def test_generate_manifest_file_abi_method_offset(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
+        manifest_path = path.replace('.py', '.manifest.json')
+
+        compiler = Compiler()
+        compiler.compile(path)
+        methods: Dict[str, Method] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Method)
+        }
+        self.assertGreater(len(methods), 0)
+
+        Boa3.compile_and_save(path)
+        self.assertTrue(os.path.exists(manifest_path))
+        with open(manifest_path, 'r') as manifest_output:
+            import json
+            manifest = json.loads(manifest_output.read())
+
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('entryPoint', abi)
+        self.assertIn('methods', abi)
+
+        abi_methods = [abi['entryPoint']]
+        abi_methods.extend(abi['methods'])
+        self.assertGreater(len(abi['methods']), 0)
+
+        for method in abi_methods:
+            self.assertIn('name', method)
+            self.assertIn('offset', method)
+            self.assertIn(method['name'], methods)
+            self.assertEqual(method['offset'], methods[method['name']].bytecode_address)

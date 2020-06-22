@@ -16,7 +16,7 @@ class BoaTest(TestCase):
         super(BoaTest, cls).setUpClass()
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
-        return compiler._Compiler__analyser
+        return compiler._analyser
 
     def assertCompilerLogs(self, expected_logged_exception, path):
         with self.assertLogs() as log:
