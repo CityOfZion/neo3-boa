@@ -11,4 +11,4 @@ class NotifyMethod(InteropMethod):
         identifier = 'notify'
         syscall = 'System.Runtime.Notify'
         args: Dict[str, Variable] = {'state': Variable(Type.any)}
-        super().__init__(identifier, syscall, args, Type.bool)
+        super().__init__(identifier, syscall, args, Type.none)
