@@ -170,3 +170,17 @@ class TestFileGeneration(BoaTest):
             self.assertIn('offset', method)
             self.assertIn(method['name'], methods)
             self.assertEqual(method['offset'], methods[method['name']].bytecode_address)
+
+    def test_generate_manifest_file_storage_feature(self):
+        path = '%s/boa3_test/example/storage_test/StorageGetBytesKey.py' % self.dirname
+        manifest_path = path.replace('.py', '.manifest.json')
+
+        Boa3.compile_and_save(path)
+        self.assertTrue(os.path.exists(manifest_path))
+        with open(manifest_path, 'r') as manifest_output:
+            import json
+            manifest = json.loads(manifest_output.read())
+
+        self.assertIn('features', manifest)
+        self.assertIn('storage', manifest['features'])
+        self.assertEqual(manifest['features']['storage'], True)
