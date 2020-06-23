@@ -806,7 +806,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 function = function.build(self_type)
 
         if not isinstance(function, Method):
-            # verifiy if it is a builtin method with its name shadowed
+            # verify if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(function_id)
             function = func if func is not None else function
         if not isinstance(function, Method):
@@ -833,7 +833,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     function = function.build(args)
                     if not function.is_supported:
                         # TODO: implement bytearray constructor with non-bytes values
-                        # number float division is not supported by Neo VM
                         self._log_error(
                             CompilerError.NotSupportedOperation(call.lineno, call.col_offset, function_id)
                         )
@@ -858,6 +857,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self.symbols[function.identifier] = function
                 call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
                                      ctx=ast.Load(), id=function.identifier)
+            if function.requires_storage:
+                self._current_method.set_storage()
         return self.get_type(function)
 
     def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Tuple[ast.AST, Optional[ISymbol], str]]:

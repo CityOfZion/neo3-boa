@@ -584,9 +584,9 @@ class CodeGenerator:
         for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info, data)
-            for arg in function.args:
-                self._stack.pop()
-            self._stack.append(function.return_type)
+        for arg in function.args:
+            self._stack.pop()
+        self._stack.append(function.return_type)
 
     def convert_method_call(self, function: Method):
         """
