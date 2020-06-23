@@ -25,11 +25,14 @@ class InteropMethod(IBuiltinMethod, ABC):
 
     @property
     def interop_method_hash(self) -> bytes:
+        return self._method_hash(self._sys_call)
+
+    def _method_hash(self, method_name: str) -> bytes:
         from boa3.constants import SIZE_OF_INT32
         from boa3.neo import cryptography
         from boa3.neo.vm.type.String import String
 
-        return cryptography.sha256(String(self._sys_call).to_bytes())[:SIZE_OF_INT32]
+        return cryptography.sha256(String(method_name).to_bytes())[:SIZE_OF_INT32]
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:

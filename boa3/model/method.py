@@ -27,6 +27,7 @@ class Method(IExpression):
         self.imported_symbols = {}
 
         self.is_public: bool = is_public
+        self._requires_storage: bool = False
         self.is_main_method: bool = False
 
         self.locals: Dict[str, Variable] = {}
@@ -87,6 +88,18 @@ class Method(IExpression):
             return None
         else:
             return self.init_bytecode.start_address
+
+    @property
+    def requires_storage(self) -> bool:
+        """
+        This method requires blockchain storage access
+
+        :return: True if the method uses storage features. False otherwise.
+        """
+        return self._requires_storage
+
+    def set_storage(self):
+        self._requires_storage = True
 
     def set_as_main_method(self):
         self.is_main_method = True

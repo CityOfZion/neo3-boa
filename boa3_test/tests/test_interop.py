@@ -40,7 +40,7 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_check_witness_mismatched_type(self):
-        path = '%s/boa3_test/example/interop_test/CheckWitnessMismatchedValue.py' % self.dirname
+        path = '%s/boa3_test/example/interop_test/CheckWitnessMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_notify_str(self):

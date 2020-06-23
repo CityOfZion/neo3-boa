@@ -30,13 +30,24 @@ class FileGenerator:
         return '0x' + to_hex_str(self._nef.script_hash)
 
     @property
+    def _public_methods(self) -> Dict[str, Method]:
+        """
+        Gets a sublist of the symbols containing all public methods
+
+        :return: a dictionary that maps each public method with its identifier
+        """
+        return {name: method for name, method in self._methods.items() if method.is_public}
+
+    @property
     def _methods(self) -> Dict[str, Method]:
         """
-        Gets a sublist of the symbols containing all the methods
+        Gets a sublist of the symbols containing all user methods
 
         :return: a dictionary that maps each method with its identifier
         """
-        return {name: method for name, method in self._symbols.items() if isinstance(method, Method) and method.is_public}
+        from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+        return {name: method for name, method in self._symbols.items()
+                if isinstance(method, Method) and not isinstance(method, IBuiltinDecorator)}
 
     @property
     def _entry_point(self) -> Optional[Tuple[str, Method]]:
@@ -47,15 +58,15 @@ class FileGenerator:
         :rtype: Tuple[str, Method] or None
         """
         method_id = None
-        if 'main' in self._methods:
+        if 'main' in self._public_methods:
             method_id = 'main'
-        elif 'Main' in self._methods:
+        elif 'Main' in self._public_methods:
             method_id = 'Main'
 
         if method_id is None:
             raise NotImplementedError
         else:
-            return method_id, self._methods[method_id]
+            return method_id, self._public_methods[method_id]
 
     def generate_nef_file(self) -> bytes:
         """
@@ -85,7 +96,7 @@ class FileGenerator:
         return {
             "groups": [],
             "features": {
-                "storage": False,
+                "storage": self._uses_storage_feature(),
                 "payable": False
             },
             "abi": self._get_abi_info(),
@@ -99,6 +110,14 @@ class FileGenerator:
             "safeMethods": [],
             "extra": None
         }
+
+    def _uses_storage_feature(self) -> bool:
+        """
+        Returns whether the smart contract uses the storage feature
+
+        :return: True if there is any method that uses storage. False otherwise.
+        """
+        return any(method.requires_storage for method in self._methods.values())
 
     def generate_abi_file(self) -> bytes:
         """
@@ -134,7 +153,7 @@ class FileGenerator:
             entry_point = entry_point[0]    # method id
 
         methods = []
-        for method_id, method in self._methods.items():
+        for method_id, method in self._public_methods.items():
             if method_id != entry_point:
                 logging.info("'{0}' method included in the ABI".format(method_id))
                 methods.append(self._construct_abi_method(method_id, method))
