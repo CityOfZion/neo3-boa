@@ -20,3 +20,12 @@ def notify(state: Any):
     :param state: the notification message
     """
     pass
+
+def log(message: str):
+    """
+    Show log messages to the client from the executing smart contract.
+
+    :param message: the log message
+    :type message: str
+    """
+    pass

@@ -130,3 +130,26 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/example/interop_test/NotifySequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_log_mismatched_type(self):
+        path = '%s/boa3_test/example/interop_test/LogMismatchedValueInt.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_log_str(self):
+        string = String('str').to_bytes()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.Log.interop_method_hash
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/interop_test/LogStr.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
