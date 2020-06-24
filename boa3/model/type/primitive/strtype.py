@@ -1,7 +1,7 @@
 from typing import Any
 
+from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
-from boa3.model.type.sequence.sequencetype import SequenceType
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItemType import StackItemType
 
@@ -38,7 +38,7 @@ class StrType(SequenceType):
             return Type.str
 
     @classmethod
-    def build_sequence(cls, value_type: IType):
+    def build_collection(cls, value_type: IType):
         from boa3.model.type.type import Type
         return Type.str
 
@@ -49,8 +49,8 @@ class StrType(SequenceType):
     def is_type_of(self, value: Any) -> bool:
         return self._is_type_of(value)
 
-    def is_valid_key(self, value_type: IType) -> bool:
-        return value_type == self.valid_key
+    def is_valid_key(self, key_type: IType) -> bool:
+        return key_type == self.valid_key
 
     @property
     def valid_key(self) -> IType:

@@ -22,6 +22,9 @@ class Variable(IExpression):
     def type(self) -> IType:
         return self.__var_type
 
+    def __str__(self) -> str:
+        return str(self.type)
+
     def set_type(self, var_type: IType):
         """
         Sets a type for the variable if its type is not defined

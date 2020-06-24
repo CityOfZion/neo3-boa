@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
@@ -15,7 +15,7 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
-from boa3.model.type.sequence.sequencetype import SequenceType
+from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -189,15 +189,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
                 return
         if not self._current_method.return_type.is_type_of(ret_type):
-            # if the return type is a specified type sequence, is not a mismatched type when the return expression
-            # is an empty sequence
-            is_empty_sequence = (
-                isinstance(ret_type, SequenceType)
+            # if the return type is a specified type collection, is not a mismatched type when the return expression
+            # is an empty collection
+            is_empty_collection = (
+                isinstance(ret_type, Collection)
                 and ret_type.is_type_of(ret_value)  # if it is a variable or a function, this will be False
                 and not isinstance(ret_value, IType)  # if it is an IType value, the latter condition will be True
                 and len(ret_value) == 0
             )
-            if not (isinstance(self._current_method.return_type, SequenceType) and is_empty_sequence):
+            if not (isinstance(self._current_method.return_type, Collection) and is_empty_collection):
                 # the return is None, but the type hint value type is not None
                 self._log_error(
                     CompilerError.MismatchedTypes(
@@ -316,16 +316,18 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             value = self.get_symbol(value.id)
         if isinstance(index, ast.Name):
             index = self.get_symbol(index.id)
+        if not isinstance(index, tuple):
+            index = (index, )
 
         # if it is a type hint, returns the outer type
-        if isinstance(value, IType) and isinstance(index, IType):
+        if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
             return value
 
         symbol_type: IType = self.get_type(value)
-        index_type: IType = self.get_type(index)
+        index_type: IType = self.get_type(index[0])
 
         # only sequence types can be subscribed
-        if not isinstance(symbol_type, SequenceType):
+        if not isinstance(symbol_type, Collection):
             self._log_error(
                 CompilerError.UnresolvedOperation(
                     subscript.lineno, subscript.col_offset,
@@ -349,7 +351,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     type_id=symbol_type.identifier,
                     operation_id=Operator.Subscript)
             )
-        return symbol_type.value_type
+        return symbol_type.item_type
 
     def validate_slice(self, subscript: ast.Subscript, slice_node: ast.Slice) -> IType:
         """
@@ -375,8 +377,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         symbol_type: IType = self.get_type(value)
-        # only sequence types can be subscribed
-        if not isinstance(symbol_type, SequenceType):
+        # only collection types can be subscribed
+        if not isinstance(symbol_type, Collection):
             self._log_error(
                 CompilerError.UnresolvedOperation(
                     subscript.lineno, subscript.col_offset,
@@ -449,7 +451,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         iterator = self.visit(for_node.iter)
         iterator_type: IType = self.get_type(iterator)
 
-        if not isinstance(iterator_type, SequenceType):
+        if not isinstance(iterator_type, Collection):
             self._log_error(
                 CompilerError.MismatchedTypes(
                     for_node.lineno, for_node.col_offset,
@@ -799,7 +801,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(arg0_identifier, ast.Name):
                 arg0_identifier = arg0_identifier.id
 
-            if function is not None and not isinstance(self.get_symbol(arg0_identifier), (IType, Import)):
+            if (function is not None
+                    and (len(call.args) < 1 or call.args[0] != arg0)
+                    and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
                 call.args.insert(0, arg0)
             if len(call.args) > 0 and isinstance(function, IBuiltinMethod) and function.has_self_argument:
                 self_type: IType = self.get_type(call.args[0])
@@ -940,6 +944,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return [self.get_type(value) for value in list_node.elts]
 
+    def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
+        """
+        Visitor of literal dict node
+
+        :param dict_node: the python ast dict node
+        :return: a list with each key and value type
+        """
+        dictionary = {}
+        size = min(len(dict_node.keys), len(dict_node.values))
+        for index in range(size):
+            key = self.get_type(dict_node.keys[index])
+            value = self.get_type(dict_node.values[index])
+            if key in dictionary and dictionary[key] != value:
+                dictionary[key] = Type.get_generic_type(dictionary[key], value)
+            else:
+                dictionary[key] = value
+        return dictionary
+
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """
         Visitor of constant names node
@@ -965,7 +987,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param index:
         :return: the object with the index value information
         """
-        return self.visit(index.value)
+        index = self.visit(index.value)
+        if isinstance(index, (Iterable, Tuple)):
+            return tuple(index)
+        return index
 
     def visit_Slice(self, slice_node: ast.Slice) -> Tuple[Any, Any, Any]:
         """

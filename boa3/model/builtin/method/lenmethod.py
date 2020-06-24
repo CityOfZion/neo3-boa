@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
-from boa3.model.type.sequence.sequencetype import SequenceType
+from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 

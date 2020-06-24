@@ -17,6 +17,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItemType import StackItemType
 
 
 class CodeGenerator:
@@ -407,6 +408,15 @@ class CodeGenerator:
             self._stack.pop()
             self._stack.append(value_type)
 
+    def convert_new_map(self, map_type: IType):
+        """
+        Converts the creation of a new map
+
+        :param map_type: the Neo Boa type of the map
+        """
+        self.__insert1(OpcodeInfo.NEWMAP)
+        self._stack.append(map_type)
+
     def convert_new_empty_array(self, length: int, array_type: IType):
         """
         Converts the creation of a new empty array
@@ -437,7 +447,7 @@ class CodeGenerator:
                 self._stack.pop()
             self._stack.append(array_type)
 
-    def convert_set_array_item(self):
+    def _set_array_item(self):
         """
         Converts the end of setting af a value in an array
         """
@@ -450,12 +460,20 @@ class CodeGenerator:
         first_new_code = self.__vm_codes_map[start_address]
         first_new_code._last_code, value_code._last_code = value_code._last_code, self.last_code
 
+    def convert_set_item(self):
+        """
+        Converts the end of setting af a value in an array
+        """
+        item_type: IType = self._stack[-3]  # top: index, 2nd-to-top: value, 3nd-to-top: array or map
+        if item_type.stack_item is not StackItemType.Map:
+            self._set_array_item()
+
         self.__insert1(OpcodeInfo.SETITEM)
         self._stack.pop()  # value
         self._stack.pop()  # index
-        self._stack.pop()  # array
+        self._stack.pop()  # array or map
 
-    def convert_get_array_item(self):
+    def _get_array_item(self):
         """
         Converts the end of get a value in an array
         """
@@ -463,8 +481,12 @@ class CodeGenerator:
         if index_type is Type.int:
             self.fix_negative_index()
 
-        array_type: IType = self._stack[-2]  # second-to-top: array
-        if array_type is Type.str:
+    def convert_get_item(self):
+        array_or_map_type: IType = self._stack[-2]  # second-to-top: array or map
+        if array_or_map_type.stack_item is not StackItemType.Map:
+            self._get_array_item()
+
+        if array_or_map_type is Type.str:
             self.convert_literal(1)  # length of substring
             self.convert_get_substring()
         else:

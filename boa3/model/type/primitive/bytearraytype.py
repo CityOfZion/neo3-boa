@@ -1,7 +1,7 @@
 from typing import Any
 
+from boa3.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
 from boa3.model.type.primitive.bytestype import BytesType
-from boa3.model.type.sequence.mutable.mutablesequencetype import MutableSequenceType
 
 
 class ByteArrayType(BytesType, MutableSequenceType):

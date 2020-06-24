@@ -1,16 +1,16 @@
 from abc import ABC
-from typing import List, Any
+from typing import Any, Set
 
+from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
-from boa3.model.type.sequence.sequencetype import SequenceType
 
 
 class MutableSequenceType(SequenceType, ABC):
     """
-    An interface used to represent Python sequence type
+    An interface used to represent Python mutable sequence type
     """
 
-    def __init__(self, identifier: str, values_type: List[IType]):
+    def __init__(self, identifier: str, values_type: Set[IType]):
         super().__init__(identifier, values_type)
 
     def is_type_of(self, value: Any) -> bool:

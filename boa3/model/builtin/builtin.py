@@ -1,6 +1,8 @@
 from typing import Dict, List, Optional
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
+from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
+from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interopmethod.interop import Interop
@@ -34,6 +36,8 @@ class Builtin:
 
     # python class method
     Append = AppendMethod()
+    Keys = MapKeysMethod()
+    Values = MapValuesMethod()
 
     # builtin decorator
     Public = PublicDecorator()

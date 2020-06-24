@@ -1,6 +1,12 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from boa3.model.type.anytype import anyType
+from boa3.model.type.collection.mapping.genericmappingtype import GenericMappingType
+from boa3.model.type.collection.mapping.mutable.dicttype import DictType
+from boa3.model.type.collection.sequence.genericsequencetype import GenericSequenceType
+from boa3.model.type.collection.sequence.mutable.genericmutablesequencetype import GenericMutableSequenceType
+from boa3.model.type.collection.sequence.mutable.listtype import ListType
+from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.booltype import BoolType
 from boa3.model.type.primitive.bytearraytype import ByteArrayType
@@ -8,10 +14,6 @@ from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.inttype import IntType
 from boa3.model.type.primitive.nonetype import NoneType
 from boa3.model.type.primitive.strtype import StrType
-from boa3.model.type.sequence.genericsequencetype import GenericSequenceType
-from boa3.model.type.sequence.mutable.genericmutablesequencetype import GenericMutableSequenceType
-from boa3.model.type.sequence.mutable.listtype import ListType
-from boa3.model.type.sequence.tupletype import TupleType
 
 
 class Type:
@@ -28,6 +30,7 @@ class Type:
             Type.str,
             Type.list,
             Type.tuple,
+            Type.dict,
             Type.bytes,
             Type.bytearray,
             Type.none
@@ -36,11 +39,7 @@ class Type:
 
     @classmethod
     def all_types(cls) -> Dict[str, IType]:
-        value_dict = {}
-        for type in vars(cls).values():
-            if isinstance(type, IType):
-                value_dict[type._identifier] = type
-        return value_dict
+        return {tpe._identifier: tpe for tpe in vars(cls).values() if isinstance(tpe, IType)}
 
     @classmethod
     def get_type(cls, value: Any) -> IType:
@@ -61,26 +60,34 @@ class Type:
         return cls.none
 
     @classmethod
-    def get_generic_type(cls, type1: IType, type2: IType) -> IType:
+    def get_generic_type(cls, *types: IType) -> IType:
         """
         Returns the common generic type between the given values.
 
-        :param type1: first type to be compared
-        :param type2: second type to be compared
+        :param types: list of type to be compared
         :return: Returns the common generic type of the values if exist. `Type.any` otherwise.
         """
-        if type1 == type2 or type1.is_type_of(type2):
-            return type1
-        if type2.is_type_of(type1):
-            return type2
+        generic = cls.any
+        if len(types) > 0:
+            generic_types = [cls.mutableSequence, cls.sequence]
+            generic = types[0]
+            for tpe in types[1:]:
+                if generic == tpe or generic.is_type_of(tpe):
+                    continue
+                if tpe.is_type_of(generic):
+                    generic = tpe
+                    continue
 
-        generic_types = [cls.mutableSequence, cls.sequence]
-        for generic in generic_types:
-            if generic.is_type_of(type1) and generic.is_type_of(type2):
-                return generic
-        return Type.any
+                for gen in generic_types:
+                    if gen.is_type_of(generic) and gen.is_type_of(tpe):
+                        generic = gen
+                        continue
 
-    # Primitive Types
+                if generic is Type.any:
+                    break
+        return generic
+
+    # Builtin Types
     int = IntType()
     bool = BoolType()
     str = StrType()
@@ -89,8 +96,10 @@ class Type:
     bytearray = ByteArrayType()
     tuple = TupleType()
     list = ListType()
+    dict = DictType()
 
     # Generic types
     sequence = GenericSequenceType()
     mutableSequence = GenericMutableSequenceType()
+    mapping = GenericMappingType()
     any = anyType
