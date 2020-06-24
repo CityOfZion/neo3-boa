@@ -1,12 +1,12 @@
 import json
 import logging
-import sys
 from typing import Any, Dict, List, Optional, Tuple
 
+from boa3.constants import ENCODING
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.neo import to_hex_str
-from boa3.neo.smart_contract.neffile import NefFile
+from boa3.neo.contracts.neffile import NefFile
 
 
 class FileGenerator:
@@ -84,7 +84,7 @@ class FileGenerator:
         """
         data: Dict[str, Any] = self._get_manifest_info()
         json_data: str = json.dumps(data, indent=4)
-        return bytes(json_data, sys.getdefaultencoding())
+        return bytes(json_data, ENCODING)
 
     def _get_manifest_info(self) -> Dict[str, Any]:
         """
@@ -127,7 +127,7 @@ class FileGenerator:
         """
         data: Dict[str, Any] = self._get_abi_info()
         json_data: str = json.dumps(data)
-        return bytes(json_data, sys.getdefaultencoding())
+        return bytes(json_data, ENCODING)
 
     def _get_abi_info(self) -> Dict[str, Any]:
         """

@@ -1,4 +1,3 @@
-import sys
 from typing import Dict
 
 from boa3.boa3 import Boa3
@@ -8,6 +7,8 @@ from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -48,13 +49,13 @@ class TestVariable(BoaTest):
 
     def test_assignment_with_type(self):
         input = 'unit_test'
-        byte_input = bytes(input, sys.getdefaultencoding())
+        byte_input = String(input).to_bytes()
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
             + Opcode.PUSHDATA1  # assignment value
-            + len(byte_input).to_bytes(1, sys.byteorder)
+            + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.STLOC0     # variable address
             + Opcode.PUSHNULL
@@ -84,13 +85,13 @@ class TestVariable(BoaTest):
 
     def test_argument_assignment(self):
         input = 'unit_test'
-        byte_input = bytes(input, sys.getdefaultencoding())
+        byte_input = String(input).to_bytes()
         expected_output = (
             Opcode.INITSLOT         # function signature
             + b'\x00'
             + b'\x01'
             + Opcode.PUSHDATA1      # assignment value
-            + len(byte_input).to_bytes(1, sys.byteorder)
+            + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.STARG0         # variable address
             + Opcode.PUSHNULL

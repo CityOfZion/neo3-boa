@@ -1,5 +1,4 @@
 import ast
-import sys
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.codegenerator import CodeGenerator
@@ -58,7 +57,7 @@ class TestConstant(BoaTest):
 
     def test_two_bytes_length_integer_constant(self):
         byte_input = bytes(300) + b'\x01'
-        input = int.from_bytes(byte_input, sys.byteorder)
+        input = Integer.from_bytes(byte_input)
         expected_output = (
             Opcode.PUSHDATA2            # push the bytes
             + Integer(len(byte_input)).to_byte_array(min_length=2)

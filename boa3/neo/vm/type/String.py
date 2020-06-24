@@ -1,4 +1,4 @@
-import sys
+from boa3.constants import ENCODING
 
 
 class String(str):
@@ -10,9 +10,9 @@ class String(str):
         :return: Return an array of bytes representing an string.
         """
 
-        bts = bytes(self, sys.getdefaultencoding())
+        bts = bytes(self, ENCODING)
         return bts.ljust(min_length)
 
     @classmethod
     def from_bytes(cls, bts: bytes) -> str:
-        return bts.decode(sys.getdefaultencoding())
+        return bts.decode(ENCODING)
