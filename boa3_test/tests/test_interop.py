@@ -46,10 +46,7 @@ class TestInterop(BoaTest):
     def test_notify_str(self):
         string = String('str').to_bytes()
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSHDATA1
+            Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
             + Opcode.SYSCALL
@@ -64,10 +61,7 @@ class TestInterop(BoaTest):
 
     def test_notify_int(self):
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH15
+            Opcode.PUSH15
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -80,10 +74,7 @@ class TestInterop(BoaTest):
 
     def test_notify_bool(self):
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH1
+            Opcode.PUSH1
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -96,10 +87,7 @@ class TestInterop(BoaTest):
 
     def test_notify_none(self):
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSHNULL
+            Opcode.PUSHNULL
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -112,10 +100,7 @@ class TestInterop(BoaTest):
 
     def test_notify_sequence(self):
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH7
+            Opcode.PUSH7
             + Opcode.PUSH5
             + Opcode.PUSH3
             + Opcode.PUSH2
@@ -138,10 +123,7 @@ class TestInterop(BoaTest):
     def test_log_str(self):
         string = String('str').to_bytes()
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSHDATA1
+            Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
             + Opcode.SYSCALL

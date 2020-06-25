@@ -8,7 +8,7 @@ class VMCode:
     """
     Represents a Neo VM code
 
-    :ivar opcode: the opcode of the code
+    :ivar info: the opcode information of the code
     :ivar data: the data in bytes of the code. Empty byte array by default.
     """
 
@@ -20,8 +20,26 @@ class VMCode:
         :param data: the data in bytes of the code. Empty byte array by default.
         """
         self._last_code = last_code    # type:Optional[VMCode]
-        self.info: OpcodeInformation = op_info
-        self.data: bytes = self.__format_data(data)
+        self._info: OpcodeInformation = op_info
+        self._data: bytes = self.__format_data(data)
+
+    @property
+    def info(self) -> OpcodeInformation:
+        """
+        Gets the Neo VM opcode information
+
+        :return: the opcode of the code.
+        """
+        return self._info
+
+    @property
+    def data(self) -> bytes:
+        """
+        Gets the Neo VM data of the code
+
+        :return: the data in bytes of the code.
+        """
+        return self._data
 
     @property
     def start_address(self) -> int:
@@ -42,7 +60,7 @@ class VMCode:
 
         :return: the last address of the code
         """
-        return self.start_address + len(self.data)
+        return self.start_address + len(self._data)
 
     @property
     def opcode(self) -> Opcode:
@@ -54,8 +72,8 @@ class VMCode:
         return self.info.opcode
 
     def update(self, opcode: OpcodeInformation, data: bytes = bytes()):
-        self.info = opcode
-        self.data = self.__format_data(data)
+        self._info = opcode
+        self._data = self.__format_data(data)
 
     def __format_data(self, data: bytes) -> bytes:
         data_len: int = len(data)
