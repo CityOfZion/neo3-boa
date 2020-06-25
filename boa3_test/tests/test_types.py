@@ -1,8 +1,8 @@
 import ast
 
 from boa3.analyser.typeanalyser import TypeAnalyser
-from boa3.model.type.sequence.mutable.listtype import ListType
-from boa3.model.type.sequence.tupletype import TupleType
+from boa3.model.type.collection.sequence.mutable.listtype import ListType
+from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.type.type import Type
 from boa3_test.tests.boa_test import BoaTest
 
@@ -140,13 +140,13 @@ class TestTypes(BoaTest):
         self.assertTrue(sequence_type.is_type_of(tuple_type))
 
     def test_sequence_int_is_type_of_tuple_any(self):
-        sequence_type = Type.sequence.build_sequence(Type.int)
+        sequence_type = Type.sequence.build_collection(Type.int)
         tuple_type = Type.tuple
         self.assertFalse(sequence_type.is_type_of(tuple_type))
 
     def test_sequence_any_is_type_of_tuple_int(self):
         sequence_type = Type.sequence
-        tuple_type = Type.tuple.build_sequence(Type.int)
+        tuple_type = Type.tuple.build_collection(Type.int)
         self.assertTrue(sequence_type.is_type_of(tuple_type))
 
     def test_sequence_any_is_type_of_list_any(self):
@@ -155,13 +155,13 @@ class TestTypes(BoaTest):
         self.assertTrue(sequence_type.is_type_of(list_type))
 
     def test_sequence_int_is_type_of_list_any(self):
-        sequence_type = Type.sequence.build_sequence(Type.int)
+        sequence_type = Type.sequence.build_collection(Type.int)
         list_type = Type.list
         self.assertFalse(sequence_type.is_type_of(list_type))
 
     def test_sequence_any_is_type_of_list_int(self):
         sequence_type = Type.sequence
-        list_type = Type.list.build_sequence(Type.int)
+        list_type = Type.list.build_collection(Type.int)
         self.assertTrue(sequence_type.is_type_of(list_type))
 
     def test_tuple_any_is_type_of_sequence(self):
@@ -171,11 +171,11 @@ class TestTypes(BoaTest):
 
     def test_tuple_any_is_type_of_tuple_int(self):
         tuple_type = Type.tuple
-        tuple_int_type = Type.tuple.build_sequence(Type.int)
+        tuple_int_type = Type.tuple.build_collection(Type.int)
         self.assertTrue(tuple_type.is_type_of(tuple_int_type))
 
     def test_tuple_int_is_type_of_tuple_any(self):
-        tuple_type = Type.tuple.build_sequence(Type.int)
+        tuple_type = Type.tuple.build_collection(Type.int)
         tuple_any_type = Type.tuple
         self.assertFalse(tuple_type.is_type_of(tuple_any_type))
 
@@ -186,11 +186,11 @@ class TestTypes(BoaTest):
 
     def test_list_any_is_type_of_list_int(self):
         list_type = Type.list
-        list_int_type = Type.list.build_sequence(Type.int)
+        list_int_type = Type.list.build_collection(Type.int)
         self.assertTrue(list_type.is_type_of(list_int_type))
 
     def test_list_int_is_type_of_list_any(self):
-        list_type = Type.list.build_sequence(Type.int)
+        list_type = Type.list.build_collection(Type.int)
         list_any_type = Type.list
         self.assertFalse(list_type.is_type_of(list_any_type))
 
@@ -200,6 +200,6 @@ class TestTypes(BoaTest):
         self.assertFalse(str_type.is_type_of(sequence_type))
 
     def test_str_any_is_type_of_sequence_str(self):
-        sequence_type = Type.sequence.build_sequence(Type.str)
+        sequence_type = Type.sequence.build_collection(Type.str)
         str_type = Type.str
         self.assertFalse(str_type.is_type_of(sequence_type))

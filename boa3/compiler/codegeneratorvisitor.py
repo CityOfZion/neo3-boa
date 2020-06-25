@@ -111,7 +111,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.generator.convert_load_symbol(var_id)
                 self.visit_to_generate(index)
                 self.visit_to_generate(value)
-                self.generator.convert_set_array_item()
+                self.generator.convert_set_item()
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -171,7 +171,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             # get item
             self.visit_to_generate(subscript.value)
             self.visit_to_generate(subscript.slice.value)
-            self.generator.convert_get_array_item()
+            self.generator.convert_get_item()
         else:
             # set item
             var_id = self.visit(subscript.value)
@@ -441,6 +441,20 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param list_node: the python ast list node
         """
         self.__create_array(list_node.elts, Type.list)
+
+    def visit_Dict(self, dict_node: ast.Dict):
+        """
+        Visitor of literal dict node
+
+        :param dict_node: the python ast dict node
+        """
+        length = min(len(dict_node.keys), len(dict_node.values))
+        self.generator.convert_new_map(Type.dict)
+        for key_value in range(length):
+            self.generator.duplicate_stack_top_item()
+            self.visit_to_generate(dict_node.keys[key_value])
+            self.visit_to_generate(dict_node.values[key_value])
+            self.generator.convert_set_item()
 
     def __create_array(self, values: List[ast.AST], array_type: IType):
         """

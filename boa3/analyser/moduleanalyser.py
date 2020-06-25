@@ -1,6 +1,6 @@
 import ast
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
@@ -12,9 +12,9 @@ from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
-from boa3.model.type.itype import IType
-from boa3.model.type.sequence.sequencetype import SequenceType
-from boa3.model.type.type import Type
+from boa3.model.type.collection.icollection import ICollectionType as Collection
+from boa3.model.type.collection.sequence.sequencetype import SequenceType
+from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
 
@@ -99,7 +99,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(var_type, IType) or var_type is None:
                 # if type is None, the variable type depends on the type of a expression
                 if isinstance(var_type, SequenceType):
-                    var_type = var_type.build_sequence(var_enumerate_type)
+                    var_type = var_type.build_collection(var_enumerate_type)
                 var = Variable(var_type)
                 self.__current_scope.include_variable(var_id, var)
 
@@ -127,15 +127,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _log_main_method(self, method_id: str, method: Method, node: ast.AST):
         if self._log:
-            fun_args: Dict[str, Variable] = method.args
-            fun_return: IType = method.return_type
-
-            # don't show return when the function is void
-            return_type = ' -> {0}'.format(fun_return.identifier) if fun_return is not Type.none else ''
-            arg_types = ', '.join(['{0}: {1}'.format(arg, var.type.identifier) for arg, var in fun_args.items()])
-
-            logging.info("Main method found at {0}:{1}: '{2}({3}){4}'"
-                         .format(node.lineno, node.col_offset, method_id, arg_types, return_type))
+            logging.info("Main method found at {0}:{1}: '{2}{3}'"
+                         .format(node.lineno, node.col_offset, method_id, method))
 
         # main method is always public
         method.set_as_main_method()
@@ -145,13 +138,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             logging.info("Importing '{0}'".format(import_from))
 
     def _log_unresolved_import(self, origin_node: ast.AST, import_id: str):
-        self._log_error(
-            CompilerError.UnresolvedReference(
-                line=origin_node.lineno,
-                col=origin_node.col_offset,
-                symbol_id=import_id
+        if self._log:
+            self._log_error(
+                CompilerError.UnresolvedReference(
+                    line=origin_node.lineno,
+                    col=origin_node.col_offset,
+                    symbol_id=import_id
+                )
             )
-        )
 
     # endregion
 
@@ -398,9 +392,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         symbol = self.get_symbol(value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, SequenceType):
-                values_type: IType = self.get_values_type(subscript.slice.value)
-                return symbol.build_sequence(values_type)
+            if isinstance(symbol, Collection):
+                values_type: Iterable[IType] = self.get_values_type(subscript.slice.value)
+                return symbol.build_collection(*values_type)
 
             symbol_type = self.get_type(symbol)
             if isinstance(symbol_type, SequenceType):
@@ -408,7 +402,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return value
 
-    def get_values_type(self, value: ast.AST):
+    def get_values_type(self, value: ast.AST) -> Iterable[Optional[IType]]:
         """
         Verifies if it is a multiple assignments statement
 
@@ -416,21 +410,23 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         value_type: Optional[IType] = None
 
-        if isinstance(value, (ast.Subscript, ast.Attribute)):
+        if isinstance(value, (ast.Subscript, ast.Attribute, ast.Tuple)):
             # index is another subscription
             value_type = self.visit(value)
         elif isinstance(value, ast.Name):
             # index is an identifier
             value_type = self.get_symbol(value.id)
 
-        if not isinstance(value_type, IType):
-            # type hint not using identifiers or using identifiers that are not types
-            index = self.visit(value)
-            self._log_error(
-                CompilerError.UnresolvedReference(value.lineno, value.col_offset, index)
-            )
+        types: Iterable[Optional[IType]] = value_type if isinstance(value_type, Iterable) else [value_type]
+        for tpe in types:
+            if not isinstance(tpe, IType):
+                # type hint not using identifiers or using identifiers that are not types
+                index = self.visit(value)
+                self._log_error(
+                    CompilerError.UnresolvedReference(value.lineno, value.col_offset, index)
+                )
 
-        return value_type
+        return types
 
     def visit_Call(self, call: ast.Call) -> Optional[IType]:
         """
@@ -558,5 +554,23 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the list
         """
         return [self.get_type(value) for value in list_node.elts]
+
+    def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
+        """
+        Visitor of literal dict node
+
+        :param dict_node: the python ast dict node
+        :return: the value of the dict
+        """
+        dictionary = {}
+        size = min(len(dict_node.keys), len(dict_node.values))
+        for index in range(size):
+            key = self.get_type(dict_node.keys[index])
+            value = self.get_type(dict_node.values[index])
+            if key in dictionary and dictionary[key] != value:
+                dictionary[key] = Type.get_generic_type(dictionary[key], value)
+            else:
+                dictionary[key] = value
+        return dictionary
 
     # endregion

@@ -54,7 +54,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         """
         # visits if it is a node
         if isinstance(value, ast.AST):
-            fun_rtype_id: str = ast.NodeVisitor.visit(self, value)
+            fun_rtype_id: Any = ast.NodeVisitor.visit(self, value)
             if isinstance(fun_rtype_id, ast.Name):
                 fun_rtype_id = fun_rtype_id.id
 

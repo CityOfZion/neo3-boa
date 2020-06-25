@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from boa3.model.expression import IExpression
 from boa3.model.symbol import ISymbol
@@ -50,6 +50,13 @@ class Method(IExpression):
     @property
     def type(self) -> IType:
         return self.return_type
+
+    def __str__(self) -> str:
+        args_types: List[str] = [str(arg.type) for arg in self.args.values()]
+        if self.return_type is not Type.none:
+            return '({0}) -> {1}'.format(', '.join(args_types), self.return_type)
+        else:
+            return '({0})'.format(', '.join(args_types))
 
     @property
     def symbols(self) -> Dict[str, Variable]:

@@ -24,6 +24,9 @@ class IType(ISymbol):
     def identifier(self) -> str:
         return self._identifier
 
+    def __str__(self) -> str:
+        return self.identifier
+
     @property
     def default_value(self) -> Any:
         return None
