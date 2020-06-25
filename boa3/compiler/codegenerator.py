@@ -540,26 +540,16 @@ class CodeGenerator:
         :param var_id: the value to be converted
         :param var: the actual variable to be loaded
         """
-        is_arg = False
-        local = var_id in self._current_method.symbols
-        if local:
-            is_arg = var_id in self._args
-            if is_arg:
-                scope = self._args
+        index, local, is_arg = self._get_variable_info(var_id)
+        if index >= 0:
+            opcode = Opcode.get_load(index, local, is_arg)
+            op_info = OpcodeInfo.get_info(opcode)
+
+            if op_info.data_len > 0:
+                self.__insert1(op_info, Integer(index).to_byte_array())
             else:
-                scope = self._locals
-        else:
-            scope = self._globals
-
-        index: int = scope.index(var_id)
-        opcode = Opcode.get_load(index, local, is_arg)
-        op_info = OpcodeInfo.get_info(opcode)
-
-        if op_info.data_len > 0:
-            self.__insert1(op_info, Integer(index).to_byte_array())
-        else:
-            self.__insert1(op_info)
-        self._stack.append(var.type)
+                self.__insert1(op_info)
+            self._stack.append(var.type)
 
     def convert_store_variable(self, var_id: str):
         """
@@ -567,8 +557,29 @@ class CodeGenerator:
 
         :param var_id: the value to be converted
         """
-        is_arg = False
-        local = var_id in self._current_method.symbols
+        index, local, is_arg = self._get_variable_info(var_id)
+        if index >= 0:
+            opcode = Opcode.get_store(index, local, is_arg)
+            if opcode is not None:
+                op_info = OpcodeInfo.get_info(opcode)
+
+                if op_info.data_len > 0:
+                    self.__insert1(op_info, Integer(index).to_byte_array())
+                else:
+                    self.__insert1(op_info)
+                self._stack.pop()
+
+    def _get_variable_info(self, var_id: str) -> Tuple[int, bool, bool]:
+        """
+        Gets the necessary information about the variable to get the correct opcode
+
+        :param var_id: the name id of the
+        :return: returns the index of the variable in its scope and two boolean variables for representing the variable
+        scope: `local` is True if it is a local variable and `is_arg` is True only if the variable is a parameter of
+        the function. If the variable is not found, returns (-1, False, False)
+        """
+        is_arg: bool = False
+        local: bool = var_id in self._current_method.symbols
         if local:
             is_arg = var_id in self._args
             if is_arg:
@@ -578,16 +589,8 @@ class CodeGenerator:
         else:
             scope = self._globals
 
-        index: int = scope.index(var_id)
-        opcode = Opcode.get_store(index, local, is_arg)
-        if opcode is not None:
-            op_info = OpcodeInfo.get_info(opcode)
-
-            if op_info.data_len > 0:
-                self.__insert1(op_info, Integer(index).to_byte_array())
-            else:
-                self.__insert1(op_info)
-            self._stack.pop()
+        index: int = scope.index(var_id) if var_id in scope else -1
+        return index, local, is_arg
 
     def convert_builtin_method_call(self, function: IBuiltinMethod):
         """
