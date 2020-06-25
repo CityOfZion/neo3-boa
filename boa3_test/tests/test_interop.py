@@ -1,6 +1,8 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
-from boa3.model.builtin.interopmethod.interop import Interop
+from boa3.interop.runtime import TriggerType
+from boa3.model.builtin.interop.interop import Interop
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -133,5 +135,52 @@ class TestInterop(BoaTest):
         )
 
         path = '%s/boa3_test/example/interop_test/LogStr.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_trigger(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.GetTrigger.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/interop_test/Trigger.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_is_application_trigger(self):
+        application = Integer(TriggerType.APPLICATION.value).to_byte_array()
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.GetTrigger.interop_method_hash
+            + Opcode.PUSHDATA1
+            + Integer(len(application)).to_byte_array(min_length=1)
+            + application
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.EQUAL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/interop_test/TriggerApplication.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_is_verification_trigger(self):
+        verification = Integer(TriggerType.VERIFICATION.value).to_byte_array()
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.GetTrigger.interop_method_hash
+            + Opcode.PUSHDATA1
+            + Integer(len(verification)).to_byte_array(min_length=1)
+            + verification
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.EQUAL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/interop_test/TriggerVerification.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

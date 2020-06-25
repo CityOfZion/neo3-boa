@@ -550,6 +550,13 @@ class CodeGenerator:
                 self.__insert1(op_info)
             self._stack.append(var.type)
 
+        elif hasattr(var.type, 'get_value'):
+            # the variable is a type constant
+            # TODO: change this when implement class conversion
+            value = var.type.get_value(var_id.split('.')[-1])
+            if value is not None:
+                self.convert_literal(value)
+
     def convert_store_variable(self, var_id: str):
         """
         Converts the assignment of a variable

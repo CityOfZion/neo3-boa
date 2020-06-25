@@ -27,7 +27,10 @@ class ObjectEquality(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
-        return left in self._valid_types and right in self._valid_types
+        return self._is_valid_type(left) and self._is_valid_type(right)
+
+    def _is_valid_type(self, tpe: IType) -> bool:
+        return any(valid.is_type_of(tpe) for valid in self._valid_types)
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):

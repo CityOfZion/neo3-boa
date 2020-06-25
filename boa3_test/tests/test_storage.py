@@ -1,6 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
-from boa3.model.builtin.interopmethod.interop import Interop
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer

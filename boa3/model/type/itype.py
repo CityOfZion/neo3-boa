@@ -1,12 +1,13 @@
 from abc import abstractmethod
-from typing import Any
+from typing import Any, Dict
 
+from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.symbol import ISymbol
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItemType import StackItemType
 
 
-class IType(ISymbol):
+class IType(IdentifiedSymbol):
     """
     An interface used to represent types
 
@@ -14,15 +15,11 @@ class IType(ISymbol):
     """
 
     def __init__(self, identifier: str):
-        self._identifier: str = identifier
+        super().__init__(identifier)
 
     @property
     def shadowing_name(self) -> str:
         return 'type'
-
-    @property
-    def identifier(self) -> str:
-        return self._identifier
 
     def __str__(self) -> str:
         return self.identifier
@@ -92,3 +89,12 @@ class IType(ISymbol):
         :rtype: IType or None
         """
         pass
+
+    @property
+    def symbols(self) -> Dict[str, ISymbol]:
+        """
+        Gets the class symbols of this type
+
+        :return: a dictionary that maps each symbol in the class type with its name
+        """
+        return {}

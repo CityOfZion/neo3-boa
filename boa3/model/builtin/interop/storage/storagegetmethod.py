@@ -1,21 +1,21 @@
 from typing import Dict, List, Tuple, Any, Iterable, Sized
 
-from boa3.model.builtin.interopmethod.interopmethod import InteropMethod
+from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class StoragePutMethod(InteropMethod):
+class StorageGetMethod(InteropMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
-        identifier = 'put'
-        syscall = 'System.Storage.Put'
+        identifier = 'get'
+        syscall = 'System.Storage.Get'
         self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
-        args: Dict[str, Variable] = {'key': Variable(Type.bytes), 'value': Variable(Type.bytes)}
-        super().__init__(identifier, syscall, args, Type.none)
+        args: Dict[str, Variable] = {'key': Variable(Type.bytes)}
+        super().__init__(identifier, syscall, args, Type.bytes)
 
     @property
     def requires_storage(self) -> bool:
@@ -30,20 +30,12 @@ class StoragePutMethod(InteropMethod):
         if len(params) != len(args):
             return False
 
-        return (self._validate_key_type(params[0].type)
-                and self._validate_value_type(params[1].type))
+        return self._validate_key_type(params[0].type)
 
     def _validate_key_type(self, key_type: IType):
         # TODO: refactor when `Union` type is implemented
         from boa3.model.type.type import Type
         return Type.str.is_type_of(key_type) or Type.bytes.is_type_of(key_type)
-
-    def _validate_value_type(self, key_type: IType):
-        # TODO: refactor when `Union` type is implemented
-        from boa3.model.type.type import Type
-        return (Type.str.is_type_of(key_type)
-                or Type.int.is_type_of(key_type)
-                or Type.bytes.is_type_of(key_type))
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
@@ -60,27 +52,25 @@ class StoragePutMethod(InteropMethod):
     def key_arg(self) -> Variable:
         return self.args['key']
 
-    @property
-    def value_arg(self) -> Variable:
-        return self.args['value']
-
     def build(self, value: Any):
-        if not isinstance(value, (Sized, Iterable)):
-            return self
-        num_args: int = len(self.args)
-        if len(value) != num_args or any(not isinstance(exp, (IExpression, IType)) for exp in value[:num_args]):
+        exp: List[IExpression] = []
+        if isinstance(value, Sized):
+            if len(value) > 1 or not isinstance(value, Iterable):
+                return self
+            exp = [exp if isinstance(exp, IExpression) else Variable(exp)
+                   for exp in value if isinstance(exp, (IExpression, IType))]
+
+        elif isinstance(exp, (IExpression, IType)):
+            exp = [value if isinstance(value, IExpression) else Variable(value)]
+        else:
             return self
 
-        exp = [exp if isinstance(exp, IExpression) else Variable(exp) for exp in value]
         if not self.validate_parameters(*exp):
             return self
 
+        method = self
         key_type: IType = exp[0].type
-        value_type: IType = exp[1].type
-        if self.key_arg.type.is_type_of(key_type) and self.value_arg.type.is_type_of(value_type):
-            return self
-
-        method: InteropMethod = StoragePutMethod()
-        method.args['key'] = Variable(key_type)
-        method.args['value'] = Variable(value_type)
+        if not method.key_arg.type.is_type_of(key_type):
+            method = StorageGetMethod()
+            method.args['key'] = Variable(key_type)
         return method
