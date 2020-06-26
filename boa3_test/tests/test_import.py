@@ -47,10 +47,7 @@ class TestImport(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSHNULL
             + Opcode.RET
-            + Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            + Opcode.NEWARRAY0  # imported function
             + Opcode.RET        # return
         )
 
@@ -61,7 +58,7 @@ class TestImport(BoaTest):
         path = '%s/boa3_test/example/import_test/ImportUserModuleWithAlias.py' % self.dirname
 
         expected_output = (
-                Opcode.INITSLOT     # function signature
+            Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
             + Opcode.CALL
@@ -69,10 +66,7 @@ class TestImport(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSHNULL
             + Opcode.RET
-            + Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            + Opcode.NEWARRAY0  # imported function
             + Opcode.RET        # return
         )
 
@@ -87,10 +81,7 @@ class TestImport(BoaTest):
         path = '%s/boa3_test/example/import_test/FromImportTyping.py' % self.dirname
 
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            Opcode.NEWARRAY0
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -100,10 +91,7 @@ class TestImport(BoaTest):
         path = '%s/boa3_test/example/import_test/FromImportTypingWithAlias.py' % self.dirname
 
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            Opcode.NEWARRAY0
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -125,10 +113,7 @@ class TestImport(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSHNULL
             + Opcode.RET
-            + Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            + Opcode.NEWARRAY0  # imported function
             + Opcode.RET        # return
         )
 
@@ -147,10 +132,7 @@ class TestImport(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSHNULL
             + Opcode.RET
-            + Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            + Opcode.NEWARRAY0  # imported function
             + Opcode.RET        # return
         )
 

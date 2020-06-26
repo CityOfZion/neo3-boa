@@ -21,6 +21,7 @@ def notify(state: Any):
     """
     pass
 
+
 def log(message: str):
     """
     Show log messages to the client from the executing smart contract.

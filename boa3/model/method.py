@@ -32,6 +32,7 @@ class Method(IExpression):
 
         self.locals: Dict[str, Variable] = {}
         self.init_bytecode: Optional[VMCode] = None
+        self.init_address: Optional[int] = None
 
     @property
     def shadowing_name(self) -> str:
@@ -92,7 +93,7 @@ class Method(IExpression):
         :return: the first address of the method
         """
         if self.init_bytecode is None:
-            return None
+            return self.init_address
         else:
             return self.init_bytecode.start_address
 

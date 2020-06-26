@@ -25,10 +25,8 @@ class TestFunction(BoaTest):
 
     def test_string_function(self):
         expected_output = (
-            Opcode.INITSLOT         # function signature
-            + b'\x00'               # num local variables
-            + b'\x00'               # num arguments
-            + Opcode.PUSHDATA1      # body
+            # functions without arguments and local variables don't need initslot
+            Opcode.PUSHDATA1        # body
             + bytes([len('42')])
             + bytes('42', 'UTF-8')
             + Opcode.RET            # return
@@ -41,10 +39,8 @@ class TestFunction(BoaTest):
 
     def test_bool_function(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'           # num local variables
-            + b'\x00'           # num arguments
-            + Opcode.PUSH1      # body
+            # functions without arguments and local variables don't need initslot
+            Opcode.PUSH1      # body
             + Opcode.RET        # return
         )
 
@@ -132,10 +128,7 @@ class TestFunction(BoaTest):
 
     def test_empty_list_return(self):
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x00'
-            + Opcode.NEWARRAY0
+            Opcode.NEWARRAY0
             + Opcode.RET
         )
 
@@ -189,11 +182,8 @@ class TestFunction(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0         # return a
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
-            + b'\x00'
-            + b'\x00'
-            + Opcode.PUSH1          # return 1
-            + Opcode.RET
+            + Opcode.PUSH1      # TestFunction
+            + Opcode.RET            # return 1
         )
 
         path = '%s/boa3_test/example/function_test/CallReturnFunctionWithoutArgs.py' % self.dirname
@@ -323,7 +313,7 @@ class TestFunction(BoaTest):
 
         self.assertEqual(expected_output, output)
 
-    def test_call_function_with_on_return(self):
+    def test_call_function_on_return(self):
         called_function_address = Integer(3).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -349,6 +339,48 @@ class TestFunction(BoaTest):
         )
 
         path = '%s/boa3_test/example/function_test/CallReturnFunctionOnReturn.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_call_function_without_variables(self):
+        main_to_one_address = Integer(13).to_byte_array(min_length=1, signed=True)
+        main_to_two_address = Integer(7).to_byte_array(min_length=1, signed=True)
+        two_to_one_address = Integer(-3).to_byte_array(min_length=1, signed=True)
+        end_if = Integer(5).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0         # if arg0 == 1
+            + Opcode.PUSH1
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + end_if
+                + Opcode.CALL           # return One()
+                + main_to_one_address
+                + Opcode.RET
+            + Opcode.LDARG0         # elif arg0 == 2
+            + Opcode.PUSH2
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + end_if
+                + Opcode.CALL           # return Two()
+                + main_to_two_address
+                + Opcode.RET
+            + Opcode.PUSH0          # default return
+            + Opcode.RET
+            + Opcode.PUSH1     # One
+            + Opcode.RET            # return 1
+            + Opcode.PUSH1     # Two
+            + Opcode.CALL           # return 1 + One()
+            + two_to_one_address
+            + Opcode.ADD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/function_test/CallFunctionWithoutVariables.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
