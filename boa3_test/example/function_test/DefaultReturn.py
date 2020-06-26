@@ -3,5 +3,5 @@ def Main(condition1: bool, condition2: bool) -> int:
         return 10
     elif condition2:
         return 20
-    # when return type is not None in the signature, returns the default value of the type
-    # in this example, it will return 0 if both `condition1` and `condition2` are False
+    # this will raise a compiler error because there is a execution flow without a return statement
+    # in this example, this flow is when both `condition1` and `condition2` are False
