@@ -5,9 +5,11 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
+from boa3.builtin import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.expression import IExpression
 from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -29,17 +31,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol], filename: str = None, log: bool = False):
-        super().__init__(ast_tree, filename, log)
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], filename: str = None, log: bool = False):
+        super().__init__(analyser.ast_tree, filename, log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
-        self.__builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
-        self.__current_module: Module = None
-        self.__current_method: Method = None
+        self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
+        self._current_module: Module = None
+        self._current_method: Method = None
 
+        self._metadata: NeoMetadata = None
         self.imported_nodes: List[ast.AST] = []
         self.visit(self._tree)
+        analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
     def __current_scope(self):
@@ -49,9 +53,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the current scope. Return None if it is the global scope
         :rtype: Method or Module or None
         """
-        if self.__current_method is not None:
-            return self.__current_method
-        return self.__current_module
+        if self._current_method is not None:
+            return self._current_method
+        return self._current_module
 
     @property
     def global_symbols(self) -> Dict[str, ISymbol]:
@@ -110,16 +114,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param method_id: method id
         :param method: method to be included
         """
-        if method_id not in self.__current_module.symbols:
-            self.__current_module.include_method(method_id, method)
+        if method_id not in self._current_module.symbols:
+            self._current_module.include_method(method_id, method)
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
         if symbol_id in self.__current_scope.symbols:
             # the symbol exists in the local scope
             return self.__current_scope.symbols[symbol_id]
-        elif symbol_id in self.__current_module.symbols:
+        elif symbol_id in self._current_module.symbols:
             # the symbol exists in the module scope
-            return self.__current_module.symbols[symbol_id]
+            return self._current_module.symbols[symbol_id]
         else:
             return super().get_symbol(symbol_id)
 
@@ -148,6 +152,79 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
     # endregion
+
+    def _read_metadata_object(self, function: ast.FunctionDef):
+        """
+        Gets the metadata object defined in this function
+
+        :param function:
+        """
+        if self._metadata is not None:
+            # metadata function has been defined already
+            self._log_warning(
+                CompilerWarning.RedeclaredSymbol(
+                    line=function.lineno, col=function.col_offset,
+                    symbol_id=Builtin.Metadata.identifier
+                )
+            )
+        # this function must have a return and no arguments
+        elif len(function.args.args) != 0:
+            self._log_error(
+                CompilerError.UnexpectedArgument(
+                    line=function.lineno, col=function.col_offset
+                )
+            )
+        elif not any(isinstance(stmt, ast.Return) for stmt in function.body):
+            self._log_error(
+                CompilerError.MissingReturnStatement(
+                    line=function.lineno, col=function.col_offset,
+                    symbol_id=function.name
+                )
+            )
+        else:
+            function.returns = None
+            function.decorator_list = []
+            module: ast.Module = ast.parse('')
+            module.body = [node for node in self._tree.body
+                           if isinstance(node, (ast.ImportFrom, ast.Import))]
+            module.body.append(function)
+            ast.copy_location(module, function)
+
+            # executes the function
+            code = compile(module, filename='<boa3>', mode='exec')
+            namespace = {}
+            exec(code, namespace)
+            obj: Any = namespace[function.name]()
+
+            node: ast.AST = function.body[-1] if len(function.body) > 0 else function
+            if not isinstance(obj, NeoMetadata):
+                obj_type = self.get_type(obj).identifier if self.get_type(obj) is not Type.any else type(obj).__name__
+                self._log_error(
+                    CompilerError.MismatchedTypes(
+                        line=node.lineno, col=node.col_offset,
+                        expected_type_id=NeoMetadata.__name__,
+                        actual_type_id=obj_type
+                    )
+                )
+                return
+
+            attributes: Dict[str, Any] = {attr: value
+                                          for attr, value in dict(obj.__dict__).items()
+                                          if attr in Builtin.metadata_fields}
+            if any(not isinstance(value, Builtin.metadata_fields[attr]) for attr, value in attributes.items()):
+                for expected, actual in [(Builtin.metadata_fields[attr], type(v_type))
+                                         for attr, v_type in attributes.items()
+                                         if not isinstance(v_type, Builtin.metadata_fields[attr])]:
+                    self._log_error(
+                        CompilerError.MismatchedTypes(
+                            line=node.lineno, col=node.col_offset,
+                            expected_type_id=expected.__name__,
+                            actual_type_id=actual.__name__
+                        )
+                    )
+            else:
+                # if the function was defined correctly, sets the metadata object of the smart contract
+                self._metadata = obj
 
     # region AST
 
@@ -212,18 +289,21 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param module:
         """
         mod: Module = Module()
-        self.__current_module = mod
+        self._current_module = mod
 
         # don't evaluate constant expression - for example: string for documentation
         module.body = [stmt for stmt in module.body
                        if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
-        for stmt in module.body:
-            self.visit(stmt)
+        for stmt in module.body.copy():
+            result = self.visit(stmt)
+            # don't evaluate the metadata function in the following analysers
+            if result is Builtin.Metadata:
+                module.body.remove(stmt)
 
         # TODO: include the body of the builtin methods to the ast
         # TODO: get module name
         self.modules['main'] = mod
-        self.__current_module = None
+        self._current_module = None
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -244,13 +324,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = self.get_symbol(function.returns.id)
             fun_rtype_symbol = self.get_type(symbol)
 
-        fun_decorators = [self.visit(decorator) for decorator in function.decorator_list]
         fun_return: IType = self.get_type(fun_rtype_symbol)
-        method = Method(fun_args, fun_return, Builtin.Public.identifier in fun_decorators)
+        fun_decorators: List[Method] = self._get_function_decorators(function)
 
+        if Builtin.Metadata in fun_decorators:
+            self._read_metadata_object(function)
+            return Builtin.Metadata
+
+        method = Method(fun_args, fun_return, Builtin.Public in fun_decorators)
         if function.name in ['main', 'Main']:
             self._log_main_method(function.name, method, function)
-        self.__current_method = method
+        self._current_method = method
 
         # don't evaluate constant expression - for example: string for documentation
         function.body = [stmt for stmt in function.body
@@ -259,7 +343,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.visit(stmt)
 
         self.__include_method(function.name, method)
-        self.__current_method = None
+        self._current_method = None
+
+    def _get_function_decorators(self, function: ast.FunctionDef) -> List[Method]:
+        """
+        Gets a list of the symbols used to decorate the given function
+
+        :param function: python ast function definition node
+        :return: a list with all function decorators. Empty if none decorator is found.
+        """
+        return [self.get_symbol(self.visit(decorator)) for decorator in function.decorator_list]
 
     def visit_arguments(self, arguments: ast.arguments) -> Dict[str, Variable]:
         """
@@ -328,6 +421,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if target_type is None and not isinstance(target, ast.NameConstant):
             # the value type is invalid
             return None
+
+        if not isinstance(target_type, (ast.AST, IType, IExpression)) and isinstance(target_type, ISymbol):
+            self._log_error(
+                CompilerError.UnresolvedReference(
+                    line=target.lineno, col=target.col_offset,
+                    symbol_id=str(target_type)
+                )
+            )
         return self.get_type(target_type)
 
     def get_enumerate_type(self, var_type: IType) -> IType:
@@ -370,9 +471,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(expr.value, ast.Name):
             if (
                 # it is not a symbol of the method scope
-                (self.__current_method is not None and value not in self.__current_method.symbols)
+                (self._current_method is not None and value not in self._current_method.symbols)
                 # nor it is a symbol of the module scope
-                or (self.__current_module is not None and value not in self.__current_module.symbols)
+                or (self._current_module is not None and value not in self._current_module.symbols)
                 # nor it is a symbol of the global scope
                 or value not in self.symbols
             ):
@@ -453,7 +554,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
             )
         elif isinstance(func_symbol, IBuiltinMethod) and func_symbol.body is not None:
-            self.__builtin_functions_to_visit[func_id] = func_symbol
+            self._builtin_functions_to_visit[func_id] = func_symbol
 
         return self.get_type(call.func)
 

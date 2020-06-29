@@ -1,5 +1,5 @@
-from bitarray import bitarray  # type: ignore
 import mmh3  # type: ignore
+from bitarray import bitarray  # type: ignore
 
 
 class BloomFilter:

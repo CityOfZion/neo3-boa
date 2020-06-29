@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from boa3.neo3.core import serialization, utils, Size as s, cryptography as crypto
 
 

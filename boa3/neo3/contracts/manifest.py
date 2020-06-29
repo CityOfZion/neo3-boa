@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import base64
 import binascii
 import json
-from typing import List, Callable
 from enum import IntFlag
+from typing import List, Callable
+
 from boa3.neo3 import contracts
 from boa3.neo3.core import serialization, types, IJson, cryptography, utils
 from boa3.neo3.core.serialization import BinaryReader, BinaryWriter

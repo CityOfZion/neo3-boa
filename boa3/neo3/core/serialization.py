@@ -1,10 +1,10 @@
 from __future__ import annotations
-import sys
+
 import abc
 import struct
+import sys
 from io import BytesIO, SEEK_END
 from typing import Union, Any, List, Type, TypeVar
-
 
 ISerializable_T = TypeVar('ISerializable_T', bound='ISerializable')
 

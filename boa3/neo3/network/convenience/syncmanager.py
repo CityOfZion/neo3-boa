@@ -1,12 +1,14 @@
 from __future__ import annotations
+
 import asyncio
 import traceback
-from datetime import datetime
-from boa3.neo3.network import payloads, convenience
-from boa3.neo3.core import msgrouter
-from boa3.neo3 import blockchain, network_logger as logger
-from typing import Dict, Optional
 from contextlib import suppress
+from datetime import datetime
+from typing import Dict
+
+from boa3.neo3 import blockchain, network_logger as logger
+from boa3.neo3.core import msgrouter
+from boa3.neo3.network import payloads, convenience
 
 
 class SyncManager(convenience._Singleton):

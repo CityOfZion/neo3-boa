@@ -33,9 +33,13 @@ class ImportAnalyser(IAstAnalyser):
             updated_tree = None
             if not (inside_python_folder and 'lib' in path):
                 if ('boa3' in path
-                        and '/'.join(path[path.index('boa3'):]).startswith('boa3/interop')):
-                    pkg_id = import_target.split('.')[-1]
-                    self.symbols = self._get_interop_symbols(pkg_id)
+                        and '/'.join(path[path.index('boa3'):]).startswith('boa3/builtin')):
+                    pkg_start_index = path.index('builtin') + 1
+                    if path[pkg_start_index] == path[-1]:
+                        self.symbols = self._get_boa3_builtin_symbols()
+                    else:
+                        pkg_id = import_target.split('.')[-1]
+                        self.symbols = self._get_interop_symbols(pkg_id)
                     self.can_be_imported = True
                 else:
                     # TODO: only user modules and typing lib imports are implemented
@@ -97,4 +101,7 @@ class ImportAnalyser(IAstAnalyser):
         return type_symbols
 
     def _get_interop_symbols(self, package: str) -> Dict[str, ISymbol]:
-        return {method_id: method for method_id, method in Builtin.interop_symbols(package).items()}
+        return Builtin.interop_symbols(package)
+
+    def _get_boa3_builtin_symbols(self) -> Dict[str, ISymbol]:
+        return Builtin.boa_symbols()

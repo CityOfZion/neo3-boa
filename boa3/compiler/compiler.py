@@ -73,7 +73,7 @@ class Compiler:
                 or len(self.bytecode) == 0):
             raise NotLoadedException
 
-        generator = FileGenerator(self.bytecode, self._analyser.symbol_table)
+        generator = FileGenerator(self.bytecode, self._analyser.metadata, self._analyser.symbol_table)
 
         nef_bytes = generator.generate_nef_file()
         with open(output_path, 'wb+') as nef_file:

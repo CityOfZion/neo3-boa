@@ -33,12 +33,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :cvar __operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
     """
 
-    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol], log: bool = False):
-        super().__init__(ast_tree, log=log)
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
+        super().__init__(analyser.ast_tree, log=log)
         self.type_errors: List[Exception] = []
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
+        from boa3.builtin import NeoMetadata
+        self._metadata: NeoMetadata = analyser.metadata
         self._current_method: Method = None
 
         self.visit(self._tree)
@@ -905,7 +907,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
                                      ctx=ast.Load(), id=function.identifier)
             if function.requires_storage:
-                self._current_method.set_storage()
+                if not self._metadata.has_storage:
+                    self._log_error(
+                        CompilerError.MetadataInformationMissing(
+                            line=call.func.lineno, col=call.func.col_offset,
+                            symbol_id=function.identifier,
+                            metadata_attr_id='storage'
+                        )
+                    )
+                else:
+                    self._current_method.set_storage()
         return self.get_type(function)
 
     def visit_value(self, node: ast.AST):

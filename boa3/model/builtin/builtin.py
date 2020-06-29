@@ -1,14 +1,16 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
@@ -40,9 +42,27 @@ class Builtin:
     Keys = MapKeysMethod()
     Values = MapValuesMethod()
 
-    # builtin decorator
-    Public = PublicDecorator()
+    _python_builtins: List[IdentifiedSymbol] = [Len,
+                                                ByteArray,
+                                                Append,
+                                                Keys,
+                                                Values]
 
     @classmethod
     def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
         return {method.identifier: method for method in Interop.interop_symbols(package)}
+
+    # builtin decorator
+    Public = PublicDecorator()
+    Metadata = MetadataDecorator()
+
+    _boa_builtins: List[IdentifiedSymbol] = [Public,
+                                             Metadata,
+                                             NeoMetadataType]
+
+    @classmethod
+    def boa_symbols(cls) -> Dict[str, IdentifiedSymbol]:
+        return {symbol.identifier: symbol for symbol in cls._boa_builtins}
+
+    metadata_fields: Dict[str, type] = {'has_storage': bool,
+                                        'is_payable': bool}

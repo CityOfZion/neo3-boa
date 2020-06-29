@@ -1,13 +1,16 @@
 from __future__ import annotations
+
 import asyncio
-import aiodns  # type: ignore
 import ipaddress
-from boa3.neo3 import network_logger as logger, settings, blockchain
-from boa3.neo3.network import node, payloads, convenience, message
-from boa3.neo3.core import msgrouter
-from typing import List, Optional
 from contextlib import suppress
 from datetime import datetime
+from typing import List, Optional
+
+import aiodns  # type: ignore
+
+from boa3.neo3 import network_logger as logger, settings, blockchain
+from boa3.neo3.core import msgrouter
+from boa3.neo3.network import node, payloads, convenience, message
 
 
 def is_ip_address(hostname: str) -> bool:

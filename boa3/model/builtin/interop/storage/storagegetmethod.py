@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Any, Iterable, Sized
+from typing import Any, Dict, Iterable, List, Sized, Tuple
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.expression import IExpression

@@ -1,9 +1,12 @@
 from __future__ import annotations
-import lz4.block  # type: ignore
+
 from enum import IntEnum, IntFlag
-from boa3.neo3.network import payloads
-from boa3.neo3.core import Size as s, serialization
+
+import lz4.block  # type: ignore
+
 from boa3.neo3 import network_logger as logger
+from boa3.neo3.core import Size as s, serialization
+from boa3.neo3.network import payloads
 
 
 class MessageType(IntEnum):

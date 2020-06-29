@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import hashlib
-from typing import Tuple, Optional
+from typing import Tuple
+
 from boa3.neo3.core import serialization, types, Size as s, utils
 
 

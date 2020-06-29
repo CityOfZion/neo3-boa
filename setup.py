@@ -1,11 +1,10 @@
 from codecs import open
 from os import path
 
+from pkg_resources import parse_version
 # Always prefer setuptools over distutils
 # To use a consistent encoding
 from setuptools import setup, find_packages
-from pkg_resources import parse_version
-
 
 from boa3 import __version__ as version
 

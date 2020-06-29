@@ -1,14 +1,15 @@
 import asyncio
 import struct
-import weakref
 import traceback
+import weakref
+from asyncio import events
+from asyncio.streams import StreamReader, StreamReaderProtocol, StreamWriter
 from typing import Optional
+
+from boa3.neo3 import network_logger as logger
+from boa3.neo3.core import serialization
 from boa3.neo3.network import node
 from boa3.neo3.network.message import Message
-from boa3.neo3.core import serialization
-from asyncio.streams import StreamReader, StreamReaderProtocol, StreamWriter
-from asyncio import events
-from boa3.neo3 import network_logger as logger
 
 
 class NeoProtocol(StreamReaderProtocol):
