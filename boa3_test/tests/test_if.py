@@ -289,3 +289,7 @@ class TestIf(BoaTest):
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
+
+    def test_if_expression_mismatched_types(self):
+        path = '%s/boa3_test/example/if_test/MismatchedIfExp.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
