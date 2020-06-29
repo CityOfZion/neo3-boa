@@ -1,12 +1,12 @@
 import os
-import sys
 from typing import Dict
 
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
+from boa3.constants import BYTEORDER, ENCODING
 from boa3.model.method import Method
-from boa3.neo.smart_contract.neffile import NefFile
+from boa3.neo.contracts.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3_test.tests.boa_test import BoaTest
 
@@ -39,18 +39,13 @@ class TestFileGeneration(BoaTest):
             script_size = nef_output.read(1)
             script = nef_output.read()
 
-        self.assertEqual(int.from_bytes(script_size, sys.byteorder), len(script))
+        self.assertEqual(int.from_bytes(script_size, BYTEORDER), len(script))
 
-        nef = NefFile(script)
-        blank = b'\x00'.decode('utf-8')
-        self.assertEqual(compiler.decode('utf-8').replace(blank, ''), nef.compiler)
-        self.assertEqual(hash, nef.script_hash)
-        self.assertEqual(int.from_bytes(check_sum, sys.byteorder), nef.check_sum)
-
-        for index, field in enumerate(nef._NefFile__version_info):
-            begin = index * constants.SIZE_OF_INT32
-            byte_field = version[begin:begin + constants.SIZE_OF_INT32]
-            self.assertEqual(int.from_bytes(byte_field, sys.byteorder), field)
+        nef = NefFile(script)._nef
+        self.assertEqual(compiler.decode(ENCODING), nef.compiler)
+        self.assertEqual(hash, nef.script_hash.to_array())
+        self.assertEqual(check_sum, nef.checksum)
+        self.assertEqual(version, nef.version.to_array())
 
     def test_generate_manifest_file_with_decorator(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname

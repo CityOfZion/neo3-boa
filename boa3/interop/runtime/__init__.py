@@ -1,5 +1,7 @@
 from typing import Any
 
+from boa3.interop.runtime.triggertype import TriggerType
+
 
 def check_witness(hash_or_pubkey: bytes) -> bool:
     """
@@ -28,5 +30,35 @@ def log(message: str):
 
     :param message: the log message
     :type message: str
+    """
+    pass
+
+
+def trigger() -> TriggerType:
+    """
+    Verifies if the smart contract trigger is an application trigger.
+
+    :return: a boolean value that represents whether the contract trigger is an application.
+    :rtype: TriggerType
+    """
+    pass
+
+
+def is_application_trigger() -> bool:
+    """
+    Verifies if the smart contract trigger is an application trigger.
+
+    :return: a boolean value that represents whether the contract trigger is an application.
+    :rtype: bool
+    """
+    pass
+
+
+def is_verification_trigger() -> bool:
+    """
+    Verifies if the smart contract trigger is an verification trigger.
+
+    :return: a boolean value that represents whether the contract trigger is a verification.
+    :rtype: bool
     """
     pass

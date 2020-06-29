@@ -34,4 +34,4 @@ class IntType(IType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return type(value) in [int, IntType]
+        return type(value) is int or isinstance(value, IntType)

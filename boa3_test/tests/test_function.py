@@ -1,4 +1,5 @@
 from boa3.boa3 import Boa3
+from boa3.constants import ENCODING
 from boa3.exception.CompilerError import MismatchedTypes, TooManyReturns, TypeHintMissing
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -28,7 +29,7 @@ class TestFunction(BoaTest):
             # functions without arguments and local variables don't need initslot
             Opcode.PUSHDATA1        # body
             + bytes([len('42')])
-            + bytes('42', 'UTF-8')
+            + bytes('42', ENCODING)
             + Opcode.RET            # return
         )
 

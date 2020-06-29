@@ -1,14 +1,15 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
-from boa3.model.builtin.interopmethod.interop import Interop
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
 
@@ -43,8 +44,5 @@ class Builtin:
     Public = PublicDecorator()
 
     @classmethod
-    def interop_methods(cls) -> Dict[str, Method]:
-        return {method.identifier: method for method in cls._interop_methods}
-
-    # interop methods
-    _interop_methods: List[IBuiltinMethod] = Interop.interop_methods()
+    def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
+        return {method.identifier: method for method in Interop.interop_symbols(package)}

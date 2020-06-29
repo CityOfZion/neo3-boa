@@ -1,8 +1,7 @@
-import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.analyser.analyser import Analyser
-from boa3.constants import ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
+from boa3.constants import ENCODING, ONE_BYTE_MAX_VALUE, TWO_BYTES_MAX_VALUE
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.importsymbol import Import
@@ -337,7 +336,7 @@ class CodeGenerator:
 
         :param value: the value to be converted
         """
-        array = bytes(value, sys.getdefaultencoding())
+        array = bytes(value, ENCODING)
         self.insert_push_data(array)
         self.convert_cast(Type.str)
 
@@ -550,6 +549,13 @@ class CodeGenerator:
             else:
                 self.__insert1(op_info)
             self._stack.append(var.type)
+
+        elif hasattr(var.type, 'get_value'):
+            # the variable is a type constant
+            # TODO: change this when implement class conversion
+            value = var.type.get_value(var_id.split('.')[-1])
+            if value is not None:
+                self.convert_literal(value)
 
     def convert_store_variable(self, var_id: str):
         """

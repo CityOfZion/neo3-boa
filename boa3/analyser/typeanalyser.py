@@ -680,10 +680,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         col = compare.col_offset
         try:
             return_type = None
-            l_operand = self.visit(compare.left)
+            l_operand = self.visit_value(compare.left)
             for index, op in enumerate(compare.ops):
                 operator: Operator = self.get_operator(op)
-                r_operand = self.visit(compare.comparators[index])
+                r_operand = self.visit_value(compare.comparators[index])
 
                 if not isinstance(operator, Operator):
                     # the operator is invalid or it was not implemented yet
@@ -864,6 +864,21 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if function.requires_storage:
                 self._current_method.set_storage()
         return self.get_type(function)
+
+    def visit_value(self, node: ast.AST):
+        result = self.visit(node)
+
+        if isinstance(node, ast.Attribute):
+            if isinstance(result, str):
+                return self.get_symbol(result)
+            else:
+                origin, value, attribute = result
+                if value is None and isinstance(origin, ast.Name):
+                    value = self.get_symbol(origin.id)
+                if value is not None:
+                    return value
+
+        return result
 
     def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Tuple[ast.AST, Optional[ISymbol], str]]:
         """

@@ -40,7 +40,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         if isinstance(node, ast.AST):
             result = self.visit(node)
             # the default return of the name visitor is the name string
-            if isinstance(node, ast.Name):
+            if isinstance(result, str):
                 # TODO: validate function calls
                 self.generator.convert_load_symbol(result)
         else:

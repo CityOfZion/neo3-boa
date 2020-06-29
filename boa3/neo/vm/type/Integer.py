@@ -1,4 +1,4 @@
-import sys
+from boa3.constants import BYTEORDER
 
 
 class Integer(int):
@@ -22,12 +22,12 @@ class Integer(int):
         length = max(min_length, byte_length)
 
         try:
-            return int.to_bytes(self, length, sys.byteorder, signed=signed)
+            return int.to_bytes(self, length, BYTEORDER, signed=signed)
         except OverflowError:
-            return int.to_bytes(self, 1 + length, sys.byteorder, signed=signed)
+            return int.to_bytes(self, 1 + length, BYTEORDER, signed=signed)
 
     @classmethod
     def from_bytes(cls, bts: bytes, signed: bool = False, byte_size: int = 0) -> int:
         if byte_size > 0:
             bts = bts[:byte_size]
-        return int.from_bytes(bts, sys.byteorder, signed=signed)
+        return int.from_bytes(bts, BYTEORDER, signed=signed)
