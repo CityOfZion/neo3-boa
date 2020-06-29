@@ -203,3 +203,43 @@ class TestStorage(BoaTest):
     def test_storage_put_mismatched_type_value(self):
         path = '%s/boa3_test/example/storage_test/StoragePutMismatchedTypeValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_storage_delete_bytes_key(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.StorageDelete.storage_context_hash
+            + Opcode.SYSCALL
+            + Interop.StorageDelete.interop_method_hash
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/storage_test/StorageDeleteBytesKey.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_storage_delete_str_key(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.StorageDelete.storage_context_hash
+            + Opcode.SYSCALL
+            + Interop.StorageDelete.interop_method_hash
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/storage_test/StorageDeleteStrKey.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_storage_delete_mismatched_type(self):
+        path = '%s/boa3_test/example/storage_test/StorageDeleteMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

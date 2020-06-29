@@ -20,6 +20,16 @@ def put(key: Any, value: Any):
     :param key: the identifier in the store for the new value
     :type key: str or bytes
     :param value: value to be stored
-    :type key: int or str or bytes
+    :type value: int or str or bytes
+    """
+    pass
+
+
+def delete(key: Any):
+    """
+    Removes a given key from the persistent storage if exists.
+
+    :param key: the identifier in the store for the new value
+    :type key: str or bytes
     """
     pass
