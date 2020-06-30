@@ -19,7 +19,7 @@ class ImportAnalyser(IAstAnalyser):
         path: List[str] = module_origin.split(os.sep)
 
         super().__init__(ast.Module(body=[]), path[-1])
-        if import_target is 'typing':
+        if import_target == 'typing':
             self.symbols.update(
                 {symbol_id: symbol for symbol_id, symbol in self._get_types_from_typing_lib().items()
                  if symbol_id not in Type.builtin_types()
