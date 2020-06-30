@@ -1,10 +1,8 @@
 from boa3.boa3 import Boa3
 from boa3.constants import ENCODING
-from boa3.exception.CompilerError import MismatchedTypes, TooManyReturns, TypeHintMissing
-from boa3.model.type.type import Type
+from boa3.exception.CompilerError import MismatchedTypes, MissingReturnStatement, TooManyReturns, TypeHintMissing
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -100,32 +98,8 @@ class TestFunction(BoaTest):
         self.assertCompilerLogs(TooManyReturns, path)
 
     def test_default_return(self):
-        twenty = Integer(20).to_byte_array(min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG0         # if arg0
-            + Opcode.JMPIFNOT
-                + Integer(4).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH10         # return 10
-                + Opcode.RET
-            + Opcode.LDARG1         # elif arg1
-            + Opcode.JMPIFNOT
-            + Integer(8).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSHDATA1      # return 20
-                + Integer(len(twenty)).to_byte_array() + twenty
-                + Opcode.CONVERT
-                + Type.int.stack_item
-                + Opcode.RET
-            + Opcode.PUSH0          # default return
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/example/function_test/DefaultReturn.py' % self.dirname
-        output = Boa3.compile(path)
-
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_empty_list_return(self):
         expected_output = (
@@ -387,27 +361,16 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_call_function_written_before_caller(self):
-        test_add: bytes = String('TestAdd').to_bytes()
-        first_call_address = Integer(7).to_byte_array(min_length=1, signed=True)
-        second_call_address = Integer(5).to_byte_array(min_length=1, signed=True)
+        call_address = Integer(3).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT     # Main
             + b'\x00'
             + b'\x02'
-            + Opcode.LDARG0         # if operation == 'TestAdd'
-            + Opcode.PUSHDATA1
-            + Integer(len(test_add)).to_byte_array(min_length=1)
-            + test_add
-            + Opcode.EQUAL
-            + Opcode.JMPIFNOT
-            + first_call_address
-                + Opcode.PUSH2          # return TestAdd(a, b)
-                + Opcode.PUSH1
-                + Opcode.CALL
-                + second_call_address
-                + Opcode.RET
-            + Opcode.PUSH0
+            + Opcode.PUSH2          # return TestAdd(a, b)
+            + Opcode.PUSH1
+            + Opcode.CALL
+            + call_address
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
             + b'\x00'
@@ -422,3 +385,259 @@ class TestFunction(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_return_inside_if(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # if arg0 % 3 == 1
+            + Opcode.PUSH3
+            + Opcode.MOD
+            + Opcode.PUSH1
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + Integer(6).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDARG0     # return arg0 - 1
+                + Opcode.PUSH1
+                + Opcode.SUB
+                + Opcode.RET
+            + Opcode.LDARG0     # elif arg0 % 3 == 2
+            + Opcode.PUSH3
+            + Opcode.MOD
+            + Opcode.PUSH2
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + Integer(6).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDARG0     # return arg0 + 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.RET
+            + Opcode.LDARG0     # else
+            + Opcode.RET            # return arg0
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnIf.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_missing_return_inside_if(self):
+        path = '%s/boa3_test/example/function_test/ReturnIfMissing.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)
+
+    def test_missing_return_inside_elif(self):
+        path = '%s/boa3_test/example/function_test/ReturnElifMissing.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)
+
+    def test_missing_return_inside_else(self):
+        path = '%s/boa3_test/example/function_test/ReturnElseMissing.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)
+
+    def test_return_inside_multiple_inner_if(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # if condition
+            + Opcode.JMPIFNOT
+            + Integer(29).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDARG0     # if condition
+                + Opcode.JMPIFNOT
+                + Integer(14).to_byte_array(min_length=1, signed=True)
+                    + Opcode.LDARG0     # if condition
+                    + Opcode.JMPIFNOT
+                    + Integer(4).to_byte_array(min_length=1, signed=True)
+                    + Opcode.PUSH1          # return 1
+                    + Opcode.RET
+                    + Opcode.LDARG0     # if condition
+                    + Opcode.JMPIFNOT
+                    + Integer(4).to_byte_array(min_length=1, signed=True)
+                    + Opcode.PUSH2          # return 2
+                    + Opcode.RET
+                    + Opcode.PUSH3      # else
+                    + Opcode.RET            # return 3
+                + Opcode.LDARG0     # elif condition
+                + Opcode.JMPIFNOT
+                + Integer(9).to_byte_array(min_length=1, signed=True)
+                    + Opcode.LDARG0     # if condition
+                    + Opcode.JMPIFNOT
+                    + Integer(4).to_byte_array(min_length=1, signed=True)
+                    + Opcode.PUSH4          # return 4
+                    + Opcode.RET
+                    + Opcode.PUSH5      # else
+                    + Opcode.RET            # return 5
+                + Opcode.PUSH6      # else
+                + Opcode.RET            # return 6
+            + Opcode.LDARG0     # else
+            + Opcode.JMPIFNOT       # if condition
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+                + Opcode.PUSH7          # return 7
+                + Opcode.RET
+            + Opcode.LDARG0         # if condition
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+                + Opcode.PUSH8          # return 8
+                + Opcode.RET
+            + Opcode.PUSH9          # else
+            + Opcode.RET                # return 9
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnMultipleInnerIf.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_missing_return_inside_multiple_inner_if(self):
+        path = '%s/boa3_test/example/function_test/ReturnMultipleInnerIfMissing.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)
+
+    def test_return_inside_for(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x03'
+            + b'\x01'
+            + Opcode.LDARG0     # for_sequence = arg0
+            + Opcode.STLOC0
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.STLOC1
+            + Opcode.JMP        # begin for
+            + Integer(20).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDLOC0     # value = for_sequence[for_index]
+                + Opcode.LDLOC1
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
+                + Opcode.PICKITEM
+                + Opcode.STLOC2
+                + Opcode.LDLOC2     # return value
+                + Opcode.RET
+                + Opcode.LDLOC1     # for_index = for_index + 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC1
+            + Opcode.LDLOC1     # if for_index < len(for_sequence)
+            + Opcode.LDLOC0
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF
+            + Integer(-22).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH5      # else
+            + Opcode.RET          # return 5
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnFor.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_missing_return_inside_for(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x04'
+            + b'\x01'
+            + Opcode.PUSH0      # x = 0
+            + Opcode.STLOC0
+            + Opcode.LDARG0     # for_sequence = arg0
+            + Opcode.STLOC1
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.STLOC2
+            + Opcode.JMP        # begin for
+            + Integer(22).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDLOC1     # value = for_sequence[for_index]
+                + Opcode.LDLOC2
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
+                + Opcode.PICKITEM
+                + Opcode.STLOC3
+                + Opcode.LDLOC0     # x += value
+                + Opcode.LDLOC3
+                + Opcode.ADD
+                + Opcode.STLOC0
+                + Opcode.LDLOC2     # for_index = for_index + 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC2
+            + Opcode.LDLOC2     # if for_index < len(for_sequence)
+            + Opcode.LDLOC1
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF
+            + Integer(-24).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0     # else
+            + Opcode.RET          # return x
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnForOnlyOnElse.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_missing_return_inside_for_else(self):
+        path = '%s/boa3_test/example/function_test/ReturnForElseMissing.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)
+
+    def test_return_inside_while(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # x = arg0
+            + Opcode.STLOC0
+            + Opcode.JMP        # begin while
+            + Integer(8).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDLOC0     # x += 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC0
+                + Opcode.LDLOC0     # return x
+                + Opcode.RET
+            + Opcode.LDLOC0
+            + Opcode.PUSH10
+            + Opcode.LT
+            + Opcode.JMPIF      # end while x < 10
+            + Integer(-9).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0     # else
+            + Opcode.RET            # return x
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnWhile.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_missing_return_inside_while(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # x = arg0
+            + Opcode.STLOC0
+            + Opcode.JMP        # begin while
+            + Integer(6).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDLOC0     # x += 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.PUSH10
+            + Opcode.LT
+            + Opcode.JMPIF      # end while x < 10
+            + Integer(-7).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0     # else
+            + Opcode.RET            # return x
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnWhileOnlyOnElse.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_missing_return_inside_while_without_else(self):
+        path = '%s/boa3_test/example/function_test/ReturnWhileWithoutElse.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)

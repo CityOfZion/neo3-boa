@@ -7,6 +7,7 @@ def Main(number: int) -> int:
         return One()
     elif number == 2:
         return Two()
+    return 0
 
 
 def Two() -> int:

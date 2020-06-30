@@ -144,6 +144,20 @@ class TooManyReturns(CompilerError):
         return "Too many returns"
 
 
+class MissingReturnStatement(CompilerError):
+    """
+    An error raised when a function with a return value is missing a return statement
+    """
+
+    def __init__(self, line: int, col: int, symbol_id: str):
+        self.symbol_id = symbol_id
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "'%s': Missing return statement" % self.symbol_id
+
+
 class IncorrectNumberOfOperands(CompilerError):
     """
     An error raised when an operation is used with the wrong number of operands

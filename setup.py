@@ -4,14 +4,35 @@ from os import path
 # Always prefer setuptools over distutils
 # To use a consistent encoding
 from setuptools import setup, find_packages
+from pkg_resources import parse_version
+
 
 from boa3 import __version__ as version
 
 here = path.abspath(path.dirname(__file__))
 
+try:
+    from pip._internal.req import parse_requirements
+    from pip import __version__ as __pip_version
+    pip_version = parse_version(__pip_version)
+    if (pip_version >= parse_version("20")):
+        from pip._internal.network.session import PipSession
+    elif (pip_version >= parse_version("10")):
+        from pip._internal.download import PipSession
+except ImportError:  # pip version < 10.0
+    from pip.req import parse_requirements
+    from pip.download import PipSession
+
 # Get the long description from the README file
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
+
+# get the requirements from requirements.txt
+install_reqs = parse_requirements('requirements.txt', session=PipSession())
+if pip_version >= parse_version("20"):
+    reqs = [str(ir.requirement) for ir in install_reqs]
+else:
+    reqs = [str(ir.req) for ir in install_reqs]
 
 
 setup(
@@ -72,6 +93,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
+    install_requires=reqs,
 
     python_requires='>=3.6',
 

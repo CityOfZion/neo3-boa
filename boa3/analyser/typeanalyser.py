@@ -133,7 +133,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             for stmt in function.body:
                 self.visit(stmt)
 
-            if len(function.body) > 0 and not isinstance(function.body[-1], ast.Return):
+            self._validate_return(function)
+
+            if (len(function.body) > 0
+                    and not isinstance(function.body[-1], ast.Return)
+                    and method.return_type is Type.none):
+                # include return None in void functions
                 default_value: str = str(method.return_type.default_value)
                 node: ast.AST = ast.parse(default_value).body[0].value
                 function.body.append(
@@ -208,6 +213,44 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # continue to walk through the tree
         self.generic_visit(ret)
+
+    def _validate_return(self, node: ast.AST):
+        if (self._current_method.return_type is not Type.none
+                and hasattr(node, 'body')
+                and not self._has_return(node)):
+            lst = list(self.symbols.items())
+            keys, values = [key_value[0] for key_value in lst], [key_value[-1] for key_value in lst]
+            self._log_error(
+                CompilerError.MissingReturnStatement(
+                    line=node.lineno, col=node.col_offset,
+                    symbol_id=keys[values.index(self._current_method)]
+                )
+            )
+
+    def _has_return(self, node: ast.AST) -> bool:
+        if not hasattr(node, 'body'):
+            return False
+
+        has_else_stmt: bool = hasattr(node, 'orelse')
+        has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
+        if has_body_return and not has_else_stmt:
+            # if any statement in the function body is a return, all flow has a return
+            return True
+
+        body = [stmt for stmt in node.body if hasattr(stmt, 'body')]
+        body_has_inner_return: bool = len(body) > 0 and all(self._has_return(stmt) for stmt in body)
+        if not has_body_return and not body_has_inner_return:
+            # for and while nodes must to check if there is a return inside the else statement
+            if not isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
+                return False
+
+        if has_else_stmt:
+            if any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.orelse):
+                return True
+            else:
+                orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
+                return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
+        return body_has_inner_return
 
     def visit_Assign(self, assign: ast.Assign):
         """
