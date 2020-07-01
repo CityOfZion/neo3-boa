@@ -1,4 +1,4 @@
-from boa3.interop.runtime import notify
+from boa3.builtin.interop.runtime import notify
 
 
 def Main():

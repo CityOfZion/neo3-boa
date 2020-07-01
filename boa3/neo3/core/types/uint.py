@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import binascii
-from boa3.neo3.core import serialization
 from typing import Type, Union
+
+from boa3.neo3.core import serialization
 
 __all__ = ['UInt160', 'UInt256']
 

@@ -1,6 +1,8 @@
 from __future__ import annotations
-from boa3.neo3.core import cryptography
+
 import bitcoin  # type: ignore
+
+from boa3.neo3.core import cryptography
 
 
 class KeyPair:

@@ -1,10 +1,12 @@
 from __future__ import annotations
+
+from contextlib import suppress
+from copy import deepcopy
 from typing import Iterator, Tuple, Dict
+
 from boa3.neo3 import storage
 from boa3.neo3.core import types
 from boa3.neo3.network import payloads
-from contextlib import suppress
-from copy import deepcopy
 
 
 class MemoryDB(storage.IDBImplementation):

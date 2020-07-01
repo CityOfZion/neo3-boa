@@ -24,6 +24,8 @@ class Import(ISymbol):
         self.methods = {fun_id: fun for fun_id, fun in symbols.items() if isinstance(fun, Method)}
         self.types = {type_id: tpe for type_id, tpe in symbols.items() if isinstance(tpe, IType)}
         self.imports = {alias: imprt for alias, imprt in symbols.items() if isinstance(imprt, Import)}
+        self._other_symbols = {alias: symbol for alias, symbol in symbols.items()
+                               if not isinstance(symbol, (Variable, Method, IType, Import))}
 
         self.ast: ast.AST = syntax_tree
 
@@ -37,5 +39,6 @@ class Import(ISymbol):
         symbol.update(self.variables)
         symbol.update(self.methods)
         symbol.update(self.types)
+        symbol.update(self._other_symbols)
         symbol.update(self.imports)
         return symbol

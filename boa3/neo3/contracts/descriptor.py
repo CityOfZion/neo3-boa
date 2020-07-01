@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import binascii
+
 from boa3.neo3.core import IJson, types, cryptography
 
 

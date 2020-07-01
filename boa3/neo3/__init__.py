@@ -1,6 +1,6 @@
-import logging
-import json
 import importlib
+import json
+import logging
 from types import SimpleNamespace
 
 version = '0.2'

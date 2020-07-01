@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import abc
+
 from boa3.neo3 import storage
 
 

@@ -1,6 +1,6 @@
 import boa3
 from boa3.neo.contracts import NEF, Version
-from boa3.neo.core import BinaryWriter
+from boa3.neo.core import BinaryReader, BinaryWriter
 
 
 class NefFile:
@@ -17,6 +17,10 @@ class NefFile:
         compiler: str = "neo3-boa by COZ"
         version = Version.from_string(boa3.__version__)
         self._nef = NEF(compiler, version, script_bytes)
+
+    @property
+    def script(self) -> bytes:
+        return self._nef.script
 
     @property
     def script_hash(self) -> bytes:
@@ -43,3 +47,20 @@ class NefFile:
             self._nef.serialize(writer)
             result = writer.to_array()
         return result
+
+    @classmethod
+    def deserialize(cls, bts: bytes):
+        """
+        Deserialize the NefFile object
+
+        :param bts: stream data
+        :return: the deserialized object.
+        :rtype: NefFile
+        """
+        with BinaryReader(bts) as reader:
+            nef = NEF()
+            nef.deserialize(reader)
+
+            nef_file = cls(b'')
+            nef_file._nef = nef
+        return nef_file

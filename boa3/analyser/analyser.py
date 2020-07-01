@@ -4,6 +4,7 @@ from typing import Dict
 from boa3.analyser.constructanalyser import ConstructAnalyser
 from boa3.analyser.moduleanalyser import ModuleAnalyser
 from boa3.analyser.typeanalyser import TypeAnalyser
+from boa3.builtin import NeoMetadata
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
 
@@ -19,6 +20,7 @@ class Analyser(object):
         self.symbol_table: Dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
+        self.metadata: NeoMetadata = NeoMetadata()
         self.is_analysed: bool = False
         self._log: bool = log
 
@@ -64,7 +66,7 @@ class Analyser(object):
 
         :return: a boolean value that represents if the analysis was successful
         """
-        type_analyser = TypeAnalyser(self.ast_tree, self.symbol_table, log=self._log)
+        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log)
         return not type_analyser.has_errors
 
     def __analyse_modules(self) -> bool:
@@ -73,7 +75,7 @@ class Analyser(object):
 
         :return: a boolean value that represents if the analysis was successful
         """
-        module_analyser = ModuleAnalyser(self.ast_tree, self.symbol_table, log=self._log)
+        module_analyser = ModuleAnalyser(self, self.symbol_table, log=self._log)
         self.symbol_table.update(module_analyser.global_symbols)
         self.ast_tree.body.extend(module_analyser.imported_nodes)
         return not module_analyser.has_errors

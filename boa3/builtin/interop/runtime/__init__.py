@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.interop.runtime.triggertype import TriggerType
+from boa3.builtin.interop.runtime.triggertype import TriggerType
 
 
 def check_witness(hash_or_pubkey: bytes) -> bool:

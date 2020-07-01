@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+from boa3.builtin import NeoMetadata
 from boa3.constants import ENCODING
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
@@ -14,9 +15,10 @@ class FileGenerator:
     This class is responsible for generating the files.
     """
 
-    def __init__(self, bytecode: bytes, symbols: Dict[str, ISymbol] = None):
+    def __init__(self, bytecode: bytes, metadata: NeoMetadata, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
             symbols = {}
+        self._metadata = metadata
         self._symbols: Dict[str, ISymbol] = symbols
         self._nef: NefFile = NefFile(bytecode)
 
@@ -96,8 +98,8 @@ class FileGenerator:
         return {
             "groups": [],
             "features": {
-                "storage": self._uses_storage_feature(),
-                "payable": False
+                "storage": self._metadata.has_storage,
+                "payable": self._metadata.is_payable
             },
             "abi": self._get_abi_info(),
             "permissions": [

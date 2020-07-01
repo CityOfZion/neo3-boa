@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import warnings
-from typing import List
 from enum import IntEnum
-from boa3.neo3.core import types, IJson
+from typing import List
+
 from boa3.neo3 import contracts
+from boa3.neo3.core import types, IJson
 
 
 class ContractParameterType(IntEnum):

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from boa3.neo3 import storage, vm, settings
+
+from boa3.neo3 import storage, settings
 from boa3.neo3.network import payloads, convenience
 
 

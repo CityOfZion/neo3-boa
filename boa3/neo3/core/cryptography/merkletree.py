@@ -1,6 +1,7 @@
 import hashlib
-from boa3.neo3.core import types
 from typing import List, Optional
+
+from boa3.neo3.core import types
 
 
 class _MerkleTreeNode:

@@ -1,4 +1,4 @@
-from boa3.interop.runtime import log
+from boa3.builtin.interop.runtime import log
 
 
 def Main():

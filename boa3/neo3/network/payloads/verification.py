@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import hashlib
 from enum import IntFlag
+from typing import List
+
 from boa3.neo3.core import serialization, utils, types, cryptography, Size as s
 from boa3.neo3.network import payloads
-from typing import List
 
 
 class Cosigner(serialization.ISerializable):

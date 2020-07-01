@@ -53,10 +53,10 @@ Examples:
         }
 
 """
-from ipaddress import IPv4Network
 from contextlib import suppress
-from typing import Dict, List
 from copy import deepcopy
+from ipaddress import IPv4Network
+from typing import Dict, List
 
 
 class IPFilter():

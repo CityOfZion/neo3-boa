@@ -1,5 +1,6 @@
 import ast
 
+from boa3.analyser.analyser import Analyser
 from boa3.analyser.typeanalyser import TypeAnalyser
 from boa3.model.type.collection.sequence.mutable.listtype import ListType
 from boa3.model.type.collection.sequence.tupletype import TupleType
@@ -14,7 +15,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = Type.int
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -24,7 +25,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = Type.int
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -34,7 +35,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = Type.bool
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -44,7 +45,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = Type.str
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -54,7 +55,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = TupleType(Type.int)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -64,7 +65,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = TupleType(Type.bool)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -74,7 +75,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = TupleType(Type.int)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -84,7 +85,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = TupleType(Type.any)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -94,7 +95,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = ListType(Type.int)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -104,7 +105,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = ListType(Type.bool)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -114,7 +115,7 @@ class TestTypes(BoaTest):
         node = ast.parse(str(input)).body[0].value
         expected_output = ListType(Type.int)
 
-        typeanalyser = TypeAnalyser(node, {})
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)
@@ -123,8 +124,8 @@ class TestTypes(BoaTest):
         input = [1, '2', False]
         node = ast.parse(str(input)).body[0].value
         expected_output = ListType(Type.any)
-
-        typeanalyser = TypeAnalyser(node, {})
+        
+        typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 
         self.assertEqual(expected_output, output)

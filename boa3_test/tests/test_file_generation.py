@@ -178,4 +178,4 @@ class TestFileGeneration(BoaTest):
 
         self.assertIn('features', manifest)
         self.assertIn('storage', manifest['features'])
-        self.assertEqual(manifest['features']['storage'], True)
+        self.assertEqual(True, manifest['features']['storage'])

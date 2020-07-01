@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 import abc
+from contextlib import suppress
 from copy import deepcopy
 from enum import Enum, auto
 from typing import Optional, Iterator, Tuple, TypeVar, Any
-from boa3.neo3.core import types, serialization
-from boa3.neo3.network import payloads
-from boa3.neo3 import storage
-from contextlib import suppress
 
+from boa3.neo3 import storage
+from boa3.neo3.core import types
+from boa3.neo3.network import payloads
 
 TKey = TypeVar('TKey', bound='serialization.ISerializable')
 TValue = TypeVar('TValue', bound='serialization.ISerializable')

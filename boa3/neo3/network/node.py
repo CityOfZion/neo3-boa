@@ -1,15 +1,17 @@
 from __future__ import annotations
+
 import asyncio
 import traceback
-from datetime import datetime
-from boa3.neo3.network import encode_base62, message, payloads, capabilities, protocol as protocol
-from boa3.neo3.network.ipfilter import ipfilter
-from boa3.neo3.network.convenience import nodeweight
-from boa3.neo3 import network_logger as logger, settings, blockchain
-from boa3.neo3.core import types, msgrouter
 from contextlib import suppress
+from datetime import datetime
 from socket import AF_INET as IP4_FAMILY
 from typing import Optional, List, Tuple, Dict, Callable, cast
+
+from boa3.neo3 import network_logger as logger, settings, blockchain
+from boa3.neo3.core import types, msgrouter
+from boa3.neo3.network import encode_base62, message, payloads, capabilities, protocol as protocol
+from boa3.neo3.network.convenience import nodeweight
+from boa3.neo3.network.ipfilter import ipfilter
 
 
 class NeoNode:

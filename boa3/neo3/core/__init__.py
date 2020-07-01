@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import abc
 from enum import IntEnum
+
 from events import Events  # type: ignore
 
 msgrouter = Events()

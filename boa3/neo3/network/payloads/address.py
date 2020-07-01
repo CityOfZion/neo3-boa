@@ -1,11 +1,14 @@
 from __future__ import annotations
-from typing import List, Optional
+
 from datetime import datetime
-from netaddr import IPAddress  # type: ignore
 from enum import IntEnum
+from typing import List, Optional
+
+from netaddr import IPAddress  # type: ignore
+
 from boa3.neo3.core import serialization, Size as s, utils
-from boa3.neo3.network.payloads import VersionPayload
 from boa3.neo3.network import capabilities
+from boa3.neo3.network.payloads import VersionPayload
 
 
 class AddressState(IntEnum):

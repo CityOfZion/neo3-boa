@@ -1,9 +1,12 @@
 # type: ignore
 
 from __future__ import annotations
-import random
+
 import binascii
+import random
+
 from mpmath.libmp import bitcount as _bitlength
+
 from boa3.neo3.core import serialization
 
 # :noindex:

@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any, List
 
 from boa3_test.example.import_test.FromImportTyping import EmptyList as NewList
 

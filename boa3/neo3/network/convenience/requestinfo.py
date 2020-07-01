@@ -1,5 +1,6 @@
-from .flightinfo import FlightInfo
 from typing import Dict, Optional
+
+from .flightinfo import FlightInfo
 
 
 class RequestInfo:

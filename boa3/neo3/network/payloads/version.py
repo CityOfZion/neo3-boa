@@ -1,10 +1,12 @@
 from __future__ import annotations
+
 import datetime
 import random
 from typing import List, Type
+
+from boa3.neo3 import settings
 from boa3.neo3.core import Size as s, serialization, utils
 from boa3.neo3.network import capabilities
-from boa3.neo3 import settings
 
 
 class VersionPayload(serialization.ISerializable):

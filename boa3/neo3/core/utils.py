@@ -1,9 +1,10 @@
 # type: ignore
 
-from enum import Enum
 from collections import Iterable
-from boa3.neo3.core import serialization
+from enum import Enum
+
 from boa3.neo3.core import Size
+from boa3.neo3.core import serialization
 
 
 def get_var_size(value: object) -> int:

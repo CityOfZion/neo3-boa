@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 import hashlib
+from copy import deepcopy
 from typing import List
+
+from bitarray import bitarray  # type: ignore
+
 from boa3.neo3.core import Size as s, serialization, types, utils, cryptography as crypto, IClonable
 from boa3.neo3.network import payloads
-from bitarray import bitarray  # type: ignore
-from copy import deepcopy
 
 
 class _BlockBase(serialization.ISerializable):
