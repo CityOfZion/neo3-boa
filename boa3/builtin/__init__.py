@@ -25,8 +25,40 @@ class NeoMetadata:
     :type has_storage: bool
     :ivar is_payable: is a boolean value indicating whether the contract accepts transfers. False by default.
     :type is_payable: bool
+    :ivar author: the smart contract author. None by default;
+    :type author: str or None
+    :ivar email: the smart contract author email. None by default;
+    :type email: str or None
+    :ivar description: the smart contract description. None by default;
+    :type description: str or None
     """
 
+    from typing import Any, Dict
+
     def __init__(self):
+        from typing import Optional
+
+        # features
         self.has_storage: bool = False
         self.is_payable: bool = False
+
+        # extras
+        self.author: Optional[str] = None
+        self.email: Optional[str] = None
+        self.description: Optional[str] = None
+
+    @property
+    def extra(self) -> Dict[str, Any]:
+        """
+        Gets the metadata extra information
+
+        :return: a dictionary that maps each extra value with its name. Empty by default.
+        """
+        extra = {}
+        if isinstance(self.author, str):
+            extra['Author'] = self.author
+        if isinstance(self.email, str):
+            extra['Email'] = self.email
+        if isinstance(self.description, str):
+            extra['Description'] = self.description
+        return extra
