@@ -129,14 +129,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     # region Log
 
-    def _log_main_method(self, method_id: str, method: Method, node: ast.AST):
-        if self._log:
-            logging.info("Main method found at {0}:{1}: '{2}{3}'"
-                         .format(node.lineno, node.col_offset, method_id, method))
-
-        # main method is always public
-        method.set_as_main_method()
-
     def _log_import(self, import_from: str):
         if self._log:
             logging.info("Importing '{0}'".format(import_from))
@@ -332,8 +324,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return Builtin.Metadata
 
         method = Method(fun_args, fun_return, Builtin.Public in fun_decorators)
-        if function.name in ['main', 'Main']:
-            self._log_main_method(function.name, method, function)
         self._current_method = method
 
         # don't evaluate constant expression - for example: string for documentation

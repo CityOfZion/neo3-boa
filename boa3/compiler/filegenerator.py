@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 from boa3.builtin import NeoMetadata
 from boa3.constants import ENCODING
@@ -50,25 +50,6 @@ class FileGenerator:
         from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
         return {name: method for name, method in self._symbols.items()
                 if isinstance(method, Method) and not isinstance(method, IBuiltinDecorator)}
-
-    @property
-    def _entry_point(self) -> Optional[Tuple[str, Method]]:
-        """
-        Gets the entry point method of the smart contract
-
-        :return: a tuple with the name and the method if found. Otherwise, return None
-        :rtype: Tuple[str, Method] or None
-        """
-        method_id = None
-        if 'main' in self._public_methods:
-            method_id = 'main'
-        elif 'Main' in self._public_methods:
-            method_id = 'Main'
-
-        if method_id is None:
-            raise NotImplementedError
-        else:
-            return method_id, self._public_methods[method_id]
 
     def generate_nef_file(self) -> bytes:
         """
@@ -140,7 +121,6 @@ class FileGenerator:
         return {
             "hash": self._nef_hash,
             "methods": self._get_abi_methods(),
-            "entryPoint": self._get_abi_entry_point(),
             "events": self._get_abi_events()
         }
 
@@ -150,28 +130,11 @@ class FileGenerator:
 
         :return: a dictionary with the abi methods
         """
-        entry_point = self._entry_point
-        if entry_point is not None:
-            entry_point = entry_point[0]    # method id
-
         methods = []
         for method_id, method in self._public_methods.items():
-            if method_id != entry_point:
-                logging.info("'{0}' method included in the ABI".format(method_id))
-                methods.append(self._construct_abi_method(method_id, method))
+            logging.info("'{0}' method included in the ABI".format(method_id))
+            methods.append(self._construct_abi_method(method_id, method))
         return methods
-
-    def _get_abi_entry_point(self) -> Dict[str, Any]:
-        """
-        Gets the abi entry point method in a dictionary format
-
-        :return: a dictionary with the abi entry point
-        """
-        if self._entry_point is None:
-            return {}
-        else:
-            method_id, method = self._entry_point
-            return self._construct_abi_method(method_id, method)
 
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
         params = []
