@@ -28,7 +28,6 @@ class Method(IExpression):
 
         self.is_public: bool = is_public
         self._requires_storage: bool = False
-        self.is_main_method: bool = False
 
         self.locals: Dict[str, Variable] = {}
         self.init_bytecode: Optional[VMCode] = None
@@ -108,7 +107,3 @@ class Method(IExpression):
 
     def set_storage(self):
         self._requires_storage = True
-
-    def set_as_main_method(self):
-        self.is_main_method = True
-        self.is_public = True

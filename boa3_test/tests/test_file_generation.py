@@ -15,7 +15,6 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_files(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
-
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         Boa3.compile_and_save(path)
@@ -25,7 +24,6 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_nef_file(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
-
         expected_nef_output = path.replace('.py', '.nef')
         Boa3.compile_and_save(path)
 
@@ -49,75 +47,66 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_decorator(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
-
         expected_manifest_output = path.replace('.py', '.manifest.json')
-        Boa3.compile_and_save(path)
+        output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
-        with open(expected_manifest_output, 'r') as manifest_output:
-            import json
-            manifest = json.loads(manifest_output.read())
-
         self.assertIn('abi', manifest)
         abi = manifest['abi']
 
-        self.assertIn('entryPoint', abi)
-        self.assertIn('name', abi['entryPoint'])
-        self.assertEqual(abi['entryPoint']['name'], 'Main')
-        self.assertIn('returnType', abi['entryPoint'])
-        self.assertEqual(abi['entryPoint']['returnType'], AbiType.Integer)
-
-        self.assertIn('parameters', abi['entryPoint'])
-        self.assertEqual(len(abi['entryPoint']['parameters']), 2)
-
-        arg0 = abi['entryPoint']['parameters'][0]
-        self.assertIn('name', arg0)
-        self.assertEqual(arg0['name'], 'a')
-        self.assertIn('type', arg0)
-        self.assertEqual(arg0['type'], AbiType.Integer)
-
-        arg1 = abi['entryPoint']['parameters'][1]
-        self.assertIn('name', arg1)
-        self.assertEqual(arg1['name'], 'b')
-        self.assertIn('type', arg1)
-        self.assertEqual(arg1['type'], AbiType.Integer)
-
+        self.assertNotIn('entryPoint', abi)
         self.assertIn('methods', abi)
-        self.assertEqual(len(abi['methods']), 1)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main
+        method0 = abi['methods'][0]
+        self.assertIn('returnType', method0)
+        self.assertEqual(AbiType.Integer, method0['returnType'])
+        self.assertIn('parameters', method0)
+        self.assertEqual(2, len(method0['parameters']))
+
+        arg0 = method0['parameters'][0]
+        self.assertIn('name', arg0)
+        self.assertEqual('a', arg0['name'])
+        self.assertIn('type', arg0)
+        self.assertEqual(AbiType.Integer, arg0['type'])
+
+        arg1 = method0['parameters'][1]
+        self.assertIn('name', arg1)
+        self.assertEqual('b', arg1['name'])
+        self.assertIn('type', arg1)
+        self.assertEqual(AbiType.Integer, arg1['type'])
+
+        # method Sub
+        method1 = abi['methods'][1]
+        self.assertIn('returnType', method1)
+        self.assertEqual(AbiType.Integer, method1['returnType'])
+        self.assertIn('parameters', method1)
+        self.assertEqual(2, len(method1['parameters']))
+
+        arg0 = method1['parameters'][0]
+        self.assertIn('name', arg0)
+        self.assertEqual('a', arg0['name'])
+        self.assertIn('type', arg0)
+        self.assertEqual(AbiType.Integer, arg0['type'])
+
+        arg1 = method1['parameters'][1]
+        self.assertIn('name', arg1)
+        self.assertEqual('b', arg1['name'])
+        self.assertIn('type', arg1)
+        self.assertEqual(AbiType.Integer, arg1['type'])
 
         self.assertIn('events', abi)
-        self.assertEqual(len(abi['events']), 0)
+        self.assertEqual(0, len(abi['events']))
 
     def test_generate_manifest_file_without_decorator(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithoutDecorator.py' % self.dirname
-
         expected_manifest_output = path.replace('.py', '.manifest.json')
-        Boa3.compile_and_save(path)
+        output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
-        with open(expected_manifest_output, 'r') as manifest_output:
-            import json
-            manifest = json.loads(manifest_output.read())
-
         self.assertIn('abi', manifest)
         abi = manifest['abi']
-
-        self.assertIn('entryPoint', abi)
-        self.assertNotEqual(0, len(abi['entryPoint']))  # entry point cannot be empty
-        self.assertIn('parameters', abi['entryPoint'])
-        self.assertEqual(len(abi['entryPoint']['parameters']), 2)
-
-        arg0 = abi['entryPoint']['parameters'][0]
-        self.assertIn('name', arg0)
-        self.assertEqual(arg0['name'], 'a')
-        self.assertIn('type', arg0)
-        self.assertEqual(arg0['type'], AbiType.Integer)
-
-        arg1 = abi['entryPoint']['parameters'][1]
-        self.assertIn('name', arg1)
-        self.assertEqual(arg1['name'], 'b')
-        self.assertIn('type', arg1)
-        self.assertEqual(arg1['type'], AbiType.Integer)
 
         self.assertIn('methods', abi)
         self.assertEqual(0, len(abi['methods']))
@@ -127,9 +116,35 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_without_main(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithoutMain.py' % self.dirname
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
 
-        with self.assertRaises(NotImplementedError):
-            Boa3.compile_and_save(path)
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertNotIn('entryPoint', abi)
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        self.assertIn('events', abi)
+        self.assertEqual(0, len(abi['events']))
+
+    def test_generate_without_main_and_public_methods(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithoutMainAndPublicMethods.py' % self.dirname
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertNotIn('entryPoint', abi)
+        self.assertIn('methods', abi)
+        self.assertEqual(0, len(abi['methods']))
+
+        self.assertIn('events', abi)
+        self.assertEqual(0, len(abi['events']))
 
     def test_generate_manifest_file_abi_method_offset(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
@@ -144,20 +159,13 @@ class TestFileGeneration(BoaTest):
         }
         self.assertGreater(len(methods), 0)
 
-        Boa3.compile_and_save(path)
+        output, manifest = self.compile_and_save(path)
         self.assertTrue(os.path.exists(manifest_path))
-        with open(manifest_path, 'r') as manifest_output:
-            import json
-            manifest = json.loads(manifest_output.read())
-
         self.assertIn('abi', manifest)
         abi = manifest['abi']
 
-        self.assertIn('entryPoint', abi)
         self.assertIn('methods', abi)
-
-        abi_methods = [abi['entryPoint']]
-        abi_methods.extend(abi['methods'])
+        abi_methods = abi['methods']
         self.assertGreater(len(abi['methods']), 0)
 
         for method in abi_methods:
@@ -170,11 +178,8 @@ class TestFileGeneration(BoaTest):
         path = '%s/boa3_test/example/storage_test/StorageGetBytesKey.py' % self.dirname
         manifest_path = path.replace('.py', '.manifest.json')
 
-        Boa3.compile_and_save(path)
+        output, manifest = self.compile_and_save(path)
         self.assertTrue(os.path.exists(manifest_path))
-        with open(manifest_path, 'r') as manifest_output:
-            import json
-            manifest = json.loads(manifest_output.read())
 
         self.assertIn('features', manifest)
         self.assertIn('storage', manifest['features'])

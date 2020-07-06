@@ -319,13 +319,15 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_call_function_without_variables(self):
-        main_to_one_address = Integer(13).to_byte_array(min_length=1, signed=True)
-        main_to_two_address = Integer(7).to_byte_array(min_length=1, signed=True)
-        two_to_one_address = Integer(-3).to_byte_array(min_length=1, signed=True)
+        main_to_one_address = Integer(-10).to_byte_array(min_length=1, signed=True)
+        main_to_two_address = Integer(5).to_byte_array(min_length=1, signed=True)
+        two_to_one_address = Integer(-24).to_byte_array(min_length=1, signed=True)
         end_if = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.PUSH1        # One
+            + Opcode.RET            # return 1
+            + Opcode.INITSLOT   # Main
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0         # if arg0 == 1
@@ -346,8 +348,6 @@ class TestFunction(BoaTest):
                 + Opcode.RET
             + Opcode.PUSH0          # default return
             + Opcode.RET
-            + Opcode.PUSH1     # One
-            + Opcode.RET            # return 1
             + Opcode.PUSH1     # Two
             + Opcode.CALL           # return 1 + One()
             + two_to_one_address
@@ -361,23 +361,23 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_call_function_written_before_caller(self):
-        call_address = Integer(3).to_byte_array(min_length=1, signed=True)
+        call_address = Integer(-12).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT     # TestFunction
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.RET
+            + Opcode.INITSLOT   # Main
             + b'\x00'
             + b'\x02'
             + Opcode.PUSH2          # return TestAdd(a, b)
             + Opcode.PUSH1
             + Opcode.CALL
             + call_address
-            + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG0         # return a + b
-            + Opcode.LDARG1
-            + Opcode.ADD
             + Opcode.RET
         )
 

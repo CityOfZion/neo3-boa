@@ -192,8 +192,6 @@ class CodeGenerator:
 
         if self.last_code.opcode is not Opcode.RET:
             self.insert_return()
-        if self._current_method.is_main_method:
-            self._move_entry_point_to_beginning()
 
         self._current_method = None
         self._stack.clear()
@@ -203,20 +201,6 @@ class CodeGenerator:
         Insert the return statement
         """
         self.__insert1(OpcodeInfo.RET)
-
-    def _move_entry_point_to_beginning(self):
-        """
-        Move the vm codes of the smart contract entry point to the beginning of the bytecode
-        """
-        method = self._current_method
-        if method is not None and method.is_main_method:
-            main_first_code = self._vm_codes_map[method.bytecode_address]
-            main_last_code = self.last_code
-            first_code = self._vm_codes[0]
-
-            if first_code.start_address != main_first_code.start_address:
-                main_first_code._last_code = None
-                first_code._last_code = main_last_code
 
     def convert_begin_while(self) -> int:
         """
