@@ -30,7 +30,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar type_errors: a list with the found type errors. Empty by default.
     :ivar modules: a list with the analysed modules. Empty by default.
     :ivar symbols: a dictionary that maps the global symbols.
-    :cvar __operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
+    :cvar _operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
     """
 
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
@@ -45,7 +45,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self.visit(self._tree)
 
-    __operators = {
+    _operators = {
         ast.Add: Operator.Plus,
         ast.Sub: Operator.Minus,
         ast.Mult: Operator.Mult,
@@ -75,7 +75,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     }
 
     @property
-    def __current_method_id(self) -> str:
+    def _current_method_id(self) -> str:
         """
         Get the string identifier of the current method
 
@@ -87,7 +87,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return list(self.symbols.keys())[index]
 
     @property
-    def __modules_symbols(self) -> Dict[str, ISymbol]:
+    def _modules_symbols(self) -> Dict[str, ISymbol]:
         """
         Gets all the symbols in the modules scopes.
 
@@ -192,7 +192,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # it is returning something, but there is no type hint for return
             elif self._current_method.return_type is Type.none:
                 self._log_error(
-                    CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self.__current_method_id)
+                    CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self._current_method_id)
                 )
                 return
         if not self._current_method.return_type.is_type_of(ret_type):
@@ -825,8 +825,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return node.operator
 
         node_type = type(node)
-        if node_type in self.__operators:
-            return self.__operators[node_type]
+        if node_type in self._operators:
+            return self._operators[node_type]
         else:
             return None
 
@@ -912,7 +912,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         CompilerError.MetadataInformationMissing(
                             line=call.func.lineno, col=call.func.col_offset,
                             symbol_id=function.identifier,
-                            metadata_attr_id='storage'
+                            metadata_attr_id='has_storage'
                         )
                     )
                 else:

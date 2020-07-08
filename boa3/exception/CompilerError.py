@@ -61,6 +61,41 @@ class InvalidType(CompilerError):
         return message
 
 
+class MetadataImplementationMissing(CompilerError):
+    """
+    An error raised when the metadata required functions aren't implemented
+    """
+
+    def __init__(self, line: int, col: int, symbol_id: str, metadata_attr_id: str):
+        self.symbol_id: str = symbol_id
+        self.metadata_attr_id: str = metadata_attr_id
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "'{0}' requires '{1}' implementation".format(self.metadata_attr_id, self.symbol_id)
+
+
+class MetadataIncorrectImplementation(CompilerError):
+    """
+    An error raised when a metadata required function is incorrectly implemented
+    """
+    from boa3.model.symbol import ISymbol
+
+    def __init__(self, line: int, col: int, symbol_id: str, expected_symbol: ISymbol, actual_symbol: ISymbol):
+        from boa3.model.symbol import ISymbol
+
+        self.symbol_id: str = symbol_id
+        self.expected_symbol: ISymbol = expected_symbol
+        self.actual_symbol: ISymbol = actual_symbol
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return ("'{0}' is not correctly implemented. Expecting '{1}', got '{2}' instead"
+                .format(self.symbol_id, self.expected_symbol, self.actual_symbol))
+
+
 class MetadataInformationMissing(CompilerError):
     """
     An error raised when the metadata info doesn't match with the functions requirements
@@ -73,7 +108,7 @@ class MetadataInformationMissing(CompilerError):
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "'{0}' requires {1}, which is missing in the metadata".format(self.symbol_id, self.metadata_attr_id)
+        return "'{0}' requires '{1}' attribute, which is missing in the metadata".format(self.symbol_id, self.metadata_attr_id)
 
 
 class MismatchedTypes(CompilerError):

@@ -1,3 +1,4 @@
+import ast
 from typing import Dict, List, Optional
 
 from boa3.model.expression import IExpression
@@ -17,7 +18,8 @@ class Method(IExpression):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none, is_public: bool = False):
+    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none,
+                 is_public: bool = False, origin_node: Optional[ast.AST] = None):
         from boa3.neo.vm.VMCode import VMCode
         if args is None:
             args = {}
@@ -26,6 +28,7 @@ class Method(IExpression):
 
         self.imported_symbols = {}
 
+        self._origin_node = origin_node
         self.is_public: bool = is_public
         self._requires_storage: bool = False
 
@@ -54,9 +57,11 @@ class Method(IExpression):
     def __str__(self) -> str:
         args_types: List[str] = [str(arg.type) for arg in self.args.values()]
         if self.return_type is not Type.none:
-            return '({0}) -> {1}'.format(', '.join(args_types), self.return_type)
+            signature = '({0}) -> {1}'.format(', '.join(args_types), self.return_type)
         else:
-            return '({0})'.format(', '.join(args_types))
+            signature = '({0})'.format(', '.join(args_types))
+        public = 'public ' if self.is_public else ''
+        return '{0}{1}'.format(public, signature)
 
     @property
     def symbols(self) -> Dict[str, Variable]:
@@ -104,6 +109,15 @@ class Method(IExpression):
         :return: True if the method uses storage features. False otherwise.
         """
         return self._requires_storage
+
+    @property
+    def origin(self) -> ast.AST:
+        """
+        Returns the method origin ast node.
+
+        :return: the ast node that describes this method. None if it is not from a ast.
+        """
+        return self._origin_node
 
     def set_storage(self):
         self._requires_storage = True
