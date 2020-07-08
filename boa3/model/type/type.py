@@ -69,7 +69,9 @@ class Type:
         """
         generic = cls.any
         if len(types) > 0:
-            generic_types = [cls.mutableSequence, cls.sequence]
+            generic_types = [cls.mutableSequence, cls.mapping, cls.sequence]
+            generic_types.append(generic)  # any type must be the last value in the list
+
             generic = types[0]
             for tpe in types[1:]:
                 if generic == tpe or generic.is_type_of(tpe):
@@ -81,7 +83,7 @@ class Type:
                 for gen in generic_types:
                     if gen.is_type_of(generic) and gen.is_type_of(tpe):
                         generic = gen
-                        continue
+                        break
 
                 if generic is Type.any:
                     break

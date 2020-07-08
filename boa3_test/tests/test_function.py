@@ -490,6 +490,29 @@ class TestFunction(BoaTest):
         path = '%s/boa3_test/example/function_test/ReturnMultipleInnerIfMissing.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
+    def test_return_if_expression(self):
+        expected_output = (
+            Opcode.INITSLOT     # Main
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # return 5 if condition else 10
+            + Opcode.JMPIFNOT
+                + Integer(5).to_byte_array(min_length=1, signed=True)
+                + Opcode.PUSH5      # 5
+            + Opcode.JMP        # else
+            + Integer(3).to_byte_array(min_length=1, signed=True)
+                + Opcode.PUSH10     # 10
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/function_test/ReturnIfExpression.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_return_if_expression_mismatched_type(self):
+        path = '%s/boa3_test/example/function_test/ReturnIfExpressionMismatched.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     def test_return_inside_for(self):
         expected_output = (
             Opcode.INITSLOT     # Main
