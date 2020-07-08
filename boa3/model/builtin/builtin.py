@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
@@ -64,5 +64,11 @@ class Builtin:
     def boa_symbols(cls) -> Dict[str, IdentifiedSymbol]:
         return {symbol.identifier: symbol for symbol in cls._boa_builtins}
 
-    metadata_fields: Dict[str, type] = {'has_storage': bool,
-                                        'is_payable': bool}
+    metadata_fields: Dict[str, Union[type, Tuple[type]]] = \
+        {
+            'author': (str, type(None)),
+            'email': (str, type(None)),
+            'description': (str, type(None)),
+            'has_storage': bool,
+            'is_payable': bool
+    }

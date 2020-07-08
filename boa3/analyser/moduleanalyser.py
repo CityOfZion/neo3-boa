@@ -207,10 +207,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 for expected, actual in [(Builtin.metadata_fields[attr], type(v_type))
                                          for attr, v_type in attributes.items()
                                          if not isinstance(v_type, Builtin.metadata_fields[attr])]:
+                    if isinstance(expected, Iterable):
+                        expected_id = 'Union[{0}]'.format(', '.join([tpe.__name__ for tpe in expected]))
+                    elif hasattr(expected, '__name__'):
+                        expected_id = expected.__name__
+                    else:
+                        expected_id = str(expected)
+
                     self._log_error(
                         CompilerError.MismatchedTypes(
                             line=node.lineno, col=node.col_offset,
-                            expected_type_id=expected.__name__,
+                            expected_type_id=expected_id,
                             actual_type_id=actual.__name__
                         )
                     )

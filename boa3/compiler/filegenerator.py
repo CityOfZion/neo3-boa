@@ -91,7 +91,7 @@ class FileGenerator:
             ],
             "trusts": [],
             "safeMethods": [],
-            "extra": None
+            "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }
 
     def _uses_storage_feature(self) -> bool:
