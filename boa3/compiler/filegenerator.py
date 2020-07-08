@@ -94,14 +94,6 @@ class FileGenerator:
             "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }
 
-    def _uses_storage_feature(self) -> bool:
-        """
-        Returns whether the smart contract uses the storage feature
-
-        :return: True if there is any method that uses storage. False otherwise.
-        """
-        return any(method.requires_storage for method in self._methods.values())
-
     def generate_abi_file(self) -> bytes:
         """
         Generates the .abi metadata file
@@ -137,16 +129,15 @@ class FileGenerator:
         return methods
 
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
-        params = []
-        for arg_id, arg in method.args.items():
-            params.append({
-                "name": arg_id,
-                "type": arg.type.abi_type
-            })
         return {
             "name": method_id,
             "offset": method.bytecode_address if method.bytecode_address is not None else 0,
-            "parameters": params,
+            "parameters": [
+                {
+                    "name": arg_id,
+                    "type": arg.type.abi_type
+                } for arg_id, arg in method.args.items()
+            ],
             "returnType": method.type.abi_type
         }
 

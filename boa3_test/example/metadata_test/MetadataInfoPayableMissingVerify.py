@@ -1,13 +1,8 @@
-from boa3.builtin import metadata, NeoMetadata, public
+from boa3.builtin import metadata, NeoMetadata
 
 
 def Main() -> int:
     return 5
-
-
-@public
-def verify() -> bool:
-    return False
 
 
 @metadata

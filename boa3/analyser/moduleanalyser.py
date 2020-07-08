@@ -41,12 +41,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_method: Method = None
 
         self._metadata: NeoMetadata = None
+        self._metadata_node: ast.AST = ast.parse('')
         self.imported_nodes: List[ast.AST] = []
         self.visit(self._tree)
+
+        self._validate_metadata_symbols()
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
-    def __current_scope(self):
+    def _current_scope(self):
         """
         Returns the scope that is currently being analysed
 
@@ -82,7 +85,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :type var_type_id: str or IType
         :param var_enumerate_type: variable value type id if var_type_id is a SequenceType
         """
-        if var_id not in self.__current_scope.symbols:
+        if var_id not in self._current_scope.symbols:
             outer_symbol = self.get_symbol(var_id)
             if outer_symbol is not None:
                 self._log_warning(
@@ -105,7 +108,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if isinstance(var_type, SequenceType):
                     var_type = var_type.build_collection(var_enumerate_type)
                 var = Variable(var_type)
-                self.__current_scope.include_variable(var_id, var)
+                self._current_scope.include_variable(var_id, var)
 
     def __include_method(self, method_id: str, method: Method):
         """
@@ -118,9 +121,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._current_module.include_method(method_id, method)
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
-        if symbol_id in self.__current_scope.symbols:
+        if symbol_id in self._current_scope.symbols:
             # the symbol exists in the local scope
-            return self.__current_scope.symbols[symbol_id]
+            return self._current_scope.symbols[symbol_id]
         elif symbol_id in self._current_module.symbols:
             # the symbol exists in the module scope
             return self._current_module.symbols[symbol_id]
@@ -144,6 +147,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
     # endregion
+
+    # region Metadata
 
     def _read_metadata_object(self, function: ast.FunctionDef):
         """
@@ -189,6 +194,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             obj: Any = namespace[function.name]()
 
             node: ast.AST = function.body[-1] if len(function.body) > 0 else function
+            # return must be a NeoMetadata object
             if not isinstance(obj, NeoMetadata):
                 obj_type = self.get_type(obj).identifier if self.get_type(obj) is not Type.any else type(obj).__name__
                 self._log_error(
@@ -200,6 +206,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
                 return
 
+            # validates the metadata attributes types
             attributes: Dict[str, Any] = {attr: value
                                           for attr, value in dict(obj.__dict__).items()
                                           if attr in Builtin.metadata_fields}
@@ -224,6 +231,50 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             else:
                 # if the function was defined correctly, sets the metadata object of the smart contract
                 self._metadata = obj
+                self._metadata_node = function  # for error messages only
+
+    def _validate_metadata_symbols(self):
+        """
+        Validates if the symbols match the requirements from the given metadata
+        """
+        if self._metadata is not None:
+            if self._metadata.is_payable:
+                """
+                Payable smart contracts requires the implementation of a 'verify' function, that must implement the
+                following signature:
+                
+                ```
+                @public
+                def verify(*args) -> bool
+                ```
+                """
+                verify_id: str = 'verify'
+                if (verify_id not in self.global_symbols  # couldn't find verify
+                    or not isinstance(self.global_symbols[verify_id], Method)  # verify is not a function
+                    or self.global_symbols[verify_id].origin is None  # verify is not a user function
+                ):
+                    self._log_error(
+                        CompilerError.MetadataImplementationMissing(
+                            line=self._metadata_node.lineno, col=self._metadata_node.col_offset,
+                            symbol_id=verify_id,
+                            metadata_attr_id='is_payable'
+                        )
+                    )
+                elif (self.global_symbols[verify_id].return_type != Type.bool
+                      or not self.global_symbols[verify_id].is_public
+                ):
+                    actual = self.global_symbols[verify_id]
+                    expected = Method(actual.args, Type.bool, True)
+                    self._log_error(
+                        CompilerError.MetadataIncorrectImplementation(
+                            line=actual.origin.lineno, col=actual.origin.col_offset,
+                            symbol_id=verify_id,
+                            expected_symbol=expected,
+                            actual_symbol=actual
+                        )
+                    )
+
+    # endregion
 
     # region AST
 
@@ -242,11 +293,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
             # includes the module to be able to generate the functions
             imported_module = Import(analyser.tree, new_symbols)
-            self.__current_scope.include_symbol(import_from.module, imported_module)
+            self._current_scope.include_symbol(import_from.module, imported_module)
 
             for name, alias in import_alias.items():
                 if name in new_symbols:
-                    self.__current_scope.include_symbol(alias, imported_module.symbols[name])
+                    self._current_scope.include_symbol(alias, imported_module.symbols[name])
                 else:
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_from, name)
@@ -277,7 +328,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
 
                 imported_module = Import(analyser.tree, new_symbols)
-                self.__current_scope.include_symbol(alias, imported_module)
+                self._current_scope.include_symbol(alias, imported_module)
 
     def visit_Module(self, module: ast.Module):
         """
@@ -330,7 +381,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._read_metadata_object(function)
             return Builtin.Metadata
 
-        method = Method(fun_args, fun_return, Builtin.Public in fun_decorators)
+        method = Method(args=fun_args, return_type=fun_return, origin_node=function,
+                        is_public=Builtin.Public in fun_decorators)
         self._current_method = method
 
         # don't evaluate constant expression - for example: string for documentation

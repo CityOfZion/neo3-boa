@@ -210,11 +210,11 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.generator.convert_operation(BinaryOp.Sub)
                 self.generator.convert_get_array_ending()
 
-    def __convert_unary_operation(self, operand, op):
+    def _convert_unary_operation(self, operand, op):
         self.visit_to_generate(operand)
         self.generator.convert_operation(op)
 
-    def __convert_binary_operation(self, left, right, op):
+    def _convert_binary_operation(self, left, right, op):
         self.visit_to_generate(left)
         self.visit_to_generate(right)
         self.generator.convert_operation(op)
@@ -226,7 +226,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param bin_op: the python ast binary operation node
         """
         if isinstance(bin_op.op, BinaryOperation):
-            self.__convert_binary_operation(bin_op.left, bin_op.right, bin_op.op)
+            self._convert_binary_operation(bin_op.left, bin_op.right, bin_op.op)
 
     def visit_UnaryOp(self, un_op: ast.UnaryOp):
         """
@@ -235,7 +235,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param un_op: the python ast binary operation node
         """
         if isinstance(un_op.op, UnaryOperation):
-            self.__convert_unary_operation(un_op.operand, un_op.op)
+            self._convert_unary_operation(un_op.operand, un_op.op)
 
     def visit_Compare(self, compare: ast.Compare):
         """
@@ -249,12 +249,12 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             right = compare.comparators[index]
             if isinstance(op, IOperation):
                 if isinstance(op, BinaryOperation):
-                    self.__convert_binary_operation(left, right, op)
+                    self._convert_binary_operation(left, right, op)
                 else:
                     operand = left
                     if isinstance(operand, ast.NameConstant) and operand.value is None:
                         operand = right
-                    self.__convert_unary_operation(operand, op)
+                    self._convert_unary_operation(operand, op)
                 # if it's more than two comparators, must include AND between the operations
                 if not converted:
                     converted = True
@@ -432,7 +432,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param tup_node: the python ast tuple node
         """
-        self.__create_array(tup_node.elts, Type.tuple)
+        self._create_array(tup_node.elts, Type.tuple)
 
     def visit_List(self, list_node: ast.List):
         """
@@ -440,7 +440,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param list_node: the python ast list node
         """
-        self.__create_array(list_node.elts, Type.list)
+        self._create_array(list_node.elts, Type.list)
 
     def visit_Dict(self, dict_node: ast.Dict):
         """
@@ -456,7 +456,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             self.visit_to_generate(dict_node.values[key_value])
             self.generator.convert_set_item()
 
-    def __create_array(self, values: List[ast.AST], array_type: IType):
+    def _create_array(self, values: List[ast.AST], array_type: IType):
         """
         Creates a new array from a literal sequence
 

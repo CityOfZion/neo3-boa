@@ -1,4 +1,5 @@
-from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, UnexpectedArgument,
+from boa3.exception.CompilerError import (MetadataImplementationMissing, MetadataIncorrectImplementation,
+                                          MismatchedTypes, MissingReturnStatement, UnexpectedArgument,
                                           UnresolvedReference)
 from boa3.exception.CompilerWarning import RedeclaredSymbol
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -89,8 +90,10 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_payable(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
-            + Opcode.RET
+            Opcode.PUSH5        # Main
+            + Opcode.RET            # return 5
+            + Opcode.PUSH0      # verify
+            + Opcode.RET            # return False
         )
 
         path = '%s/boa3_test/example/metadata_test/MetadataInfoPayable.py' % self.dirname
@@ -101,9 +104,25 @@ class TestMetadata(BoaTest):
         self.assertIn('storage', manifest['features'])
         self.assertEqual(True, manifest['features']['payable'])
 
+        self.assertIn('abi', manifest)
+        self.assertIn('methods', manifest['abi'])
+        self.assertTrue(any(method['name'] == 'verify' for method in manifest['abi']['methods'] if 'name' in method))
+
     def test_metadata_info_payable_mismatched_type(self):
         path = '%s/boa3_test/example/metadata_test/MetadataInfoPayableMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_metadata_info_payable_missing_verify(self):
+        path = '%s/boa3_test/example/metadata_test/MetadataInfoPayableMissingVerify.py' % self.dirname
+        self.assertCompilerLogs(MetadataImplementationMissing, path)
+
+    def test_metadata_info_payable_incorrect_verify(self):
+        path = '%s/boa3_test/example/metadata_test/MetadataInfoPayableIncorrectVerify.py' % self.dirname
+        self.assertCompilerLogs(MetadataIncorrectImplementation, path)
+
+    def test_metadata_info_payable_private_verify(self):
+        path = '%s/boa3_test/example/metadata_test/MetadataInfoPayablePrivateVerify.py' % self.dirname
+        self.assertCompilerLogs(MetadataIncorrectImplementation, path)
 
     def test_metadata_info_author(self):
         expected_output = (

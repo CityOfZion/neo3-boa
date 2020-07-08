@@ -6,8 +6,8 @@ def Main() -> int:
 
 
 @public
-def verify() -> bool:
-    return False
+def verify() -> int:
+    return 10
 
 
 @metadata
