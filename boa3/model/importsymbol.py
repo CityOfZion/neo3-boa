@@ -16,7 +16,7 @@ class Import(ISymbol):
     :ivar types: a dictionary that maps each type with its name. Empty by default.
     """
 
-    def __init__(self, syntax_tree: ast.AST, symbols: Dict[str, ISymbol] = None):
+    def __init__(self, origin: str, syntax_tree: ast.AST, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
             symbols = {}
 
@@ -27,6 +27,7 @@ class Import(ISymbol):
         self._other_symbols = {alias: symbol for alias, symbol in symbols.items()
                                if not isinstance(symbol, (Variable, Method, IType, Import))}
 
+        self.origin: str = origin
         self.ast: ast.AST = syntax_tree
 
     @property

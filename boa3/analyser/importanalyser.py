@@ -17,6 +17,7 @@ class ImportAnalyser(IAstAnalyser):
 
         module_origin: str = importlib.util.find_spec(import_target).origin
         path: List[str] = module_origin.split(os.sep)
+        self.path: str = module_origin.replace(os.sep, '/')
 
         super().__init__(ast.Module(body=[]), path[-1])
         if import_target == 'typing':

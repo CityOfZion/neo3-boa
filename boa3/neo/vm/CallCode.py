@@ -42,5 +42,5 @@ class CallCode(VMCode):
 
     @property
     def _unformatted_data(self) -> Integer:
-        target = self._target_method.bytecode_address
+        target = self._target_method.start_address
         return Integer((target if target is not None else self.start_address) - self.start_address)

@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Python Contract",
+            "type": "neo-contract",
+            "request": "launch",
+            "program": "${workspaceFolder}\\GenerationWithMultipleFlows.nef",
+            "operation": "Main",
+            "args": [],
+            "storage": [],
+            "runtime": {
+                "witnesses": {
+                    "check-result": true
+                }
+            }
+        }
+    ]
+}

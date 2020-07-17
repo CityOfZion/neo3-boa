@@ -193,6 +193,7 @@ class CodeGenerator:
         if self.last_code.opcode is not Opcode.RET:
             self.insert_return()
 
+        self._current_method.end_bytecode = self.last_code
         self._current_method = None
         self._stack.clear()
 

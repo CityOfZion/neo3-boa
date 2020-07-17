@@ -98,7 +98,7 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, ast.AST):
-                        ast.copy_location(item, origin)
+                        self.update_line_and_col(item, origin)
             elif isinstance(value, ast.AST):
-                ast.copy_location(value, origin)
+                self.update_line_and_col(value, origin)
         ast.fix_missing_locations(target)

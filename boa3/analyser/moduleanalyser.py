@@ -292,7 +292,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
             # includes the module to be able to generate the functions
-            imported_module = Import(analyser.tree, new_symbols)
+            imported_module = Import(analyser.path, analyser.tree, new_symbols)
             self._current_scope.include_symbol(import_from.module, imported_module)
 
             for name, alias in import_alias.items():
@@ -327,7 +327,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
 
-                imported_module = Import(analyser.tree, new_symbols)
+                imported_module = Import(analyser.path, analyser.tree, new_symbols)
                 self._current_scope.include_symbol(alias, imported_module)
 
     def visit_Module(self, module: ast.Module):
@@ -659,6 +659,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the identifier of the name
         """
         return name.id
+
+    def visit_Constant(self, constant: ast.Constant) -> Any:
+        """
+        Visitor of constant values node
+
+        :param constant: the python ast constant value node
+        :return: the value of the constant
+        """
+        return constant.value
 
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """

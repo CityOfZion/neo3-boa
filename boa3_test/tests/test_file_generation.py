@@ -17,10 +17,12 @@ class TestFileGeneration(BoaTest):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
+        expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
         Boa3.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_nef_output))
         self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertTrue(os.path.exists(expected_debug_info_output))
 
     def test_generate_nef_file(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
@@ -54,7 +56,7 @@ class TestFileGeneration(BoaTest):
         self.assertIn('abi', manifest)
         abi = manifest['abi']
 
-        self.assertNotIn('entryPoint', abi)
+        self.assertNotIn('entrypoint', abi)
         self.assertIn('methods', abi)
         self.assertEqual(2, len(abi['methods']))
 
@@ -114,6 +116,53 @@ class TestFileGeneration(BoaTest):
         self.assertIn('events', abi)
         self.assertEqual(0, len(abi['events']))
 
+    def test_generate_nefdbgnfo_file(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
+
+        expected_nef_output = path.replace('.py', '.nefdbgnfo')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        methods: Dict[str, Method] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Method)
+        }
+
+        self.assertTrue(os.path.exists(expected_nef_output))
+        debug_info = self.get_debug_info(path)
+        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('methods', debug_info)
+        self.assertGreater(len(debug_info['methods']), 0)
+
+        for debug_method in debug_info['methods']:
+            self.assertIn('name', debug_method)
+            parsed_name = debug_method['name'].split(',')
+            self.assertEqual(2, len(parsed_name))
+            self.assertIn(parsed_name[-1], methods)
+            actual_method = methods[parsed_name[-1]]
+
+            # validate id
+            self.assertIn('id', debug_method)
+            self.assertEqual(str(id(actual_method)), debug_method['id'])
+
+            # validate parameters
+            self.assertIn('params', debug_method)
+            self.assertEqual(len(actual_method.args), len(debug_method['params']))
+            for var in debug_method['params']:
+                self.assertEqual(2, len(var.split(',')))
+                param_id, param_type = var.split(',')
+                self.assertIn(param_id, actual_method.args)
+                self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
+
+            # validate local variables
+            self.assertIn('variables', debug_method)
+            self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
+            for var in debug_method['variables']:
+                self.assertEqual(2, len(var.split(',')))
+                var_id, var_type = var.split(',')
+                self.assertIn(var_id, actual_method.locals)
+                self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
+
     def test_generate_without_main(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithoutMain.py' % self.dirname
         expected_manifest_output = path.replace('.py', '.manifest.json')
@@ -172,7 +221,7 @@ class TestFileGeneration(BoaTest):
             self.assertIn('name', method)
             self.assertIn('offset', method)
             self.assertIn(method['name'], methods)
-            self.assertEqual(method['offset'], methods[method['name']].bytecode_address)
+            self.assertEqual(method['offset'], methods[method['name']].start_address)
 
     def test_generate_manifest_file_storage_feature(self):
         path = '%s/boa3_test/example/storage_test/StorageGetBytesKey.py' % self.dirname
@@ -184,3 +233,48 @@ class TestFileGeneration(BoaTest):
         self.assertIn('features', manifest)
         self.assertIn('storage', manifest['features'])
         self.assertEqual(True, manifest['features']['storage'])
+
+    def test_generate_debug_info_with_multiple_flows(self):
+        path = '%s/boa3_test/example/generation_test/GenerationWithMultipleFlows.py' % self.dirname
+
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        methods: Dict[str, Method] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Method)
+        }
+        self.assertGreater(len(methods), 0)
+
+        debug_info = self.get_debug_info(path)
+        self.assertIn('methods', debug_info)
+        self.assertGreater(len(debug_info['methods']), 0)
+
+        for debug_method in debug_info['methods']:
+            self.assertIn('name', debug_method)
+            parsed_name = debug_method['name'].split(',')
+            self.assertEqual(2, len(parsed_name))
+            self.assertIn(parsed_name[-1], methods)
+            actual_method = methods[parsed_name[-1]]
+
+            # validate id
+            self.assertIn('id', debug_method)
+            self.assertEqual(str(id(actual_method)), debug_method['id'])
+
+            # validate parameters
+            self.assertIn('params', debug_method)
+            self.assertEqual(len(actual_method.args), len(debug_method['params']))
+            for var in debug_method['params']:
+                self.assertEqual(2, len(var.split(',')))
+                param_id, param_type = var.split(',')
+                self.assertIn(param_id, actual_method.args)
+                self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
+
+            # validate local variables
+            self.assertIn('variables', debug_method)
+            self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
+            for var in debug_method['variables']:
+                self.assertEqual(2, len(var.split(',')))
+                var_id, var_type = var.split(',')
+                self.assertIn(var_id, actual_method.locals)
+                self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)

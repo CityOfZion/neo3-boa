@@ -2,8 +2,9 @@ import json
 import logging
 from typing import Any, Dict, List
 
-from boa3.builtin import NeoMetadata
+from boa3.analyser.analyser import Analyser
 from boa3.constants import ENCODING
+from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.neo import to_hex_str
@@ -15,21 +16,12 @@ class FileGenerator:
     This class is responsible for generating the files.
     """
 
-    def __init__(self, bytecode: bytes, metadata: NeoMetadata, symbols: Dict[str, ISymbol] = None):
-        if symbols is None:
-            symbols = {}
-        self._metadata = metadata
-        self._symbols: Dict[str, ISymbol] = symbols
+    def __init__(self, bytecode: bytes, analyser: Analyser):
+        self._metadata = analyser.metadata
+        self._symbols: Dict[str, ISymbol] = analyser.symbol_table
+        import os
+        self._files: List[str] = [analyser.path.replace(os.sep, '/')]
         self._nef: NefFile = NefFile(bytecode)
-
-    @property
-    def _nef_hash(self) -> str:
-        """
-        Gets the string representation of the hash of the nef file
-
-        :return: the hex string representation of the hash
-        """
-        return '0x' + to_hex_str(self._nef.script_hash)
 
     @property
     def _public_methods(self) -> Dict[str, Method]:
@@ -51,6 +43,17 @@ class FileGenerator:
         return {name: method for name, method in self._symbols.items()
                 if isinstance(method, Method) and not isinstance(method, IBuiltinDecorator)}
 
+    # region NEF
+
+    @property
+    def _nef_hash(self) -> str:
+        """
+        Gets the string representation of the hash of the nef file
+
+        :return: the hex string representation of the hash
+        """
+        return '0x' + to_hex_str(self._nef.script_hash)
+
     def generate_nef_file(self) -> bytes:
         """
         Generates the .nef file
@@ -58,6 +61,10 @@ class FileGenerator:
         :return: the resulting nef file as a byte array
         """
         return self._nef.serialize()
+
+    # endregion
+
+    # region Manifest
 
     def generate_manifest_file(self) -> bytes:
         """
@@ -94,16 +101,6 @@ class FileGenerator:
             "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }
 
-    def generate_abi_file(self) -> bytes:
-        """
-        Generates the .abi metadata file
-
-        :return: the resulting abi as a byte array
-        """
-        data: Dict[str, Any] = self._get_abi_info()
-        json_data: str = json.dumps(data)
-        return bytes(json_data, ENCODING)
-
     def _get_abi_info(self) -> Dict[str, Any]:
         """
         Gets the abi information in a dictionary format
@@ -131,7 +128,7 @@ class FileGenerator:
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
         return {
             "name": method_id,
-            "offset": method.bytecode_address if method.bytecode_address is not None else 0,
+            "offset": method.start_address if method.start_address is not None else 0,
             "parameters": [
                 {
                     "name": arg_id,
@@ -150,10 +147,88 @@ class FileGenerator:
         # TODO: abi events
         return []
 
-    def generate_avmdbgnfo_file(self) -> bytes:
+    # endregion
+
+    # region Debug Info
+
+    def generate_nefdbgnfo_file(self) -> bytes:
         """
         Generates a debug map for NEO debugger
 
         :return: the resulting map as a byte array
         """
-        raise NotImplementedError
+        data: Dict[str, Any] = self._get_debug_info()
+        json_data: str = json.dumps(data, indent=4)
+        return bytes(json_data, ENCODING)
+
+    def _get_debug_info(self) -> Dict[str, Any]:
+        """
+        Gets the debug information in a dictionary format
+
+        :return: a dictionary with the debug information
+        """
+        return {
+            "hash": self._nef_hash,
+            "documents": self._files,
+            "methods": self._get_debug_methods(),
+            "events": self._get_debug_events()
+        }
+
+    def _get_debug_methods(self) -> List[Dict[str, Any]]:
+        """
+        Gets the methods' debug information in a dictionary format
+
+        :return: a dictionary with the methods' debug information
+        """
+        return [
+            self._get_method_debug_info(method_id, method)
+            for method_id, method in self._methods.items()
+        ]
+
+    def _get_method_debug_info(self, method_id: str, method: Method) -> Dict[str, Any]:
+        return {
+            "id": str(id(method)),
+            "name": ',{0}'.format(method_id),  # TODO: include module name
+            "range": '{0}-{1}'.format(method.start_address, method.end_address),
+            "params": [
+                '{0},{1}'.format(name, var.type.abi_type) for name, var in method.args.items()
+            ],
+            "return": method.return_type.abi_type,
+            "variables": [
+                '{0},{1}'.format(name, var.type.abi_type) for name, var in method.locals.items()
+            ],
+            "sequence-points": [
+                '{0}[{1}]{2}:{3}-{4}:{5}'.format(instruction.code.start_address,
+                                                 self._get_method_origin_index(method),
+                                                 instruction.start_line, instruction.start_col,
+                                                 instruction.end_line, instruction.end_col)
+                for instruction in method.debug_map()
+            ]
+        }
+
+    def _get_method_origin_index(self, method: Method) -> int:
+        imported_files: List[Import] = [imported for imported in self._symbols.values()
+                                        if isinstance(imported, Import) and imported.origin is not None]
+        imported = None
+        for file in imported_files:
+            if method in file.symbols.values():
+                imported = file
+                break
+
+        if imported is None:
+            return 0
+        else:
+            if imported.origin not in self._files:
+                self._files.append(imported.origin)
+            return self._files.index(imported.origin)
+
+    def _get_debug_events(self) -> List[Dict[str, Any]]:
+        """
+        Gets the events' debug information in a dictionary format
+
+        :return: a dictionary with the event's debug information
+        """
+        # TODO: debug events
+        return []
+
+    # endregion
