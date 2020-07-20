@@ -181,8 +181,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param ret: the python ast return node
         """
         ret_value: Any = self.visit(ret.value) if ret.value is not None else None
-        ret_type: IType = self.get_type(ret.value)
-        if ret.value is not None and ret_type is not Type.none:
+        if ret.value is not None and self.get_type(ret.value) is not Type.none:
             # multiple returns are not allowed
             if isinstance(ret.value, ast.Tuple):
                 self._log_error(
@@ -195,23 +194,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self._current_method_id)
                 )
                 return
-        if not self._current_method.return_type.is_type_of(ret_type):
-            # if the return type is a specified type collection, is not a mismatched type when the return expression
-            # is an empty collection
-            is_empty_collection = (
-                isinstance(ret_type, Collection)
-                and ret_type.is_type_of(ret_value)  # if it is a variable or a function, this will be False
-                and not isinstance(ret_value, IType)  # if it is an IType value, the latter condition will be True
-                and len(ret_value) == 0
-            )
-            if not (isinstance(self._current_method.return_type, Collection) and is_empty_collection):
-                # the return is None, but the type hint value type is not None
-                self._log_error(
-                    CompilerError.MismatchedTypes(
-                        ret.lineno, ret.col_offset,
-                        actual_type_id=ret_type.identifier,
-                        expected_type_id=self._current_method.return_type.identifier)
-                )
+        self.validate_type_variable_assign(ret, ret_value, self._current_method)
 
         # continue to walk through the tree
         self.generic_visit(ret)
@@ -303,18 +286,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.validate_type_variable_assign(aug_assign.target, operation)
             aug_assign.op = operation
 
-    def validate_type_variable_assign(self, target: ast.AST, value: Any) -> bool:
+    def validate_type_variable_assign(self, node: ast.AST, value: Any, target: Any = None) -> bool:
         value_type: IType = self.get_type(value)
+        if isinstance(value, ast.AST):
+            value = self.visit(value)
 
-        if not isinstance(target, ast.Name):
+        if target is not None:
             target_type = self.get_type(target)
+        elif not isinstance(node, ast.Name):
+            target_type = self.get_type(node)
         else:
-            var: ISymbol = self.get_symbol(target.id)
+            var: ISymbol = self.get_symbol(node.id)
             if not isinstance(var, Variable):
                 self._log_error(
                     CompilerError.UnresolvedReference(
-                        target.lineno, target.col_offset,
-                        symbol_id=target.id
+                        node.lineno, node.col_offset,
+                        symbol_id=node.id
                     ))
                 return False
             if var.type is None:
@@ -322,10 +309,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var.set_type(value_type)
             target_type = var.type
 
-        if not target_type.is_type_of(value_type):
+        if not target_type.is_type_of(value_type) and value != target_type.default_value:
             self._log_error(
                 CompilerError.MismatchedTypes(
-                    target.lineno, target.col_offset,
+                    node.lineno, node.col_offset,
                     actual_type_id=value_type.identifier,
                     expected_type_id=target_type.identifier
                 ))

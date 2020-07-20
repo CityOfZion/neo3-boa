@@ -154,6 +154,21 @@ class TestDict(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_dict_assign_empty_dict(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x00'
+            + Opcode.NEWMAP  # a = {}
+            + Opcode.STLOC0
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/dict_test/EmptyDictAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
     def test_dict_type_hint_assignment(self):
         expected_output = (
             Opcode.INITSLOT
