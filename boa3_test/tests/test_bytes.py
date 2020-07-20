@@ -252,3 +252,11 @@ class TestBytes(BoaTest):
     def test_byte_array_append(self):
         path = '%s/boa3_test/example/bytes_test/BytearrayAppend.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_bytes_clear(self):
+        path = '%s/boa3_test/example/bytes_test/BytesClear.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_byte_array_clear(self):
+        path = '%s/boa3_test/example/bytes_test/BytearrayClear.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)

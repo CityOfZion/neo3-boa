@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
+from boa3.model.builtin.classmethod.clearmethod import ClearMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
@@ -39,12 +40,14 @@ class Builtin:
 
     # python class method
     Append = AppendMethod()
+    Clear = ClearMethod()
     Keys = MapKeysMethod()
     Values = MapValuesMethod()
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 ByteArray,
                                                 Append,
+                                                Clear,
                                                 Keys,
                                                 Values]
 

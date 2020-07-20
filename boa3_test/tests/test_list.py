@@ -364,3 +364,24 @@ class TestList(BoaTest):
     def test_list_append_with_builtin_mismatched_type(self):
         path = '%s/boa3_test/example/list_test/MismatchedTypesAppendWithBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_list_clear(self):
+        path = '%s/boa3_test/example/list_test/ClearList.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.clear()
+            + Opcode.CLEARITEMS
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
