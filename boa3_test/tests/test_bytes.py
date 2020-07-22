@@ -79,6 +79,14 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/example/bytes_test/BytesSetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
+    def test_bytes_clear(self):
+        path = '%s/boa3_test/example/bytes_test/BytesClear.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_bytes_reverse(self):
+        path = '%s/boa3_test/example/bytes_test/BytesReverse.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -253,10 +261,28 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/example/bytes_test/BytearrayAppend.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
-    def test_bytes_clear(self):
-        path = '%s/boa3_test/example/bytes_test/BytesClear.py' % self.dirname
-        self.assertCompilerLogs(MismatchedTypes, path)
-
     def test_byte_array_clear(self):
         path = '%s/boa3_test/example/bytes_test/BytearrayClear.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_byte_array_reverse(self):
+        data = b'\x01\x02\x03'
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.reverse()
+            + Opcode.REVERSEITEMS
+            + Opcode.LDLOC0
+            + Opcode.RET        # return a
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytearrayReverse.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
