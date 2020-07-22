@@ -169,6 +169,21 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_list_assign_empty_list(self):
+        path = '%s/boa3_test/example/list_test/EmptyListAssignment.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.NEWARRAY0
+            + Opcode.STLOC0
+            + Opcode.PUSHNULL
+            + Opcode.RET        # return
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
     def test_list_set_value(self):
         path = '%s/boa3_test/example/list_test/SetValue.py' % self.dirname
 
