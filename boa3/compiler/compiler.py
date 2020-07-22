@@ -73,15 +73,18 @@ class Compiler:
                 or len(self.bytecode) == 0):
             raise NotLoadedException
 
-        generator = FileGenerator(self.bytecode, self._analyser.metadata, self._analyser.symbol_table)
-
-        nef_bytes = generator.generate_nef_file()
+        generator = FileGenerator(self.bytecode, self._analyser)
         with open(output_path, 'wb+') as nef_file:
+            nef_bytes = generator.generate_nef_file()
             nef_file.write(nef_bytes)
             nef_file.close()
 
-        manifest_path = output_path.replace('.nef', '.manifest.json')
-        manifest_bytes = generator.generate_manifest_file()
-        with open(manifest_path, 'wb+') as manifest_file:
+        with open(output_path.replace('.nef', '.manifest.json'), 'wb+') as manifest_file:
+            manifest_bytes = generator.generate_manifest_file()
             manifest_file.write(manifest_bytes)
             manifest_file.close()
+
+        from zipfile import ZipFile, ZIP_DEFLATED
+        with ZipFile(output_path.replace('.nef', '.nefdbgnfo'), 'w', ZIP_DEFLATED) as nef_debug_info:
+            debug_bytes = generator.generate_nefdbgnfo_file()
+            nef_debug_info.writestr(os.path.basename(output_path.replace('.nef', '.debug.json')), debug_bytes)

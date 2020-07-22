@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
 from boa3.model.builtin.builtin import Builtin
@@ -26,10 +26,29 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
     def __init__(self, generator: CodeGenerator):
         self.generator = generator
+        self.current_method: Optional[Method] = None
 
     @property
     def symbols(self) -> Dict[str, ISymbol]:
         return self.generator.symbol_table
+
+    def include_instruction(self, node: ast.AST, address: int):
+        if self.current_method is not None and address in self.generator._vm_codes_map:
+            bytecode = self.generator._vm_codes_map[address]
+            from boa3.model.debuginstruction import DebugInstruction
+            self.current_method.include_instruction(DebugInstruction.build(node, bytecode))
+
+    def visit_to_map(self, node: ast.AST, generate: bool = False):
+        address: int = self.generator.address
+        if generate:
+            value = self.visit_to_generate(node)
+        else:
+            value = self.visit(node)
+
+        if not hasattr(node, 'test'):
+            # control flow nodes must map each of their instructions
+            self.include_instruction(node, address)
+        return value
 
     def visit_to_generate(self, node):
         """
@@ -43,6 +62,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             if isinstance(result, str):
                 # TODO: validate function calls
                 self.generator.convert_load_symbol(result)
+            return result
         else:
             self.generator.convert_literal(node)
 
@@ -56,12 +76,14 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         method = self.symbols[function.name]
         if isinstance(method, Method):
+            self.current_method = method
             self.generator.convert_begin_method(method)
 
             for stmt in function.body:
-                self.visit(stmt)
+                self.visit_to_map(stmt)
 
             self.generator.convert_end_method()
+            self.current_method = None
 
     def visit_arguments(self, arguments: ast.arguments) -> Dict[str, Variable]:
         """
@@ -283,14 +305,14 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         start_addr: int = self.generator.convert_begin_while()
         for stmt in while_node.body:
-            self.visit_to_generate(stmt)
+            self.visit_to_map(stmt, generate=True)
 
         test_address: int = self.generator.address
-        self.visit_to_generate(while_node.test)
+        self.visit_to_map(while_node.test, generate=True)
         self.generator.convert_end_while(start_addr, test_address)
 
         for stmt in while_node.orelse:
-            self.visit_to_generate(stmt)
+            self.visit_to_map(stmt, generate=True)
 
     def visit_For(self, for_node: ast.For):
         """
@@ -301,14 +323,18 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         start_address = self.generator.convert_begin_while()
         last_code = for_node.body[-1]
         for stmt in for_node.body[:-1]:
-            self.visit_to_generate(stmt)
+            self.visit_to_map(stmt, generate=True)
+
+        # TODO: remove when optimizing for generation
+        if self.current_method is not None:
+            self.current_method.remove_instruction(for_node.lineno, for_node.col_offset)
 
         test_address: int = self.generator.address
-        self.visit_to_generate(last_code)
+        self.visit_to_map(last_code, generate=True)
         self.generator.convert_end_while(start_address, test_address)
 
         for stmt in for_node.orelse:
-            self.visit_to_generate(stmt)
+            self.visit_to_map(stmt, generate=True)
 
     def visit_If(self, if_node: ast.If):
         """
@@ -316,16 +342,16 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param if_node: the python ast if statement node
         """
-        self.visit_to_generate(if_node.test)
+        self.visit_to_map(if_node.test, generate=True)
 
         start_addr: int = self.generator.convert_begin_if()
         for stmt in if_node.body:
-            self.visit_to_generate(stmt)
+            self.visit_to_map(stmt, generate=True)
 
         if len(if_node.orelse) > 0:
             start_addr = self.generator.convert_begin_else(start_addr)
             for stmt in if_node.orelse:
-                self.visit_to_generate(stmt)
+                self.visit_to_map(stmt, generate=True)
 
         self.generator.convert_end_if(start_addr)
 
@@ -335,13 +361,13 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param if_node: the python ast if statement node
         """
-        self.visit_to_generate(if_node.test)
+        self.visit_to_map(if_node.test, generate=True)
 
         start_addr: int = self.generator.convert_begin_if()
-        self.visit_to_generate(if_node.body)
+        self.visit_to_map(if_node.body, generate=True)
 
         start_addr = self.generator.convert_begin_else(start_addr)
-        self.visit_to_generate(if_node.orelse)
+        self.visit_to_map(if_node.orelse, generate=True)
 
         self.generator.convert_end_if(start_addr)
 
@@ -392,12 +418,19 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             return '{0}.{1}'.format(value_id, attribute.attr)
         return attribute.attr
 
+    def visit_Constant(self, constant: ast.Constant):
+        """
+        Visitor of constant values node
+
+        :param constant: the python ast constant value node
+        """
+        self.generator.convert_literal(constant.value)
+
     def visit_NameConstant(self, constant: ast.NameConstant):
         """
         Visitor of constant names node
 
         :param constant: the python ast name constant node
-        :return: the value of the constant
         """
         self.generator.convert_literal(constant.value)
 
@@ -422,7 +455,6 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         Visitor of literal bytes node
 
         :param bts: the python ast bytes node
-        :return: the value of the bytes
         """
         self.generator.convert_literal(bts.s)
 

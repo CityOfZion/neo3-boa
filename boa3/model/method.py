@@ -1,10 +1,12 @@
 import ast
 from typing import Dict, List, Optional
 
+from boa3.model.debuginstruction import DebugInstruction
 from boa3.model.expression import IExpression
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
+from boa3.neo.vm.VMCode import VMCode
 
 
 class Method(IExpression):
@@ -20,7 +22,6 @@ class Method(IExpression):
 
     def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none,
                  is_public: bool = False, origin_node: Optional[ast.AST] = None):
-        from boa3.neo.vm.VMCode import VMCode
         if args is None:
             args = {}
         self.args: Dict[str, Variable] = args
@@ -33,8 +34,11 @@ class Method(IExpression):
         self._requires_storage: bool = False
 
         self.locals: Dict[str, Variable] = {}
-        self.init_bytecode: Optional[VMCode] = None
         self.init_address: Optional[int] = None
+        self.init_bytecode: Optional[VMCode] = None
+        self.end_bytecode: Optional[VMCode] = None
+
+        self._debug_map: List[DebugInstruction] = []
 
     @property
     def shadowing_name(self) -> str:
@@ -90,7 +94,7 @@ class Method(IExpression):
                 self.imported_symbols[symbol_id] = symbol
 
     @property
-    def bytecode_address(self) -> Optional[int]:
+    def start_address(self) -> Optional[int]:
         """
         Gets the address where this method starts in the bytecode
 
@@ -100,6 +104,18 @@ class Method(IExpression):
             return self.init_address
         else:
             return self.init_bytecode.start_address
+
+    @property
+    def end_address(self) -> Optional[int]:
+        """
+        Gets the address of this method's last operation in the bytecode
+
+        :return: the last address of the method
+        """
+        if self.end_bytecode is None:
+            return self.start_address
+        else:
+            return self.end_bytecode.end_address
 
     @property
     def requires_storage(self) -> bool:
@@ -121,3 +137,36 @@ class Method(IExpression):
 
     def set_storage(self):
         self._requires_storage = True
+
+    def debug_map(self) -> List[DebugInstruction]:
+        """
+        Returns a list with the debug information of each mapped Python instruction inside this method
+        """
+        return sorted(self._debug_map, key=lambda x: x.code.start_address)
+
+    def include_instruction(self, instr_info: DebugInstruction):
+        """
+        Includes a new instruction in the debug info
+
+        :param instr_info: debug information from the new instruction
+        """
+        if not any((info.start_line == instr_info.start_line and info.start_col == instr_info.start_col
+                    for info in self._debug_map)):
+            existing_instr_info: Optional[DebugInstruction] =\
+                next((info for info in self._debug_map if info.code == instr_info.code), None)
+            if existing_instr_info is not None:
+                self._debug_map.remove(existing_instr_info)
+            self._debug_map.append(instr_info)
+
+    def remove_instruction(self, start_line: int, start_col: int):
+        """
+        Removes a instruction from the debug info at the given position if it exists
+
+        :param start_line: instruction's first line
+        :param start_col: instruction's beginning offset in the first line
+        """
+        instruction = next((info for info in self._debug_map
+                            if info.start_line == start_line and info.start_col == start_col),
+                           None)
+        if instruction is not None:
+            self._debug_map.remove(instruction)

@@ -5,10 +5,8 @@ __pycache__
 *.nef
 .manifest.json
 *.manifest.json
-.avmdbgnfo
-*.avmdbgnfo
-.abi.json
-*.abi.json
+.nefdbgnfo
+*.nefdbgnfo
 dist
 build
 neo3_boa.egg-info

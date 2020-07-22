@@ -12,7 +12,7 @@ class Variable(IExpression):
     """
 
     def __init__(self, var_type: Optional[IType]):
-        self.__var_type: Optional[IType] = var_type
+        self._var_type: Optional[IType] = var_type
 
     @property
     def shadowing_name(self) -> str:
@@ -20,16 +20,15 @@ class Variable(IExpression):
 
     @property
     def type(self) -> IType:
-        return self.__var_type
+        return self._var_type
 
     def __str__(self) -> str:
         return str(self.type)
 
     def set_type(self, var_type: IType):
         """
-        Sets a type for the variable if its type is not defined
+        Sets a type for the variable
 
         :param var_type:
         """
-        if self.__var_type is None:
-            self.__var_type = var_type
+        self._var_type = var_type

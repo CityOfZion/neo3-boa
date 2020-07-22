@@ -507,6 +507,18 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # TODO: remove when iteration in strings is implemented
             raise NotImplementedError
 
+        # TODO: change when optimizing for loops
+        elif self.get_type(for_node.target) != iterator_type.item_type:
+            from boa3 import helpers
+            for_iter: Variable = self.get_symbol(helpers.get_auxiliary_name(for_node, 'iter'))
+            for_iter.set_type(iterator_type)
+
+            target_id = self.visit(for_node.target)
+            if isinstance(target_id, ast.Name):
+                target_id = target_id.id
+            symbol = self.get_symbol(target_id)
+            symbol.set_type(iterator_type.item_type)
+
         # continue to walk through the tree
         for stmt in for_node.body:
             self.visit(stmt)
@@ -962,6 +974,20 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
         return attribute.value, attr_symbol, attribute.attr
+
+    def visit_Constant(self, constant: ast.Constant) -> Any:
+        """
+        Visitor of constant values node
+
+        :param constant: the python ast constant value node
+        :return: the value of the constant
+        """
+        if isinstance(constant, ast.Num) and not isinstance(constant.value, int):
+            # only integer numbers are allowed
+            self._log_error(
+                CompilerError.InvalidType(constant.lineno, constant.col_offset, symbol_id=type(constant.value).__name__)
+            )
+        return constant.value
 
     def visit_Num(self, num: ast.Num) -> int:
         """

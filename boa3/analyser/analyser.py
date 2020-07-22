@@ -27,6 +27,7 @@ class Analyser(object):
         self.__include_builtins_symbols()
 
         import os
+        self.path: str = path
         self.filename: str = path if path is None else os.path.split(os.path.realpath(path))[1]
 
     @staticmethod
