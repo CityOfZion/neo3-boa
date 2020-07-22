@@ -175,3 +175,61 @@ class TestVariable(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
+
+    # region TestClear
+
+    def test_clear_tuple(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ClearTuple.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_clear_mutable_sequence(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.clear()
+            + Opcode.CLEARITEMS
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/ClearMutableSequence.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_clear_mutable_sequence_with_builtin(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # MutableSequence.clear(a)
+            + Opcode.CLEARITEMS
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/ClearMutableSequenceBuiltinCall.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_clear_too_many_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ClearTooManyParameters.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_clear_too_few_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ClearTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    # endregion

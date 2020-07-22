@@ -242,7 +242,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 """
                 Payable smart contracts requires the implementation of a 'verify' function, that must implement the
                 following signature:
-                
+
                 ```
                 @public
                 def verify(*args) -> bool
@@ -252,7 +252,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if (verify_id not in self.global_symbols  # couldn't find verify
                     or not isinstance(self.global_symbols[verify_id], Method)  # verify is not a function
                     or self.global_symbols[verify_id].origin is None  # verify is not a user function
-                ):
+                    ):
                     self._log_error(
                         CompilerError.MetadataImplementationMissing(
                             line=self._metadata_node.lineno, col=self._metadata_node.col_offset,
@@ -262,7 +262,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     )
                 elif (self.global_symbols[verify_id].return_type != Type.bool
                       or not self.global_symbols[verify_id].is_public
-                ):
+                      ):
                     actual = self.global_symbols[verify_id]
                     expected = Method(actual.args, Type.bool, True)
                     self._log_error(
