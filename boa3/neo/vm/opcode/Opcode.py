@@ -82,45 +82,46 @@ class Opcode(bytes, Enum):
 
     # region Flow control
 
-    def get_large_jump(self):
+    def has_larger_opcode(self) -> bool:
+        return self in self.__larger_opcode
+
+    def get_larger_opcode(self):
         """
-        Gets the large jump opcode to the standard jump
+        Gets the large opcode to the standard opcode
 
         :return: the respective opcode
         :rtype: Opcode or None
         """
-        if self in self.__larger_jump:
-            return self.__larger_jump[self]
+        opcode_map = self.__larger_opcode
+        if self in opcode_map:
+            return opcode_map[self]
+        elif self in opcode_map.values():
+            return self
         else:
             return None
 
     @property
-    def __larger_jump(self) -> Dict[bytes, bytes]:
+    def __larger_opcode(self) -> Dict[bytes, bytes]:
         """
-        A map of each jump with its larger equivalent
+        A map of each opcode with its larger equivalent
 
-        :return: a dictionary that maps each jump opcode to its larger equivalent.
+        :return: a dictionary that maps each opcode to its larger equivalent.
         """
-        return {
+        opcodes = {
             self.JMP: self.JMP_L,
-            self.JMP_L: self.JMP_L,
             self.JMPIF: self.JMPIF_L,
-            self.JMPIF_L: self.JMPIF_L,
             self.JMPIFNOT: self.JMPIFNOT_L,
-            self.JMPIFNOT_L: self.JMPIFNOT_L,
             self.JMPEQ: self.JMPEQ_L,
-            self.JMPEQ_L: self.JMPEQ_L,
             self.JMPNE: self.JMPNE_L,
-            self.JMPNE_L: self.JMPNE_L,
             self.JMPGT: self.JMPGT_L,
-            self.JMPGT_L: self.JMPGT_L,
             self.JMPGE: self.JMPGE_L,
-            self.JMPGE_L: self.JMPGE_L,
             self.JMPLT: self.JMPLT_L,
-            self.JMPLT_L: self.JMPLT_L,
             self.JMPLE: self.JMPLE_L,
-            self.JMPLE_L: self.JMPLE_L
+            self.CALL: self.CALL_L,
+            self.TRY: self.TRY_L,
+            self.ENDTRY: self.ENDTRY_L
         }
+        return opcodes
 
     # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
     NOP = b'\x21'
@@ -216,6 +217,9 @@ class Opcode(bytes, Enum):
     RET = b'\x40'
     # Calls to an interop service.
     SYSCALL = b'\x41'
+
+    def has_target(self) -> bool:
+        return self.JMP <= self <= self.CALL_L or self.ENDTRY <= self <= self.ENDFINALLY
 
     # endregion
 

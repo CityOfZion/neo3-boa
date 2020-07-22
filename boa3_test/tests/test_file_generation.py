@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Any, Dict, Tuple
 
 from boa3 import constants
 from boa3.boa3 import Boa3
@@ -12,6 +12,27 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestFileGeneration(BoaTest):
+    def get_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+        nef_output = path.replace('.py', '.nef')
+        manifest_output = path.replace('.py', '.manifest.json')
+
+        from boa3.neo.contracts.neffile import NefFile
+
+        if not os.path.isfile(nef_output):
+            output = bytes()
+        else:
+            with open(nef_output, mode='rb') as nef:
+                file = nef.read()
+                output = NefFile.deserialize(file).script
+
+        if not os.path.isfile(manifest_output):
+            manifest = {}
+        else:
+            with open(manifest_output) as manifest_output:
+                import json
+                manifest = json.loads(manifest_output.read())
+
+        return output, manifest
 
     def test_generate_files(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
@@ -200,7 +221,7 @@ class TestFileGeneration(BoaTest):
         manifest_path = path.replace('.py', '.manifest.json')
 
         compiler = Compiler()
-        compiler.compile(path)
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -208,7 +229,7 @@ class TestFileGeneration(BoaTest):
         }
         self.assertGreater(len(methods), 0)
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         self.assertTrue(os.path.exists(manifest_path))
         self.assertIn('abi', manifest)
         abi = manifest['abi']
