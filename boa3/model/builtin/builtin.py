@@ -4,6 +4,7 @@ from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.clearmethod import ClearMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
+from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
@@ -39,17 +40,19 @@ class Builtin:
     ByteArray = ByteArrayMethod()
 
     # python class method
-    Append = AppendMethod()
-    Clear = ClearMethod()
-    Keys = MapKeysMethod()
-    Values = MapValuesMethod()
+    SequenceAppend = AppendMethod()
+    SequenceClear = ClearMethod()
+    SequenceReverse = ReverseMethod()
+    DictKeys = MapKeysMethod()
+    DictValues = MapValuesMethod()
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 ByteArray,
-                                                Append,
-                                                Clear,
-                                                Keys,
-                                                Values]
+                                                SequenceAppend,
+                                                SequenceClear,
+                                                SequenceReverse,
+                                                DictKeys,
+                                                DictValues]
 
     @classmethod
     def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:

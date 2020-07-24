@@ -400,3 +400,24 @@ class TestList(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_list_reverse(self):
+        path = '%s/boa3_test/example/list_test/ReverseList.py' % self.dirname
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.reverse()
+            + Opcode.REVERSEITEMS
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)

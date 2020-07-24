@@ -233,3 +233,62 @@ class TestVariable(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
+
+    # region TestReverse
+
+    def test_reverse_tuple(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ReverseTuple.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_reverse_mutable_sequence(self):
+        expected_output = (
+                Opcode.INITSLOT     # function signature
+                + b'\x01'
+                + b'\x00'
+                + Opcode.PUSH3      # a = [1, 2, 3]
+                + Opcode.PUSH2
+                + Opcode.PUSH1
+                + Opcode.PUSH3
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.LDLOC0     # a.reverse()
+                + Opcode.REVERSEITEMS
+                + Opcode.LDLOC0     # return a
+                + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/ReverseMutableSequence.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_reverse_mutable_sequence_with_builtin(self):
+        data = b'\x01\x02\x03'
+        expected_output = (
+                Opcode.INITSLOT     # function signature
+                + b'\x01'
+                + b'\x00'
+                + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+                + Integer(len(data)).to_byte_array(min_length=1)
+                + data
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.STLOC0
+                + Opcode.LDLOC0     # MutableSequence.reverse(a)
+                + Opcode.REVERSEITEMS
+                + Opcode.LDLOC0     # return a
+                + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/ReverseMutableSequenceBuiltinCall.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_reverse_too_many_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ReverseTooManyParameters.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_reverse_too_few_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ReverseTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    # endregion
