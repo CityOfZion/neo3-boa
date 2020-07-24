@@ -292,3 +292,103 @@ class TestVariable(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
+
+    # region TestExtend
+
+    def test_extend_tuple(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ExtendTuple.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_extend_sequence(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ExtendSequence.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_extend_mutable_sequence(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.extend((4, 5, 6))
+            + Opcode.PUSH6      # (4, 5, 6)
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.UNPACK     # a.extend
+                + Opcode.JMP
+                + Integer(9).to_byte_array(signed=True, min_length=1)
+                + Opcode.DUP
+                + Opcode.INC
+                + Opcode.PICK
+                + Opcode.PUSH2
+                + Opcode.ROLL
+                + Opcode.APPEND
+                + Opcode.DEC
+                + Opcode.DUP
+                + Opcode.JMPIF
+                + Integer(-8).to_byte_array(signed=True, min_length=1)
+                + Opcode.DROP
+                + Opcode.DROP
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/ExtendMutableSequence.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_extend_mutable_sequence_with_builtin(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # MutableSequence.extend(a, [4, 5, 6])
+            + Opcode.PUSH6      # [4, 5, 6]
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.UNPACK     # a.extend
+                + Opcode.JMP
+                + Integer(9).to_byte_array(signed=True, min_length=1)
+                + Opcode.DUP
+                + Opcode.INC
+                + Opcode.PICK
+                + Opcode.PUSH2
+                + Opcode.ROLL
+                + Opcode.APPEND
+                + Opcode.DEC
+                + Opcode.DUP
+                + Opcode.JMPIF
+                + Integer(-8).to_byte_array(signed=True, min_length=1)
+                + Opcode.DROP
+                + Opcode.DROP
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/example/built_in_methods_test/ExtendMutableSequenceBuiltinCall.py' % self.dirname
+
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_extend_too_many_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ExtendTooManyParameters.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_extend_too_few_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ExtendTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    # endregion

@@ -286,3 +286,7 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/example/bytes_test/BytearrayReverse.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_byte_array_extend(self):
+        path = '%s/boa3_test/example/bytes_test/BytearrayExtend.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)

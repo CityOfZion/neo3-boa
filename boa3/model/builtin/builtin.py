@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.clearmethod import ClearMethod
+from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
@@ -42,6 +43,7 @@ class Builtin:
     # python class method
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
+    SequenceExtend = ExtendMethod()
     SequenceReverse = ReverseMethod()
     DictKeys = MapKeysMethod()
     DictValues = MapValuesMethod()
@@ -50,6 +52,7 @@ class Builtin:
                                                 ByteArray,
                                                 SequenceAppend,
                                                 SequenceClear,
+                                                SequenceExtend,
                                                 SequenceReverse,
                                                 DictKeys,
                                                 DictValues]
