@@ -499,5 +499,4 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         if length > 0:
             for value in reversed(values):
                 self.visit_to_generate(value)
-            self.visit_to_generate(length)
         self.generator.convert_new_array(length, array_type)

@@ -1,6 +1,4 @@
-from typing import Optional
-
-from boa3.model.method import Method
+from boa3.model.callable import Callable
 from boa3.neo.vm.VMCode import VMCode
 
 
@@ -12,15 +10,15 @@ class CallCode(VMCode):
     :ivar data: the data in bytes of the code. Empty byte array by default.
     """
 
-    def __init__(self, target_method: Method):
+    def __init__(self, target_callable: Callable):
         """
-        :param target_method: the calling method
-        :type target_method: Method
+        :param target_callable: the calling method
+        :type target_callable: Method
         """
-        self._target_method: Method = target_method
+        self._target_callable: Callable = target_callable
         from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
         super().__init__(OpcodeInfo.CALL)
 
     @property
     def target(self) -> VMCode:
-        return self._target_method.init_bytecode
+        return self._target_callable.init_bytecode

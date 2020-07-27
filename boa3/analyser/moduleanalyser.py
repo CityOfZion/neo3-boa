@@ -9,6 +9,8 @@ from boa3.builtin import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.callable import Callable
+from boa3.model.event import Event
 from boa3.model.expression import IExpression
 from boa3.model.importsymbol import Import
 from boa3.model.method import Method
@@ -110,15 +112,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var = Variable(var_type)
                 self._current_scope.include_variable(var_id, var)
 
-    def __include_method(self, method_id: str, method: Method):
+    def __include_callable(self, callable_id: str, callable: Callable):
         """
         Includes the method in the symbol table if the id was not used
 
-        :param method_id: method id
-        :param method: method to be included
+        :param callable_id: method id
+        :param callable: method to be included
         """
-        if method_id not in self._current_module.symbols:
-            self._current_module.include_method(method_id, method)
+        if callable_id not in self._current_module.symbols:
+            self._current_module.include_callable(callable_id, callable)
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
         if symbol_id in self._current_scope.symbols:
@@ -381,18 +383,27 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._read_metadata_object(function)
             return Builtin.Metadata
 
-        method = Method(args=fun_args, return_type=fun_return, origin_node=function,
-                        is_public=Builtin.Public in fun_decorators)
-        self._current_method = method
+        if Builtin.Event in fun_decorators:
+            event = Event(args=fun_args, origin_node=function, is_public=True)
+            if len(function.body) > 0 and not isinstance(function.body[0], ast.Pass):
+                self._log_warning(
+                    CompilerWarning.UnreachableCode(line=function.body[0].lineno,
+                                                    col=function.body[0].col_offset)
+                )
+            self.__include_callable(function.name, event)
+        else:
+            method = Method(args=fun_args, return_type=fun_return,
+                            origin_node=function, is_public=Builtin.Public in fun_decorators)
+            self._current_method = method
 
-        # don't evaluate constant expression - for example: string for documentation
-        function.body = [stmt for stmt in function.body
-                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
-        for stmt in function.body:
-            self.visit(stmt)
+            # don't evaluate constant expression - for example: string for documentation
+            function.body = [stmt for stmt in function.body
+                             if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
+            for stmt in function.body:
+                self.visit(stmt)
 
-        self.__include_method(function.name, method)
-        self._current_method = None
+            self.__include_callable(function.name, method)
+            self._current_method = None
 
     def _get_function_decorators(self, function: ast.FunctionDef) -> List[Method]:
         """
@@ -593,11 +604,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if func_symbol is None:
             return None
 
-        if not isinstance(func_symbol, Method):
+        if not isinstance(func_symbol, Callable):
             # verifiy if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(func_id)
             func_symbol = func if func is not None else func_symbol
-        if not isinstance(func_symbol, Method):
+        if not isinstance(func_symbol, Callable):
             # the symbol doesn't exists
             self._log_error(
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)

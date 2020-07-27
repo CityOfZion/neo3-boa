@@ -1,3 +1,13 @@
+def event(*args):
+    """
+    This decorator identifies a method that specifies a Neo event.
+    The method's body is ignored when using this decorator and the function must have no return.
+    """
+    def event_wrapper():
+        pass
+    return event_wrapper
+
+
 def public(*args):
     """
     This decorator identifies which methods should be included in the abi file

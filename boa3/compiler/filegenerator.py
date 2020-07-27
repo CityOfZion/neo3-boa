@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ENCODING
+from boa3.model.event import Event
 from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
@@ -42,6 +43,15 @@ class FileGenerator:
         from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
         return {name: method for name, method in self._symbols.items()
                 if isinstance(method, Method) and not isinstance(method, IBuiltinDecorator)}
+
+    @property
+    def _events(self) -> Dict[str, Event]:
+        """
+        Gets a sublist of the symbols containing all user events
+
+        :return: a dictionary that maps each event with its identifier
+        """
+        return {name: event for name, event in self._symbols.items() if isinstance(event, Event)}
 
     # region NEF
 
@@ -144,8 +154,17 @@ class FileGenerator:
 
         :return: a dictionary with the abi events
         """
-        # TODO: abi events
-        return []
+        return [
+            {
+                "name": name,
+                "parameters": [
+                    {
+                        "name": arg_id,
+                        "type": arg.type.abi_type
+                    } for arg_id, arg in event.args.items()
+                ],
+            } for name, event in self._events.items()
+        ]
 
     # endregion
 
@@ -229,7 +248,14 @@ class FileGenerator:
 
         :return: a dictionary with the event's debug information
         """
-        # TODO: debug events
-        return []
+        return [
+            {
+                "id": str(id(event)),
+                "name": ',{0}'.format(event_id),  # TODO: include module name
+                "params": [
+                    '{0},{1}'.format(name, var.type.abi_type) for name, var in event.args.items()
+                ]
+            } for event_id, event in self._events.items()
+        ]
 
     # endregion

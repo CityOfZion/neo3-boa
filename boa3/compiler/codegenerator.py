@@ -5,6 +5,7 @@ from boa3.compiler.vmcodemapping import VMCodeMapping
 from boa3.constants import ENCODING
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.event import Event
 from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
@@ -384,6 +385,7 @@ class CodeGenerator:
         if length <= 0:
             self.convert_new_empty_array(length, array_type)
         else:
+            self.convert_literal(length)
             self.__insert1(OpcodeInfo.PACK)
             self._stack.pop()  # array size
             for x in range(length):
@@ -479,6 +481,8 @@ class CodeGenerator:
                 self.convert_load_variable(symbol_id, symbol)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol)
+            elif isinstance(symbol, Event):
+                self.convert_event_call(symbol_id, symbol)
             else:
                 self.convert_method_call(symbol)
 
@@ -573,6 +577,20 @@ class CodeGenerator:
         for arg in function.args:
             self._stack.pop()
         self._stack.append(function.return_type)
+
+    def convert_event_call(self, event_id: str, event: Event):
+        """
+        Converts an event call
+
+        :param event_id: called event identifier
+        :param event: called event
+        """
+        self.convert_new_array(len(event.args), Type.list.stack_item)
+        self.convert_literal(event_id)
+        from boa3.model.builtin.interop.interop import Interop
+        for opcode, data in Interop.Notify.opcode:
+            info = OpcodeInfo.get_info(opcode)
+            self.__insert1(info, data)
 
     def convert_operation(self, operation: IOperation):
         """

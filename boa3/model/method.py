@@ -1,15 +1,14 @@
 import ast
 from typing import Dict, List, Optional
 
+from boa3.model.callable import Callable
 from boa3.model.debuginstruction import DebugInstruction
-from boa3.model.expression import IExpression
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
-from boa3.neo.vm.VMCode import VMCode
 
 
-class Method(IExpression):
+class Method(Callable):
     """
     A class used to represent a function or a class method
 
@@ -22,21 +21,11 @@ class Method(IExpression):
 
     def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none,
                  is_public: bool = False, origin_node: Optional[ast.AST] = None):
-        if args is None:
-            args = {}
-        self.args: Dict[str, Variable] = args
-        self.return_type: IType = return_type
+        super().__init__(args, return_type, is_public, origin_node)
 
         self.imported_symbols = {}
-
-        self._origin_node = origin_node
-        self.is_public: bool = is_public
         self._requires_storage: bool = False
-
         self.locals: Dict[str, Variable] = {}
-        self.init_address: Optional[int] = None
-        self.init_bytecode: Optional[VMCode] = None
-        self.end_bytecode: Optional[VMCode] = None
 
         self._debug_map: List[DebugInstruction] = []
 
@@ -53,10 +42,6 @@ class Method(IExpression):
         """
         if var_id not in self.symbols:
             self.locals[var_id] = var
-
-    @property
-    def type(self) -> IType:
-        return self.return_type
 
     def __str__(self) -> str:
         args_types: List[str] = [str(arg.type) for arg in self.args.values()]
@@ -92,32 +77,6 @@ class Method(IExpression):
                 self.include_variable(symbol_id, symbol)
             else:
                 self.imported_symbols[symbol_id] = symbol
-
-    @property
-    def start_address(self) -> Optional[int]:
-        """
-        Gets the address where this method starts in the bytecode
-
-        :return: the first address of the method
-        """
-        if self.init_bytecode is None:
-            return self.init_address
-        else:
-            from boa3.compiler.vmcodemapping import VMCodeMapping
-            return VMCodeMapping.instance().get_start_address(self.init_bytecode)
-
-    @property
-    def end_address(self) -> Optional[int]:
-        """
-        Gets the address of this method's last operation in the bytecode
-
-        :return: the last address of the method
-        """
-        if self.end_bytecode is None:
-            return self.start_address
-        else:
-            from boa3.compiler.vmcodemapping import VMCodeMapping
-            return VMCodeMapping.instance().get_end_address(self.end_bytecode)
 
     @property
     def requires_storage(self) -> bool:
