@@ -2,6 +2,7 @@ import ast
 from typing import Dict, List, Optional, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
+from boa3.compiler.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
@@ -33,13 +34,13 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         return self.generator.symbol_table
 
     def include_instruction(self, node: ast.AST, address: int):
-        if self.current_method is not None and address in self.generator._vm_codes_map:
-            bytecode = self.generator._vm_codes_map[address]
+        if self.current_method is not None and address in VMCodeMapping.instance().code_map:
+            bytecode = VMCodeMapping.instance().code_map[address]
             from boa3.model.debuginstruction import DebugInstruction
             self.current_method.include_instruction(DebugInstruction.build(node, bytecode))
 
     def visit_to_map(self, node: ast.AST, generate: bool = False):
-        address: int = self.generator.address
+        address: int = VMCodeMapping.instance().bytecode_size
         if generate:
             value = self.visit_to_generate(node)
         else:
@@ -64,7 +65,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.generator.convert_load_symbol(result)
             return result
         else:
-            self.generator.convert_literal(node)
+            return self.generator.convert_literal(node)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -132,8 +133,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 # if not, it is an array assignment
                 self.generator.convert_load_symbol(var_id)
                 self.visit_to_generate(index)
-                self.visit_to_generate(value)
-                self.generator.convert_set_item()
+                value_address = self.visit_to_generate(value)
+                self.generator.convert_set_item(value_address)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -307,7 +308,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in while_node.body:
             self.visit_to_map(stmt, generate=True)
 
-        test_address: int = self.generator.address
+        test_address: int = VMCodeMapping.instance().bytecode_size
         self.visit_to_map(while_node.test, generate=True)
         self.generator.convert_end_while(start_addr, test_address)
 
@@ -329,7 +330,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         if self.current_method is not None:
             self.current_method.remove_instruction(for_node.lineno, for_node.col_offset)
 
-        test_address: int = self.generator.address
+        test_address: int = VMCodeMapping.instance().bytecode_size
         self.visit_to_map(last_code, generate=True)
         self.generator.convert_end_while(start_address, test_address)
 
@@ -424,7 +425,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param constant: the python ast constant value node
         """
-        self.generator.convert_literal(constant.value)
+        return self.generator.convert_literal(constant.value)
 
     def visit_NameConstant(self, constant: ast.NameConstant):
         """
@@ -432,7 +433,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param constant: the python ast name constant node
         """
-        self.generator.convert_literal(constant.value)
+        return self.generator.convert_literal(constant.value)
 
     def visit_Num(self, num: ast.Num):
         """
@@ -440,7 +441,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param num: the python ast number node
         """
-        self.generator.convert_literal(num.n)
+        return self.generator.convert_literal(num.n)
 
     def visit_Str(self, string: ast.Str):
         """
@@ -448,7 +449,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param string: the python ast string node
         """
-        self.generator.convert_literal(string.s)
+        return self.generator.convert_literal(string.s)
 
     def visit_Bytes(self, bts: ast.Bytes):
         """
@@ -456,7 +457,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param bts: the python ast bytes node
         """
-        self.generator.convert_literal(bts.s)
+        return self.generator.convert_literal(bts.s)
 
     def visit_Tuple(self, tup_node: ast.Tuple):
         """
@@ -485,8 +486,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for key_value in range(length):
             self.generator.duplicate_stack_top_item()
             self.visit_to_generate(dict_node.keys[key_value])
-            self.visit_to_generate(dict_node.values[key_value])
-            self.generator.convert_set_item()
+            value_address = self.visit_to_generate(dict_node.values[key_value])
+            self.generator.convert_set_item(value_address)
 
     def _create_array(self, values: List[ast.AST], array_type: IType):
         """

@@ -103,7 +103,8 @@ class Method(IExpression):
         if self.init_bytecode is None:
             return self.init_address
         else:
-            return self.init_bytecode.start_address
+            from boa3.compiler.vmcodemapping import VMCodeMapping
+            return VMCodeMapping.instance().get_start_address(self.init_bytecode)
 
     @property
     def end_address(self) -> Optional[int]:
@@ -115,7 +116,8 @@ class Method(IExpression):
         if self.end_bytecode is None:
             return self.start_address
         else:
-            return self.end_bytecode.end_address
+            from boa3.compiler.vmcodemapping import VMCodeMapping
+            return VMCodeMapping.instance().get_end_address(self.end_bytecode)
 
     @property
     def requires_storage(self) -> bool:
@@ -142,7 +144,8 @@ class Method(IExpression):
         """
         Returns a list with the debug information of each mapped Python instruction inside this method
         """
-        return sorted(self._debug_map, key=lambda x: x.code.start_address)
+        from boa3.compiler.vmcodemapping import VMCodeMapping
+        return sorted(self._debug_map, key=lambda instr: VMCodeMapping.instance().get_start_address(instr.code))
 
     def include_instruction(self, instr_info: DebugInstruction):
         """

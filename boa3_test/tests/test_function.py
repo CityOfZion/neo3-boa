@@ -664,3 +664,238 @@ class TestFunction(BoaTest):
     def test_missing_return_inside_while_without_else(self):
         path = '%s/boa3_test/example/function_test/ReturnWhileWithoutElse.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
+
+    def test_multiple_function_large_call(self):
+        expected_output = (
+            # main(operation: str, arg: List[int])
+            Opcode.INITSLOT + b'\x02\x02'
+            + Opcode.LDARG0         # if operation == 'calculate' and len(arg) >= 2:
+            + Opcode.PUSHDATA1 + b'\x09calculate'
+            + Opcode.EQUAL
+            + Opcode.LDARG1
+            + Opcode.SIZE
+            + Opcode.PUSH2
+            + Opcode.GE
+            + Opcode.BOOLAND
+            + Opcode.JMPIFNOT + b'\x2e'
+            + Opcode.NEWARRAY0          # operands: List[int] = []
+            + Opcode.STLOC0
+            + Opcode.PUSH1              # i = 1
+            + Opcode.STLOC1
+            + Opcode.JMP + b'\x13'      # begin while i < len(arg):
+            + Opcode.LDLOC0                 # operands.append(arg[i])
+            + Opcode.LDARG1                 # arg[i]
+            + Opcode.LDLOC1
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.APPEND
+            + Opcode.LDLOC1                 # i += 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC1
+            + Opcode.LDLOC1             # end while i < len(arg)
+            + Opcode.LDARG1
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF + b'\xeb'
+            + Opcode.LDLOC0             # return calculate(arg[0], operands)
+            + Opcode.LDARG1             # arg[0]
+            + Opcode.PUSH0
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.CALL + b'\x05'     # calculate(arg[0], operands)
+            + Opcode.RET
+            + Opcode.PUSHNULL           # else: return None
+            + Opcode.RET
+            # calculate(op_id: int, operands: List[int])
+            + Opcode.INITSLOT + b'\x05\x02'
+            + Opcode.LDARG0             # op = get_operation(op_id)
+            + Opcode.CALL + b'\x62'
+            + Opcode.STLOC0
+            + Opcode.LDARG1             # if len(operands) <= 0
+            + Opcode.SIZE
+            + Opcode.PUSH0
+            + Opcode.LE
+            + Opcode.JMPIFNOT + b'\x2b'
+            + Opcode.PUSHDATA1 + b'\x24There are missing some parameters...'
+            + Opcode.STLOC1                 # result = "There are missing some parameters..."
+            + Opcode.JMP + b'\x30'      # else
+            + Opcode.LDARG1                 # calc = operands[0]
+            + Opcode.PUSH0
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.PUSH1                  # y = 1
+            + Opcode.STLOC3
+            + Opcode.LDARG1                 # size = len(operands)
+            + Opcode.SIZE
+            + Opcode.STLOC4
+            + Opcode.JMP + b'\x16'          # begin while
+            + Opcode.LDARG1                     # operands[y]
+            + Opcode.LDLOC3
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.LDLOC2
+            + Opcode.LDLOC0
+            + Opcode.CALL + b'\x6e'             # calc = calculate_simple(op, calc, operands[y])
+            + Opcode.STLOC2
+            + Opcode.LDLOC3                     # y += 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC3
+            + Opcode.LDLOC3                 # end while y < size
+            + Opcode.LDLOC4
+            + Opcode.LT
+            + Opcode.JMPIF + b'\xe9'
+            + Opcode.LDLOC2                 # else: result = calc
+            + Opcode.STLOC1
+            + Opcode.LDLOC1                 # return result
+            + Opcode.RET
+            # def get_operation(args: int)
+            + Opcode.INITSLOT + b'\x00\x01'
+            + Opcode.LDARG0                 # if args == 1:
+            + Opcode.PUSH1
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT + b'\x08'
+            + Opcode.PUSHDATA1 + b'\x03add'     # return "add"
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif args == 2:
+            + Opcode.PUSH2
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT + b'\x08'
+            + Opcode.PUSHDATA1 + b'\x03sub'     # return "sub"
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif args == 3:
+            + Opcode.PUSH3
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT + b'\x08'
+            + Opcode.PUSHDATA1 + b'\x03div'     # return "div"
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif args == 4:
+            + Opcode.PUSH4
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT + b'\x08'
+            + Opcode.PUSHDATA1 + b'\x03mul'     # return "mul"
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif args == 5:
+            + Opcode.PUSH5
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT + b'\x08'
+            + Opcode.PUSHDATA1 + b'\x03mod'     # return "mod"
+            + Opcode.RET
+            + Opcode.PUSHDATA1 + b'\x21Operation must be between 1 and 5'
+            + Opcode.RET                    # else: return "Operation must be between 1 and 5"
+            # calculate_simple(operation: str, a: int, b: int)
+            + Opcode.INITSLOT + b'\x05\x03'
+            + Opcode.PUSHDATA1 + b'\x03add'  # add_op = "add"
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1 + b'\x03sub'  # sub_op = "sub"
+            + Opcode.STLOC1
+            + Opcode.PUSHDATA1 + b'\x03mul'  # mul_op = "mul"
+            + Opcode.STLOC2
+            + Opcode.PUSHDATA1 + b'\x03div'  # div_op = "div"
+            + Opcode.STLOC3
+            + Opcode.PUSHDATA1 + b'\x03mod'  # mod_op = "mod"
+            + Opcode.STLOC4
+            + Opcode.LDARG0                 # if operation == add_op:
+            + Opcode.LDLOC0
+            + Opcode.EQUAL
+            + Opcode.JMPIFNOT + b'\x07'
+            + Opcode.LDARG2                     # return add(a, b)
+            + Opcode.LDARG1
+            + Opcode.CALL + b'\x34'
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif operation == sub_op:
+            + Opcode.LDLOC1
+            + Opcode.EQUAL
+            + Opcode.JMPIFNOT + b'\x07'
+            + Opcode.LDARG2                     # return sub(a, b)
+            + Opcode.LDARG1
+            + Opcode.CALL + b'\x23'
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif operation == div_op:
+            + Opcode.LDLOC3
+            + Opcode.EQUAL
+            + Opcode.JMPIFNOT + b'\x07'
+            + Opcode.LDARG2                     # return div(a, b)
+            + Opcode.LDARG1
+            + Opcode.CALL + b"\x27"
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif operation == mul_op:
+            + Opcode.LDLOC2
+            + Opcode.EQUAL
+            + Opcode.JMPIFNOT + b'\x07'
+            + Opcode.LDARG2                     # return mul(a, b)
+            + Opcode.LDARG1
+            + Opcode.CALL + b'\x24'
+            + Opcode.RET
+            + Opcode.LDARG0                 # elif operation == mod_op:
+            + Opcode.LDLOC4
+            + Opcode.EQUAL
+            + Opcode.JMPIFNOT + b'\x07'
+            + Opcode.LDARG2                     # return mod(a, b)
+            + Opcode.LDARG1
+            + Opcode.CALL + b'\x21'
+            + Opcode.RET
+            + Opcode.PUSH0                  # else:
+            + Opcode.RET                        # return 0
+            # sub(a: int, b: int)
+            + Opcode.INITSLOT + b'\x00\x02'
+            + Opcode.LDARG0                 # return a - b
+            + Opcode.LDARG1
+            + Opcode.SUB
+            + Opcode.RET
+            # add(a: int, b: int)
+            + Opcode.INITSLOT + b'\x00\x02'
+            + Opcode.LDARG0                 # return a + b
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.RET
+            # div(a: int, b: int)
+            + Opcode.INITSLOT + b'\x00\x02'
+            + Opcode.LDARG0                 # return a // b
+            + Opcode.LDARG1
+            + Opcode.DIV
+            + Opcode.RET
+            # mul(a: int, b: int)
+            + Opcode.INITSLOT + b'\x00\x02'
+            + Opcode.LDARG0                 # return a * b
+            + Opcode.LDARG1
+            + Opcode.MUL
+            + Opcode.RET
+            # mod(a: int, b: int)
+            + Opcode.INITSLOT + b'\x00\x02'
+            + Opcode.LDARG0                 # return a % b
+            + Opcode.LDARG1
+            + Opcode.MOD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/function_test/MultipleFunctionLargeCall.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)

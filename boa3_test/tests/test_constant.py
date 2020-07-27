@@ -10,12 +10,16 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestConstant(BoaTest):
+    def build_code_generator(self) -> CodeGenerator:
+        from boa3.compiler.vmcodemapping import VMCodeMapping
+        VMCodeMapping.reset()
+        return CodeGenerator({})
 
     def test_small_integer_constant(self):
         input = 7
         expected_output = Opcode.PUSH7
 
-        generator = CodeGenerator({})
+        generator = self.build_code_generator()
         generator.convert_integer_literal(input)
         output = generator.bytecode
 
@@ -32,7 +36,7 @@ class TestConstant(BoaTest):
             + Type.int.stack_item
         )
 
-        generator = CodeGenerator({})
+        generator = self.build_code_generator()
         generator.convert_integer_literal(input)
         output = generator.bytecode
 
@@ -49,7 +53,7 @@ class TestConstant(BoaTest):
             + Type.int.stack_item
         )
 
-        generator = CodeGenerator({})
+        generator = self.build_code_generator()
         generator.convert_integer_literal(input)
         output = generator.bytecode
 
@@ -66,7 +70,7 @@ class TestConstant(BoaTest):
             + Type.int.stack_item
         )
 
-        generator = CodeGenerator({})
+        generator = self.build_code_generator()
         generator.convert_integer_literal(input)
         output = generator.bytecode
 
@@ -83,7 +87,7 @@ class TestConstant(BoaTest):
             + Type.int.stack_item
         )
 
-        generator = CodeGenerator({})
+        generator = self.build_code_generator()
         generator.convert_integer_literal(input)
         output = generator.bytecode
 
@@ -98,7 +102,7 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        generator = CodeGenerator({})
+        generator = self.build_code_generator()
         generator.convert_string_literal(input)
         output = generator.bytecode
 
