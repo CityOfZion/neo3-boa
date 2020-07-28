@@ -32,7 +32,7 @@ class Opcode(bytes, Enum):
         Gets the push opcode to the respective integer
 
         :param integer: value that will be pushed
-        :return: the respective opceode
+        :return: the respective opcode
         :rtype: Opcode or None
         """
         if -1 <= integer <= 16:
@@ -366,6 +366,26 @@ class Opcode(bytes, Enum):
                 return Opcode.LDLOC
             else:
                 return Opcode.LDSFLD
+
+    @property
+    def is_load_slot(self) -> bool:
+        return (self.LDSFLD0 <= self <= self.LDSFLD
+                or self.LDLOC0 <= self <= self.LDLOC
+                or self.LDARG0 <= self <= self.LDARG)
+
+    @staticmethod
+    def get_store_from_load(load_opcode):
+        """
+        Gets the store slot opcode equivalent to the given load slot opcode.
+
+        :param load_opcode: load opcode
+        :type load_opcode: Opcode
+        :return: equivalent store opcode if the given opcode is a load slot. Otherwise, returns None
+        :rtype: Opcode or None
+        """
+        if load_opcode.is_load_slot:
+            opcode_value: int = Integer.from_bytes(load_opcode) + 8
+            return Opcode(Integer(opcode_value).to_byte_array())
 
     # Loads the static field at index 0 onto the evaluation stack.
     LDSFLD0 = b'\x58'

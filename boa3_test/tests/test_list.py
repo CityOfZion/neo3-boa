@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes, UnresolvedOperation
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -318,7 +319,18 @@ class TestList(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-            + Opcode.APPEND
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -343,7 +355,18 @@ class TestList(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(four)).to_byte_array()
             + four
-            + Opcode.APPEND
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -369,7 +392,18 @@ class TestList(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # list.append(a, 4)
             + Opcode.PUSH4
-            + Opcode.APPEND
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )

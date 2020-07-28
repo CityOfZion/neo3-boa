@@ -25,6 +25,10 @@ class AppendMethod(IBuiltinMethod):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
+    @property
+    def stores_on_slot(self) -> bool:
+        return True
+
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 2:
             return False
@@ -40,14 +44,18 @@ class AppendMethod(IBuiltinMethod):
         return sequence_type.value_type.is_type_of(value_type)
 
     @property
-    def is_supported(self) -> bool:
-        # TODO: remove when bytearray.append() is implemented
-        from boa3.model.type.type import Type
-        return self._arg_self.type is not Type.bytearray
-
-    @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.APPEND, b'')]
+        from boa3.model.type.type import Type
+        from boa3.neo.vm.type.Integer import Integer
+        return [
+            (Opcode.OVER, b''),
+            (Opcode.ISTYPE, Type.bytearray.stack_item),     # append opcode only works for array
+            (Opcode.JMPIFNOT, Integer(8).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
+            (Opcode.CAT, b''),
+            (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
+            (Opcode.APPEND, b''),
+            (Opcode.JMP, Integer(2).to_byte_array(min_length=1))
+        ]
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

@@ -324,8 +324,8 @@ class OpcodeInfo:
 
     # region Splice
 
-    NEWBUFFER = OpcodeInformation(Opcode.NEWBUFFER),
-    MEMCPY = OpcodeInformation(Opcode.MEMCPY),
+    NEWBUFFER = OpcodeInformation(Opcode.NEWBUFFER)
+    MEMCPY = OpcodeInformation(Opcode.MEMCPY)
     # Concatenates two strings.
     CAT = OpcodeInformation(Opcode.CAT)
     # Returns a section of a string.

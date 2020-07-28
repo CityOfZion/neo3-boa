@@ -469,18 +469,19 @@ class CodeGenerator:
         self._stack.pop()  # length
         self._stack.pop()  # original array
 
-    def convert_load_symbol(self, symbol_id: str):
+    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None):
         """
         Converts the load of a symbol
 
         :param symbol_id: the symbol identifier
+        :param params_addresses: a list with each function arguments' first addresses
         """
         symbol = self.get_symbol(symbol_id)
         if symbol is not Type.none:
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id, symbol)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
-                self.convert_builtin_method_call(symbol)
+                self.convert_builtin_method_call(symbol, params_addresses)
             elif isinstance(symbol, Event):
                 self.convert_event_call(symbol_id, symbol)
             else:
@@ -552,15 +553,33 @@ class CodeGenerator:
         index: int = scope.index(var_id) if var_id in scope else -1
         return index, local, is_arg
 
-    def convert_builtin_method_call(self, function: IBuiltinMethod):
+    def convert_builtin_method_call(self, function: IBuiltinMethod, args_address: List[int] = None):
         """
         Converts a builtin method function call
 
         :param function: the function to be converted
+        :param args_address: a list with each function arguments' first addresses
         """
+        if args_address is None:
+            args_address = []
+        store_opcode: OpcodeInformation = None
+        store_data: bytes = b''
+
+        if function.stores_on_slot and 0 < len(function.args) <= len(args_address):
+            address = args_address[-len(function.args)]
+            load_instr = VMCodeMapping.instance().code_map[address]
+            if load_instr.opcode.is_load_slot:
+                store: Opcode = Opcode.get_store_from_load(load_instr.opcode)
+                store_opcode = OpcodeInfo.get_info(store)
+                store_data = load_instr.data
+
         for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info, data)
+
+        if store_opcode is not None:
+            self.__insert1(store_opcode, store_data)
+
         for arg in function.args:
             self._stack.pop()
         self._stack.append(function.return_type)

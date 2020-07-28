@@ -258,8 +258,106 @@ class TestBytes(BoaTest):
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_byte_array_append(self):
+        data = b'\x01\x02\x03'
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.append(4)
+            + Opcode.PUSH4
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET        # return a
+        )
+
         path = '%s/boa3_test/example/bytes_test/BytearrayAppend.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_byte_array_append_with_builtin(self):
+        data = b'\x01\x02\x03'
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # bytearray.append(a, 4)
+            + Opcode.PUSH4
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET        # return a
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytearrayAppendWithBuiltin.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_byte_array_append_mutable_sequence_with_builtin(self):
+        data = b'\x01\x02\x03'
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # MutableSequence.append(a, 4)
+            + Opcode.PUSH4
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET        # return a
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytearrayAppendWithMutableSequence.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_byte_array_clear(self):
         path = '%s/boa3_test/example/bytes_test/BytearrayClear.py' % self.dirname
