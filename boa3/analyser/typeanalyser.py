@@ -501,16 +501,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     actual_type_id=iterator_type.identifier,
                     expected_type_id=Type.sequence.identifier)
             )
-        elif iterator_type is Type.str:
-            # TODO: remove when iteration in strings is implemented
-            raise NotImplementedError
 
         # TODO: change when optimizing for loops
         elif self.get_type(for_node.target) != iterator_type.item_type:
-            from boa3 import helpers
-            for_iter: Variable = self.get_symbol(helpers.get_auxiliary_name(for_node, 'iter'))
-            for_iter.set_type(iterator_type)
-
             target_id = self.visit(for_node.target)
             if isinstance(target_id, ast.Name):
                 target_id = target_id.id

@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import UnresolvedOperation
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -27,6 +28,8 @@ class TestString(BoaTest):
                 + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.str.stack_item
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -54,6 +57,8 @@ class TestString(BoaTest):
             + Opcode.PUSH2
             + Opcode.SUB
             + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.str.stack_item
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/example/string_test/StringSlicingLiteralValues.py' % self.dirname
@@ -82,6 +87,8 @@ class TestString(BoaTest):
             + Opcode.LDLOC0
             + Opcode.SUB
             + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.str.stack_item
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/example/string_test/StringSlicingVariableValues.py' % self.dirname

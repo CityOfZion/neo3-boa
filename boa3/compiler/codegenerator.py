@@ -192,6 +192,41 @@ class CodeGenerator:
         end_jmp_to: int = while_body - VMCodeMapping.instance().bytecode_size
         self._insert_jump(OpcodeInfo.JMPIF, end_jmp_to)
 
+    def convert_begin_for(self) -> int:
+        """
+        Converts the beginning of the for statement
+
+        :return: the address of the for first opcode
+        """
+        self.convert_literal(0)
+        address = self.convert_begin_while()
+
+        self.duplicate_stack_item(2)  # duplicate for sequence
+        self.duplicate_stack_item(2)  # duplicate for index
+        self.convert_get_item()
+        return address
+
+    def convert_end_for(self, start_address: int) -> int:
+        """
+        Converts the end of the for statement
+
+        :param start_address: the address of the for first opcode
+        :return: the address of the loop condition
+        """
+        self.__insert1(OpcodeInfo.INC)      # index += 1
+        test_address = VMCodeMapping.instance().bytecode_size
+
+        self.duplicate_stack_top_item()     # dup index and sequence
+        self.duplicate_stack_item(3)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.convert_operation(BinaryOp.Lt)  # continue loop condition: index < len(sequence)
+
+        self.convert_end_while(start_address, test_address)
+
+        self.remove_stack_top_item()    # removes index and sequence from stack
+        self.remove_stack_top_item()
+        return test_address
+
     def convert_begin_if(self) -> int:
         """
         Converts the beginning of the if statement
@@ -440,10 +475,12 @@ class CodeGenerator:
         """
         Converts the end of get a substring
         """
-        self.__insert1(OpcodeInfo.SUBSTR)
         self._stack.pop()  # length
         self._stack.pop()  # start
         self._stack.pop()  # original string
+        self.__insert1(OpcodeInfo.SUBSTR)
+        self._stack.append(Type.bytes)  # substr returns a buffer instead of a bytestring
+        self.convert_cast(Type.str)
 
     def convert_get_sub_array(self):
         """
@@ -706,7 +743,25 @@ class CodeGenerator:
         if pos > 0:
             opcode: Opcode = Opcode.get_dup(pos)
             if opcode is Opcode.PICK:
-                self.convert_literal(pos)
+                self.convert_literal(pos - 1)
+            op_info = OpcodeInfo.get_info(opcode)
+            self.__insert1(op_info)
+            self._stack.append(self._stack[-pos])
+
+    def remove_stack_top_item(self):
+        self.remove_stack_item()
+
+    def remove_stack_item(self, pos: int = 1):
+        """
+        Removes the item n from the stack
+
+        :param pos: index of the variable
+        """
+        # n = 1 -> removes stack top item
+        if pos > 0:
+            opcode: Opcode = Opcode.get_drop(pos)
+            if opcode is Opcode.XDROP:
+                self.convert_literal(pos - 1)
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
             self._stack.append(self._stack[-pos])

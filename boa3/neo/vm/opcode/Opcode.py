@@ -235,6 +235,27 @@ class Opcode(bytes, Enum):
     XDROP = b'\x48'
     # Clear the stack
     CLEAR = b'\x49'
+
+    @staticmethod
+    def get_drop(position: int):
+        """
+        Gets the opcode to remove the item n back in the stack
+
+        :param position: index of the variable
+        :return: the respective opcode
+        :rtype: Opcode
+        """
+        duplicate_item = {
+            1: Opcode.DROP,
+            2: Opcode.NIP
+        }
+
+        if position > 0:
+            if position in duplicate_item:
+                return duplicate_item[position]
+            else:
+                return Opcode.XDROP
+
     # Duplicates the top stack item.
     DUP = b'\x4A'
     # Copies the second-to-top stack item to the top.
