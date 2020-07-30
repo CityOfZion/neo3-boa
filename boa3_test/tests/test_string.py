@@ -54,7 +54,7 @@ class TestString(BoaTest):
             + Opcode.LDLOC0     # return a[2:3]
             + Opcode.PUSH2
             + Opcode.PUSH3      # size = 3 - 2
-            + Opcode.PUSH2
+            + Opcode.OVER
             + Opcode.SUB
             + Opcode.SUBSTR
             + Opcode.CONVERT
@@ -84,7 +84,7 @@ class TestString(BoaTest):
             + Opcode.LDLOC2     # return a[a1:a2]
             + Opcode.LDLOC0
             + Opcode.LDLOC1     # size = a2 - a1
-            + Opcode.LDLOC0
+            + Opcode.OVER
             + Opcode.SUB
             + Opcode.SUBSTR
             + Opcode.CONVERT
@@ -148,7 +148,7 @@ class TestString(BoaTest):
             + byte_input
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a[2:]
-            + Opcode.LDLOC0         # size of the substring: len(a) - 2
+            + Opcode.DUP            # size of the substring: len(a) - 2
             + Opcode.SIZE
             + Opcode.PUSH2
             + Opcode.SUB
