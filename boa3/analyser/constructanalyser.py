@@ -1,7 +1,6 @@
 import ast
-from typing import List, Sequence, Union
+from typing import Sequence, Union
 
-from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
 
 
@@ -25,36 +24,6 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         :return: the analysed ast
         """
         return self._tree
-
-    def visit_For(self, for_node: ast.For):
-        """
-        Includes additional operations for converting the for statement into Neo VM
-
-        :param for_node: the python ast for node
-        """
-        # get auxiliary variables
-        var_iter_id = helpers.get_auxiliary_name(for_node, 'iter')
-        var_index_id = helpers.get_auxiliary_name(for_node, 'index')
-
-        add_instructs: List[ast.AST] = self.parse_to_node('{0} = x; {1} = 0'.format(var_iter_id, var_index_id), for_node)
-        add_instructs[0].value = for_node.iter  # iter auxiliary variable is assigned with the node iter value
-
-        update_target: ast.Assign = self.parse_to_node('x = {0}[{1}]'.format(var_iter_id, var_index_id), for_node)
-        update_target.targets[0] = for_node.target  # target variable is updated each loop iteration
-
-        update_index: ast.Assign = self.parse_to_node('{0} = {0} + 1'.format(var_index_id), for_node)
-        loop_test: ast.Compare = self.parse_to_node('{0} < len({1})'.format(var_index_id, var_iter_id), for_node)
-
-        for_node.body.insert(0, update_target)
-        for_node.body.append(update_index)
-        for_node.body.append(loop_test)
-
-        for node in add_instructs:
-            self.generic_visit(node)
-        self.generic_visit(for_node)
-
-        add_instructs.append(for_node)
-        return add_instructs
 
     def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
         """

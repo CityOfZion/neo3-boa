@@ -516,16 +516,14 @@ class TestFunction(BoaTest):
     def test_return_inside_for(self):
         expected_output = (
             Opcode.INITSLOT     # Main
-            + b'\x03'
+            + b'\x01'
             + b'\x01'
             + Opcode.LDARG0     # for_sequence = arg0
-            + Opcode.STLOC0
             + Opcode.PUSH0      # for_index = 0
-            + Opcode.STLOC1
             + Opcode.JMP        # begin for
-            + Integer(20).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # value = for_sequence[for_index]
-                + Opcode.LDLOC1
+            + Integer(17).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER     # value = for_sequence[for_index]
+                + Opcode.OVER
                     + Opcode.DUP
                     + Opcode.SIGN
                     + Opcode.PUSHM1
@@ -535,19 +533,19 @@ class TestFunction(BoaTest):
                     + Opcode.SIZE
                     + Opcode.ADD
                 + Opcode.PICKITEM
-                + Opcode.STLOC2
-                + Opcode.LDLOC2     # return value
+                + Opcode.STLOC0
+                + Opcode.LDLOC0     # return value
                 + Opcode.RET
-                + Opcode.LDLOC1     # for_index = for_index + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC1
-            + Opcode.LDLOC1     # if for_index < len(for_sequence)
-            + Opcode.LDLOC0
+                + Opcode.INC     # for_index = for_index + 1
+            + Opcode.DUP        # if for_index < len(for_sequence)
+            + Opcode.PUSH2
+            + Opcode.PICK
             + Opcode.SIZE
             + Opcode.LT
             + Opcode.JMPIF
-            + Integer(-22).to_byte_array(min_length=1, signed=True)
+            + Integer(-20).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.PUSH5      # else
             + Opcode.RET          # return 5
         )
@@ -559,18 +557,16 @@ class TestFunction(BoaTest):
     def test_missing_return_inside_for(self):
         expected_output = (
             Opcode.INITSLOT     # Main
-            + b'\x04'
+            + b'\x02'
             + b'\x01'
             + Opcode.PUSH0      # x = 0
             + Opcode.STLOC0
             + Opcode.LDARG0     # for_sequence = arg0
-            + Opcode.STLOC1
             + Opcode.PUSH0      # for_index = 0
-            + Opcode.STLOC2
             + Opcode.JMP        # begin for
-            + Integer(22).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC1     # value = for_sequence[for_index]
-                + Opcode.LDLOC2
+            + Integer(19).to_byte_array(min_length=1, signed=True)
+                + Opcode.OVER       # value = for_sequence[for_index]
+                + Opcode.OVER
                     + Opcode.DUP
                     + Opcode.SIGN
                     + Opcode.PUSHM1
@@ -580,21 +576,21 @@ class TestFunction(BoaTest):
                     + Opcode.SIZE
                     + Opcode.ADD
                 + Opcode.PICKITEM
-                + Opcode.STLOC3
+                + Opcode.STLOC1
                 + Opcode.LDLOC0     # x += value
-                + Opcode.LDLOC3
+                + Opcode.LDLOC1
                 + Opcode.ADD
                 + Opcode.STLOC0
-                + Opcode.LDLOC2     # for_index = for_index + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC2
-            + Opcode.LDLOC2     # if for_index < len(for_sequence)
-            + Opcode.LDLOC1
+                + Opcode.INC        # for_index = for_index + 1
+            + Opcode.DUP        # if for_index < len(for_sequence)
+            + Opcode.PUSH2
+            + Opcode.PICK
             + Opcode.SIZE
             + Opcode.LT
             + Opcode.JMPIF
-            + Integer(-24).to_byte_array(min_length=1, signed=True)
+            + Integer(-22).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.LDLOC0     # else
             + Opcode.RET          # return x
         )

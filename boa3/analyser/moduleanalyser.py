@@ -2,7 +2,6 @@ import ast
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
 from boa3.builtin import NeoMetadata
@@ -652,12 +651,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 for target in targets:
                     if isinstance(target, str):
                         self.__include_variable(target, iter_type.value_type, source_node=for_node.target)
-
-            for_iter_id = helpers.get_auxiliary_name(for_node, 'iter')
-            for_index_id = helpers.get_auxiliary_name(for_node, 'index')
-
-            self.__include_variable(for_iter_id, iter_type, source_node=for_node.iter)
-            self.__include_variable(for_index_id, iter_type.valid_key, source_node=for_node)
 
         # continue to walk through the tree
         self.generic_visit(for_node)

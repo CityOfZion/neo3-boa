@@ -321,18 +321,26 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param for_node: the python ast for node
         """
-        start_address = self.generator.convert_begin_while()
-        last_code = for_node.body[-1]
-        for stmt in for_node.body[:-1]:
+        self.visit_to_generate(for_node.iter)
+        start_address = self.generator.convert_begin_for()
+
+        if isinstance(for_node.target, tuple):
+            for target in for_node.target:
+                var_id = self.visit_to_map(target)
+                self.generator.convert_store_variable(var_id)
+        else:
+            var_id = self.visit(for_node.target)
+            self.generator.convert_store_variable(var_id)
+
+        for stmt in for_node.body:
             self.visit_to_map(stmt, generate=True)
 
         # TODO: remove when optimizing for generation
         if self.current_method is not None:
             self.current_method.remove_instruction(for_node.lineno, for_node.col_offset)
 
-        test_address: int = VMCodeMapping.instance().bytecode_size
-        self.visit_to_map(last_code, generate=True)
-        self.generator.convert_end_while(start_address, test_address)
+        condition_address = self.generator.convert_end_for(start_address)
+        self.include_instruction(for_node, condition_address)
 
         for stmt in for_node.orelse:
             self.visit_to_map(stmt, generate=True)
