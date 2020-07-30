@@ -389,16 +389,23 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         # the parameters are included into the stack in the reversed order
         function_id = self.visit(call.func)
         symbol = self.generator.get_symbol(function_id)
+        args_addresses: List[int] = []
 
         if isinstance(symbol, IBuiltinMethod) and symbol.push_self_first():
             args = call.args[1:]
+            args_addresses.append(
+                VMCodeMapping.instance().bytecode_size
+            )
             self.visit_to_generate(call.args[0])
         else:
             args = call.args
 
         for arg in reversed(args):
+            args_addresses.append(
+                VMCodeMapping.instance().bytecode_size
+            )
             self.visit_to_generate(arg)
-        self.generator.convert_load_symbol(function_id)
+        self.generator.convert_load_symbol(function_id, args_addresses)
 
     def visit_Name(self, name: ast.Name) -> str:
         """

@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.constants import ENCODING
 from boa3.exception.CompilerError import MismatchedTypes, MissingReturnStatement, TooManyReturns, TypeHintMissing
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -673,12 +674,12 @@ class TestFunction(BoaTest):
             + Opcode.PUSH2
             + Opcode.GE
             + Opcode.BOOLAND
-            + Opcode.JMPIFNOT + b'\x2e'
+            + Opcode.JMPIFNOT + b'\x39'
             + Opcode.NEWARRAY0          # operands: List[int] = []
             + Opcode.STLOC0
             + Opcode.PUSH1              # i = 1
             + Opcode.STLOC1
-            + Opcode.JMP + b'\x13'      # begin while i < len(arg):
+            + Opcode.JMP + b'\x1e'      # begin while i < len(arg):
             + Opcode.LDLOC0                 # operands.append(arg[i])
             + Opcode.LDARG1                 # arg[i]
             + Opcode.LDLOC1
@@ -689,8 +690,19 @@ class TestFunction(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.APPEND
+            + Opcode.PICKITEM               # append(args[i])
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC1                 # i += 1
             + Opcode.PUSH1
             + Opcode.ADD
@@ -699,7 +711,7 @@ class TestFunction(BoaTest):
             + Opcode.LDARG1
             + Opcode.SIZE
             + Opcode.LT
-            + Opcode.JMPIF + b'\xeb'
+            + Opcode.JMPIF + b'\xe0'
             + Opcode.LDLOC0             # return calculate(arg[0], operands)
             + Opcode.LDARG1             # arg[0]
             + Opcode.PUSH0
@@ -893,5 +905,4 @@ class TestFunction(BoaTest):
 
         path = '%s/boa3_test/example/function_test/MultipleFunctionLargeCall.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)

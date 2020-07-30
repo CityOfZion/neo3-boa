@@ -88,6 +88,15 @@ class IBuiltinMethod(IBuiltinDecorator, ABC):
         return 0
 
     @property
+    def stores_on_slot(self) -> bool:
+        """
+        Returns whether this method needs to update the value from a variable
+
+        :return: the number of arguments.
+        """
+        return False
+
+    @property
     def body(self) -> Optional[str]:
         """
         Gets the body of the method.

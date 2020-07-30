@@ -135,7 +135,18 @@ class TestVariable(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-            + Opcode.APPEND
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -157,7 +168,18 @@ class TestVariable(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-            + Opcode.APPEND
+                + Opcode.OVER
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(8).to_byte_array(min_length=1)
+                + Opcode.CAT
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.APPEND
+                + Opcode.JMP
+                + Integer(2).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
