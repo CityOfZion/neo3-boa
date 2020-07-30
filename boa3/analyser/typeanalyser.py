@@ -5,6 +5,7 @@ from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.callable import Callable
 from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -129,6 +130,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         self.visit(function.args)
         method = self.symbols[function.name]
+        from boa3.model.event import Event
         if isinstance(method, Method):
             self._current_method = method
 
@@ -147,6 +149,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
                 )
             self._current_method = None
+        elif (isinstance(method, Event)         # events don't have return
+                and function.returns is not None):
+            return_type = self.get_type(function.returns)
+            if return_type is not Type.none:
+                self._log_error(
+                    CompilerError.MismatchedTypes(line=function.lineno, col=function.col_offset,
+                                                  expected_type_id=Type.none.identifier,
+                                                  actual_type_id=return_type.identifier)
+                )
 
     def visit_arguments(self, arguments: ast.arguments):
         """
@@ -837,56 +848,56 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the result type of the called function
         """
         if isinstance(call.func, ast.Name):
-            function_id: str = call.func.id
-            function = self.get_symbol(function_id)
+            callable_id: str = call.func.id
+            callable_target = self.get_symbol(callable_id)
         else:
-            arg0, function, function_id = self.visit(call.func)
+            arg0, callable_target, callable_id = self.visit(call.func)
             arg0_identifier = self.visit(arg0)
             if isinstance(arg0_identifier, ast.Name):
                 arg0_identifier = arg0_identifier.id
 
-            if (function is not None
+            if (callable_target is not None
                     and (len(call.args) < 1 or call.args[0] != arg0)
                     and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
                 call.args.insert(0, arg0)
-            if len(call.args) > 0 and isinstance(function, IBuiltinMethod) and function.has_self_argument:
+            if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
                 self_type: IType = self.get_type(call.args[0])
-                function = function.build(self_type)
+                callable_target = callable_target.build(self_type)
 
-        if not isinstance(function, Method):
+        if not isinstance(callable_target, Callable):
             # verify if it is a builtin method with its name shadowed
-            func = Builtin.get_symbol(function_id)
-            function = func if func is not None else function
-        if not isinstance(function, Method):
+            call_target = Builtin.get_symbol(callable_id)
+            callable_target = call_target if call_target is not None else callable_target
+        if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
-                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, function_id)
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
             )
         else:
             # TODO: change when kwargs is implemented
-            if len(call.args) > len(function.args):
-                unexpected_arg = call.args[len(function.args)]
+            if len(call.args) > len(callable_target.args):
+                unexpected_arg = call.args[len(callable_target.args)]
                 self._log_error(
                     CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
                 )
-            elif len(call.args) < len(function.args):
-                missed_arg = list(function.args)[len(call.args)]
+            elif len(call.args) < len(callable_target.args):
+                missed_arg = list(callable_target.args)[len(call.args)]
                 self._log_error(
                     CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
             else:
                 args = [self.get_type(param) for param in call.args]
-                if isinstance(function, IBuiltinMethod):
+                if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
-                    function = function.build(args)
-                    if not function.is_supported:
+                    callable_target = callable_target.build(args)
+                    if not callable_target.is_supported:
                         # TODO: implement bytearray constructor with non-bytes values
                         self._log_error(
-                            CompilerError.NotSupportedOperation(call.lineno, call.col_offset, function_id)
+                            CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
                         )
-                        return function.return_type
+                        return callable_target.return_type
 
-                for index, (arg_id, arg_value) in enumerate(function.args.items()):
+                for index, (arg_id, arg_value) in enumerate(callable_target.args.items()):
                     param = call.args[index]
                     param_type = self.get_type(param)
                     args.append(param_type)
@@ -899,24 +910,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                             ))
 
             # if the arguments are not generic, include the specified method in the symbol table
-            if (isinstance(function, IBuiltinMethod)
-                    and function.identifier != function_id
-                    and function.identifier not in self.symbols):
-                self.symbols[function.identifier] = function
+            if (isinstance(callable_target, IBuiltinMethod)
+                    and callable_target.identifier != callable_id
+                    and callable_target.identifier not in self.symbols):
+                self.symbols[callable_target.identifier] = callable_target
                 call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
-                                     ctx=ast.Load(), id=function.identifier)
-            if function.requires_storage:
+                                     ctx=ast.Load(), id=callable_target.identifier)
+            if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
                 if not self._metadata.has_storage:
                     self._log_error(
                         CompilerError.MetadataInformationMissing(
                             line=call.func.lineno, col=call.func.col_offset,
-                            symbol_id=function.identifier,
+                            symbol_id=callable_target.identifier,
                             metadata_attr_id='has_storage'
                         )
                     )
                 else:
                     self._current_method.set_storage()
-        return self.get_type(function)
+        return self.get_type(callable_target)
 
     def visit_value(self, node: ast.AST):
         result = self.visit(node)

@@ -7,6 +7,7 @@ from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.model.builtin.decorator.eventdecorator import EventDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
@@ -63,9 +64,11 @@ class Builtin:
 
     # builtin decorator
     Public = PublicDecorator()
+    Event = EventDecorator()
     Metadata = MetadataDecorator()
 
     _boa_builtins: List[IdentifiedSymbol] = [Public,
+                                             Event,
                                              Metadata,
                                              NeoMetadataType]
 

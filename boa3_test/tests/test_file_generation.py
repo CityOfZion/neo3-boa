@@ -5,6 +5,7 @@ from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
 from boa3.constants import BYTEORDER, ENCODING
+from boa3.model.event import Event
 from boa3.model.method import Method
 from boa3.neo.contracts.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
@@ -137,6 +138,41 @@ class TestFileGeneration(BoaTest):
         self.assertIn('events', abi)
         self.assertEqual(0, len(abi['events']))
 
+    def test_generate_manifest_file_with_event(self):
+        path = '%s/boa3_test/example/event_test/EventWithArgument.py' % self.dirname
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        events: Dict[str, Event] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Event)
+        }
+
+        output, manifest = self.get_output(path)
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(0, len(abi['methods']))
+
+        self.assertIn('events', abi)
+        self.assertEqual(1, len(abi['events']))
+
+        for abi_event in abi['events']:
+            self.assertIn('name', abi_event)
+            self.assertIn(abi_event['name'], events)
+            self.assertIn('parameters', abi_event)
+
+            event_args = events[abi_event['name']].args
+            for event_param in abi_event['parameters']:
+                self.assertIn('name', event_param)
+                self.assertIn(event_param['name'], event_args)
+                self.assertIn('type', event_param)
+                self.assertEqual(event_args[event_param['name']].type.abi_type,
+                                 event_param['type'])
+
     def test_generate_nefdbgnfo_file(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithDecorator.py' % self.dirname
 
@@ -183,6 +219,44 @@ class TestFileGeneration(BoaTest):
                 var_id, var_type = var.split(',')
                 self.assertIn(var_id, actual_method.locals)
                 self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
+
+    def test_generate_nefdbgnfo_file_with_event(self):
+        path = '%s/boa3_test/example/event_test/EventWithArgument.py' % self.dirname
+
+        expected_nef_output = path.replace('.py', '.nefdbgnfo')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        events: Dict[str, Event] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Event)
+        }
+
+        self.assertTrue(os.path.exists(expected_nef_output))
+        debug_info = self.get_debug_info(path)
+        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('events', debug_info)
+        self.assertGreater(len(debug_info['events']), 0)
+
+        for debug_event in debug_info['events']:
+            self.assertIn('name', debug_event)
+            parsed_name = debug_event['name'].split(',')
+            self.assertEqual(2, len(parsed_name))
+            self.assertIn(parsed_name[-1], events)
+            actual_event = events[parsed_name[-1]]
+
+            # validate id
+            self.assertIn('id', debug_event)
+            self.assertEqual(str(id(actual_event)), debug_event['id'])
+
+            # validate parameters
+            self.assertIn('params', debug_event)
+            self.assertEqual(len(actual_event.args), len(debug_event['params']))
+            for var in debug_event['params']:
+                self.assertEqual(2, len(var.split(',')))
+                param_id, param_type = var.split(',')
+                self.assertIn(param_id, actual_event.args)
+                self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
     def test_generate_without_main(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithoutMain.py' % self.dirname
