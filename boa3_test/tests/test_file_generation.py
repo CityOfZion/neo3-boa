@@ -258,6 +258,26 @@ class TestFileGeneration(BoaTest):
                 self.assertIn(param_id, actual_event.args)
                 self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
+    def test_generate_manifest_file_with_notify_event(self):
+        path = '%s/boa3_test/example/interop_test/NotifySequence.py' % self.dirname
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('events', abi)
+        self.assertGreater(len(abi['events']), 0)
+
+        notify_event = next(abi_event for abi_event in abi['events']
+                            if 'name' in abi_event and abi_event['name'] == 'notify')
+        self.assertIsNotNone(notify_event, "notify event is not listed in the contract's abi")
+        self.assertIn('parameters', notify_event)
+        self.assertEqual(1, len(notify_event['parameters']))
+        self.assertIn('type', notify_event['parameters'][0])
+        self.assertEqual(AbiType.Any, notify_event['parameters'][0]['type'])
+
     def test_generate_without_main(self):
         path = '%s/boa3_test/example/generation_test/GenerationWithoutMain.py' % self.dirname
         expected_manifest_output = path.replace('.py', '.manifest.json')

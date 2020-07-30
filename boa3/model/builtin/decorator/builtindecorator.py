@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
+from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.expression import IExpression
-from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 
-class IBuiltinDecorator(Method, IdentifiedSymbol, ABC):
+class IBuiltinDecorator(IBuiltinCallable, Method, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        super().__init__(args, return_type)
-        self._identifier = identifier
+        super().__init__(identifier, args, return_type)
 
     @abstractmethod
     def validate_parameters(self, *params: IExpression) -> bool:

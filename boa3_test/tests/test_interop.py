@@ -46,11 +46,17 @@ class TestInterop(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_notify_str(self):
+        event_name = String('notify').to_bytes()
         string = String('str').to_bytes()
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -62,8 +68,14 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_notify_int(self):
+        event_name = String('notify').to_bytes()
         expected_output = (
             Opcode.PUSH15
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -75,8 +87,14 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_notify_bool(self):
+        event_name = String('notify').to_bytes()
         expected_output = (
             Opcode.PUSH1
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -88,8 +106,14 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_notify_none(self):
+        event_name = String('notify').to_bytes()
         expected_output = (
             Opcode.PUSHNULL
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
@@ -101,6 +125,7 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_notify_sequence(self):
+        event_name = String('notify').to_bytes()
         expected_output = (
             Opcode.PUSH7
             + Opcode.PUSH5
@@ -108,6 +133,11 @@ class TestInterop(BoaTest):
             + Opcode.PUSH2
             + Opcode.PUSH4
             + Opcode.PACK
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.PUSHNULL
