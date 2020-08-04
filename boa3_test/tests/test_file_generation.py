@@ -84,8 +84,8 @@ class TestFileGeneration(BoaTest):
 
         # method Main
         method0 = abi['methods'][0]
-        self.assertIn('returnType', method0)
-        self.assertEqual(AbiType.Integer, method0['returnType'])
+        self.assertIn('returntype', method0)
+        self.assertEqual(AbiType.Integer, method0['returntype'])
         self.assertIn('parameters', method0)
         self.assertEqual(2, len(method0['parameters']))
 
@@ -103,8 +103,8 @@ class TestFileGeneration(BoaTest):
 
         # method Sub
         method1 = abi['methods'][1]
-        self.assertIn('returnType', method1)
-        self.assertEqual(AbiType.Integer, method1['returnType'])
+        self.assertIn('returntype', method1)
+        self.assertEqual(AbiType.Integer, method1['returntype'])
         self.assertIn('parameters', method1)
         self.assertEqual(2, len(method1['parameters']))
 

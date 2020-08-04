@@ -695,7 +695,7 @@ class TestFunction(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)

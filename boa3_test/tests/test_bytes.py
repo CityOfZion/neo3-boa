@@ -275,7 +275,7 @@ class TestBytes(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -309,7 +309,7 @@ class TestBytes(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -343,7 +343,7 @@ class TestBytes(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -360,8 +360,41 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_byte_array_clear(self):
+        data = b'\x01\x02\x03\x04'
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03\x04')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.clear()
+                + Opcode.DUP
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(9).to_byte_array(min_length=1)
+                + Opcode.DROP
+                + Opcode.PUSHDATA1
+                + Integer(0).to_byte_array(min_length=1)
+                + Opcode.CONVERT
+                + Type.bytearray.stack_item
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.CLEARITEMS
+                + Opcode.JMP
+                + Integer(3).to_byte_array(min_length=1)
+                + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET        # return a
+        )
+
         path = '%s/boa3_test/example/bytes_test/BytearrayClear.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_byte_array_reverse(self):
         data = b'\x01\x02\x03'

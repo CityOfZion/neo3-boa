@@ -50,7 +50,7 @@ class AppendMethod(IBuiltinMethod):
         return [
             (Opcode.OVER, b''),
             (Opcode.ISTYPE, Type.bytearray.stack_item),     # append opcode only works for array
-            (Opcode.JMPIFNOT, Integer(8).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
+            (Opcode.JMPIFNOT, Integer(5).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
             (Opcode.CAT, b''),
             (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
             (Opcode.APPEND, b'')
