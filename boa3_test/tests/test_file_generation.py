@@ -84,8 +84,8 @@ class TestFileGeneration(BoaTest):
 
         # method Main
         method0 = abi['methods'][0]
-        self.assertIn('returnType', method0)
-        self.assertEqual(AbiType.Integer, method0['returnType'])
+        self.assertIn('returntype', method0)
+        self.assertEqual(AbiType.Integer, method0['returntype'])
         self.assertIn('parameters', method0)
         self.assertEqual(2, len(method0['parameters']))
 
@@ -103,8 +103,8 @@ class TestFileGeneration(BoaTest):
 
         # method Sub
         method1 = abi['methods'][1]
-        self.assertIn('returnType', method1)
-        self.assertEqual(AbiType.Integer, method1['returnType'])
+        self.assertIn('returntype', method1)
+        self.assertEqual(AbiType.Integer, method1['returntype'])
         self.assertIn('parameters', method1)
         self.assertEqual(2, len(method1['parameters']))
 
@@ -393,3 +393,58 @@ class TestFileGeneration(BoaTest):
                 var_id, var_type = var.split(',')
                 self.assertIn(var_id, actual_method.locals)
                 self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
+
+    def test_generate_init_method(self):
+        path = '%s/boa3_test/example/variable_test/GlobalAssignmentWithType.py' % self.dirname
+
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        methods: Dict[str, Method] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Method)
+        }
+        from boa3.constants import INITIALIZE_METHOD_ID
+        self.assertGreater(len(methods), 0)
+        self.assertIn(INITIALIZE_METHOD_ID, methods)
+        init_method = methods[INITIALIZE_METHOD_ID]
+
+        output, manifest = self.get_output(path)
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertGreater(len(abi['methods']), 0)
+
+        abi_init = next(method for method in abi['methods']
+                        if 'name' in method and method['name'] == INITIALIZE_METHOD_ID)
+        self.assertIsNotNone(abi_init)
+        self.assertIn('offset', abi_init)
+        self.assertEqual(init_method.start_address, abi_init['offset'])
+        self.assertIn('parameters', abi_init)
+        self.assertEqual(0, len(abi_init['parameters']))
+        self.assertIn('returntype', abi_init)
+        self.assertEqual(AbiType.Void, abi_init['returntype'])
+
+        debug_info = self.get_debug_info(path)
+        self.assertIn('methods', debug_info)
+        self.assertGreater(len(debug_info['methods']), 0)
+
+        debug_method = next((method for method in debug_info['methods']
+                             if 'id' in method and method['id'] == str(id(init_method))), None)
+        self.assertIsNotNone(debug_method)
+        parsed_name = debug_method['name'].split(',')
+        self.assertEqual(2, len(parsed_name))
+        self.assertIn(parsed_name[-1], methods)
+
+        # validate parameters
+        self.assertIn('params', debug_method)
+        self.assertEqual(0, len(debug_method['params']))
+
+        # validate local variables
+        self.assertIn('variables', debug_method)
+        self.assertEqual(0, len(debug_method['variables']))
+
+        # validate sequence points
+        self.assertIn('sequence-points', debug_method)
+        self.assertEqual(0, len(debug_method['sequence-points']))

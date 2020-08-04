@@ -27,6 +27,7 @@ class Module(ISymbol):
         self.callables: Dict[str, Callable] = {}
 
         self.imported_symbols = {}
+        self.assigned_variables = []
 
     @property
     def shadowing_name(self) -> str:
@@ -41,6 +42,24 @@ class Module(ISymbol):
         """
         if var_id not in self.symbols:
             self.variables[var_id] = var
+
+    def is_variable_assigned(self, var_id: str) -> bool:
+        if var_id not in self.variables:
+            return False
+
+        if var_id in self.assigned_variables or var_id in self.imported_symbols:
+            return True
+
+        for imported in self.imported_symbols.values():
+            from boa3.model.importsymbol import Import
+            if isinstance(imported, Import) and self.variables[var_id] in imported.variables.values():
+                return True
+
+        return False
+
+    def assign_variable(self, var_id: str):
+        if var_id in self.variables:
+            self.assigned_variables.append(var_id)
 
     def include_callable(self, method_id: str, method: Callable):
         """

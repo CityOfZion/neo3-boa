@@ -107,7 +107,8 @@ class FileGenerator:
                 }
             ],
             "trusts": [],
-            "safeMethods": [],
+            "safemethods": [],
+            "supportedstandards": [],
             "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }
 
@@ -145,7 +146,7 @@ class FileGenerator:
                     "type": arg.type.abi_type
                 } for arg_id, arg in method.args.items()
             ],
-            "returnType": method.type.abi_type
+            "returntype": method.type.abi_type
         }
 
     def _get_abi_events(self) -> List[Dict[str, Any]]:

@@ -17,14 +17,15 @@ class Callable(IExpression, ABC):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none,
-                 is_public: bool = False, origin_node: Optional[ast.AST] = None):
+    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none, is_public: bool = False,
+                 origin_node: Optional[ast.AST] = None):
         if args is None:
             args = {}
         self.args: Dict[str, Variable] = args
         self.return_type: IType = return_type
-        self._origin_node = origin_node
         self.is_public: bool = is_public
+
+        super().__init__(origin_node)
 
         self.init_address: Optional[int] = None
         self.init_bytecode: Optional[VMCode] = None
@@ -42,15 +43,6 @@ class Callable(IExpression, ABC):
         :return: a dictionary that maps each symbol in the module with its name
         """
         return self.args.copy()
-
-    @property
-    def origin(self) -> ast.AST:
-        """
-        Returns the method origin ast node.
-
-        :return: the ast node that describes this method. None if it is not from a ast.
-        """
-        return self._origin_node
 
     @property
     def start_address(self) -> Optional[int]:

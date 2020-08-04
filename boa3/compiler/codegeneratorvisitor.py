@@ -67,6 +67,67 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         else:
             return self.generator.convert_literal(node)
 
+    def visit_Module(self, module: ast.Module):
+        """
+        Visitor of the module node
+
+        Fills module symbol table
+
+        :param module:
+        """
+        global_stmts = [node for node in module.body if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        function_stmts = module.body[len(global_stmts):]
+
+        for stmt in function_stmts:
+            self.visit(stmt)
+
+        if self.generator.initialize_static_fields():
+            for stmt in global_stmts:
+                self.visit(stmt)
+
+            self.generator.end_initialize()
+
+    def visit_ImportFrom(self, import_from: ast.ImportFrom):
+        """
+        Includes methods and variables from other modules into the current scope
+
+        :param import_from:
+        """
+        self._import_static_fields(import_from.names)
+
+    def visit_Import(self, import_node: ast.Import):
+        """
+        Includes methods and variables from other modules into the current scope
+
+        :param import_node:
+        """
+        self._import_static_fields(import_node.names)
+
+    def _import_static_fields(self, names: List[ast.alias]):
+        """
+        Visits the imported nodes that aren't function definitions to initialize static fields
+
+        :param names: list of imported alias
+        """
+        for alias in names:
+            name = alias.asname if alias.asname is not None else alias.name
+            if name in self.symbols:
+                if hasattr(self.symbols[name], 'ast') and self.symbols[name].ast is not None:
+                    ast_root = self.symbols[name].ast
+                elif hasattr(self.symbols[name], 'origin') and self.symbols[name].origin is not None:
+                    ast_root = self.symbols[name].origin
+                else:
+                    continue
+
+                if isinstance(ast_root, ast.Module):
+                    body = ast_root.body
+                else:
+                    body = [ast_root]
+
+                for node in body:
+                    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        self.visit(node)
+
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
         Visitor of the function definition node

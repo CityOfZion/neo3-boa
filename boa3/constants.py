@@ -8,3 +8,5 @@ DEFAULT_UINT32 = 0
 
 ENCODING = 'utf-8'
 BYTEORDER = 'little'
+
+INITIALIZE_METHOD_ID = '_initialize'
