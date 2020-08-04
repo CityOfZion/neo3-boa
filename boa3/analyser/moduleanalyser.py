@@ -77,7 +77,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return global_symbols
 
     def __include_variable(self, var_id: str, var_type_id: Union[str, IType],
-                           source_node: ast.AST, var_enumerate_type: IType = Type.none):
+                           source_node: ast.AST,
+                           var_enumerate_type: IType = Type.none, assignment: bool = True):
         """
         Includes the variable in the symbol table if the id was not used
 
@@ -86,30 +87,41 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :type var_type_id: str or IType
         :param var_enumerate_type: variable value type id if var_type_id is a SequenceType
         """
-        if var_id not in self._current_scope.symbols:
-            outer_symbol = self.get_symbol(var_id)
-            if outer_symbol is not None:
-                self._log_warning(
-                    CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
-                )
+        if not isinstance(var_id, str) and isinstance(var_id, Iterable):
+            variables = [var_name.id for var_name in source_node.targets[0].elts]
+            var_types = self.visit(source_node.value)
+        else:
+            variables = [var_id]
+            var_types = [var_type_id]
 
-            var_type = None
-            if isinstance(var_type_id, SequenceType):
-                var_type = var_type_id
-                var_enumerate_type = self.get_enumerate_type(var_type)
-            elif isinstance(var_type_id, IType):
-                var_type = var_type_id
+        for x in range(min(len(variables), len(var_types))):
+            var_id, var_type_id = variables[x], var_types[x]
+            if var_id not in self._current_scope.symbols:
+                outer_symbol = self.get_symbol(var_id)
+                if outer_symbol is not None:
+                    self._log_warning(
+                        CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
+                    )
 
-            # when setting a None value to a variable, set the variable as any type
-            if var_type is Type.none:
-                var_type = Type.any
+                var_type = None
+                if isinstance(var_type_id, SequenceType):
+                    var_type = var_type_id
+                    var_enumerate_type = self.get_enumerate_type(var_type)
+                elif isinstance(var_type_id, IType):
+                    var_type = var_type_id
 
-            if isinstance(var_type, IType) or var_type is None:
-                # if type is None, the variable type depends on the type of a expression
-                if isinstance(var_type, SequenceType):
-                    var_type = var_type.build_collection(var_enumerate_type)
-                var = Variable(var_type)
-                self._current_scope.include_variable(var_id, var)
+                # when setting a None value to a variable, set the variable as any type
+                if var_type is Type.none:
+                    var_type = Type.any
+
+                if isinstance(var_type, IType) or var_type is None:
+                    # if type is None, the variable type depends on the type of a expression
+                    if isinstance(var_type, SequenceType):
+                        var_type = var_type.build_collection(var_enumerate_type)
+                    var = Variable(var_type, origin_node=source_node)
+                    self._current_scope.include_variable(var_id, var)
+            if hasattr(self._current_scope, 'assign_variable') and assignment:
+                self._current_scope.assign_variable(var_id)
 
     def __include_callable(self, callable_id: str, callable: Callable):
         """
@@ -293,7 +305,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
             # includes the module to be able to generate the functions
-            imported_module = Import(analyser.path, analyser.tree, new_symbols)
+            imported_module = Import(analyser.path, analyser.tree, analyser, import_alias)
             self._current_scope.include_symbol(import_from.module, imported_module)
 
             for name, alias in import_alias.items():
@@ -328,7 +340,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
 
-                imported_module = Import(analyser.path, analyser.tree, new_symbols)
+                imported_module = Import(analyser.path, analyser.tree, analyser)
                 self._current_scope.include_symbol(alias, imported_module)
 
     def visit_Module(self, module: ast.Module):
@@ -342,10 +354,29 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         mod: Module = Module()
         self._current_module = mod
 
-        # don't evaluate constant expression - for example: string for documentation
-        module.body = [stmt for stmt in module.body
-                       if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
-        for stmt in module.body.copy():
+        global_stmts = []
+        function_stmts = []
+        for stmt in module.body:
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                function_stmts.append(stmt)
+            elif not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant)):
+                # don't evaluate constant expression - for example: string for documentation
+                global_stmts.append(stmt)
+                self.visit(stmt)
+
+        module.body = global_stmts + function_stmts
+        for var_id, var in mod.variables.items():
+            # all static fields must be initialized
+            if not mod.is_variable_assigned(var_id):
+                self._log_error(
+                    CompilerError.UnresolvedReference(
+                        line=var.origin.lineno if var.origin is not None else 0,
+                        col=var.origin.col_offset if var.origin is not None else 0,
+                        symbol_id=var_id
+                    )
+                )
+
+        for stmt in function_stmts:
             result = self.visit(stmt)
             # don't evaluate the metadata function in the following analysers
             if result is Builtin.Metadata:
@@ -518,7 +549,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_type: IType = self.visit_type(ann_assign.annotation)
 
         # TODO: check if the annotated type and the value type are the same
-        self.__include_variable(var_id, var_type, source_node=ann_assign)
+        self.__include_variable(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
+
+    def visit_Global(self, global_node: ast.Global):
+        """
+        Visitor of the global identifier node
+
+        :param global_node:
+        """
+        raise NotImplementedError
 
     def visit_Expr(self, expr: ast.Expr):
         """

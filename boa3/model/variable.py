@@ -1,3 +1,4 @@
+import ast
 from typing import Optional
 
 from boa3.model.expression import IExpression
@@ -11,7 +12,8 @@ class Variable(IExpression):
     :ivar var_type: the type of the variable.
     """
 
-    def __init__(self, var_type: Optional[IType]):
+    def __init__(self, var_type: Optional[IType], origin_node: Optional[ast.AST] = None):
+        super().__init__(origin_node)
         self._var_type: Optional[IType] = var_type
 
     @property

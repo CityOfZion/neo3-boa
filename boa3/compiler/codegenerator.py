@@ -42,9 +42,10 @@ class CodeGenerator:
         generator = CodeGenerator(analyser.symbol_table)
         visitor = VisitorCodeGenerator(generator)
         visitor.visit(analyser.ast_tree)
+        generator.initialized_static_fields = True
 
         for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
-            generator.symbol_table.update(symbol.symbols)
+            generator.symbol_table.update(symbol.all_symbols)
             visitor.visit(symbol.ast)
         return generator.bytecode
 
@@ -54,6 +55,7 @@ class CodeGenerator:
         self._current_method: Method = None
         self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
         self._stack: List[IType] = []  # simulates neo execution stack
+        self.initialized_static_fields: bool = False
 
     @property
     def bytecode(self) -> bytes:
@@ -116,8 +118,14 @@ class CodeGenerator:
 
         :return: A list with the variables names
         """
-        # TODO: Global scope not implemented yet
-        return []
+        module_globals = [var_id for var_id, var in self.symbol_table.items() if isinstance(var, Variable)]
+        for imported in self.symbol_table.values():
+            if isinstance(imported, Import):
+                # tried to use set and just update, but we need the varibles to be ordered
+                for var_id, var in imported.variables.items():
+                    if isinstance(var, Variable) and var_id not in module_globals:
+                        module_globals.append(var_id)
+        return module_globals
 
     def get_symbol(self, identifier: str) -> ISymbol:
         """
@@ -143,6 +151,45 @@ class CodeGenerator:
             if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                 return attr.symbols[symbol_id]
         return Type.none
+
+    def initialize_static_fields(self):
+        """
+        Converts the signature of the method
+
+        :return: whether there are static fields to be initialized
+        """
+        if self.initialized_static_fields:
+            return False
+
+        num_static_fields = len(self._globals)
+        if num_static_fields > 0:
+            init_data = bytearray([num_static_fields])
+            self.__insert1(OpcodeInfo.INITSSLOT, init_data)
+
+            from boa3.constants import INITIALIZE_METHOD_ID
+            if INITIALIZE_METHOD_ID in self.symbol_table:
+                from boa3.helpers import get_auxiliary_name
+                method = self.symbol_table.pop(INITIALIZE_METHOD_ID)
+                new_id = get_auxiliary_name(INITIALIZE_METHOD_ID, method)
+                self.symbol_table[new_id] = method
+
+            init_method = Method(is_public=True)
+            init_method.init_bytecode = self.last_code
+            self.symbol_table[INITIALIZE_METHOD_ID] = init_method
+
+        return num_static_fields > 0
+
+    def end_initialize(self):
+        """
+        Converts the signature of the method
+        """
+        self.__insert1(OpcodeInfo.RET)
+        self.initialized_static_fields = True
+
+        from boa3.constants import INITIALIZE_METHOD_ID
+        if INITIALIZE_METHOD_ID in self.symbol_table:
+            init_method = self.symbol_table[INITIALIZE_METHOD_ID]
+            init_method.end_bytecode = self.last_code
 
     def convert_begin_method(self, method: Method):
         """
@@ -661,7 +708,7 @@ class CodeGenerator:
         the function. If the variable is not found, returns (-1, False, False)
         """
         is_arg: bool = False
-        local: bool = var_id in self._current_method.symbols
+        local: bool = isinstance(self._current_method, Method) and var_id in self._current_method.symbols
         if local:
             is_arg = var_id in self._args
             if is_arg:
