@@ -1,24 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.model.builtin.builtincallable import IBuiltinCallable
+from boa3.model.method import Method
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class IBuiltinMethod(IBuiltinDecorator, ABC):
+class IBuiltinMethod(IBuiltinCallable, Method, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
         super().__init__(identifier, args, return_type)
-
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        """
-        Gets the opcode for the method.
-
-        :return: the opcode and its data if exists. None otherwise.
-        """
-        return []
 
     @property
     def is_supported(self) -> bool:
