@@ -53,8 +53,7 @@ class AppendMethod(IBuiltinMethod):
             (Opcode.JMPIFNOT, Integer(8).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
             (Opcode.CAT, b''),
             (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
-            (Opcode.APPEND, b''),
-            (Opcode.JMP, Integer(2).to_byte_array(min_length=1))
+            (Opcode.APPEND, b'')
         ]
 
     def push_self_first(self) -> bool:

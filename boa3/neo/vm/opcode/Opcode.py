@@ -277,7 +277,7 @@ class Opcode(bytes, Enum):
             2: Opcode.OVER
         }
 
-        if position > 0:
+        if position >= 0:
             if position in duplicate_item:
                 return duplicate_item[position]
             else:
@@ -313,7 +313,7 @@ class Opcode(bytes, Enum):
             4: Opcode.REVERSE4
         }
 
-        if no_stack_items > 1:
+        if no_stack_items >= 0:
             if no_stack_items in reverse_stack:
                 return reverse_stack[no_stack_items]
             else:

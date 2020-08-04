@@ -215,8 +215,6 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             self.visit_to_generate(subscript.slice.lower)
             # length of slice
             self.visit_to_generate(subscript.slice.upper)
-            self.visit_to_generate(subscript.slice.lower)
-            self.generator.convert_operation(BinaryOp.Sub)
             self.generator.convert_get_sub_array()
         # only one of them is omitted
         elif lower_omitted != upper_omitted:
@@ -226,12 +224,13 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.generator.convert_get_array_beginning()
             # start position is omitted
             else:
-                self.visit_to_generate(subscript.value)
+                self.generator.duplicate_stack_top_item()
                 # length of slice
                 self.generator.convert_builtin_method_call(Builtin.Len)
                 self.visit_to_generate(subscript.slice.lower)
-                self.generator.convert_operation(BinaryOp.Sub)
                 self.generator.convert_get_array_ending()
+        else:
+            self.generator.convert_copy()
 
     def _convert_unary_operation(self, operand, op):
         self.visit_to_generate(operand)

@@ -145,7 +145,7 @@ class TestVariable(BoaTest):
                 + Integer(5).to_byte_array(min_length=1)
                 + Opcode.APPEND
                 + Opcode.JMP
-                + Integer(2).to_byte_array(min_length=1)
+                + Integer(3).to_byte_array(min_length=1)
                 + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
@@ -178,7 +178,7 @@ class TestVariable(BoaTest):
                 + Integer(5).to_byte_array(min_length=1)
                 + Opcode.APPEND
                 + Opcode.JMP
-                + Integer(2).to_byte_array(min_length=1)
+                + Integer(3).to_byte_array(min_length=1)
                 + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET

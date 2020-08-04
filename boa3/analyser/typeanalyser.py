@@ -360,7 +360,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(index, ast.Name):
             index = self.get_symbol(index.id)
         if not isinstance(index, tuple):
-            index = (index, )
+            index = (index,)
 
         # if it is a type hint, returns the outer type
         if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
@@ -434,18 +434,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         upper = upper if upper is not Type.none else symbol_type.valid_key
 
         # TODO: remove when slices of other sequence types are implemented
-        if symbol_type is not Type.str:
-            expected: IType = symbol_type.valid_key
-            actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
-            self._log_error(
-                CompilerError.MismatchedTypes(
-                    subscript.lineno, subscript.col_offset,
-                    expected_type_id=expected.identifier,
-                    actual_type_id=[value.identifier for value in actual]
-                )
-            )
-        elif (
-            not symbol_type.is_valid_key(lower)
+        if (not symbol_type.is_valid_key(lower)
             or not symbol_type.is_valid_key(upper)
             or (step is not Type.none and not symbol_type.is_valid_key(step))
         ):

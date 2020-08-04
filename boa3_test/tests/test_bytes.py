@@ -281,7 +281,7 @@ class TestBytes(BoaTest):
                 + Integer(5).to_byte_array(min_length=1)
                 + Opcode.APPEND
                 + Opcode.JMP
-                + Integer(2).to_byte_array(min_length=1)
+                + Integer(3).to_byte_array(min_length=1)
                 + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
@@ -315,7 +315,7 @@ class TestBytes(BoaTest):
                 + Integer(5).to_byte_array(min_length=1)
                 + Opcode.APPEND
                 + Opcode.JMP
-                + Integer(2).to_byte_array(min_length=1)
+                + Integer(3).to_byte_array(min_length=1)
                 + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
@@ -349,7 +349,7 @@ class TestBytes(BoaTest):
                 + Integer(5).to_byte_array(min_length=1)
                 + Opcode.APPEND
                 + Opcode.JMP
-                + Integer(2).to_byte_array(min_length=1)
+                + Integer(3).to_byte_array(min_length=1)
                 + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
