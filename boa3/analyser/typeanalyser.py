@@ -437,7 +437,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if (not symbol_type.is_valid_key(lower)
             or not symbol_type.is_valid_key(upper)
             or (step is not Type.none and not symbol_type.is_valid_key(step))
-        ):
+            ):
             actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
             self._log_error(
                 CompilerError.MismatchedTypes(

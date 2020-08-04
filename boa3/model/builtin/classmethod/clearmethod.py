@@ -21,20 +21,29 @@ class ClearMethod(IBuiltinMethod):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
+    @property
+    def stores_on_slot(self) -> bool:
+        return True
+
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 1:
             return False
         return isinstance(params[0], IExpression) and isinstance(params[0].type, MutableSequenceType)
 
     @property
-    def is_supported(self) -> bool:
-        # TODO: remove when bytearray.clear() is implemented
-        from boa3.model.type.type import Type
-        return self._arg_self.type is not Type.bytearray
-
-    @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.CLEARITEMS, b'')]
+        from boa3.model.type.type import Type
+        from boa3.neo.vm.type.Integer import Integer
+        return [
+            (Opcode.DUP, b''),
+            (Opcode.ISTYPE, Type.bytearray.stack_item),     # append opcode only works for array
+            (Opcode.JMPIFNOT, Integer(9).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
+            (Opcode.DROP, b''),
+            (Opcode.PUSHDATA1, b'\x00'),
+            (Opcode.CONVERT, Type.bytearray.stack_item),
+            (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
+            (Opcode.CLEARITEMS, b'')
+        ]
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

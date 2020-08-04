@@ -350,7 +350,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(signed=True, min_length=1)
+                + Integer(5).to_byte_array(signed=True, min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -427,7 +427,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(signed=True, min_length=1)
+                + Integer(5).to_byte_array(signed=True, min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -497,7 +497,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(signed=True, min_length=1)
+                + Integer(5).to_byte_array(signed=True, min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -591,7 +591,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(signed=True, min_length=1)
+                + Integer(5).to_byte_array(signed=True, min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -643,7 +643,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -679,7 +679,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -716,7 +716,7 @@ class TestList(BoaTest):
                 + Opcode.ISTYPE
                 + Type.bytearray.stack_item
                 + Opcode.JMPIFNOT
-                + Integer(8).to_byte_array(min_length=1)
+                + Integer(5).to_byte_array(min_length=1)
                 + Opcode.CAT
                 + Opcode.JMP
                 + Integer(5).to_byte_array(min_length=1)
@@ -748,7 +748,22 @@ class TestList(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.clear()
-            + Opcode.CLEARITEMS
+                + Opcode.DUP
+                + Opcode.ISTYPE
+                + Type.bytearray.stack_item
+                + Opcode.JMPIFNOT
+                + Integer(9).to_byte_array(min_length=1)
+                + Opcode.DROP
+                + Opcode.PUSHDATA1
+                + Integer(0).to_byte_array(min_length=1)
+                + Opcode.CONVERT
+                + Type.bytearray.stack_item
+                + Opcode.JMP
+                + Integer(5).to_byte_array(min_length=1)
+                + Opcode.CLEARITEMS
+                + Opcode.JMP
+                + Integer(3).to_byte_array(min_length=1)
+                + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
