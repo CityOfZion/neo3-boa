@@ -25,6 +25,44 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         """
         return self._tree
 
+    def visit_Call(self, call: ast.Call):
+        """
+        Visitor of a function call node
+
+        :param call: the python ast function call node
+        """
+        if isinstance(call.func, ast.Attribute):
+            from boa3.model.builtin.builtin import Builtin
+            if call.func.attr == Builtin.ScriptHash.identifier:
+                from boa3.model.type.type import Type
+                literals = {
+                    Type.int.identifier: ast.Num,
+                    Type.str.identifier: ast.Str,
+                    Type.bytes.identifier: ast.Bytes
+                }
+
+                if isinstance(call.func.value, tuple(literals.values())) and len(call.args) == 0:
+                    value = ast.literal_eval(call.func.value)
+                elif (isinstance(call.func.value, ast.Name)
+                      and call.func.value.id in literals        # checks if is the name of a type
+                      and len(call.args) == 1                   # and if the arguments is from the same type
+                      and type(call.args[0]) == literals[call.func.value.id]):
+                    value = ast.literal_eval(call.args[0])
+                else:
+                    return call
+
+                from boa3.neo import to_script_hash
+                # value must be bytes
+                if isinstance(value, int):
+                    from boa3.neo.vm.type.Integer import Integer
+                    value = Integer(value).to_byte_array()
+                elif isinstance(value, str):
+                    from boa3.neo.vm.type.String import String
+                    value = String(value).to_bytes()
+                return self.parse_to_node(str(to_script_hash(value)), call)
+
+        return call
+
     def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
         """
         Parses an expression to an ast.

@@ -1,3 +1,6 @@
+from typing import Any
+
+
 def event(*args):
     """
     This decorator identifies a method that specifies a Neo event.
@@ -25,6 +28,17 @@ def metadata(*args):
     def metadata_wrapper():
         pass
     return metadata_wrapper
+
+
+def to_script_hash(data_bytes: Any) -> bytes:
+    """
+    Converts a data to a script hash.
+
+    :param data_bytes: data to hash.
+    :return: the script hash of the data
+    :rtype: bytes
+    """
+    pass
 
 
 class NeoMetadata:

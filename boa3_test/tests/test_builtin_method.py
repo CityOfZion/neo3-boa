@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
+from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation, UnexpectedArgument, UnfilledArgument
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -442,5 +442,99 @@ class TestVariable(BoaTest):
     def test_extend_too_few_parameters(self):
         path = '%s/boa3_test/example/built_in_methods_test/ExtendTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
+
+    # endregion
+
+    # region TestToScriptHash
+
+    def test_script_hash_int(self):
+        from boa3.neo import to_script_hash
+        script_hash = to_script_hash(Integer(123).to_byte_array())
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashInt.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_script_hash_int_with_builtin(self):
+        from boa3.neo import to_script_hash
+        script_hash = to_script_hash(Integer(123).to_byte_array())
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashIntBuiltinCall.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_script_hash_str(self):
+        from boa3.neo import to_script_hash
+        script_hash = to_script_hash(String('123').to_bytes())
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashStr.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_script_hash_str_with_builtin(self):
+        from boa3.neo import to_script_hash
+        script_hash = to_script_hash(String('123').to_bytes())
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashStrBuiltinCall.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_script_hash_variable(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashVariable.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_script_hash_variable_with_builtin(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_script_hahs_too_many_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashTooManyParameters.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_script_hash_too_few_parameters(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_script_hash_mismatched_types(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashMismatchedType.py' % self.dirname
+        # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_script_hash_builtin_mismatched_types(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashBuiltinMismatchedType.py' % self.dirname
+        # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     # endregion

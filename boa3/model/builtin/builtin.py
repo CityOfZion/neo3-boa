@@ -14,6 +14,7 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -37,6 +38,7 @@ class Builtin:
 
     # builtin method
     Len = LenMethod()
+    ScriptHash = ScriptHashMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -50,6 +52,7 @@ class Builtin:
     DictValues = MapValuesMethod()
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
+                                                ScriptHash,
                                                 ByteArray,
                                                 SequenceAppend,
                                                 SequenceClear,
