@@ -34,20 +34,28 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         if isinstance(call.func, ast.Attribute):
             from boa3.model.builtin.builtin import Builtin
             if call.func.attr == Builtin.ScriptHash.identifier:
+                import sys
                 from boa3.model.type.type import Type
-                literals = {
-                    Type.int.identifier: ast.Num,
-                    Type.str.identifier: ast.Str,
-                    Type.bytes.identifier: ast.Bytes
+                types = {
+                    Type.int.identifier: int,
+                    Type.str.identifier: str,
+                    Type.bytes.identifier: bytes
                 }
+                literal: tuple = ((ast.Constant,)
+                                  if sys.version_info > (3, 8)
+                                  else (ast.Num, ast.Str, ast.Bytes))
 
-                if isinstance(call.func.value, tuple(literals.values())) and len(call.args) == 0:
+                if isinstance(call.func.value, literal) and len(call.args) == 0:
                     value = ast.literal_eval(call.func.value)
-                elif (isinstance(call.func.value, ast.Name)
-                      and call.func.value.id in literals        # checks if is the name of a type
-                      and len(call.args) == 1                   # and if the arguments is from the same type
-                      and type(call.args[0]) == literals[call.func.value.id]):
+                    if not isinstance(value, tuple(types.values())):
+                        return call
+                elif (isinstance(call.func.value, ast.Name)     # checks if is the name of a type
+                      and call.func.value.id in types        # and if the arguments is from the same type
+                      and len(call.args) == 1
+                      and isinstance(call.args[0], literal)):
                     value = ast.literal_eval(call.args[0])
+                    if not isinstance(value, (types[call.func.value.id],)):
+                        return call
                 else:
                     return call
 
