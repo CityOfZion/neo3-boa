@@ -53,7 +53,10 @@ class CodeGenerator:
         self.symbol_table: Dict[str, ISymbol] = symbol_table
 
         self._current_method: Method = None
+
         self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
+        self._can_append_target: bool = True
+
         self._stack: List[IType] = []  # simulates neo execution stack
         self.initialized_static_fields: bool = False
 
@@ -324,6 +327,11 @@ class CodeGenerator:
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
 
     def fix_negative_index(self, value_index: int = None):
+        self._can_append_target = not self._can_append_target
+
+        value_code = self.last_code_start_address
+        size = VMCodeMapping.instance().bytecode_size
+
         self.duplicate_stack_top_item()
         self.__insert1(OpcodeInfo.SIGN)
         self.convert_literal(-1)
@@ -337,7 +345,12 @@ class CodeGenerator:
 
         if not isinstance(value_index, int):
             value_index = VMCodeMapping.instance().bytecode_size
-        self._update_jump(jmp_address, value_index)
+        jmp_target = value_index if value_index < size else VMCodeMapping.instance().bytecode_size
+        self._update_jump(jmp_address, jmp_target)
+
+        VMCodeMapping.instance().move_to_end(value_index, value_code)
+
+        self._can_append_target = not self._can_append_target
 
     def convert_literal(self, value: Any) -> int:
         """
@@ -493,12 +506,9 @@ class CodeGenerator:
         """
         Converts the end of setting af a value in an array
         """
-        value_code = self.last_code_start_address
         index_type: IType = self._stack[-2]  # top: index
         if index_type is Type.int:
             self.fix_negative_index(value_start_address)
-
-        VMCodeMapping.instance().move_to_end(value_start_address, value_code)
 
     def convert_set_item(self, value_start_address: int):
         """
@@ -578,12 +588,19 @@ class CodeGenerator:
         self.remove_stack_top_item()
         self.remove_stack_top_item()
 
-    def convert_get_sub_array(self):
+    def convert_get_sub_array(self, value_addresses: List[int] = None):
         """
         Converts the end of get a slice in the beginning of an array
+
+        :param value_addresses: the start and end values addresses
         """
         # top: length, index, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
+            if value_addresses is not None:
+                opcodes = [VMCodeMapping.instance().code_map[address] for address in value_addresses]
+                for code in opcodes:
+                    self.fix_negative_index(VMCodeMapping.instance().get_end_address(code) + 1)
+
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
                 self.duplicate_stack_item(2)
@@ -604,6 +621,7 @@ class CodeGenerator:
         Converts the end of get a slice in the beginning of an array
         """
         if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
+            self.fix_negative_index()
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
                 self.__insert1(OpcodeInfo.LEFT)
@@ -621,6 +639,7 @@ class CodeGenerator:
         """
         # top: start_slice, array_length, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
+            self.fix_negative_index()
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
                 self.convert_operation(BinaryOp.Sub)
@@ -809,7 +828,9 @@ class CodeGenerator:
         if op_info.opcode.has_target():
             relative_address: int = Integer.from_bytes(data, signed=True)
             actual_address = VMCodeMapping.instance().bytecode_size + relative_address
-            if relative_address != 0 and actual_address in VMCodeMapping.instance().code_map:
+            if (self._can_append_target
+                    and relative_address != 0
+                    and actual_address in VMCodeMapping.instance().code_map):
                 vm_code.set_target(VMCodeMapping.instance().code_map[actual_address])
             else:
                 self._include_missing_target(vm_code, actual_address)
@@ -834,9 +855,29 @@ class CodeGenerator:
         :return:
         """
         if vmcode.opcode.has_target():
+            if target_address == VMCodeMapping.instance().bytecode_size:
+                target_address = None
+            else:
+                self._remove_missing_target(vmcode)
+
             if target_address not in self._missing_target:
                 self._missing_target[target_address] = []
             self._missing_target[target_address].append(vmcode)
+
+    def _remove_missing_target(self, vmcode: VMCode):
+        """
+        Removes a instruction from the missing target list
+
+        :param vmcode: instruction with incomplete parameter
+        :return:
+        """
+        if vmcode.opcode.has_target():
+            for target_address, opcodes in self._missing_target.copy().items():
+                if vmcode in opcodes:
+                    opcodes.remove(vmcode)
+                    if len(opcodes) == 0:
+                        self._missing_target.pop(target_address)
+                    break
 
     def _update_codes_with_target(self, vm_code: VMCode):
         """
@@ -845,7 +886,7 @@ class CodeGenerator:
         :param vm_code: targeted instruction
         """
         for target_address, codes in list(self._missing_target.items()):
-            if target_address <= VMCodeMapping.instance().get_start_address(vm_code):
+            if target_address is not None and target_address <= VMCodeMapping.instance().get_start_address(vm_code):
                 for code in codes:
                     code.set_target(vm_code)
                 self._missing_target.pop(target_address)
@@ -873,6 +914,7 @@ class CodeGenerator:
         vmcode: VMCode = VMCodeMapping.instance().code_map[jump_address]
         if vmcode is not None:
             if updated_jump_to in VMCodeMapping.instance().code_map:
+                self._remove_missing_target(vmcode)
                 target: VMCode = VMCodeMapping.instance().code_map[updated_jump_to]
                 vmcode.set_target(target)
             else:

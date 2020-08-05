@@ -273,10 +273,14 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         self.visit_to_generate(subscript.value)
         # if both are explicit
         if not lower_omitted and not upper_omitted:
+            addresses = [VMCodeMapping.instance().bytecode_size]
             self.visit_to_generate(subscript.slice.lower)
+
             # length of slice
+            addresses.append(VMCodeMapping.instance().bytecode_size)
             self.visit_to_generate(subscript.slice.upper)
-            self.generator.convert_get_sub_array()
+
+            self.generator.convert_get_sub_array(addresses)
         # only one of them is omitted
         elif lower_omitted != upper_omitted:
             # end position is omitted
