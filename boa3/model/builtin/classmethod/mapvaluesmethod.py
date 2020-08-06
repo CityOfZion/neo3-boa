@@ -19,7 +19,7 @@ class MapValuesMethod(IBuiltinMethod):
 
         identifier = 'values'
         args: Dict[str, Variable] = {'self': self_arg}
-        super().__init__(identifier, args, return_type)
+        super().__init__(identifier, args, return_type=return_type)
 
     @property
     def _arg_self(self) -> Variable:

@@ -1,3 +1,4 @@
+import ast
 from abc import ABC
 from typing import Dict, List, Optional, Tuple
 
@@ -10,9 +11,10 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class InteropMethod(IBuiltinMethod, ABC):
 
-    def __init__(self, identifier: str, sys_call: str, args: Dict[str, Variable] = None, return_type: IType = None):
+    def __init__(self, identifier: str, sys_call: str, args: Dict[str, Variable] = None,
+                 defaults: List[ast.AST] = None, return_type: IType = None):
         self._sys_call: str = sys_call
-        super().__init__(identifier, args, return_type)
+        super().__init__(identifier, args, defaults, return_type)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):

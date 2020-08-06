@@ -1,3 +1,4 @@
+import ast
 from abc import ABC
 from typing import Dict, List, Tuple
 
@@ -9,8 +10,9 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
-    def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        super().__init__(args, return_type)
+    def __init__(self, identifier: str, args: Dict[str, Variable] = None,
+                 defaults: List[ast.AST] = None, return_type: IType = None):
+        super().__init__(args, defaults, return_type)
         self._identifier = identifier
 
     @property

@@ -17,7 +17,7 @@ class ByteArrayMethod(IBuiltinMethod):
 
         identifier = 'bytearray'
         args: Dict[str, Variable] = {'object': Variable(argument_type)}
-        super().__init__(identifier, args, Type.bytearray)
+        super().__init__(identifier, args, return_type=Type.bytearray)
 
     @property
     def _arg_object(self) -> Variable:

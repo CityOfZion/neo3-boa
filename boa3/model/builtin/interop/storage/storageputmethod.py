@@ -15,7 +15,7 @@ class StoragePutMethod(InteropMethod):
         syscall = 'System.Storage.Put'
         self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
         args: Dict[str, Variable] = {'key': Variable(Type.bytes), 'value': Variable(Type.bytes)}
-        super().__init__(identifier, syscall, args, Type.none)
+        super().__init__(identifier, syscall, args, return_type=Type.none)
 
     @property
     def requires_storage(self) -> bool:
