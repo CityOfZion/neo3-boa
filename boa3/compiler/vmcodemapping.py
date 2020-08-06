@@ -153,6 +153,16 @@ class VMCodeMapping:
 
         for code in moved_codes:
             self.insert_code(code)
+        self._update_targets()
+
+    def _update_targets(self):
+        from boa3.neo.vm.type.Integer import Integer
+        for address, code in self.code_map.items():
+            if code.opcode.has_target() and code.target is None:
+                relative = Integer.from_bytes(code.data)
+                absolute = address + relative
+                if absolute in self.code_map:
+                    code.set_target = self.code_map[absolute]
 
     def _update_larger_codes(self):
         """
