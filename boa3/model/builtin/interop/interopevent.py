@@ -1,3 +1,4 @@
+import ast
 from abc import ABC
 from typing import Dict, List, Tuple
 
@@ -8,9 +9,10 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class InteropEvent(IBuiltinEvent, ABC):
 
-    def __init__(self, identifier: str, sys_call: str, args: Dict[str, Variable] = None):
+    def __init__(self, identifier: str, sys_call: str,
+                 args: Dict[str, Variable] = None, defaults: List[ast.AST] = None):
         self._sys_call: str = sys_call
-        super().__init__(identifier, args)
+        super().__init__(identifier, args, defaults)
 
     @property
     def interop_method_hash(self) -> bytes:

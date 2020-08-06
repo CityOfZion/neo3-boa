@@ -137,9 +137,11 @@ class FileGenerator:
         return methods
 
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
+        from boa3.compiler.vmcodemapping import VMCodeMapping
         return {
             "name": method_id,
-            "offset": method.start_address if method.start_address is not None else 0,
+            "offset": (VMCodeMapping.instance().get_start_address(method.start_bytecode)
+                       if method.start_bytecode is not None else 0),
             "parameters": [
                 {
                     "name": arg_id,

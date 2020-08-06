@@ -422,7 +422,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             self.__include_callable(function.name, event)
         else:
-            method = Method(args=fun_args, return_type=fun_return,
+            method = Method(args=fun_args, defaults=function.args.defaults, return_type=fun_return,
                             origin_node=function, is_public=Builtin.Public in fun_decorators)
             self._current_method = method
 

@@ -13,7 +13,7 @@ class LenMethod(IBuiltinMethod):
         from boa3.model.type.type import Type
         identifier = 'len'
         args: Dict[str, Variable] = {'__o': Variable(Type.sequence)}
-        super().__init__(identifier, args, Type.int)
+        super().__init__(identifier, args, return_type=Type.int)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 1:

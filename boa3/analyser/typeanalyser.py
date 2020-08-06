@@ -857,17 +857,25 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         else:
             # TODO: change when kwargs is implemented
-            if len(call.args) > len(callable_target.args):
+            if len(call.keywords) > 0:
+                raise NotImplementedError
+
+            len_call_args = len(call.args)
+            callable_required_args = len(callable_target.args_without_default)
+            if len_call_args > len(callable_target.args):
                 unexpected_arg = call.args[len(callable_target.args)]
                 self._log_error(
                     CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
                 )
-            elif len(call.args) < len(callable_target.args):
+            elif len_call_args < callable_required_args:
                 missed_arg = list(callable_target.args)[len(call.args)]
                 self._log_error(
                     CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
             else:
+                if callable_required_args <= len_call_args < len(callable_target.args):
+                    included_args = len_call_args - callable_required_args
+                    call.args.extend(callable_target.defaults[included_args:])
                 args = [self.get_type(param) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
