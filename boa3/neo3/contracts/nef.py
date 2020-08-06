@@ -72,7 +72,7 @@ class Version(serialization.ISerializable):
 
         Args:
             input: string representing a version number following the format `Major.Minor[.build[.revision]]`.
-            Each version part must fit in the rage >= 0 <= 255.
+            Each version part must fit in the range >= 0 <= 255.
 
         Raises:
             ValueError: if the input cannot be successfully parsed.
