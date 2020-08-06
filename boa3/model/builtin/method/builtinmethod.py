@@ -1,5 +1,6 @@
+import ast
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.method import Method
@@ -8,8 +9,9 @@ from boa3.model.variable import Variable
 
 
 class IBuiltinMethod(IBuiltinCallable, Method, ABC):
-    def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        super().__init__(identifier, args, return_type)
+    def __init__(self, identifier: str, args: Dict[str, Variable] = None,
+                 defaults: List[ast.AST] = None, return_type: IType = None):
+        super().__init__(identifier, args, defaults, return_type)
 
     @property
     def is_supported(self) -> bool:

@@ -11,4 +11,4 @@ class CheckWitnessMethod(InteropMethod):
         identifier = 'check_witness'
         syscall = 'System.Runtime.CheckWitness'
         args: Dict[str, Variable] = {'hash_or_pubkey': Variable(Type.bytes)}
-        super().__init__(identifier, syscall, args, Type.bool)
+        super().__init__(identifier, syscall, args, return_type=Type.bool)

@@ -472,7 +472,7 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.NEWARRAY)
         self._stack.append(array_type)
 
-    def convert_new_array(self, length: int, array_type: IType):
+    def convert_new_array(self, length: int, array_type: IType = Type.list):
         """
         Converts the creation of a new array
 
@@ -653,7 +653,7 @@ class CodeGenerator:
             elif isinstance(symbol, Event):
                 self.convert_event_call(symbol_id, symbol)
             else:
-                self.convert_method_call(symbol)
+                self.convert_method_call(symbol, len(params_addresses))
 
     def convert_load_variable(self, var_id: str, var: Variable):
         """
@@ -756,7 +756,7 @@ class CodeGenerator:
         if function.return_type is not None:
             self._stack.append(function.return_type)
 
-    def convert_method_call(self, function: Method):
+    def convert_method_call(self, function: Method, num_args: int):
         """
         Converts a builtin method function call
 
@@ -765,7 +765,7 @@ class CodeGenerator:
         from boa3.neo.vm.CallCode import CallCode
         self.__insert_code(CallCode(function))
 
-        for arg in function.args:
+        for arg in range(num_args):
             self._stack.pop()
         self._stack.append(function.return_type)
 

@@ -906,3 +906,81 @@ class TestFunction(BoaTest):
         path = '%s/boa3_test/example/function_test/MultipleFunctionLargeCall.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_function_with_default_argument(self):
+        expected_output = (
+            Opcode.PUSH3    # add(1, 2, 3)
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.CALL
+            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSH0
+            + Opcode.PUSH6  # add(5, 6)
+            + Opcode.PUSH5
+            + Opcode.CALL
+            + Integer(4).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSHNULL
+            + Opcode.RET
+            + Opcode.INITSLOT   # def add(a: int, b: int, c: int = 0)
+            + b'\x00\x03'
+            + Opcode.LDARG0     # return a + b + c
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.LDARG2
+            + Opcode.ADD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/function_test/FunctionWithDefaultArgument.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_function_with_only_default_arguments(self):
+        expected_output = (
+            Opcode.PUSH0        # defaults
+            + Opcode.PUSH0
+            + Opcode.PUSH0
+            + Opcode.CALL   # add()
+            + Integer(19).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSH0      # defaults
+            + Opcode.PUSH6      # add(5, 6)
+            + Opcode.PUSH5
+            + Opcode.CALL
+            + Integer(14).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSH0      # defaults
+            + Opcode.PUSH0
+            + Opcode.PUSH9      # add(9)
+            + Opcode.CALL
+            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSH3      # add(1, 2, 3)
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.CALL
+            + Integer(4).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSHNULL
+            + Opcode.RET
+            + Opcode.INITSLOT   # def add(a: int, b: int, c: int)
+            + b'\x00\x03'
+            + Opcode.LDARG0     # return a + b + c
+            + Opcode.LDARG1
+            + Opcode.ADD
+            + Opcode.LDARG2
+            + Opcode.ADD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/function_test/FunctionWithOnlyDefaultArguments.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_function_with_default_argument_between_other_args(self):
+        path = '%s/boa3_test/example/function_test/FunctionWithDefaultArgumentBetweenArgs.py' % self.dirname
+
+        with self.assertRaises(SyntaxError):
+            output = Boa3.compile(path)
+
+    def test_call_function_with_kwargs(self):
+        path = '%s/boa3_test/example/function_test/CallFunctionWithKwargs.py' % self.dirname
+
+        with self.assertRaises(NotImplementedError):
+            output = Boa3.compile(path)

@@ -1,6 +1,6 @@
 import ast
 from abc import ABC
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from boa3.model.expression import IExpression
 from boa3.model.type.type import IType, Type
@@ -17,11 +17,17 @@ class Callable(IExpression, ABC):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, return_type: IType = Type.none, is_public: bool = False,
+    def __init__(self, args: Dict[str, Variable] = None, defaults: List[ast.AST] = None,
+                 return_type: IType = Type.none, is_public: bool = False,
                  origin_node: Optional[ast.AST] = None):
         if args is None:
             args = {}
         self.args: Dict[str, Variable] = args
+
+        if not isinstance(defaults, list):
+            defaults = []
+        self.defaults: List[ast.AST] = defaults
+
         self.return_type: IType = return_type
         self.is_public: bool = is_public
 
@@ -29,6 +35,7 @@ class Callable(IExpression, ABC):
 
         self.init_address: Optional[int] = None
         self.init_bytecode: Optional[VMCode] = None
+        self.init_defaults_bytecode: Optional[VMCode] = None
         self.end_bytecode: Optional[VMCode] = None
 
     @property
@@ -45,17 +52,29 @@ class Callable(IExpression, ABC):
         return self.args.copy()
 
     @property
+    def args_without_default(self) -> Dict[str, Variable]:
+        num_defaults = len(self.defaults)
+        if num_defaults > 0:
+            return {key: self.args[key] for key in list(self.args.keys())[:-num_defaults]}
+        return self.args
+
+    @property
     def start_address(self) -> Optional[int]:
         """
         Gets the address where this method starts in the bytecode
 
         :return: the first address of the method
         """
-        if self.init_bytecode is None:
+        if self.init_bytecode is None and self.init_defaults_bytecode is None:
             return self.init_address
         else:
             from boa3.compiler.vmcodemapping import VMCodeMapping
             return VMCodeMapping.instance().get_start_address(self.init_bytecode)
+
+    @property
+    def start_bytecode(self) -> Optional[VMCode]:
+        return (self.init_defaults_bytecode if len(self.defaults) > 0
+                else self.init_bytecode)
 
     @property
     def end_address(self) -> Optional[int]:

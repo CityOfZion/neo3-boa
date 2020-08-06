@@ -11,4 +11,4 @@ class TriggerMethod(InteropMethod):
         identifier = 'trigger'
         syscall = 'System.Runtime.GetTrigger'
         args: Dict[str, Variable] = {}
-        super().__init__(identifier, syscall, args, trigger_type)
+        super().__init__(identifier, syscall, args, return_type=trigger_type)

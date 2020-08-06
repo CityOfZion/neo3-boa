@@ -11,4 +11,4 @@ class LogMethod(InteropMethod):
         identifier = 'log'
         syscall = 'System.Runtime.Log'
         args: Dict[str, Variable] = {'message': Variable(Type.str)}
-        super().__init__(identifier, syscall, args, Type.none)
+        super().__init__(identifier, syscall, args, return_type=Type.none)
