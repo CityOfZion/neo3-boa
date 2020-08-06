@@ -130,7 +130,6 @@ class FileGenerator:
 
         :return: a dictionary with the abi methods
         """
-        from boa3.compiler.vmcodemapping import VMCodeMapping
         methods = []
         for method_id, method in self._public_methods.items():
             logging.info("'{0}' method included in the ABI".format(method_id))
