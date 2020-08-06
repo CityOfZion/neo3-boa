@@ -1,11 +1,11 @@
 from typing import Any
 
-from boa3.model.type.itype import IType
+from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItemType import StackItemType
 
 
-class IntType(IType):
+class IntType(PrimitiveType):
     """
     A class used to represent Python int type
     """

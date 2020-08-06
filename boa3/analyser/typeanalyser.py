@@ -100,6 +100,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return symbols
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+        if not isinstance(symbol_id, str):
+            return Variable(self.get_type(symbol_id))
         if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
             return self._current_method.symbols[symbol_id]
