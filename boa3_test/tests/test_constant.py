@@ -306,3 +306,42 @@ class TestConstant(BoaTest):
         output = CodeGenerator.generate_code(analyser)
 
         self.assertEqual(expected_output, output)
+
+    def test_integer_script_hash(self):
+        from boa3.neo import cryptography, to_script_hash
+
+        input = Integer(123).to_byte_array()
+        expected_output = cryptography.hash160(input)
+        output = to_script_hash(input)
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_script_hash(self):
+        from boa3.neo import cryptography, to_script_hash
+
+        input = String('123').to_bytes()
+        expected_output = cryptography.hash160(input)
+        output = to_script_hash(input)
+
+        self.assertEqual(expected_output, output)
+
+    def test_bytes_script_hash(self):
+        from boa3.neo import cryptography, to_script_hash
+
+        input = b'\x01\x02\x03'
+        expected_output = cryptography.hash160(input)
+        output = to_script_hash(input)
+
+        self.assertEqual(expected_output, output)
+
+    def test_address_script_hash(self):
+        from base58 import b58decode
+        from boa3.neo import cryptography, to_script_hash
+
+        input = String('Nd7eAuHsKvvzHzSPyuJQALcYCcUrcwvm5W').to_bytes()
+        expected_output = b58decode(input)[1:21]
+        wrong_output = cryptography.hash160(input)
+        output = to_script_hash(input)
+
+        self.assertNotEqual(wrong_output, output)
+        self.assertEqual(expected_output, output)
