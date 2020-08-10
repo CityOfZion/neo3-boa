@@ -534,16 +534,16 @@ class TestInterop(BoaTest):
     def test_hash160_str(self):
         string = String('test').to_bytes()
         expected_output = (
-                Opcode.PUSHDATA1
-                + Integer(len(string)).to_byte_array(min_length=1)
-                + string
-                + Opcode.SYSCALL
-                + Interop.Sha256.interop_method_hash
-                + Opcode.SYSCALL
-                + Interop.Ripemd160.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.Sha256.interop_method_hash
+            + Opcode.SYSCALL
+            + Interop.Ripemd160.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/Hash160Str.py' % self.dirname
@@ -585,3 +585,89 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/Hash256Str.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_base58_encode(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.Base58Encode.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/Base58Encode.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        import base58
+        engine = TestEngine(self.dirname)
+        expected_result = base58.b58encode('unit test')
+        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(expected_result, result)
+
+        expected_result = base58.b58encode('')
+        result = self.run_smart_contract(engine, path, 'Main', '')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(expected_result, result)
+
+        long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
+                       'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                       'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                       'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                       'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                       'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                       'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                       'est enim dictum massa, id aliquet justo magna in purus.')
+        expected_result = base58.b58encode(long_string)
+        result = self.run_smart_contract(engine, path, 'Main', long_string)
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(expected_result, result)
+
+    def test_base58_encode_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/Base58EncodeMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_base58_decode(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.Base58Decode.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/Base58Decode.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        import base58
+        engine = TestEngine(self.dirname)
+        arg = base58.b58encode('unit test')
+        result = self.run_smart_contract(engine, path, 'Main', arg)
+        self.assertEqual('unit test', result)
+
+        arg = base58.b58encode('')
+        result = self.run_smart_contract(engine, path, 'Main', arg)
+        self.assertEqual('', result)
+
+        long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
+                       'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                       'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                       'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                       'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                       'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                       'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                       'est enim dictum massa, id aliquet justo magna in purus.')
+        arg = base58.b58encode(long_string)
+        result = self.run_smart_contract(engine, path, 'Main', arg)
+        self.assertEqual(long_string, result)
+
+    def test_base58_decode_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/Base58DecodeMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

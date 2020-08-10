@@ -4,10 +4,11 @@ from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.variable import Variable
 
 
-class Sha256Method(InteropMethod):
+class Base58EncodeMethod(InteropMethod):
+
     def __init__(self):
         from boa3.model.type.type import Type
-        identifier = 'sha256'
-        syscall = 'Neo.Crypto.SHA256'
-        args: Dict[str, Variable] = {'key': Variable(Type.any)}
+        identifier = 'base58_encode'
+        syscall = 'System.Binary.Base58Encode'
+        args: Dict[str, Variable] = {'key': Variable(Type.str)}
         super().__init__(identifier, syscall, args, return_type=Type.bytes)
