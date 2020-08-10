@@ -111,7 +111,8 @@ class Builtin:
                                              NewEvent,
                                              Event,
                                              Metadata,
-                                             NeoMetadataType
+                                             NeoMetadataType,
+                                             ScriptHash
                                              ]
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = \
