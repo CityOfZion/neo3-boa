@@ -8,3 +8,5 @@ Events==0.3
 mmh3==2.5.1
 mpmath==1.1.0
 pycodestyle==2.5.0
+Sphinx==1.6.4
+sphinx-rtd-theme==0.2.4

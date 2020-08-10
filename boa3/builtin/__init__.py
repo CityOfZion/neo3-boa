@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 
 def event(*args):
@@ -56,8 +56,6 @@ class NeoMetadata:
     :ivar description: the smart contract description. None by default;
     :type description: str or None
     """
-
-    from typing import Any, Dict
 
     def __init__(self):
         from typing import Optional
