@@ -10,7 +10,7 @@ class TestAny(BoaTest):
 
     def test_any_variable_assignments(self):
         two = String('2').to_bytes()
-        path = '%s/boa3_test/example/any_test/AnyVariableAssignments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/AnyVariableAssignments.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -36,12 +36,12 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_variable_assignment_with_any(self):
-        path = '%s/boa3_test/example/any_test/VariableAssignmentWithAny.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/VariableAssignmentWithAny.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_any_list(self):
         ok = String('ok').to_bytes()
-        path = '%s/boa3_test/example/any_test/AnyList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/AnyList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -62,7 +62,7 @@ class TestAny(BoaTest):
 
     def test_any_tuple(self):
         ok = String('ok').to_bytes()
-        path = '%s/boa3_test/example/any_test/AnyTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/AnyTuple.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -82,7 +82,7 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_any_operation(self):
-        path = '%s/boa3_test/example/any_test/OperationWithAny.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/OperationWithAny.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_function_any_param(self):
@@ -140,7 +140,7 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/any_test/FunctionAnyParam.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/FunctionAnyParam.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -192,16 +192,16 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/any_test/AnySequenceAssignments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/AnySequenceAssignments.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_int_sequence_any_assignments(self):
-        path = '%s/boa3_test/example/any_test/IntSequenceAnyAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/IntSequenceAnyAssignment.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_str_sequence_any_assignments(self):
-        path = '%s/boa3_test/example/any_test/StrSequenceAnyAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/StrSequenceAnyAssignment.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_str_sequence_str_assignment(self):
@@ -218,7 +218,7 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/any_test/StrSequenceStrAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/StrSequenceStrAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -265,7 +265,7 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/any_test/SequenceOfAnySequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/SequenceOfAnySequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -295,10 +295,10 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/any_test/SequenceOfIntSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/SequenceOfIntSequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_sequence_of_int_sequence_fail(self):
-        path = '%s/boa3_test/example/any_test/SequenceOfAnyIntSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/any_test/SequenceOfAnyIntSequence.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

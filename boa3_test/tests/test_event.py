@@ -22,7 +22,7 @@ class TestEvent(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/event_test/EventWithoutArguments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithoutArguments.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -41,7 +41,7 @@ class TestEvent(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/event_test/EventWithArgument.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithArgument.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -60,14 +60,14 @@ class TestEvent(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/event_test/EventWithName.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithName.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_event_with_return(self):
-        path = '%s/boa3_test/example/event_test/EventWithoutTypes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithoutTypes.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_event_call_mismatched_type(self):
-        path = '%s/boa3_test/example/event_test/MismatchedTypeCallEvent.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/MismatchedTypeCallEvent.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

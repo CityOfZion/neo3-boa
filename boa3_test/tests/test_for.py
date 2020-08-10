@@ -57,7 +57,7 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/for_test/TupleCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/TupleCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -117,7 +117,7 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/for_test/StringCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/StringCondition.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -171,16 +171,16 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/for_test/VariableCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/VariableCondition.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_for_mismatched_type_condition(self):
-        path = '%s/boa3_test/example/for_test/MismatchedTypeCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/MismatchedTypeCondition.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_for_no_condition(self):
-        path = '%s/boa3_test/example/for_test/NoCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/NoCondition.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -266,7 +266,7 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/for_test/NestedFor.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/NestedFor.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -325,7 +325,7 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/for_test/ForElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/for_test/ForElse.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)

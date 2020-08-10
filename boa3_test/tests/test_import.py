@@ -8,7 +8,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestImport(BoaTest):
 
     def test_import_typing(self):
-        path = '%s/boa3_test/example/import_test/ImportTyping.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/ImportTyping.py' % self.dirname
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -22,7 +22,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_import_typing_with_alias(self):
-        path = '%s/boa3_test/example/import_test/ImportTypingWithAlias.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/ImportTypingWithAlias.py' % self.dirname
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -36,7 +36,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_import_user_module(self):
-        path = '%s/boa3_test/example/import_test/ImportUserModule.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/ImportUserModule.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -59,7 +59,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_import_user_module_with_alias(self):
-        path = '%s/boa3_test/example/import_test/ImportUserModuleWithAlias.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/ImportUserModuleWithAlias.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -99,7 +99,7 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/import_test/FromImportWithGlobalVariables.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportWithGlobalVariables.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -120,16 +120,16 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/import_test/FromImportVariable.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportVariable.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_typing_python_library(self):
-        path = '%s/boa3_test/example/import_test/ImportPythonLib.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/ImportPythonLib.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_from_typing_import(self):
-        path = '%s/boa3_test/example/import_test/FromImportTyping.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportTyping.py' % self.dirname
 
         expected_output = (
             Opcode.NEWARRAY0
@@ -143,7 +143,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_from_typing_import_with_alias(self):
-        path = '%s/boa3_test/example/import_test/FromImportTypingWithAlias.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportTypingWithAlias.py' % self.dirname
 
         expected_output = (
             Opcode.NEWARRAY0
@@ -153,11 +153,11 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_from_typing_import_not_supported_type(self):
-        path = '%s/boa3_test/example/import_test/FromImportTypingNotImplementedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportTypingNotImplementedType.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_from_import_user_module(self):
-        path = '%s/boa3_test/example/import_test/FromImportUserModule.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportUserModule.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -176,7 +176,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_from_import_user_module_with_alias(self):
-        path = '%s/boa3_test/example/import_test/FromImportUserModuleWithAlias.py' % self.dirname
+        path = '%s/boa3_test/test_sc/import_test/FromImportUserModuleWithAlias.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature

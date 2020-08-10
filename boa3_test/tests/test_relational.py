@@ -17,7 +17,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumEquality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumEquality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -33,13 +33,13 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumInequality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumInequality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_number_inequality_operation_2(self):
-        path = '%s/boa3_test/example/relational_test/NumInequalityPython2.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumInequalityPython2.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -55,7 +55,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumLessThan.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumLessThan.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -71,7 +71,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumLessOrEqual.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumLessOrEqual.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -87,7 +87,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumGreaterThan.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumGreaterThan.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -103,13 +103,13 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumGreaterOrEqual.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumGreaterOrEqual.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_identity_operation(self):
-        path = '%s/boa3_test/example/relational_test/NumIdentity.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumIdentity.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_boolean_equality_operation(self):
@@ -123,7 +123,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/BoolEquality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/BoolEquality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -139,7 +139,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/BoolInequality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/BoolInequality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -159,7 +159,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/NumRange.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/NumRange.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -175,7 +175,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/StrEquality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/StrEquality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -191,7 +191,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/StrInequality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/StrInequality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -207,7 +207,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/StrLessThan.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/StrLessThan.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -223,7 +223,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/StrLessOrEqual.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/StrLessOrEqual.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -239,7 +239,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/StrGreaterThan.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/StrGreaterThan.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -255,7 +255,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/StrGreaterOrEqual.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/StrGreaterOrEqual.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -271,7 +271,7 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/MixedEquality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MixedEquality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -287,23 +287,23 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/MixedInequality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MixedInequality.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_mixed_less_than_operation(self):
-        path = '%s/boa3_test/example/relational_test/MixedLessThan.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MixedLessThan.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_less_or_equal_than_operation(self):
-        path = '%s/boa3_test/example/relational_test/MixedLessOrEqual.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MixedLessOrEqual.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_greater_than_operation(self):
-        path = '%s/boa3_test/example/relational_test/MixedGreaterThan.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MixedGreaterThan.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_greater_or_equal_than_operation(self):
-        path = '%s/boa3_test/example/relational_test/MixedGreaterOrEqual.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MixedGreaterOrEqual.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

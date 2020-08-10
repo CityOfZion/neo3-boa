@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from boa3_test.example.import_test.FromImportTyping import EmptyList
+from boa3_test.test_sc.import_test.FromImportTyping import EmptyList
 
 
 def Main():

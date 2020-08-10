@@ -22,7 +22,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/CheckWitness.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CheckWitness.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -37,12 +37,12 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/CheckWitnessImportedAs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CheckWitnessImportedAs.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_check_witness_mismatched_type(self):
-        path = '%s/boa3_test/example/interop_test/CheckWitnessMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CheckWitnessMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_notify_str(self):
@@ -63,7 +63,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/NotifyStr.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/NotifyStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -82,7 +82,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/NotifyInt.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/NotifyInt.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -101,7 +101,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/NotifyBool.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/NotifyBool.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -120,7 +120,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/NotifyNone.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/NotifyNone.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -144,12 +144,12 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/NotifySequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/NotifySequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_log_mismatched_type(self):
-        path = '%s/boa3_test/example/interop_test/LogMismatchedValueInt.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/LogMismatchedValueInt.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_log_str(self):
@@ -164,7 +164,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/LogStr.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/LogStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -175,7 +175,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/Trigger.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/Trigger.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -193,7 +193,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/TriggerApplication.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/TriggerApplication.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -211,7 +211,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/TriggerVerification.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/TriggerVerification.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -224,6 +224,6 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/interop_test/CallingScriptHash.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CallingScriptHash.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
