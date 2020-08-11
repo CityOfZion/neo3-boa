@@ -1,4 +1,6 @@
-from boa3.builtin import event, metadata, NeoMetadata
+from boa3.builtin import metadata, NeoMetadata, public
+from boa3.builtin.contract import Nep5TransferEvent
+from boa3.builtin.interop.execution import calling_script_hash
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.interop.storage import delete, get, put
 
@@ -45,21 +47,7 @@ TOKEN_TOTAL_SUPPLY = 10_000_000 * 100_000_000  # 10m total supply * 10^8 (decima
 # -------------------------------------------
 
 
-@event
-def on_transfer(from_addr: bytes, to_addr: bytes, amount: int):
-    """
-    Triggers the `transfer` event
-
-    Must be triggered when tokens are transferred, including zero value transfers.
-
-    :param from_addr: the address to transfer from
-    :type from_addr: bytes
-    :param to_addr: the address to transfer to
-    :type to_addr: bytes
-    :param amount: the amount of NEP5 tokens to transfer
-    :type amount: int
-    """
-    pass
+on_transfer = Nep5TransferEvent
 
 
 # -------------------------------------------
@@ -67,6 +55,7 @@ def on_transfer(from_addr: bytes, to_addr: bytes, amount: int):
 # -------------------------------------------
 
 
+@public
 def verify() -> bool:
     """
     When this contract address is included in the transaction signature,
@@ -78,6 +67,7 @@ def verify() -> bool:
     return check_witness(OWNER)
 
 
+@public
 def name() -> str:
     """
     Gets the name of the token.
@@ -89,6 +79,7 @@ def name() -> str:
     return TOKEN_NAME
 
 
+@public
 def symbol() -> str:
     """
     Gets the symbols of the token.
@@ -102,6 +93,7 @@ def symbol() -> str:
     return TOKEN_SYMBOL
 
 
+@public
 def decimals() -> int:
     """
     Gets the amount of decimals used by the token.
@@ -114,6 +106,7 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
+@public
 def totalSupply() -> int:
     """
     Gets the total token supply deployed in the system.
@@ -126,6 +119,7 @@ def totalSupply() -> int:
     return TOKEN_TOTAL_SUPPLY
 
 
+@public
 def balanceOf(account: bytes) -> int:
     """
     Get the current balance of an address
@@ -139,9 +133,10 @@ def balanceOf(account: bytes) -> int:
     :raise AssertionError: raised if `account` length is not 20.
     """
     assert len(account) == 20
-    return int(get(account))
+    return get(account).to_int()
 
 
+@public
 def transfer(from_addr: bytes, to_addr: bytes, amount: int) -> bool:
     """
     Transfers a specified amount of NEP5 tokens from one account to another
@@ -165,15 +160,19 @@ def transfer(from_addr: bytes, to_addr: bytes, amount: int) -> bool:
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = int(get(from_addr))
+    from_balance = get(from_addr).to_int()
     if from_balance < amount:
         return False
-    # check if from is the same script hash of the caller
-    # if not:
-    if not check_witness(from_addr):
-        return False
+
+    # The function should check whether the from address equals the caller contract hash.
+    # If so, the transfer should be processed;
+    # If not, the function should use the check_witness to verify the transfer.
+    if from_addr != calling_script_hash:
+        if not check_witness(from_addr):
+            return False
 
     # if the `to_addr` is a deployed contract, the function should check the payable flag of this contract
+    # TODO: include example when objects are implemented
 
     if from_addr == to_addr:
         # transfer to self
@@ -184,7 +183,7 @@ def transfer(from_addr: bytes, to_addr: bytes, amount: int) -> bool:
     else:
         put(from_addr, from_balance - amount)
 
-    to_balance = int(get(to_addr))
+    to_balance = get(to_addr).to_int()
     put(to_addr, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event, and must return true
