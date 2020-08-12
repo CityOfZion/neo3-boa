@@ -4,6 +4,7 @@ import os
 import sys
 
 from boa3.boa3 import Boa3
+from boa3.exception.NotLoadedException import NotLoadedException
 
 
 def main():
@@ -21,6 +22,8 @@ def main():
     try:
         Boa3.compile_and_save(args.input)
         logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
+    except NotLoadedException as e:
+        logging.error("Could not compile")
     except Exception as e:
         logging.exception(e)
 
