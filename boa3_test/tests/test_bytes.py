@@ -87,6 +87,48 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/example/bytes_test/BytesReverse.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
+    def test_bytes_to_int(self):
+        data = b'\x01\x02'
+        expected_output = (
+            Opcode.PUSHDATA1    # b'\x01\x02'
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # b'\x01\x02'.to_int()
+            + Type.int.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytesToInt.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bytes_to_int_with_builtin(self):
+        data = b'\x01\x02'
+        expected_output = (
+            Opcode.PUSHDATA1    # b'\x01\x02'
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # bytes.to_int(b'\x01\x02')
+            + Type.int.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytesToIntWithBuiltin.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bytes_to_int_mismatched_types(self):
+        path = '%s/boa3_test/example/bytes_test/BytesToIntWithBuiltinMismatchedTypes.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_bytes_to_int_with_byte_array_builtin(self):
+        path = '%s/boa3_test/example/bytes_test/BytesToIntWithBytearrayBuiltin.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -421,3 +463,54 @@ class TestBytes(BoaTest):
     def test_byte_array_extend(self):
         path = '%s/boa3_test/example/bytes_test/BytearrayExtend.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_byte_array_to_int(self):
+        data = b'\x01\x02'
+        expected_output = (
+            Opcode.PUSHDATA1    # bytearray(b'\x01\x02')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # bytearray(b'\x01\x02').to_int()
+            + Type.int.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytearrayToInt.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_byte_array_to_int_with_builtin(self):
+        data = b'\x01\x02'
+        expected_output = (
+            Opcode.PUSHDATA1    # bytearray(b'\x01\x02')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # bytearray.to_int(bytearray(b'\x01\x02'))
+            + Type.int.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytearrayToIntWithBuiltin.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_byte_array_to_int_with_bytes_builtin(self):
+        data = b'\x01\x02'
+        expected_output = (
+            Opcode.PUSHDATA1    # bytearray(b'\x01\x02')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # bytes.to_int(bytearray(b'\x01\x02'))
+            + Type.int.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytearrayToIntWithBytesBuiltin.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)

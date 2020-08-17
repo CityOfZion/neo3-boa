@@ -17,7 +17,7 @@ def to_script_hash(data_bytes: bytes) -> bytes:
         if len(base58_decoded) < SIZE_OF_INT160:
             raise AttributeError
         return bytes(base58_decoded[:SIZE_OF_INT160])
-    except:
+    except BaseException:
         return cryptography.hash160(data_bytes)
 
 
