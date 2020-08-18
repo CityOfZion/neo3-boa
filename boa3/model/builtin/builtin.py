@@ -7,6 +7,7 @@ from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
+from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.decorator.eventdecorator import EventDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
@@ -54,6 +55,7 @@ class Builtin:
 
     # custom class methods
     ConvertToInt = ToIntMethod
+    ConvertToBytes = ToBytesMethod
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 ScriptHash,
@@ -64,7 +66,8 @@ class Builtin:
                                                 SequenceReverse,
                                                 DictKeys,
                                                 DictValues,
-                                                ConvertToInt
+                                                ConvertToInt,
+                                                ConvertToBytes
                                                 ]
 
     @classmethod
