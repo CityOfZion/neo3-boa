@@ -7,6 +7,7 @@ from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
+from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.decorator.eventdecorator import EventDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
@@ -51,6 +52,9 @@ class Builtin:
     DictKeys = MapKeysMethod()
     DictValues = MapValuesMethod()
 
+    # custom class methods
+    ConvertToInt = ToIntMethod
+
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 ScriptHash,
                                                 ByteArray,
@@ -59,7 +63,9 @@ class Builtin:
                                                 SequenceExtend,
                                                 SequenceReverse,
                                                 DictKeys,
-                                                DictValues]
+                                                DictValues,
+                                                ConvertToInt
+                                                ]
 
     @classmethod
     def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
@@ -73,7 +79,8 @@ class Builtin:
     _boa_builtins: List[IdentifiedSymbol] = [Public,
                                              Event,
                                              Metadata,
-                                             NeoMetadataType]
+                                             NeoMetadataType
+                                             ]
 
     @classmethod
     def boa_symbols(cls) -> Dict[str, IdentifiedSymbol]:

@@ -846,6 +846,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 call.args.insert(0, arg0)
             if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
                 self_type: IType = self.get_type(call.args[0])
+                caller = self.get_symbol(arg0_identifier)
+                if isinstance(caller, IType) and not caller.is_type_of(self_type):
+                    self_type = caller
                 callable_target = callable_target.build(self_type)
 
         if not isinstance(callable_target, Callable):
