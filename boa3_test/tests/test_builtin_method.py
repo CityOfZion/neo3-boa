@@ -538,3 +538,45 @@ class TestVariable(BoaTest):
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     # endregion
+
+    # region TestToBytes
+
+    def test_int_to_bytes(self):
+        value = Integer(123).to_byte_array()
+        expected_output = (
+            Opcode.PUSHDATA1        # (123).to_bytes()
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/built_in_methods_test/IntToBytes.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_int_to_bytes_with_builtin(self):
+        value = Integer(123).to_byte_array()
+        expected_output = (
+            Opcode.PUSHDATA1        # int.to_bytes(123)
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/built_in_methods_test/IntToBytesWithBuiltin.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_to_bytes_mismatched_types(self):
+        path = '%s/boa3_test/example/built_in_methods_test/ToBytesMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    # endregion

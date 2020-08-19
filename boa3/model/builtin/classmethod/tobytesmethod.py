@@ -6,19 +6,20 @@ from boa3.model.expression import IExpression
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
+from boa3.model.type.primitive.inttype import IntType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class ToIntMethod(IBuiltinMethod, ABC):
+class ToBytesMethod(IBuiltinMethod, ABC):
     def __init__(self, self_type: IType):
-        identifier = 'to_int'
+        identifier = 'to_bytes'
         if isinstance(self_type, IdentifiedSymbol):
             identifier = '-{0}_{1}'.format(self_type.identifier, identifier)
 
         args: Dict[str, Variable] = {'self': Variable(self_type)}
         from boa3.model.type.type import Type
-        super().__init__(identifier, args, return_type=Type.int)
+        super().__init__(identifier, args, return_type=Type.bytes)
 
     @property
     def _arg_self(self) -> Variable:
@@ -37,7 +38,7 @@ class ToIntMethod(IBuiltinMethod, ABC):
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.type import Type
         return [
-            (Opcode.CONVERT, Type.int.stack_item)
+            (Opcode.CONVERT, Type.bytes.stack_item)
         ]
 
     def push_self_first(self) -> bool:
@@ -52,30 +53,30 @@ class ToIntMethod(IBuiltinMethod, ABC):
         return None
 
 
-class _ConvertToIntMethod(ToIntMethod):
+class _ConvertToBytesMethod(ToBytesMethod):
     def __init__(self):
         super().__init__(None)
 
     def build(self, value: Any):
-        if isinstance(value, BytesType):
-            return BytesToIntMethod(value)
-        # if it is not a valid type, show mismatched type with bytes
-        return BytesToIntMethod()
+        if isinstance(value, IntType):
+            return IntToBytesMethod(value)
+        # if it is not a valid type, show mismatched type with int
+        return IntToBytesMethod()
 
 
-ToInt = _ConvertToIntMethod()
+ToBytes = _ConvertToBytesMethod()
 
 
-class BytesToIntMethod(ToIntMethod):
+class IntToBytesMethod(ToBytesMethod):
     def __init__(self, self_type: IType = None):
-        if not isinstance(self_type, BytesType):
+        if not isinstance(self_type, IntType):
             from boa3.model.type.type import Type
-            self_type = Type.bytes
+            self_type = Type.int
         super().__init__(self_type)
 
     def build(self, value: Any):
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, BytesType):
-            return BytesToIntMethod(value)
+            return IntToBytesMethod(value)
         return super().build(value)
