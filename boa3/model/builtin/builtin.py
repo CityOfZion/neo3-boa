@@ -9,6 +9,7 @@ from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
+from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
 from boa3.model.builtin.decorator.eventdecorator import EventDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
@@ -54,8 +55,9 @@ class Builtin:
     DictValues = MapValuesMethod()
 
     # custom class methods
-    ConvertToInt = ToIntMethod
     ConvertToBytes = ToBytesMethod
+    ConvertToInt = ToIntMethod
+    ConvertToStr = ToStrMethod
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 ScriptHash,
@@ -66,8 +68,9 @@ class Builtin:
                                                 SequenceReverse,
                                                 DictKeys,
                                                 DictValues,
+                                                ConvertToBytes,
                                                 ConvertToInt,
-                                                ConvertToBytes
+                                                ConvertToStr
                                                 ]
 
     @classmethod
