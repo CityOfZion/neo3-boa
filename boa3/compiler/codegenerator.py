@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.vmcodemapping import VMCodeMapping
@@ -12,6 +12,7 @@ from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
+from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.VMCode import VMCode
@@ -238,7 +239,7 @@ class CodeGenerator:
         :return: the address of the while first opcode
         """
         # it will be updated when the while ends
-        self._insert_jump(OpcodeInfo.JMP, 0)
+        self._insert_jump(OpcodeInfo.JMP)
         return self.last_code_start_address
 
     def convert_end_while(self, start_address: int, test_address: int):
@@ -299,7 +300,7 @@ class CodeGenerator:
         :return: the address of the if first opcode
         """
         # it will be updated when the if ends
-        self._insert_jump(OpcodeInfo.JMPIFNOT, 0)
+        self._insert_jump(OpcodeInfo.JMPIFNOT)
         return VMCodeMapping.instance().get_start_address(self.last_code)
 
     def convert_begin_else(self, start_address: int) -> int:
@@ -310,7 +311,7 @@ class CodeGenerator:
         :return: the address of the if else first opcode
         """
         # it will be updated when the if ends
-        self._insert_jump(OpcodeInfo.JMP, 0)
+        self._insert_jump(OpcodeInfo.JMP)
 
         # updates the begin jmp with the target address
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
@@ -337,7 +338,7 @@ class CodeGenerator:
         self.convert_literal(-1)
 
         jmp_address = VMCodeMapping.instance().bytecode_size
-        self._insert_jump(OpcodeInfo.JMPNE, 0)     # if index < 0
+        self._insert_jump(OpcodeInfo.JMPNE)     # if index < 0
 
         self.duplicate_stack_item(2)                    # index += len(array)
         self.convert_builtin_method_call(Builtin.Len)
@@ -765,7 +766,7 @@ class CodeGenerator:
             self.__insert1(op_info, data)
 
         if store_opcode is not None:
-            self._insert_jump(OpcodeInfo.JMP, 0)
+            self._insert_jump(OpcodeInfo.JMP)
             jump = self.last_code_start_address
             self.__insert1(store_opcode, store_data)
             self._update_jump(jump, VMCodeMapping.instance().bytecode_size)
@@ -815,6 +816,33 @@ class CodeGenerator:
         for op in range(operation.op_on_stack):
             self._stack.pop()
         self._stack.append(operation.result)
+
+    def convert_assert(self):
+        asserted_type = self._stack[-1] if len(self._stack) > 0 else Type.any
+
+        if not isinstance(asserted_type, PrimitiveType):
+            len_pos = VMCodeMapping.instance().bytecode_size
+            # if the value is an array, a map or a struct, asserts it is not empty
+            self.convert_builtin_method_call(Builtin.Len)
+            len_code = VMCodeMapping.instance().code_map[len_pos]
+
+            if asserted_type is Type.any:
+                # need to check in runtime
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.ISTYPE, StackItemType.Array)
+                self._insert_jump(OpcodeInfo.JMPIF, len_code)
+
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.ISTYPE, StackItemType.Map)
+                self._insert_jump(OpcodeInfo.JMPIF, len_code)
+
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.ISTYPE, StackItemType.Struct)
+                self._insert_jump(OpcodeInfo.JMPIFNOT, 2)
+
+                VMCodeMapping.instance().move_to_end(len_pos, len_pos)
+
+        self.__insert1(OpcodeInfo.ASSERT)
 
     def __insert1(self, op_info: OpcodeInformation, data: bytes = bytes()):
         """
@@ -891,13 +919,16 @@ class CodeGenerator:
                     code.set_target(vm_code)
                 self._missing_target.pop(target_address)
 
-    def _insert_jump(self, op_info: OpcodeInformation, jump_to: int):
+    def _insert_jump(self, op_info: OpcodeInformation, jump_to: Union[int, VMCode] = 0):
         """
         Inserts a jump opcode into the bytecode
 
         :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
         """
+        if isinstance(jump_to, VMCode):
+            jump_to = VMCodeMapping.instance().get_start_address(jump_to) - VMCodeMapping.instance().bytecode_size
+
         if self.last_code.opcode is not Opcode.RET:
             data: bytes = self._get_jump_data(op_info, jump_to)
             self.__insert1(op_info, data)

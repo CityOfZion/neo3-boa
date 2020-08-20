@@ -444,6 +444,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         self.generator.convert_end_if(start_addr)
 
+    def visit_Assert(self, assert_node: ast.Assert):
+        """
+        Visitor of the assert node
+
+        :param assert_node: the python ast assert node
+        """
+        self.visit_to_generate(assert_node.test)
+        self.generator.convert_assert()
+
     def visit_Call(self, call: ast.Call):
         """
         Visitor of a function call node
