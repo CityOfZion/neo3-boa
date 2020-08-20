@@ -214,3 +214,16 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/example/interop_test/TriggerVerification.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_get_calling_script_hash(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.CallingScriptHash.getter.interop_method_hash
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/example/interop_test/CallingScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)

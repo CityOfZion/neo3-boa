@@ -10,6 +10,7 @@ from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
@@ -665,6 +666,10 @@ class CodeGenerator:
         """
         symbol = self.get_symbol(symbol_id)
         if symbol is not Type.none:
+            if isinstance(symbol, Property):
+                symbol = symbol.getter
+                params_addresses = []
+
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id, symbol)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:

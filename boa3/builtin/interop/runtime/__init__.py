@@ -62,3 +62,6 @@ def is_verification_trigger() -> bool:
     :rtype: bool
     """
     pass
+
+
+calling_script_hash: bytes
