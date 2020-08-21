@@ -162,7 +162,7 @@ class VMCodeMapping:
                 relative = Integer.from_bytes(code.data)
                 absolute = address + relative
                 if absolute in self.code_map:
-                    code.set_target = self.code_map[absolute]
+                    code.set_target(self.code_map[absolute])
 
     def _update_larger_codes(self):
         """
