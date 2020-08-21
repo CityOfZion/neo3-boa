@@ -1,9 +1,11 @@
-from boa3.builtin import event
+from boa3.builtin import CreateNewEvent
 
 
-@event
-def Event(a: int):
-    pass
+Event = CreateNewEvent(
+    [
+        ('a', int)
+    ]
+)
 
 
 def Main():

@@ -1,7 +1,7 @@
 from boa3.builtin import CreateNewEvent
 
 
-Event = CreateNewEvent()
+Event = CreateNewEvent([('a',)])
 
 
 def Main():

@@ -1,14 +1,4 @@
-from typing import Any, Dict
-
-
-def event(*args):
-    """
-    This decorator identifies a method that specifies a Neo event.
-    The method's body is ignored when using this decorator and the function must have no return.
-    """
-    def event_wrapper():
-        pass
-    return event_wrapper
+from typing import Any, Dict, List, Tuple
 
 
 def public(*args):
@@ -37,6 +27,22 @@ def to_script_hash(data_bytes: Any) -> bytes:
     :param data_bytes: data to hash.
     :return: the script hash of the data
     :rtype: bytes
+    """
+    pass
+
+
+def Event(*args, **kwargs):
+    pass
+
+
+def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '') -> Event:
+    """
+    Creates a new event.
+
+    :param arguments: the list of the events args' names and types
+    :param event_name: custom name of the event. It's filled with the variable name if not specified.
+    :return: the new event
+    :rtype: Event
     """
     pass
 
