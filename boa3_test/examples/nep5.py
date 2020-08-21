@@ -132,7 +132,10 @@ def balanceOf(account: bytes) -> int:
     :raise AssertionError: raised if `account` length is not 20.
     """
     assert len(account) == 20
-    return get(account).to_int()
+    balance = get(account)
+    if balance is None:
+        return 0
+    return balance.to_int()
 
 
 @public
@@ -160,6 +163,8 @@ def transfer(from_address: bytes, to_address: bytes, amount: int) -> bool:
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
     from_balance = get(from_address).to_int()
+    if from_balance is None:
+        from_balance = 0
     if from_balance < amount:
         return False
 
@@ -183,6 +188,8 @@ def transfer(from_address: bytes, to_address: bytes, amount: int) -> bool:
         put(from_address, from_balance - amount)
 
     to_balance = get(to_address).to_int()
+    if to_balance is None:
+        to_balance = 0
     put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event, and must return true
