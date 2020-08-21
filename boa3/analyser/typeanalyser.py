@@ -861,6 +861,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
             )
         else:
+            if callable_target is Builtin.NewEvent:
+                return callable_target.return_type
             # TODO: change when kwargs is implemented
             if len(call.keywords) > 0:
                 raise NotImplementedError

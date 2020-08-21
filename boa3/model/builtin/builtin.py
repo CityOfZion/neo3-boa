@@ -10,12 +10,12 @@ from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
-from boa3.model.builtin.decorator.eventdecorator import EventDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
+from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
 from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
@@ -42,6 +42,7 @@ class Builtin:
     # builtin method
     Len = LenMethod()
     ScriptHash = ScriptHashMethod()
+    NewEvent = CreateEventMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -79,10 +80,13 @@ class Builtin:
 
     # builtin decorator
     Public = PublicDecorator()
-    Event = EventDecorator()
     Metadata = MetadataDecorator()
 
+    # boa builtin type
+    Event = EventType
+
     _boa_builtins: List[IdentifiedSymbol] = [Public,
+                                             NewEvent,
                                              Event,
                                              Metadata,
                                              NeoMetadataType

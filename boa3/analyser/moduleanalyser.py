@@ -40,6 +40,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
         self._current_method: Method = None
+        self._current_event: Event = None
 
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
@@ -263,8 +264,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 """
                 verify_id: str = 'verify'
                 if (verify_id not in self.global_symbols  # couldn't find verify
-                    or not isinstance(self.global_symbols[verify_id], Method)  # verify is not a function
-                    or self.global_symbols[verify_id].origin is None  # verify is not a user function
+                        or not isinstance(self.global_symbols[verify_id], Method)  # verify is not a function
+                        or self.global_symbols[verify_id].origin is None  # verify is not a user function
                     ):
                     self._log_error(
                         CompilerError.MetadataImplementationMissing(
@@ -361,8 +362,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 function_stmts.append(stmt)
             elif not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant)):
                 # don't evaluate constant expression - for example: string for documentation
-                global_stmts.append(stmt)
-                self.visit(stmt)
+                if self.visit(stmt) is not Builtin.Event:
+                    global_stmts.append(stmt)
 
         module.body = global_stmts + function_stmts
         for var_id, var in mod.variables.items():
@@ -413,27 +414,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._read_metadata_object(function)
             return Builtin.Metadata
 
-        if Builtin.Event in fun_decorators:
-            event = Event(args=fun_args, origin_node=function, is_public=True)
-            if len(function.body) > 0 and not isinstance(function.body[0], ast.Pass):
-                self._log_warning(
-                    CompilerWarning.UnreachableCode(line=function.body[0].lineno,
-                                                    col=function.body[0].col_offset)
-                )
-            self.__include_callable(function.name, event)
-        else:
-            method = Method(args=fun_args, defaults=function.args.defaults, return_type=fun_return,
-                            origin_node=function, is_public=Builtin.Public in fun_decorators)
-            self._current_method = method
+        method = Method(args=fun_args, defaults=function.args.defaults, return_type=fun_return,
+                        origin_node=function, is_public=Builtin.Public in fun_decorators)
+        self._current_method = method
 
-            # don't evaluate constant expression - for example: string for documentation
-            function.body = [stmt for stmt in function.body
-                             if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
-            for stmt in function.body:
-                self.visit(stmt)
+        # don't evaluate constant expression - for example: string for documentation
+        function.body = [stmt for stmt in function.body
+                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
+        for stmt in function.body:
+            self.visit(stmt)
 
-            self.__include_callable(function.name, method)
-            self._current_method = None
+        self.__include_callable(function.name, method)
+        self._current_method = None
 
     def _get_function_decorators(self, function: ast.FunctionDef) -> List[Method]:
         """
@@ -454,7 +446,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         args: Dict[str, Variable] = {}
 
         for arg in arguments.args:
-            var_id, var = self.visit_arg(arg)   # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arg)  # Tuple[str, Variable]
             args[var_id] = var
         return args
 
@@ -535,7 +527,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_id = self.visit(assign.targets[0])
         var_type = self.visit_type(assign.value)
 
-        self.__include_variable(var_id, var_type, source_node=assign)
+        return self.assign_value(var_id, var_type, source_node=assign)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -549,7 +541,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_type: IType = self.visit_type(ann_assign.annotation)
 
         # TODO: check if the annotated type and the value type are the same
-        self.__include_variable(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
+        return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
+
+    def assign_value(self, var_id: str, var_type: IType, source_node: ast.AST, assignment: bool = True) -> IType:
+        if var_type is Builtin.Event and self._current_event is not None:
+            if '' in self._current_module.symbols and self._current_module.symbols[''] is self._current_event:
+                self._current_scope.callables[var_id] = self._current_scope.callables.pop('')
+                self._current_event.name = var_id
+            else:
+                self._current_scope.callables[var_id] = self._current_event
+            self._current_event = None
+        else:
+            self.__include_variable(var_id, var_type, source_node=source_node, assignment=assignment)
+        return var_type
 
     def visit_Global(self, global_node: ast.Global):
         """
@@ -568,12 +572,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         value = self.visit(expr.value)
         if isinstance(expr.value, ast.Name):
             if (
-                # it is not a symbol of the method scope
-                (self._current_method is not None and value not in self._current_method.symbols)
-                # nor it is a symbol of the module scope
-                or (self._current_module is not None and value not in self._current_module.symbols)
-                # nor it is a symbol of the global scope
-                or value not in self.symbols
+                    # it is not a symbol of the method scope
+                    (self._current_method is not None and value not in self._current_method.symbols)
+                    # nor it is a symbol of the module scope
+                    or (self._current_module is not None and value not in self._current_module.symbols)
+                    # nor it is a symbol of the global scope
+                    or value not in self.symbols
             ):
                 self._log_error(
                     CompilerError.UnresolvedReference(expr.value.lineno, expr.value.col_offset, value)
@@ -651,10 +655,72 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_error(
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
             )
-        elif isinstance(func_symbol, IBuiltinMethod) and func_symbol.body is not None:
-            self._builtin_functions_to_visit[func_id] = func_symbol
+        elif isinstance(func_symbol, IBuiltinMethod):
+            if func_symbol.body is not None:
+                self._builtin_functions_to_visit[func_id] = func_symbol
+            elif func_symbol is Builtin.NewEvent:
+                new_event = self.create_new_event(call)
+                self.__include_callable(new_event.identifier, new_event)
+                self._current_event = new_event
 
         return self.get_type(call.func)
+
+    def create_new_event(self, create_call: ast.Call) -> Event:
+        event = Event('')
+        event_args = create_call.args
+
+        if len(event_args) < 0:
+            self._log_error(
+                CompilerError.UnfilledArgument(line=create_call.lineno,
+                                               col=create_call.col_offset,
+                                               param=list(Builtin.NewEvent.args)[0])
+            )
+        elif len(event_args) > 0:
+            args_type = self.get_type(event_args[0])
+            if not Type.list.is_type_of(args_type):
+                self._log_error(
+                    CompilerError.MismatchedTypes(line=event_args[0].lineno,
+                                                  col=event_args[0].col_offset,
+                                                  expected_type_id=Type.list.identifier,
+                                                  actual_type_id=args_type.identifier)
+                )
+            else:
+                for value in event_args[0].elts:
+                    if not isinstance(value, ast.Tuple):
+                        CompilerError.MismatchedTypes(line=value.lineno,
+                                                      col=value.col_offset,
+                                                      expected_type_id=Type.tuple.identifier,
+                                                      actual_type_id=self.get_type(value).identifier)
+                    elif len(value.elts) < 2:
+                        self._log_error(
+                            CompilerError.UnfilledArgument(line=value.lineno,
+                                                           col=value.col_offset,
+                                                           param=list(Builtin.NewEvent.args)[0])
+                        )
+                    elif not (isinstance(value.elts[0], ast.Str)
+                              and (isinstance(value.elts[1], ast.Name)
+                                   and isinstance(self.get_symbol(value.elts[1].id), IType)
+                                   )):
+                        CompilerError.MismatchedTypes(line=value.lineno,
+                                                      col=value.col_offset,
+                                                      expected_type_id=Type.tuple.identifier,
+                                                      actual_type_id=self.get_type(value).identifier)
+                    else:
+                        arg_name = value.elts[0].s
+                        arg_type = self.get_symbol(value.elts[1].id)
+                        event.args[arg_name] = Variable(arg_type)
+
+            if len(event_args) > 1:
+                if not isinstance(event_args[1], ast.Str):
+                    name_type = self.get_type(event_args[1])
+                    CompilerError.MismatchedTypes(line=event_args[1].lineno,
+                                                  col=event_args[1].col_offset,
+                                                  expected_type_id=Type.str.identifier,
+                                                  actual_type_id=name_type.identifier)
+                else:
+                    event.name = event_args[1].s
+
+        return event
 
     def visit_Attribute(self, attribute: ast.Attribute) -> Union[ISymbol, str]:
         """

@@ -40,9 +40,9 @@ class FileGenerator:
 
         :return: a dictionary that maps each method with its identifier
         """
-        from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+        from boa3.model.builtin.decorator.builtindecorator import IBuiltinCallable
         return {name: method for name, method in self._symbols.items()
-                if isinstance(method, Method) and not isinstance(method, IBuiltinDecorator)}
+                if isinstance(method, Method) and not isinstance(method, IBuiltinCallable)}
 
     @property
     def _events(self) -> Dict[str, Event]:
@@ -51,7 +51,7 @@ class FileGenerator:
 
         :return: a dictionary that maps each event with its identifier
         """
-        return {name: event for name, event in self._symbols.items() if isinstance(event, Event)}
+        return {event.identifier: event for event in self._symbols.values() if isinstance(event, Event)}
 
     # region NEF
 

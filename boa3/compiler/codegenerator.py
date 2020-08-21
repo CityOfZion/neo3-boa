@@ -676,7 +676,7 @@ class CodeGenerator:
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol, params_addresses)
             elif isinstance(symbol, Event):
-                self.convert_event_call(symbol_id, symbol)
+                self.convert_event_call(symbol)
             else:
                 self.convert_method_call(symbol, len(params_addresses))
 
@@ -794,7 +794,7 @@ class CodeGenerator:
             self._stack.pop()
         self._stack.append(function.return_type)
 
-    def convert_event_call(self, event_id: str, event: Event):
+    def convert_event_call(self, event: Event):
         """
         Converts an event call
 
@@ -802,7 +802,7 @@ class CodeGenerator:
         :param event: called event
         """
         self.convert_new_array(len(event.args), Type.list.stack_item)
-        self.convert_literal(event_id)
+        self.convert_literal(event.identifier)
         from boa3.model.builtin.interop.interop import Interop
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)

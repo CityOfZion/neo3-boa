@@ -23,3 +23,7 @@ class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
         :return: the opcode and its data if exists. None otherwise.
         """
         return []
+
+    @property
+    def identifier(self) -> str:
+        return self._identifier
