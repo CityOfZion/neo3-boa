@@ -129,6 +129,44 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/example/bytes_test/BytesToIntWithBytearrayBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
+    def test_bytes_to_str(self):
+        data = b'abc'
+        expected_output = (
+            Opcode.PUSHDATA1    # b'abc'
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # b'abc'.to_str()
+            + Type.str.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytesToStr.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bytes_to_str_with_builtin(self):
+        data = b'123'
+        expected_output = (
+            Opcode.PUSHDATA1    # b'123'
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.CONVERT    # bytes.to_str(b'123')
+            + Type.str.stack_item
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/example/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bytes_to_str_mismatched_types(self):
+        path = '%s/boa3_test/example/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
         expected_output = (
