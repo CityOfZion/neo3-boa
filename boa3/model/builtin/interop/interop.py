@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Dict
 
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
+from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
 from boa3.model.builtin.interop.runtime.triggermethod import TriggerMethod
@@ -35,6 +36,7 @@ class Interop:
     Log = LogMethod()
     TriggerType = TriggerTyping()
     GetTrigger = TriggerMethod(TriggerType)
+    CallingScriptHash = CallingScriptHashProperty()
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -46,8 +48,11 @@ class Interop:
                                  Notify,
                                  Log,
                                  TriggerType,
-                                 GetTrigger],
+                                 GetTrigger,
+                                 CallingScriptHash
+                                 ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,
-                                 StorageDelete]
+                                 StorageDelete
+                                 ]
     }
