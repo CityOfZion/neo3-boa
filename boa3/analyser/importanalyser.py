@@ -29,35 +29,36 @@ class ImportAnalyser(IAstAnalyser):
 
         else:
             import re
+
             inside_python_folder = any(re.search(r'python(\d\.?)*', folder.lower()) for folder in path)
-
             updated_tree = None
-            if not (inside_python_folder and 'lib' in path):
-                if ('boa3' in path
-                        and '/'.join(path[path.index('boa3'):]).startswith('boa3/builtin')):
-                    pkg_start_index = path.index('builtin') + 1
-                    if path[pkg_start_index] == path[-1]:
-                        self.symbols = self._get_boa3_builtin_symbols()
-                    else:
-                        pkg_id = import_target.split('.')[-1]
-                        self.symbols = self._get_interop_symbols(pkg_id)
-                    self.can_be_imported = True
+            
+            if 'boa3' in path and '/'.join(path[path.index('boa3'):]).startswith('boa3/builtin'):
+                pkg_start_index = path.index('builtin') + 1
+                if path[pkg_start_index] == path[-1]:
+                    self.symbols = self._get_boa3_builtin_symbols()
                 else:
-                    # TODO: only user modules and typing lib imports are implemented
-                    try:
-                        from boa3.analyser.analyser import Analyser
-                        analyser = Analyser.analyse(module_origin)
+                    pkg_id = import_target.split('.')[-1]
+                    self.symbols = self._get_interop_symbols(pkg_id)
+                self.can_be_imported = True
 
-                        # include only imported symbols
-                        if analyser.is_analysed:
-                            self.symbols.update(
-                                {symbol_id: symbol for symbol_id, symbol in analyser.symbol_table.items()
-                                 if symbol_id not in Type.all_types()
-                                 })
-                        updated_tree = analyser.ast_tree
-                        self.can_be_imported = analyser.is_analysed
-                    except FileNotFoundError:
-                        self.can_be_imported = False
+            elif not (inside_python_folder and 'lib' in path):
+                print('Importing with analyser - user modules only')
+                # TODO: only user modules and typing lib imports are implemented
+                try:
+                    from boa3.analyser.analyser import Analyser
+                    analyser = Analyser.analyse(module_origin)
+
+                    # include only imported symbols
+                    if analyser.is_analysed:
+                        self.symbols.update(
+                            {symbol_id: symbol for symbol_id, symbol in analyser.symbol_table.items()
+                             if symbol_id not in Type.all_types()
+                             })
+                    updated_tree = analyser.ast_tree
+                    self.can_be_imported = analyser.is_analysed
+                except FileNotFoundError:
+                    self.can_be_imported = False
 
                 if updated_tree is not None:
                     self._tree = updated_tree
