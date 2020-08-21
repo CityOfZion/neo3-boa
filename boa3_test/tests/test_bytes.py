@@ -142,7 +142,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesToStr.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -159,12 +159,12 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_bytes_to_str_mismatched_types(self):
-        path = '%s/boa3_test/example/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_from_byte_array(self):

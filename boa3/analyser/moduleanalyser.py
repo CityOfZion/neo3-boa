@@ -527,6 +527,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_id = self.visit(assign.targets[0])
         var_type = self.visit_type(assign.value)
 
+        if var_type is Type.none and isinstance(assign.value, ast.Name):
+            symbol = self.get_symbol(assign.value.id)
+            if isinstance(symbol, Event):
+                var_type = Builtin.Event
+                self._current_event = symbol
+
         return self.assign_value(var_id, var_type, source_node=assign)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):

@@ -1,7 +1,6 @@
 from boa3.builtin import metadata, NeoMetadata, public
 from boa3.builtin.contract import Nep5TransferEvent
-from boa3.builtin.interop.execution import calling_script_hash
-from boa3.builtin.interop.runtime import check_witness
+from boa3.builtin.interop.runtime import calling_script_hash, check_witness
 from boa3.builtin.interop.storage import delete, get, put
 
 
@@ -137,55 +136,55 @@ def balanceOf(account: bytes) -> int:
 
 
 @public
-def transfer(from_addr: bytes, to_addr: bytes, amount: int) -> bool:
+def transfer(from_address: bytes, to_address: bytes, amount: int) -> bool:
     """
     Transfers a specified amount of NEP5 tokens from one account to another
 
     If the method succeeds, it must fire the `transfer` event and must return true, even if the amount is 0,
     or from and to are the same address.
 
-    :param from_addr: the address to transfer from
-    :type from_addr: bytes
-    :param to_addr: the address to transfer to
-    :type to_addr: bytes
+    :param from_address: the address to transfer from
+    :type from_address: bytes
+    :param to_address: the address to transfer to
+    :type to_address: bytes
     :param amount: the amount of NEP5 tokens to transfer
     :type amount: int
 
     :return: whether the transfer was successful
-    :raise AssertionError: raised if `from_addr` or `to_addr` length is not 20 or if `amount` if less than zero.
+    :raise AssertionError: raised if `from_address` or `to_address` length is not 20 or if `amount` if less than zero.
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
-    assert len(from_addr) == 20 and len(to_addr) == 20
+    assert len(from_address) == 20 and len(to_address) == 20
     # the parameter amount must be greater than or equal to 0. If not, this method should throw an exception.
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = get(from_addr).to_int()
+    from_balance = get(from_address).to_int()
     if from_balance < amount:
         return False
 
     # The function should check whether the from address equals the caller contract hash.
     # If so, the transfer should be processed;
     # If not, the function should use the check_witness to verify the transfer.
-    if from_addr != calling_script_hash:
-        if not check_witness(from_addr):
+    if from_address != calling_script_hash:
+        if not check_witness(from_address):
             return False
 
-    # if the `to_addr` is a deployed contract, the function should check the payable flag of this contract
+    # if the `to_address` is a deployed contract, the function should check the payable flag of this contract
     # TODO: include example when objects are implemented
 
-    if from_addr == to_addr:
+    if from_address == to_address:
         # transfer to self
         return True
 
     if from_balance == amount:
-        delete(from_addr)
+        delete(from_address)
     else:
-        put(from_addr, from_balance - amount)
+        put(from_address, from_balance - amount)
 
-    to_balance = get(to_addr).to_int()
-    put(to_addr, to_balance + amount)
+    to_balance = get(to_address).to_int()
+    put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event, and must return true
-    on_transfer(from_addr, to_addr, amount)
+    on_transfer(from_address, to_address, amount)
     return True

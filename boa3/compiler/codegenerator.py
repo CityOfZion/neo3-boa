@@ -802,7 +802,7 @@ class CodeGenerator:
         :param event: called event
         """
         self.convert_new_array(len(event.args), Type.list.stack_item)
-        self.convert_literal(event.identifier)
+        self.convert_literal(event.name)
         from boa3.model.builtin.interop.interop import Interop
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)
