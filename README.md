@@ -27,10 +27,10 @@ The `neo3-boa` compiler is a tool for compiling Python files to the `.nef` and `
 - Converts Functions
 
 - Converts Local Variable Declarations and Assignments 
-    ```
-    foo: int = 42
-    bar = foo
-    ```
+```python
+foo: int = 42
+bar = foo
+```
 - Converts Number Arithmetic Operations (`+`, `-`, `*`, `//`, `%`)
 
 - Converts Numeric Arithmetic Augmented assignment Operators (`+=`, `-=`, `*=`, `//=`, `%=`)
