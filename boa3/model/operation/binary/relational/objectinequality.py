@@ -15,7 +15,7 @@ class ObjectInequality(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str, Type.int, Type.bool]
+    _valid_types: List[IType] = [Type.str, Type.bytes, Type.int, Type.bool]
 
     def __init__(self, left: IType = Type.str, right: IType = None):
         self.operator: Operator = Operator.NotEq

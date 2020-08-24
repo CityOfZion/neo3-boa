@@ -64,4 +64,4 @@ def is_verification_trigger() -> bool:
     pass
 
 
-calling_script_hash: bytes
+calling_script_hash: bytes = b''

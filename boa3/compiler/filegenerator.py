@@ -51,7 +51,7 @@ class FileGenerator:
 
         :return: a dictionary that maps each event with its identifier
         """
-        return {event.identifier: event for event in self._symbols.values() if isinstance(event, Event)}
+        return {event.name: event for event in self._symbols.values() if isinstance(event, Event)}
 
     # region NEF
 

@@ -10,7 +10,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestTuple(BoaTest):
 
     def test_tuple_int_values(self):
-        path = '%s/boa3_test/example/tuple_test/IntTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/IntTuple.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -29,7 +29,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_tuple_string_values(self):
-        path = '%s/boa3_test/example/tuple_test/StrTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/StrTuple.py' % self.dirname
         byte_input0 = String('1').to_bytes()
         byte_input1 = String('2').to_bytes()
         byte_input2 = String('3').to_bytes()
@@ -57,7 +57,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_tuple_bool_values(self):
-        path = '%s/boa3_test/example/tuple_test/BoolTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/BoolTuple.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -76,7 +76,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_tuple_variable_values(self):
-        path = '%s/boa3_test/example/tuple_test/VariableTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/VariableTuple.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -101,7 +101,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_tuple_assign_empty_tuple(self):
-        path = '%s/boa3_test/example/tuple_test/EmptyTupleAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -116,7 +116,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_tuple_get_value(self):
-        path = '%s/boa3_test/example/tuple_test/GetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/GetValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -139,23 +139,23 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_non_sequence_get_value(self):
-        path = '%s/boa3_test/example/tuple_test/MismatchedTypeGetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeGetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_tuple_set_value(self):
-        path = '%s/boa3_test/example/tuple_test/SetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/SetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_non_sequence_set_value(self):
-        path = '%s/boa3_test/example/tuple_test/MismatchedTypeSetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeSetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_tuple_index_mismatched_type(self):
-        path = '%s/boa3_test/example/tuple_test/MismatchedTypeTupleIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeTupleIndex.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_tuple_of_tuple(self):
-        path = '%s/boa3_test/example/tuple_test/TupleOfTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleOfTuple.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -188,7 +188,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_nep5_main(self):
-        path = '%s/boa3_test/example/tuple_test/Nep5Main.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/Nep5Main.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -295,7 +295,7 @@ class TestTuple(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingLiteralValues.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -388,7 +388,7 @@ class TestTuple(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingVariableValues.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -468,7 +468,7 @@ class TestTuple(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingNegativeStart.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -548,7 +548,7 @@ class TestTuple(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingNegativeEnd.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -626,7 +626,7 @@ class TestTuple(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingStartOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -649,7 +649,7 @@ class TestTuple(BoaTest):
             + Opcode.PACK
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -728,16 +728,16 @@ class TestTuple(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingEndOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_slicing_omitted_stride(self):
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingWithStride.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingWithStride.py' % self.dirname
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
     def test_tuple_slicing_omitted_with_stride(self):
-        path = '%s/boa3_test/example/tuple_test/TupleSlicingOmittedWithStride.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithStride.py' % self.dirname
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)

@@ -18,7 +18,7 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/function_test/IntegerFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/IntegerFunction.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -32,7 +32,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/StringFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/StringFunction.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -44,19 +44,19 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/function_test/BoolFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/BoolFunction.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_none_function(self):
-        path = '%s/boa3_test/example/function_test/NoneFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/NoneFunction.py' % self.dirname
 
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
     def test_arg_without_type_hint(self):
-        path = '%s/boa3_test/example/function_test/ArgWithoutTypeHintFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ArgWithoutTypeHintFunction.py' % self.dirname
         self.assertCompilerLogs(TypeHintMissing, path)
 
     def test_no_return_hint_function_with_empty_return_statement(self):
@@ -67,7 +67,7 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/function_test/EmptyReturnFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/EmptyReturnFunction.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -81,25 +81,25 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/function_test/NoReturnFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/NoReturnFunction.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_return_type_hint_function_with_empty_return(self):
-        path = '%s/boa3_test/example/function_test/ExpectingReturnFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ExpectingReturnFunction.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_multiple_return_function(self):
-        path = '%s/boa3_test/example/function_test/MultipleReturnFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/MultipleReturnFunction.py' % self.dirname
         self.assertCompilerLogs(TooManyReturns, path)
 
     def test_tuple_function(self):
-        path = '%s/boa3_test/example/function_test/TupleFunction.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/TupleFunction.py' % self.dirname
         self.assertCompilerLogs(TooManyReturns, path)
 
     def test_default_return(self):
-        path = '%s/boa3_test/example/function_test/DefaultReturn.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/DefaultReturn.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_empty_list_return(self):
@@ -108,17 +108,17 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/function_test/EmptyListReturn.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/EmptyListReturn.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_mismatched_return_type(self):
-        path = '%s/boa3_test/example/function_test/MismatchedReturnType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/MismatchedReturnType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_return_type_with_if(self):
-        path = '%s/boa3_test/example/function_test/MismatchedReturnTypeWithIf.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/MismatchedReturnTypeWithIf.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
@@ -141,7 +141,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/CallVoidFunctionWithoutArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallVoidFunctionWithoutArgs.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -162,7 +162,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return 1
         )
 
-        path = '%s/boa3_test/example/function_test/CallReturnFunctionWithoutArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithoutArgs.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -191,7 +191,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/CallVoidFunctionWithLiteralArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallVoidFunctionWithLiteralArgs.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -219,7 +219,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/CallReturnFunctionWithLiteralArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithLiteralArgs.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -252,7 +252,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/CallVoidFunctionWithVariableArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallVoidFunctionWithVariableArgs.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -284,7 +284,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/CallReturnFunctionWithVariableArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithVariableArgs.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -314,7 +314,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/example/function_test/CallReturnFunctionOnReturn.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionOnReturn.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -356,7 +356,7 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/function_test/CallFunctionWithoutVariables.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallFunctionWithoutVariables.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -382,7 +382,7 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/function_test/CallFunctionWrittenBefore.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallFunctionWrittenBefore.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -418,20 +418,20 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return arg0
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnIf.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnIf.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_missing_return_inside_if(self):
-        path = '%s/boa3_test/example/function_test/ReturnIfMissing.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnIfMissing.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_missing_return_inside_elif(self):
-        path = '%s/boa3_test/example/function_test/ReturnElifMissing.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnElifMissing.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_missing_return_inside_else(self):
-        path = '%s/boa3_test/example/function_test/ReturnElseMissing.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnElseMissing.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_inside_multiple_inner_if(self):
@@ -483,12 +483,12 @@ class TestFunction(BoaTest):
             + Opcode.RET                # return 9
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnMultipleInnerIf.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnMultipleInnerIf.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_missing_return_inside_multiple_inner_if(self):
-        path = '%s/boa3_test/example/function_test/ReturnMultipleInnerIfMissing.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnMultipleInnerIfMissing.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_if_expression(self):
@@ -506,12 +506,12 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnIfExpression.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnIfExpression.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_return_if_expression_mismatched_type(self):
-        path = '%s/boa3_test/example/function_test/ReturnIfExpressionMismatched.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnIfExpressionMismatched.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_return_inside_for(self):
@@ -551,7 +551,7 @@ class TestFunction(BoaTest):
             + Opcode.RET          # return 5
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnFor.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnFor.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -596,12 +596,12 @@ class TestFunction(BoaTest):
             + Opcode.RET          # return x
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnForOnlyOnElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnForOnlyOnElse.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_missing_return_inside_for_else(self):
-        path = '%s/boa3_test/example/function_test/ReturnForElseMissing.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnForElseMissing.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_inside_while(self):
@@ -628,7 +628,7 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return x
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnWhile.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnWhile.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -654,12 +654,12 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return x
         )
 
-        path = '%s/boa3_test/example/function_test/ReturnWhileOnlyOnElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnWhileOnlyOnElse.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_missing_return_inside_while_without_else(self):
-        path = '%s/boa3_test/example/function_test/ReturnWhileWithoutElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/ReturnWhileWithoutElse.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_multiple_function_large_call(self):
@@ -903,7 +903,7 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/function_test/MultipleFunctionLargeCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/MultipleFunctionLargeCall.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -931,7 +931,7 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/function_test/FunctionWithDefaultArgument.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/FunctionWithDefaultArgument.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -969,18 +969,18 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/function_test/FunctionWithOnlyDefaultArguments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/FunctionWithOnlyDefaultArguments.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_function_with_default_argument_between_other_args(self):
-        path = '%s/boa3_test/example/function_test/FunctionWithDefaultArgumentBetweenArgs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/FunctionWithDefaultArgumentBetweenArgs.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_call_function_with_kwargs(self):
-        path = '%s/boa3_test/example/function_test/CallFunctionWithKwargs.py' % self.dirname
+        path = '%s/boa3_test/test_sc/function_test/CallFunctionWithKwargs.py' % self.dirname
 
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)

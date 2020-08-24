@@ -44,6 +44,8 @@ class CodeGenerator:
         generator = CodeGenerator(analyser.symbol_table)
         visitor = VisitorCodeGenerator(generator)
         visitor.visit(analyser.ast_tree)
+
+        analyser.symbol_table.update(generator.symbol_table)
         generator.initialized_static_fields = True
 
         for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
@@ -52,7 +54,7 @@ class CodeGenerator:
         return generator.bytecode
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
-        self.symbol_table: Dict[str, ISymbol] = symbol_table
+        self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
 
         self._current_method: Method = None
 
@@ -802,7 +804,7 @@ class CodeGenerator:
         :param event: called event
         """
         self.convert_new_array(len(event.args), Type.list.stack_item)
-        self.convert_literal(event.identifier)
+        self.convert_literal(event.name)
         from boa3.model.builtin.interop.interop import Interop
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)

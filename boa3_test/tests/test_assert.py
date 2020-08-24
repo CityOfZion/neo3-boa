@@ -19,7 +19,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertUnaryOperation.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertUnaryOperation.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -36,7 +36,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertBinaryOperation.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertBinaryOperation.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -53,7 +53,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertWithMessage.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertWithMessage.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -68,7 +68,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertInt.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertInt.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -83,7 +83,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertStr.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -98,7 +98,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertBytes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertBytes.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -115,7 +115,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertList.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -132,7 +132,7 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -157,6 +157,6 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/assert_test/AssertAny.py' % self.dirname
+        path = '%s/boa3_test/test_sc/assert_test/AssertAny.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

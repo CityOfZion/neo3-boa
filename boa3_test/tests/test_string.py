@@ -10,7 +10,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestString(BoaTest):
 
     def test_string_get_value(self):
-        path = '%s/boa3_test/example/string_test/GetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/GetValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -36,7 +36,7 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_string_set_value(self):
-        path = '%s/boa3_test/example/string_test/SetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/SetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_string_slicing(self):
@@ -77,7 +77,7 @@ class TestString(BoaTest):
             + Type.str.stack_item
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingLiteralValues.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -123,7 +123,7 @@ class TestString(BoaTest):
             + Type.str.stack_item
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingVariableValues.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingVariableValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -153,7 +153,7 @@ class TestString(BoaTest):
             + Opcode.LEFT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingNegativeStart.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingNegativeStart.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -186,7 +186,7 @@ class TestString(BoaTest):
             + Opcode.RIGHT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingNegativeEnd.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingNegativeEnd.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -215,7 +215,7 @@ class TestString(BoaTest):
             + Opcode.LEFT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingStartOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingStartOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -234,7 +234,7 @@ class TestString(BoaTest):
             + Opcode.LDLOC0     # return a[:3]
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -266,16 +266,16 @@ class TestString(BoaTest):
             + Opcode.RIGHT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/string_test/StringSlicingEndOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingEndOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_string_slicing_omitted_stride(self):
-        path = '%s/boa3_test/example/string_test/StringSlicingWithStride.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingWithStride.py' % self.dirname
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
     def test_string_slicing_omitted_with_stride(self):
-        path = '%s/boa3_test/example/string_test/StringSlicingOmittedWithStride.py' % self.dirname
+        path = '%s/boa3_test/test_sc/string_test/StringSlicingOmittedWithStride.py' % self.dirname
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)

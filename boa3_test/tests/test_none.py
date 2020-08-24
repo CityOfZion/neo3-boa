@@ -7,7 +7,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestAny(BoaTest):
 
     def test_variable_none(self):
-        path = '%s/boa3_test/example/none_test/VariableNone.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/VariableNone.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -22,7 +22,7 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_none_tuple(self):
-        path = '%s/boa3_test/example/none_test/NoneTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/NoneTuple.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -41,7 +41,7 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_none_identity(self):
-        path = '%s/boa3_test/example/none_test/NoneIdentity.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/NoneIdentity.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -55,7 +55,7 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_none_not_identity(self):
-        path = '%s/boa3_test/example/none_test/NoneNotIdentity.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/NoneNotIdentity.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -70,17 +70,17 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_none_equality(self):
-        path = '%s/boa3_test/example/none_test/NoneEquality.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/NoneEquality.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_int_operation(self):
-        path = '%s/boa3_test/example/none_test/MismatchedTypesInOperation.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/MismatchedTypesInOperation.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_assign(self):
-        path = '%s/boa3_test/example/none_test/MismatchedTypesAssign.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/MismatchedTypesAssign.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_after_reassign(self):
-        path = '%s/boa3_test/example/none_test/MismatchedTypesAfterReassign.py' % self.dirname
+        path = '%s/boa3_test/test_sc/none_test/MismatchedTypesAfterReassign.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

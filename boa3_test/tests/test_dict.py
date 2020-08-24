@@ -31,7 +31,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/IntKeyDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/IntKeyDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -68,7 +68,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/StrKeyDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/StrKeyDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -99,7 +99,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/AnyValueDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/AnyValueDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -150,7 +150,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/DictOfDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/DictOfDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -165,7 +165,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/EmptyDictAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/EmptyDictAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -192,7 +192,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/TypeHintAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/TypeHintAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -225,7 +225,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/VariableDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/VariableDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -240,12 +240,12 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/GetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/GetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_get_value_mismatched_type(self):
-        path = '%s/boa3_test/example/dict_test/MismatchedTypeGetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeGetValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_set_value(self):
@@ -265,12 +265,12 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/SetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/SetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_set_value_mismatched_type(self):
-        path = '%s/boa3_test/example/dict_test/MismatchedTypeSetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeSetValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_keys(self):
@@ -309,12 +309,12 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/KeysDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/KeysDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_keys_mismatched_type(self):
-        path = '%s/boa3_test/example/dict_test/MismatchedTypeKeysDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeKeysDict.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_values(self):
@@ -353,10 +353,10 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/dict_test/ValuesDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/ValuesDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_values_mismatched_type(self):
-        path = '%s/boa3_test/example/dict_test/MismatchedTypeValuesDict.py' % self.dirname
+        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeValuesDict.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

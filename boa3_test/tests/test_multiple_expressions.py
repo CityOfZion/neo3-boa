@@ -24,7 +24,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/arithmetic_test/MultipleExpressionsInLine.py' % self.dirname
+        path = '%s/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -51,7 +51,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/relational_test/MultipleExpressionsInLine.py' % self.dirname
+        path = '%s/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -82,7 +82,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/logical_test/MultipleExpressionsInLine.py' % self.dirname
+        path = '%s/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -129,7 +129,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/tuple_test/MultipleExpressionsInLine.py' % self.dirname
+        path = '%s/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -173,7 +173,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/list_test/MultipleExpressionsInLine.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)

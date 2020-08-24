@@ -1,6 +1,6 @@
 from typing import Any, List
 
-import boa3_test.example.import_test.FromImportTyping as UserModule
+import boa3_test.test_sc.import_test.FromImportTyping as UserModule
 
 
 def Main():

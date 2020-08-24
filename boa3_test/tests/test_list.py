@@ -10,7 +10,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestList(BoaTest):
 
     def test_list_int_values(self):
-        path = '%s/boa3_test/example/list_test/IntList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/IntList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -29,7 +29,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_string_values(self):
-        path = '%s/boa3_test/example/list_test/StrList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/StrList.py' % self.dirname
         byte_input0 = String('1').to_bytes()
         byte_input1 = String('2').to_bytes()
         byte_input2 = String('3').to_bytes()
@@ -57,7 +57,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_bool_values(self):
-        path = '%s/boa3_test/example/list_test/BoolList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/BoolList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -76,7 +76,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_variable_values(self):
-        path = '%s/boa3_test/example/list_test/VariableList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/VariableList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -101,11 +101,11 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_non_sequence_get_value(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeGetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeGetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_list_get_value(self):
-        path = '%s/boa3_test/example/list_test/GetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/GetValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -128,7 +128,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_get_value_with_negative_index(self):
-        path = '%s/boa3_test/example/list_test/GetValueNegativeIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/GetValueNegativeIndex.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -152,7 +152,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_type_hint(self):
-        path = '%s/boa3_test/example/list_test/TypeHintAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/TypeHintAssignment.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -171,7 +171,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_assign_empty_list(self):
-        path = '%s/boa3_test/example/list_test/EmptyListAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/EmptyListAssignment.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -186,7 +186,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_set_value(self):
-        path = '%s/boa3_test/example/list_test/SetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/SetValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -211,7 +211,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_set_value_with_negative_index(self):
-        path = '%s/boa3_test/example/list_test/SetValueNegativeIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/SetValueNegativeIndex.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -237,15 +237,15 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_non_sequence_set_value(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeSetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeSetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_list_index_mismatched_type(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeListIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeListIndex.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_of_list(self):
-        path = '%s/boa3_test/example/list_test/ListOfList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListOfList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -278,7 +278,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_nep5_main(self):
-        path = '%s/boa3_test/example/list_test/Nep5Main.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/Nep5Main.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -385,7 +385,7 @@ class TestList(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingLiteralValues.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -478,7 +478,7 @@ class TestList(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingVariableValues.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingVariableValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -558,7 +558,7 @@ class TestList(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingNegativeStart.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingNegativeStart.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -637,7 +637,7 @@ class TestList(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingNegativeEnd.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingNegativeEnd.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -715,7 +715,7 @@ class TestList(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingStartOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingStartOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -738,7 +738,7 @@ class TestList(BoaTest):
             + Opcode.PACK
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -817,22 +817,22 @@ class TestList(BoaTest):
                 + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/example/list_test/ListSlicingEndOmitted.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingEndOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_slicing_omitted_stride(self):
-        path = '%s/boa3_test/example/list_test/ListSlicingWithStride.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingWithStride.py' % self.dirname
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
     def test_list_slicing_omitted_with_stride(self):
-        path = '%s/boa3_test/example/list_test/ListSlicingOmittedWithStride.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ListSlicingOmittedWithStride.py' % self.dirname
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
     def test_list_append_int_value(self):
-        path = '%s/boa3_test/example/list_test/AppendIntValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/AppendIntValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -866,7 +866,7 @@ class TestList(BoaTest):
 
     def test_list_append_any_value(self):
         four = String('4').to_bytes(min_length=1)
-        path = '%s/boa3_test/example/list_test/AppendAnyValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/AppendAnyValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -901,11 +901,11 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_append_mismatched_type(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeAppendValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeAppendValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_append_with_builtin(self):
-        path = '%s/boa3_test/example/list_test/AppendIntWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -938,11 +938,11 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_append_with_builtin_mismatched_type(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeAppendWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeAppendWithBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_clear(self):
-        path = '%s/boa3_test/example/list_test/ClearList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ClearList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -978,7 +978,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_reverse(self):
-        path = '%s/boa3_test/example/list_test/ReverseList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ReverseList.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -999,7 +999,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_extend_tuple_value(self):
-        path = '%s/boa3_test/example/list_test/ExtendTupleValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ExtendTupleValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -1040,7 +1040,7 @@ class TestList(BoaTest):
 
     def test_list_extend_any_value(self):
         four = String('4').to_bytes(min_length=1)
-        path = '%s/boa3_test/example/list_test/ExtendAnyValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ExtendAnyValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -1082,15 +1082,15 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_extend_mismatched_type(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeExtendValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeExtendValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_extend_mismatched_iterable_value_type(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeExtendTupleValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeExtendTupleValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_extend_with_builtin(self):
-        path = '%s/boa3_test/example/list_test/ExtendWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/ExtendWithBuiltin.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -1130,5 +1130,5 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_list_extend_with_builtin_mismatched_type(self):
-        path = '%s/boa3_test/example/list_test/MismatchedTypeExtendWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/list_test/MismatchedTypeExtendWithBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

@@ -22,7 +22,7 @@ class TestEvent(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/event_test/EventWithoutArguments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithoutArguments.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -41,7 +41,7 @@ class TestEvent(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/event_test/EventWithArgument.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithArgument.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -60,14 +60,37 @@ class TestEvent(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/event_test/EventWithName.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithName.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_event_nep5_transfer(self):
+        event_name = String('transfer').to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # Main()
+            + b'\x00\x03'
+            + Opcode.LDARG2         # event(from_addr, to_addr, amount)
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.SYSCALL
+            + Interop.Notify.interop_method_hash
+            + Opcode.PUSHNULL       # return
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/event_test/EventNep5Transfer.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_event_with_return(self):
-        path = '%s/boa3_test/example/event_test/EventWithoutTypes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/EventWithoutTypes.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_event_call_mismatched_type(self):
-        path = '%s/boa3_test/example/event_test/MismatchedTypeCallEvent.py' % self.dirname
+        path = '%s/boa3_test/test_sc/event_test/MismatchedTypeCallEvent.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)

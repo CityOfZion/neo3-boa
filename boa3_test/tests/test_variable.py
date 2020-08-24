@@ -15,7 +15,7 @@ from boa3_test.tests.boa_test import BoaTest
 class TestVariable(BoaTest):
 
     def test_declaration_with_type(self):
-        path = '%s/boa3_test/example/variable_test/DeclarationWithType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/DeclarationWithType.py' % self.dirname
 
         test_variable_id = 'a'
         test_method_id = 'Main'
@@ -44,7 +44,7 @@ class TestVariable(BoaTest):
         self.assertTrue(test_variable_id in method_symbol_table)
 
     def test_declaration_without_type(self):
-        path = '%s/boa3_test/example/variable_test/DeclarationWithoutType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/DeclarationWithoutType.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_assignment_with_type(self):
@@ -62,7 +62,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/AssignmentWithType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/AssignmentWithType.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -78,7 +78,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/AssignmentWithoutType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/AssignmentWithoutType.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -98,17 +98,17 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/ArgumentAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/ArgumentAssignment.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments(self):
-        path = '%s/boa3_test/example/variable_test/MultipleAssignments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MultipleAssignments.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_tuple_multiple_assignments(self):
-        path = '%s/boa3_test/example/variable_test/AssignmentWithTuples.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/AssignmentWithTuples.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_many_assignments(self):
@@ -137,7 +137,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/ManyAssignments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/ManyAssignments.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -151,7 +151,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/ReturnArgument.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/ReturnArgument.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -167,7 +167,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/ReturnLocalVariable.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/ReturnLocalVariable.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -183,45 +183,45 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/AssignLocalWithArgument.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/AssignLocalWithArgument.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_using_undeclared_variable(self):
-        path = '%s/boa3_test/example/variable_test/UsingUndeclaredVariable.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/UsingUndeclaredVariable.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_return_undeclared_variable(self):
-        path = '%s/boa3_test/example/variable_test/ReturnUndeclaredVariable.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/ReturnUndeclaredVariable.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_assign_value_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_binary_operation_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignBinOp.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignBinOp.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_unary_operation_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignUnOp.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignUnOp.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_mixed_operations_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignMixedOp.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignMixedOp.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_sequence_get_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignSequenceGet.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignSequenceGet.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_sequence_set_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAssignSequenceSet.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignSequenceSet.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_aug_assign_mismatched_type(self):
-        path = '%s/boa3_test/example/variable_test/MismatchedTypeAugAssign.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAugAssign.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_global_declaration_with_assignment(self):
@@ -234,12 +234,12 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0    # a = 10
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_global_declaration_without_assignment(self):
-        path = '%s/boa3_test/example/variable_test/GlobalDeclarationWithoutAssignment.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalDeclarationWithoutAssignment.py' % self.dirname
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_global_assignment_with_type(self):
@@ -252,7 +252,7 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0    # a = 10
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/variable_test/GlobalAssignmentWithType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -266,12 +266,12 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0    # a = 10
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/variable_test/GlobalAssignmentWithoutType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithoutType.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_global_tuple_multiple_assignments(self):
-        path = '%s/boa3_test/example/variable_test/GlobalAssignmentWithTuples.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithTuples.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_many_global_assignments(self):
@@ -308,7 +308,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/variable_test/ManyGlobalAssignments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/ManyGlobalAssignments.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -327,7 +327,7 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD1
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/variable_test/GlobalAssignmentBetweenFunctions.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentBetweenFunctions.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -364,7 +364,7 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD + b'\x07'   # variable index greater than 6 uses another opcode
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/variable_test/GetGlobalValueWrittenAfter.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GetGlobalValueWrittenAfter.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -383,12 +383,12 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/variable_test/AssignLocalWithArgumentShadowingGlobal.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/AssignLocalWithArgumentShadowingGlobal.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_assign_global_in_function(self):
-        path = '%s/boa3_test/example/variable_test/GlobalAssignmentInFunctionWithArgument.py' % self.dirname
+        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py' % self.dirname
 
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)

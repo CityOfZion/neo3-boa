@@ -28,7 +28,7 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC1     # return b
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/LenTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenTuple.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -50,7 +50,7 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC1     # return b
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/LenList.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenList.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -70,7 +70,7 @@ class TestVariable(BoaTest):
             + Opcode.SIZE
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/LenString.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenString.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -93,21 +93,21 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC1
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/LenBytes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenBytes.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_len_of_no_collection(self):
-        path = '%s/boa3_test/example/built_in_methods_test/LenMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_len_too_many_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/LenTooManyParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_len_too_few_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/LenTooFewParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/LenTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -115,11 +115,11 @@ class TestVariable(BoaTest):
     # region TestAppend
 
     def test_append_tuple(self):
-        path = '%s/boa3_test/example/built_in_methods_test/AppendTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTuple.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_append_sequence(self):
-        path = '%s/boa3_test/example/built_in_methods_test/AppendSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendSequence.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_append_mutable_sequence(self):
@@ -150,7 +150,7 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/AppendMutableSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendMutableSequence.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -183,17 +183,17 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/AppendMutableSequenceBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendMutableSequenceBuiltinCall.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_append_too_many_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/AppendTooManyParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_append_too_few_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/AppendTooFewParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -201,7 +201,7 @@ class TestVariable(BoaTest):
     # region TestClear
 
     def test_clear_tuple(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ClearTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTuple.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_clear_mutable_sequence(self):
@@ -235,7 +235,7 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/ClearMutableSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearMutableSequence.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -271,17 +271,17 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/ClearMutableSequenceBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearMutableSequenceBuiltinCall.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_clear_too_many_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ClearTooManyParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_clear_too_few_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ClearTooFewParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -289,7 +289,7 @@ class TestVariable(BoaTest):
     # region TestReverse
 
     def test_reverse_tuple(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ReverseTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTuple.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_reverse_mutable_sequence(self):
@@ -308,7 +308,7 @@ class TestVariable(BoaTest):
                 + Opcode.LDLOC0     # return a
                 + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/ReverseMutableSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequence.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -330,17 +330,17 @@ class TestVariable(BoaTest):
                 + Opcode.LDLOC0     # return a
                 + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/ReverseMutableSequenceBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequenceBuiltinCall.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_reverse_too_many_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ReverseTooManyParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_reverse_too_few_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ReverseTooFewParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -348,11 +348,11 @@ class TestVariable(BoaTest):
     # region TestExtend
 
     def test_extend_tuple(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ExtendTuple.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTuple.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_extend_sequence(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ExtendSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendSequence.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_extend_mutable_sequence(self):
@@ -390,7 +390,7 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/ExtendMutableSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendMutableSequence.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -430,17 +430,17 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/built_in_methods_test/ExtendMutableSequenceBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendMutableSequenceBuiltinCall.py' % self.dirname
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_extend_too_many_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ExtendTooManyParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_extend_too_few_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ExtendTooFewParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -459,7 +459,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashInt.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashInt.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -475,7 +475,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashIntBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashIntBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -491,7 +491,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashStr.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -507,33 +507,33 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashStrBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStrBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_script_hash_variable(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashVariable.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariable.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_script_hash_variable_with_builtin(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_script_hahs_too_many_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashTooManyParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_script_hash_too_few_parameters(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashTooFewParameters.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_script_hash_mismatched_types(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashMismatchedType.py' % self.dirname
         # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_script_hash_builtin_mismatched_types(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ScriptHashBuiltinMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashBuiltinMismatchedType.py' % self.dirname
         # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
         self.assertCompilerLogs(NotSupportedOperation, path)
 
@@ -554,7 +554,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/built_in_methods_test/IntToBytes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IntToBytes.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -571,12 +571,12 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/built_in_methods_test/IntToBytesWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IntToBytesWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_to_bytes_mismatched_types(self):
-        path = '%s/boa3_test/example/built_in_methods_test/ToBytesMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/built_in_methods_test/ToBytesMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion

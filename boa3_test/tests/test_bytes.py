@@ -24,7 +24,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesLiteral.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesLiteral.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -47,7 +47,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesGetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesGetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -71,20 +71,20 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesGetValueNegativeIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesGetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_bytes_set_value(self):
-        path = '%s/boa3_test/example/bytes_test/BytesSetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesSetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_bytes_clear(self):
-        path = '%s/boa3_test/example/bytes_test/BytesClear.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesClear.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_reverse(self):
-        path = '%s/boa3_test/example/bytes_test/BytesReverse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesReverse.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_int(self):
@@ -100,7 +100,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesToInt.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToInt.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -117,16 +117,16 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesToIntWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_bytes_to_int_mismatched_types(self):
-        path = '%s/boa3_test/example/bytes_test/BytesToIntWithBuiltinMismatchedTypes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltinMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_int_with_byte_array_builtin(self):
-        path = '%s/boa3_test/example/bytes_test/BytesToIntWithBytearrayBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBytearrayBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_str(self):
@@ -142,7 +142,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesToStr.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -159,12 +159,12 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_bytes_to_str_mismatched_types(self):
-        path = '%s/boa3_test/example/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_from_byte_array(self):
@@ -185,7 +185,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytesFromBytearray.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytesFromBytearray.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -208,7 +208,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayGetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayGetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -232,7 +232,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayGetValueNegativeIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayGetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -257,7 +257,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearraySetValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearraySetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -283,12 +283,12 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearraySetValueNegativeIndex.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearraySetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_byte_array_literal_value(self):
-        path = '%s/boa3_test/example/bytes_test/BytearrayLiteral.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayLiteral.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_byte_array_from_literal_bytes(self):
@@ -307,7 +307,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayFromLiteralBytes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayFromLiteralBytes.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -329,12 +329,12 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayFromVariableBytes.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayFromVariableBytes.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_byte_array_string(self):
-        path = '%s/boa3_test/example/bytes_test/BytearrayFromString.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayFromString.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_byte_array_append(self):
@@ -367,7 +367,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return a
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayAppend.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppend.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -401,7 +401,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return a
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayAppendWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppendWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -435,7 +435,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return a
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayAppendWithMutableSequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppendWithMutableSequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -472,7 +472,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return a
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayClear.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayClear.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -494,12 +494,12 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return a
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayReverse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayReverse.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_byte_array_extend(self):
-        path = '%s/boa3_test/example/bytes_test/BytearrayExtend.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayExtend.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_byte_array_to_int(self):
@@ -515,7 +515,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayToInt.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayToInt.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -532,7 +532,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayToIntWithBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayToIntWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -549,6 +549,6 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/example/bytes_test/BytearrayToIntWithBytesBuiltin.py' % self.dirname
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayToIntWithBytesBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
