@@ -15,7 +15,7 @@ class Integer(int):
         aux: int = bits_per_byte - 1
         if self < 0:
             signed = True
-        if signed:
+        if self > 0 and signed:
             aux += 1  # signed numbers uses an additional bit to represent the signal
 
         byte_length: int = ((self.bit_length() + aux) // bits_per_byte)

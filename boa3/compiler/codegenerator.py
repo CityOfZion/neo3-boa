@@ -391,7 +391,7 @@ class CodeGenerator:
                 op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
                 self.__insert1(op_info)
         else:
-            array = Integer(value).to_byte_array()
+            array = Integer(value).to_byte_array(signed=True)
             self.insert_push_data(array)
             # cast the value to integer
             self.convert_cast(Type.int)
