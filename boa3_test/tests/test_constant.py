@@ -43,7 +43,7 @@ class TestConstant(BoaTest):
 
         self.assertEqual(expected_output, output)
 
-    def test_one_byte_integer_constant(self):
+    def test_one_byte_length_integer_constant(self):
         input = 42
         byte_input = Integer(input).to_byte_array()
         expected_output = (
@@ -60,7 +60,7 @@ class TestConstant(BoaTest):
 
         self.assertEqual(expected_output, output)
 
-    def test_two_bytes_length_integer_constant(self):
+    def test_two_bytes_length_length_integer_constant(self):
         byte_input = bytes(300) + b'\x01'
         input = Integer.from_bytes(byte_input)
         expected_output = (
@@ -93,6 +93,44 @@ class TestConstant(BoaTest):
         output = generator.bytecode
 
         self.assertEqual(expected_output, output)
+
+    def test_ambiguous_integer_constant(self):
+        byte_input = b'\x00\x80'
+        unsigned = Integer.from_bytes(byte_input, signed=False)
+        signed = Integer.from_bytes(byte_input, signed=True)
+        self.assertNotEqual(unsigned, signed)
+
+        unsigned_byte_input = Integer(unsigned).to_byte_array(signed=True)
+        self.assertNotEqual(byte_input, unsigned_byte_input)
+        unsigned_expected_output = (
+            Opcode.PUSHDATA1            # push the bytes
+            + Integer(len(unsigned_byte_input)).to_byte_array(min_length=1)
+            + unsigned_byte_input
+            + Opcode.CONVERT            # convert to integer
+            + Type.int.stack_item
+        )
+
+        generator = self.build_code_generator()
+        generator.convert_integer_literal(unsigned)
+        output = generator.bytecode
+
+        self.assertEqual(unsigned_expected_output, output)
+
+        signed_byte_input = Integer(signed).to_byte_array(signed=True)
+        self.assertEqual(byte_input, signed_byte_input)
+        signed_expected_output = (
+            Opcode.PUSHDATA1            # push the bytes
+            + Integer(len(signed_byte_input)).to_byte_array(min_length=1)
+            + signed_byte_input
+            + Opcode.CONVERT            # convert to integer
+            + Type.int.stack_item
+        )
+
+        generator = self.build_code_generator()
+        generator.convert_integer_literal(signed)
+        output = generator.bytecode
+
+        self.assertEqual(signed_expected_output, output)
 
     def test_string_constant(self):
         input = 'unit_test'
