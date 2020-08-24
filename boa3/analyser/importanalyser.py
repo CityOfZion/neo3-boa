@@ -32,7 +32,7 @@ class ImportAnalyser(IAstAnalyser):
 
             inside_python_folder = any(re.search(r'python(\d\.?)*', folder.lower()) for folder in path)
             updated_tree = None
-            
+
             if 'boa3' in path and '/'.join(path[path.index('boa3'):]).startswith('boa3/builtin'):
                 pkg_start_index = path.index('builtin') + 1
                 if path[pkg_start_index] == path[-1]:
@@ -117,4 +117,4 @@ class ImportAnalyser(IAstAnalyser):
             if packages[0] == 'interop':
                 return self._get_interop_symbols(packages[1])
 
-        return Builtin.boa_symbols()
+        return self._get_boa3_builtin_symbols()

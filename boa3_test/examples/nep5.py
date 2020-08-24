@@ -27,6 +27,7 @@ def manifest_metadata() -> NeoMetadata:
 
 # Script hash of the contract owner
 OWNER = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+SUPPLY_KEY = 'totalSupply'
 
 # Name of the Token
 TOKEN_NAME = 'NEP5 Standard'
@@ -194,4 +195,24 @@ def transfer(from_address: bytes, to_address: bytes, amount: int) -> bool:
 
     # if the method succeeds, it must fire the transfer event, and must return true
     on_transfer(from_address, to_address, amount)
+    return True
+
+
+@public
+def deploy() -> bool:
+    """
+    Initializes the storage when the smart contract is deployed.
+
+    :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
+    """
+    if not check_witness(OWNER):
+        return False
+
+    if get(SUPPLY_KEY) is not None:
+        return False
+
+    put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+    put(OWNER, TOKEN_TOTAL_SUPPLY)
+
+    on_transfer(b'', OWNER, TOKEN_TOTAL_SUPPLY)
     return True

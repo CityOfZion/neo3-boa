@@ -44,6 +44,8 @@ class CodeGenerator:
         generator = CodeGenerator(analyser.symbol_table)
         visitor = VisitorCodeGenerator(generator)
         visitor.visit(analyser.ast_tree)
+
+        analyser.symbol_table.update(generator.symbol_table)
         generator.initialized_static_fields = True
 
         for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
@@ -52,7 +54,7 @@ class CodeGenerator:
         return generator.bytecode
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
-        self.symbol_table: Dict[str, ISymbol] = symbol_table
+        self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
 
         self._current_method: Method = None
 
