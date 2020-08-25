@@ -44,7 +44,6 @@ class ImportAnalyser(IAstAnalyser):
                 self.can_be_imported = True
 
             elif not (inside_python_folder and 'lib' in path):
-                print('Importing with analyser - user modules only')
                 # TODO: only user modules and typing lib imports are implemented
                 try:
                     from boa3.analyser.analyser import Analyser

@@ -956,7 +956,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return '{0}.{1}'.format(attribute.value.id, attribute.attr)
 
         symbol = None
-        if isinstance(value, str):
+        if isinstance(value, str) and not isinstance(attribute.value, ast.Str):
             symbol = self.get_symbol(value)
             if symbol is None:
                 return '{0}.{1}'.format(value, attribute.attr)
