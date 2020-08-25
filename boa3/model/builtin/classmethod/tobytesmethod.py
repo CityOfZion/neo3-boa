@@ -7,6 +7,7 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.inttype import IntType
+from boa3.model.type.primitive.strtype import StrType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
@@ -60,6 +61,8 @@ class _ConvertToBytesMethod(ToBytesMethod):
     def build(self, value: Any):
         if isinstance(value, IntType):
             return IntToBytesMethod(value)
+        elif isinstance(value, StrType):
+            return StrToBytesMethod(value)
         # if it is not a valid type, show mismatched type with int
         return IntToBytesMethod()
 
@@ -77,6 +80,21 @@ class IntToBytesMethod(ToBytesMethod):
     def build(self, value: Any):
         if type(value) == type(self.args['self'].type):
             return self
-        if isinstance(value, BytesType):
+        if isinstance(value, IntType):
             return IntToBytesMethod(value)
+        return super().build(value)
+
+
+class StrToBytesMethod(ToBytesMethod):
+    def __init__(self, self_type: IType = None):
+        if not isinstance(self_type, StrType):
+            from boa3.model.type.type import Type
+            self_type = Type.str
+        super().__init__(self_type)
+
+    def build(self, value: Any):
+        if type(value) == type(self.args['self'].type):
+            return self
+        if isinstance(value, StrType):
+            return StrToBytesMethod(value)
         return super().build(value)
