@@ -81,7 +81,7 @@ source venv/bin/activate
 Then, install the requirements:
 
 ```
-pip install -r requirements.txt
+pip install -e .
 ```
 
 <br/>
