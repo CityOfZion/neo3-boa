@@ -12,14 +12,7 @@ Welcome to neo3-boa's documentation!
 
    overview
    install
+   package-reference
    contribute
    license
-   boa3/boa3
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   project-structure

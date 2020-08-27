@@ -108,7 +108,7 @@ class Builtin:
             'description': (str, type(None)),
             'has_storage': bool,
             'is_payable': bool
-        }
+    }
 
     @classmethod
     def boa_symbols(cls) -> Dict[str, IdentifiedSymbol]:
