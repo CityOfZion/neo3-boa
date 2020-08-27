@@ -9,4 +9,4 @@ def get_auxiliary_name(node: ast.AST, aux_symbol_id: str) -> str:
     :param aux_symbol_id: the id name of the auxiliary symbol
     :return: the unique name to the symbol.
     """
-    return "%s_%s" % (aux_symbol_id, id(node))
+    return "{0}_{1}".format(aux_symbol_id, id(node))

@@ -1,10 +1,11 @@
 from typing import Any
 
-from boa3.model.type.itype import IType
+from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.StackItemType import StackItemType
 
 
-class IntType(IType):
+class IntType(PrimitiveType):
     """
     A class used to represent Python int type
     """
@@ -21,6 +22,10 @@ class IntType(IType):
     def abi_type(self) -> AbiType:
         return AbiType.Integer
 
+    @property
+    def stack_item(self) -> StackItemType:
+        return StackItemType.Integer
+
     @classmethod
     def build(cls, value: Any):
         if cls._is_type_of(value):
@@ -29,4 +34,4 @@ class IntType(IType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return type(value) in [int, IntType]
+        return type(value) is int or isinstance(value, IntType)

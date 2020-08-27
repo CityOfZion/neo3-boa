@@ -1,6 +1,6 @@
 from typing import Dict
 
-from boa3.model.expression import IExpression
+from boa3.model.callable import Callable
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
@@ -12,6 +12,8 @@ class Module(ISymbol):
 
     :ivar variables: a dictionary that maps each variable with its name. Empty by default.
     :ivar methods: a dictionary that maps each method with its name. Empty by default.
+    :ivar callables: a dictionary that maps each callable object with its name. Empty by default.
+    :ivar imported_symbols: a dictionary that maps each imported symbol with its name. Empty by default.
     """
 
     def __init__(self, variables: Dict[str, Variable] = None, methods: Dict[str, Method] = None):
@@ -22,6 +24,10 @@ class Module(ISymbol):
         if methods is None:
             methods = {}
         self.methods = methods
+        self.callables: Dict[str, Callable] = {}
+
+        self.imported_symbols = {}
+        self.assigned_variables = []
 
     @property
     def shadowing_name(self) -> str:
@@ -37,7 +43,25 @@ class Module(ISymbol):
         if var_id not in self.symbols:
             self.variables[var_id] = var
 
-    def include_method(self, method_id: str, method: Method):
+    def is_variable_assigned(self, var_id: str) -> bool:
+        if var_id not in self.variables:
+            return False
+
+        if var_id in self.assigned_variables or var_id in self.imported_symbols:
+            return True
+
+        for imported in self.imported_symbols.values():
+            from boa3.model.importsymbol import Import
+            if isinstance(imported, Import) and self.variables[var_id] in imported.variables.values():
+                return True
+
+        return False
+
+    def assign_variable(self, var_id: str):
+        if var_id in self.variables:
+            self.assigned_variables.append(var_id)
+
+    def include_callable(self, method_id: str, method: Callable):
         """
         Includes a method into the scope of the module
 
@@ -45,16 +69,36 @@ class Module(ISymbol):
         :param method: method to be included
         """
         if method_id not in self.symbols:
-            self.methods[method_id] = method
+            if isinstance(method, Method):
+                self.methods[method_id] = method
+            else:
+                self.callables[method_id] = method
+
+    def include_symbol(self, symbol_id: str, symbol: ISymbol):
+        """
+        Includes a method into the scope of the module
+
+        :param symbol_id: method identifier
+        :param symbol: method to be included
+        """
+        if symbol_id not in self.symbols:
+            if isinstance(symbol, Variable):
+                self.include_variable(symbol_id, symbol)
+            elif isinstance(symbol, Callable):
+                self.include_callable(symbol_id, symbol)
+            else:
+                self.imported_symbols[symbol_id] = symbol
 
     @property
-    def symbols(self) -> Dict[str, IExpression]:
+    def symbols(self) -> Dict[str, ISymbol]:
         """
         Gets all the symbols in the module
 
         :return: a dictionary that maps each symbol in the module with its name
         """
         symbols = {}
+        symbols.update(self.imported_symbols)
         symbols.update(self.variables)
         symbols.update(self.methods)
+        symbols.update(self.callables)
         return symbols

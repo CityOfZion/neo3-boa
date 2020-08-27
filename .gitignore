@@ -1,14 +1,10 @@
 .idea
 venv
 __pycache__
-.nef
 *.nef
-.manifest.json
 *.manifest.json
-.avmdbgnfo
-*.avmdbgnfo
-.abi.json
-*.abi.json
+*.nefdbgnfo
 dist
 build
+_build
 neo3_boa.egg-info

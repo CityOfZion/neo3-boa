@@ -1,16 +1,18 @@
+import ast
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 
+from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.expression import IExpression
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 
-class IBuiltinDecorator(Method, ABC):
-    def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        self.identifier = identifier
-        super().__init__(args, return_type)
+class IBuiltinDecorator(IBuiltinCallable, Method, ABC):
+    def __init__(self, identifier: str, args: Dict[str, Variable] = None,
+                 defaults: List[ast.AST] = None, return_type: IType = None):
+        super().__init__(identifier, args, defaults, return_type)
 
     @abstractmethod
     def validate_parameters(self, *params: IExpression) -> bool:
@@ -21,3 +23,7 @@ class IBuiltinDecorator(Method, ABC):
         :return: True if all arguments are valid. False otherwise.
         """
         pass
+
+    @property
+    def requires_storage(self) -> bool:
+        return False

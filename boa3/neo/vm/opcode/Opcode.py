@@ -32,7 +32,7 @@ class Opcode(bytes, Enum):
         Gets the push opcode to the respective integer
 
         :param integer: value that will be pushed
-        :return: the respective opceode
+        :return: the respective opcode
         :rtype: Opcode or None
         """
         if -1 <= integer <= 16:
@@ -82,45 +82,46 @@ class Opcode(bytes, Enum):
 
     # region Flow control
 
-    def get_large_jump(self):
+    def has_larger_opcode(self) -> bool:
+        return self in self.__larger_opcode
+
+    def get_larger_opcode(self):
         """
-        Gets the large jump opcode to the standard jump
+        Gets the large opcode to the standard opcode
 
         :return: the respective opcode
         :rtype: Opcode or None
         """
-        if self in self.__larger_jump:
-            return self.__larger_jump[self]
+        opcode_map = self.__larger_opcode
+        if self in opcode_map:
+            return opcode_map[self]
+        elif self in opcode_map.values():
+            return self
         else:
             return None
 
     @property
-    def __larger_jump(self) -> Dict[bytes, bytes]:
+    def __larger_opcode(self) -> Dict[bytes, bytes]:
         """
-        A map of each jump with its larger equivalent
+        A map of each opcode with its larger equivalent
 
-        :return: a dictionary that maps each jump opcode to its larger equivalent.
+        :return: a dictionary that maps each opcode to its larger equivalent.
         """
-        return {
+        opcodes = {
             self.JMP: self.JMP_L,
-            self.JMP_L: self.JMP_L,
             self.JMPIF: self.JMPIF_L,
-            self.JMPIF_L: self.JMPIF_L,
             self.JMPIFNOT: self.JMPIFNOT_L,
-            self.JMPIFNOT_L: self.JMPIFNOT_L,
             self.JMPEQ: self.JMPEQ_L,
-            self.JMPEQ_L: self.JMPEQ_L,
             self.JMPNE: self.JMPNE_L,
-            self.JMPNE_L: self.JMPNE_L,
             self.JMPGT: self.JMPGT_L,
-            self.JMPGT_L: self.JMPGT_L,
             self.JMPGE: self.JMPGE_L,
-            self.JMPGE_L: self.JMPGE_L,
             self.JMPLT: self.JMPLT_L,
-            self.JMPLT_L: self.JMPLT_L,
             self.JMPLE: self.JMPLE_L,
-            self.JMPLE_L: self.JMPLE_L
+            self.CALL: self.CALL_L,
+            self.TRY: self.TRY_L,
+            self.ENDTRY: self.ENDTRY_L
         }
+        return opcodes
 
     # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
     NOP = b'\x21'
@@ -217,6 +218,9 @@ class Opcode(bytes, Enum):
     # Calls to an interop service.
     SYSCALL = b'\x41'
 
+    def has_target(self) -> bool:
+        return self.JMP <= self <= self.CALL_L or self.ENDTRY <= self <= self.ENDFINALLY
+
     # endregion
 
     # region Stack
@@ -231,6 +235,27 @@ class Opcode(bytes, Enum):
     XDROP = b'\x48'
     # Clear the stack
     CLEAR = b'\x49'
+
+    @staticmethod
+    def get_drop(position: int):
+        """
+        Gets the opcode to remove the item n back in the stack
+
+        :param position: index of the variable
+        :return: the respective opcode
+        :rtype: Opcode
+        """
+        duplicate_item = {
+            1: Opcode.DROP,
+            2: Opcode.NIP
+        }
+
+        if position > 0:
+            if position in duplicate_item:
+                return duplicate_item[position]
+            else:
+                return Opcode.XDROP
+
     # Duplicates the top stack item.
     DUP = b'\x4A'
     # Copies the second-to-top stack item to the top.
@@ -252,7 +277,7 @@ class Opcode(bytes, Enum):
             2: Opcode.OVER
         }
 
-        if position > 0:
+        if position >= 0:
             if position in duplicate_item:
                 return duplicate_item[position]
             else:
@@ -288,7 +313,7 @@ class Opcode(bytes, Enum):
             4: Opcode.REVERSE4
         }
 
-        if no_stack_items > 1:
+        if no_stack_items >= 0:
             if no_stack_items in reverse_stack:
                 return reverse_stack[no_stack_items]
             else:
@@ -362,6 +387,26 @@ class Opcode(bytes, Enum):
                 return Opcode.LDLOC
             else:
                 return Opcode.LDSFLD
+
+    @property
+    def is_load_slot(self) -> bool:
+        return (self.LDSFLD0 <= self <= self.LDSFLD
+                or self.LDLOC0 <= self <= self.LDLOC
+                or self.LDARG0 <= self <= self.LDARG)
+
+    @staticmethod
+    def get_store_from_load(load_opcode):
+        """
+        Gets the store slot opcode equivalent to the given load slot opcode.
+
+        :param load_opcode: load opcode
+        :type load_opcode: Opcode
+        :return: equivalent store opcode if the given opcode is a load slot. Otherwise, returns None
+        :rtype: Opcode or None
+        """
+        if load_opcode.is_load_slot:
+            opcode_value: int = Integer.from_bytes(load_opcode) + 8
+            return Opcode(Integer(opcode_value).to_byte_array())
 
     # Loads the static field at index 0 onto the evaluation stack.
     LDSFLD0 = b'\x58'

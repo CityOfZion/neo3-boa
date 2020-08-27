@@ -30,7 +30,7 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/ConstantCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/ConstantCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -58,17 +58,17 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/VariableCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/VariableCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_while_mismatched_type_condition(self):
-        path = '%s/boa3_test/example/while_test/MismatchedTypeCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/MismatchedTypeCondition.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_while_no_condition(self):
-        path = '%s/boa3_test/example/while_test/NoCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/NoCondition.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -114,7 +114,7 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/NestedWhile.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/NestedWhile.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -146,7 +146,7 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/WhileElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/WhileElse.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -182,7 +182,7 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/RelationalCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/RelationalCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -222,13 +222,13 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/MultipleRelationalCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/MultipleRelationalCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_boa2_while_test(self):
-        path = '%s/boa3_test/example/while_test/WhileBoa2Test.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test.py' % self.dirname
 
         # TODO: change test when 'break' are implemented
         with self.assertRaises(NotImplementedError):
@@ -259,13 +259,13 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/while_test/WhileBoa2Test1.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test1.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_boa2_while_test2(self):
-        path = '%s/boa3_test/example/while_test/WhileBoa2Test2.py' % self.dirname
+        path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test2.py' % self.dirname
 
         # TODO: change test when 'break' are implemented
         with self.assertRaises(NotImplementedError):

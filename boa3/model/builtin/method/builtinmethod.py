@@ -1,42 +1,43 @@
+import ast
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
-from boa3.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.model.builtin.builtincallable import IBuiltinCallable
+from boa3.model.method import Method
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class IBuiltinMethod(IBuiltinDecorator, ABC):
-    def __init__(self, identifier: str, args: Dict[str, Variable] = None, return_type: IType = None):
-        self.identifier = identifier
-        super().__init__(identifier, args, return_type)
+class IBuiltinMethod(IBuiltinCallable, Method, ABC):
+    def __init__(self, identifier: str, args: Dict[str, Variable] = None,
+                 defaults: List[ast.AST] = None, return_type: IType = None):
+        super().__init__(identifier, args, defaults, return_type)
 
     @property
-    def opcode(self) -> Optional[Opcode]:
+    def is_supported(self) -> bool:
         """
-        Gets the opcode for the method.
+        Verifies if the builtin method is supported by the compiler
 
-        :return: the opcode if exists. None otherwise.
+        :return: True if it is supported. False otherwise.
         """
-        return None
+        return True
 
     @property
     def args_on_stack(self) -> int:
         """
         Gets the number of arguments that must be on stack before the opcode is called.
 
-        :return: the number of arguments if opcode is not None. Zero otherwise.
+        :return: the number of arguments if opcode is not empty. Zero otherwise.
         """
-        if self.opcode is None:
-            return 0
-        else:
+        if len(self.opcode) > 0:
             num_args = self._args_on_stack
             if num_args < 0:
                 return 0
             elif num_args > len(self.args):
                 return len(self.args)
             return num_args
+        else:
+            return 0
 
     def push_self_first(self) -> bool:
         """
@@ -80,16 +81,22 @@ class IBuiltinMethod(IBuiltinDecorator, ABC):
         return 0
 
     @property
+    def stores_on_slot(self) -> bool:
+        """
+        Returns whether this method needs to update the value from a variable
+
+        :return: the number of arguments.
+        """
+        return False
+
+    @property
     def body(self) -> Optional[str]:
         """
         Gets the body of the method.
 
         :return: Return the code of the method body if there is no opcode. None otherwise.
         """
-        if self.opcode is None:
-            return self._body
-        else:
-            return None
+        return self._body if len(self.opcode) <= 0 else None
 
     @property
     @abstractmethod

@@ -15,7 +15,7 @@ class ObjectInequality(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str, Type.int, Type.bool]
+    _valid_types: List[IType] = [Type.str, Type.bytes, Type.int, Type.bool]
 
     def __init__(self, left: IType = Type.str, right: IType = None):
         self.operator: Operator = Operator.NotEq
@@ -27,7 +27,10 @@ class ObjectInequality(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
-        return left in self._valid_types and right in self._valid_types
+        return self._is_valid_type(left) and self._is_valid_type(right)
+
+    def _is_valid_type(self, tpe: IType) -> bool:
+        return any(valid.is_type_of(tpe) for valid in self._valid_types)
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):

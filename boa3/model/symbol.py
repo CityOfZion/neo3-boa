@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class ISymbol(ABC):
+class ISymbol(ABC, object):
     @property
     @abstractmethod
     def shadowing_name(self) -> str:

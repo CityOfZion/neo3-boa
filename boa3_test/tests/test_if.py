@@ -1,8 +1,8 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -26,7 +26,7 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/if_test/ConstantCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/ConstantCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -49,23 +49,23 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/if_test/VariableCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/VariableCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_if_mismatched_type_condition(self):
-        path = '%s/boa3_test/example/if_test/MismatchedTypeCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/MismatchedTypeCondition.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_if_no_condition(self):
-        path = '%s/boa3_test/example/if_test/IfWithoutCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/IfWithoutCondition.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_if_no_body(self):
-        path = '%s/boa3_test/example/if_test/IfWithoutBody.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/IfWithoutBody.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -101,7 +101,7 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/if_test/NestedIf.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/NestedIf.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -127,13 +127,13 @@ class TestIf(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/if_test/IfElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/IfElse.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_else_no_body(self):
-        path = '%s/boa3_test/example/if_test/ElseWithoutBody.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/ElseWithoutBody.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -163,18 +163,18 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/if_test/IfElif.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/IfElif.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_elif_no_condition(self):
-        path = '%s/boa3_test/example/if_test/ElifWithoutCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/ElifWithoutCondition.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_elif_no_body(self):
-        path = '%s/boa3_test/example/if_test/ElifWithoutBody.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/ElifWithoutBody.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -201,7 +201,7 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/if_test/RelationalCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/RelationalCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -252,13 +252,13 @@ class TestIf(BoaTest):
                 + Integer(len(twenty)).to_byte_array()
                 + twenty
                 + Opcode.CONVERT
-                + StackItemType.Integer
+                + Type.int.stack_item
                 + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/example/if_test/MultipleBranches.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/MultipleBranches.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -279,13 +279,17 @@ class TestIf(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/example/if_test/IfExpVariableCondition.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/IfExpVariableCondition.py' % self.dirname
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_if_expression_without_else_branch(self):
-        path = '%s/boa3_test/example/if_test/IfExpWithoutElse.py' % self.dirname
+        path = '%s/boa3_test/test_sc/if_test/IfExpWithoutElse.py' % self.dirname
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
+
+    def test_if_expression_mismatched_types(self):
+        path = '%s/boa3_test/test_sc/if_test/MismatchedIfExp.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

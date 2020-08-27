@@ -1,7 +1,6 @@
 import ast
-from typing import List, Sequence, Union
+from typing import Sequence, Union
 
-from boa3 import helpers
 from boa3.analyser.astanalyser import IAstAnalyser
 
 
@@ -13,8 +12,8 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
     These methods are used to walk through the Python abstract syntax tree.
     """
 
-    def __init__(self, ast_tree: ast.AST):
-        super().__init__(ast_tree)
+    def __init__(self, ast_tree: ast.AST, log: bool = False):
+        super().__init__(ast_tree, log=log)
         self.visit(self._tree)
 
     @property
@@ -26,35 +25,51 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         """
         return self._tree
 
-    def visit_For(self, for_node: ast.For):
+    def visit_Call(self, call: ast.Call):
         """
-        Includes additional operations for converting the for statement into Neo VM
+        Visitor of a function call node
 
-        :param for_node: the python ast for node
+        :param call: the python ast function call node
         """
-        # get auxiliary variables
-        var_iter_id = helpers.get_auxiliary_name(for_node, 'iter')
-        var_index_id = helpers.get_auxiliary_name(for_node, 'index')
+        if isinstance(call.func, ast.Attribute):
+            from boa3.model.builtin.builtin import Builtin
+            if call.func.attr == Builtin.ScriptHash.identifier:
+                import sys
+                from boa3.model.type.type import Type
+                types = {
+                    Type.int.identifier: int,
+                    Type.str.identifier: str,
+                    Type.bytes.identifier: bytes
+                }
+                literal: tuple = ((ast.Constant,)
+                                  if sys.version_info > (3, 8)
+                                  else (ast.Num, ast.Str, ast.Bytes))
 
-        add_instructs: List[ast.AST] = self.parse_to_node('{0} = x; {1} = 0'.format(var_iter_id, var_index_id), for_node)
-        add_instructs[0].value = for_node.iter  # iter auxiliary variable is assigned with the node iter value
+                if isinstance(call.func.value, literal) and len(call.args) == 0:
+                    value = ast.literal_eval(call.func.value)
+                    if not isinstance(value, tuple(types.values())):
+                        return call
+                elif (isinstance(call.func.value, ast.Name)     # checks if is the name of a type
+                      and call.func.value.id in types        # and if the arguments is from the same type
+                      and len(call.args) == 1
+                      and isinstance(call.args[0], literal)):
+                    value = ast.literal_eval(call.args[0])
+                    if not isinstance(value, (types[call.func.value.id],)):
+                        return call
+                else:
+                    return call
 
-        update_target: ast.Assign = self.parse_to_node('x = {0}[{1}]'.format(var_iter_id, var_index_id), for_node)
-        update_target.targets[0] = for_node.target  # target variable is updated each loop iteration
+                from boa3.neo import to_script_hash
+                # value must be bytes
+                if isinstance(value, int):
+                    from boa3.neo.vm.type.Integer import Integer
+                    value = Integer(value).to_byte_array()
+                elif isinstance(value, str):
+                    from boa3.neo.vm.type.String import String
+                    value = String(value).to_bytes()
+                return self.parse_to_node(str(to_script_hash(value)), call)
 
-        update_index: ast.Assign = self.parse_to_node('{0} = {0} + 1'.format(var_index_id), for_node)
-        loop_test: ast.Compare = self.parse_to_node('{0} < len({1})'.format(var_index_id, var_iter_id), for_node)
-
-        for_node.body.insert(0, update_target)
-        for_node.body.append(update_index)
-        for_node.body.append(loop_test)
-
-        for node in add_instructs:
-            self.generic_visit(node)
-        self.generic_visit(for_node)
-
-        add_instructs.append(for_node)
-        return add_instructs
+        return call
 
     def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
         """
@@ -98,7 +113,7 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, ast.AST):
-                        ast.copy_location(item, origin)
+                        self.update_line_and_col(item, origin)
             elif isinstance(value, ast.AST):
-                ast.copy_location(value, origin)
+                self.update_line_and_col(value, origin)
         ast.fix_missing_locations(target)

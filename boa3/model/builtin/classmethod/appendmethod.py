@@ -1,8 +1,8 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
-from boa3.model.type.sequence.mutable.mutablesequencetype import MutableSequenceType
+from boa3.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
@@ -21,6 +21,14 @@ class AppendMethod(IBuiltinMethod):
         args: Dict[str, Variable] = {'self': self_arg, 'item': item_arg}
         super().__init__(identifier, args)
 
+    @property
+    def _arg_self(self) -> Variable:
+        return self.args['self']
+
+    @property
+    def stores_on_slot(self) -> bool:
+        return True
+
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 2:
             return False
@@ -36,8 +44,17 @@ class AppendMethod(IBuiltinMethod):
         return sequence_type.value_type.is_type_of(value_type)
 
     @property
-    def opcode(self) -> Optional[Opcode]:
-        return Opcode.APPEND
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        from boa3.model.type.type import Type
+        from boa3.neo.vm.type.Integer import Integer
+        return [
+            (Opcode.OVER, b''),
+            (Opcode.ISTYPE, Type.bytearray.stack_item),     # append opcode only works for array
+            (Opcode.JMPIFNOT, Integer(5).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
+            (Opcode.CAT, b''),
+            (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
+            (Opcode.APPEND, b'')
+        ]
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

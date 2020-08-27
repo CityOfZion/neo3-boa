@@ -16,7 +16,7 @@ class Compiler:
 
     def __init__(self):
         self.bytecode: bytearray = bytearray()
-        self.__analyser: Analyser = None
+        self._analyser: Analyser = None
 
     def compile(self, path: str) -> bytes:
         """
@@ -29,8 +29,8 @@ class Compiler:
         filepath, filename = os.path.split(fullpath)
 
         logging.info('Started compiling\t{0}'.format(filename))
-        self.__analyse(path)
-        return self.__compile()
+        self._analyse(path)
+        return self._compile()
 
     def compile_and_save(self, path: str, output_path: str):
         """
@@ -40,48 +40,51 @@ class Compiler:
         :param output_path: the path to save the generated files
         """
         self.bytecode = self.compile(path)
-        self.__save(output_path)
+        self._save(output_path)
 
-    def __analyse(self, path: str):
+    def _analyse(self, path: str):
         """
         Load a Python file and analyses its syntax
 
         :param path: the path of the Python file to compile
         """
-        self.__analyser = Analyser.analyse(path)
+        self._analyser = Analyser.analyse(path, log=True)
 
-    def __compile(self) -> bytes:
+    def _compile(self) -> bytes:
         """
         Compile the analysed Python file.
 
         :return: the compiled file as a bytecode.
         :raise NotLoadedException: raised if none file were analysed
         """
-        if not self.__analyser.is_analysed:
+        if not self._analyser.is_analysed:
             raise NotLoadedException
-        return CodeGenerator.generate_code(self.__analyser)
+        return CodeGenerator.generate_code(self._analyser)
 
-    def __save(self, output_path: str):
+    def _save(self, output_path: str):
         """
         Save the compiled file and the metadata files
 
         :param output_path: the path to save the generated files
         :raise NotLoadedException: raised if no file were compiled
         """
-        if (self.__analyser is None
-                or not self.__analyser.is_analysed
+        if (self._analyser is None
+                or not self._analyser.is_analysed
                 or len(self.bytecode) == 0):
             raise NotLoadedException
 
-        generator = FileGenerator(self.bytecode, self.__analyser.symbol_table)
-
-        nef_bytes = generator.generate_nef_file()
+        generator = FileGenerator(self.bytecode, self._analyser)
         with open(output_path, 'wb+') as nef_file:
+            nef_bytes = generator.generate_nef_file()
             nef_file.write(nef_bytes)
             nef_file.close()
 
-        manifest_path = output_path.replace('.nef', '.manifest.json')
-        manifest_bytes = generator.generate_manifest_file()
-        with open(manifest_path, 'wb+') as manifest_file:
+        with open(output_path.replace('.nef', '.manifest.json'), 'wb+') as manifest_file:
+            manifest_bytes = generator.generate_manifest_file()
             manifest_file.write(manifest_bytes)
             manifest_file.close()
+
+        from zipfile import ZipFile, ZIP_DEFLATED
+        with ZipFile(output_path.replace('.nef', '.nefdbgnfo'), 'w', ZIP_DEFLATED) as nef_debug_info:
+            debug_bytes = generator.generate_nefdbgnfo_file()
+            nef_debug_info.writestr(os.path.basename(output_path.replace('.nef', '.debug.json')), debug_bytes)

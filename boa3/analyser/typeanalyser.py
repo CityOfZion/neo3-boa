@@ -1,9 +1,12 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.exception import CompilerError
+from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.callable import Callable
+from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -13,7 +16,7 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
-from boa3.model.type.sequence.sequencetype import SequenceType
+from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -28,20 +31,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar type_errors: a list with the found type errors. Empty by default.
     :ivar modules: a list with the analysed modules. Empty by default.
     :ivar symbols: a dictionary that maps the global symbols.
-    :cvar __operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
+    :cvar _operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
     """
 
-    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol]):
-        super().__init__(ast_tree)
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
+        super().__init__(analyser.ast_tree, log=log)
         self.type_errors: List[Exception] = []
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
-        self.__current_method: Method = None
+        from boa3.builtin import NeoMetadata
+        self._metadata: NeoMetadata = analyser.metadata
+        self._current_method: Method = None
 
         self.visit(self._tree)
 
-    __operators = {
+    _operators = {
         ast.Add: Operator.Plus,
         ast.Sub: Operator.Minus,
         ast.Mult: Operator.Mult,
@@ -71,19 +76,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     }
 
     @property
-    def __current_method_id(self) -> str:
+    def _current_method_id(self) -> str:
         """
         Get the string identifier of the current method
 
         :return: The name identifier of the method. If the current method is None, returns None.
         :rtype: str or None
         """
-        if self.__current_method in self.symbols.values():
-            index = list(self.symbols.values()).index(self.__current_method)
+        if self._current_method in self.symbols.values():
+            index = list(self.symbols.values()).index(self._current_method)
             return list(self.symbols.keys())[index]
 
     @property
-    def __modules_symbols(self) -> Dict[str, ISymbol]:
+    def _modules_symbols(self) -> Dict[str, ISymbol]:
         """
         Gets all the symbols in the modules scopes.
 
@@ -95,9 +100,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return symbols
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
-        if self.__current_method is not None and symbol_id in self.__current_method.symbols:
+        if not isinstance(symbol_id, str):
+            return Variable(self.get_type(symbol_id))
+        if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
-            return self.__current_method.symbols[symbol_id]
+            return self._current_method.symbols[symbol_id]
         elif symbol_id in self.modules:
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
@@ -125,19 +132,34 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         self.visit(function.args)
         method = self.symbols[function.name]
+        from boa3.model.event import Event
         if isinstance(method, Method):
-            self.__current_method = method
+            self._current_method = method
 
             for stmt in function.body:
                 self.visit(stmt)
 
-            if len(function.body) > 0 and not isinstance(function.body[-1], ast.Return):
+            self._validate_return(function)
+
+            if (len(function.body) > 0
+                    and not isinstance(function.body[-1], ast.Return)
+                    and method.return_type is Type.none):
+                # include return None in void functions
                 default_value: str = str(method.return_type.default_value)
                 node: ast.AST = ast.parse(default_value).body[0].value
                 function.body.append(
                     ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
                 )
-            self.__current_method = None
+            self._current_method = None
+        elif (isinstance(method, Event)         # events don't have return
+                and function.returns is not None):
+            return_type = self.get_type(function.returns)
+            if return_type is not Type.none:
+                self._log_error(
+                    CompilerError.MismatchedTypes(line=function.lineno, col=function.col_offset,
+                                                  expected_type_id=Type.none.identifier,
+                                                  actual_type_id=return_type.identifier)
+                )
 
     def visit_arguments(self, arguments: ast.arguments):
         """
@@ -172,8 +194,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param ret: the python ast return node
         """
         ret_value: Any = self.visit(ret.value) if ret.value is not None else None
-        ret_type: IType = self.get_type(ret.value)
-        if ret.value is not None and ret_type is not Type.none:
+        if ret.value is not None and self.get_type(ret.value) is not Type.none:
             # multiple returns are not allowed
             if isinstance(ret.value, ast.Tuple):
                 self._log_error(
@@ -181,31 +202,53 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
                 return
             # it is returning something, but there is no type hint for return
-            elif self.__current_method.return_type is Type.none:
+            elif self._current_method.return_type is Type.none:
                 self._log_error(
-                    CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self.__current_method_id)
+                    CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self._current_method_id)
                 )
                 return
-        if not self.__current_method.return_type.is_type_of(ret_type):
-            # if the return type is a specified type sequence, is not a mismatched type when the return expression
-            # is an empty sequence
-            is_empty_sequence = (
-                isinstance(ret_type, SequenceType)
-                and ret_type.is_type_of(ret_value)  # if it is a variable or a function, this will be False
-                and not isinstance(ret_value, IType)  # if it is an IType value, the latter condition will be True
-                and len(ret_value) == 0
-            )
-            if not (isinstance(self.__current_method.return_type, SequenceType) and is_empty_sequence):
-                # the return is None, but the type hint value type is not None
-                self._log_error(
-                    CompilerError.MismatchedTypes(
-                        ret.lineno, ret.col_offset,
-                        actual_type_id=ret_type.identifier,
-                        expected_type_id=self.__current_method.return_type.identifier)
-                )
+        self.validate_type_variable_assign(ret, ret_value, self._current_method)
 
         # continue to walk through the tree
         self.generic_visit(ret)
+
+    def _validate_return(self, node: ast.AST):
+        if (self._current_method.return_type is not Type.none
+                and hasattr(node, 'body')
+                and not self._has_return(node)):
+            lst = list(self.symbols.items())
+            keys, values = [key_value[0] for key_value in lst], [key_value[-1] for key_value in lst]
+            self._log_error(
+                CompilerError.MissingReturnStatement(
+                    line=node.lineno, col=node.col_offset,
+                    symbol_id=keys[values.index(self._current_method)]
+                )
+            )
+
+    def _has_return(self, node: ast.AST) -> bool:
+        if not hasattr(node, 'body'):
+            return False
+
+        has_else_stmt: bool = hasattr(node, 'orelse')
+        has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
+        if has_body_return and not has_else_stmt:
+            # if any statement in the function body is a return, all flow has a return
+            return True
+
+        body = [stmt for stmt in node.body if hasattr(stmt, 'body')]
+        body_has_inner_return: bool = len(body) > 0 and all(self._has_return(stmt) for stmt in body)
+        if not has_body_return and not body_has_inner_return:
+            # for and while nodes must to check if there is a return inside the else statement
+            if not isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
+                return False
+
+        if has_else_stmt:
+            if any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.orelse):
+                return True
+            else:
+                orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
+                return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
+        return body_has_inner_return
 
     def visit_Assign(self, assign: ast.Assign):
         """
@@ -239,9 +282,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if ann_assign.value is not None:
             self.validate_type_variable_assign(ann_assign.target, ann_assign.value)
 
-        # continue to walk through the tree
-        self.generic_visit(ann_assign)
-
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """
         Verifies if the types of the target variable and the value are compatible with the operation
@@ -259,18 +299,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.validate_type_variable_assign(aug_assign.target, operation)
             aug_assign.op = operation
 
-    def validate_type_variable_assign(self, target: ast.AST, value: Any) -> bool:
+    def validate_type_variable_assign(self, node: ast.AST, value: Any, target: Any = None) -> bool:
         value_type: IType = self.get_type(value)
+        if isinstance(value, ast.AST):
+            value = self.visit(value)
 
-        if not isinstance(target, ast.Name):
+        if target is not None:
             target_type = self.get_type(target)
+        elif not isinstance(node, ast.Name):
+            target_type = self.get_type(node)
         else:
-            var: ISymbol = self.get_symbol(target.id)
+            var: ISymbol = self.get_symbol(node.id)
             if not isinstance(var, Variable):
                 self._log_error(
                     CompilerError.UnresolvedReference(
-                        target.lineno, target.col_offset,
-                        symbol_id=target.id
+                        node.lineno, node.col_offset,
+                        symbol_id=node.id
                     ))
                 return False
             if var.type is None:
@@ -278,10 +322,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var.set_type(value_type)
             target_type = var.type
 
-        if not target_type.is_type_of(value_type):
+        if not target_type.is_type_of(value_type) and value != target_type.default_value:
             self._log_error(
                 CompilerError.MismatchedTypes(
-                    target.lineno, target.col_offset,
+                    node.lineno, node.col_offset,
                     actual_type_id=value_type.identifier,
                     expected_type_id=target_type.identifier
                 ))
@@ -317,16 +361,18 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             value = self.get_symbol(value.id)
         if isinstance(index, ast.Name):
             index = self.get_symbol(index.id)
+        if not isinstance(index, tuple):
+            index = (index,)
 
         # if it is a type hint, returns the outer type
-        if isinstance(value, IType) and isinstance(index, IType):
+        if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
             return value
 
         symbol_type: IType = self.get_type(value)
-        index_type: IType = self.get_type(index)
+        index_type: IType = self.get_type(index[0])
 
         # only sequence types can be subscribed
-        if not isinstance(symbol_type, SequenceType):
+        if not isinstance(symbol_type, Collection):
             self._log_error(
                 CompilerError.UnresolvedOperation(
                     subscript.lineno, subscript.col_offset,
@@ -335,7 +381,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
             return symbol_type
         # the sequence can't use the given type as index
-        elif not symbol_type.is_valid_key(index_type):
+        if not symbol_type.is_valid_key(index_type):
             self._log_error(
                 CompilerError.MismatchedTypes(
                     subscript.lineno, subscript.col_offset,
@@ -350,9 +396,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     type_id=symbol_type.identifier,
                     operation_id=Operator.Subscript)
             )
-        else:
-            return symbol_type.value_type
-        return Type.none
+        return symbol_type.item_type
 
     def validate_slice(self, subscript: ast.Subscript, slice_node: ast.Slice) -> IType:
         """
@@ -378,8 +422,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         symbol_type: IType = self.get_type(value)
-        # only sequence types can be subscribed
-        if not isinstance(symbol_type, SequenceType):
+        # only collection types can be subscribed
+        if not isinstance(symbol_type, Collection):
             self._log_error(
                 CompilerError.UnresolvedOperation(
                     subscript.lineno, subscript.col_offset,
@@ -392,21 +436,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         upper = upper if upper is not Type.none else symbol_type.valid_key
 
         # TODO: remove when slices of other sequence types are implemented
-        if symbol_type is not Type.str:
-            expected: IType = symbol_type.valid_key
-            actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
-            self._log_error(
-                CompilerError.MismatchedTypes(
-                    subscript.lineno, subscript.col_offset,
-                    expected_type_id=expected.identifier,
-                    actual_type_id=[value.identifier for value in actual]
-                )
-            )
-        elif (
-            not symbol_type.is_valid_key(lower)
+        if (not symbol_type.is_valid_key(lower)
             or not symbol_type.is_valid_key(upper)
             or (step is not Type.none and not symbol_type.is_valid_key(step))
-        ):
+            ):
             actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
             self._log_error(
                 CompilerError.MismatchedTypes(
@@ -452,16 +485,21 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         iterator = self.visit(for_node.iter)
         iterator_type: IType = self.get_type(iterator)
 
-        if not isinstance(iterator_type, SequenceType):
+        if not isinstance(iterator_type, Collection):
             self._log_error(
                 CompilerError.MismatchedTypes(
                     for_node.lineno, for_node.col_offset,
                     actual_type_id=iterator_type.identifier,
                     expected_type_id=Type.sequence.identifier)
             )
-        elif iterator_type is Type.str:
-            # TODO: remove when iteration in strings is implemented
-            raise NotImplementedError
+
+        # TODO: change when optimizing for loops
+        elif self.get_type(for_node.target) != iterator_type.item_type:
+            target_id = self.visit(for_node.target)
+            if isinstance(target_id, ast.Name):
+                target_id = target_id.id
+            symbol = self.get_symbol(target_id)
+            symbol.set_type(iterator_type.item_type)
 
         # continue to walk through the tree
         for stmt in for_node.body:
@@ -681,10 +719,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         col = compare.col_offset
         try:
             return_type = None
-            l_operand = self.visit(compare.left)
+            l_operand = self.visit_value(compare.left)
             for index, op in enumerate(compare.ops):
                 operator: Operator = self.get_operator(op)
-                r_operand = self.visit(compare.comparators[index])
+                r_operand = self.visit_value(compare.comparators[index])
 
                 if not isinstance(operator, Operator):
                     # the operator is invalid or it was not implemented yet
@@ -781,8 +819,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return node.operator
 
         node_type = type(node)
-        if node_type in self.__operators:
-            return self.__operators[node_type]
+        if node_type in self._operators:
+            return self._operators[node_type]
         else:
             return None
 
@@ -793,43 +831,73 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param call: the python ast function call node
         :return: the result type of the called function
         """
-        function = None
         if isinstance(call.func, ast.Name):
-            function_id: str = call.func.id
-            function = self.get_symbol(function_id)
+            callable_id: str = call.func.id
+            callable_target = self.get_symbol(callable_id)
         else:
-            arg0, function, function_id = self.visit(call.func)
+            arg0, callable_target, callable_id = self.visit(call.func)
             arg0_identifier = self.visit(arg0)
             if isinstance(arg0_identifier, ast.Name):
                 arg0_identifier = arg0_identifier.id
 
-            if function is not None and not isinstance(self.get_symbol(arg0_identifier), IType):
+            if (callable_target is not None
+                    and (len(call.args) < 1 or call.args[0] != arg0)
+                    and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
                 call.args.insert(0, arg0)
-            if len(call.args) > 0 and isinstance(function, IBuiltinMethod) and function.has_self_argument:
+            if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
                 self_type: IType = self.get_type(call.args[0])
-                function = function.build(self_type)
+                caller = self.get_symbol(arg0_identifier)
+                if isinstance(caller, IType) and not caller.is_type_of(self_type):
+                    self_type = caller
+                callable_target = callable_target.build(self_type)
 
-        if not isinstance(function, Method):
+        if not isinstance(callable_target, Callable):
+            # verify if it is a builtin method with its name shadowed
+            call_target = Builtin.get_symbol(callable_id)
+            callable_target = call_target if call_target is not None else callable_target
+        if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
-                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, function_id)
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
             )
         else:
+            if callable_target is Builtin.NewEvent:
+                return callable_target.return_type
             # TODO: change when kwargs is implemented
-            if len(call.args) > len(function.args):
-                unexpected_arg = call.args[len(function.args)]
+            if len(call.keywords) > 0:
+                raise NotImplementedError
+
+            len_call_args = len(call.args)
+            callable_required_args = len(callable_target.args_without_default)
+            if len_call_args > len(callable_target.args):
+                unexpected_arg = call.args[len(callable_target.args)]
                 self._log_error(
                     CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
                 )
-            elif len(call.args) < len(function.args):
-                missed_arg = list(function.args)[len(call.args)]
+            elif len_call_args < callable_required_args:
+                missed_arg = list(callable_target.args)[len(call.args)]
                 self._log_error(
                     CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
             else:
-                for index, (arg_id, arg_value) in enumerate(function.args.items()):
+                if callable_required_args <= len_call_args < len(callable_target.args):
+                    included_args = len_call_args - callable_required_args
+                    call.args.extend(callable_target.defaults[included_args:])
+                args = [self.get_type(param) for param in call.args]
+                if isinstance(callable_target, IBuiltinMethod):
+                    # if the arguments are not generic, build the specified method
+                    callable_target = callable_target.build(args)
+                    if not callable_target.is_supported:
+                        # TODO: implement bytearray constructor with non-bytes values
+                        self._log_error(
+                            CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
+                        )
+                        return callable_target.return_type
+
+                for index, (arg_id, arg_value) in enumerate(callable_target.args.items()):
                     param = call.args[index]
                     param_type = self.get_type(param)
+                    args.append(param_type)
                     if not arg_value.type.is_type_of(param_type):
                         self._log_error(
                             CompilerError.MismatchedTypes(
@@ -837,9 +905,43 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                 arg_value.type.identifier,
                                 param_type.identifier
                             ))
-        return self.get_type(function)
 
-    def visit_Attribute(self, attribute: ast.Attribute) -> Tuple[IType, Optional[ISymbol], str]:
+            # if the arguments are not generic, include the specified method in the symbol table
+            if (isinstance(callable_target, IBuiltinMethod)
+                    and callable_target.identifier != callable_id
+                    and callable_target.identifier not in self.symbols):
+                self.symbols[callable_target.identifier] = callable_target
+                call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
+                                     ctx=ast.Load(), id=callable_target.identifier)
+            if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
+                if not self._metadata.has_storage:
+                    self._log_error(
+                        CompilerError.MetadataInformationMissing(
+                            line=call.func.lineno, col=call.func.col_offset,
+                            symbol_id=callable_target.identifier,
+                            metadata_attr_id='has_storage'
+                        )
+                    )
+                else:
+                    self._current_method.set_storage()
+        return self.get_type(callable_target)
+
+    def visit_value(self, node: ast.AST):
+        result = self.visit(node)
+
+        if isinstance(node, ast.Attribute):
+            if isinstance(result, str):
+                return self.get_symbol(result)
+            else:
+                origin, value, attribute = result
+                if value is None and isinstance(origin, ast.Name):
+                    value = self.get_symbol(origin.id)
+                if value is not None:
+                    return value
+
+        return result
+
+    def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Tuple[ast.AST, Optional[ISymbol], str]]:
         """
         Gets the attribute inside the ast node
 
@@ -847,10 +949,40 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: returns the type of the value, the attribute symbol and its id if the attribute exists.
                  Otherwise, returns None
         """
-        value_type: IType = self.get_type(attribute.value)
-        attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
+        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id) \
+            if isinstance(attribute.value, ast.Name) else self.visit(attribute.value)
+
+        if value is None and isinstance(attribute.value, ast.Name):
+            return '{0}.{1}'.format(attribute.value.id, attribute.attr)
+
+        symbol = None
+        if isinstance(value, str) and not isinstance(attribute.value, ast.Str):
+            symbol = self.get_symbol(value)
+            if symbol is None:
+                return '{0}.{1}'.format(value, attribute.attr)
+        if isinstance(value, ISymbol):
+            symbol = value
+
+        if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
+            attr_symbol = symbol.symbols[attribute.attr]
+        else:
+            attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
         return attribute.value, attr_symbol, attribute.attr
+
+    def visit_Constant(self, constant: ast.Constant) -> Any:
+        """
+        Visitor of constant values node
+
+        :param constant: the python ast constant value node
+        :return: the value of the constant
+        """
+        if isinstance(constant, ast.Num) and not isinstance(constant.value, int):
+            # only integer numbers are allowed
+            self._log_error(
+                CompilerError.InvalidType(constant.lineno, constant.col_offset, symbol_id=type(constant.value).__name__)
+            )
+        return constant.value
 
     def visit_Num(self, num: ast.Num) -> int:
         """
@@ -866,14 +998,23 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         return num.n
 
-    def visit_Str(self, str: ast.Str) -> str:
+    def visit_Str(self, string: ast.Str) -> str:
         """
         Visitor of literal string node
 
-        :param str: the python ast string node
+        :param string: the python ast string node
         :return: the value of the string
         """
-        return str.s
+        return string.s
+
+    def visit_Bytes(self, bts: ast.Bytes) -> bytes:
+        """
+        Visitor of literal bytes node
+
+        :param bts: the python ast bytes node
+        :return: the value of the bytes
+        """
+        return bts.s
 
     def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
         """
@@ -892,6 +1033,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the list
         """
         return [self.get_type(value) for value in list_node.elts]
+
+    def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
+        """
+        Visitor of literal dict node
+
+        :param dict_node: the python ast dict node
+        :return: a list with each key and value type
+        """
+        dictionary = {}
+        size = min(len(dict_node.keys), len(dict_node.values))
+        for index in range(size):
+            key = self.get_type(dict_node.keys[index])
+            value = self.get_type(dict_node.values[index])
+            if key in dictionary and dictionary[key] != value:
+                dictionary[key] = Type.get_generic_type(dictionary[key], value)
+            else:
+                dictionary[key] = value
+        return dictionary
 
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """
@@ -918,7 +1077,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param index:
         :return: the object with the index value information
         """
-        return self.visit(index.value)
+        index = self.visit(index.value)
+        if isinstance(index, (Iterable, Tuple)):
+            return tuple(index)
+        return index
 
     def visit_Slice(self, slice_node: ast.Slice) -> Tuple[Any, Any, Any]:
         """

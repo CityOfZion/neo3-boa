@@ -19,6 +19,11 @@ class CompilerWarning(ABC):
     def __str__(self) -> str:
         return self.message
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self.message == other.message
+
 
 class NameShadowing(CompilerWarning):
     """
@@ -35,3 +40,31 @@ class NameShadowing(CompilerWarning):
     def _warning_message(self) -> Optional[str]:
         if self.symbol_id is not None:
             return "Shadowing {0} name '{1}'".format(self.existing_symbol.shadowing_name, self.symbol_id)
+
+
+class RedeclaredSymbol(CompilerWarning):
+    """
+    An warning raised when a name from the same scope is used to identify multiple symbols
+    """
+
+    def __init__(self, line: int, col: int, symbol_id: str):
+        self.symbol_id: str = symbol_id
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        if self.symbol_id is not None:
+            return "Redeclared '{0}' defined above".format(self.symbol_id)
+
+
+class UnreachableCode(CompilerWarning):
+    """
+    An warning raised when a block of code is detected as unreachable
+    """
+
+    def __init__(self, line: int, col: int):
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        return "Unreachable code"

@@ -23,20 +23,25 @@ class CompilerError(ABC, Exception):
     def __str__(self) -> str:
         return self.message
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self.message == other.message
 
-class TypeHintMissing(CompilerError):
+
+class IncorrectNumberOfOperands(CompilerError):
     """
-    An error raised when type hint cannot be found
+    An error raised when an operation is used with the wrong number of operands
     """
 
-    def __init__(self, line: int, col: int, symbol_id: str = None):
-        self.symbol_id = symbol_id
+    def __init__(self, line: int, col: int, expected_count: int, actual_count: int):
+        self.expected = expected_count
+        self.actual = actual_count
         super().__init__(line, col)
 
     @property
     def _error_message(self) -> Optional[str]:
-        if self.symbol_id is not None:
-            return "Type hint is missing for the symbol '%s'" % self.symbol_id
+        return "Incorrect number of operands: expected '%s', got '%s' instead" % (self.expected, self.actual)
 
 
 class InvalidType(CompilerError):
@@ -56,47 +61,54 @@ class InvalidType(CompilerError):
         return message
 
 
-class NotSupportedOperation(CompilerError):
+class MetadataImplementationMissing(CompilerError):
     """
-    An error raised when an operation that is not supported by Neo VM is used
+    An error raised when the metadata required functions aren't implemented
     """
 
-    def __init__(self, line: int, col: int, symbol_id: str):
-        self.symbol_id = symbol_id
+    def __init__(self, line: int, col: int, symbol_id: str, metadata_attr_id: str):
+        self.symbol_id: str = symbol_id
+        self.metadata_attr_id: str = metadata_attr_id
         super().__init__(line, col)
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "The following operation is not supported: '%s'" % self.symbol_id
+        return "'{0}' requires '{1}' implementation".format(self.metadata_attr_id, self.symbol_id)
 
 
-class UnresolvedReference(CompilerError):
+class MetadataIncorrectImplementation(CompilerError):
     """
-    An error raised when an undefined symbol is used
+    An error raised when a metadata required function is incorrectly implemented
     """
+    from boa3.model.symbol import ISymbol
 
-    def __init__(self, line: int, col: int, symbol_id: str):
-        self.symbol_id = symbol_id
+    def __init__(self, line: int, col: int, symbol_id: str, expected_symbol: ISymbol, actual_symbol: ISymbol):
+        from boa3.model.symbol import ISymbol
+
+        self.symbol_id: str = symbol_id
+        self.expected_symbol: ISymbol = expected_symbol
+        self.actual_symbol: ISymbol = actual_symbol
         super().__init__(line, col)
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "Unresolved reference '%s'" % self.symbol_id
+        return ("'{0}' is not correctly implemented. Expecting '{1}', got '{2}' instead"
+                .format(self.symbol_id, self.expected_symbol, self.actual_symbol))
 
 
-class UnresolvedOperation(CompilerError):
+class MetadataInformationMissing(CompilerError):
     """
-    An error raised when an undefined symbol is used
+    An error raised when the metadata info doesn't match with the functions requirements
     """
 
-    def __init__(self, line: int, col: int, type_id: str, operation_id: str):
-        self.type_id = type_id
-        self.operation_id = operation_id
+    def __init__(self, line: int, col: int, symbol_id: str, metadata_attr_id: str):
+        self.symbol_id: str = symbol_id
+        self.metadata_attr_id: str = metadata_attr_id
         super().__init__(line, col)
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "Unresolved reference: '%s' does not have a definition of '%s' operator" % (self.type_id, self.operation_id)
+        return "'{0}' requires '{1}' attribute, which is missing in the metadata".format(self.symbol_id, self.metadata_attr_id)
 
 
 class MismatchedTypes(CompilerError):
@@ -121,32 +133,32 @@ class MismatchedTypes(CompilerError):
         return "Expected type '%s', got '%s' instead" % (expected_types, actual_types)
 
 
-class TooManyReturns(CompilerError):
+class MissingReturnStatement(CompilerError):
     """
-    An error raised when a function returns a tuple
+    An error raised when a function with a return value is missing a return statement
     """
 
-    def __init__(self, line: int, col: int):
+    def __init__(self, line: int, col: int, symbol_id: str):
+        self.symbol_id = symbol_id
         super().__init__(line, col)
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "Too many returns"
+        return "'%s': Missing return statement" % self.symbol_id
 
 
-class IncorrectNumberOfOperands(CompilerError):
+class NotSupportedOperation(CompilerError):
     """
-    An error raised when an operation is used with the wrong number of operands
+    An error raised when an operation that is not supported by Neo VM is used
     """
 
-    def __init__(self, line: int, col: int, expected_count: int, actual_count: int):
-        self.expected = expected_count
-        self.actual = actual_count
+    def __init__(self, line: int, col: int, symbol_id: str):
+        self.symbol_id = symbol_id
         super().__init__(line, col)
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "Incorrect number of operands: expected '%s', got '%s' instead" % (self.expected, self.actual)
+        return "The following operation is not supported: '%s'" % self.symbol_id
 
 
 class UnexpectedArgument(CompilerError):
@@ -174,6 +186,68 @@ class UnfilledArgument(CompilerError):
     @property
     def _error_message(self) -> Optional[str]:
         return "Parameter '%s' unfilled" % self.param
+
+
+class UnresolvedReference(CompilerError):
+    """
+    An error raised when an undefined symbol is used
+    """
+
+    def __init__(self, line: int, col: int, symbol_id: str):
+        self.symbol_id = symbol_id
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "Unresolved reference '%s'" % self.symbol_id
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self._error_message == other._error_message
+
+
+class UnresolvedOperation(CompilerError):
+    """
+    An error raised when an undefined symbol is used
+    """
+
+    def __init__(self, line: int, col: int, type_id: str, operation_id: str):
+        self.type_id = type_id
+        self.operation_id = operation_id
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "Unresolved reference: '%s' does not have a definition of '%s' operator" % (self.type_id, self.operation_id)
+
+
+class TooManyReturns(CompilerError):
+    """
+    An error raised when a function returns a tuple
+    """
+
+    def __init__(self, line: int, col: int):
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "Too many returns"
+
+
+class TypeHintMissing(CompilerError):
+    """
+    An error raised when type hint cannot be found
+    """
+
+    def __init__(self, line: int, col: int, symbol_id: str = None):
+        self.symbol_id = symbol_id
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        if self.symbol_id is not None:
+            return "Type hint is missing for the symbol '%s'" % self.symbol_id
 
 
 def join_args(iterable: Iterable[str]) -> str:

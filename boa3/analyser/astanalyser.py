@@ -19,9 +19,13 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     :ivar warnings: a list that contains all the warnings found by the compiler. Empty by default.
     """
 
-    def __init__(self, ast_tree: ast.AST):
+    def __init__(self, ast_tree: ast.AST, filename: str = None, log: bool = False):
         self.errors: List[CompilerError] = []
         self.warnings: List[CompilerWarning] = []
+
+        self.filename: Optional[str] = filename
+        self._log: bool = log
+
         self._tree: ast.AST = ast_tree
         self.symbols: Dict[str, ISymbol] = {}
 
@@ -30,13 +34,13 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         return len(self.errors) > 0
 
     def _log_error(self, error: CompilerError):
-        if not any(err.message == error.message for err in self.errors):
+        if self._log and not any(err == error for err in self.errors):
             # don't include duplicated errors
             self.errors.append(error)
             logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
-        if not any(warn.message == warning.message for warn in self.errors):
+        if self._log and not any(warn == warning for warn in self.errors):
             # don't include duplicated warnings
             self.warnings.append(warning)
             logging.warning(warning)
@@ -50,7 +54,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         """
         # visits if it is a node
         if isinstance(value, ast.AST):
-            fun_rtype_id: str = ast.NodeVisitor.visit(self, value)
+            fun_rtype_id: Any = ast.NodeVisitor.visit(self, value)
             if isinstance(fun_rtype_id, ast.Name):
                 fun_rtype_id = fun_rtype_id.id
 

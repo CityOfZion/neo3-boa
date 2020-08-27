@@ -172,7 +172,7 @@ class OpcodeInfo:
     # Returns from the current method.
     RET = OpcodeInformation(Opcode.RET)
     # Calls to an interop service.
-    SYSCALL = OpcodeInformation(Opcode.SYSCALL)
+    SYSCALL = OpcodeInformation(Opcode.SYSCALL, min_data_len=4)
 
     # endregion
 
@@ -324,8 +324,8 @@ class OpcodeInfo:
 
     # region Splice
 
-    NEWBUFFER = OpcodeInformation(Opcode.NEWBUFFER),
-    MEMCPY = OpcodeInformation(Opcode.MEMCPY),
+    NEWBUFFER = OpcodeInformation(Opcode.NEWBUFFER)
+    MEMCPY = OpcodeInformation(Opcode.MEMCPY)
     # Concatenates two strings.
     CAT = OpcodeInformation(Opcode.CAT)
     # Returns a section of a string.
