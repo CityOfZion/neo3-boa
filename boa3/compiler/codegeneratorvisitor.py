@@ -507,6 +507,13 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             return '{0}.{1}'.format(value_id, attribute.attr)
         return attribute.attr
 
+    def visit_Continue(self, continue_node: ast.Continue):
+        """
+        :param continue_node: the python ast continue statement node
+        """
+        # TODO: remove when implement continue statement
+        self.generator.convert_loop_continue()
+
     def visit_Constant(self, constant: ast.Constant):
         """
         Visitor of constant values node

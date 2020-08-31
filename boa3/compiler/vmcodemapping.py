@@ -75,6 +75,18 @@ class VMCodeMapping:
         if vm_code not in self._codes.values():
             self._codes[self.bytecode_size] = vm_code
 
+    def get_code(self, address: int):
+        if address in self._codes:
+            return self._codes[address]
+        else:
+            # if the address is not the start of a instruction, gets the last instruction before given address
+            code_address = 0
+            for addr in self._codes:
+                if addr > address:
+                    break
+                code_address = addr
+            return self._codes[code_address]
+
     def get_start_address(self, vm_code: VMCode) -> int:
         """
         Gets the vm code's first byte address

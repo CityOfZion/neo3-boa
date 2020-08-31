@@ -1102,10 +1102,3 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         # TODO: remove when implement break statement
         raise NotImplementedError
-
-    def visit_Continue(self, continue_node: ast.Continue):
-        """
-        :param continue_node: the python ast continue statement node
-        """
-        # TODO: remove when implement continue statement
-        raise NotImplementedError

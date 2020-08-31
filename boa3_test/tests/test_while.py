@@ -227,6 +227,70 @@ class TestWhile(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    def test_while_continue(self):
+        jmpif_address = Integer(31).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-33).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x04'
+            + b'\x00'
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC0
+            + Opcode.PUSH0      # b = 0
+            + Opcode.STLOC1
+            + Opcode.PUSH15     # sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC2
+            + Opcode.JMP        # begin while
+            + jmpif_address
+                + Opcode.LDLOC2     # x = sequence[a]
+                + Opcode.LDLOC0
+                    + Opcode.DUP
+                    + Opcode.SIGN
+                    + Opcode.PUSHM1
+                    + Opcode.JMPNE
+                    + Integer(5).to_byte_array(min_length=1, signed=True)
+                    + Opcode.OVER
+                    + Opcode.SIZE
+                    + Opcode.ADD
+                + Opcode.PICKITEM
+                + Opcode.STLOC3
+                + Opcode.LDLOC0     # a += 1
+                + Opcode.PUSH1
+                + Opcode.ADD
+                + Opcode.STLOC0
+                + Opcode.LDLOC3     # if x % 5 != 0
+                + Opcode.PUSH5
+                + Opcode.MOD
+                + Opcode.PUSH0
+                + Opcode.NUMNOTEQUAL
+                + Opcode.JMPIFNOT
+                + Integer(4).to_byte_array(min_length=1, signed=True)
+                    + Opcode.JMP        # continue
+                    + Integer(6).to_byte_array(min_length=1, signed=True)
+                + Opcode.LDLOC1     # b += x
+                + Opcode.LDLOC3
+                + Opcode.ADD
+                + Opcode.STLOC1
+            + Opcode.LDLOC0
+            + Opcode.LDLOC2
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF      # end while a < len(sequence)
+            + jmp_address
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/while_test/WhileContinue.py' % self.dirname
+        output = Boa3.compile(path)
+        
+        self.assertEqual(expected_output, output)
+
     def test_boa2_while_test(self):
         path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test.py' % self.dirname
 
