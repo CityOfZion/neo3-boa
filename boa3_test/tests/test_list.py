@@ -113,14 +113,14 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -137,14 +137,14 @@ class TestList(BoaTest):
             + Opcode.LDARG0     # arg[-1]
             + Opcode.PUSH1
             + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -194,14 +194,14 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0] = 1
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
             + Opcode.PUSH1      # return 1
@@ -220,14 +220,14 @@ class TestList(BoaTest):
             + Opcode.LDARG0     # arg[-1] = 1
             + Opcode.PUSH1
             + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
             + Opcode.LDARG0     # return a
@@ -253,24 +253,24 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0][0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -286,14 +286,14 @@ class TestList(BoaTest):
             + b'\x02'
             + Opcode.LDARG1     # args[0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -316,73 +316,73 @@ class TestList(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a[2:3]
             + Opcode.PUSH2
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH3
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PUSH2      # get slice
-                + Opcode.PICK
-                + Opcode.SIZE
-                + Opcode.MIN        # slice end
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH2      # get slice
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN        # slice end
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/list_test/ListSlicingLiteralValues.py' % self.dirname
@@ -409,73 +409,73 @@ class TestList(BoaTest):
             + Opcode.STLOC2
             + Opcode.LDLOC2     # return a[a1:a2]
             + Opcode.LDLOC0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.LDLOC1
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PUSH2      # get slice
-                + Opcode.PICK
-                + Opcode.SIZE
-                + Opcode.MIN        # slice end
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH2      # get slice
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN        # slice end
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/list_test/ListSlicingVariableValues.py' % self.dirname
@@ -501,61 +501,61 @@ class TestList(BoaTest):
             + Opcode.SIZE       # slice end
             + Opcode.PUSH4
             + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.SWAP
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/list_test/ListSlicingNegativeStart.py' % self.dirname
@@ -579,62 +579,62 @@ class TestList(BoaTest):
             + Opcode.LDLOC0     # return a[:-4]
             + Opcode.PUSH4
             + Opcode.NEGATE         # slice end
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH0
             + Opcode.SWAP
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/list_test/ListSlicingNegativeEnd.py' % self.dirname
@@ -657,62 +657,62 @@ class TestList(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a[:3]
             + Opcode.PUSH3          # slice end
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH0
             + Opcode.SWAP
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/list_test/ListSlicingStartOmitted.py' % self.dirname
@@ -760,61 +760,61 @@ class TestList(BoaTest):
             + Opcode.DUP
             + Opcode.SIZE       # slice end
             + Opcode.PUSH2
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.SWAP       # get slice
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.SWAP       # get slice
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/list_test/ListSlicingEndOmitted.py' % self.dirname
@@ -846,18 +846,18 @@ class TestList(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -882,18 +882,18 @@ class TestList(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(four)).to_byte_array()
             + four
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -919,18 +919,18 @@ class TestList(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # list.append(a, 4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -955,22 +955,22 @@ class TestList(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.clear()
-                + Opcode.DUP
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(9).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.PUSHDATA1
-                + Integer(0).to_byte_array(min_length=1)
-                + Opcode.CONVERT
-                + Type.bytearray.stack_item
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CLEARITEMS
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSHDATA1
+            + Integer(0).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.bytearray.stack_item
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CLEARITEMS
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -1018,20 +1018,20 @@ class TestList(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.UNPACK     # a.extend
-                + Opcode.JMP
-                + Integer(9).to_byte_array(signed=True, min_length=1)
-                + Opcode.DUP
-                + Opcode.INC
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.ROLL
-                + Opcode.APPEND
-                + Opcode.DEC
-                + Opcode.DUP
-                + Opcode.JMPIF
-                + Integer(-8).to_byte_array(signed=True, min_length=1)
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.JMP
+            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Opcode.DUP
+            + Opcode.INC
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.ROLL
+            + Opcode.APPEND
+            + Opcode.DEC
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(-8).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -1061,20 +1061,20 @@ class TestList(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.UNPACK     # a.extend
-                + Opcode.JMP
-                + Integer(9).to_byte_array(signed=True, min_length=1)
-                + Opcode.DUP
-                + Opcode.INC
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.ROLL
-                + Opcode.APPEND
-                + Opcode.DEC
-                + Opcode.DUP
-                + Opcode.JMPIF
-                + Integer(-8).to_byte_array(signed=True, min_length=1)
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.JMP
+            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Opcode.DUP
+            + Opcode.INC
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.ROLL
+            + Opcode.APPEND
+            + Opcode.DEC
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(-8).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )

@@ -336,17 +336,17 @@ class TestFunction(BoaTest):
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + end_if
-                + Opcode.CALL           # return One()
-                + main_to_one_address
-                + Opcode.RET
+            + Opcode.CALL           # return One()
+            + main_to_one_address
+            + Opcode.RET
             + Opcode.LDARG0         # elif arg0 == 2
             + Opcode.PUSH2
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + end_if
-                + Opcode.CALL           # return Two()
-                + main_to_two_address
-                + Opcode.RET
+            + Opcode.CALL           # return Two()
+            + main_to_two_address
+            + Opcode.RET
             + Opcode.PUSH0          # default return
             + Opcode.RET
             + Opcode.PUSH1     # Two
@@ -399,10 +399,10 @@ class TestFunction(BoaTest):
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + Integer(6).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDARG0     # return arg0 - 1
-                + Opcode.PUSH1
-                + Opcode.SUB
-                + Opcode.RET
+            + Opcode.LDARG0     # return arg0 - 1
+            + Opcode.PUSH1
+            + Opcode.SUB
+            + Opcode.RET
             + Opcode.LDARG0     # elif arg0 % 3 == 2
             + Opcode.PUSH3
             + Opcode.MOD
@@ -410,10 +410,10 @@ class TestFunction(BoaTest):
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + Integer(6).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDARG0     # return arg0 + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.RET
+            + Opcode.LDARG0     # return arg0 + 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.RET
             + Opcode.LDARG0     # else
             + Opcode.RET            # return arg0
         )
@@ -442,43 +442,43 @@ class TestFunction(BoaTest):
             + Opcode.LDARG0     # if condition
             + Opcode.JMPIFNOT
             + Integer(29).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDARG0     # if condition
-                + Opcode.JMPIFNOT
-                + Integer(14).to_byte_array(min_length=1, signed=True)
-                    + Opcode.LDARG0     # if condition
-                    + Opcode.JMPIFNOT
-                    + Integer(4).to_byte_array(min_length=1, signed=True)
-                    + Opcode.PUSH1          # return 1
-                    + Opcode.RET
-                    + Opcode.LDARG0     # if condition
-                    + Opcode.JMPIFNOT
-                    + Integer(4).to_byte_array(min_length=1, signed=True)
-                    + Opcode.PUSH2          # return 2
-                    + Opcode.RET
-                    + Opcode.PUSH3      # else
-                    + Opcode.RET            # return 3
-                + Opcode.LDARG0     # elif condition
-                + Opcode.JMPIFNOT
-                + Integer(9).to_byte_array(min_length=1, signed=True)
-                    + Opcode.LDARG0     # if condition
-                    + Opcode.JMPIFNOT
-                    + Integer(4).to_byte_array(min_length=1, signed=True)
-                    + Opcode.PUSH4          # return 4
-                    + Opcode.RET
-                    + Opcode.PUSH5      # else
-                    + Opcode.RET            # return 5
-                + Opcode.PUSH6      # else
-                + Opcode.RET            # return 6
+            + Opcode.LDARG0     # if condition
+            + Opcode.JMPIFNOT
+            + Integer(14).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDARG0     # if condition
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH1          # return 1
+            + Opcode.RET
+            + Opcode.LDARG0     # if condition
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2          # return 2
+            + Opcode.RET
+            + Opcode.PUSH3      # else
+            + Opcode.RET            # return 3
+            + Opcode.LDARG0     # elif condition
+            + Opcode.JMPIFNOT
+            + Integer(9).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDARG0     # if condition
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH4          # return 4
+            + Opcode.RET
+            + Opcode.PUSH5      # else
+            + Opcode.RET            # return 5
+            + Opcode.PUSH6      # else
+            + Opcode.RET            # return 6
             + Opcode.LDARG0     # else
             + Opcode.JMPIFNOT       # if condition
             + Integer(4).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH7          # return 7
-                + Opcode.RET
+            + Opcode.PUSH7          # return 7
+            + Opcode.RET
             + Opcode.LDARG0         # if condition
             + Opcode.JMPIFNOT
             + Integer(4).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH8          # return 8
-                + Opcode.RET
+            + Opcode.PUSH8          # return 8
+            + Opcode.RET
             + Opcode.PUSH9          # else
             + Opcode.RET                # return 9
         )
@@ -498,11 +498,11 @@ class TestFunction(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # return 5 if condition else 10
             + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH5      # 5
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH5      # 5
             + Opcode.JMP        # else
             + Integer(3).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH10     # 10
+            + Opcode.PUSH10     # 10
             + Opcode.RET        # return
         )
 
@@ -523,21 +523,21 @@ class TestFunction(BoaTest):
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP        # begin for
             + Integer(17).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER     # value = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC0
-                + Opcode.LDLOC0     # return value
-                + Opcode.RET
-                + Opcode.INC     # for_index = for_index + 1
+            + Opcode.OVER     # value = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return value
+            + Opcode.RET
+            + Opcode.INC     # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -566,23 +566,23 @@ class TestFunction(BoaTest):
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP        # begin for
             + Integer(19).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER       # value = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC1
-                + Opcode.LDLOC0     # x += value
-                + Opcode.LDLOC1
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.INC        # for_index = for_index + 1
+            + Opcode.OVER       # value = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC1
+            + Opcode.LDLOC0     # x += value
+            + Opcode.LDLOC1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC        # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -613,12 +613,12 @@ class TestFunction(BoaTest):
             + Opcode.STLOC0
             + Opcode.JMP        # begin while
             + Integer(8).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # x += 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.LDLOC0     # return x
-                + Opcode.RET
+            + Opcode.LDLOC0     # x += 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
             + Opcode.LDLOC0
             + Opcode.PUSH10
             + Opcode.LT
@@ -641,10 +641,10 @@ class TestFunction(BoaTest):
             + Opcode.STLOC0
             + Opcode.JMP        # begin while
             + Integer(6).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # x += 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.LDLOC0     # x += 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.PUSH10
             + Opcode.LT
@@ -691,18 +691,18 @@ class TestFunction(BoaTest):
             + Opcode.SIZE
             + Opcode.ADD
             + Opcode.PICKITEM               # append(args[i])
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC1                 # i += 1
             + Opcode.PUSH1
             + Opcode.ADD

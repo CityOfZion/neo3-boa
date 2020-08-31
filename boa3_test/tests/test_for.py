@@ -27,23 +27,23 @@ class TestFor(BoaTest):
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP        # begin for
             + jmpif_address
-                + Opcode.OVER           # x = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC1
-                + Opcode.LDLOC0         # a = a + x
-                + Opcode.LDLOC1
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.INC            # for_index = for_index + 1
+            + Opcode.OVER           # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC1
+            + Opcode.LDLOC0         # a = a + x
+            + Opcode.LDLOC1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -81,29 +81,29 @@ class TestFor(BoaTest):
             + sequence
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP
-                + jmpif_address
-                + Opcode.OVER           # x = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PUSH1
-                + Opcode.SUBSTR
-                + Opcode.CONVERT
-                + Type.str.stack_item
-                + Opcode.STLOC2
-                + Opcode.LDLOC0         # a = a + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.LDLOC2         # b = x
-                + Opcode.STLOC1
-                + Opcode.INC            # for_index = for_index + 1
+            + jmpif_address
+            + Opcode.OVER           # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH1
+            + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.str.stack_item
+            + Opcode.STLOC2
+            + Opcode.LDLOC0         # a = a + 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.LDLOC2         # b = x
+            + Opcode.STLOC1
+            + Opcode.INC            # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -141,23 +141,23 @@ class TestFor(BoaTest):
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP
             + jmpif_address
-                + Opcode.OVER         # x = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC2
-                + Opcode.LDLOC0         # a = a + x
-                + Opcode.LDLOC2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.INC            # for_index = for_index + 1
+            + Opcode.OVER         # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.LDLOC0         # a = a + x
+            + Opcode.LDLOC2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -208,51 +208,51 @@ class TestFor(BoaTest):
             + Opcode.PUSH0      # outer_for_index = 0
             + Opcode.JMP
             + outer_jmpif_address
-                + Opcode.OVER           # x = outer_for_sequence[outer_for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC2
-                    + Opcode.LDLOC1     # inner_for_sequence = sequence
-                    + Opcode.PUSH0      # inner_for_index = 0
-                + Opcode.JMP
-                + inner_jmpif_address
-                    + Opcode.OVER         # y = inner_for_sequence[inner_for_index]
-                    + Opcode.OVER
-                        + Opcode.DUP
-                        + Opcode.SIGN
-                        + Opcode.PUSHM1
-                        + Opcode.JMPNE
-                        + Integer(5).to_byte_array(min_length=1, signed=True)
-                        + Opcode.OVER
-                        + Opcode.SIZE
-                        + Opcode.ADD
-                    + Opcode.PICKITEM
-                    + Opcode.STLOC3
-                    + Opcode.LDLOC0         # a = a + x * y
-                    + Opcode.LDLOC2
-                    + Opcode.LDLOC3
-                    + Opcode.MUL
-                    + Opcode.ADD
-                    + Opcode.STLOC0
-                    + Opcode.INC            # inner_for_index = inner_for_index + 1
-                + Opcode.DUP        # if inner_for_index < len(inner_for_sequence)
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.SIZE
-                + Opcode.LT
-                + Opcode.JMPIF      # end inner_for
-                + inner_jmp_address
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.INC     # outer_for_index = outer_for_index + 1
+            + Opcode.OVER           # x = outer_for_sequence[outer_for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.LDLOC1     # inner_for_sequence = sequence
+            + Opcode.PUSH0      # inner_for_index = 0
+            + Opcode.JMP
+            + inner_jmpif_address
+            + Opcode.OVER         # y = inner_for_sequence[inner_for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC3
+            + Opcode.LDLOC0         # a = a + x * y
+            + Opcode.LDLOC2
+            + Opcode.LDLOC3
+            + Opcode.MUL
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # inner_for_index = inner_for_index + 1
+            + Opcode.DUP        # if inner_for_index < len(inner_for_sequence)
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF      # end inner_for
+            + inner_jmp_address
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.INC     # outer_for_index = outer_for_index + 1
             + Opcode.DUP        # if outer_for_index < len(outer_for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -291,23 +291,23 @@ class TestFor(BoaTest):
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP
             + jmpif_address
-                + Opcode.OVER           # x = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC2
-                + Opcode.LDLOC0         # a = a + x
-                + Opcode.LDLOC2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.INC            # for_index = for_index + 1
+            + Opcode.OVER           # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.LDLOC0         # a = a + x
+            + Opcode.LDLOC2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK

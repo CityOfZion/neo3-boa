@@ -135,18 +135,18 @@ class TestVariable(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -168,18 +168,18 @@ class TestVariable(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -216,22 +216,22 @@ class TestVariable(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.clear()
-                + Opcode.DUP
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(9).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.PUSHDATA1
-                + Integer(0).to_byte_array(min_length=1)
-                + Opcode.CONVERT
-                + Type.bytearray.stack_item
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CLEARITEMS
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSHDATA1
+            + Integer(0).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.bytearray.stack_item
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CLEARITEMS
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -252,22 +252,22 @@ class TestVariable(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.LDLOC0     # MutableSequence.clear(a)
-                + Opcode.DUP
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(9).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.PUSHDATA1
-                + Integer(0).to_byte_array(min_length=1)
-                + Opcode.CONVERT
-                + Type.bytearray.stack_item
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CLEARITEMS
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSHDATA1
+            + Integer(0).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.bytearray.stack_item
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CLEARITEMS
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -294,19 +294,19 @@ class TestVariable(BoaTest):
 
     def test_reverse_mutable_sequence(self):
         expected_output = (
-                Opcode.INITSLOT     # function signature
-                + b'\x01'
-                + b'\x00'
-                + Opcode.PUSH3      # a = [1, 2, 3]
-                + Opcode.PUSH2
-                + Opcode.PUSH1
-                + Opcode.PUSH3
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.LDLOC0     # a.reverse()
-                + Opcode.REVERSEITEMS
-                + Opcode.LDLOC0     # return a
-                + Opcode.RET
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # a.reverse()
+            + Opcode.REVERSEITEMS
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequence.py' % self.dirname
 
@@ -316,19 +316,19 @@ class TestVariable(BoaTest):
     def test_reverse_mutable_sequence_with_builtin(self):
         data = b'\x01\x02\x03'
         expected_output = (
-                Opcode.INITSLOT     # function signature
-                + b'\x01'
-                + b'\x00'
-                + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
-                + Integer(len(data)).to_byte_array(min_length=1)
-                + data
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.STLOC0
-                + Opcode.LDLOC0     # MutableSequence.reverse(a)
-                + Opcode.REVERSEITEMS
-                + Opcode.LDLOC0     # return a
-                + Opcode.RET
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # MutableSequence.reverse(a)
+            + Opcode.REVERSEITEMS
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequenceBuiltinCall.py' % self.dirname
 
@@ -373,20 +373,20 @@ class TestVariable(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.UNPACK     # a.extend
-                + Opcode.JMP
-                + Integer(9).to_byte_array(signed=True, min_length=1)
-                + Opcode.DUP
-                + Opcode.INC
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.ROLL
-                + Opcode.APPEND
-                + Opcode.DEC
-                + Opcode.DUP
-                + Opcode.JMPIF
-                + Integer(-8).to_byte_array(signed=True, min_length=1)
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.JMP
+            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Opcode.DUP
+            + Opcode.INC
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.ROLL
+            + Opcode.APPEND
+            + Opcode.DEC
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(-8).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -413,20 +413,20 @@ class TestVariable(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.UNPACK     # a.extend
-                + Opcode.JMP
-                + Integer(9).to_byte_array(signed=True, min_length=1)
-                + Opcode.DUP
-                + Opcode.INC
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.ROLL
-                + Opcode.APPEND
-                + Opcode.DEC
-                + Opcode.DUP
-                + Opcode.JMPIF
-                + Integer(-8).to_byte_array(signed=True, min_length=1)
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.JMP
+            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Opcode.DUP
+            + Opcode.INC
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.ROLL
+            + Opcode.APPEND
+            + Opcode.DEC
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(-8).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )

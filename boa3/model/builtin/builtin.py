@@ -19,6 +19,7 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
@@ -52,6 +53,7 @@ class Builtin:
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
+    Range = RangeMethod()
 
     # python class method
     SequenceAppend = AppendMethod()
