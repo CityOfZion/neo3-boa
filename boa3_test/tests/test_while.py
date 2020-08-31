@@ -19,10 +19,10 @@ class TestWhile(BoaTest):
             + Opcode.STLOC0
             + Opcode.JMP        # begin while
             + jmpif_address
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.LDLOC0     # a = a + 2
+            + Opcode.PUSH2
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.PUSH0
             + Opcode.JMPIF      # end while False
             + jmp_address
@@ -47,10 +47,10 @@ class TestWhile(BoaTest):
             + Opcode.STLOC0
             + Opcode.JMP        # begin while
             + jmpif_address
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.LDLOC0     # a = a + 2
+            + Opcode.PUSH2
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIF      # end while arg0
             + jmp_address
@@ -90,23 +90,23 @@ class TestWhile(BoaTest):
             + Opcode.STLOC1
             + Opcode.JMP        # begin outer while
             + outer_jmpif_address
-                + Opcode.LDLOC0     # c = c + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.JMP        # begin inner while
-                + inner_jmpif_address
-                    + Opcode.LDLOC1     # d = d + 3
-                    + Opcode.PUSH3
-                    + Opcode.ADD
-                    + Opcode.STLOC1
-                + Opcode.LDARG1
-                + Opcode.JMPIF      # end inner while arg1
-                + inner_jmp_address
-                + Opcode.LDLOC0     # c = c + d
-                + Opcode.LDLOC1
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.LDLOC0     # c = c + 2
+            + Opcode.PUSH2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.JMP        # begin inner while
+            + inner_jmpif_address
+            + Opcode.LDLOC1     # d = d + 3
+            + Opcode.PUSH3
+            + Opcode.ADD
+            + Opcode.STLOC1
+            + Opcode.LDARG1
+            + Opcode.JMPIF      # end inner while arg1
+            + inner_jmp_address
+            + Opcode.LDLOC0     # c = c + d
+            + Opcode.LDLOC1
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIF      # end outer while arg0
             + outer_jmp_address
@@ -131,10 +131,10 @@ class TestWhile(BoaTest):
             + Opcode.STLOC0
             + Opcode.JMP        # begin while
             + jmpif_address
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.LDLOC0     # a = a + 2
+            + Opcode.PUSH2
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.PUSH0
             + Opcode.JMPIF      # end while False
             + jmp_address
@@ -165,14 +165,14 @@ class TestWhile(BoaTest):
             + Opcode.STLOC1
             + Opcode.JMP        # begin while
             + jmpif_address
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.LDLOC1     # b = b + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC1
+            + Opcode.LDLOC0     # a = a + 2
+            + Opcode.PUSH2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.LDLOC1     # b = b + 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC1
             + Opcode.LDLOC1
             + Opcode.PUSH10
             + Opcode.LT
@@ -201,14 +201,14 @@ class TestWhile(BoaTest):
             + Opcode.STLOC1
             + Opcode.JMP        # begin while
             + jmpif_address
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.LDLOC1     # b = b + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC1
+            + Opcode.LDLOC0     # a = a + 2
+            + Opcode.PUSH2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.LDLOC1     # b = b + 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC1
             + Opcode.LDLOC1
             + Opcode.PUSH10
             + Opcode.LT
@@ -246,10 +246,10 @@ class TestWhile(BoaTest):
             + Opcode.STLOC0
             + Opcode.JMP            # while
             + jmpif_address
-                + Opcode.LDLOC0         # j = j + 1
-                + Opcode.PUSH1
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.LDLOC0         # j = j + 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.LDLOC0         # while j < 6
             + Opcode.PUSH6
             + Opcode.LT

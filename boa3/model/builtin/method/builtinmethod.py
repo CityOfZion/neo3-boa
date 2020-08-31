@@ -85,9 +85,28 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         Returns whether this method needs to update the value from a variable
 
-        :return: the number of arguments.
+        :return: whether the method needs to update a variable
         """
         return False
+
+    @property
+    def requires_reordering(self) -> bool:
+        """
+        Returns whether this method requires a reordering of user inputted parameters
+
+        :return: whether the method requires the parameters to be ordered differently as inputted from the user
+        """
+        return False
+
+    def reorder(self, arguments: list):
+        """
+        Reorder the arguments if the method requires it.
+
+        If `requires_reordering` returns True, this method must be implemented
+
+        :param arguments: list of arguments to be reordered
+        """
+        pass
 
     @property
     def body(self) -> Optional[str]:

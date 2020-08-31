@@ -111,39 +111,39 @@ class TestDict(BoaTest):
             + Opcode.NEWMAP  # a = map
             + Opcode.DUP
             + Opcode.PUSH1      # map[1] = {14: False, 12: True, 5: True}
-                + Opcode.NEWMAP
-                + Opcode.DUP
-                + Opcode.PUSH14
-                + Opcode.PUSH0
-                + Opcode.SETITEM
-                + Opcode.DUP
-                + Opcode.PUSH12
-                + Opcode.PUSH1
-                + Opcode.SETITEM
-                + Opcode.DUP
-                + Opcode.PUSH5
-                + Opcode.PUSH1
-                + Opcode.SETITEM
+            + Opcode.NEWMAP
+            + Opcode.DUP
+            + Opcode.PUSH14
+            + Opcode.PUSH0
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH12
+            + Opcode.PUSH1
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH5
+            + Opcode.PUSH1
+            + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.DUP
             + Opcode.PUSH2      # map[2] = {0: True, 6: False}
-                + Opcode.NEWMAP
-                + Opcode.DUP
-                + Opcode.PUSH0
-                + Opcode.PUSH1
-                + Opcode.SETITEM
-                + Opcode.DUP
-                + Opcode.PUSH6
-                + Opcode.PUSH0
-                + Opcode.SETITEM
+            + Opcode.NEWMAP
+            + Opcode.DUP
+            + Opcode.PUSH0
+            + Opcode.PUSH1
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH6
+            + Opcode.PUSH0
+            + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.DUP
             + Opcode.PUSH3      # map[3] = {11: False}
-                + Opcode.NEWMAP
-                + Opcode.DUP
-                + Opcode.PUSH11
-                + Opcode.PUSH0
-                + Opcode.SETITEM
+            + Opcode.NEWMAP
+            + Opcode.DUP
+            + Opcode.PUSH11
+            + Opcode.PUSH0
+            + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.STLOC0
             + Opcode.PUSHNULL

@@ -880,6 +880,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
                 )
             else:
+                if isinstance(callable_target, IBuiltinMethod) and callable_target.requires_reordering:
+                    if not hasattr(call, 'was_reordered') or not call.was_reordered:
+                        callable_target.reorder(call.args)
+                        call.was_reordered = True
+
                 if callable_required_args <= len_call_args < len(callable_target.args):
                     included_args = len_call_args - callable_required_args
                     call.args.extend(callable_target.defaults[included_args:])

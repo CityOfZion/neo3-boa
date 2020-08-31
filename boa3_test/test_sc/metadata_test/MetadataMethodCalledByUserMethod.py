@@ -12,4 +12,3 @@ def example() -> NeoMetadata:
     meta = NeoMetadata()
     meta.has_storage = True
     return meta
-

@@ -6,6 +6,7 @@ from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.genericsequencetype import GenericSequenceType
 from boa3.model.type.collection.sequence.mutable.genericmutablesequencetype import GenericMutableSequenceType
 from boa3.model.type.collection.sequence.mutable.listtype import ListType
+from boa3.model.type.collection.sequence.rangetype import RangeType
 from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.booltype import BoolType
@@ -31,6 +32,7 @@ class Type:
             Type.list,
             Type.tuple,
             Type.dict,
+            Type.range,
             Type.bytes,
             Type.bytearray,
             Type.none
@@ -99,6 +101,7 @@ class Type:
     tuple = TupleType()
     list = ListType()
     dict = DictType()
+    range = RangeType(int)
 
     # Generic types
     sequence = GenericSequenceType()
