@@ -656,6 +656,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             # verifiy if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(func_id)
             func_symbol = func if func is not None else func_symbol
+            func_symbol = Builtin.Exception if func_symbol is Type.exception else func_symbol
         if not isinstance(func_symbol, Callable):
             # the symbol doesn't exists
             self._log_error(

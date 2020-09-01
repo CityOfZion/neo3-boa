@@ -18,6 +18,7 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
+from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
@@ -54,6 +55,7 @@ class Builtin:
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
     Range = RangeMethod()
+    Exception = ExceptionMethod()
 
     # python class method
     SequenceAppend = AppendMethod()

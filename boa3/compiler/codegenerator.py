@@ -880,6 +880,21 @@ class CodeGenerator:
 
         self.__insert1(OpcodeInfo.ASSERT)
 
+    def convert_new_exception(self, message: Optional[str] = None):
+        if message is None:
+            message = Builtin.Exception.default_message
+        self.convert_literal(message)
+        self._stack.pop()
+        self._stack.append(Type.exception)
+
+    def convert_raise_exception(self):
+        from boa3.model.type.baseexceptiontype import BaseExceptionType
+        if len(self._stack) == 0 or not isinstance(self._stack[-1], BaseExceptionType):
+            self.convert_literal(Builtin.Exception.default_message)
+
+        self._stack.pop()
+        self.__insert1(OpcodeInfo.THROW)
+
     def __insert1(self, op_info: OpcodeInformation, data: bytes = bytes()):
         """
         Inserts one opcode into the bytecode

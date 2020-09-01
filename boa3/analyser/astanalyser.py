@@ -1,6 +1,7 @@
 import ast
 import logging
 from abc import ABC
+from inspect import isclass
 from typing import Any, Dict, List, Optional
 
 from boa3.exception.CompilerError import CompilerError
@@ -86,4 +87,11 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         else:
             # the symbol may be a built in. If not, returns None
             from boa3.model.builtin.builtin import Builtin
-            return Builtin.get_symbol(symbol_id)
+            found_symbol = Builtin.get_symbol(symbol_id)
+
+            if (found_symbol is None and isinstance(symbol_id, str)
+                    and (symbol_id in globals() or symbol_id in globals()['__builtins__'])):
+                symbol = globals()[symbol_id] if symbol_id in globals() else globals()['__builtins__'][symbol_id]
+                if isclass(symbol) and issubclass(symbol, Exception):
+                    found_symbol = Builtin.Exception.return_type
+            return found_symbol
