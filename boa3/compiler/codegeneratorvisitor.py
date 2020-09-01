@@ -1,4 +1,5 @@
 import ast
+from inspect import isclass
 from typing import Dict, List, Optional, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
@@ -61,11 +62,22 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             result = self.visit(node)
             # the default return of the name visitor is the name string
             if isinstance(result, str):
-                # TODO: validate function calls
-                self.generator.convert_load_symbol(result)
+                if self.is_exception_name(result):
+                    self.generator.convert_new_exception()
+                else:
+                    # TODO: validate function calls
+                    self.generator.convert_load_symbol(result)
             return result
         else:
             return self.generator.convert_literal(node)
+
+    def is_exception_name(self, exc_id: str) -> bool:
+        global_symbols = globals()
+        if exc_id in global_symbols or exc_id in global_symbols['__builtins__']:
+            symbol = global_symbols[exc_id] if exc_id in global_symbols else global_symbols['__builtins__'][exc_id]
+            if isclass(symbol) and issubclass(symbol, Exception):
+                return True
+        return False
 
     def visit_Module(self, module: ast.Module):
         """
@@ -479,6 +491,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             )
             self.visit_to_generate(arg)
         self.generator.convert_load_symbol(function_id, args_addresses)
+
+    def visit_Raise(self, raise_node: ast.Raise):
+        """
+        Visitor of the raise node
+
+        :param raise_node: the python ast raise node
+        """
+        self.visit_to_map(raise_node.exc, generate=True)
+        self.generator.convert_raise_exception()
 
     def visit_Name(self, name: ast.Name) -> str:
         """

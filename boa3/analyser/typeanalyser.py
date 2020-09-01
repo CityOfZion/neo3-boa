@@ -854,6 +854,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if not isinstance(callable_target, Callable):
             # verify if it is a builtin method with its name shadowed
             call_target = Builtin.get_symbol(callable_id)
+            if (not isinstance(call_target, Callable) and
+                    (callable_id in globals() or callable_id in globals()['__builtins__'])):
+                tpe = globals()[callable_id] if callable_id in globals() else globals()['__builtins__'][callable_id]
+                if issubclass(tpe, Exception):
+                    call_target = Builtin.Exception
+
             callable_target = call_target if call_target is not None else callable_target
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
@@ -930,6 +936,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 else:
                     self._current_method.set_storage()
         return self.get_type(callable_target)
+
+    def visit_Raise(self, raise_node: ast.Raise):
+        """
+        Visitor of the raise node
+
+        Verifies if the raised object is a exception
+
+        :param raise_node: the python ast raise node
+        """
+        raised = self.visit(raise_node.exc)
+        raised_type: IType = self.get_type(raised)
+        if raised_type is not Type.exception:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    raise_node.lineno, raise_node.col_offset,
+                    actual_type_id=raised_type.identifier,
+                    expected_type_id=Type.exception.identifier
+                ))
 
     def visit_value(self, node: ast.AST):
         result = self.visit(node)

@@ -549,7 +549,6 @@ class TestTuple(BoaTest):
         )
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py' % self.dirname
         output = Boa3.compile(path)
-        from boa3.compiler.vmcodemapping import VMCodeMapping
         self.assertEqual(expected_output, output)
 
     def test_tuple_slicing_start_omitted(self):
