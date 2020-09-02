@@ -193,3 +193,7 @@ class TestImport(BoaTest):
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_import_non_existent_package(self):
+        path = '%s/boa3_test/test_sc/import_test/ImportNonExistantPackage.py' % self.dirname
+        self.assertCompilerLogs(UnresolvedReference, path)
