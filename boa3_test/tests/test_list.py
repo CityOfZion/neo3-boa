@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, UnresolvedOperation
+from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnresolvedOperation
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -299,6 +299,8 @@ class TestList(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    # region TestSlicing
 
     def test_list_slicing(self):
         expected_output = (
@@ -831,6 +833,10 @@ class TestList(BoaTest):
         with self.assertRaises(NotImplementedError):
             output = Boa3.compile(path)
 
+    # endregion
+
+    # region TestAppend
+
     def test_list_append_int_value(self):
         path = '%s/boa3_test/test_sc/list_test/AppendIntValue.py' % self.dirname
 
@@ -941,6 +947,8 @@ class TestList(BoaTest):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeAppendWithBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
+    # endregion
+
     def test_list_clear(self):
         path = '%s/boa3_test/test_sc/list_test/ClearList.py' % self.dirname
 
@@ -997,6 +1005,8 @@ class TestList(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    # region TestExtend
 
     def test_list_extend_tuple_value(self):
         path = '%s/boa3_test/test_sc/list_test/ExtendTupleValue.py' % self.dirname
@@ -1132,3 +1142,207 @@ class TestList(BoaTest):
     def test_list_extend_with_builtin_mismatched_type(self):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeExtendWithBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    # endregion
+
+    # region TestPop
+
+    def test_list_pop(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSH5      # a = [1, 2, 3, 4, 5]
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH5
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = a.pop()
+            + Opcode.PUSHM1
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.OVER
+            + Opcode.OVER
+            + Opcode.PICKITEM
+            + Opcode.REVERSE3
+            + Opcode.SWAP
+            + Opcode.REMOVE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/list_test/PopList.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_pop_without_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5      # a = [1, 2, 3, 4, 5]
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH5
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = a.pop()
+            + Opcode.PUSHM1
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.OVER
+            + Opcode.OVER
+            + Opcode.PICKITEM
+            + Opcode.REVERSE3
+            + Opcode.SWAP
+            + Opcode.REMOVE
+            + Opcode.DROP
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/list_test/PopListWithoutAssignment.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_pop_literal_argument(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSH5      # a = [1, 2, 3, 4, 5]
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH5
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = a.pop(2)
+            + Opcode.PUSH2
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.OVER
+            + Opcode.OVER
+            + Opcode.PICKITEM
+            + Opcode.REVERSE3
+            + Opcode.SWAP
+            + Opcode.REMOVE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/list_test/PopListLiteralArgument.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_pop_literal_negative_argument(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSH5      # a = [1, 2, 3, 4, 5]
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH5
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = a.pop(-2)
+            + Opcode.PUSH2
+            + Opcode.NEGATE
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.OVER
+            + Opcode.OVER
+            + Opcode.PICKITEM
+            + Opcode.REVERSE3
+            + Opcode.SWAP
+            + Opcode.REMOVE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/list_test/PopListLiteralNegativeArgument.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_pop_literal_variable_argument(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x01'
+            + Opcode.PUSH5      # a = [1, 2, 3, 4, 5]
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH5
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = a.pop(arg0)
+            + Opcode.LDARG0
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.OVER
+            + Opcode.OVER
+            + Opcode.PICKITEM
+            + Opcode.REVERSE3
+            + Opcode.SWAP
+            + Opcode.REMOVE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/list_test/PopListVariableArgument.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_list_pop_mismatched_type_argument(self):
+        path = '%s/boa3_test/test_sc/list_test/PopListMismatchedTypeArgument.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_list_pop_mismatched_type_result(self):
+        path = '%s/boa3_test/test_sc/list_test/PopListMismatchedTypeResult.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_list_pop_too_many_arguments(self):
+        path = '%s/boa3_test/test_sc/list_test/PopListTooManyArguments.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    # endregion

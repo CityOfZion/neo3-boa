@@ -91,12 +91,20 @@ class CodeGenerator:
             return None
 
     @property
+    def stack_size(self) -> int:
+        """
+        Gets the size of the stack
+
+        :return: the size of the stack of converted values
+        """
+        return len(self._stack)
+
+    @property
     def last_code_start_address(self) -> int:
         """
         Gets the first address from last code in the bytecode
 
-        :return: the last code. If the bytecode is empty, returns None
-        :rtype: VMCode or None
+        :return: the last code's first address
         """
         instance = VMCodeMapping.instance()
         if len(instance.codes) > 0:
@@ -809,7 +817,7 @@ class CodeGenerator:
 
         for arg in function.args:
             self._stack.pop()
-        if function.return_type is not None:
+        if function.return_type not in (None, Type.none):
             self._stack.append(function.return_type)
 
     def convert_method_call(self, function: Method, num_args: int):
@@ -832,12 +840,14 @@ class CodeGenerator:
         :param event_id: called event identifier
         :param event: called event
         """
-        self.convert_new_array(len(event.args), Type.list.stack_item)
+        self.convert_new_array(len(event.args), Type.list)
         self.convert_literal(event.name)
         from boa3.model.builtin.interop.interop import Interop
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)
             self.__insert1(info, data)
+            self._stack.pop()
+            self._stack.pop()
 
     def convert_operation(self, operation: IOperation):
         """

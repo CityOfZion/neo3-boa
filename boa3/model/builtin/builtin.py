@@ -7,6 +7,7 @@ from boa3.model.builtin.classmethod.clearmethod import ClearMethod
 from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
+from boa3.model.builtin.classmethod.popmethod import PopMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
@@ -61,6 +62,7 @@ class Builtin:
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
+    SequencePop = PopMethod()
     SequenceReverse = ReverseMethod()
     DictKeys = MapKeysMethod()
     DictValues = MapValuesMethod()
@@ -76,6 +78,7 @@ class Builtin:
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
+                                                SequencePop,
                                                 SequenceReverse,
                                                 DictKeys,
                                                 DictValues,

@@ -42,7 +42,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
     def visit_to_map(self, node: ast.AST, generate: bool = False):
         address: int = VMCodeMapping.instance().bytecode_size
-        if generate:
+        if isinstance(node, ast.Expr):
+            value = self.visit_Expr(node, generate)
+        elif generate:
             value = self.visit_to_generate(node)
         else:
             value = self.visit(node)
@@ -439,6 +441,25 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.visit_to_map(stmt, generate=True)
 
         self.generator.convert_end_if(start_addr)
+
+    def visit_Expr(self, expr: ast.Expr, generate: bool = False):
+        """
+        Visitor of an expression node
+
+        :param expr: the python ast expression node
+        :param generate: if it should convert the value
+        """
+        last_stack = self.generator.stack_size
+        if generate:
+            value = self.visit_to_generate(expr.value)
+        else:
+            value = self.visit(expr.value)
+
+        new_stack = self.generator.stack_size
+        for x in range(last_stack, new_stack):
+            self.generator.remove_stack_top_item()
+
+        return value
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """

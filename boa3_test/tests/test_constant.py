@@ -156,6 +156,7 @@ class TestConstant(BoaTest):
             + Opcode.PUSH1      # 1
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -184,6 +185,7 @@ class TestConstant(BoaTest):
             + byte_input0
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -206,6 +208,7 @@ class TestConstant(BoaTest):
             + Opcode.PUSH1      # 1
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -237,6 +240,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
             + Opcode.PUSH3  # tuple length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -255,6 +259,7 @@ class TestConstant(BoaTest):
             + Opcode.PUSH1  # 1
             + Opcode.PUSH3  # list length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -283,6 +288,7 @@ class TestConstant(BoaTest):
             + byte_input0
             + Opcode.PUSH3          # list length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -305,6 +311,7 @@ class TestConstant(BoaTest):
             + Opcode.PUSH1      # 1
             + Opcode.PUSH3      # list length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
@@ -336,6 +343,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
             + Opcode.PUSH3  # list length
             + Opcode.PACK
+            + Opcode.DROP
             + Opcode.RET
         )
 
