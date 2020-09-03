@@ -288,7 +288,7 @@ class TestWhile(BoaTest):
 
         path = '%s/boa3_test/test_sc/while_test/WhileContinue.py' % self.dirname
         output = Boa3.compile(path)
-        
+
         self.assertEqual(expected_output, output)
 
     def test_boa2_while_test(self):

@@ -122,7 +122,7 @@ class TestFunction(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
-        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT     # Main
@@ -130,6 +130,7 @@ class TestFunction(BoaTest):
             + b'\x02'
             + Opcode.CALL           # TestFunction()
             + called_function_address
+            + Opcode.DROP
             + Opcode.PUSH1          # return True
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
@@ -168,7 +169,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_call_void_function_with_literal_args(self):
-        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT     # Main
@@ -178,6 +179,7 @@ class TestFunction(BoaTest):
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
+            + Opcode.DROP
             + Opcode.PUSH1          # return True
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
@@ -225,7 +227,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_call_void_function_with_variable_args(self):
-        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT     # Main
@@ -239,6 +241,7 @@ class TestFunction(BoaTest):
             + Opcode.LDLOC0
             + Opcode.CALL
             + called_function_address
+            + Opcode.DROP
             + Opcode.PUSH1          # return True
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
@@ -913,12 +916,14 @@ class TestFunction(BoaTest):
             + Opcode.PUSH2
             + Opcode.PUSH1
             + Opcode.CALL
-            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Integer(11).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
             + Opcode.PUSH0
             + Opcode.PUSH6  # add(5, 6)
             + Opcode.PUSH5
             + Opcode.CALL
-            + Integer(4).to_byte_array(signed=True, min_length=1)
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
             + Opcode.PUSHNULL
             + Opcode.RET
             + Opcode.INITSLOT   # def add(a: int, b: int, c: int = 0)
@@ -941,22 +946,26 @@ class TestFunction(BoaTest):
             + Opcode.PUSH0
             + Opcode.PUSH0
             + Opcode.CALL   # add()
-            + Integer(19).to_byte_array(signed=True, min_length=1)
+            + Integer(23).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
             + Opcode.PUSH0      # defaults
             + Opcode.PUSH6      # add(5, 6)
             + Opcode.PUSH5
             + Opcode.CALL
-            + Integer(14).to_byte_array(signed=True, min_length=1)
+            + Integer(17).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
             + Opcode.PUSH0      # defaults
             + Opcode.PUSH0
             + Opcode.PUSH9      # add(9)
             + Opcode.CALL
-            + Integer(9).to_byte_array(signed=True, min_length=1)
+            + Integer(11).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
             + Opcode.PUSH3      # add(1, 2, 3)
             + Opcode.PUSH2
             + Opcode.PUSH1
             + Opcode.CALL
-            + Integer(4).to_byte_array(signed=True, min_length=1)
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
             + Opcode.PUSHNULL
             + Opcode.RET
             + Opcode.INITSLOT   # def add(a: int, b: int, c: int)
