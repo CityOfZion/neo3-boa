@@ -29,7 +29,7 @@ class Compiler:
         filepath, filename = os.path.split(fullpath)
 
         logging.info('Started compiling\t{0}'.format(filename))
-        self._analyse(path)
+        self._analyse(fullpath)
         return self._compile()
 
     def compile_and_save(self, path: str, output_path: str):
