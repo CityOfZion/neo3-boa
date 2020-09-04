@@ -77,7 +77,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         global_symbols = globals()
         if exc_id in global_symbols or exc_id in global_symbols['__builtins__']:
             symbol = global_symbols[exc_id] if exc_id in global_symbols else global_symbols['__builtins__'][exc_id]
-            if isclass(symbol) and issubclass(symbol, Exception):
+            if isclass(symbol) and issubclass(symbol, BaseException):
                 return True
         return False
 
@@ -521,6 +521,28 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         self.visit_to_map(raise_node.exc, generate=True)
         self.generator.convert_raise_exception()
+
+    def visit_Try(self, try_node: ast.Try):
+        """
+        Visitor of the try node
+
+        :param try_node: the python ast try node
+        """
+        try_address: int = self.generator.convert_begin_try()
+        try_end: Optional[int] = None
+        for stmt in try_node.body:
+            self.visit_to_map(stmt, generate=True)
+
+        if len(try_node.handlers) == 1:
+            handler = try_node.handlers[0]
+            try_end = self.generator.convert_try_except(handler.name)
+            for stmt in handler.body:
+                self.visit_to_map(stmt, generate=True)
+
+        except_end = self.generator.convert_end_try(try_address, try_end)
+        for stmt in try_node.finalbody:
+            self.visit_to_map(stmt, generate=True)
+        self.generator.convert_end_try_finally(except_end)
 
     def visit_Name(self, name: ast.Name) -> str:
         """

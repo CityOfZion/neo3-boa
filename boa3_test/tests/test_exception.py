@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
+from boa3.exception.CompilerWarning import UsingSpecificException
 from boa3.model.builtin.builtin import Builtin
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -152,3 +153,86 @@ class TestException(BoaTest):
     def test_raise_mismatched_type(self):
         path = '%s/boa3_test/test_sc/exception_test/RaiseMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_try_except_without_exception(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.TRY        # try:
+            + Integer(7).to_byte_array(signed=True, min_length=1)  # jmp to exception
+            + Integer(0).to_byte_array(signed=True, min_length=1)  # jmp to finally if exists
+            + Opcode.LDARG0         # x = arg
+            + Opcode.STLOC0
+            + Opcode.JMP        # except:
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0          # x = 0
+            + Opcode.STLOC0
+            + Opcode.ENDTRY
+            + Integer(2).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/exception_test/TryExceptWithoutException.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_try_except_base_exception(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.TRY        # try:
+            + Integer(7).to_byte_array(signed=True, min_length=1)  # jmp to exception
+            + Integer(0).to_byte_array(signed=True, min_length=1)  # jmp to finally if exists
+            + Opcode.LDARG0         # x = arg
+            + Opcode.STLOC0
+            + Opcode.JMP        # except BaseException:
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0          # x = 0
+            + Opcode.STLOC0
+            + Opcode.ENDTRY
+            + Integer(2).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/exception_test/TryExceptBaseException.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_try_except_specific_exception(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.TRY        # try:
+            + Integer(7).to_byte_array(signed=True, min_length=1)  # jmp to exception
+            + Integer(0).to_byte_array(signed=True, min_length=1)  # jmp to finally if exists
+            + Opcode.LDARG0         # x = arg
+            + Opcode.STLOC0
+            + Opcode.JMP        # except ValueError:
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0          # x = 0
+            + Opcode.STLOC0
+            + Opcode.ENDTRY
+            + Integer(2).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/exception_test/TryExceptSpecificException.py' % self.dirname
+        output = self.assertCompilerLogs(UsingSpecificException, path)
+        self.assertEqual(expected_output, output)
+
+    def test_try_except_with_name(self):
+        path = '%s/boa3_test/test_sc/exception_test/TryExceptWithName.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_try_except_finally(self):
+        path = '%s/boa3_test/test_sc/exception_test/TryExceptFinally.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)

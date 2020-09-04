@@ -68,3 +68,17 @@ class UnreachableCode(CompilerWarning):
     @property
     def _warning_message(self) -> Optional[str]:
         return "Unreachable code"
+
+
+class UsingSpecificException(CompilerWarning):
+    """
+    An warning raised when a specific exception is used.
+    """
+
+    def __init__(self, line: int, col: int, exception_id: str):
+        self._exception_id: str = exception_id
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        return "{0} will be interpreted as BaseException when running in the blockchain".format(self._exception_id)

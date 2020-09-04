@@ -2,7 +2,7 @@ import ast
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.exception import CompilerError
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
@@ -151,8 +151,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
                 )
             self._current_method = None
-        elif (isinstance(method, Event)         # events don't have return
-                and function.returns is not None):
+        elif (isinstance(method, Event)  # events don't have return
+              and function.returns is not None):
             return_type = self.get_type(function.returns)
             if return_type is not Type.none:
                 self._log_error(
@@ -437,8 +437,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # TODO: remove when slices of other sequence types are implemented
         if (not symbol_type.is_valid_key(lower)
-            or not symbol_type.is_valid_key(upper)
-            or (step is not Type.none and not symbol_type.is_valid_key(step))
+                or not symbol_type.is_valid_key(upper)
+                or (step is not Type.none and not symbol_type.is_valid_key(step))
             ):
             actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
             self._log_error(
@@ -954,6 +954,92 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     actual_type_id=raised_type.identifier,
                     expected_type_id=Type.exception.identifier
                 ))
+
+    def visit_Try(self, try_node: ast.Try):
+        """
+        Visitor of the try node
+
+        :param try_node: the python ast try node
+        """
+        if len(try_node.finalbody) > 0:
+            self._log_error(
+                # TODO: remove when 'finally' is implemented
+                CompilerError.NotSupportedOperation(line=try_node.lineno,
+                                                    col=try_node.col_offset,
+                                                    symbol_id='finally')
+            )
+        self.validate_except_handlers(try_node)
+
+        for stmt in try_node.body:
+            self.visit(stmt)
+
+    def validate_except_handlers(self, try_node: ast.Try):
+        if len(try_node.handlers) > 1:
+            exception_handlers: List[ast.ExceptHandler] = try_node.handlers.copy()
+            general_exc_handler: ast.ExceptHandler = next(
+                (handler
+                 for handler in exception_handlers
+                 if (handler.type is None or  # no specified exception or is BaseException
+                     (isinstance(handler.type, ast.Name) and handler.type.id == BaseException.__name__)
+                     )
+                 ), exception_handlers[0]
+            )
+
+            try_node.handlers = [general_exc_handler]
+            exception_handlers.remove(general_exc_handler)
+
+            for handler in exception_handlers:
+                warnings = len(self.warnings)
+                self.visit(handler)
+                if warnings == len(self.warnings):
+                    self._log_using_specific_exception_warning(handler.type)
+
+        if len(try_node.handlers) == 1:
+            self.visit(try_node.handlers[0])
+
+    def visit_ExceptHandler(self, node: ast.ExceptHandler):
+        """
+        Visitor of the try except node
+
+        :param node: the python ast try except node
+        """
+        logged_errors = False
+
+        exception_type: IType = self.get_type(node.type)
+        if node.type is not None and exception_type is not Type.exception:
+            self._log_error(
+                CompilerError.MismatchedTypes(line=node.type.lineno,
+                                              col=node.type.col_offset,
+                                              expected_type_id=Type.exception.identifier,
+                                              actual_type_id=exception_type.identifier)
+            )
+            logged_errors = True
+
+        if node.name is not None:
+            # TODO: remove when getting the exception is implemented
+            self._log_error(
+                CompilerError.NotSupportedOperation(line=node.lineno,
+                                                    col=node.col_offset,
+                                                    symbol_id='naming exceptions')
+            )
+            logged_errors = True
+
+        if not logged_errors and node.type is not None:
+            self._log_using_specific_exception_warning(node.type)
+
+    def _log_using_specific_exception_warning(self, node: ast.AST):
+        if node is None:
+            exc_id = 'Exception'
+        elif isinstance(node, ast.Name):
+            exc_id = node.id
+        else:
+            exc_id = self.get_type(node).identifier
+
+        self._log_warning(
+            CompilerWarning.UsingSpecificException(line=node.lineno,
+                                                   col=node.col_offset,
+                                                   exception_id=exc_id)
+        )
 
     def visit_value(self, node: ast.AST):
         result = self.visit(node)

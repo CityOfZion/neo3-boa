@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
@@ -75,9 +75,19 @@ class VMCodeMapping:
         if vm_code not in self._codes.values():
             self._codes[self.bytecode_size] = vm_code
 
-    def get_code(self, address: int):
+    def get_code(self, address: int) -> Optional[VMCode]:
+        """
+        Gets the VM Opcode at the given position
+
+        :param address: the position of the opcode
+        :return: the opcode if it exists. None otherwise
+        :rtype: VMCode or None
+        """
         if address in self._codes:
             return self._codes[address]
+        elif address >= self.bytecode_size:
+            # the address is not in the bytecode
+            return None
         else:
             # if the address is not the start of a instruction, gets the last instruction before given address
             code_address = 0

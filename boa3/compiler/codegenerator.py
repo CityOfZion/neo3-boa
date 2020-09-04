@@ -16,6 +16,7 @@ from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
+from boa3.neo.vm.TryCode import TryCode
 from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo, OpcodeInformation
@@ -111,6 +112,15 @@ class CodeGenerator:
             return instance.get_start_address(instance.codes[-1])
         else:
             return 0
+
+    @property
+    def bytecode_size(self) -> int:
+        """
+        Gets the current bytecode size
+
+        :return: the current bytecode size
+        """
+        return VMCodeMapping.instance().bytecode_size
 
     @property
     def _args(self) -> List[str]:
@@ -350,6 +360,68 @@ class CodeGenerator:
         """
         # updates the begin jmp with the target address
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
+
+    def convert_begin_try(self) -> int:
+        """
+        Converts the beginning of the try statement
+
+        :return: the address of the try first opcode
+        """
+        # it will be updated when the while ends
+        self.__insert_code(TryCode())
+
+        return self.last_code_start_address
+
+    def convert_try_except(self, exception_id: Optional[str]) -> int:
+        """
+        Converts the end of the try statement
+
+        :param exception_id: the name identifier of the exception
+        :type exception_id: str or None
+
+        :return: the last address from try body
+        """
+        self._insert_jump(OpcodeInfo.JMP)
+        last_try_code = self.last_code_start_address
+
+        self._stack.append(Type.exception)  # when reaching the except body, an exception was raised
+        if exception_id is None:
+            self.remove_stack_top_item()
+
+        return last_try_code
+
+    def convert_end_try(self, start_address: int, end_address: Optional[int] = None) -> int:
+        """
+        Converts the end of the try statement
+
+        :param start_address: the address of the try first opcode
+        :param end_address: the address of the try last opcode. If it is None, there's no except body.
+        :return: the last address of the except body
+        """
+        self.__insert1(OpcodeInfo.ENDTRY)
+        if end_address is not None:
+            vmcode_mapping_instance = VMCodeMapping.instance()
+
+            try_vm_code = vmcode_mapping_instance.get_code(start_address)
+            try_jump = vmcode_mapping_instance.get_code(end_address)
+
+            except_start_address = vmcode_mapping_instance.get_end_address(try_jump) + 1
+            except_start_code = vmcode_mapping_instance.get_code(except_start_address)
+
+            if isinstance(try_vm_code, TryCode):
+                try_vm_code.set_except_code(except_start_code)
+            self._update_jump(end_address, self.last_code_start_address)
+
+        return self.last_code_start_address
+
+    def convert_end_try_finally(self, last_address: int):
+        """
+        Converts the end of the try finally statement
+
+        :param last_address: the address of the try except last opcode.
+        :return: the last address of the except body
+        """
+        self._update_jump(last_address, VMCodeMapping.instance().bytecode_size)
 
     def fix_negative_index(self, value_index: int = None):
         self._can_append_target = not self._can_append_target
@@ -905,7 +977,7 @@ class CodeGenerator:
         self._stack.pop()
         self.__insert1(OpcodeInfo.THROW)
 
-    def __insert1(self, op_info: OpcodeInformation, data: bytes = bytes()):
+    def __insert1(self, op_info: OpcodeInformation, data: bytes = None):
         """
         Inserts one opcode into the bytecode
 
@@ -915,6 +987,7 @@ class CodeGenerator:
         vm_code = VMCode(op_info, data)
 
         if op_info.opcode.has_target():
+            data = vm_code.data
             relative_address: int = Integer.from_bytes(data, signed=True)
             actual_address = VMCodeMapping.instance().bytecode_size + relative_address
             if (self._can_append_target
@@ -951,7 +1024,8 @@ class CodeGenerator:
 
             if target_address not in self._missing_target:
                 self._missing_target[target_address] = []
-            self._missing_target[target_address].append(vmcode)
+            if vmcode not in self._missing_target[target_address]:
+                self._missing_target[target_address].append(vmcode)
 
     def _remove_missing_target(self, vmcode: VMCode):
         """
@@ -974,8 +1048,10 @@ class CodeGenerator:
 
         :param vm_code: targeted instruction
         """
+        instance = VMCodeMapping.instance()
+        vm_code_start_address = instance.get_start_address(vm_code)
         for target_address, codes in list(self._missing_target.items()):
-            if target_address is not None and target_address <= VMCodeMapping.instance().get_start_address(vm_code):
+            if target_address is not None and target_address <= vm_code_start_address:
                 for code in codes:
                     code.set_target(vm_code)
                 self._missing_target.pop(target_address)
@@ -1021,11 +1097,11 @@ class CodeGenerator:
         :param jump_address: jump code start address
         :param updated_jump_to: new data of the code
         """
-        vmcode: VMCode = VMCodeMapping.instance().code_map[jump_address]
+        vmcode: VMCode = VMCodeMapping.instance().get_code(jump_address)
         if vmcode is not None:
             if updated_jump_to in VMCodeMapping.instance().code_map:
                 self._remove_missing_target(vmcode)
-                target: VMCode = VMCodeMapping.instance().code_map[updated_jump_to]
+                target: VMCode = VMCodeMapping.instance().get_code(updated_jump_to)
                 vmcode.set_target(target)
             else:
                 data: bytes = self._get_jump_data(vmcode.info, updated_jump_to - jump_address)
