@@ -361,14 +361,6 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_boa2_while_test(self):
-        comment = String(
-            self.indent_text(
-                """
-
-                :return:
-                """, 4
-            )
-        ).to_bytes(min_length=1)
         outer_jmpif_address = Integer(28).to_byte_array(min_length=1, signed=True)
         outer_jmp_address = Integer(-29).to_byte_array(min_length=1, signed=True)
 
@@ -382,10 +374,6 @@ class TestWhile(BoaTest):
             Opcode.INITSLOT
             + b'\x03'
             + b'\x00'
-            + Opcode.PUSHDATA1      # comment
-            + Integer(len(comment)).to_byte_array(min_length=1)
-            + comment
-            + Opcode.DROP
             + Opcode.PUSH0          # a = 0
             + Opcode.STLOC0
             + Opcode.PUSH0          # b = 0

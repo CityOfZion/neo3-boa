@@ -34,7 +34,7 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         if isinstance(call.func, ast.Attribute):
             from boa3.model.builtin.builtin import Builtin
             if call.func.attr == Builtin.ScriptHash.identifier:
-                import sys
+                from boa3.constants import SYS_VERSION_INFO
                 from boa3.model.type.type import Type
                 types = {
                     Type.int.identifier: int,
@@ -42,7 +42,7 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
                     Type.bytes.identifier: bytes
                 }
                 literal: tuple = ((ast.Constant,)
-                                  if sys.version_info > (3, 8)
+                                  if SYS_VERSION_INFO >= (3, 8)
                                   else (ast.Num, ast.Str, ast.Bytes))
 
                 if isinstance(call.func.value, literal) and len(call.args) == 0:
