@@ -350,32 +350,32 @@ class TestFor(BoaTest):
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP
             + jmpif_address
-                + Opcode.OVER           # x = for_sequence[for_index]
-                + Opcode.OVER
-                    + Opcode.DUP
-                    + Opcode.SIGN
-                    + Opcode.PUSHM1
-                    + Opcode.JMPNE
-                    + Integer(5).to_byte_array(min_length=1, signed=True)
-                    + Opcode.OVER
-                    + Opcode.SIZE
-                    + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.STLOC2
-                + Opcode.LDLOC2         # if x % 5 != 0
-                + Opcode.PUSH5
-                + Opcode.MOD
-                + Opcode.PUSH0
-                + Opcode.NUMNOTEQUAL
-                + Opcode.JMPIFNOT
-                + Integer(4).to_byte_array(min_length=1, signed=True)
-                + Opcode.JMP                # continue
-                + Integer(6).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0         # a = a + x
-                + Opcode.LDLOC2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.INC            # for_index = for_index + 1
+            + Opcode.OVER           # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.LDLOC2         # if x % 5 != 0
+            + Opcode.PUSH5
+            + Opcode.MOD
+            + Opcode.PUSH0
+            + Opcode.NUMNOTEQUAL
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.JMP                # continue
+            + Integer(6).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0         # a = a + x
+            + Opcode.LDLOC2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # for_index = for_index + 1
             + Opcode.DUP        # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
@@ -390,5 +390,146 @@ class TestFor(BoaTest):
         )
 
         path = '%s/boa3_test/test_sc/for_test/ForContinue.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_for_break(self):
+        jmpif_address = Integer(32).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-35).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC0
+            + Opcode.PUSH15     # sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # for_sequence = sequence
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.JMP
+            + jmpif_address
+            + Opcode.OVER           # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.LDLOC2         # if x % 5 != 0
+            + Opcode.PUSH5
+            + Opcode.MOD
+            + Opcode.PUSH0
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + Integer(8).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0             # a += x
+            + Opcode.LDLOC2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.JMP                # break
+            + Integer(16).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0         # a += 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # for_index = for_index + 1
+            + Opcode.DUP        # if for_index < len(for_sequence)
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF      # end for
+            + jmp_address
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/for_test/ForBreak.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_for_break_else(self):
+        jmpif_address = Integer(32).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-35).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC0
+            + Opcode.PUSH15     # sequence = (3, 5, 15)
+            + Opcode.PUSH5
+            + Opcode.PUSH3
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # for_sequence = sequence
+            + Opcode.PUSH0      # for_index = 0
+            + Opcode.JMP
+            + jmpif_address
+            + Opcode.OVER           # x = for_sequence[for_index]
+            + Opcode.OVER
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC2
+            + Opcode.LDLOC2         # if x % 5 == 0
+            + Opcode.PUSH5
+            + Opcode.MOD
+            + Opcode.PUSH0
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + Integer(8).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0             # a += x
+            + Opcode.LDLOC2
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.JMP                # break
+            + Integer(21).to_byte_array(min_length=1, signed=True)
+            + Opcode.LDLOC0         # a += 1
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.INC            # for_index = for_index + 1
+            + Opcode.DUP        # if for_index < len(for_sequence)
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.LT
+            + Opcode.JMPIF      # end for
+            + jmp_address
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.PUSH1          # a = -1
+            + Opcode.NEGATE
+            + Opcode.STLOC0
+            + Opcode.JMP        # else
+            + Integer(4).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/for_test/ForBreakElse.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

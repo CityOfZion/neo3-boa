@@ -393,6 +393,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in while_node.orelse:
             self.visit_to_map(stmt, generate=True)
 
+        self.generator.convert_end_loop_else(start_addr, len(while_node.orelse) > 0)
+
     def visit_For(self, for_node: ast.For):
         """
         Visitor of for statement node
@@ -422,6 +424,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         for stmt in for_node.orelse:
             self.visit_to_map(stmt, generate=True)
+
+        self.generator.convert_end_loop_else(start_address,
+                                             has_else=len(for_node.orelse) > 0,
+                                             pop_from_stack=2)
 
     def visit_If(self, if_node: ast.If):
         """
@@ -553,8 +559,13 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         :param continue_node: the python ast continue statement node
         """
-        # TODO: remove when implement continue statement
         self.generator.convert_loop_continue()
+
+    def visit_Break(self, break_node: ast.Break):
+        """
+        :param break_node: the python ast break statement node
+        """
+        self.generator.convert_loop_break()
 
     def visit_Constant(self, constant: ast.Constant):
         """

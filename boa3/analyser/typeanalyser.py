@@ -1119,10 +1119,3 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         return slice_node.lower, slice_node.upper, slice_node.step
-
-    def visit_Break(self, break_node: ast.Break):
-        """
-        :param break_node: the python ast break statement node
-        """
-        # TODO: remove when implement break statement
-        raise NotImplementedError
