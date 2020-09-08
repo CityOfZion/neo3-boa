@@ -92,6 +92,6 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             if (found_symbol is None and isinstance(symbol_id, str)
                     and (symbol_id in globals() or symbol_id in globals()['__builtins__'])):
                 symbol = globals()[symbol_id] if symbol_id in globals() else globals()['__builtins__'][symbol_id]
-                if isclass(symbol) and issubclass(symbol, Exception):
+                if isclass(symbol) and issubclass(symbol, BaseException):
                     found_symbol = Builtin.Exception.return_type
             return found_symbol

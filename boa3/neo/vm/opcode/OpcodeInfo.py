@@ -154,18 +154,18 @@ class OpcodeInfo:
     THROW = OpcodeInformation(Opcode.THROW)
     # TRY CatchOffset(sbyte) FinallyOffset(sbyte). If there's no catch body, set CatchOffset 0. If there's no finally
     # body, set FinallyOffset 0.
-    TRY = OpcodeInformation(Opcode.TRY)
+    TRY = OpcodeInformation(Opcode.TRY, 2)
     # TRY_L CatchOffset(int) FinallyOffset(int). If there's no catch body, set CatchOffset 0. If there's no finally
     # body, set FinallyOffset 0.
-    TRY_L = OpcodeInformation(Opcode.TRY_L)
+    TRY_L = OpcodeInformation(Opcode.TRY_L, 8)
     # Ensures that the appropriate surrounding finally blocks are executed. And then unconditionally transfers
     # control to the specific target instruction, represented as a 1-byte signed offset from the beginning of the
     # current instruction.
-    ENDTRY = OpcodeInformation(Opcode.ENDTRY)
+    ENDTRY = OpcodeInformation(Opcode.ENDTRY, 1)
     # Ensures that the appropriate surrounding finally blocks are executed. And then unconditionally transfers
     # control to the specific target instruction, represented as a 4-byte signed offset from the beginning of the
     # current instruction.
-    ENDTRY_L = OpcodeInformation(Opcode.ENDTRY_L)
+    ENDTRY_L = OpcodeInformation(Opcode.ENDTRY_L, 4)
     # End finally, If no exception happen or be catched, vm will jump to the target instruction of ENDTRY/ENDTRY_L.
     # Otherwise vm will rethrow the exception to upper layer.
     ENDFINALLY = OpcodeInformation(Opcode.ENDFINALLY)

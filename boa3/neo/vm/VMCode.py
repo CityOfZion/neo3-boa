@@ -13,11 +13,13 @@ class VMCode:
     :ivar data: the data in bytes of the code. Empty byte array by default.
     """
 
-    def __init__(self, op_info: OpcodeInformation, data: bytes = bytes()):
+    def __init__(self, op_info: OpcodeInformation, data: bytes = None):
         """
         :param op_info: information of the opcode of the code
         :param data: the data in bytes of the code. Empty byte array by default.
         """
+        if data is None:
+            data = bytes(op_info.data_len)
         self._info: OpcodeInformation = op_info
         self._target: Optional[VMCode] = None
         self._data: bytes = data
@@ -42,7 +44,7 @@ class VMCode:
         info = self.info
 
         if len(data) < info.data_len:
-            data = data.zfill(info.data_len)
+            data.extend(bytes(info.data_len))
         elif len(data) > info.max_data_len:
             data = data[:info.max_data_len]
         return data
