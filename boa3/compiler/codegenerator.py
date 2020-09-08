@@ -64,6 +64,7 @@ class CodeGenerator:
 
         self._current_loop: List[int] = []  # a stack with the converting loops' start addresses
         self._jumps_to_loop_condition: Dict[int, List[int]] = {}
+        self._jumps_to_loop_break: Dict[int, List[int]] = {}
 
         self._stack: List[IType] = []  # simulates neo execution stack
         self.initialized_static_fields: bool = False
@@ -325,7 +326,29 @@ class CodeGenerator:
 
         self.remove_stack_top_item()    # removes index and sequence from stack
         self.remove_stack_top_item()
+
         return test_address
+
+    def convert_end_loop_else(self, start_address: int, has_else: bool = False, pop_from_stack: int = 0):
+        """
+        Updates the break loops jumps
+
+        :param start_address: the address of the loop first opcode
+        :param has_else: whether this loop has an else branch
+        :param pop_from_stack: the number of stacked values that exists only in the loop's scope
+        """
+        if start_address in self._jumps_to_loop_break:
+            if has_else and pop_from_stack > 0:
+                self._insert_jump(OpcodeInfo.JMP)
+
+            self._update_break_jumps(start_address)
+            if has_else and pop_from_stack > 0:
+                jmp_address = self.last_code_start_address
+                self._stack.extend(list(range(pop_from_stack)))
+                for _ in range(pop_from_stack):
+                    self.remove_stack_top_item()
+
+                self._update_jump(jmp_address, VMCodeMapping.instance().bytecode_size)
 
     def convert_begin_if(self) -> int:
         """
@@ -464,6 +487,24 @@ class CodeGenerator:
             jump_addresses = self._jumps_to_loop_condition.pop(loop_start_address)
             for address in jump_addresses:
                 self._update_jump(address, loop_test_address)
+
+    def convert_loop_break(self):
+        loop_start = self._current_loop[-1]
+        self._insert_jump(OpcodeInfo.JMP)
+        break_address = self.last_code_start_address
+
+        if loop_start not in self._jumps_to_loop_condition:
+            self._jumps_to_loop_break[loop_start] = [break_address]
+        else:
+            self._jumps_to_loop_break[loop_start].append(break_address)
+
+    def _update_break_jumps(self, loop_start_address) -> int:
+        jump_target = VMCodeMapping.instance().bytecode_size
+
+        if loop_start_address in self._jumps_to_loop_break:
+            jump_addresses = self._jumps_to_loop_break.pop(loop_start_address)
+            for address in jump_addresses:
+                self._update_jump(address, jump_target)
 
     def convert_literal(self, value: Any) -> int:
         """

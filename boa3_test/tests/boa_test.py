@@ -19,6 +19,10 @@ class BoaTest(TestCase):
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
 
+    def indent_text(self, text: str, no_spaces: int = 4) -> str:
+        import re
+        return re.sub('\n[ \t]+', '\n' + ' ' * no_spaces, text)
+
     def assertCompilerLogs(self, expected_logged_exception, path):
         output = None
         with self.assertLogs() as log:

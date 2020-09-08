@@ -419,8 +419,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_method = method
 
         # don't evaluate constant expression - for example: string for documentation
-        function.body = [stmt for stmt in function.body
-                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
+        from boa3.constants import SYS_VERSION_INFO
+        if SYS_VERSION_INFO >= (3, 8):
+            function.body = [stmt for stmt in function.body
+                             if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
+        else:
+            function.body = [stmt for stmt in function.body
+                             if not (isinstance(stmt, ast.Expr) and
+                                     (hasattr(stmt.value, 'n') or hasattr(stmt.value, 's'))
+                                     )]
         for stmt in function.body:
             self.visit(stmt)
 
