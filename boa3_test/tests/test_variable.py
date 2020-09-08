@@ -387,8 +387,21 @@ class TestVariable(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_assign_global_in_function(self):
+    def test_assign_global_in_function_with_global_keyword(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # b = a
+            + Opcode.STSFLD0
+            + Opcode.LDSFLD0    # return b
+            + Opcode.RET
+            + Opcode.INITSSLOT  # global variables
+            + b'\x01'           # number of globals
+            + Opcode.PUSH0      # b = 0
+            + Opcode.STSFLD0
+            + Opcode.RET
+        )
         path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py' % self.dirname
-
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)

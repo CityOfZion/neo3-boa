@@ -880,19 +880,23 @@ class CodeGenerator:
         Gets the necessary information about the variable to get the correct opcode
 
         :param var_id: the name id of the
-        :return: returns the index of the variable in its scope and two boolean variables for representing the variable
-        scope: `local` is True if it is a local variable and `is_arg` is True only if the variable is a parameter of
-        the function. If the variable is not found, returns (-1, False, False)
+        :return: returns the index of the variable in its scope and two boolean variables for representing the
+        variable scope:
+            `local` is True if it is a local variable and
+            `is_arg` is True only if the variable is a parameter of the function.
+        If the variable is not found, returns (-1, False, False)
         """
-        is_arg: bool = False
-        local: bool = isinstance(self._current_method, Method) and var_id in self._current_method.symbols
-        if local:
-            is_arg = var_id in self._args
-            if is_arg:
-                scope = self._args
-            else:
-                scope = self._locals
+        if var_id in self._args:
+            is_arg: bool = True
+            local: bool = True
+            scope = self._args
+        elif var_id in self._locals:
+            is_arg = False
+            local: bool = True
+            scope = self._locals
         else:
+            is_arg: bool = False
+            local: bool = False
             scope = self._globals
 
         index: int = scope.index(var_id) if var_id in scope else -1
