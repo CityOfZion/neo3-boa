@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Optional
 
 
-class CompilerWarning(ABC):
+class CompilerWarning(ABC, BaseException):
     def __init__(self, line: int, col: int):
         self.line: int = line
         self.col: int = col

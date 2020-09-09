@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import UnresolvedOperation
+from boa3.exception.CompilerError import InternalError, UnresolvedOperation
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -272,10 +272,8 @@ class TestString(BoaTest):
 
     def test_string_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/string_test/StringSlicingWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)
 
     def test_string_slicing_omitted_with_stride(self):
         path = '%s/boa3_test/test_sc/string_test/StringSlicingOmittedWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)

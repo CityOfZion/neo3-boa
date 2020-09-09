@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnresolvedOperation
+from boa3.exception.CompilerError import InternalError, MismatchedTypes, UnexpectedArgument, UnresolvedOperation
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -825,13 +825,11 @@ class TestList(BoaTest):
 
     def test_list_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/list_test/ListSlicingWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)
 
     def test_list_slicing_omitted_with_stride(self):
         path = '%s/boa3_test/test_sc/list_test/ListSlicingOmittedWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)
 
     # endregion
 

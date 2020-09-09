@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Iterable, Optional, Union
 
 
-class CompilerError(ABC, Exception):
+class CompilerError(ABC, BaseException):
     """
     An interface for compilation errors
     """
@@ -58,6 +58,25 @@ class InvalidType(CompilerError):
         message = "Invalid type"
         if self.symbol_id is not None:
             message += ": '%s'" % self.symbol_id
+        return message
+
+
+class InternalError(CompilerError):
+    """
+    An error raised when an unexpected exception is raised during the compilation
+    """
+
+    def __init__(self, line: int, col: int, raised_exception: BaseException = None):
+        self.raised_exception: BaseException = raised_exception
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        message = "Internal compiler error"
+        if self.raised_exception is not None:
+            message += ". %s" % type(self.raised_exception).__name__
+            if len(self.raised_exception.args) > 0:
+                message += ": %s" % self.raised_exception.args
         return message
 
 

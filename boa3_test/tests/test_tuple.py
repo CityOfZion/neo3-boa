@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, UnresolvedOperation
+from boa3.exception.CompilerError import InternalError, MismatchedTypes, UnresolvedOperation
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -733,10 +733,8 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)
 
     def test_tuple_slicing_omitted_with_stride(self):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)

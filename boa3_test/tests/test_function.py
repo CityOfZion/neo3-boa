@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.constants import ENCODING
-from boa3.exception.CompilerError import MismatchedTypes, MissingReturnStatement, TooManyReturns, TypeHintMissing
+from boa3.exception.CompilerError import (InternalError, MismatchedTypes, MissingReturnStatement, TooManyReturns,
+                                          TypeHintMissing)
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -51,9 +52,7 @@ class TestFunction(BoaTest):
 
     def test_none_function(self):
         path = '%s/boa3_test/test_sc/function_test/NoneFunction.py' % self.dirname
-
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)
 
     def test_arg_without_type_hint(self):
         path = '%s/boa3_test/test_sc/function_test/ArgWithoutTypeHintFunction.py' % self.dirname
@@ -990,6 +989,4 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_kwargs(self):
         path = '%s/boa3_test/test_sc/function_test/CallFunctionWithKwargs.py' % self.dirname
-
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)

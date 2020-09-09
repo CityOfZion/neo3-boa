@@ -857,11 +857,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if not isinstance(callable_target, Callable):
             # verify if it is a builtin method with its name shadowed
             call_target = Builtin.get_symbol(callable_id)
-            if (not isinstance(call_target, Callable) and
-                    (callable_id in globals() or callable_id in globals()['__builtins__'])):
-                tpe = globals()[callable_id] if callable_id in globals() else globals()['__builtins__'][callable_id]
-                if issubclass(tpe, Exception):
-                    call_target = Builtin.Exception
+            if not isinstance(call_target, Callable) and self.is_exception(callable_id):
+                call_target = Builtin.Exception
 
             callable_target = call_target if call_target is not None else callable_target
         if not isinstance(callable_target, Callable):

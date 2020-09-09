@@ -28,7 +28,7 @@ class Analyser(object):
 
         import os
         self.path: str = path
-        self.filename: str = path if path is None else os.path.split(os.path.realpath(path))[1]
+        self.filename: str = path if path is None else os.path.realpath(path)
 
     @staticmethod
     def analyse(path: str, log: bool = False):
