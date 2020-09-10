@@ -146,10 +146,10 @@ Boa3.compile_and_save('path/to/your/file.py')
 ### Debugger ready
 Neo3-boa is compatible with the [Neo Debugger](https://github.com/neo-project/neo-debugger).
 Debugger launch configuration example:
-```json
+```
 {
     //Launch configuration example for Neo3-boa.
-    //Make sure you compiled you smart-contract before you try to debug it.
+    //Make sure you compile your smart-contract before you try to debug it.
     "version": "0.2.0",
     "configurations": [
         {
