@@ -574,7 +574,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param global_node:
         """
-        raise NotImplementedError
+        for var_id in global_node.names:
+            symbol = self.get_symbol(var_id)
+            if isinstance(symbol, Variable) and self._current_method is not None:
+                self._current_method.include_variable(var_id, symbol, is_global=True)
 
     def visit_Expr(self, expr: ast.Expr):
         """

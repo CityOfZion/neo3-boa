@@ -625,6 +625,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         l_type: IType = self.get_type(left)
         r_type: IType = self.get_type(right)
 
+        if l_type is None or r_type is None:
+            return BinaryOp.get_operation_by_operator(operator, l_type if l_type is not None else r_type)
+
         actual_types = (l_type.identifier, r_type.identifier)
         operation: IOperation = BinaryOp.validate_type(operator, l_type, r_type)
 

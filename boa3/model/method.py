@@ -25,6 +25,7 @@ class Method(Callable):
 
         self.imported_symbols = {}
         self._requires_storage: bool = False
+        self._symbols = {}
         self.locals: Dict[str, Variable] = {}
 
         self._debug_map: List[DebugInstruction] = []
@@ -33,15 +34,19 @@ class Method(Callable):
     def shadowing_name(self) -> str:
         return 'method'
 
-    def include_variable(self, var_id: str, var: Variable):
+    def include_variable(self, var_id: str, var: Variable, is_global: bool = False):
         """
         Includes a variable into the list of locals
 
         :param var_id: variable identifier
         :param var: variable to be included
+        :param is_global: whether the variable is declared outside the method
         """
         if var_id not in self.symbols:
-            self.locals[var_id] = var
+            if is_global:
+                self._symbols[var_id] = var
+            else:
+                self.locals[var_id] = var
 
     def __str__(self) -> str:
         args_types: List[str] = [str(arg.type) for arg in self.args.values()]
@@ -59,22 +64,23 @@ class Method(Callable):
 
         :return: a dictionary that maps each symbol in the module with its name
         """
-        symbols = {}
+        symbols = self._symbols.copy()
         symbols.update(self.imported_symbols)
         symbols.update(self.args)
         symbols.update(self.locals)
         return symbols
 
-    def include_symbol(self, symbol_id: str, symbol: ISymbol):
+    def include_symbol(self, symbol_id: str, symbol: ISymbol, is_global: bool = False):
         """
         Includes a method into the scope of the module
 
         :param symbol_id: method identifier
         :param symbol: method to be included
+        :param is_global: whether the variable is declared outside the method
         """
         if symbol_id not in self.symbols:
             if isinstance(symbol, Variable):
-                self.include_variable(symbol_id, symbol)
+                self.include_variable(symbol_id, symbol, is_global)
             else:
                 self.imported_symbols[symbol_id] = symbol
 
