@@ -4,7 +4,7 @@ from abc import ABC
 from inspect import isclass
 from typing import Any, Dict, List, Optional
 
-from boa3.exception.CompilerError import CompilerError
+from boa3.exception.CompilerError import CompilerError, InternalError
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.expression import IExpression
 from boa3.model.operation.operation import IOperation
@@ -45,6 +45,21 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             # don't include duplicated warnings
             self.warnings.append(warning)
             logging.warning(warning)
+
+    def visit(self, node: ast.AST) -> Any:
+        try:
+            return super().visit(node)
+        except CompilerError as error:
+            self._log_error(error)
+        except CompilerWarning as warning:
+            self._log_warning(warning)
+        except BaseException as exception:
+            if hasattr(node, 'lineno'):
+                self._log_error(
+                    InternalError(line=node.lineno,
+                                  col=node.col_offset,
+                                  raised_exception=exception)
+                )
 
     def get_type(self, value: Any) -> IType:
         """
@@ -89,9 +104,16 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             from boa3.model.builtin.builtin import Builtin
             found_symbol = Builtin.get_symbol(symbol_id)
 
-            if (found_symbol is None and isinstance(symbol_id, str)
-                    and (symbol_id in globals() or symbol_id in globals()['__builtins__'])):
-                symbol = globals()[symbol_id] if symbol_id in globals() else globals()['__builtins__'][symbol_id]
-                if isclass(symbol) and issubclass(symbol, BaseException):
-                    found_symbol = Builtin.Exception.return_type
+            if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
+                found_symbol = Builtin.Exception.return_type
             return found_symbol
+
+    def is_exception(self, symbol_id: str) -> bool:
+        global_symbols = globals()
+        if symbol_id in global_symbols or symbol_id in global_symbols['__builtins__']:
+            symbol = (global_symbols[symbol_id]
+                      if symbol_id in global_symbols
+                      else global_symbols['__builtins__'][symbol_id])
+            if isclass(symbol) and issubclass(symbol, BaseException):
+                return True
+        return False

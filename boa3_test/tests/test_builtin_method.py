@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation, UnexpectedArgument, UnfilledArgument
+from boa3.exception.CompilerError import (MissingReturnStatement, MismatchedTypes, NotSupportedOperation,
+                                          UnexpectedArgument, UnfilledArgument)
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -608,5 +609,13 @@ class TestVariable(BoaTest):
     def test_to_bytes_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ToBytesMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    # endregion
+
+    # region TestPrint
+
+    def test_print_missing_outer_function_return(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintIntMissingFunctionReturn.py' % self.dirname
+        self.assertCompilerLogs(MissingReturnStatement, path)
 
     # endregion

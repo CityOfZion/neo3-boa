@@ -76,7 +76,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
     def is_exception_name(self, exc_id: str) -> bool:
         global_symbols = globals()
         if exc_id in global_symbols or exc_id in global_symbols['__builtins__']:
-            symbol = global_symbols[exc_id] if exc_id in global_symbols else global_symbols['__builtins__'][exc_id]
+            symbol = (global_symbols[exc_id]
+                      if exc_id in global_symbols
+                      else global_symbols['__builtins__'][exc_id])
             if isclass(symbol) and issubclass(symbol, BaseException):
                 return True
         return False
