@@ -4,7 +4,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
 
-class TestAny(BoaTest):
+class TestNone(BoaTest):
 
     def test_variable_none(self):
         path = '%s/boa3_test/test_sc/none_test/VariableNone.py' % self.dirname

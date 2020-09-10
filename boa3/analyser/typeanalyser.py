@@ -2,6 +2,7 @@ import ast
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
+from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -838,29 +839,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id: str = call.func.id
             callable_target = self.get_symbol(callable_id)
         else:
-            arg0, callable_target, callable_id = self.visit(call.func)
-            arg0_identifier = self.visit(arg0)
-            if isinstance(arg0_identifier, ast.Name):
-                arg0_identifier = arg0_identifier.id
+            callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
-            if (callable_target is not None
-                    and (len(call.args) < 1 or call.args[0] != arg0)
-                    and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
-                call.args.insert(0, arg0)
-            if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
-                self_type: IType = self.get_type(call.args[0])
-                caller = self.get_symbol(arg0_identifier)
-                if isinstance(caller, IType) and not caller.is_type_of(self_type):
-                    self_type = caller
-                callable_target = callable_target.build(self_type)
-
-        if not isinstance(callable_target, Callable):
-            # verify if it is a builtin method with its name shadowed
-            call_target = Builtin.get_symbol(callable_id)
-            if not isinstance(call_target, Callable) and self.is_exception(callable_id):
-                call_target = Builtin.Exception
-
-            callable_target = call_target if call_target is not None else callable_target
+        callable_target = self.validate_builtin_callable(callable_id, callable_target)
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
@@ -873,69 +854,121 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if len(call.keywords) > 0:
                 raise NotImplementedError
 
-            len_call_args = len(call.args)
-            callable_required_args = len(callable_target.args_without_default)
-            if len_call_args > len(callable_target.args):
-                unexpected_arg = call.args[len(callable_target.args)]
-                self._log_error(
-                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
-                )
-            elif len_call_args < callable_required_args:
-                missed_arg = list(callable_target.args)[len(call.args)]
-                self._log_error(
-                    CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
-                )
-            else:
-                if isinstance(callable_target, IBuiltinMethod) and callable_target.requires_reordering:
-                    if not hasattr(call, 'was_reordered') or not call.was_reordered:
-                        callable_target.reorder(call.args)
-                        call.was_reordered = True
-
-                if callable_required_args <= len_call_args < len(callable_target.args):
-                    included_args = len_call_args - callable_required_args
-                    call.args.extend(callable_target.defaults[included_args:])
+            if self.validate_callable_arguments(call, callable_target):
                 args = [self.get_type(param) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
-                    callable_target = callable_target.build(args)
+                    callable_target: IBuiltinMethod = callable_target.build(args)
                     if not callable_target.is_supported:
-                        # TODO: implement bytearray constructor with non-bytes values
                         self._log_error(
                             CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
                         )
                         return callable_target.return_type
 
-                for index, (arg_id, arg_value) in enumerate(callable_target.args.items()):
-                    param = call.args[index]
-                    param_type = self.get_type(param)
-                    args.append(param_type)
-                    if not arg_value.type.is_type_of(param_type):
-                        self._log_error(
-                            CompilerError.MismatchedTypes(
-                                param.lineno, param.col_offset,
-                                arg_value.type.identifier,
-                                param_type.identifier
-                            ))
+                self.validate_passed_arguments(call, args, callable_id, callable_target)
 
-            # if the arguments are not generic, include the specified method in the symbol table
-            if (isinstance(callable_target, IBuiltinMethod)
-                    and callable_target.identifier != callable_id
-                    and callable_target.identifier not in self.symbols):
-                self.symbols[callable_target.identifier] = callable_target
-                call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
-                                     ctx=ast.Load(), id=callable_target.identifier)
-            if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
-                if not self._metadata.has_storage:
-                    self._log_error(
-                        CompilerError.MetadataInformationMissing(
-                            line=call.func.lineno, col=call.func.col_offset,
-                            symbol_id=callable_target.identifier,
-                            metadata_attr_id='has_storage'
-                        )
-                    )
-                else:
-                    self._current_method.set_storage()
+            self.update_callable_after_validation(call, callable_id, callable_target)
         return self.get_type(callable_target)
+
+    def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
+        arg0, callable_target, callable_id = self.visit(call.func)
+        arg0_identifier = self.visit(arg0)
+        if isinstance(arg0_identifier, ast.Name):
+            arg0_identifier = arg0_identifier.id
+
+        if (callable_target is not None
+                and (len(call.args) < 1 or call.args[0] != arg0)
+                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
+            call.args.insert(0, arg0)
+
+        if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
+            self_type: IType = self.get_type(call.args[0])
+            caller = self.get_symbol(arg0_identifier)
+            if isinstance(caller, IType) and not caller.is_type_of(self_type):
+                self_type = caller
+            callable_target = callable_target.build(self_type)
+
+        return callable_id, callable_target
+
+    def validate_builtin_callable(self, callable_id: str, callable_target: ISymbol) -> ISymbol:
+        if not isinstance(callable_target, Callable):
+            # verify if it is a builtin method with its name shadowed
+            call_target = Builtin.get_symbol(callable_id)
+            if not isinstance(call_target, Callable) and self.is_exception(callable_id):
+                call_target = Builtin.Exception
+
+            callable_target = call_target if call_target is not None else callable_target
+        return callable_target
+
+    def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:
+        len_call_args = len(call.args)
+        callable_required_args = len(callable_target.args_without_default)
+
+        if len_call_args > len(callable_target.args):
+            unexpected_arg = call.args[len(callable_target.args)]
+            self._log_error(
+                CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+            )
+            return False
+        elif len_call_args < callable_required_args:
+            missed_arg = list(callable_target.args)[len(call.args)]
+            self._log_error(
+                CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
+            )
+            return False
+
+        if isinstance(callable_target, IBuiltinMethod) and callable_target.requires_reordering:
+            if not hasattr(call, 'was_reordered') or not call.was_reordered:
+                callable_target.reorder(call.args)
+                call.was_reordered = True
+
+        if callable_required_args <= len_call_args < len(callable_target.args):
+            included_args = len_call_args - callable_required_args
+            call.args.extend(callable_target.defaults[included_args:])
+        return True
+
+    def validate_passed_arguments(self, call: ast.Call, args_types: List[IType], callable_id: str, callable: Callable):
+        if isinstance(callable, IBuiltinMethod):
+            builtin_analyser = BuiltinFunctionCallAnalyser(self, call, callable_id, callable)
+            if builtin_analyser.validate():
+                self.errors.extend(builtin_analyser.errors)
+                self.warnings.extend(builtin_analyser.warnings)
+                return
+
+        for index, (arg_id, arg_value) in enumerate(callable.args.items()):
+            param = call.args[index]
+            param_type = self.get_type(param)
+            args_types.append(param_type)
+            if not arg_value.type.is_type_of(param_type):
+                self._log_error(
+                    CompilerError.MismatchedTypes(
+                        param.lineno, param.col_offset,
+                        arg_value.type.identifier,
+                        param_type.identifier
+                    ))
+
+    def update_callable_after_validation(self, call: ast.Call, callable_id: str, callable_target: Callable):
+        # if the arguments are not generic, include the specified method in the symbol table
+        if (isinstance(callable_target, IBuiltinMethod)
+                and callable_target.identifier != callable_id
+                and callable_target.raw_identifier == callable_id
+                and callable_target.identifier not in self.symbols):
+            self.symbols[callable_target.identifier] = callable_target
+            call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
+                                 ctx=ast.Load(), id=callable_target.identifier)
+
+        # validates if metadata matches callable's requirements
+        if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
+            if not self._metadata.has_storage:
+                self._log_error(
+                    CompilerError.MetadataInformationMissing(
+                        line=call.func.lineno, col=call.func.col_offset,
+                        symbol_id=callable_target.identifier,
+                        metadata_attr_id='has_storage'
+                    )
+                )
+            else:
+                self._current_method.set_storage()
 
     def visit_Raise(self, raise_node: ast.Raise):
         """

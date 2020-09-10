@@ -21,3 +21,12 @@ class IdentifiedSymbol(ISymbol, ABC):
         :return: the resulting type when the expression is evaluated
         """
         return self._identifier
+
+    @property
+    def raw_identifier(self) -> str:
+        """
+        Gets the type's simple id of the evaluated expression
+
+        :return: the simple id of the resulting type when the expression is evaluated
+        """
+        return self._identifier
