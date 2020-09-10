@@ -19,7 +19,7 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
 
         self._origin: IAstAnalyser = origin
 
-        # all methods validators must be (IBuiltinMethod, List[IType]) -> bool
+        # all methods validators must be (IBuiltinMethod, List[IType]) -> None
         self._methods_validators: Dict[Type[IBuiltinMethod],
                                        Callable[[IBuiltinMethod, List[IType]], None]] = \
             {
