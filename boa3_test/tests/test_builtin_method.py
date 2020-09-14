@@ -8,9 +8,9 @@ from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
 
-class TestVariable(BoaTest):
+class TestBuiltinMethod(BoaTest):
 
-    # region TestLen
+    # region len test
 
     def test_len_of_tuple(self):
         expected_output = (
@@ -113,7 +113,7 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestAppend
+    # region append test
 
     def test_append_tuple(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTuple.py' % self.dirname
@@ -199,7 +199,7 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestClear
+    # region clear test
 
     def test_clear_tuple(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTuple.py' % self.dirname
@@ -287,7 +287,7 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestReverse
+    # region reverse test
 
     def test_reverse_tuple(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTuple.py' % self.dirname
@@ -346,7 +346,7 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestExtend
+    # region extend test
 
     def test_extend_tuple(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTuple.py' % self.dirname
@@ -446,7 +446,7 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestToScriptHash
+    # region to_script_hash test
 
     def test_script_hash_int(self):
         from boa3.neo import to_script_hash
@@ -540,7 +540,7 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestToBytes
+    # region to_bytes test
 
     def test_int_to_bytes(self):
         value = Integer(123).to_byte_array()
@@ -612,10 +612,177 @@ class TestVariable(BoaTest):
 
     # endregion
 
-    # region TestPrint
+    # region print test
 
     def test_print_missing_outer_function_return(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/PrintIntMissingFunctionReturn.py' % self.dirname
         self.assertCompilerLogs(MissingReturnStatement, path)
+
+    # endregion
+
+    # region isinstance test
+
+    def test_isinstance_int_literal(self):
+        value = Integer(123).to_byte_array()
+        expected_output = (
+            Opcode.PUSHDATA1        # isinstance(123, int)
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.ISTYPE
+            + Type.int.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceIntLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_int_variable(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0         # isinstance(a, int)
+            + Opcode.ISTYPE
+            + Type.int.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceIntVariable.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_bool_literal(self):
+        value = Integer(123).to_byte_array()
+        expected_output = (
+            Opcode.PUSHDATA1        # isinstance(123, bool)
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.ISTYPE
+            + Type.bool.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_bool_variable(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0         # isinstance(a, bool)
+            + Opcode.ISTYPE
+            + Type.bool.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolVariable.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_str_literal(self):
+        value = String('123').to_bytes()
+        expected_output = (
+            Opcode.PUSHDATA1        # isinstance('123', str)
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.ISTYPE
+            + Type.str.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceStrLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_str_variable(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0         # isinstance(a, str)
+            + Opcode.ISTYPE
+            + Type.str.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceStrVariable.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_list_literal(self):
+        expected_output = (
+            Opcode.NEWARRAY0        # isinstance([], list)
+            + Opcode.ISTYPE
+            + Type.list.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceListLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_tuple_literal(self):
+        expected_output = (
+            Opcode.NEWARRAY0        # isinstance([], tuple)
+            + Opcode.ISTYPE
+            + Type.tuple.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_tuple_variable(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0         # isinstance(a, tuple)
+            + Opcode.ISTYPE
+            + Type.tuple.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleVariable.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_isinstance_many_types(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0         # isinstance(a, tuple)
+            + Opcode.ISTYPE
+            + Type.list.stack_item
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(14).to_byte_array(min_length=1, signed=True)
+            + Opcode.ISTYPE
+            + Type.int.stack_item
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(9).to_byte_array(min_length=1, signed=True)
+            + Opcode.ISTYPE
+            + Type.bool.stack_item
+            + Opcode.DUP
+            + Opcode.JMPIF
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.ISTYPE
+            + Type.dict.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypes.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     # endregion

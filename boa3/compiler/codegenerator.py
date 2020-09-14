@@ -817,6 +817,8 @@ class CodeGenerator:
         :param symbol_id: the symbol identifier
         :param params_addresses: a list with each function arguments' first addresses
         """
+        if not params_addresses:
+            params_addresses = []
         symbol = self.get_symbol(symbol_id)
         if symbol is not Type.none:
             if isinstance(symbol, Property):
@@ -829,7 +831,7 @@ class CodeGenerator:
                 self.convert_builtin_method_call(symbol, params_addresses)
             elif isinstance(symbol, Event):
                 self.convert_event_call(symbol)
-            else:
+            elif isinstance(symbol, Method):
                 self.convert_method_call(symbol, len(params_addresses))
 
     def convert_load_variable(self, var_id: str, var: Variable):
@@ -932,7 +934,7 @@ class CodeGenerator:
             self.__insert1(store_opcode, store_data)
             self._update_jump(jump, VMCodeMapping.instance().bytecode_size)
 
-        for arg in function.args:
+        for _ in range(function.args_on_stack):
             self._stack.pop()
         if function.return_type not in (None, Type.none):
             self._stack.append(function.return_type)
@@ -1007,16 +1009,18 @@ class CodeGenerator:
 
         self.__insert1(OpcodeInfo.ASSERT)
 
-    def convert_new_exception(self, message: Optional[str] = None):
-        if message is None:
-            message = Builtin.Exception.default_message
-        self.convert_literal(message)
+    def convert_new_exception(self, exception_args_len: int = 0):
+        if exception_args_len == 0 or len(self._stack) == 0:
+            self.convert_literal(Builtin.Exception.default_message)
+
+        if exception_args_len > 1:
+            self.convert_new_array(exception_args_len)
+
         self._stack.pop()
         self._stack.append(Type.exception)
 
     def convert_raise_exception(self):
-        from boa3.model.type.baseexceptiontype import BaseExceptionType
-        if len(self._stack) == 0 or not isinstance(self._stack[-1], BaseExceptionType):
+        if len(self._stack) == 0:
             self.convert_literal(Builtin.Exception.default_message)
 
         self._stack.pop()

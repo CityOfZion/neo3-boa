@@ -519,7 +519,11 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 VMCodeMapping.instance().bytecode_size
             )
             self.visit_to_generate(arg)
-        self.generator.convert_load_symbol(function_id, args_addresses)
+
+        if self.is_exception_name(function_id):
+            self.generator.convert_new_exception(len(call.args))
+        else:
+            self.generator.convert_load_symbol(function_id, args_addresses)
 
     def visit_Raise(self, raise_node: ast.Raise):
         """
