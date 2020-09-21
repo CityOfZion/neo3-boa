@@ -163,7 +163,7 @@ class TestVariable(BoaTest):
             + b'\x01'
             + Opcode.PUSH1
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # variable address
+            + Opcode.PUSH1      # variable address
             + Opcode.RET
         )
 

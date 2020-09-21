@@ -236,8 +236,8 @@ class TestFunction(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSH2          # b = 2
             + Opcode.STLOC1
-            + Opcode.LDLOC1         # TestAdd(a, b)
-            + Opcode.LDLOC0
+            + Opcode.PUSH2          # TestAdd(a, b)
+            + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
             + Opcode.DROP
@@ -270,8 +270,8 @@ class TestFunction(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSH2          # b = 2
             + Opcode.STLOC1
-            + Opcode.LDLOC1         # c = TestAdd(a, b)
-            + Opcode.LDLOC0
+            + Opcode.PUSH2          # c = TestAdd(a, b)
+            + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
             + Opcode.STLOC2
@@ -302,8 +302,8 @@ class TestFunction(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSH2          # b = 2
             + Opcode.STLOC1
-            + Opcode.LDLOC1         # return TestAdd(a, b)
-            + Opcode.LDLOC0
+            + Opcode.PUSH2          # return TestAdd(a, b)
+            + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
             + Opcode.RET
@@ -832,39 +832,39 @@ class TestFunction(BoaTest):
             + Opcode.PUSHDATA1 + b'\x03mod'  # mod_op = "mod"
             + Opcode.STLOC4
             + Opcode.LDARG0                 # if operation == add_op:
-            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1 + b'\x03add'
             + Opcode.EQUAL
             + Opcode.JMPIFNOT + b'\x07'
             + Opcode.LDARG2                     # return add(a, b)
             + Opcode.LDARG1
-            + Opcode.CALL + b'\x34'
+            + Opcode.CALL + b'\x44'
             + Opcode.RET
             + Opcode.LDARG0                 # elif operation == sub_op:
-            + Opcode.LDLOC1
+            + Opcode.PUSHDATA1 + b'\x03sub'
             + Opcode.EQUAL
             + Opcode.JMPIFNOT + b'\x07'
             + Opcode.LDARG2                     # return sub(a, b)
             + Opcode.LDARG1
-            + Opcode.CALL + b'\x23'
+            + Opcode.CALL + b'\x2f'
             + Opcode.RET
             + Opcode.LDARG0                 # elif operation == div_op:
-            + Opcode.LDLOC3
+            + Opcode.PUSHDATA1 + b'\x03div'
             + Opcode.EQUAL
             + Opcode.JMPIFNOT + b'\x07'
             + Opcode.LDARG2                     # return div(a, b)
             + Opcode.LDARG1
-            + Opcode.CALL + b"\x27"
+            + Opcode.CALL + b"\x2f"
             + Opcode.RET
             + Opcode.LDARG0                 # elif operation == mul_op:
-            + Opcode.LDLOC2
+            + Opcode.PUSHDATA1 + b'\x03mul'
             + Opcode.EQUAL
             + Opcode.JMPIFNOT + b'\x07'
             + Opcode.LDARG2                     # return mul(a, b)
             + Opcode.LDARG1
-            + Opcode.CALL + b'\x24'
+            + Opcode.CALL + b'\x28'
             + Opcode.RET
             + Opcode.LDARG0                 # elif operation == mod_op:
-            + Opcode.LDLOC4
+            + Opcode.PUSHDATA1 + b'\x03mod'
             + Opcode.EQUAL
             + Opcode.JMPIFNOT + b'\x07'
             + Opcode.LDARG2                     # return mod(a, b)

@@ -26,8 +26,21 @@ class TestConstant(BoaTest):
 
         self.assertEqual(expected_output, output)
 
-    def test_negative_integer_constant(self):
+    def test_small_negative_integer_constant(self):
         input = -10
+        expected_output = (
+            Opcode.PUSH10
+            + Opcode.NEGATE
+        )
+
+        generator = self.build_code_generator()
+        generator.convert_integer_literal(input)
+        output = generator.bytecode
+
+        self.assertEqual(expected_output, output)
+
+    def test_negative_integer_constant(self):
+        input = -100
         byte_input = Integer(input).to_byte_array()
         expected_output = (
             Opcode.PUSHDATA1            # push the bytes

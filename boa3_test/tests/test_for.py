@@ -504,7 +504,7 @@ class TestFor(BoaTest):
             + Opcode.ADD
             + Opcode.STLOC0
             + Opcode.JMP                # break
-            + Integer(21).to_byte_array(min_length=1, signed=True)
+            + Integer(20).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0         # a += 1
             + Opcode.PUSH1
             + Opcode.ADD
@@ -519,8 +519,7 @@ class TestFor(BoaTest):
             + jmp_address
             + Opcode.DROP
             + Opcode.DROP
-            + Opcode.PUSH1          # a = -1
-            + Opcode.NEGATE
+            + Opcode.PUSHM1         # a = -1
             + Opcode.STLOC0
             + Opcode.JMP        # else
             + Integer(4).to_byte_array(signed=True, min_length=1)

@@ -87,7 +87,7 @@ class TestWhile(BoaTest):
             + b'\x02'
             + Opcode.PUSH0      # c = 0
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # d = c
+            + Opcode.PUSH0      # d = c
             + Opcode.STLOC1
             + Opcode.JMP        # begin outer while
             + outer_jmpif_address

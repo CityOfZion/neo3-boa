@@ -1,4 +1,4 @@
-from boa3.builtin import metadata, NeoMetadata, public
+from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.interop.storage import put
 
 

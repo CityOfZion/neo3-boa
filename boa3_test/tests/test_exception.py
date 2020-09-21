@@ -117,8 +117,10 @@ class TestException(BoaTest):
             + Opcode.PUSH0
             + Opcode.LT
             + Opcode.JMPIFNOT
-            + Integer(4).to_byte_array(signed=True, min_length=1)
-            + Opcode.LDLOC0         # raise Exception(x)
+            + Integer(24).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSHDATA1      # raise Exception(x)
+            + Integer(len(exception_message)).to_byte_array(signed=True, min_length=1)
+            + exception_message
             + Opcode.THROW
             + Opcode.PUSHNULL
             + Opcode.RET
