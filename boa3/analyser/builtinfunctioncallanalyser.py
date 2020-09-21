@@ -1,14 +1,12 @@
 import ast
-from typing import List, Callable, Dict, Type, Any, Optional
-
-from boa3.model.symbol import ISymbol
-
-from boa3.exception import CompilerError
-from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
-from boa3.model.type.itype import IType
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from boa3.analyser.astanalyser import IAstAnalyser
+from boa3.exception import CompilerError
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
+from boa3.model.symbol import ISymbol
+from boa3.model.type.itype import IType
 
 
 class BuiltinFunctionCallAnalyser(IAstAnalyser):
@@ -21,10 +19,9 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
 
         # all methods validators must be (IBuiltinMethod, List[IType]) -> None
         self._methods_validators: Dict[Type[IBuiltinMethod],
-                                       Callable[[IBuiltinMethod, List[IType]], None]] = \
-            {
-                IsInstanceMethod: self._validate_IsInstanceMethod
-            }
+                                       Callable[[IBuiltinMethod, List[IType]], None]] = {
+            IsInstanceMethod: self._validate_IsInstanceMethod
+        }
 
     @property
     def method(self) -> IBuiltinMethod:

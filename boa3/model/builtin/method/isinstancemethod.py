@@ -35,7 +35,7 @@ class IsInstanceMethod(IBuiltinMethod):
         from boa3.model.type.type import Type
         if (len(self._instances_type) == 0
                 or (len(self._instances_type) == 1 and self._instances_type[0] in (None, Type.none))
-        ):
+            ):
             return self._identifier
 
         types = list({tpe.raw_identifier for tpe in self._instances_type})
