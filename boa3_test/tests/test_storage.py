@@ -20,6 +20,15 @@ class TestStorage(BoaTest):
             + Interop.StorageGet.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StorageGet.interop_method_hash
+            + Opcode.DUP
+            + Opcode.ISNULL
+            + Opcode.JMPIFNOT
+            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSHDATA1
+            + Integer(0).to_byte_array(signed=False, min_length=1)
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -41,6 +50,15 @@ class TestStorage(BoaTest):
             + Interop.StorageGet.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StorageGet.interop_method_hash
+            + Opcode.DUP
+            + Opcode.ISNULL
+            + Opcode.JMPIFNOT
+            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSHDATA1
+            + Integer(0).to_byte_array(signed=False, min_length=1)
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
             + Opcode.RET
         )
 

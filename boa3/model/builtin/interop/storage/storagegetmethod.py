@@ -39,8 +39,19 @@ class StorageGetMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        from boa3.model.type.type import Type
+        from boa3.neo.vm.type.Integer import Integer
+
         opcodes = [(Opcode.SYSCALL, self.storage_context_hash)]
         opcodes.extend(super().opcode)
+        opcodes.extend([
+            (Opcode.DUP, b''),
+            (Opcode.ISNULL, b''),
+            (Opcode.JMPIFNOT, Integer(7).to_byte_array(signed=True, min_length=1)),
+            (Opcode.DROP, b''),
+            (Opcode.PUSHDATA1, b'\x00'),
+            (Opcode.CONVERT, Type.bytes.stack_item),
+        ])
         return opcodes
 
     @property
