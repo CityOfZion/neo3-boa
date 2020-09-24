@@ -531,7 +531,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param assign:
         """
-        var_id = self.visit(assign.targets[0])
         var_type = self.visit_type(assign.value)
 
         if var_type is Type.none and isinstance(assign.value, ast.Name):
@@ -540,7 +539,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var_type = Builtin.Event
                 self._current_event = symbol
 
-        return self.assign_value(var_id, var_type, source_node=assign)
+        return_type = var_type
+        for target in assign.targets:
+            var_id = self.visit(target)
+            return_type = self.assign_value(var_id, var_type, source_node=assign)
+
+        return return_type
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """

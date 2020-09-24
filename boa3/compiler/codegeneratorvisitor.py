@@ -199,19 +199,45 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             self.visit_to_generate(ret.value)
             self.generator.insert_return()
 
-    def store_variable(self, var_id: str, value: ast.AST, index: ast.AST = None):
+    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST]], value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
-            if index is None:
-                # if index is None, then it is a variable assignment
+            if len(var_ids) == 1:
+                # it's a simple assignment
+                var_id, index = var_ids[0]
+                if index is None:
+                    # if index is None, then it is a variable assignment
+                    self.visit_to_generate(value)
+                    self.generator.convert_store_variable(var_id)
+                else:
+                    # if not, it is an array assignment
+                    self.generator.convert_load_symbol(var_id)
+                    self.visit_to_generate(index)
+                    value_address = self.visit_to_generate(value)
+                    self.generator.convert_set_item(value_address)
+
+            elif len(var_ids) > 0:
+                # it's a chained assignment
                 self.visit_to_generate(value)
-                self.generator.convert_store_variable(var_id)
-            else:
-                # if not, it is an array assignment
-                self.generator.convert_load_symbol(var_id)
-                self.visit_to_generate(index)
-                value_address = self.visit_to_generate(value)
-                self.generator.convert_set_item(value_address)
+                for pos, (var_id, index) in enumerate(reversed(var_ids)):
+                    if index is None:
+                        # if index is None, then it is a variable assignment
+                        if pos < len(var_ids) - 1:
+                            self.generator.duplicate_stack_top_item()
+                        self.generator.convert_store_variable(var_id)
+                    else:
+                        # if not, it is an array assignment
+                        if pos < len(var_ids) - 1:
+                            self.generator.convert_load_symbol(var_id)
+                            self.visit_to_generate(index)
+                            fix_index = VMCodeMapping.instance().bytecode_size
+                            self.generator.duplicate_stack_item(3)
+                        else:
+                            self.visit_to_generate(index)
+                            fix_index = VMCodeMapping.instance().bytecode_size
+                            self.generator.convert_load_symbol(var_id)
+                            self.generator.swap_reverse_stack_items(3)
+                        self.generator.convert_set_item(fix_index)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -220,7 +246,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param ann_assign: the python ast variable assignment node
         """
         var_id = self.visit(ann_assign.target)
-        self.store_variable(var_id, ann_assign.value)
+        self.store_variable((var_id, None), value=ann_assign.value)
 
     def visit_Assign(self, assign: ast.Assign):
         """
@@ -228,15 +254,19 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param assign: the python ast variable assignment node
         """
-        var_index = None
-        var_id = self.visit(assign.targets[0])
+        vars_ids: List[Tuple[str, Optional[ast.AST]]] = []
+        for target in assign.targets:
+            var_index = None
+            var_id = self.visit(target)
 
-        # if it is a tuple, then it is an array assignment
-        if isinstance(var_id, tuple):
-            var_index = var_id[1]
-            var_id: str = var_id[0]
+            # if it is a tuple, then it is an array assignment
+            if isinstance(var_id, tuple):
+                var_index = var_id[1]
+                var_id: str = var_id[0]
 
-        self.store_variable(var_id, assign.value, var_index)
+            vars_ids.append((var_id, var_index))
+
+        self.store_variable(*vars_ids, value=assign.value)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """

@@ -258,17 +258,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param assign: the python ast variable assignment node
         """
         # multiple assignments
-        if len(assign.targets) > 1:
-            self._log_error(
-                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
-            )
-        # multiple assignments with tuples
-        elif isinstance(assign.targets[0], ast.Tuple):
+        if isinstance(assign.targets[0], ast.Tuple):
             self._log_error(
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
         else:
-            self.validate_type_variable_assign(assign.targets[0], assign.value)
+            for target in assign.targets:
+                self.validate_type_variable_assign(target, assign.value)
 
         # continue to walk through the tree
         self.generic_visit(assign)
