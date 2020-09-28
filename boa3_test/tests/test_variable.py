@@ -104,8 +104,102 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSH1      # a = b = c = True
+            + Opcode.DUP            # c = True
+            + Opcode.STLOC2
+            + Opcode.DUP            # b = True
+            + Opcode.STLOC1
+            + Opcode.STLOC0         # a = True
+            + Opcode.PUSHNULL   # return
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/test_sc/variable_test/MultipleAssignments.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_multiple_assignments_set_sequence(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSH2      # c = a[2] = b = 2
+            + Opcode.DUP            # b = 2
+            + Opcode.STLOC2
+            + Opcode.LDLOC0         # a[2] = 2
+            + Opcode.PUSH2
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SETITEM
+            + Opcode.STLOC1         # c = 2
+            + Opcode.PUSHNULL   # return
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/variable_test/MultipleAssignmentsSetSequence.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_multiple_assignments_set_sequence_last(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSH3      # a = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSH2      # a[2] = c = b = 2
+            + Opcode.DUP            # b = 2
+            + Opcode.STLOC2
+            + Opcode.DUP            # c = 2
+            + Opcode.STLOC1
+            + Opcode.PUSH2          # a[2] = 2
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.LDLOC0
+            + Opcode.REVERSE3
+            + Opcode.SETITEM
+            + Opcode.PUSHNULL   # return
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/variable_test/MultipleAssignmentsSetSequenceLast.py' % self.dirname
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
+
+    def test_multiple_assignments_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeMultipleAssignments.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_tuple_multiple_assignments(self):
         path = '%s/boa3_test/test_sc/variable_test/AssignmentWithTuples.py' % self.dirname
