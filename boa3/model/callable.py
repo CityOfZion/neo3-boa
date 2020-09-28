@@ -59,6 +59,10 @@ class Callable(IExpression, ABC):
         return self.args
 
     @property
+    def allow_starred_argument(self) -> bool:
+        return False
+
+    @property
     def start_address(self) -> Optional[int]:
         """
         Gets the address where this method starts in the bytecode

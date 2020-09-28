@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
                                           UnexpectedArgument, UnfilledArgument)
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -619,6 +620,48 @@ class TestBuiltinMethod(BoaTest):
     # endregion
 
     # region print test
+
+    def test_print_int(self):
+        value = Integer(42).to_byte_array()
+        expected_output = (
+            Opcode.PUSHDATA1        # print(123)
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.SYSCALL
+            + Interop.Log.interop_method_hash
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintInt.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_print_str(self):
+        value = String('str').to_bytes()
+        expected_output = (
+            Opcode.PUSHDATA1        # print('str')
+            + Integer(len(value)).to_byte_array(min_length=1)
+            + value
+            + Opcode.SYSCALL
+            + Interop.Log.interop_method_hash
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintStr.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_print_list(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintList.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_print_many_values(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintManyValues.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_print_missing_outer_function_return(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/PrintIntMissingFunctionReturn.py' % self.dirname

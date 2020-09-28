@@ -897,6 +897,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return callable_target
 
     def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:
+        if (callable_target.allow_starred_argument
+                and not hasattr(call, 'checked_starred_args')
+                and len(call.args) > len(callable_target.args_without_default)):
+            args = self.parse_to_node(str(Type.sequence.default_value), call)
+            args.elts = call.args
+            call.args = [args]
+            call.checked_starred_args = True
+
         len_call_args = len(call.args)
         callable_required_args = len(callable_target.args_without_default)
 
