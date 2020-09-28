@@ -1,6 +1,7 @@
 import ast
 from typing import Dict
 
+from boa3.analyser.astoptimizer import AstOptimizer
 from boa3.analyser.constructanalyser import ConstructAnalyser
 from boa3.analyser.moduleanalyser import ModuleAnalyser
 from boa3.analyser.typeanalyser import TypeAnalyser
@@ -45,12 +46,15 @@ class Analyser(object):
 
         analyser = Analyser(ast_tree, path, log)
         analyser.__pre_execute()
+
         # fill symbol table
         if not analyser.__analyse_modules():
             return analyser
         # check is the types are correct
         if not analyser.__check_types():
             return analyser
+
+        analyser.__pos_execute()
         analyser.is_analysed = True
 
         return analyser
@@ -86,3 +90,9 @@ class Analyser(object):
         Pre executes the instructions of the ast for optimization
         """
         self.ast_tree = ConstructAnalyser(self.ast_tree, log=self._log).tree
+
+    def __pos_execute(self):
+        """
+        Tries to optimize the ast after validations
+        """
+        AstOptimizer(self, log=self._log)

@@ -23,6 +23,46 @@ class TestArithmetic(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    def test_addition_literal_operation(self):
+        expected_output = (
+            Opcode.PUSH3
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_addition_literal_and_variable(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.PUSH1
+            + Opcode.LDARG0
+            + Opcode.ADD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionLiteralAndVariable.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_addition_variable_and_literal(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.ADD
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionVariableAndLiteral.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
     def test_subtraction_operation(self):
         expected_output = (
             Opcode.INITSLOT
@@ -169,10 +209,10 @@ class TestArithmetic(BoaTest):
             Opcode.INITSLOT
             + b'\x00'
             + b'\x02'
-            + Opcode.PUSH4
+            + Opcode.LDARG0
             + Opcode.LDARG1
             + Opcode.ADD
-            + Opcode.LDARG0
+            + Opcode.PUSH4
             + Opcode.ADD
             + Opcode.RET
         )
@@ -181,6 +221,27 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_sequence_addition_different_orders(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.PUSH6
+            + Opcode.LDARG0
+            + Opcode.ADD
+            + Opcode.RET
+        )
+        path_1 = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeValuesUnordered1.py' % self.dirname
+        output_1 = Boa3.compile(path_1)
+        self.assertEqual(expected_output, output_1)
+
+        path_2 = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeValuesUnordered2.py' % self.dirname
+        output_2 = Boa3.compile(path_2)
+        self.assertEqual(expected_output, output_2)
+
+        path_3 = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeValuesUnordered3.py' % self.dirname
+        output_3 = Boa3.compile(path_3)
+        self.assertEqual(expected_output, output_3)
 
     def test_mixed_operations(self):
         expected_output = (

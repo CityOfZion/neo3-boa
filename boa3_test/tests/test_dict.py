@@ -209,16 +209,16 @@ class TestDict(BoaTest):
             + Opcode.STLOC2
             + Opcode.NEWMAP  # d = {a: c, b: a, c: b}
             + Opcode.DUP
-            + Opcode.LDLOC0     # map[a] = c
-            + Opcode.LDLOC2
+            + Opcode.PUSH1      # map[a] = c
+            + Opcode.PUSH3
             + Opcode.SETITEM
             + Opcode.DUP
-            + Opcode.LDLOC1     # map[b] = a
-            + Opcode.LDLOC0
+            + Opcode.PUSH2      # map[b] = a
+            + Opcode.PUSH1
             + Opcode.SETITEM
             + Opcode.DUP
-            + Opcode.LDLOC2     # map[c] = b
-            + Opcode.LDLOC1
+            + Opcode.PUSH3      # map[c] = b
+            + Opcode.PUSH2
             + Opcode.SETITEM
             + Opcode.STLOC3
             + Opcode.PUSHNULL

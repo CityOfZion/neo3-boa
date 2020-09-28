@@ -51,7 +51,9 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[2:3]
+            + Opcode.PUSHDATA1  # return a[2:3]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.PUSH2
             + Opcode.DUP
             + Opcode.SIGN
@@ -97,8 +99,10 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC2
-            + Opcode.LDLOC2     # return a[a1:a2]
-            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1  # return a[a1:a2]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
+            + Opcode.PUSH2
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -107,7 +111,7 @@ class TestString(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.ADD
-            + Opcode.LDLOC1     # size = a2 - a1
+            + Opcode.PUSH3     # size = a2 - a1
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -139,7 +143,9 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[:-4]
+            + Opcode.PUSHDATA1  # return a[:-4]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.PUSH4            # size of the substring: len(a) - 4
             + Opcode.NEGATE
             + Opcode.DUP
@@ -169,7 +175,9 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[-4:]
+            + Opcode.PUSHDATA1  # return a[-4:]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.DUP            # size of the substring: len(a) - (len(a) - 4) = 4
             + Opcode.SIZE
             + Opcode.PUSH4
@@ -202,7 +210,9 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[:3]
+            + Opcode.PUSHDATA1  # return a[:3]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.PUSH3            # size of the substring: 3
             + Opcode.DUP
             + Opcode.SIGN
@@ -231,7 +241,9 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[:3]
+            + Opcode.PUSHDATA1  # return a[:3]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/string_test/StringSlicingOmitted.py' % self.dirname
@@ -250,7 +262,9 @@ class TestString(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[2:]
+            + Opcode.PUSHDATA1  # return a[2:]
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.DUP            # size of the substring: len(a) - 2
             + Opcode.SIZE
             + Opcode.PUSH2

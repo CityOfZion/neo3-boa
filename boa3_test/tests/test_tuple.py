@@ -88,9 +88,9 @@ class TestTuple(BoaTest):
             + Opcode.STLOC1
             + Opcode.PUSH3      # c = 3
             + Opcode.STLOC2
-            + Opcode.LDLOC2     # d = (a, b, c)
-            + Opcode.LDLOC1
-            + Opcode.LDLOC0
+            + Opcode.PUSH3      # d = (a, b, c)
+            + Opcode.PUSH2
+            + Opcode.PUSH1
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC3
@@ -318,7 +318,7 @@ class TestTuple(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC2
             + Opcode.LDLOC2     # return a[a1:a2]
-            + Opcode.LDLOC0
+            + Opcode.PUSH2
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -327,7 +327,7 @@ class TestTuple(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.ADD
-            + Opcode.LDLOC1
+            + Opcode.PUSH3
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1

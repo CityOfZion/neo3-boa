@@ -88,9 +88,9 @@ class TestList(BoaTest):
             + Opcode.STLOC1
             + Opcode.PUSH3      # c = 3
             + Opcode.STLOC2
-            + Opcode.LDLOC2     # d = [a, b, c]
-            + Opcode.LDLOC1
-            + Opcode.LDLOC0
+            + Opcode.PUSH3      # d = [a, b, c]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC3
@@ -135,8 +135,7 @@ class TestList(BoaTest):
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[-1]
-            + Opcode.PUSH1
-            + Opcode.NEGATE
+            + Opcode.PUSHM1
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -218,8 +217,7 @@ class TestList(BoaTest):
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[-1] = 1
-            + Opcode.PUSH1
-            + Opcode.NEGATE
+            + Opcode.PUSHM1
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -410,7 +408,7 @@ class TestList(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC2
             + Opcode.LDLOC2     # return a[a1:a2]
-            + Opcode.LDLOC0
+            + Opcode.PUSH2
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -419,7 +417,7 @@ class TestList(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.ADD
-            + Opcode.LDLOC1
+            + Opcode.PUSH3
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1

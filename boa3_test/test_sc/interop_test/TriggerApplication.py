@@ -1,4 +1,4 @@
-from boa3.builtin.interop.runtime import trigger, TriggerType
+from boa3.builtin.interop.runtime import TriggerType, trigger
 
 
 def Main() -> bool:

@@ -10,6 +10,7 @@ from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
+from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -535,17 +536,23 @@ class CodeGenerator:
 
         :param value: the value to be converted
         """
-        if -1 <= value <= 16:
-            opcode = Opcode.get_literal_push(value)
+        opcode = Opcode.get_literal_push(value)
+        if opcode is not None:
+            op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
+            self.__insert1(op_info)
+            self._stack.append(Type.int)
+        else:
+            opcode = Opcode.get_literal_push(-value)
             if opcode is not None:
                 op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
                 self.__insert1(op_info)
-        else:
-            array = Integer(value).to_byte_array(signed=True)
-            self.insert_push_data(array)
-            # cast the value to integer
-            self.convert_cast(Type.int)
-        self._stack.append(Type.int)
+                self._stack.append(Type.int)
+                self.convert_operation(UnaryOp.Negative)
+            else:
+                array = Integer(value).to_byte_array(signed=True)
+                self.insert_push_data(array)
+                # cast the value to integer
+                self.convert_cast(Type.int)
 
     def convert_string_literal(self, value: str):
         """

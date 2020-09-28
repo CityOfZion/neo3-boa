@@ -1,6 +1,6 @@
 import ast
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.method import Method

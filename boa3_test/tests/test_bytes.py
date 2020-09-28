@@ -57,8 +57,7 @@ class TestBytes(BoaTest):
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
-            + Opcode.PUSH1
-            + Opcode.NEGATE
+            + Opcode.PUSHM1
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -218,8 +217,7 @@ class TestBytes(BoaTest):
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
-            + Opcode.PUSH1
-            + Opcode.NEGATE
+            + Opcode.PUSHM1
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -267,8 +265,7 @@ class TestBytes(BoaTest):
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[-1] = 0x01
-            + Opcode.PUSH1
-            + Opcode.NEGATE
+            + Opcode.PUSHM1
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -323,7 +320,11 @@ class TestBytes(BoaTest):
             + Opcode.CONVERT
             + Type.bytes.stack_item
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # b = bytearray(a)
+            + Opcode.PUSHDATA1  # b = bytearray(a)
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
             + Opcode.STLOC1
             + Opcode.PUSHNULL
             + Opcode.RET        # return

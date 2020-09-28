@@ -446,7 +446,7 @@ class TestRange(BoaTest):
             + Opcode.DROP
             + Opcode.STLOC2
             + Opcode.LDLOC2     # return a[a1:a2]
-            + Opcode.LDLOC0
+            + Opcode.PUSH2
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1
@@ -455,7 +455,7 @@ class TestRange(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.ADD
-            + Opcode.LDLOC1
+            + Opcode.PUSH3
             + Opcode.DUP
             + Opcode.SIGN
             + Opcode.PUSHM1

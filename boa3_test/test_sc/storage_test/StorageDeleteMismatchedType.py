@@ -1,4 +1,4 @@
-from boa3.builtin import metadata, NeoMetadata
+from boa3.builtin import NeoMetadata, metadata
 from boa3.builtin.interop.storage import delete
 
 

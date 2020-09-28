@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import (MissingReturnStatement, MismatchedTypes, NotSupportedOperation,
+from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
                                           UnexpectedArgument, UnfilledArgument)
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -67,7 +67,9 @@ class TestBuiltinMethod(BoaTest):
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
-            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1            # push the bytes
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
             + Opcode.SIZE
             + Opcode.RET
         )
@@ -88,7 +90,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.CONVERT
             + Type.bytes.stack_item
             + Opcode.STLOC0
-            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1            # push the bytes
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
             + Opcode.SIZE
             + Opcode.STLOC1
             + Opcode.LDLOC1

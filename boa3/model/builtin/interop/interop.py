@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict
+from typing import Dict, List
 
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
