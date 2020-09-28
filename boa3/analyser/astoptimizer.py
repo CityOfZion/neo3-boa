@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.optimizer import ScopeValue, Undefined
@@ -45,6 +45,17 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
             return ast.literal_eval(node)
         except BaseException:
             return Undefined
+
+    def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
+        """
+        Parses an expression to an ast.
+
+        :param expression: string expression to be parsed
+        :param origin: an existing ast. If not None, the parsed node will have the same location of origin.
+        :return: the parsed node
+        :rtype: ast.AST or Sequence[ast.AST]
+        """
+        return self.visit(super().parse_to_node(expression, origin))
 
     def reset_state(self):
         self.current_scope.reset()

@@ -22,6 +22,7 @@ from boa3.model.builtin.method.createeventmethod import CreateEventMethod, Event
 from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
 from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
@@ -52,6 +53,7 @@ class Builtin:
     # builtin method
     Len = LenMethod()
     IsInstance = IsInstanceMethod()
+    Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     NewEvent = CreateEventMethod()
 
@@ -76,6 +78,7 @@ class Builtin:
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 IsInstance,
+                                                Print,
                                                 ScriptHash,
                                                 ByteArray,
                                                 SequenceAppend,

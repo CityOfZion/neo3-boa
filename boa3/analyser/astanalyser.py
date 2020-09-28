@@ -146,7 +146,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         if isinstance(result, ast.Expr):
             # an expr node encapsulates another node in its value field.
             result = result.value
-        return self.visit(result)
+        return result
 
     def update_line_and_col(self, target: ast.AST, origin: ast.AST):
         """
