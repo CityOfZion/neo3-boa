@@ -148,7 +148,7 @@ class VMCodeMapping:
                 if new_address < 0:
                     new_address = self.get_start_address(last_code) if last_code is not None else 0
 
-                new_address += last_code.size
+                new_address += last_code.size if last_code is not None else 0
                 if new_address != address:
                     updated_codes[new_address] = self._codes.pop(address)
             last_code = code

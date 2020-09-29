@@ -314,6 +314,8 @@ class CodeGenerator:
         :return: the address of the loop condition
         """
         self.__insert1(OpcodeInfo.INC)      # index += 1
+        if len(self._stack) < 1 or self._stack[-1] is not Type.int:
+            self._stack.append(Type.int)
         for_increment = self.last_code_start_address
         test_address = VMCodeMapping.instance().bytecode_size
         self._update_continue_jumps(start_address, for_increment)
