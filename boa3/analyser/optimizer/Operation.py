@@ -2,9 +2,8 @@ import ast
 from enum import Enum, auto
 from typing import Any, Union
 
-from boa3.model.operation.operator import Operator
-
 from boa3.model.operation.operation import IOperation
+from boa3.model.operation.operator import Operator
 
 
 class Operation(Enum):
