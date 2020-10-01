@@ -43,6 +43,7 @@ class StoragePutMethod(InteropMethod):
         from boa3.model.type.type import Type
         return (Type.str.is_type_of(key_type)
                 or Type.int.is_type_of(key_type)
+                or Type.bool.is_type_of(key_type)
                 or Type.bytes.is_type_of(key_type))
 
     @property
