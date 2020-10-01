@@ -1,6 +1,9 @@
 from enum import Enum
 from typing import Dict, List
 
+from boa3.model.builtin.interop.contract.callmethod import CallMethod
+from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
+from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
@@ -14,6 +17,7 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
 class InteropPackage(str, Enum):
+    Contract = 'contract'
     Runtime = 'runtime'
     Storage = 'storage'
 
@@ -30,6 +34,11 @@ class Interop:
             lst.extend(symbols)
         return lst
 
+    # Contract Interops
+    CallContract = CallMethod()
+    NeoScriptHash = NeoProperty()
+    GasScriptHash = GasProperty()
+
     # Runtime Interops
     CheckWitness = CheckWitnessMethod()
     Notify = NotifyMethod()
@@ -44,6 +53,10 @@ class Interop:
     StorageDelete = StorageDeleteMethod()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
+        InteropPackage.Contract: [CallContract,
+                                  NeoScriptHash,
+                                  GasScriptHash
+                                  ],
         InteropPackage.Runtime: [CheckWitness,
                                  Notify,
                                  Log,

@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
+from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -225,5 +226,81 @@ class TestInterop(BoaTest):
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CallingScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_call_contract(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x03'
+            + Opcode.LDARG2
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_call_contract_without_args(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.NEWARRAY0
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHashWithoutArgs.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_call_contract_too_many_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooManyArguments.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_call_contract_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooFewArguments.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_get_neo_native_script_hash(self):
+        value = NEO
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(value)).to_byte_array()
+            + value
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/NeoScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_gas_native_script_hash(self):
+        value = GAS
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(value)).to_byte_array()
+            + value
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GasScriptHash.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

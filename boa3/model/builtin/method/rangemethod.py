@@ -29,8 +29,7 @@ class RangeMethod(IBuiltinMethod):
         }
         start_default = ast.parse("{0}".format(Type.int.default_value)
                                   ).body[0].value
-        step_default = ast.parse("1".format(Type.int.default_value)
-                                 ).body[0].value
+        step_default = ast.parse("1").body[0].value
         super().__init__(identifier, args, defaults=[start_default, step_default], return_type=Type.range)
 
     @property
