@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimization in the code generation of literal operations
 - Implemented `print` method
 - Converted the smart contract `call` interop
+- Included an ICO example
 
 ### Changed
 - Raises a compiler error if a method specifies a return type but doesn't have a return statement
