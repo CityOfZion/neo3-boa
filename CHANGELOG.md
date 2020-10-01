@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Raises a compiler error if a method specifies a return type but doesn't have a return statement
 
 ### Fixed
-- Compiler's exception handling when compiling a smart contract that uses unsupported or unimplemented builtin methods
+- Compiler's exception handling when compiling a smart contract that uses unsupported or not yet implemented builtin methods
 - Return value of storage's get method when the key is not found
 
 ## [0.3.0] - 2020-08-27

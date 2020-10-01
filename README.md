@@ -40,7 +40,7 @@
   - [Configuring the Debugger](#configuring-the-debugger)
 - [Docs](#docs)
 - [Reference Examples](#reference-examples)
-- [Supported Features](#supported-features)
+- [Python Supported Features](#python-supported-features)
 - [Neo Python Suite Projects](#neo-python-suite-projects)
 - [Opening a New Issue](#opening-a-new-issue)
 - [License](#license)
