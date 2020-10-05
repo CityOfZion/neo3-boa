@@ -9,6 +9,7 @@ from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMe
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
 from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
+from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
 from boa3.model.builtin.interop.runtime.triggermethod import TriggerMethod
@@ -55,6 +56,7 @@ class Interop:
     CallingScriptHash = CallingScriptHashProperty()
     BlockTime = BlockTimeProperty()
     GasLeft = GasLeftProperty()
+    InvocationCounter = InvocationCounterProperty()
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -75,7 +77,8 @@ class Interop:
                                  GetTrigger,
                                  CallingScriptHash,
                                  BlockTime,
-                                 GasLeft
+                                 GasLeft,
+                                 InvocationCounter
                                  ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,
