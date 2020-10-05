@@ -65,3 +65,4 @@ def is_verification_trigger() -> bool:
 
 
 calling_script_hash: bytes = b''
+get_time: int = 0

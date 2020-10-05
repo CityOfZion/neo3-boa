@@ -5,6 +5,7 @@ from boa3.model.builtin.interop.contract.callmethod import CallMethod
 from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
 from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
+from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
@@ -46,6 +47,7 @@ class Interop:
     TriggerType = TriggerTyping()
     GetTrigger = TriggerMethod(TriggerType)
     CallingScriptHash = CallingScriptHashProperty()
+    BlockTime = BlockTimeProperty()
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -62,7 +64,8 @@ class Interop:
                                  Log,
                                  TriggerType,
                                  GetTrigger,
-                                 CallingScriptHash
+                                 CallingScriptHash,
+                                 BlockTime
                                  ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,

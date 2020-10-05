@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType
 from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
+from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -303,4 +304,29 @@ class TestInterop(BoaTest):
 
         path = '%s/boa3_test/test_sc/interop_test/GasScriptHash.py' % self.dirname
         output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_block_time(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.BlockTime.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/BlockTime.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_block_time_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/BlockTimeCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
