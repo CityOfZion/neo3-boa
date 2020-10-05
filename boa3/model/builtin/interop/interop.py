@@ -8,6 +8,7 @@ from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProper
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
+from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
 from boa3.model.builtin.interop.runtime.triggermethod import TriggerMethod
@@ -53,6 +54,7 @@ class Interop:
     GetTrigger = TriggerMethod(TriggerType)
     CallingScriptHash = CallingScriptHashProperty()
     BlockTime = BlockTimeProperty()
+    GasLeft = GasLeftProperty()
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -72,7 +74,8 @@ class Interop:
                                  TriggerType,
                                  GetTrigger,
                                  CallingScriptHash,
-                                 BlockTime
+                                 BlockTime,
+                                 GasLeft
                                  ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,
