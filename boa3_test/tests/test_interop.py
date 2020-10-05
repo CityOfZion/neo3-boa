@@ -230,6 +230,20 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_calling_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CallingScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
     def test_call_contract(self):
         expected_output = (
             Opcode.INITSLOT
@@ -291,6 +305,20 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_neo_native_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/NeoScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
     def test_get_gas_native_script_hash(self):
         value = GAS
         expected_output = (
@@ -329,4 +357,43 @@ class TestInterop(BoaTest):
 
         path = '%s/boa3_test/test_sc/interop_test/BlockTimeCantAssign.py' % self.dirname
         output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_gas_native_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GasScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_current_height(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.CurrentHeight.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CurrentHeight.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_current_height_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CurrentHeightCantAssign.py' % self.dirname
+        output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
