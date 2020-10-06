@@ -236,5 +236,38 @@ class TestException(BoaTest):
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_try_except_finally(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH4
+            + Opcode.DIV
+            + Opcode.STLOC0
+            + Opcode.TRY        # try:
+            + Integer(9).to_byte_array(signed=True, min_length=1)   # jmp to exception
+            + Integer(15).to_byte_array(signed=True, min_length=1)  # jmp to finally if exists
+            + Opcode.LDLOC0         # x += arg
+            + Opcode.LDARG0
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.JMP        # except ValueError:
+            + Integer(6).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.LDLOC0         # x = -x
+            + Opcode.NEGATE
+            + Opcode.STLOC0
+            + Opcode.ENDTRY
+            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0     # finally
+            + Opcode.PUSH2          # x *= 2
+            + Opcode.MUL
+            + Opcode.STLOC0
+            + Opcode.ENDFINALLY
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/test_sc/exception_test/TryExceptFinally.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
