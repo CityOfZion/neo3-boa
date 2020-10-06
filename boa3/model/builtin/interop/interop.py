@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Dict, List
 
+from boa3.model.builtin.interop.blockchain.getcurrentheightmethod import CurrentHeightProperty
 from boa3.model.builtin.interop.contract.callmethod import CallMethod
 from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
 from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
@@ -18,6 +19,7 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
 class InteropPackage(str, Enum):
+    Blockchain = 'blockchain'
     Contract = 'contract'
     Runtime = 'runtime'
     Storage = 'storage'
@@ -34,6 +36,9 @@ class Interop:
         for symbols in cls._interop_symbols.values():
             lst.extend(symbols)
         return lst
+
+    # Blockchain Interops
+    CurrentHeight = CurrentHeightProperty()
 
     # Contract Interops
     CallContract = CallMethod()
@@ -55,6 +60,8 @@ class Interop:
     StorageDelete = StorageDeleteMethod()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
+        InteropPackage.Blockchain: [CurrentHeight
+                                    ],
         InteropPackage.Contract: [CallContract,
                                   NeoScriptHash,
                                   GasScriptHash
