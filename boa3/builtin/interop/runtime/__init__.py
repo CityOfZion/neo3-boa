@@ -67,3 +67,4 @@ def is_verification_trigger() -> bool:
 calling_script_hash: bytes = b''
 get_time: int = 0
 gas_left: int = 0
+invocation_counter: int = 0
