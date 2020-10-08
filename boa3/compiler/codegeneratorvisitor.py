@@ -584,7 +584,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         except_end = self.generator.convert_end_try(try_address, try_end)
         for stmt in try_node.finalbody:
             self.visit_to_map(stmt, generate=True)
-        self.generator.convert_end_try_finally(except_end, try_address, len(try_node.finalbody) > 0)
+        self.generator.convert_end_try_finally(except_end)
 
     def visit_Name(self, name: ast.Name) -> str:
         """

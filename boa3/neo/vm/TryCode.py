@@ -74,7 +74,7 @@ class TryCode(VMCode):
             from boa3.compiler.vmcodemapping import VMCodeMapping
             code_mapping = VMCodeMapping.instance()
             self_start = code_mapping.get_start_address(self)
-            target_start = code_mapping.get_start_address(opcode)
+            target_start = code_mapping.get_start_address(self.target)
 
             return (Integer(target_start - self_start)
                     .to_byte_array(signed=True, min_length=min_len))

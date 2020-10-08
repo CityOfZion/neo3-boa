@@ -440,29 +440,13 @@ class CodeGenerator:
 
         return self.last_code_start_address
 
-    def convert_end_try_finally(self, last_address: int, start_address: int, has_try_body: bool = False):
+    def convert_end_try_finally(self, last_address: int):
         """
         Converts the end of the try finally statement
 
         :param last_address: the address of the try except last opcode.
-        :param start_address: the address of the try first opcode
-        :param has_try_body: whether this try statement has a finally body.
         :return: the last address of the except body
         """
-        if has_try_body:
-            self.__insert1(OpcodeInfo.ENDFINALLY)
-            vmcode_mapping_instance = VMCodeMapping.instance()
-
-            try_vm_code = vmcode_mapping_instance.get_code(start_address)
-            try_last_code = vmcode_mapping_instance.get_code(last_address)
-
-            finally_start_address = vmcode_mapping_instance.get_end_address(try_last_code) + 1
-            finally_start_code = vmcode_mapping_instance.get_code(finally_start_address)
-
-            if isinstance(try_vm_code, TryCode):
-                try_vm_code.set_finally_code(finally_start_code)
-            self._update_jump(vmcode_mapping_instance.bytecode_size, self.last_code_start_address)
-
         self._update_jump(last_address, VMCodeMapping.instance().bytecode_size)
 
     def fix_negative_index(self, value_index: int = None):

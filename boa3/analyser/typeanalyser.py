@@ -32,6 +32,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar type_errors: a list with the found type errors. Empty by default.
     :ivar modules: a list with the analysed modules. Empty by default.
     :ivar symbols: a dictionary that maps the global symbols.
+    :cvar _operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
     """
 
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
@@ -45,6 +46,35 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_method: Method = None
 
         self.visit(self._tree)
+
+    _operators = {
+        ast.Add: Operator.Plus,
+        ast.Sub: Operator.Minus,
+        ast.Mult: Operator.Mult,
+        ast.Div: Operator.Div,
+        ast.FloorDiv: Operator.IntDiv,
+        ast.Mod: Operator.Mod,
+        ast.Pow: Operator.Pow,
+        ast.UAdd: Operator.Plus,
+        ast.USub: Operator.Minus,
+        ast.Eq: Operator.Eq,
+        ast.NotEq: Operator.NotEq,
+        ast.Lt: Operator.Lt,
+        ast.LtE: Operator.LtE,
+        ast.Gt: Operator.Gt,
+        ast.GtE: Operator.GtE,
+        ast.Is: Operator.Is,
+        ast.IsNot: Operator.IsNot,
+        ast.And: Operator.And,
+        ast.Or: Operator.Or,
+        ast.Not: Operator.Not,
+        ast.BitAnd: Operator.BitAnd,
+        ast.BitOr: Operator.BitOr,
+        ast.BitXor: Operator.BitXor,
+        ast.Invert: Operator.BitNot,
+        ast.LShift: Operator.LeftShift,
+        ast.RShift: Operator.RightShift
+    }
 
     @property
     def _current_method_id(self) -> str:
@@ -788,7 +818,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif isinstance(node, IOperation):
             return node.operator
 
-        return Operator.get_operation(node)
+        node_type = type(node)
+        if node_type in self._operators:
+            return self._operators[node_type]
+        else:
+            return None
 
     def visit_Call(self, call: ast.Call):
         """
@@ -964,15 +998,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param try_node: the python ast try node
         """
+        if len(try_node.finalbody) > 0:
+            self._log_error(
+                # TODO: remove when 'finally' is implemented
+                CompilerError.NotSupportedOperation(line=try_node.lineno,
+                                                    col=try_node.col_offset,
+                                                    symbol_id='finally')
+            )
         self.validate_except_handlers(try_node)
 
         for stmt in try_node.body:
-            self.visit(stmt)
-
-        for exception_handler in try_node.handlers:
-            self.visit(exception_handler)
-
-        for stmt in try_node.finalbody:
             self.visit(stmt)
 
     def validate_except_handlers(self, try_node: ast.Try):
@@ -1028,8 +1063,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if not logged_errors and node.type is not None:
             self._log_using_specific_exception_warning(node.type)
-
-        self.generic_visit(node)
 
     def _log_using_specific_exception_warning(self, node: ast.AST):
         if node is None:
