@@ -18,7 +18,7 @@ jobs:
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
     docker:
-      - image: circleci/python:3.8.0
+      - image: circleci/python:3.8.0b4-buster
     steps:
       - checkout
 
