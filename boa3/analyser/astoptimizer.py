@@ -7,6 +7,7 @@ from boa3.analyser.optimizer.Operation import Operation
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
+from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.primitive.primitivetype import PrimitiveType
@@ -55,7 +56,11 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         :return: the parsed node
         :rtype: ast.AST or Sequence[ast.AST]
         """
-        return self.visit(super().parse_to_node(expression, origin))
+        new_node = self.visit(super().parse_to_node(expression, origin))
+        if hasattr(new_node, 'op'):
+            new_node.op = Operator.get_operation(new_node.op)
+
+        return new_node
 
     def reset_state(self):
         self.current_scope.reset()
@@ -329,7 +334,10 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         self.current_scope = self.current_scope.previous_scope()
         self.current_scope.update_values(try_scope, *except_scopes)
 
-        # TODO: include finally and else scopes
+        for stmt in node.finalbody:
+            self.visit(stmt)
+
+        # TODO: include else scope
         return node
 
     def visit_Name(self, node: ast.Name) -> ast.AST:
