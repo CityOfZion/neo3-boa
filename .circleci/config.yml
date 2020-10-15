@@ -5,11 +5,24 @@ orbs:
 
 jobs:
   unit-test:
-    executor: python/default
+    working_directory: ~/neo3-boa
+    docker:
+      - image: circleci/python:3.8.0
     steps:
       - checkout
       - python/load-cache
-      - python/install-deps
+
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo pip install -r requirements_dev.txt
+            wget https://aka.ms/dotnet/net5/5.0.1xx/daily/Sdk/dotnet-sdk-linux-x64.tar.gz
+            mkdir -p "$HOME/dotnet" && tar zxf dotnet-sdk-linux-x64.tar.gz -C "$HOME/dotnet"
+            export DOTNET_ROOT=$HOME/dotnet
+            export PATH=$PATH:$HOME/dotnet
+            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
+            dotnet build ./neo-devpack-dotnet/src/TestEngine/TestEngine.csproj -o ./TestEngine
+
       - python/save-cache
       - run:
           command: python -m unittest discover boa3_test
