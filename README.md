@@ -168,47 +168,848 @@ For an extensive collection of examples:
 
 ## Python Supported Features
 
-| Status | Release | Converts | Example Code | Contract Example Test |
-| :--:|:---|:---|:---|:---|
-|✅ | v0.3 | <p>Local variable declarations and assignments</p>   | <p>`def func():`<br/>&emsp;`foo: int = 42`<br/> &emsp;`bar = foo`</p> | [ArgumentAssignment.py](/boa3_test/test_sc/variable_test/ArgumentAssignment.py), [AssignLocalWithArgument.py](/boa3_test/test_sc/variable_test/AssignLocalWithArgument.py), [AssignLocalWithArgumentShadowingGlobal.py](/boa3_test/test_sc/variable_test/AssignLocalWithArgumentShadowingGlobal.py), [AssignmentWithoutType.py](/boa3_test/test_sc/variable_test/AssignmentWithoutType.py), [AssignmentWithType.py](/boa3_test/test_sc/variable_test/AssignmentWithType.py), [AssignmentWithoutType.py](/boa3_test/test_sc/variable_test/AssignmentWithoutType.py), [DeclarationWithType.py](/boa3_test/test_sc/variable_test/DeclarationWithType.py), [ManyAssignments.py](/boa3_test/test_sc/variable_test/ManyAssignments.py), [ReturnArgument.py](/boa3_test/test_sc/variable_test/ReturnArgument.py), [ReturnLocalVariable.py](/boa3_test/test_sc/variable_test/ReturnLocalVariable.py) |
-|✅ | v0.3 | <p>Global variable declarations and assignments</p>  | <p>`foo: int = 42`<br/>`bar = foo`</p> | [GetGlobalValueWrittenAfter.py](/boa3_test/test_sc/variable_test/GetGlobalValueWrittenAfter.py), [GlobalAssignmentBetweenFunctions.py](/boa3_test/test_sc/variable_test/GlobalAssignmentBetweenFunctions.py), [GlobalAssignmentInFunctionWithArgument.py](/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py), [GlobalAssignmentWithType.py](/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py), [GlobalDeclarationWithArgumentWrittenAfter.py](/boa3_test/test_sc/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py), [ManyGlobalAssignments.py](/boa3_test/test_sc/variable_test/ManyGlobalAssignments.py) |
-|✅ | v0.4 | <p>Global keyword</p>  | <p>`foo: int = 42`<br/>`bar = foo`<br/><br/>`def func():`<br/>&emsp;`global foo`<br/>&emsp;`foo = 1`</p> | [GlobalAssignmentInFunctionWithArgument.py](boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py) |
-|✅ | v0.3 | <p>Arithmetic operations</p>                         | <p>`+`, `-`, `*`, `//`, `%`</p> | [Addition.py](/boa3_test/test_sc/arithmetic_test/Addition.py), [AdditionThreeElements.py](/boa3_test/test_sc/arithmetic_test/AdditionThreeElements.py), [Concatenation.py](/boa3_test/test_sc/arithmetic_test/Concatenation.py), [IntegerDivision.py](/boa3_test/test_sc/arithmetic_test/IntegerDivision.py), [MixedOperations.py](/boa3_test/test_sc/arithmetic_test/MixedOperations.py), [Modulo.py](/boa3_test/test_sc/arithmetic_test/Modulo.py), [MultipleExpressionsInLine.py](/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py), [Multiplication.py](/boa3_test/test_sc/arithmetic_test/Multiplication.py), [Negative.py](/boa3_test/test_sc/arithmetic_test/Negative.py), [Positive.py](/boa3_test/test_sc/arithmetic_test/Positive.py), [StringMultiplication.py](/boa3_test/test_sc/arithmetic_test/StringMultiplication.py), [Subtraction.py](/boa3_test/test_sc/arithmetic_test/Subtraction.py), [WithParentheses.py](/boa3_test/test_sc/arithmetic_test/WithParentheses.py) |
-|🔜 | backlog | <p>Arithmetic operations</p>                         | <p>`/`, `**`</p> |  |
-|✅ | v0.3 | <p>Arithmetic augmented assignment operators</p>     | <p>`+=`, `-=`, `*=`, `//=`, `%=`</p> | [AdditionAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/AdditionAugmentedAssignment.py), [ConcatenationAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/ConcatenationAugmentedAssignment.py), [IntegerDivisionAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/IntegerDivisionAugmentedAssignment.py), [ModuloAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/ModuloAugmentedAssignment.py), [MultiplicationAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/MultiplicationAugmentedAssignment.py), [StringMultiplicationAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/StringMultiplicationAugmentedAssignment.py), [SubtractionAugmentedAssignment.py](/boa3_test/test_sc/arithmetic_test/SubtractionAugmentedAssignment.py) |
-|🔜 | backlog | <p>Arithmetic augmented assignment operators</p>     | <p>`/=`</p> |  |
-|✅ | v0.3 | <p>Relational operations</p>                         | <p>`==`, `!=`, `<`, `<=`, `>`, `>=`<br/>`is None`, `is not None`</p> | [BoolEquality.py](/boa3_test/test_sc/relational_test/BoolEquality.py), [BoolInequality.py](/boa3_test/test_sc/relational_test/BoolInequality.py), [MixedEquality.py](/boa3_test/test_sc/relational_test/MixedEquality.py), [MixedInequality.py](/boa3_test/test_sc/relational_test/MixedInequality.py), [MultipleExpressionsInLine.py](/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py), [NoneEquality.py](/boa3_test/test_sc/none_test/NoneEquality.py), [NoneIdentity.py](/boa3_test/test_sc/none_test/NoneIdentity.py), [NoneNotIdentity.py](/boa3_test/test_sc/none_test/NoneNotIdentity.py), [NumEquality.py](/boa3_test/test_sc/relational_test/NumEquality.py), [NumGreaterOrEqual.py](/boa3_test/test_sc/relational_test/NumGreaterOrEqualpy), [NumGreaterThan.py](/boa3_test/test_sc/relational_test/NumGreaterThan.py), [NumInequality.py](/boa3_test/test_sc/relational_test/NumInequality.py), [NumLessOrEqual.py](/boa3_test/test_sc/relational_test/NumLessOrEqual.py), [NumLessThan.py](/boa3_test/test_sc/relational_test/NumLessThan.py), [NumRange.py](/boa3_test/test_sc/relational_test/NumRange.py), [StrEquality.py](/boa3_test/test_sc/relational_test/StrEquality.py), [StrGreaterOrEqual.py](/boa3_test/test_sc/relational_test/StrGreaterOrEqual.py), [StrGreaterThan.py](/boa3_test/test_sc/relational_test/StrGreaterThan.py), [StrInequality.py](/boa3_test/test_sc/relational_test/StrInequality.py), [StrLessOrEqual.py](/boa3_test/test_sc/relational_test/StrLessOrEqual.py), [StrLessThan.py](/boa3_test/test_sc/relational_test/StrLessThan.py) |
-|🔜 | backlog | <p>Relational operations</p>                         | <p>`is`, `is not`</p> |  |
-|✅ | v0.3 | <p>Bitwise operations</p>                            | <p>`&`, `\|`, `~`, `^`, `<<`, `>>`</p> | [LogicAndBool.py](/boa3_test/test_sc/logical_test/LogicAndBool.py), [LogicAndInt.py](/boa3_test/test_sc/logical_test/LogicAndInt.py), [LogicLeftShift.py](/boa3_test/test_sc/logical_test/LogicLeftShift.py), [LogicNotBool.py](/boa3_test/test_sc/logical_test/LogicNotBool.py), [LogicNotInt.py](/boa3_test/test_sc/logical_test/LogicNotInt.py), [LogicOrBool.py](/boa3_test/test_sc/logical_test/LogicOrBool.py), [LogicOrInt.py](/boa3_test/test_sc/logical_test/LogicOrInt.py), [LogicRightShift.py](/boa3_test/test_sc/logical_test/LogicRightShift.py), [LogicXorBool.py](/boa3_test/test_sc/logical_test/LogicXorBool.py), [LogicXorInt.py](/boa3_test/test_sc/logical_test/LogicXorInt.py) |
-|🔜 | backlog | <p>Bitwise augmented assignment operators</p>        | <p>`&=`, `\|=`, `~=`, `^=`, `<<=`, `>>=`</p> |  |
-|✅ | v0.3 | <p>Boolean logic operations</p>                      | <p>`and`, `or`, `not`<p/> | [BoolAnd.py](/boa3_test/test_sc/logical_test/BoolAnd.py), [BoolNot.py](/boa3_test/test_sc/logical_test/BoolNot.py), [BoolOr.py](/boa3_test/test_sc/logical_test/BoolOr.py), [BoolOrThreeElements.py](/boa3_test/test_sc/logical_test/BoolOrThreeElements.py), [MixedOperations.py](/boa3_test/test_sc/logical_test/MixedOperations.py), [MultipleExpressionsInLine.py](/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py) |
-|✅ | v0.3 | <p>Tuple type</p>                                    | <p>`a = ('1', '2', '3')`</p> | [NoneTuple.py](/boa3_test/test_sc/none_test/NoneTuple.py), [BoolTuple.py](/boa3_test/test_sc/tuple_test/BoolTuple.py), [EmptyTupleAssignment.py](/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py), [GetValue.py](/boa3_test/test_sc/tuple_test/GetValue.py), [IntTuple.py](/boa3_test/test_sc/tuple_test/IntTuple.py), [MultipleExpressionsInLine.py](/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py), [Nep5Main.py](/boa3_test/test_sc/tuple_test/Nep5Main.py), [StrTuple.py](/boa3_test/test_sc/tuple_test/StrTuple.py), [TupleOfTuple.py](/boa3_test/test_sc/tuple_test/TupleOfTuple.py), [TupleSlicingEndOmitted.py](/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py), [TupleSlicingLiteralValues.py](/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py), [TupleSlicingNegativeEnd.py](/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py), [TupleSlicingNegativeStart.py](/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py), [TupleSlicingOmitted.py](/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py), [TupleSlicingStartOmitted.py](/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py), [TupleSlicingVariableValues.py](/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py), [VariableTuple.py](/boa3_test/test_sc/tuple_test/VariableTuple.py) |
-|✅ | v0.3 | <p>List type</p>                                     | <p>`a = ['1', '2', '3']`</p> | [AppendAnyValue.py](/boa3_test/test_sc/list_test/AppendAnyValue.py), [AppendIntValue.py](/boa3_test/test_sc/list_test/AppendIntValue.py), [AppendIntWithBuiltin.py](/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py), [BoolList.py](/boa3_test/test_sc/list_test/BoolList.py), [ClearList.py](/boa3_test/test_sc/list_test/ClearList.py), [EmptyListAssignment.py](/boa3_test/test_sc/list_test/EmptyListAssignment.py), [ExtendAnyValue.py](/boa3_test/test_sc/list_test/ExtendAnyValue.py), [ExtendTupleValue.py](/boa3_test/test_sc/list_test/ExtendTupleValue.py), [ExtendWithBuiltin.py](/boa3_test/test_sc/list_test/ExtendWithBuiltin.py), [GetValue.py](/boa3_test/test_sc/list_test/GetValue.py), [GetValueNegativeIndex.py](/boa3_test/test_sc/list_test/GetValueNegativeIndex.py), [IntList.py](/boa3_test/test_sc/list_test/IntList.py), [ListOfList.py](/boa3_test/test_sc/list_test/ListOfList.py), [MultipleExpressionsInLine.py](/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py), [Nep5Main.py](/boa3_test/test_sc/list_test/Nep5Main.py), [ReverseList.py](/boa3_test/test_sc/list_test/ReverseList.py), [SetValue.py](/boa3_test/test_sc/list_test/SetValue.py), [SetValueNegativeIndex.py](/boa3_test/test_sc/list_test/SetValueNegativeIndex.py), [StrList.py](/boa3_test/test_sc/list_test/StrList.py), [TypeHintAssignment.py](/boa3_test/test_sc/list_test/TypeHintAssignment.py), [VariableList.py](/boa3_test/test_sc/list_test/VariableList.py) |
-|✅ | v0.4 | <p>List type</p>  |  `a.pop()`  |  [PopList.py](/boa3_test/test_sc/list_test/PopList.py), [PopListLiteralArgument.py](/boa3_test/test_sc/list_test/PopListLiteralArgument.py), [PopListLiteralNegativeArgument.py](/boa3_test/test_sc/list_test/PopListLiteralNegativeArgument.py), [PopListVariableArgument.py](/boa3_test/test_sc/list_test/PopListVariableArgument.py), [PopListWithoutAssignment.py](/boa3_test/test_sc/list_test/PopListWithoutAssignment.py) |
-|🔜 | next release | <p>List type</p>  |  <p>`a.remove(1)`<br/>`a.insert('example', 2)`</p>  |   |
-|✅ | v0.3 | <p>Dict type</p>                                     | <p>`a = {1:'1', 2:'2', 3:'3'}`</p> | [AnyValueDict.py](/boa3_test/test_sc/dict_test/AnyValueDict.py), [DictOfDict.py](/boa3_test/test_sc/dict_test/DictOfDict.py), [EmptyDictAssignment.py](/boa3_test/test_sc/dict_test/EmptyDictAssignment.py), [GetValue.py](/boa3_test/test_sc/dict_test/GetValue.py), [IntKeyDict.py](/boa3_test/test_sc/dict_test/IntKeyDict.py), [KeysDict.py](/boa3_test/test_sc/dict_test/KeysDict.py), [SetValue.py](/boa3_test/test_sc/dict_test/SetValue.py), [StrKeyDict.py](/boa3_test/test_sc/dict_test/StrKeyDict.py), [TypeHintAssignment.py](/boa3_test/test_sc/dict_test/TypeHintAssignment.py), [ValuesDict.py](/boa3_test/test_sc/dict_test/ValuesDict.py), [VariableDict.py](/boa3_test/test_sc/dict_test/VariableDict.py) |
-|🔜 | backlog | <p>Set type</p>                                   | <p>`a = {'1', '2', '3'}`</p> |  |
-|✅ | v0.3 | <p>Bytes type</p>                                    | <p>`a = b'\x01\x02\x03\x04'`</p> | [BytearrayToIntWithBytesBuiltin.py](/boa3_test/test_sc/bytes_test/BytearrayToIntWithBytesBuiltin.py), [BytesFromBytearray.py](/boa3_test/test_sc/bytes_test/BytesFromBytearray.py), [BytesGetValue.py](/boa3_test/test_sc/bytes_test/BytesGetValue.py), [BytesGetValueNegativeIndex.py](/boa3_test/test_sc/bytes_test/BytesGetValueNegativeIndex.py), [BytesLiteral.py](/boa3_test/test_sc/bytes_test/BytesLiteral.py), [BytesToInt.py](/boa3_test/test_sc/bytes_test/BytesToInt.py), [BytesToIntWithBuiltin.py](/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltin.py), [BytesToStr.py](/boa3_test/test_sc/bytes_test/BytesToStr.py), [BytesToStrWithBuiltin.py](/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py) |
-|✅ | v0.3 | <p>Bytearray type</p>                                | <p>`a = bytearray(b'\x01\x02\x03\x04')`</p> | [BytearrayAppend.py](/boa3_test/test_sc/bytes_test/BytearrayAppend.py), [BytearrayAppendWithBuiltin.py](/boa3_test/test_sc/bytes_test/BytearrayAppendWithBuiltin.py), [BytearrayAppendWithMutableSequence.py](/boa3_test/test_sc/bytes_test/BytearrayAppendWithMutableSequence.py), [BytearrayClear.py](/boa3_test/test_sc/bytes_test/BytearrayClear.py), [BytearrayFromLiteralBytes.py](/boa3_test/test_sc/bytes_test/BytearrayFromLiteralBytes.py), [BytearrayFromVariableBytes.py](/boa3_test/test_sc/bytes_test/BytearrayFromVariableBytes.py), [BytearrayGetValue.py](/boa3_test/test_sc/bytes_test/BytearrayGetValuet.py), [BytearrayGetValueNegativeIndex.py](/boa3_test/test_sc/bytes_test/BytearrayGetValueNegativeIndex.py), [BytearrayReverse.py](/boa3_test/test_sc/bytes_test/BytearrayReverse.py), [BytearraySetValue.py](/boa3_test/test_sc/bytes_test/BytearraySetValue.py), [BytearraySetValueNegativeIndex.py](/boa3_test/test_sc/bytes_test/BytearraySetValueNegativeIndex.py), [BytearrayToInt.py](/boa3_test/test_sc/bytes_test/BytearrayToInt.py), [BytearrayToIntWithBuiltin.py](/boa3_test/test_sc/bytes_test/BytearrayToIntWithBuiltin.py) |
-|🔜 | next release | <p>Optional type</p>                          | <p>`a: Optional[int] = 5`<br/>`a = 142`<br/>`a = None`</p> |  |
-|✅ | v0.3 | <p>While statement</p>                               | <p>`foo = 0`<br/>`while condition:`<br/>&emsp;`foo = foo + 2`</p> | [ConstantCondition.py](/boa3_test/test_sc/while_test/ConstantCondition.py), [MultipleRelationalCondition.py](/boa3_test/test_sc/while_test/MultipleRelationalCondition.py), [NestedWhile.py](/boa3_test/test_sc/while_test/NestedWhile.py), [RelationalCondition.py](/boa3_test/test_sc/while_test/RelationalCondition.py), [VariableCondition.py](/boa3_test/test_sc/while_test/VariableCondition.py), [WhileBoa2Test.py](/boa3_test/test_sc/while_test/WhileBoa2Test.py), [WhileBoa2Test1.py](/boa3_test/test_sc/while_test/WhileBoa2Test1.py), [WhileBoa2Test2.py](/boa3_test/test_sc/while_test/WhileBoa2Test2.py), [WhileBreak.py](/boa3_test/test_sc/while_test/WhileBreak.py), [WhileBreakElse.py](/boa3_test/test_sc/while_test/WhileBreakElse.py), [WhileContinue.py](/boa3_test/test_sc/while_test/WhileContinue.py), [WhileElse.py](/boa3_test/test_sc/while_test/WhileElse.py) |
-|✅ | v0.3 | <p>If, elif, else statements</p>                     | <p>`if condition1:`<br/>&emsp;`foo = 0`<br/>`elif condition2:`<br/>&emsp;`foo = 1`<br/>`else:`<br/>&emsp;`bar = 2`</p>     | [ConstantCondition.py](/boa3_test/test_sc/if_test/ConstantCondition.py), [IfElif.py](/boa3_test/test_sc/if_test/IfElif.py), [IfElse.py](/boa3_test/test_sc/if_test/IfElse.py), [IfExpVariableCondition.py](/boa3_test/test_sc/if_test/IfExpVariableCondition.py), [MultipleBranches.py](/boa3_test/test_sc/if_test/MultipleBranches.py), [NestedIf.py](/boa3_test/test_sc/if_test/NestedIf.py), [RelationalCondition.py](/boa3_test/test_sc/if_test/RelationalCondition.py), [VariableCondition.py](/boa3_test/test_sc/if_test/VariableCondition.py) |
-|✅ | v0.3 | <p>For statement</p>                                 | <p>`for x in (1, 2, 3):`<br/>&emsp;`...`</p> | [ForBreak.py](/boa3_test/test_sc/for_test/ForBreak.py), [ForBreakElse.py](/boa3_test/test_sc/for_test/ForBreakElse.py), [ForContinue.py](/boa3_test/test_sc/for_test/ForContinue.py), [ForElse.py](/boa3_test/test_sc/for_test/ForElse.py), [NestedFor.py](/boa3_test/test_sc/for_test/NestedFor.py), [StringCondition.py](/boa3_test/test_sc/for_test/StringCondition.py), [TupleCondition.py](/boa3_test/test_sc/for_test/TupleCondition.py), [VariableCondition.py](/boa3_test/test_sc/for_test/VariableCondition.py) |
-|✅ | v0.3 | <p>Function call</p>                                 | <p>`def Main(num: int):`<br/>&emsp;`a = foo(num)`<br/>&emsp;`...`<br/><br/>`def foo(num: int) -> int:`<br/>&emsp;`...`</p> | [CallFunctionWithoutVariables.py](/boa3_test/test_sc/function_test/CallFunctionWithoutVariables.py), [CallFunctionWrittenBefore.py](/boa3_test/test_sc/function_test/CallFunctionWrittenBefore.py), [CallReturnFunctionOnReturn.py](/boa3_test/test_sc/function_test/CallReturnFunctionOnReturn.py), [CallReturnFunctionWithLiteralArgs.py](/boa3_test/test_sc/function_test/CallReturnFunctionWithLiteralArgs.py), [CallReturnFunctionWithoutArgs.py](/boa3_test/test_sc/function_test/CallReturnFunctionWithoutArgs.py), [CallReturnFunctionWithVariableArgs.py](/boa3_test/test_sc/function_test/CallReturnFunctionWithVariableArgs.py), [CallVoidFunctionWithLiteralArgs.py](/boa3_test/test_sc/function_test/CallVoidFunctionWithLiteralArgs.py), [CallVoidFunctionWithoutArgs.py](/boa3_test/test_sc/function_test/CallVoidFunctionWithoutArgs.py), [CallVoidFunctionWithVariableArgs.py](/boa3_test/test_sc/function_test/CallVoidFunctionWithVariableArgs.py) |
-|✅ | v0.3 | <p>Built in function</p>                             | <p>`a = len('hello')`</p> | [Folder](/boa3_test/test_sc/built_in_methods_test) with the Examples. |
-|✅ | v0.4 |<p>Built in function</p>           | <p>`a = range(1, 5, 2)`<br/>`b = isinstance(5, str)`<br/>`print(42)`</p> | [Range examples folder](boa3_test/test_sc/range_test), [IsInstanceBoolLiteral.py](boa3_test/test_sc/built_in_methods_test/IsInstanceBoolLiteral.py), [IsInstanceBoolVariable.py](boa3_test/test_sc/built_in_methods_test/IsInstanceBoolVariable.py), [IsInstanceIntLiteral.py](boa3_test/test_sc/built_in_methods_test/IsInstanceIntLiteral.py), [IsInstanceIntVariable.py](boa3_test/test_sc/built_in_methods_test/IsInstanceIntVariable.py), [IsInstanceListLiteral.py](boa3_test/test_sc/built_in_methods_test/IsInstanceListLiteral.py), [IsInstanceManyTypes.py](boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypes.py), [IsInstanceStrLiteral.py](boa3_test/test_sc/built_in_methods_test/IsInstanceStrLiteral.py), [IsInstanceStrVariable.py](boa3_test/test_sc/built_in_methods_test/IsInstanceStrVariable.py), [IsInstanceTupleLiteral.py](boa3_test/test_sc/built_in_methods_test/IsInstanceTupleLiteral.py), [IsInstanceTupleVariable.py](boa3_test/test_sc/built_in_methods_test/IsInstanceTupleVariable.py), [IsInstanceVariableType.py](boa3_test/test_sc/built_in_methods_test/IsInstanceVariableType.py), [PrintInt.py](boa3_test/test_sc/built_in_methods_test/PrintInt.py), [PrintIntMissingFunctionReturn.py](boa3_test/test_sc/built_in_methods_test/PrintIntMissingFunctionReturn.py), [PrintList.py](boa3_test/test_sc/built_in_methods_test/PrintList.py), [PrintManyValues.py](boa3_test/test_sc/built_in_methods_test/PrintManyValues.py), [PrintStr.py](boa3_test/test_sc/built_in_methods_test/PrintStr.py) |
-|🔜 | next release | <p>Built in function</p>                          | <p>`a = reversed([1, 2, 3, 4])`</p> |  |
-|🔜 | backlog | <p>Built in function</p>                          | <p>`a = abs(-5)`<br/>`b = max(7, 0, 12, 8)`<br/>`c = min(1, 6, 2)`<br/>`d = pow(2, 2)`<br/>`e = sum(list_of_num, 0)`</p> |  |
-|✅ | v0.3 | <p>Multiple expressions in the same line<p/>         | <p>`i = i + h; a = 1; b = 3 + a; count = 0`</p> | [MultipleExpressionsInLine (Arithmetic)](/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py), [MultipleExpressionsInLine (Logical)](/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py), [MultipleExpressionsInLine (List)](/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py), [MultipleExpressionsInLine (Tuple)](/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py), [MultipleExpressionsInLine (Relational)](/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py) |
-|✅ | v0.4 | <p>Chained assignment<p/>                         | <p>`x = y = foo()`</p> |  |
-|✅ | v0.3 | <p>Sequence slicing<p/>                              | <p>`x = 'example'[2:4]`, `x = [1, 2, 3][:2]`, `x = 'example'[4:]`, `x = (1, 2, 3)[:]`, `x = 'example'[-4:-2]`, `x = 'example'[:-4]`</p> | [ListSlicingEndOmitted.py](/boa3_test/test_sc/list_test/ListSlicingEndOmitted.py), [ListSlicingLiteralValues.py](/boa3_test/test_sc/list_test/ListSlicingLiteralValues.py), [ListSlicingNegativeEnd.py](/boa3_test/test_sc/list_test/ListSlicingNegativeEnd.py), [ListSlicingNegativeStart.py](/boa3_test/test_sc/list_test/ListSlicingNegativeStart.py), [ListSlicingOmitted.py](/boa3_test/test_sc/list_test/ListSlicingOmitted.py), [ListSlicingStartOmitted.py](/boa3_test/test_sc/list_test/ListSlicingStartOmitted.py), [ListSlicingVariableValues.py](/boa3_test/test_sc/list_test/ListSlicingVariableValues.py), [StringSlicingEndOmitted.py](/boa3_test/test_sc/string_test/StringSlicingEndOmitted.py), [StringSlicingLiteralValues.py](/boa3_test/test_sc/string_test/StringSlicingLiteralValues.py), [StringSlicingNegativeEnd.py](/boa3_test/test_sc/string_test/StringSlicingNegativeEnd.py), [StringSlicingNegativeStart.py](/boa3_test/test_sc/string_test/StringSlicingNegativeStart.py), [StringSlicingOmitted.py](/boa3_test/test_sc/string_test/StringSlicingOmitted.py), [StringSlicingStartOmitted.py](/boa3_test/test_sc/string_test/StringSlicingStartOmitted.py), [StringSlicingVariableValues.py](/boa3_test/test_sc/string_test/StringSlicingVariableValues.py), [TupleSlicingEndOmitted.py](/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py), [TupleSlicingLiteralValues.py](/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py), [TupleSlicingNegativeEnd.py](/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py), [TupleSlicingNegativeStart.py](/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py), [TupleSlicingOmitted.py](/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py), [TupleSlicingStartOmitted.py](/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py), [TupleSlicingVariableValues.py](/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py) |
-|🔜 | backlog | <p>Sequence slicing</p>                           | <p>`x = 'example'[2:4:2]`, `x = 'example'[::2]`</p> |  |
-|✅ | v0.3 | <p>Assert</p>                                        | <p>`assert x % 2 == 0`<br/>`assert x % 3 != 2, 'error message'`</p> | [AssertAny.py](/boa3_test/test_sc/assert_test/AssertAny.py), [AssertBinaryOperation.py](/boa3_test/test_sc/assert_test/AssertBinaryOperation.py), [AssertBytes.py](/boa3_test/test_sc/assert_test/AssertBytes.py), [AssertDict.py](/boa3_test/test_sc/assert_test/AssertDict.py), [AssertInt.py](/boa3_test/test_sc/assert_test/AssertInt.py), [AssertList.py](/boa3_test/test_sc/assert_test/AssertList.py), [AssertStr.py](/boa3_test/test_sc/assert_test/AssertStr.py), [AssertUnaryOperation.py](/boa3_test/test_sc/assert_test/AssertUnaryOperation.py), [AssertWithMessage.py](/boa3_test/test_sc/assert_test/AssertWithMessage.py) |
-|✅ | v0.4 | <p>Try except</p>                                    | <p>`try:`<br/>&emsp;`a = foo(b)`<br/>`except Exception as e:`<br/>&emsp;`a = foo(b)`</p> | [TryExceptBaseException.py](/boa3_test/test_sc/exception_test/TryExceptBaseException.py), [TryExceptSpecificException.py](/boa3_test/test_sc/exception_test/TryExceptSpecificException.py), [TryExceptWithoutException.py](/boa3_test/test_sc/exception_test/TryExceptWithoutException.py) |
-|🔜 | next release | <p>Try except with finally</p>               | <p>`try:`<br/>&emsp;`a = foo(b)`<br/>`except Exception as e:`<br/>&emsp;`a = zubs(b)`<br/>`finally:`<br/>&emsp;`b = zubs(a)`</p> |  |
-|✅ | v0.4 | <p>Continue, break</p>                               |  |  |
-|🔜 | backlog | <p>Pass</p>                                       |  |  |
-|✅ | v0.3 | <p>Import</p>                                        | <p>Only `boa3.builtin` packages are supported right now.</p> | [FromImportTyping.py](/boa3_test/test_sc/import_test/FromImportTyping.py), [FromImportTypingWithAlias.py](/boa3_test/test_sc/import_test/FromImportTypingWithAlias.py), [FromImportUserModule.py](/boa3_test/test_sc/import_test/FromImportUserModule.py), [FromImportUserModuleWithAlias.py](/boa3_test/test_sc/import_test/FromImportUserModuleWithAlias.py), [FromImportVariable.py](/boa3_test/test_sc/import_test/FromImportVariable.py), [FromImportWithGlobalVariables.py](/boa3_test/test_sc/import_test/FromImportWithGlobalVariables.py), [ImportTyping.py](/boa3_test/test_sc/import_test/ImportTyping.py), [ImportTypingWithAlias.py](/boa3_test/test_sc/import_test/ImportTypingWithAlias.py), [ImportUserModule.py](/boa3_test/test_sc/import_test/ImportUserModule.py), [ImportUserModuleWithAlias.py](/boa3_test/test_sc/import_test/ImportUserModuleWithAlias.py) |
+<table>
+  <thead>
+    <tr>
+      <td><b>Status</b></td>
+      <td><b>Release</b></td>
+      <td><b>Converts</b></td>
+      <td><b>Example Code</b></td>
+      <td><b>Contract Example Test</b></td>
+    </tr>
+  </thead>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Local variable declarations and assignments</td>
+    <td>
+      <pre>
+        <code>
+  def func():
+    foo: int = 42
+    bar = foo
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/variable_test/ArgumentAssignment.py">ArgumentAssignment.py</a>
+      <a href="/boa3_test/test_sc/variable_test/AssignLocalWithArgument.py">AssignLocalWithArgument.py</a>
+      <a href="/boa3_test/test_sc/variable_test/AssignLocalWithArgumentShadowingGlobal.py">AssignLocalWithArgumentShadowingGlobal.py</a>
+      <a href="/boa3_test/test_sc/variable_test/AssignmentWithoutType.py">AssignmentWithoutType.py</a>
+      <a href="/boa3_test/test_sc/variable_test/AssignmentWithType.py">AssignmentWithType.py</a>
+      <a href="/boa3_test/test_sc/variable_test/DeclarationWithType.py">DeclarationWithType.py</a>
+      <a href="/boa3_test/test_sc/variable_test/ManyAssignments.py">ManyAssignments.py</a>
+      <a href="/boa3_test/test_sc/variable_test/ReturnArgument.py">ReturnArgument.py</a>
+      <a href="/boa3_test/test_sc/variable_test/ReturnLocalVariable.py">ReturnLocalVariable.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Global variable declarations and assignments</td>
+    <td>
+      <pre>
+        <code>
+  foo: int = 42
+  bar = foo
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/variable_test/GetGlobalValueWrittenAfter.py">GetGlobalValueWrittenAfter.py</a>
+      <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentBetweenFunctions.py">GlobalAssignmentBetweenFunctions.py</a>
+      <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>
+      <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>
+      <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py">GlobalAssignmentWithType.py</a>
+      <a href="/boa3_test/test_sc/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py">GlobalDeclarationWithArgumentWrittenAfter.py</a>
+      <a href="/boa3_test/test_sc/variable_test/ManyGlobalAssignments.py">ManyGlobalAssignments.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.4</td>
+    <td>Global keyword</td>
+    <td>
+      <pre>
+        <code>
+  foo: int = 42
+  bar = foo
+        </code>
+        <code>
+  def func():
+    global foo
+    foo = 1
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Arithmetic operations</td>
+    <td>
+      <pre>
+        <code>
+  +, -, * //, %
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/arithmetic_test/Addition.py">Addition.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/AdditionThreeElements.py">AdditionThreeElements.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/Concatenation.py">Concatenation.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/IntegerDivision.py">IntegerDivision.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/MixedOperations.py">MixedOperations.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/Modulo.py">Modulo.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/Multiplication.py">Multiplication.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/Negative.py">Negative.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/Positive.py">Positive.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/StringMultiplication.py">StringMultiplication.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/Subtraction.py">Subtraction.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/WithParentheses.py">WithParentheses.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Arithmetic operations</td>
+    <td>
+      <pre>
+        <code>
+  /, **
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Arithmetic augmented assignment operators</td>
+    <td>
+      <pre>
+        <code>
+  +=, -=, *=, //=, %=
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/arithmetic_test/AdditionAugmentedAssignment.py">AdditionAugmentedAssignment.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/ConcatenationAugmentedAssignment.py">ConcatenationAugmentedAssignment.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/IntegerDivisionAugmentedAssignment.py">IntegerDivisionAugmentedAssignment.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/ModuloAugmentedAssignment.py">ModuloAugmentedAssignment.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/MultiplicationAugmentedAssignment.py">MultiplicationAugmentedAssignment.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/StringMultiplicationAugmentedAssignment.py">StringMultiplicationAugmentedAssignment.py</a>
+      <a href="/boa3_test/test_sc/arithmetic_test/SubtractionAugmentedAssignment.py">SubtractionAugmentedAssignment.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Arithmetic augmented assignment operators</td>
+    <td>
+      <pre>
+        <code>
+  /=
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Relational operations</td>
+    <td>
+      <pre>
+        <code>
+  ==, !=, <, <=, >, >=
+  is None, is not None
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/relational_test/BoolEquality.py">BoolEquality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/BoolInequality.py">BoolInequality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/MixedEquality.py">MixedEquality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/MixedInequality.py">MixedInequality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+      <a href="/boa3_test/test_sc/none_test/NoneEquality.py">NoneEquality.py</a>
+      <a href="/boa3_test/test_sc/none_test/NoneIdentity.py">NoneIdentity.py</a>
+      <a href="/boa3_test/test_sc/none_test/NoneNotIdentity.py">NoneNotIdentity.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumEquality.py">NumEquality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumGreaterOrEqual.py">NumGreaterOrEqual.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumGreaterThan.py">NumGreaterThan.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumInequality.py">NumInequality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumLessOrEqual.py">NumLessOrEqual.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumLessThan.py">NumLessThan.py</a>
+      <a href="/boa3_test/test_sc/relational_test/NumRange.py">NumRange.py</a>
+      <a href="/boa3_test/test_sc/relational_test/StrEquality.py">StrEquality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/StrGreaterOrEqual.py">StrGreaterOrEqual.py</a>
+      <a href="/boa3_test/test_sc/relational_test/StrGreaterThan.py">StrGreaterThan.py</a>
+      <a href="/boa3_test/test_sc/relational_test/StrInequality.py">StrInequality.py</a>
+      <a href="/boa3_test/test_sc/relational_test/StrLessOrEqual.py">StrLessOrEqual.py</a>
+      <a href="/boa3_test/test_sc/relational_test/StrLessThan.py">StrLessThan.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Relational operations</td>
+    <td>
+      <pre>
+        <code>
+  is, is not
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Bitwise operations</td>
+    <td>
+      <pre>
+        <code>
+  &, |, ~, ^, <<, >>
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/logical_test/LogicAndBool.py">LogicAndBool.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicAndInt.py">LogicAndInt.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicLeftShift.py">LogicLeftShift.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicNotBool.py">LogicNotBool.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicNotInt.py">LogicNotInt.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicOrBool.py">LogicOrBool.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicOrInt.py">LogicOrInt.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicRightShift.py">LogicRightShift.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicXorBool.py">LogicXorBool.py</a>
+      <a href="/boa3_test/test_sc/logical_test/LogicXorInt.py">LogicXorInt.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Bitwise augmented assignment operators</td>
+    <td>
+      <pre>
+        <code>
+  &=, |=, ~=, ^=, <<=, >>=
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Boolean logic operations</td>
+    <td>
+      <pre>
+        <code>
+  and, or, not
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/logical_test/BoolAnd.py">BoolAnd.py</a>
+      <a href="/boa3_test/test_sc/logical_test/BoolNot.py">BoolNot.py</a>
+      <a href="/boa3_test/test_sc/logical_test/BoolOr.py">BoolOr.py</a>
+      <a href="/boa3_test/test_sc/logical_test/BoolOrThreeElements.py">BoolOrThreeElements.py</a>
+      <a href="/boa3_test/test_sc/logical_test/MixedOperations.py">MixedOperations.py</a>
+      <a href="/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Tuple type</td>
+    <td>
+      <pre>
+        <code>
+  a = ('1', '2', '3')
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/none_test/NoneTuple.py">NoneTuple.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/BoolTuple.py">BoolTuple.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py">EmptyTupleAssignment.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/GetValue.py">GetValue.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/IntTuple.py">IntTuple.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/Nep5Main.py">Nep5Main.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/StrTuple.py">StrTuple.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleOfTuple.py">TupleOfTuple.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py">TupleSlicingEndOmitted.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py">TupleSlicingLiteralValues.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py">TupleSlicingNegativeEnd.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py">TupleSlicingNegativeStart.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py">TupleSlicingOmitted.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py">TupleSlicingStartOmitted.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py">TupleSlicingVariableValues.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/VariableTuple.py">VariableTuple.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>List type</td>
+    <td>
+      <pre>
+        <code>
+  a = ['1', '2', '3']
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/list_test/AppendAnyValue.py">AppendAnyValue.py</a>
+      <a href="/boa3_test/test_sc/list_test/AppendIntValue.py">AppendIntValue.py</a>
+      <a href="/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py">AppendIntWithBuiltin.py</a>
+      <a href="/boa3_test/test_sc/list_test/BoolList.py">BoolList.py</a>
+      <a href="/boa3_test/test_sc/list_test/ClearList.py">ClearList.py</a>
+      <a href="/boa3_test/test_sc/list_test/EmptyListAssignment.py">EmptyListAssignment.py</a>
+      <a href="/boa3_test/test_sc/list_test/ExtendAnyValue.py">ExtendAnyValue.py</a>
+      <a href="/boa3_test/test_sc/list_test/ExtendTupleValue.py">ExtendTupleValue.py</a>
+      <a href="/boa3_test/test_sc/list_test/ExtendWithBuiltin.py">ExtendWithBuiltin.py</a>
+      <a href="/boa3_test/test_sc/list_test/GetValue.py">GetValue.py</a>
+      <a href="/boa3_test/test_sc/list_test/GetValueNegativeIndex.py">GetValueNegativeIndex.py</a>
+      <a href="/boa3_test/test_sc/list_test/IntList.py">IntList.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListOfList.py">ListOfList.py</a>
+      <a href="/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+      <a href="/boa3_test/test_sc/list_test/Nep5Main.py">Nep5Main.py</a>
+      <a href="/boa3_test/test_sc/list_test/ReverseList.py">ReverseList.py</a>
+      <a href="/boa3_test/test_sc/list_test/SetValue.py">SetValue.py</a>
+      <a href="/boa3_test/test_sc/list_test/SetValueNegativeIndex.py">SetValueNegativeIndex.py</a>
+      <a href="/boa3_test/test_sc/list_test/StrList.py">StrList.py</a>
+      <a href="/boa3_test/test_sc/list_test/TypeHintAssignment.py">TypeHintAssignment.py</a>
+      <a href="/boa3_test/test_sc/list_test/VariableList.py">VariableList.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.4</td>
+    <td>List type</td>
+    <td>
+      <pre>
+        <code>
+  a.pop()
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/list_test/PopList.py">PopList.py</a>
+      <a href="/boa3_test/test_sc/list_test/PopListLiteralArgument.py">PopListLiteralArgument.py</a>
+      <a href="/boa3_test/test_sc/list_test/PopListLiteralNegativeArgument.py">PopListLiteralNegativeArgument.py</a>
+      <a href="/boa3_test/test_sc/list_test/PopListVariableArgument.py">PopListVariableArgument.py</a>
+      <a href="/boa3_test/test_sc/list_test/PopListWithoutAssignment.py">PopListWithoutAssignment.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>next release</td>
+    <td>List type</td>
+    <td>
+      <pre>
+        <code>
+  a.remove(1)
+  a.insert('example', 2)
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Dict type</td>
+    <td>
+      <pre>
+        <code>
+  a = {1:'1', 2:'2', 3:'3'}
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/dict_test/AnyValueDict.py">AnyValueDict.py</a>
+      <a href="/boa3_test/test_sc/dict_test/DictOfDict.py">DictOfDict.py</a>
+      <a href="/boa3_test/test_sc/dict_test/EmptyDictAssignment.py">EmptyDictAssignment.py</a>
+      <a href="/boa3_test/test_sc/dict_test/GetValue.py">GetValue.py</a>
+      <a href="/boa3_test/test_sc/dict_test/IntKeyDict.py">IntKeyDict.py</a>
+      <a href="/boa3_test/test_sc/dict_test/KeysDict.py">KeysDict.py</a>
+      <a href="/boa3_test/test_sc/dict_test/SetValue.py">SetValue.py</a>
+      <a href="/boa3_test/test_sc/dict_test/StrKeyDict.py">StrKeyDict.py</a>
+      <a href="/boa3_test/test_sc/dict_test/TypeHintAssignment.py">TypeHintAssignment.py</a>
+      <a href="/boa3_test/test_sc/dict_test/ValuesDict.py">ValuesDict.py</a>
+      <a href="/boa3_test/test_sc/dict_test/VariableDict.py">VariableDict.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Set type</td>
+    <td>
+      <pre>
+        <code>
+  a = {'1', '2', '3'}
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Bytes type</td>
+    <td>
+      <pre>
+        <code>
+  a = b'\x01\x02\x03\x04'
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayToIntWithBytesBuiltin.py">BytearrayToIntWithBytesBuiltin.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesFromBytearray.py">BytesFromBytearray.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesGetValue.py">BytesGetValue.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesGetValueNegativeIndex.py">BytesGetValueNegativeIndex.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesLiteral.py">BytesLiteral.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesToInt.py">BytesToInt.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltin.py">BytesToIntWithBuiltin.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesToStr.py">BytesToStr.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py">BytesToStrWithBuiltin.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Bytearray type</td>
+    <td>
+      <pre>
+        <code>
+  a = bytearray(b'\x01\x02\x03\x04')
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayAppend.py">BytearrayAppend.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayAppendWithBuiltin.py">BytearrayAppendWithBuiltin.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayAppendWithMutableSequence.py">BytearrayAppendWithMutableSequence.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayClear.py">BytearrayClear.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayFromLiteralBytes.py">BytearrayFromLiteralBytes.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayFromVariableBytes.py">BytearrayFromVariableBytes.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValuet.py">BytearrayGetValue.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValueNegativeIndex.py">BytearrayGetValueNegativeIndex.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayReverse.py">BytearrayReverse.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearraySetValue.py">BytearraySetValue.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearraySetValueNegativeIndex.py">BytearraySetValueNegativeIndex.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayToInt.py">BytearrayToInt.py</a>
+      <a href="/boa3_test/test_sc/bytes_test/BytearrayToIntWithBuiltin.py">BytearrayToIntWithBuiltin.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>next release</td>
+    <td>Optional type</td>
+    <td>
+      <pre>
+        <code>
+  a: Optional[int] = 5
+  a = 142
+  a = None
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>While statement</td>
+    <td>
+      <pre>
+        <code>
+  foo = 0
+  while condition:
+    foo = foo + 2
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/while_test/ConstantCondition.py">ConstantCondition.py</a>
+      <a href="/boa3_test/test_sc/while_test/MultipleRelationalCondition.py">MultipleRelationalCondition.py</a>
+      <a href="/boa3_test/test_sc/while_test/NestedWhile.py">NestedWhile.py</a>
+      <a href="/boa3_test/test_sc/while_test/RelationalCondition.py">RelationalCondition.py</a>
+      <a href="/boa3_test/test_sc/while_test/VariableCondition.py">VariableCondition.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileBoa2Test.py">WhileBoa2Test.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileBoa2Test1.py">WhileBoa2Test1.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileBoa2Test2.py">WhileBoa2Test2.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileBreak.py">WhileBreak.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileBreakElse.py">WhileBreakElse.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileContinue.py">WhileContinue.py</a>
+      <a href="/boa3_test/test_sc/while_test/WhileElse.py">WhileElse.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>If, elif, else statements</td>
+    <td>
+      <pre>
+        <code>
+  if condition1:
+    foo = 0
+  elif condition2:
+    foo = 1
+  else:
+    bar = 2
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/if_test/ConstantCondition.py">ConstantCondition.py</a>
+      <a href="/boa3_test/test_sc/if_test/IfElif.py">IfElif.py</a>
+      <a href="/boa3_test/test_sc/if_test/IfElse.py">IfElse.py</a>
+      <a href="/boa3_test/test_sc/if_test/IfExpVariableCondition.py">IfExpVariableCondition.py</a>
+      <a href="/boa3_test/test_sc/if_test/MultipleBranches.py">MultipleBranches.py</a>
+      <a href="/boa3_test/test_sc/if_test/NestedIf.py">NestedIf.py</a>
+      <a href="/boa3_test/test_sc/if_test/RelationalCondition.py">RelationalCondition.py</a>
+      <a href="/boa3_test/test_sc/if_test/VariableCondition.py">VariableCondition.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>For statement</td>
+    <td>
+      <pre>
+        <code>
+  for x in (1, 2, 3):
+    ...
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/for_test/ForBreak.py">ForBreak.py</a>
+      <a href="/boa3_test/test_sc/for_test/ForBreakElse.py">ForBreakElse.py</a>
+      <a href="/boa3_test/test_sc/for_test/ForContinue.py">ForContinue.py</a>
+      <a href="/boa3_test/test_sc/for_test/ForElse.py">ForElse.py</a>
+      <a href="/boa3_test/test_sc/for_test/NestedFor.py">NestedFor.py</a>
+      <a href="/boa3_test/test_sc/for_test/StringCondition.py">StringCondition.py</a>
+      <a href="/boa3_test/test_sc/for_test/TupleCondition.py">TupleCondition.py</a>
+      <a href="/boa3_test/test_sc/for_test/VariableCondition.py">VariableCondition.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Function call</td>
+    <td>
+      <pre>
+        <code>
+  def Main(num: int):
+    a = foo(num)
+    ...
+        </code>
+        <code>
+  def foo(num: int) -> int:
+    ...
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/function_test/CallFunctionWithoutVariables.py">CallFunctionWithoutVariables.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallFunctionWrittenBefore.py">CallFunctionWrittenBefore.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallReturnFunctionOnReturn.py">CallReturnFunctionOnReturn.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallReturnFunctionWithLiteralArgs.py">CallReturnFunctionWithLiteralArgs.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallReturnFunctionWithoutArgs.py">CallReturnFunctionWithoutArgs.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallReturnFunctionWithVariableArgs.py">CallReturnFunctionWithVariableArgs.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallVoidFunctionWithLiteralArgs.py">CallVoidFunctionWithLiteralArgs.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallVoidFunctionWithoutArgs.py">CallVoidFunctionWithoutArgs.py</a>
+      <a href="/boa3_test/test_sc/function_test/CallVoidFunctionWithVariableArgs.py">CallVoidFunctionWithVariableArgs.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = len('hello')
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/built_in_methods_test">Folder with the Examples.</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.4</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = range(1, 5, 2)
+  b = isinstance(5, str)
+  print(42)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/range_test">Range examples folder</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolLiteral.py">IsInstanceBoolLiteral.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolVariable.py">IsInstanceBoolVariable.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceIntLiteral.py">IsInstanceIntLiteral.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceIntVariable.py">IsInstanceIntVariable.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceListLiteral.py">IsInstanceListLiteral.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypes.py">IsInstanceManyTypes.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceStrLiteral.py">IsInstanceStrLiteral.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceStrVariable.py">IsInstanceStrVariable.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleLiteral.py">IsInstanceTupleLiteral.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleVariable.py">IsInstanceTupleVariable.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceVariableType.py">IsInstanceVariableType.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/PrintInt.py">PrintInt.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/PrintIntMissingFunctionReturn.py">PrintIntMissingFunctionReturn.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/PrintList.py">PrintList.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/PrintManyValues.py">PrintManyValues.py</a>
+      <a href="/boa3_test/test_sc/built_in_methods_test/PrintStr.py">PrintStr.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>next release</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = reversed([1, 2, 3, 4])
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = abs(-5)
+  b = max(7, 0, 12, 8)
+  c = min(1, 6, 2)
+  d = pow(2, 2)
+  e = sum(list_of_num, 0)
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Multiple expressions in the same line</td>
+    <td>
+      <pre>
+        <code>
+  i = i + h; a = 1; b = 3 + a; count = 0
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Arithmetic)</a>
+      <a href="/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Logical)</a>
+      <a href="/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (List)</a>
+      <a href="/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Tuple)</a>
+      <a href="/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Relational)</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.4</td>
+    <td>Chained assignment</td>
+    <td>
+      <pre>
+        <code>
+  x = y = foo()
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Sequence slicing</td>
+    <td>
+      <pre>
+        <code>
+  x = 'example'[2:4]
+  x = [1, 2, 3][:2]
+  x = 'example'[4:]
+  x = (1, 2, 3)[:]
+  x = 'example'[-4:-2]
+  x = 'example'[:-4]
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingEndOmitted.py">ListSlicingEndOmitted.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingLiteralValues.py">ListSlicingLiteralValues.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingNegativeEnd.py">ListSlicingNegativeEnd.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingNegativeStart.py">ListSlicingNegativeStart.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingOmitted.py">ListSlicingOmitted.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingStartOmitted.py">ListSlicingStartOmitted.py</a>
+      <a href="/boa3_test/test_sc/list_test/ListSlicingVariableValues.py">ListSlicingVariableValues.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingEndOmitted.py">StringSlicingEndOmitted.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingLiteralValues.py">StringSlicingLiteralValues.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingNegativeEnd.py">StringSlicingNegativeEnd.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingNegativeStart.py">StringSlicingNegativeStart.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingOmitted.py">StringSlicingOmitted.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingStartOmitted.py">StringSlicingStartOmitted.py</a>
+      <a href="/boa3_test/test_sc/string_test/StringSlicingVariableValues.py">StringSlicingVariableValues.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py">TupleSlicingEndOmitted.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py">TupleSlicingLiteralValues.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py">TupleSlicingNegativeEnd.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py">TupleSlicingNegativeStart.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py">TupleSlicingOmitted.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py">TupleSlicingStartOmitted.py</a>
+      <a href="/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py">TupleSlicingVariableValues.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Sequence slicing</td>
+    <td>
+      <pre>
+        <code>
+  x = 'example'[2:4:2]
+  x = 'example'[::2]
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Assert</td>
+    <td>
+      <pre>
+        <code>
+  assert x % 2 == 0
+  assert x % 3 != 2, 'error message'
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/assert_test/AssertAny.py">AssertAny.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertBinaryOperation.py">AssertBinaryOperation.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertBytes.py">AssertBytes.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertDict.py">AssertDict.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertInt.py">AssertInt.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertList.py">AssertList.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertStr.py">AssertStr.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertUnaryOperation.py">AssertUnaryOperation.py</a>
+      <a href="/boa3_test/test_sc/assert_test/AssertWithMessage.py">AssertWithMessage.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.4</td>
+    <td>Try except</td>
+    <td>
+      <pre>
+        <code>
+  try:
+    a = foo(b)
+  except Exception as e:
+    a = foo(b)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/boa3_test/test_sc/exception_test/TryExceptBaseException.py">TryExceptBaseException.py</a>
+      <a href="/boa3_test/test_sc/exception_test/TryExceptSpecificException.py">TryExceptSpecificException.py</a>
+      <a href="/boa3_test/test_sc/exception_test/TryExceptWithoutException.py">TryExceptWithoutException.py</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>next release</td>
+    <td>Try except with finally</td>
+    <td>
+      <pre>
+        <code>
+  try:
+    a = foo(b)
+  except Exception as e:
+    a = zubs(b)
+  finally:
+    b = zubs(a)
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.4</td>
+    <td>Continue, break</td>
+    <td>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Pass</td>
+    <td>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.3</td>
+    <td>Import</td>
+    <td>Only <code>boa3.builtin</code> packages are supported right now.</td>
+    <td>
+      <a href="/boa3_test/test_sc/import_test/FromImportTyping.py">FromImportTyping.py</a>
+      <a href="/boa3_test/test_sc/import_test/FromImportTypingWithAlias.py">FromImportTypingWithAlias.py</a>
+      <a href="/boa3_test/test_sc/import_test/FromImportUserModule.py">FromImportUserModule.py</a>
+      <a href="/boa3_test/test_sc/import_test/FromImportUserModuleWithAlias.py">FromImportUserModuleWithAlias.py</a>
+      <a href="/boa3_test/test_sc/import_test/FromImportVariable.py">FromImportVariable.py</a>
+      <a href="/boa3_test/test_sc/import_test/FromImportWithGlobalVariables.py">FromImportWithGlobalVariables.py</a>
+      <a href="/boa3_test/test_sc/import_test/ImportTyping.py">ImportTyping.py</a>
+      <a href="/boa3_test/test_sc/import_test/ImportTypingWithAlias.py">ImportTypingWithAlias.py</a>
+      <a href="/boa3_test/test_sc/import_test/ImportUserModule.py">ImportUserModule.py</a>
+      <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithAlias.py">ImportUserModuleWithAlias.py</a>
+    </td>
+  </tbody>
+</table>
 
 ## Neo Python Suite Projects
 
