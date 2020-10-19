@@ -122,6 +122,10 @@ $ pip install -e .
 $ neo3-boa path/to/your/file.py
 ```
 
+<br/>
+
+> Note: When resolving compilation errors it is recommended to resolve the first reported error and try to compile again. An error can have a cascading effect and throw more errors all caused by the first.
+
 #### Using Python Script
 
 ```python
