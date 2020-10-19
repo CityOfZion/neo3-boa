@@ -253,7 +253,7 @@ For an extensive collection of examples:
     <td>
       <pre>
         <code>
-  +, -, * //, %
+  +, -, *, //, %
         </code>
       </pre>
     </td>
@@ -329,7 +329,7 @@ For an extensive collection of examples:
     <td>
       <pre>
         <code>
-  ==, !=, <, <=, >, >=
+  ==, !=, <, <=, >, >=, 
   is None, is not None
         </code>
       </pre>
