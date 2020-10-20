@@ -6,6 +6,7 @@ from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestFunction(BoaTest):
@@ -288,8 +289,12 @@ class TestFunction(BoaTest):
 
         path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithVariableArgs.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'TestAdd', 1, 2)
+        self.assertEqual(1, len(engine.result_stack))
+        self.assertEqual(3, engine.result_stack[-1])
 
     def test_call_function_on_return(self):
         called_function_address = Integer(3).to_byte_array(min_length=1, signed=True)
