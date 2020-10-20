@@ -8,7 +8,7 @@ from boa3.neo3.vm import VMState
 
 class TestEngine:
     def __init__(self, root_path: str):
-        self._test_engine_path = '{0}/TestEngine/TestEngine.exe'.format(root_path)
+        self._test_engine_path = '{0}/TestEngine/TestEngine.dll'.format(root_path)
 
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
@@ -69,7 +69,7 @@ class TestEngine:
 
         contract_parameters = [contract_parameter_to_json(x) for x in arguments]
         param_json = json.dumps(contract_parameters).replace(' ', '')
-        process = subprocess.Popen([self._test_engine_path, nef_path, method, param_json],
+        process = subprocess.Popen(['dotnet', self._test_engine_path, nef_path, method, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
                                    text=True)
