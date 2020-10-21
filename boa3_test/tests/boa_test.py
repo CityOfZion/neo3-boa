@@ -4,6 +4,9 @@ from unittest import TestCase
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.neo3.vm import VMState
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class BoaTest(TestCase):
@@ -11,8 +14,7 @@ class BoaTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        path = os.path.abspath(__file__).replace('\\', '/')  # for windows compatibility
-        cls.dirname = '/'.join(path.split('/')[:-3])
+        cls.dirname = '/'.join(os.path.abspath(__file__).split(os.sep)[:-3])
 
         super(BoaTest, cls).setUpClass()
 
@@ -71,3 +73,15 @@ class BoaTest(TestCase):
             import json
             debug_info = json.loads(dbgnfo.read(os.path.basename(path.replace('.py', '.debug.json'))))
         return debug_info
+
+    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
+                           *arguments: Any, reset_engine: bool = False):
+        if smart_contract_path.endswith('.py'):
+            if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
+                self.compile_and_save(smart_contract_path)
+            smart_contract_path = smart_contract_path.replace('.py', '.nef')
+
+        test_engine.run(smart_contract_path, method, *arguments, reset_engine=reset_engine)
+
+        if test_engine.vm_state is VMState.NONE and test_engine.error is not None:
+            raise TestExecutionException(test_engine.error)

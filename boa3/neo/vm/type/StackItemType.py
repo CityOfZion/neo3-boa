@@ -12,3 +12,10 @@ class StackItemType(bytes, Enum):
     Struct = b'\x41'
     Map = b'\x48'
     InteropInterface = b'\x60'
+
+    @classmethod
+    def get_stack_item_type(cls, stack_item_type: str):
+        try:
+            return StackItemType[stack_item_type]
+        except BaseException:
+            return StackItemType.Any
