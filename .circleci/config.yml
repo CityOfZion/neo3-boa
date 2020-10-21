@@ -16,17 +16,18 @@ jobs:
           name: Install Dependencies
           command: |
             sudo pip install -r requirements_dev.txt
+
+      - python/save-cache
+      - run:
+          name: Test
+          command: |
             wget https://aka.ms/dotnet/net5/5.0.1xx/daily/Sdk/dotnet-sdk-linux-x64.tar.gz
             mkdir -p "$HOME/dotnet" && tar zxf dotnet-sdk-linux-x64.tar.gz -C "$HOME/dotnet"
             export DOTNET_ROOT=$HOME/dotnet
             export PATH=$PATH:$HOME/dotnet
             git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
             dotnet build ./neo-devpack-dotnet/src/TestEngine/TestEngine.csproj -o ./TestEngine
-
-      - python/save-cache
-      - run:
-          command: python -m unittest discover boa3_test
-          name: Test
+            python -m unittest discover boa3_test
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
