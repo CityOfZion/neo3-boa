@@ -7,6 +7,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBuiltinMethod(BoaTest):
@@ -35,6 +36,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(3, result)
+
     def test_len_of_list(self):
         expected_output = (
             Opcode.INITSLOT
@@ -57,6 +62,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(3, result)
+
     def test_len_of_str(self):
         input = 'just a test'
         byte_input = String(input).to_bytes()
@@ -78,6 +87,10 @@ class TestBuiltinMethod(BoaTest):
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(11, result)
 
     def test_len_of_bytes(self):
         byte_input = b'\x01\x02\x03'
@@ -105,6 +118,10 @@ class TestBuiltinMethod(BoaTest):
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(3, result)
 
     def test_len_of_no_collection(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/LenMismatchedType.py' % self.dirname
@@ -134,7 +151,7 @@ class TestBuiltinMethod(BoaTest):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -163,11 +180,15 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'append_example')
+        self.assertEqual([1, 2, 3, 4], result)
+
     def test_append_mutable_sequence_with_builtin(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -196,6 +217,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'append_example')
+        self.assertEqual([1, 2, 3, 4], result)
+
     def test_append_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
@@ -216,7 +241,7 @@ class TestBuiltinMethod(BoaTest):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -248,11 +273,15 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'clear_example')
+        self.assertEqual([], result)
+
     def test_clear_mutable_sequence_with_builtin(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -283,6 +312,10 @@ class TestBuiltinMethod(BoaTest):
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'clear_example')
+        self.assertEqual([], result)
 
     def test_clear_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTooManyParameters.py' % self.dirname
@@ -321,6 +354,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([3, 2, 1], result)
+
     def test_reverse_mutable_sequence_with_builtin(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -342,6 +379,10 @@ class TestBuiltinMethod(BoaTest):
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(b'\x03\x02\x01', result)
 
     def test_reverse_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTooManyParameters.py' % self.dirname
@@ -367,7 +408,7 @@ class TestBuiltinMethod(BoaTest):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -403,11 +444,15 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, 4, 5, 6], result)
+
     def test_extend_mutable_sequence_with_builtin(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -443,6 +488,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, 4, 5, 6], result)
+
     def test_extend_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTooManyParameters.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
@@ -471,6 +520,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(script_hash, result)
+
     def test_script_hash_int_with_builtin(self):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
@@ -486,6 +539,10 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashIntBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(script_hash, result)
 
     def test_script_hash_str(self):
         from boa3.neo import to_script_hash
@@ -503,6 +560,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(script_hash, result)
+
     def test_script_hash_str_with_builtin(self):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
@@ -518,6 +579,10 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStrBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(script_hash, result)
 
     def test_script_hash_variable(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariable.py' % self.dirname
@@ -566,6 +631,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'int_to_bytes')
+        self.assertEqual(value, result)
+
     def test_int_to_bytes_with_builtin(self):
         value = Integer(123).to_byte_array()
         expected_output = (
@@ -583,6 +652,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'int_to_bytes')
+        self.assertEqual(value, result)
+
     def test_str_to_bytes(self):
         value = String('123').to_bytes()
         expected_output = (
@@ -598,6 +671,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'str_to_bytes')
+        self.assertEqual(value, result)
+
     def test_str_to_bytes_with_builtin(self):
         value = String('123').to_bytes()
         expected_output = (
@@ -612,6 +689,10 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/StrToBytesWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'str_to_bytes')
+        self.assertEqual(value, result)
 
     def test_to_bytes_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ToBytesMismatchedType.py' % self.dirname
@@ -688,6 +769,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(True, result)
+
     def test_isinstance_int_variable(self):
         expected_output = (
             Opcode.INITSLOT
@@ -702,6 +787,14 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceIntVariable.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'string')
+        self.assertEqual(False, result)
 
     def test_isinstance_bool_literal(self):
         value = Integer(123).to_byte_array()
@@ -720,6 +813,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(False, result)
+
     def test_isinstance_bool_variable(self):
         expected_output = (
             Opcode.INITSLOT
@@ -734,6 +831,14 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolVariable.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'string')
+        self.assertEqual(False, result)
 
     def test_isinstance_str_literal(self):
         value = String('123').to_bytes()
@@ -750,6 +855,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(True, result)
+
     def test_isinstance_str_variable(self):
         expected_output = (
             Opcode.INITSLOT
@@ -765,6 +874,14 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'string')
+        self.assertEqual(True, result)
+
     def test_isinstance_list_literal(self):
         expected_output = (
             Opcode.NEWARRAY0        # isinstance([], list)
@@ -777,6 +894,10 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(True, result)
+
     def test_isinstance_tuple_literal(self):
         expected_output = (
             Opcode.NEWARRAY0        # isinstance([], tuple)
@@ -788,6 +909,10 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleLiteral.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(True, result)
 
     def test_isinstance_tuple_variable(self):
         expected_output = (
@@ -804,34 +929,58 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'string')
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', [])
+        self.assertEqual(True, result)
+
     def test_isinstance_many_types(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0         # isinstance(a, tuple)
+            + Opcode.DUP
             + Opcode.ISTYPE
             + Type.list.stack_item
-            + Opcode.DUP
             + Opcode.JMPIF
-            + Integer(14).to_byte_array(min_length=1, signed=True)
+            + Integer(16).to_byte_array(min_length=1, signed=True)
+            + Opcode.DUP
             + Opcode.ISTYPE
             + Type.int.stack_item
-            + Opcode.DUP
             + Opcode.JMPIF
-            + Integer(9).to_byte_array(min_length=1, signed=True)
+            + Integer(11).to_byte_array(min_length=1, signed=True)
+            + Opcode.DUP
             + Opcode.ISTYPE
             + Type.bool.stack_item
-            + Opcode.DUP
             + Opcode.JMPIF
-            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Integer(6).to_byte_array(min_length=1, signed=True)
             + Opcode.ISTYPE
             + Type.dict.stack_item
+            + Opcode.JMP
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
+            + Opcode.PUSH1
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypes.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'string')
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', {})
+        self.assertEqual(True, result)
 
     # endregion

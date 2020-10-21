@@ -1,7 +1,10 @@
 from typing import MutableSequence
 
+from boa3.builtin import public
 
-def Main(op: str, args: list) -> MutableSequence[int]:
+
+@public
+def append_example() -> MutableSequence[int]:
     a: MutableSequence[int] = [1, 2, 3]
     MutableSequence.append(a, 4)
     return a

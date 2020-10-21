@@ -75,13 +75,14 @@ class BoaTest(TestCase):
         return debug_info
 
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
-                           *arguments: Any, reset_engine: bool = False):
+                           *arguments: Any, reset_engine: bool = False) -> Any:
         if smart_contract_path.endswith('.py'):
-            if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
-                self.compile_and_save(smart_contract_path)
+            # if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
+            self.compile_and_save(smart_contract_path)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
 
-        test_engine.run(smart_contract_path, method, *arguments, reset_engine=reset_engine)
+        result = test_engine.run(smart_contract_path, method, *arguments, reset_engine=reset_engine)
 
-        if test_engine.vm_state is VMState.NONE and test_engine.error is not None:
+        if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
             raise TestExecutionException(test_engine.error)
+        return result

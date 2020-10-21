@@ -1,3 +1,4 @@
+from textwrap import indent
 from typing import Any, Dict, List, Optional, Union
 
 from boa3.neo.smart_contract.notification import Notification
@@ -36,6 +37,9 @@ class TestEngine:
     @property
     def notifications(self) -> List[Notification]:
         return self._notifications
+
+    def get_events(self, event_name: str) -> List[Notification]:
+        return [n for n in self._notifications if n.name == event_name]
 
     @property
     def storage(self) -> Dict[str, Any]:
@@ -82,15 +86,26 @@ class TestEngine:
         else:
             self.reset_state()
 
-        logging.debug('Test Engine parameters:' + '\n\t' +
-                      self._test_engine_path + '\n\t' +
-                      nef_path + '\n\t' +
-                      method + '\n\t' +
-                      param_json + '\n\n' +
-                      'Test Engine output' + '\n\t' +
-                      str(stdout) + '\n\t' +
-                      str(stderr)
-                      )
+        logging.debug(
+            indent((
+                'Test Engine parameters:\n'
+                '{0}\n'
+                '{1}\n'
+                '{2}\n'
+                '{3}\n'
+                '\n'
+                'Test Engine output\n'
+                '{4}\n'
+                '{5}'
+                ).format(
+                    self._test_engine_path,
+                    nef_path,
+                    method,
+                    param_json,
+                    str(stdout),
+                    str(stderr)
+                ), '')
+        )
 
         stdout = stdout.splitlines()[-1]
 
@@ -100,16 +115,32 @@ class TestEngine:
             self._error_message = result['error'] if 'error' in result else None
             if 'vm_state' in result:
                 self._vm_state = VMState.get_vm_state(result['vm_state'])
+
             if 'gasconsumed' in result:
                 self._gas_consumed = result['gasconsumed']
+
             if 'result_stack' in result:
                 if isinstance(result['result_stack'], list):
                     self._result_stack = [stack_item_from_json(value) for value in result['result_stack']]
                 else:
                     self._result_stack = [stack_item_from_json(result['result_stack'])]
+
+            if 'notifications' in result:
+                json_notifications = result['notifications']
+                if not isinstance(json_notifications, list):
+                    json_notifications = [json_notifications]
+
+                notifications = []
+                for n in json_notifications:
+                    new = Notification.from_json(n)
+                    if new is not None:
+                        notifications.append(new)
+                self._notifications = notifications
+
         except BaseException as e:
             self._error_message = str(e)
 
+        # TODO: convert the result to the return type of the function in the manifest
         return self._result_stack[-1] if len(self._result_stack) > 0 else None
 
     def reset_state(self):

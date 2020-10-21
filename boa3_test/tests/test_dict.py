@@ -4,9 +4,13 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestDict(BoaTest):
+
+    key_not_found_error_msg = 'Key not found in Map'
 
     def test_dict_int_keys(self):
         expected_output = (
@@ -244,6 +248,13 @@ class TestDict(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', {0: 'zero'})
+        self.assertEqual('zero', result)
+
+        with self.assertRaises(TestExecutionException, msg=self.key_not_found_error_msg):
+            self.run_smart_contract(engine, path, 'Main', {1: 'one'})
+
     def test_dict_get_value_mismatched_type(self):
         path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeGetValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
@@ -268,6 +279,12 @@ class TestDict(BoaTest):
         path = '%s/boa3_test/test_sc/dict_test/SetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', {0: 'zero'})
+        self.assertEqual({0: 'ok'}, result)
+        result = self.run_smart_contract(engine, path, 'Main', {1: 'one'})
+        self.assertEqual({0: 'ok', 1: 'one'}, result)
 
     def test_dict_set_value_mismatched_type(self):
         path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeSetValue.py' % self.dirname
@@ -313,6 +330,10 @@ class TestDict(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(['one', 'two', 'three'], result)
+
     def test_dict_keys_mismatched_type(self):
         path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeKeysDict.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
@@ -356,6 +377,10 @@ class TestDict(BoaTest):
         path = '%s/boa3_test/test_sc/dict_test/ValuesDict.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3], result)
 
     def test_dict_values_mismatched_type(self):
         path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeValuesDict.py' % self.dirname
