@@ -69,6 +69,8 @@ class TestEngine:
 
         contract_parameters = [contract_parameter_to_json(x) for x in arguments]
         param_json = json.dumps(contract_parameters).replace(' ', '')
+
+        import logging
         process = subprocess.Popen(['dotnet', self._test_engine_path, nef_path, method, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
@@ -79,6 +81,16 @@ class TestEngine:
             self.reset_engine()
         else:
             self.reset_state()
+
+        logging.debug('Test Engine parameters:' + '\n\t' +
+                      self._test_engine_path + '\n\t' +
+                      nef_path + '\n\t' +
+                      method + '\n\t' +
+                      param_json + '\n\n' +
+                      'Test Engine output' + '\n\t' +
+                      str(stdout) + '\n\t' +
+                      str(stderr)
+                      )
 
         stdout = stdout.splitlines()[-1]
 

@@ -21,8 +21,8 @@ jobs:
       - run:
           name: Test
           command: |
-            wget https://aka.ms/dotnet/net5/5.0.1xx/daily/Sdk/dotnet-sdk-linux-x64.tar.gz
-            mkdir -p "$HOME/dotnet" && tar zxf dotnet-sdk-linux-x64.tar.gz -C "$HOME/dotnet"
+            wget https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-arm64.tar.gz
+            mkdir -p "$HOME/dotnet" && tar zxf dotnet-sdk-latest-linux-arm64.tar.gz -C "$HOME/dotnet"
             export DOTNET_ROOT=$HOME/dotnet
             export PATH=$PATH:$HOME/dotnet
             git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
