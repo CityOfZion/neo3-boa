@@ -5,13 +5,13 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTuple(BoaTest):
 
     def test_tuple_int_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/IntTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -25,11 +25,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/IntTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_string_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/StrTuple.py' % self.dirname
         byte_input0 = String('1').to_bytes()
         byte_input1 = String('2').to_bytes()
         byte_input2 = String('3').to_bytes()
@@ -53,12 +54,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/StrTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_bool_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/BoolTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -72,12 +73,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/BoolTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_variable_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/VariableTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x04'
@@ -97,12 +98,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/VariableTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_assign_empty_tuple(self):
-        path = '%s/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -112,12 +113,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_get_value(self):
-        path = '%s/boa3_test/test_sc/tuple_test/GetValue.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -135,8 +136,19 @@ class TestTuple(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/GetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual(5, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
 
     def test_non_sequence_get_value(self):
         path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeGetValue.py' % self.dirname
@@ -155,8 +167,6 @@ class TestTuple(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_tuple_of_tuple(self):
-        path = '%s/boa3_test/test_sc/tuple_test/TupleOfTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -184,12 +194,21 @@ class TestTuple(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/TupleOfTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_nep5_main(self):
-        path = '%s/boa3_test/test_sc/tuple_test/Nep5Main.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        self.assertEqual(1, result)
 
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', ())
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', ((), (1, 2), (3, 4)))
+
+    def test_nep5_main(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -207,8 +226,19 @@ class TestTuple(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/Nep5Main.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 'op', (1, 2, 3, 4))
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'op', ('a', False))
+        self.assertEqual('a', result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', 'op', ())
 
     def test_tuple_slicing(self):
         expected_output = (
@@ -298,6 +328,10 @@ class TestTuple(BoaTest):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
 
     def test_tuple_slicing_with_variables(self):
         expected_output = (
@@ -392,6 +426,10 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
+
     def test_tuple_slicing_negative_start(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -472,6 +510,10 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
+
     def test_tuple_slicing_negative_end(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -551,6 +593,10 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1], result)
+
     def test_tuple_slicing_start_omitted(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -625,9 +671,14 @@ class TestTuple(BoaTest):
             + Opcode.DROP
             + Opcode.RET        # return
         )
+
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2], result)
 
     def test_tuple_slicing_omitted(self):
         expected_output = (
@@ -651,6 +702,10 @@ class TestTuple(BoaTest):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2, 3, 4, 5], result)
 
     def test_tuple_slicing_end_omitted(self):
         expected_output = (
@@ -730,6 +785,10 @@ class TestTuple(BoaTest):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
 
     def test_tuple_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingWithStride.py' % self.dirname

@@ -18,37 +18,40 @@ class Compiler:
         self.bytecode: bytearray = bytearray()
         self._analyser: Analyser = None
 
-    def compile(self, path: str) -> bytes:
+    def compile(self, path: str, log: bool = True) -> bytes:
         """
         Load a Python file and tries to compile it
 
         :param path: the path of the Python file to compile
+        :param log: if compiler errors should be logged.
         :return: the bytecode of the compiled .nef file
         """
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
         logging.info('Started compiling\t{0}'.format(filename))
-        self._analyse(fullpath)
+        self._analyse(fullpath, log)
         return self._compile()
 
-    def compile_and_save(self, path: str, output_path: str):
+    def compile_and_save(self, path: str, output_path: str, log: bool = True):
         """
         Save the compiled file and the metadata files
 
         :param path: the path of the Python file to compile
         :param output_path: the path to save the generated files
+        :param log: if compiler errors should be logged.
         """
-        self.bytecode = self.compile(path)
+        self.bytecode = self.compile(path, log)
         self._save(output_path)
 
-    def _analyse(self, path: str):
+    def _analyse(self, path: str, log: bool = True):
         """
         Load a Python file and analyses its syntax
 
         :param path: the path of the Python file to compile
+        :param log: if compiler errors should be logged.
         """
-        self._analyser = Analyser.analyse(path, log=True)
+        self._analyser = Analyser.analyse(path, log)
 
     def _compile(self) -> bytes:
         """

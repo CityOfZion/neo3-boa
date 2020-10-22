@@ -1,6 +1,10 @@
+from boa3.builtin import public
+
+
 def TestAdd(a: int, b: int) -> int:
     return a + b
 
 
-def Main(operation: str, args: tuple) -> int:
+@public
+def Main() -> int:
     return TestAdd(1, 2)

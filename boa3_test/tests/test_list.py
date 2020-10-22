@@ -5,13 +5,13 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestList(BoaTest):
 
     def test_list_int_values(self):
-        path = '%s/boa3_test/test_sc/list_test/IntList.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -25,11 +25,12 @@ class TestList(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/IntList.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_string_values(self):
-        path = '%s/boa3_test/test_sc/list_test/StrList.py' % self.dirname
         byte_input0 = String('1').to_bytes()
         byte_input1 = String('2').to_bytes()
         byte_input2 = String('3').to_bytes()
@@ -53,12 +54,12 @@ class TestList(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/StrList.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_bool_values(self):
-        path = '%s/boa3_test/test_sc/list_test/BoolList.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -72,12 +73,12 @@ class TestList(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/BoolList.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_variable_values(self):
-        path = '%s/boa3_test/test_sc/list_test/VariableList.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x04'
@@ -97,6 +98,8 @@ class TestList(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/VariableList.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -105,8 +108,6 @@ class TestList(BoaTest):
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_list_get_value(self):
-        path = '%s/boa3_test/test_sc/list_test/GetValue.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -124,12 +125,21 @@ class TestList(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/GetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_list_get_value_with_negative_index(self):
-        path = '%s/boa3_test/test_sc/list_test/GetValueNegativeIndex.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual(5, result)
 
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
+
+    def test_list_get_value_with_negative_index(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -147,12 +157,21 @@ class TestList(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/GetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_list_type_hint(self):
-        path = '%s/boa3_test/test_sc/list_test/TypeHintAssignment.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual(4, result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual(2, result)
 
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
+
+    def test_list_type_hint(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -166,12 +185,12 @@ class TestList(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/TypeHintAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_assign_empty_list(self):
-        path = '%s/boa3_test/test_sc/list_test/EmptyListAssignment.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -181,12 +200,12 @@ class TestList(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/EmptyListAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_set_value(self):
-        path = '%s/boa3_test/test_sc/list_test/SetValue.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -203,15 +222,24 @@ class TestList(BoaTest):
             + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
-            + Opcode.PUSH1      # return 1
+            + Opcode.LDARG0      # return 1
             + Opcode.RET
         )
+
+        path = '%s/boa3_test/test_sc/list_test/SetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_list_set_value_with_negative_index(self):
-        path = '%s/boa3_test/test_sc/list_test/SetValueNegativeIndex.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual([1, 2, 3, 4], result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual([1, 3, 2], result)
 
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
+
+    def test_list_set_value_with_negative_index(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -231,8 +259,19 @@ class TestList(BoaTest):
             + Opcode.LDARG0     # return a
             + Opcode.RET
         )
+
+        path = '%s/boa3_test/test_sc/list_test/SetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual([1, 2, 3, 1], result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual([5, 3, 1], result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
 
     def test_non_sequence_set_value(self):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeSetValue.py' % self.dirname
@@ -243,8 +282,6 @@ class TestList(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_of_list(self):
-        path = '%s/boa3_test/test_sc/list_test/ListOfList.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -272,12 +309,21 @@ class TestList(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/ListOfList.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_nep5_main(self):
-        path = '%s/boa3_test/test_sc/list_test/Nep5Main.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [[1, 2], [3, 4]])
+        self.assertEqual(1, result)
 
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [[], [1, 2], [3, 4]])
+
+    def test_nep5_main(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -295,8 +341,19 @@ class TestList(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/list_test/Nep5Main.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 'op', [1, 2, 3, 4])
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'op', ['a', False])
+        self.assertEqual('a', result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', 'op', [])
 
     # region TestSlicing
 
@@ -388,6 +445,10 @@ class TestList(BoaTest):
         path = '%s/boa3_test/test_sc/list_test/ListSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
 
     def test_list_slicing_with_variables(self):
         expected_output = (
@@ -482,6 +543,10 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
+
     def test_list_slicing_negative_start(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -562,6 +627,10 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
+
     def test_list_slicing_negative_end(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -641,6 +710,10 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1], result)
+
     def test_list_slicing_start_omitted(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -719,6 +792,10 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2], result)
+
     def test_list_slicing_omitted(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -741,6 +818,10 @@ class TestList(BoaTest):
         path = '%s/boa3_test/test_sc/list_test/ListSlicingOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2, 3, 4, 5], result)
 
     def test_list_slicing_end_omitted(self):
         expected_output = (
@@ -821,6 +902,10 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
+
     def test_list_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/list_test/ListSlicingWithStride.py' % self.dirname
         self.assertCompilerLogs(InternalError, path)
@@ -834,12 +919,10 @@ class TestList(BoaTest):
     # region TestAppend
 
     def test_list_append_int_value(self):
-        path = '%s/boa3_test/test_sc/list_test/AppendIntValue.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -863,17 +946,22 @@ class TestList(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
+
+        path = '%s/boa3_test/test_sc/list_test/AppendIntValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, 4], result)
+
     def test_list_append_any_value(self):
         four = String('4').to_bytes(min_length=1)
-        path = '%s/boa3_test/test_sc/list_test/AppendAnyValue.py' % self.dirname
 
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -899,20 +987,24 @@ class TestList(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
+
+        path = '%s/boa3_test/test_sc/list_test/AppendAnyValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, '4'], result)
 
     def test_list_append_mismatched_type(self):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeAppendValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_append_with_builtin(self):
-        path = '%s/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
-            + b'\x02'
+            + b'\x00'
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
             + Opcode.PUSH1
@@ -936,8 +1028,14 @@ class TestList(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
+
+        path = '%s/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, 4], result)
 
     def test_list_append_with_builtin_mismatched_type(self):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeAppendWithBuiltin.py' % self.dirname

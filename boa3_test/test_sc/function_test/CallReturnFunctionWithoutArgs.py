@@ -1,4 +1,8 @@
-def Main(operation: str, args: tuple) -> int:
+from boa3.builtin import public
+
+
+@public
+def Main() -> int:
     a = TestFunction()
     return a
 

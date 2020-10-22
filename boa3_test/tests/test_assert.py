@@ -1,17 +1,14 @@
-from boa3.neo.vm.type.String import String
-
 from boa3.boa3 import Boa3
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestAssert(BoaTest):
-
-    assert_resulted_false_msg = 'ASSERT is executed with false result.'
 
     def test_assert_unary_boolean_operation(self):
         expected_output = (
@@ -33,7 +30,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', False, 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', True, 20)
 
     def test_assert_binary_boolean_operation(self):
@@ -57,7 +54,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10, 20)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', 20, 20)
 
     def test_assert_with_message(self):
@@ -81,7 +78,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
 
     def test_assert_int(self):
@@ -105,7 +102,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', -10)
         self.assertEqual(-10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', 0)
 
     def test_assert_str(self):
@@ -127,7 +124,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 'unittest')
         self.assertEqual('unittest', result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_assert_bytes(self):
@@ -149,7 +146,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', b'unittest')
         self.assertEqual(b'unittest', String(result).to_bytes())
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', b'')
 
     def test_assert_list(self):
@@ -173,7 +170,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3])
         self.assertEqual(3, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_assert_dict(self):
@@ -197,7 +194,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 5})
         self.assertEqual(2, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.assert_resulted_false_msg):
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', {})
 
     def test_assert_any(self):

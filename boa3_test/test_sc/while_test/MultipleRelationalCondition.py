@@ -1,3 +1,7 @@
+from boa3.builtin import public
+
+
+@public
 def Main(operation: str, arg: int) -> int:
     a = 0
     b = 0

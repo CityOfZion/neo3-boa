@@ -10,8 +10,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestDict(BoaTest):
 
-    key_not_found_error_msg = 'Key not found in Map'
-
     def test_dict_int_keys(self):
         expected_output = (
             Opcode.INITSLOT
@@ -252,7 +250,7 @@ class TestDict(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', {0: 'zero'})
         self.assertEqual('zero', result)
 
-        with self.assertRaises(TestExecutionException, msg=self.key_not_found_error_msg):
+        with self.assertRaises(TestExecutionException, msg=self.MAP_KEY_NOT_FOUND_ERROR_MSG):
             self.run_smart_contract(engine, path, 'Main', {1: 'one'})
 
     def test_dict_get_value_mismatched_type(self):

@@ -1,3 +1,7 @@
+from boa3.builtin import public
+
+
+@public
 def Main() -> tuple:
     a1 = 2
     a2 = 3

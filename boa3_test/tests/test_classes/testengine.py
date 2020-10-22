@@ -1,4 +1,3 @@
-from textwrap import indent
 from typing import Any, Dict, List, Optional, Union
 
 from boa3.neo.smart_contract.notification import Notification
@@ -74,7 +73,6 @@ class TestEngine:
         contract_parameters = [contract_parameter_to_json(x) for x in arguments]
         param_json = json.dumps(contract_parameters).replace(' ', '')
 
-        import logging
         process = subprocess.Popen(['dotnet', self._test_engine_path, nef_path, method, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
@@ -85,27 +83,6 @@ class TestEngine:
             self.reset_engine()
         else:
             self.reset_state()
-
-        logging.debug(
-            indent((
-                'Test Engine parameters:\n'
-                '{0}\n'
-                '{1}\n'
-                '{2}\n'
-                '{3}\n'
-                '\n'
-                'Test Engine output\n'
-                '{4}\n'
-                '{5}'
-                ).format(
-                    self._test_engine_path,
-                    nef_path,
-                    method,
-                    param_json,
-                    str(stdout),
-                    str(stderr)
-                ), '')
-        )
 
         stdout = stdout.splitlines()[-1]
 

@@ -22,7 +22,7 @@ class Boa3:
         return Compiler().compile(path)
 
     @staticmethod
-    def compile_and_save(path: str, output_path: str = None):
+    def compile_and_save(path: str, output_path: str = None, show_errors: bool = True):
         """
         Load a Python file to be compiled and save the result into the files.
         By default, the resultant .nef file is saved in the same folder of the
@@ -30,6 +30,7 @@ class Boa3:
 
         :param path: the path of the Python file to compile
         :param output_path: Optional path to save the generated files
+        :param show_errors: if compiler errors should be logged.
         """
         if not path.endswith('.py'):
             raise InvalidPathException(path)
@@ -39,4 +40,4 @@ class Boa3:
         elif not output_path.endswith('.nef'):
             raise InvalidPathException(path)
 
-        Compiler().compile_and_save(path, output_path)
+        Compiler().compile_and_save(path, output_path, show_errors)
