@@ -155,7 +155,7 @@ class TestFileGeneration(BoaTest):
         abi = manifest['abi']
 
         self.assertIn('methods', abi)
-        self.assertEqual(0, len(abi['methods']))
+        self.assertEqual(1, len(abi['methods']))
 
         self.assertIn('events', abi)
         self.assertEqual(1, len(abi['events']))
@@ -190,7 +190,7 @@ class TestFileGeneration(BoaTest):
         abi = manifest['abi']
 
         self.assertIn('methods', abi)
-        self.assertEqual(0, len(abi['methods']))
+        self.assertEqual(1, len(abi['methods']))
 
         self.assertIn('events', abi)
         self.assertEqual(1, len(abi['events']))

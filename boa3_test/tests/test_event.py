@@ -5,12 +5,14 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestEvent(BoaTest):
 
     def test_event_without_arguments(self):
-        event_name = String('Event').to_bytes(min_length=1)
+        event_id = 'Event'
+        event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
             Opcode.NEWARRAY0    # Main()
             + Opcode.PUSHDATA1      # event()
@@ -26,8 +28,17 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((), event_notifications[0].arguments)
+
     def test_event_with_arguments(self):
-        event_name = String('Event').to_bytes(min_length=1)
+        event_id = 'Event'
+        event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
             Opcode.PUSH10        # Main()
             + Opcode.PUSH1          # event(10)
@@ -45,8 +56,17 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((10,), event_notifications[0].arguments)
+
     def test_event_with_name(self):
-        event_name = String('example').to_bytes(min_length=1)
+        event_id = 'example'
+        event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
             Opcode.PUSH10       # Main()
             + Opcode.PUSH1
@@ -64,8 +84,17 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((10,), event_notifications[0].arguments)
+
     def test_event_nep5_transfer(self):
-        event_name = String('transfer').to_bytes(min_length=1)
+        event_id = 'transfer'
+        event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
             Opcode.INITSLOT     # Main()
             + b'\x00\x03'
@@ -86,6 +115,14 @@ class TestEvent(BoaTest):
         path = '%s/boa3_test/test_sc/event_test/EventNep5Transfer.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
 
     def test_event_with_return(self):
         path = '%s/boa3_test/test_sc/event_test/EventWithoutTypes.py' % self.dirname

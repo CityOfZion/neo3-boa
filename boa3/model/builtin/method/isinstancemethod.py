@@ -62,18 +62,27 @@ class IsInstanceMethod(IBuiltinMethod):
             code, data = self._type_opcode(types[-1])
             size = len(code + data)
             opcodes.append((code, data))
+
+            from boa3.neo.vm.type.Integer import Integer
+
             for instance_type in reversed(types[:-1]):
-                from boa3.neo.vm.type.Integer import Integer
                 jmp_if_true_body = [
-                    self._type_opcode(instance_type),
                     (Opcode.DUP, b''),
-                    (Opcode.JMPIF, Integer(size + 2).to_byte_array(min_length=1, signed=True))
+                    self._type_opcode(instance_type),
+                    (Opcode.JMPIF, Integer(size + 4).to_byte_array(min_length=1, signed=True))
                 ]
 
                 for opcode, code_data in jmp_if_true_body:
                     size += len(opcode + code_data)
 
                 opcodes = jmp_if_true_body + opcodes
+
+            if len(types) > 1:
+                opcodes.extend([
+                    (Opcode.JMP, Integer(4).to_byte_array(min_length=1, signed=True)),
+                    (Opcode.DROP, b''),
+                    (Opcode.PUSH1, b''),
+                ])
 
             return opcodes
 

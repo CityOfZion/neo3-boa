@@ -1,3 +1,7 @@
+from boa3.builtin import public
+
+
+@public
 def Main(a: bool, b: bool) -> int:
     c = 0
     d = c

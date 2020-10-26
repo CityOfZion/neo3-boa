@@ -713,8 +713,7 @@ For an extensive collection of examples:
       <a href="/boa3_test/test_sc/for_test/ForElse.py">ForElse.py</a>, 
       <a href="/boa3_test/test_sc/for_test/NestedFor.py">NestedFor.py</a>, 
       <a href="/boa3_test/test_sc/for_test/StringCondition.py">StringCondition.py</a>, 
-      <a href="/boa3_test/test_sc/for_test/TupleCondition.py">TupleCondition.py</a>, 
-      <a href="/boa3_test/test_sc/for_test/VariableCondition.py">VariableCondition.py</a>
+      <a href="/boa3_test/test_sc/for_test/TupleCondition.py">TupleCondition.py</a>
     </td>
   </tbody>
   <tbody>

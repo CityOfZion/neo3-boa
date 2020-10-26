@@ -1,7 +1,10 @@
 from typing import Any, List
 
+from boa3.builtin import public
 from boa3_test.test_sc.import_test.FromImportTyping import EmptyList
 
 
-def Main():
+@public
+def Main() -> list:
     a: List[Any] = EmptyList()
+    return a

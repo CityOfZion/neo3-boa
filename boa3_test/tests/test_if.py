@@ -4,6 +4,7 @@ from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestIf(BoaTest):
@@ -26,8 +27,11 @@ class TestIf(BoaTest):
 
         path = '%s/boa3_test/test_sc/if_test/ConstantCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(2, result)
 
     def test_if_variable_condition(self):
         expected_output = (
@@ -47,8 +51,13 @@ class TestIf(BoaTest):
 
         path = '%s/boa3_test/test_sc/if_test/VariableCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(0, result)
 
     def test_if_mismatched_type_condition(self):
         path = '%s/boa3_test/test_sc/if_test/MismatchedTypeCondition.py' % self.dirname
@@ -95,8 +104,17 @@ class TestIf(BoaTest):
 
         path = '%s/boa3_test/test_sc/if_test/NestedIf.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True, True)
+        self.assertEqual(5, result)
+        result = self.run_smart_contract(engine, path, 'Main', True, False)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False, True)
+        self.assertEqual(0, result)
+        result = self.run_smart_contract(engine, path, 'Main', False, False)
+        self.assertEqual(0, result)
 
     def test_if_else(self):
         expected_output = (
@@ -119,8 +137,13 @@ class TestIf(BoaTest):
         )
         path = '%s/boa3_test/test_sc/if_test/IfElse.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(10, result)
 
     def test_else_no_body(self):
         path = '%s/boa3_test/test_sc/if_test/ElseWithoutBody.py' % self.dirname
@@ -154,6 +177,12 @@ class TestIf(BoaTest):
         path = '%s/boa3_test/test_sc/if_test/IfElif.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(0, result)
 
     def test_elif_no_condition(self):
         path = '%s/boa3_test/test_sc/if_test/ElifWithoutCondition.py' % self.dirname
@@ -189,8 +218,13 @@ class TestIf(BoaTest):
 
         path = '%s/boa3_test/test_sc/if_test/RelationalCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 5)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(0, result)
 
     def test_if_multiple_branches(self):
         twenty = Integer(20).to_byte_array()
@@ -246,8 +280,21 @@ class TestIf(BoaTest):
 
         path = '%s/boa3_test/test_sc/if_test/MultipleBranches.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', -10)
+        self.assertEqual(0, result)
+        result = self.run_smart_contract(engine, path, 'Main', 2)
+        self.assertEqual(5, result)
+        result = self.run_smart_contract(engine, path, 'Main', 7)
+        self.assertEqual(10, result)
+        result = self.run_smart_contract(engine, path, 'Main', 13)
+        self.assertEqual(15, result)
+        result = self.run_smart_contract(engine, path, 'Main', 17)
+        self.assertEqual(20, result)
+        result = self.run_smart_contract(engine, path, 'Main', 23)
+        self.assertEqual(20, result)
 
     def test_if_expression_variable_condition(self):
         expected_output = (
@@ -267,8 +314,13 @@ class TestIf(BoaTest):
         )
         path = '%s/boa3_test/test_sc/if_test/IfExpVariableCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(3, result)
 
     def test_if_expression_without_else_branch(self):
         path = '%s/boa3_test/test_sc/if_test/IfExpWithoutElse.py' % self.dirname

@@ -1,6 +1,9 @@
 from typing import List
 
+from boa3.builtin import public
 
-def Main(a: List[int]) -> int:
+
+@public
+def Main(a: List[int]) -> list:
     a[0] = 1
-    return 1
+    return a

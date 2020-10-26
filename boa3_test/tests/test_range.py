@@ -6,6 +6,8 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestRange(BoaTest):
@@ -63,8 +65,15 @@ class TestRange(BoaTest):
 
         path = '%s/boa3_test/test_sc/range_test/RangeGivenLen.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'range_example', 5)
+        self.assertEqual([0, 1, 2, 3, 4], result)
+        result = self.run_smart_contract(engine, path, 'range_example', 10)
+        self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], result)
+        result = self.run_smart_contract(engine, path, 'range_example', 0)
+        self.assertEqual([], result)
 
     def test_range_given_start(self):
         expected_output = (
@@ -117,8 +126,13 @@ class TestRange(BoaTest):
 
         path = '%s/boa3_test/test_sc/range_test/RangeGivenStart.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'range_example', 2, 6)
+        self.assertEqual([2, 3, 4, 5], result)
+        result = self.run_smart_contract(engine, path, 'range_example', -10, 0)
+        self.assertEqual([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1], result)
 
     def test_range_given_step(self):
         expected_output = (
@@ -171,8 +185,13 @@ class TestRange(BoaTest):
 
         path = '%s/boa3_test/test_sc/range_test/RangeGivenStep.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'range_example', 2, 10, 3)
+        self.assertEqual([2, 5, 8], result)
+        result = self.run_smart_contract(engine, path, 'range_example', -2, 10, 3)
+        self.assertEqual([-2, 1, 4, 7], result)
 
     def test_range_parameter_mismatched_type(self):
         path = '%s/boa3_test/test_sc/range_test/RangeParameterMismatchedType.py' % self.dirname
@@ -229,8 +248,13 @@ class TestRange(BoaTest):
 
         path = '%s/boa3_test/test_sc/range_test/RangeExpectedSequence.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'range_example', 2, 6)
+        self.assertEqual([2, 3, 4, 5], result)
+        result = self.run_smart_contract(engine, path, 'range_example', -10, 0)
+        self.assertEqual([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1], result)
 
     def test_range_mismatched_type(self):
         path = '%s/boa3_test/test_sc/range_test/RangeMismatchedType.py' % self.dirname
@@ -245,8 +269,6 @@ class TestRange(BoaTest):
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_range_get_value(self):
-        path = '%s/boa3_test/test_sc/range_test/GetValue.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -264,8 +286,19 @@ class TestRange(BoaTest):
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/range_test/GetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual(5, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
 
     def test_range_set_value(self):
         path = '%s/boa3_test/test_sc/range_test/SetValue.py' % self.dirname
@@ -394,6 +427,10 @@ class TestRange(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
+
     def test_range_slicing_with_variables(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -520,6 +557,10 @@ class TestRange(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
+
     def test_range_slicing_negative_start(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -633,6 +674,10 @@ class TestRange(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
+
     def test_range_slicing_negative_end(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -745,6 +790,10 @@ class TestRange(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1], result)
+
     def test_range_slicing_start_omitted(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -856,6 +905,10 @@ class TestRange(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2], result)
+
     def test_range_slicing_omitted(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -911,6 +964,10 @@ class TestRange(BoaTest):
         path = '%s/boa3_test/test_sc/range_test/RangeSlicingOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2, 3, 4, 5], result)
 
     def test_range_slicing_end_omitted(self):
         expected_output = (
@@ -1023,6 +1080,10 @@ class TestRange(BoaTest):
         path = '%s/boa3_test/test_sc/range_test/RangeSlicingEndOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
 
     def test_range_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/range_test/RangeSlicingWithStride.py' % self.dirname

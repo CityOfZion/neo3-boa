@@ -37,4 +37,10 @@ class Concat(BinaryOperation):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.CAT, b'')]
+        codes = [(Opcode.CAT, b'')]
+
+        if Type.str.is_type_of(self.left_type) and Type.str.is_type_of(self.right_type):
+            codes.append(
+                (Opcode.CONVERT, Type.str.stack_item)
+            )
+        return codes

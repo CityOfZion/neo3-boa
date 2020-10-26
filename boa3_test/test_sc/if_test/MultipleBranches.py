@@ -1,3 +1,7 @@
+from boa3.builtin import public
+
+
+@public
 def Main(value: int) -> int:
     if value < 0:
         a = 0

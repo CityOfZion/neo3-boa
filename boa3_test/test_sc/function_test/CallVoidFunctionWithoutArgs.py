@@ -1,4 +1,8 @@
-def Main(operation: str, args: tuple) -> bool:
+from boa3.builtin import public
+
+
+@public
+def Main() -> bool:
     TestFunction()
     return True
 

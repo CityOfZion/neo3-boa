@@ -38,7 +38,7 @@ class StrMultiplication(BinaryOperation):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
-        return [
+        codes = [
             (Opcode.PUSHDATA1, Integer(0).to_byte_array(min_length=1)),  # concatString = ''
             (Opcode.ROT, b''),
             (Opcode.ROT, b''),
@@ -54,3 +54,8 @@ class StrMultiplication(BinaryOperation):
             (Opcode.DROP, b''),
             (Opcode.DROP, b'')
         ]
+        if Type.str.is_type_of(self.left_type):
+            codes.append(
+                (Opcode.CONVERT, Type.str.stack_item)
+            )
+        return codes

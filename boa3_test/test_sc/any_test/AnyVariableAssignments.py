@@ -1,9 +1,6 @@
 from typing import Any
 
-from boa3.builtin import public
 
-
-@public
 def Main():
     a: Any = 1
     a = '2'

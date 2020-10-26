@@ -5,6 +5,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestFor(BoaTest):
@@ -59,8 +60,11 @@ class TestFor(BoaTest):
 
         path = '%s/boa3_test/test_sc/for_test/TupleCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(23, result)
 
     def test_for_string_condition(self):
         sequence = String('3515').to_bytes(min_length=1)
@@ -121,59 +125,9 @@ class TestFor(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_for_variable_condition(self):
-        jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-22).to_byte_array(min_length=1, signed=True)
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x03'
-            + b'\x00'
-            + Opcode.PUSH0      # a = 0
-            + Opcode.STLOC0
-            + Opcode.PUSH15     # sequence = (3, 5, 15)
-            + Opcode.PUSH5
-            + Opcode.PUSH3
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC1
-            + Opcode.LDLOC1     # for_sequence = sequence
-            + Opcode.PUSH0      # for_index = 0
-            + Opcode.JMP
-            + jmpif_address
-            + Opcode.OVER         # x = for_sequence[for_index]
-            + Opcode.OVER
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.STLOC2
-            + Opcode.LDLOC0         # a = a + x
-            + Opcode.LDLOC2
-            + Opcode.ADD
-            + Opcode.STLOC0
-            + Opcode.INC            # for_index = for_index + 1
-            + Opcode.DUP        # if for_index < len(for_sequence)
-            + Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.SIZE
-            + Opcode.LT
-            + Opcode.JMPIF      # end for
-            + jmp_address
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
-
-        path = '%s/boa3_test/test_sc/for_test/VariableCondition.py' % self.dirname
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual('5', result)
 
     def test_for_mismatched_type_condition(self):
         path = '%s/boa3_test/test_sc/for_test/MismatchedTypeCondition.py' % self.dirname
@@ -268,8 +222,11 @@ class TestFor(BoaTest):
 
         path = '%s/boa3_test/test_sc/for_test/NestedFor.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(529, result)
 
     def test_for_else(self):
         jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
@@ -327,8 +284,11 @@ class TestFor(BoaTest):
 
         path = '%s/boa3_test/test_sc/for_test/ForElse.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(24, result)
 
     def test_for_continue(self):
         jmpif_address = Integer(28).to_byte_array(min_length=1, signed=True)
@@ -392,6 +352,10 @@ class TestFor(BoaTest):
         path = '%s/boa3_test/test_sc/for_test/ForContinue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(20, result)
 
     def test_for_break(self):
         jmpif_address = Integer(32).to_byte_array(min_length=1, signed=True)
@@ -459,6 +423,10 @@ class TestFor(BoaTest):
         path = '%s/boa3_test/test_sc/for_test/ForBreak.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(6, result)
 
     def test_for_break_else(self):
         jmpif_address = Integer(32).to_byte_array(min_length=1, signed=True)
@@ -532,3 +500,7 @@ class TestFor(BoaTest):
         path = '%s/boa3_test/test_sc/for_test/ForBreakElse.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(6, result)
