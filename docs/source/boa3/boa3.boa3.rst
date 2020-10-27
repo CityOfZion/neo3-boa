@@ -5,3 +5,4 @@ boa3\.boa3 module
     :members:
     :undoc-members:
     :show-inheritance:
+ update
