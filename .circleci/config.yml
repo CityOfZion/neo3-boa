@@ -87,7 +87,7 @@ workflows:
            tags:
              only: /^v.*/
            branches:
-             only: master
+             ignore: /.*/
       - approve-release:
           type: approval
           requires:
@@ -96,7 +96,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
       - build_deploy_prod:
           context: pypi_prod
           requires:
@@ -105,4 +105,4 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: master
+              ignore: /.*/
