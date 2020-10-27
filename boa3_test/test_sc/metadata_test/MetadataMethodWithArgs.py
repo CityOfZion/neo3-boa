@@ -1,4 +1,4 @@
-from boa3.builtin import metadata, NeoMetadata
+from boa3.builtin import NeoMetadata, metadata
 
 
 def Main() -> int:
@@ -9,4 +9,3 @@ def Main() -> int:
 def example(arg0: int, arg1: str) -> NeoMetadata:
     # this function doesn't allow arguments
     return NeoMetadata()
-

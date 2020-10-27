@@ -5,15 +5,31 @@ orbs:
 
 jobs:
   unit-test:
-    executor: python/default
+    working_directory: ~/neo3-boa
+    docker:
+      - image: circleci/python:3.8.0
     steps:
       - checkout
       - python/load-cache
-      - python/install-deps
+
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo pip install -r requirements_dev.txt
+
       - python/save-cache
       - run:
-          command: python -m unittest discover boa3_test
           name: Test
+          command: |
+            wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+            sudo dpkg -i packages-microsoft-prod.deb
+            sudo apt-get update; \
+              sudo apt-get install -y apt-transport-https && \
+              sudo apt-get update && \
+              sudo apt-get install -y dotnet-sdk-3.1
+            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
+            dotnet build ./neo-devpack-dotnet/src/TestEngine/TestEngine.csproj -o ./TestEngine
+            python -m unittest discover boa3_test
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa

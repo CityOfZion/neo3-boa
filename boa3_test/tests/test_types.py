@@ -124,7 +124,7 @@ class TestTypes(BoaTest):
         input = [1, '2', False]
         node = ast.parse(str(input)).body[0].value
         expected_output = ListType(Type.any)
-        
+
         typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
 

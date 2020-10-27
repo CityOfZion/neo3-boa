@@ -43,7 +43,7 @@ class ExtendMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        # TODO: remove when bytearray.append() is implemented
+        # TODO: remove when bytearray.extend() is implemented
         from boa3.model.type.type import Type
         return self._arg_self.type is not Type.bytearray
 

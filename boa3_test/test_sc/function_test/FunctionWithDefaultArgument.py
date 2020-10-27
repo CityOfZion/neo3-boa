@@ -1,6 +1,13 @@
-def Main():
-    add(1, 2, 3)
-    add(5, 6)
+from typing import List
+
+from boa3.builtin import public
+
+
+@public
+def Main() -> List[int]:
+    x = add(1, 2, 3)
+    y = add(5, 6)
+    return [x, y]
 
 
 def add(a: int, b: int, c: int = 0) -> int:

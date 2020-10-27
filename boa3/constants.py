@@ -1,3 +1,7 @@
+import sys
+
+SYS_VERSION_INFO = sys.version_info
+
 ONE_BYTE_MAX_VALUE = 255
 TWO_BYTES_MAX_VALUE = 256 ** 2 - 1
 FOUR_BYTES_MAX_VALUE = 256 ** 4 - 1

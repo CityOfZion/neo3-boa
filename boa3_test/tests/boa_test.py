@@ -4,20 +4,30 @@ from unittest import TestCase
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.neo3.vm import VMState
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class BoaTest(TestCase):
     dirname: str = None
 
+    ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
+    MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
+    VALUE_IS_OUT_OF_RANGE_MSG = 'The value is out of range'
+
     @classmethod
     def setUpClass(cls):
-        path = os.path.abspath(__file__).replace('\\', '/')  # for windows compatibility
-        cls.dirname = '/'.join(path.split('/')[:-3])
+        cls.dirname = '/'.join(os.path.abspath(__file__).split(os.sep)[:-3])
 
         super(BoaTest, cls).setUpClass()
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
+
+    def indent_text(self, text: str, no_spaces: int = 4) -> str:
+        import re
+        return re.sub('\n[ \t]+', '\n' + ' ' * no_spaces, text)
 
     def assertCompilerLogs(self, expected_logged_exception, path):
         output = None
@@ -38,13 +48,13 @@ class BoaTest(TestCase):
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output
 
-    def compile_and_save(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+    def compile_and_save(self, path: str, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         manifest_output = path.replace('.py', '.manifest.json')
 
         from boa3.boa3 import Boa3
         from boa3.neo.contracts.neffile import NefFile
-        Boa3.compile_and_save(path)
+        Boa3.compile_and_save(path, show_errors=log)
 
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
@@ -67,3 +77,16 @@ class BoaTest(TestCase):
             import json
             debug_info = json.loads(dbgnfo.read(os.path.basename(path.replace('.py', '.debug.json'))))
         return debug_info
+
+    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
+                           *arguments: Any, reset_engine: bool = False) -> Any:
+        if smart_contract_path.endswith('.py'):
+            if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
+                self.compile_and_save(smart_contract_path, log=False)
+            smart_contract_path = smart_contract_path.replace('.py', '.nef')
+
+        result = test_engine.run(smart_contract_path, method, *arguments, reset_engine=reset_engine)
+
+        if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
+            raise TestExecutionException(test_engine.error)
+        return result

@@ -1,11 +1,16 @@
-def Main(a: bool, b: bool) -> int:
+from boa3.builtin import public
+
+
+@public
+def Main() -> int:
     c = 0
     d = c
 
-    while a:
+    while c % 3 < 2:
         c = c + 2
-        while b:
+        while d % 10 < 5:
             d = d + 3
+
         c = c + d
 
     return c

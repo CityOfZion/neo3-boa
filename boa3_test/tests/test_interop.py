@@ -1,12 +1,15 @@
 from boa3.boa3 import Boa3
+from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
+from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestInterop(BoaTest):
@@ -47,7 +50,8 @@ class TestInterop(BoaTest):
 
     def test_notify_str(self):
         event_name = String('notify').to_bytes()
-        string = String('str').to_bytes()
+        message = 'str'
+        string = String(message).to_bytes()
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
@@ -66,6 +70,14 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/NotifyStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=Interop.Notify.name)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((message,), event_notifications[0].arguments)
 
     def test_notify_int(self):
         event_name = String('notify').to_bytes()
@@ -86,6 +98,14 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=Interop.Notify.name)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((15,), event_notifications[0].arguments)
+
     def test_notify_bool(self):
         event_name = String('notify').to_bytes()
         expected_output = (
@@ -105,6 +125,14 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=Interop.Notify.name)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((1,), event_notifications[0].arguments)
+
     def test_notify_none(self):
         event_name = String('notify').to_bytes()
         expected_output = (
@@ -123,6 +151,14 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/NotifyNone.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=Interop.Notify.name)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((None,), event_notifications[0].arguments)
 
     def test_notify_sequence(self):
         event_name = String('notify').to_bytes()
@@ -147,6 +183,14 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/NotifySequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        self.run_smart_contract(engine, path, 'Main')
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=Interop.Notify.name)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual(([2, 3, 5, 7],), event_notifications[0].arguments)
 
     def test_log_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/LogMismatchedValueInt.py' % self.dirname
@@ -179,6 +223,10 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(TriggerType.APPLICATION, result)
+
     def test_is_application_trigger(self):
         application = Integer(TriggerType.APPLICATION.value).to_byte_array()
         expected_output = (
@@ -196,6 +244,10 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/TriggerApplication.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(True, result)
 
     def test_is_verification_trigger(self):
         verification = Integer(TriggerType.VERIFICATION.value).to_byte_array()
@@ -215,6 +267,10 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(False, result)
+
     def test_get_calling_script_hash(self):
         expected_output = (
             Opcode.SYSCALL
@@ -226,4 +282,234 @@ class TestInterop(BoaTest):
 
         path = '%s/boa3_test/test_sc/interop_test/CallingScriptHash.py' % self.dirname
         output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_calling_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CallingScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_call_contract(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x03'
+            + Opcode.LDARG2
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_call_contract_without_args(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.NEWARRAY0
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHashWithoutArgs.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_call_contract_too_many_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooManyArguments.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_call_contract_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooFewArguments.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_get_neo_native_script_hash(self):
+        value = NEO
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(value)).to_byte_array()
+            + value
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/NeoScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(value, result)
+
+    def test_neo_native_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/NeoScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_gas_native_script_hash(self):
+        value = GAS
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(value)).to_byte_array()
+            + value
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GasScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(value, result)
+
+    def test_gas_native_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GasScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_block_time(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.BlockTime.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/BlockTime.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(0, result)
+
+    def test_block_time_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/BlockTimeCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_current_height(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.CurrentHeight.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CurrentHeight.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_current_height_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CurrentHeightCantAssign.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_gas_left(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.GasLeft.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GasLeft.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_gas_left_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GasLeftCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
+    def test_get_invocation_counter(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.InvocationCounter.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/InvocationCounter.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_invocation_counter_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/InvocationCounterCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)

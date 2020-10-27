@@ -100,7 +100,8 @@ class TestAny(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0         # SequenceFunction(bool_tuple)
             + Opcode.CALL
-            + Integer(46).to_byte_array(min_length=1, signed=True)
+            + Integer(51).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
             + Opcode.PUSHDATA1      # SequenceFunction([True, 1, 'ok'])
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
@@ -108,12 +109,14 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(36).to_byte_array(min_length=1, signed=True)
+            + Integer(40).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
             + Opcode.PUSHDATA1      # SequenceFunction('some_string')
             + Integer(len(some_string)).to_byte_array()
             + some_string
             + Opcode.CALL
-            + Integer(21).to_byte_array(min_length=1, signed=True)
+            + Integer(24).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
             + Opcode.PUSHDATA1      # SequenceFunction((True, 1, 'ok'))
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
@@ -121,14 +124,16 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(11).to_byte_array(min_length=1, signed=True)
+            + Integer(13).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
             + Opcode.PUSH3          # SequenceFunction([1, 2, 3])
             + Opcode.PUSH2
             + Opcode.PUSH1
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.DROP
             + Opcode.PUSHNULL
             + Opcode.RET        # return
             + Opcode.INITSLOT   # SequenceFunction

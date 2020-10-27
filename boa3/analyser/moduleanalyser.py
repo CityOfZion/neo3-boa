@@ -419,8 +419,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_method = method
 
         # don't evaluate constant expression - for example: string for documentation
-        function.body = [stmt for stmt in function.body
-                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
+        from boa3.constants import SYS_VERSION_INFO
+        if SYS_VERSION_INFO >= (3, 8):
+            function.body = [stmt for stmt in function.body
+                             if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
+        else:
+            function.body = [stmt for stmt in function.body
+                             if not (isinstance(stmt, ast.Expr) and
+                                     (hasattr(stmt.value, 'n') or hasattr(stmt.value, 's'))
+                                     )]
         for stmt in function.body:
             self.visit(stmt)
 
@@ -524,7 +531,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param assign:
         """
-        var_id = self.visit(assign.targets[0])
         var_type = self.visit_type(assign.value)
 
         if var_type is Type.none and isinstance(assign.value, ast.Name):
@@ -533,7 +539,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var_type = Builtin.Event
                 self._current_event = symbol
 
-        return self.assign_value(var_id, var_type, source_node=assign)
+        return_type = var_type
+        for target in assign.targets:
+            var_id = self.visit(target)
+            return_type = self.assign_value(var_id, var_type, source_node=assign)
+
+        return return_type
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -567,7 +578,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param global_node:
         """
-        raise NotImplementedError
+        for var_id in global_node.names:
+            symbol = self.get_symbol(var_id)
+            if isinstance(symbol, Variable) and self._current_method is not None:
+                self._current_method.include_variable(var_id, symbol, is_global=True)
 
     def visit_Expr(self, expr: ast.Expr):
         """
@@ -656,6 +670,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             # verifiy if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(func_id)
             func_symbol = func if func is not None else func_symbol
+            func_symbol = Builtin.Exception if func_symbol is Type.exception else func_symbol
         if not isinstance(func_symbol, Callable):
             # the symbol doesn't exists
             self._log_error(

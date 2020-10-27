@@ -1,6 +1,7 @@
-# TODO: include test when 'break' are implemented
+from boa3.builtin import public
 
 
+@public
 def Main() -> int:
 
     j = 3

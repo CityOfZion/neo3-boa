@@ -1,3 +1,7 @@
+from boa3.builtin import public
+
+
+@public
 def Main(condition: bool) -> int:
     if condition:
         if condition:

@@ -219,7 +219,7 @@ class Opcode(bytes, Enum):
     SYSCALL = b'\x41'
 
     def has_target(self) -> bool:
-        return self.JMP <= self <= self.CALL_L or self.ENDTRY <= self <= self.ENDFINALLY
+        return self.JMP <= self <= self.CALL_L or self.TRY <= self <= self.ENDFINALLY
 
     # endregion
 

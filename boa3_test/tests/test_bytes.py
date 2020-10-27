@@ -4,6 +4,7 @@ from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBytes(BoaTest):
@@ -35,14 +36,14 @@ class TestBytes(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -51,22 +52,27 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        self.assertEqual(48, result)
+
     def test_bytes_get_value_negative_index(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
-            + Opcode.PUSH1
-            + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.PUSHM1
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -74,6 +80,12 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytesGetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
+        self.assertEqual(3, result)
+        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        self.assertEqual(48, result)
 
     def test_bytes_set_value(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesSetValue.py' % self.dirname
@@ -104,6 +116,10 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_int')
+        self.assertEqual(513, result)
+
     def test_bytes_to_int_with_builtin(self):
         data = b'\x01\x02'
         expected_output = (
@@ -120,6 +136,10 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_int')
+        self.assertEqual(513, result)
 
     def test_bytes_to_int_mismatched_types(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltinMismatchedTypes.py' % self.dirname
@@ -146,6 +166,10 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_str')
+        self.assertEqual('abc', result)
+
     def test_bytes_to_str_with_builtin(self):
         data = b'123'
         expected_output = (
@@ -162,6 +186,10 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_str')
+        self.assertEqual('123', result)
 
     def test_bytes_to_str_mismatched_types(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
@@ -196,14 +224,14 @@ class TestBytes(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -212,22 +240,27 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        self.assertEqual(48, result)
+
     def test_byte_array_get_value_negative_index(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
-            + Opcode.PUSH1
-            + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.PUSHM1
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -236,6 +269,12 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
+        self.assertEqual(3, result)
+        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        self.assertEqual(48, result)
+
     def test_byte_array_set_value(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -243,14 +282,14 @@ class TestBytes(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0] = 0x01
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
             + Opcode.LDARG0
@@ -261,22 +300,27 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', b'123')
+        self.assertEqual(b'\x0123', result)
+        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        self.assertEqual(b'\x01', result)
+
     def test_byte_array_set_value_negative_index(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[-1] = 0x01
-            + Opcode.PUSH1
-            + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.PUSHM1
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
             + Opcode.LDARG0
@@ -286,6 +330,12 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytearraySetValueNegativeIndex.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', b'123')
+        self.assertEqual(b'12\x01', result)
+        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        self.assertEqual(b'\x01', result)
 
     def test_byte_array_literal_value(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayLiteral.py' % self.dirname
@@ -323,7 +373,11 @@ class TestBytes(BoaTest):
             + Opcode.CONVERT
             + Type.bytes.stack_item
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # b = bytearray(a)
+            + Opcode.PUSHDATA1  # b = bytearray(a)
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
             + Opcode.STLOC1
             + Opcode.PUSHNULL
             + Opcode.RET        # return
@@ -351,18 +405,18 @@ class TestBytes(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.append(4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
         )
@@ -370,6 +424,10 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppend.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(b'\x01\x02\x03\x04', result)
 
     def test_byte_array_append_with_builtin(self):
         data = b'\x01\x02\x03'
@@ -385,18 +443,18 @@ class TestBytes(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # bytearray.append(a, 4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
         )
@@ -404,6 +462,10 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppendWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(b'\x01\x02\x03\x04', result)
 
     def test_byte_array_append_mutable_sequence_with_builtin(self):
         data = b'\x01\x02\x03'
@@ -419,18 +481,18 @@ class TestBytes(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # MutableSequence.append(a, 4)
             + Opcode.PUSH4
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
         )
@@ -438,6 +500,10 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppendWithMutableSequence.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(b'\x01\x02\x03\x04', result)
 
     def test_byte_array_clear(self):
         data = b'\x01\x02\x03\x04'
@@ -452,22 +518,22 @@ class TestBytes(BoaTest):
             + Type.bytes.stack_item
             + Opcode.STLOC0
             + Opcode.LDLOC0     # a.clear()
-                + Opcode.DUP
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(9).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.PUSHDATA1
-                + Integer(0).to_byte_array(min_length=1)
-                + Opcode.CONVERT
-                + Type.bytearray.stack_item
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.CLEARITEMS
-                + Opcode.JMP
-                + Integer(3).to_byte_array(min_length=1)
-                + Opcode.STLOC0
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSHDATA1
+            + Integer(0).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.bytearray.stack_item
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.CLEARITEMS
+            + Opcode.JMP
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.RET        # return a
         )
@@ -475,6 +541,10 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayClear.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(b'', result)
 
     def test_byte_array_reverse(self):
         data = b'\x01\x02\x03'
@@ -498,6 +568,10 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(b'\x03\x02\x01', result)
+
     def test_byte_array_extend(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayExtend.py' % self.dirname
         self.assertCompilerLogs(NotSupportedOperation, path)
@@ -519,6 +593,10 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_int')
+        self.assertEqual(513, result)
+
     def test_byte_array_to_int_with_builtin(self):
         data = b'\x01\x02'
         expected_output = (
@@ -536,6 +614,10 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_int')
+        self.assertEqual(513, result)
+
     def test_byte_array_to_int_with_bytes_builtin(self):
         data = b'\x01\x02'
         expected_output = (
@@ -552,3 +634,7 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayToIntWithBytesBuiltin.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_int')
+        self.assertEqual(513, result)

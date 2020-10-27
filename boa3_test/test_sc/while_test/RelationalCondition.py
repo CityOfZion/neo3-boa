@@ -1,4 +1,8 @@
-def Main(operation: str, arg: int) -> int:
+from boa3.builtin import public
+
+
+@public
+def Main() -> int:
     a = 0
     b = 0
 

@@ -1,6 +1,9 @@
 from typing import Tuple
 
+from boa3.builtin import public
 
+
+@public
 def Main() -> int:
     a: int = 0
     sequence: Tuple[int] = (3, 5, 15)

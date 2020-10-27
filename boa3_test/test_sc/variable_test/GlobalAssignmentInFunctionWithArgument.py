@@ -1,7 +1,11 @@
-b: int = 0
+from boa3.builtin import public
 
 
+@public
 def Main(a: int) -> int:
-    global b  # not implemented yet
+    global b
     b = a
     return b
+
+
+b: int = 0

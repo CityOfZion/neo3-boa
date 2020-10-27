@@ -1,17 +1,17 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, UnresolvedOperation
+from boa3.exception.CompilerError import InternalError, MismatchedTypes, UnresolvedOperation
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTuple(BoaTest):
 
     def test_tuple_int_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/IntTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -25,11 +25,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/IntTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_string_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/StrTuple.py' % self.dirname
         byte_input0 = String('1').to_bytes()
         byte_input1 = String('2').to_bytes()
         byte_input2 = String('3').to_bytes()
@@ -53,12 +54,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/StrTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_bool_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/BoolTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -72,12 +73,12 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/BoolTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_variable_values(self):
-        path = '%s/boa3_test/test_sc/tuple_test/VariableTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x04'
@@ -88,21 +89,21 @@ class TestTuple(BoaTest):
             + Opcode.STLOC1
             + Opcode.PUSH3      # c = 3
             + Opcode.STLOC2
-            + Opcode.LDLOC2     # d = (a, b, c)
-            + Opcode.LDLOC1
-            + Opcode.LDLOC0
+            + Opcode.PUSH3      # d = (a, b, c)
+            + Opcode.PUSH2
+            + Opcode.PUSH1
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC3
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/VariableTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_assign_empty_tuple(self):
-        path = '%s/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -112,31 +113,42 @@ class TestTuple(BoaTest):
             + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_get_value(self):
-        path = '%s/boa3_test/test_sc/tuple_test/GetValue.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/GetValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
+        self.assertEqual(5, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', [])
 
     def test_non_sequence_get_value(self):
         path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeGetValue.py' % self.dirname
@@ -155,60 +167,78 @@ class TestTuple(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_tuple_of_tuple(self):
-        path = '%s/boa3_test/test_sc/tuple_test/TupleOfTuple.py' % self.dirname
-
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
             + b'\x01'
             + Opcode.LDARG0     # arg[0][0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/TupleOfTuple.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_nep5_main(self):
-        path = '%s/boa3_test/test_sc/tuple_test/Nep5Main.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        self.assertEqual(1, result)
 
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', ())
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', ((), (1, 2), (3, 4)))
+
+    def test_nep5_main(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
             + b'\x02'
             + Opcode.LDARG1     # args[0]
             + Opcode.PUSH0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
+
+        path = '%s/boa3_test/test_sc/tuple_test/Nep5Main.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 'op', (1, 2, 3, 4))
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'op', ('a', False))
+        self.assertEqual('a', result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'Main', 'op', ())
 
     def test_tuple_slicing(self):
         expected_output = (
@@ -226,78 +256,82 @@ class TestTuple(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a[2:3]
             + Opcode.PUSH2
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH3
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PUSH2      # get slice
-                + Opcode.PICK
-                + Opcode.SIZE
-                + Opcode.MIN        # slice end
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH2      # get slice
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN        # slice end
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
 
     def test_tuple_slicing_with_variables(self):
         expected_output = (
@@ -318,79 +352,83 @@ class TestTuple(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC2
             + Opcode.LDLOC2     # return a[a1:a2]
-            + Opcode.LDLOC0
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-            + Opcode.LDLOC1
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PUSH2      # get slice
-                + Opcode.PICK
-                + Opcode.SIZE
-                + Opcode.MIN        # slice end
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.PUSH2
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH3
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH2      # get slice
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN        # slice end
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2], result)
 
     def test_tuple_slicing_negative_start(self):
         expected_output = (
@@ -411,66 +449,70 @@ class TestTuple(BoaTest):
             + Opcode.SIZE       # slice end
             + Opcode.PUSH4
             + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.SWAP       # get slice
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
 
     def test_tuple_slicing_negative_end(self):
         expected_output = (
@@ -487,70 +529,73 @@ class TestTuple(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a[:-4]
+            + Opcode.PUSH4
+            + Opcode.NEGATE         # slice end
             + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
             + Opcode.SIZE
-            + Opcode.PUSH4          # slice end
-            + Opcode.NEGATE
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.ADD
+            + Opcode.PUSH0
             + Opcode.SWAP
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1], result)
 
     def test_tuple_slicing_start_omitted(self):
         expected_output = (
@@ -568,67 +613,72 @@ class TestTuple(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a[:3]
             + Opcode.PUSH3          # slice end
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
             + Opcode.PUSH0
-                + Opcode.SWAP
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.SWAP
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
+
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2], result)
 
     def test_tuple_slicing_omitted(self):
         expected_output = (
@@ -653,6 +703,10 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 1, 2, 3, 4, 5], result)
+
     def test_tuple_slicing_end_omitted(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -671,73 +725,75 @@ class TestTuple(BoaTest):
             + Opcode.DUP
             + Opcode.SIZE       # slice end
             + Opcode.PUSH2
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.SWAP       # get slice
-                + Opcode.NEWARRAY0  # slice
-                + Opcode.PUSH2
-                + Opcode.PICK       # index
-                + Opcode.JMP        # while index < end
-                + Integer(32).to_byte_array(min_length=1)
-                + Opcode.DUP            # if index >= slice start
-                + Opcode.PUSH4
-                + Opcode.PICK
-                + Opcode.GE
-                + Opcode.JMPIFNOT
-                + Integer(25).to_byte_array(min_length=1)
-                + Opcode.OVER               # slice.append(array[index])
-                + Opcode.PUSH5
-                + Opcode.PICK
-                + Opcode.PUSH2
-                + Opcode.PICK
-                + Opcode.DUP
-                + Opcode.SIGN
-                + Opcode.PUSHM1
-                + Opcode.JMPNE
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.OVER
-                + Opcode.SIZE
-                + Opcode.ADD
-                + Opcode.PICKITEM
-                + Opcode.OVER
-                + Opcode.ISTYPE
-                + Type.bytearray.stack_item
-                + Opcode.JMPIFNOT
-                + Integer(5).to_byte_array(signed=True, min_length=1)
-                + Opcode.CAT
-                + Opcode.JMP
-                + Integer(5).to_byte_array(min_length=1)
-                + Opcode.APPEND
-                + Opcode.INC            # index += 1
-                + Opcode.DUP
-                + Opcode.PUSH3
-                + Opcode.PICK
-                + Opcode.LT
-                + Opcode.JMPIF          # end while index < slice end
-                + Integer(-34).to_byte_array(min_length=1)
-                + Opcode.DROP
-                + Opcode.REVERSE4
-                + Opcode.DROP
-                + Opcode.DROP
-                + Opcode.DROP
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.SWAP       # get slice
+            + Opcode.NEWARRAY0  # slice
+            + Opcode.PUSH2
+            + Opcode.PICK       # index
+            + Opcode.JMP        # while index < end
+            + Integer(32).to_byte_array(min_length=1)
+            + Opcode.DUP            # if index >= slice start
+            + Opcode.PUSH4
+            + Opcode.PICK
+            + Opcode.GE
+            + Opcode.JMPIFNOT
+            + Integer(25).to_byte_array(min_length=1)
+            + Opcode.OVER               # slice.append(array[index])
+            + Opcode.PUSH5
+            + Opcode.PICK
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.OVER
+            + Opcode.ISTYPE
+            + Type.bytearray.stack_item
+            + Opcode.JMPIFNOT
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.CAT
+            + Opcode.JMP
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.APPEND
+            + Opcode.INC            # index += 1
+            + Opcode.DUP
+            + Opcode.PUSH3
+            + Opcode.PICK
+            + Opcode.LT
+            + Opcode.JMPIF          # end while index < slice end
+            + Integer(-34).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.REVERSE4
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 3, 4, 5], result)
+
     def test_tuple_slicing_omitted_stride(self):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)
 
     def test_tuple_slicing_omitted_with_stride(self):
         path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithStride.py' % self.dirname
-        with self.assertRaises(NotImplementedError):
-            output = Boa3.compile(path)
+        self.assertCompilerLogs(InternalError, path)

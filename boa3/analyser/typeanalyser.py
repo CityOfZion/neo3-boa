@@ -2,7 +2,8 @@ import ast
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.exception import CompilerError
+from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
@@ -31,7 +32,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar type_errors: a list with the found type errors. Empty by default.
     :ivar modules: a list with the analysed modules. Empty by default.
     :ivar symbols: a dictionary that maps the global symbols.
-    :cvar _operators: a dictionary that maps each operator from Python ast to its equivalent Boa operator.
     """
 
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
@@ -45,35 +45,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_method: Method = None
 
         self.visit(self._tree)
-
-    _operators = {
-        ast.Add: Operator.Plus,
-        ast.Sub: Operator.Minus,
-        ast.Mult: Operator.Mult,
-        ast.Div: Operator.Div,
-        ast.FloorDiv: Operator.IntDiv,
-        ast.Mod: Operator.Mod,
-        ast.Pow: Operator.Pow,
-        ast.UAdd: Operator.Plus,
-        ast.USub: Operator.Minus,
-        ast.Eq: Operator.Eq,
-        ast.NotEq: Operator.NotEq,
-        ast.Lt: Operator.Lt,
-        ast.LtE: Operator.LtE,
-        ast.Gt: Operator.Gt,
-        ast.GtE: Operator.GtE,
-        ast.Is: Operator.Is,
-        ast.IsNot: Operator.IsNot,
-        ast.And: Operator.And,
-        ast.Or: Operator.Or,
-        ast.Not: Operator.Not,
-        ast.BitAnd: Operator.BitAnd,
-        ast.BitOr: Operator.BitOr,
-        ast.BitXor: Operator.BitXor,
-        ast.Invert: Operator.BitNot,
-        ast.LShift: Operator.LeftShift,
-        ast.RShift: Operator.RightShift
-    }
 
     @property
     def _current_method_id(self) -> str:
@@ -151,8 +122,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
                 )
             self._current_method = None
-        elif (isinstance(method, Event)         # events don't have return
-                and function.returns is not None):
+        elif (isinstance(method, Event)  # events don't have return
+              and function.returns is not None):
             return_type = self.get_type(function.returns)
             if return_type is not Type.none:
                 self._log_error(
@@ -257,17 +228,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param assign: the python ast variable assignment node
         """
         # multiple assignments
-        if len(assign.targets) > 1:
-            self._log_error(
-                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
-            )
-        # multiple assignments with tuples
-        elif isinstance(assign.targets[0], ast.Tuple):
+        if isinstance(assign.targets[0], ast.Tuple):
             self._log_error(
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
         else:
-            self.validate_type_variable_assign(assign.targets[0], assign.value)
+            for target in assign.targets:
+                self.validate_type_variable_assign(target, assign.value)
 
         # continue to walk through the tree
         self.generic_visit(assign)
@@ -437,8 +404,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # TODO: remove when slices of other sequence types are implemented
         if (not symbol_type.is_valid_key(lower)
-            or not symbol_type.is_valid_key(upper)
-            or (step is not Type.none and not symbol_type.is_valid_key(step))
+                or not symbol_type.is_valid_key(upper)
+                or (step is not Type.none and not symbol_type.is_valid_key(step))
             ):
             actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
             self._log_error(
@@ -624,6 +591,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         l_type: IType = self.get_type(left)
         r_type: IType = self.get_type(right)
+
+        if l_type is None or r_type is None:
+            return BinaryOp.get_operation_by_operator(operator, l_type if l_type is not None else r_type)
 
         actual_types = (l_type.identifier, r_type.identifier)
         operation: IOperation = BinaryOp.validate_type(operator, l_type, r_type)
@@ -818,11 +788,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif isinstance(node, IOperation):
             return node.operator
 
-        node_type = type(node)
-        if node_type in self._operators:
-            return self._operators[node_type]
-        else:
-            return None
+        return Operator.get_operation(node)
 
     def visit_Call(self, call: ast.Call):
         """
@@ -835,26 +801,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id: str = call.func.id
             callable_target = self.get_symbol(callable_id)
         else:
-            arg0, callable_target, callable_id = self.visit(call.func)
-            arg0_identifier = self.visit(arg0)
-            if isinstance(arg0_identifier, ast.Name):
-                arg0_identifier = arg0_identifier.id
+            callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
-            if (callable_target is not None
-                    and (len(call.args) < 1 or call.args[0] != arg0)
-                    and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
-                call.args.insert(0, arg0)
-            if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
-                self_type: IType = self.get_type(call.args[0])
-                caller = self.get_symbol(arg0_identifier)
-                if isinstance(caller, IType) and not caller.is_type_of(self_type):
-                    self_type = caller
-                callable_target = callable_target.build(self_type)
-
-        if not isinstance(callable_target, Callable):
-            # verify if it is a builtin method with its name shadowed
-            call_target = Builtin.get_symbol(callable_id)
-            callable_target = call_target if call_target is not None else callable_target
+        callable_target = self.validate_builtin_callable(callable_id, callable_target)
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
@@ -867,64 +816,234 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if len(call.keywords) > 0:
                 raise NotImplementedError
 
-            len_call_args = len(call.args)
-            callable_required_args = len(callable_target.args_without_default)
-            if len_call_args > len(callable_target.args):
-                unexpected_arg = call.args[len(callable_target.args)]
-                self._log_error(
-                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
-                )
-            elif len_call_args < callable_required_args:
-                missed_arg = list(callable_target.args)[len(call.args)]
-                self._log_error(
-                    CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
-                )
-            else:
-                if callable_required_args <= len_call_args < len(callable_target.args):
-                    included_args = len_call_args - callable_required_args
-                    call.args.extend(callable_target.defaults[included_args:])
+            if self.validate_callable_arguments(call, callable_target):
                 args = [self.get_type(param) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
-                    callable_target = callable_target.build(args)
+                    callable_target: IBuiltinMethod = callable_target.build(args)
                     if not callable_target.is_supported:
-                        # TODO: implement bytearray constructor with non-bytes values
                         self._log_error(
                             CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
                         )
                         return callable_target.return_type
 
-                for index, (arg_id, arg_value) in enumerate(callable_target.args.items()):
-                    param = call.args[index]
-                    param_type = self.get_type(param)
-                    args.append(param_type)
-                    if not arg_value.type.is_type_of(param_type):
-                        self._log_error(
-                            CompilerError.MismatchedTypes(
-                                param.lineno, param.col_offset,
-                                arg_value.type.identifier,
-                                param_type.identifier
-                            ))
+                self.validate_passed_arguments(call, args, callable_id, callable_target)
 
-            # if the arguments are not generic, include the specified method in the symbol table
-            if (isinstance(callable_target, IBuiltinMethod)
-                    and callable_target.identifier != callable_id
-                    and callable_target.identifier not in self.symbols):
-                self.symbols[callable_target.identifier] = callable_target
-                call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
-                                     ctx=ast.Load(), id=callable_target.identifier)
-            if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
-                if not self._metadata.has_storage:
-                    self._log_error(
-                        CompilerError.MetadataInformationMissing(
-                            line=call.func.lineno, col=call.func.col_offset,
-                            symbol_id=callable_target.identifier,
-                            metadata_attr_id='has_storage'
-                        )
-                    )
-                else:
-                    self._current_method.set_storage()
+            self.update_callable_after_validation(call, callable_id, callable_target)
         return self.get_type(callable_target)
+
+    def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
+        arg0, callable_target, callable_id = self.visit(call.func)
+        arg0_identifier = self.visit(arg0)
+        if isinstance(arg0_identifier, ast.Name):
+            arg0_identifier = arg0_identifier.id
+
+        if (callable_target is not None
+                and (len(call.args) < 1 or call.args[0] != arg0)
+                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
+            call.args.insert(0, arg0)
+
+        if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
+            self_type: IType = self.get_type(call.args[0])
+            caller = self.get_symbol(arg0_identifier)
+            if isinstance(caller, IType) and not caller.is_type_of(self_type):
+                self_type = caller
+            callable_target = callable_target.build(self_type)
+
+        return callable_id, callable_target
+
+    def validate_builtin_callable(self, callable_id: str, callable_target: ISymbol) -> ISymbol:
+        if not isinstance(callable_target, Callable):
+            # verify if it is a builtin method with its name shadowed
+            call_target = Builtin.get_symbol(callable_id)
+            if not isinstance(call_target, Callable) and self.is_exception(callable_id):
+                call_target = Builtin.Exception
+
+            callable_target = call_target if call_target is not None else callable_target
+        return callable_target
+
+    def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:
+        if (callable_target.allow_starred_argument
+                and not hasattr(call, 'checked_starred_args')
+                and len(call.args) > len(callable_target.args_without_default)):
+            args = self.parse_to_node(str(Type.sequence.default_value), call)
+            args.elts = call.args
+            call.args = [args]
+            call.checked_starred_args = True
+
+        len_call_args = len(call.args)
+        callable_required_args = len(callable_target.args_without_default)
+
+        if len_call_args > len(callable_target.args):
+            unexpected_arg = call.args[len(callable_target.args)]
+            self._log_error(
+                CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+            )
+            return False
+        elif len_call_args < callable_required_args:
+            missed_arg = list(callable_target.args)[len(call.args)]
+            self._log_error(
+                CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
+            )
+            return False
+
+        if isinstance(callable_target, IBuiltinMethod) and callable_target.requires_reordering:
+            if not hasattr(call, 'was_reordered') or not call.was_reordered:
+                callable_target.reorder(call.args)
+                call.was_reordered = True
+
+        if callable_required_args <= len_call_args < len(callable_target.args):
+            included_args = len_call_args - callable_required_args
+            call.args.extend(callable_target.defaults[included_args:])
+        return True
+
+    def validate_passed_arguments(self, call: ast.Call, args_types: List[IType], callable_id: str, callable: Callable):
+        if isinstance(callable, IBuiltinMethod):
+            builtin_analyser = BuiltinFunctionCallAnalyser(self, call, callable_id, callable)
+            if builtin_analyser.validate():
+                self.errors.extend(builtin_analyser.errors)
+                self.warnings.extend(builtin_analyser.warnings)
+                return
+
+        for index, (arg_id, arg_value) in enumerate(callable.args.items()):
+            param = call.args[index]
+            param_type = self.get_type(param)
+            args_types.append(param_type)
+            if not arg_value.type.is_type_of(param_type):
+                self._log_error(
+                    CompilerError.MismatchedTypes(
+                        param.lineno, param.col_offset,
+                        arg_value.type.identifier,
+                        param_type.identifier
+                    ))
+
+    def update_callable_after_validation(self, call: ast.Call, callable_id: str, callable_target: Callable):
+        # if the arguments are not generic, include the specified method in the symbol table
+        if (isinstance(callable_target, IBuiltinMethod)
+                and callable_target.identifier != callable_id
+                and callable_target.raw_identifier == callable_id
+                and callable_target.identifier not in self.symbols):
+            self.symbols[callable_target.identifier] = callable_target
+            call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
+                                 ctx=ast.Load(), id=callable_target.identifier)
+
+        # validates if metadata matches callable's requirements
+        if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
+            if not self._metadata.has_storage:
+                self._log_error(
+                    CompilerError.MetadataInformationMissing(
+                        line=call.func.lineno, col=call.func.col_offset,
+                        symbol_id=callable_target.identifier,
+                        metadata_attr_id='has_storage'
+                    )
+                )
+            else:
+                self._current_method.set_storage()
+
+    def visit_Raise(self, raise_node: ast.Raise):
+        """
+        Visitor of the raise node
+
+        Verifies if the raised object is a exception
+
+        :param raise_node: the python ast raise node
+        """
+        raised = self.visit(raise_node.exc)
+        raised_type: IType = self.get_type(raised)
+        if raised_type is not Type.exception:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    raise_node.lineno, raise_node.col_offset,
+                    actual_type_id=raised_type.identifier,
+                    expected_type_id=Type.exception.identifier
+                ))
+
+    def visit_Try(self, try_node: ast.Try):
+        """
+        Visitor of the try node
+
+        :param try_node: the python ast try node
+        """
+        self.validate_except_handlers(try_node)
+
+        for stmt in try_node.body:
+            self.visit(stmt)
+
+        for exception_handler in try_node.handlers:
+            self.visit(exception_handler)
+
+        for stmt in try_node.finalbody:
+            self.visit(stmt)
+
+    def validate_except_handlers(self, try_node: ast.Try):
+        if len(try_node.handlers) > 1:
+            exception_handlers: List[ast.ExceptHandler] = try_node.handlers.copy()
+            general_exc_handler: ast.ExceptHandler = next(
+                (handler
+                 for handler in exception_handlers
+                 if (handler.type is None or  # no specified exception or is BaseException
+                     (isinstance(handler.type, ast.Name) and handler.type.id == BaseException.__name__)
+                     )
+                 ), exception_handlers[0]
+            )
+
+            try_node.handlers = [general_exc_handler]
+            exception_handlers.remove(general_exc_handler)
+
+            for handler in exception_handlers:
+                warnings = len(self.warnings)
+                self.visit(handler)
+                if warnings == len(self.warnings):
+                    self._log_using_specific_exception_warning(handler.type)
+
+        if len(try_node.handlers) == 1:
+            self.visit(try_node.handlers[0])
+
+    def visit_ExceptHandler(self, node: ast.ExceptHandler):
+        """
+        Visitor of the try except node
+
+        :param node: the python ast try except node
+        """
+        logged_errors = False
+
+        exception_type: IType = self.get_type(node.type)
+        if node.type is not None and exception_type is not Type.exception:
+            self._log_error(
+                CompilerError.MismatchedTypes(line=node.type.lineno,
+                                              col=node.type.col_offset,
+                                              expected_type_id=Type.exception.identifier,
+                                              actual_type_id=exception_type.identifier)
+            )
+            logged_errors = True
+
+        if node.name is not None:
+            # TODO: remove when getting the exception is implemented
+            self._log_error(
+                CompilerError.NotSupportedOperation(line=node.lineno,
+                                                    col=node.col_offset,
+                                                    symbol_id='naming exceptions')
+            )
+            logged_errors = True
+
+        if not logged_errors and node.type is not None:
+            self._log_using_specific_exception_warning(node.type)
+
+        self.generic_visit(node)
+
+    def _log_using_specific_exception_warning(self, node: ast.AST):
+        if node is None:
+            exc_id = 'Exception'
+        elif isinstance(node, ast.Name):
+            exc_id = node.id
+        else:
+            exc_id = self.get_type(node).identifier
+
+        self._log_warning(
+            CompilerWarning.UsingSpecificException(line=node.lineno,
+                                                   col=node.col_offset,
+                                                   exception_id=exc_id)
+        )
 
     def visit_value(self, node: ast.AST):
         result = self.visit(node)
@@ -1090,17 +1209,3 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         return slice_node.lower, slice_node.upper, slice_node.step
-
-    def visit_Break(self, break_node: ast.Break):
-        """
-        :param break_node: the python ast break statement node
-        """
-        # TODO: remove when implement break statement
-        raise NotImplementedError
-
-    def visit_Continue(self, continue_node: ast.Continue):
-        """
-        :param continue_node: the python ast continue statement node
-        """
-        # TODO: remove when implement continue statement
-        raise NotImplementedError

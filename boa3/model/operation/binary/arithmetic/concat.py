@@ -15,7 +15,7 @@ class Concat(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str]
+    _valid_types: List[IType] = [Type.str, Type.bytes]
 
     def __init__(self, left: IType = Type.str, right: IType = None):
         self.operator: Operator = Operator.Plus
@@ -37,4 +37,10 @@ class Concat(BinaryOperation):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.CAT, b'')]
+        codes = [(Opcode.CAT, b'')]
+
+        if Type.str.is_type_of(self.left_type) and Type.str.is_type_of(self.right_type):
+            codes.append(
+                (Opcode.CONVERT, Type.str.stack_item)
+            )
+        return codes

@@ -1,4 +1,5 @@
 import ast
+from inspect import isclass
 from typing import Dict, List, Optional, Tuple
 
 from boa3.compiler.codegenerator import CodeGenerator
@@ -41,7 +42,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
     def visit_to_map(self, node: ast.AST, generate: bool = False):
         address: int = VMCodeMapping.instance().bytecode_size
-        if generate:
+        if isinstance(node, ast.Expr):
+            value = self.visit_Expr(node, generate)
+        elif generate:
             value = self.visit_to_generate(node)
         else:
             value = self.visit(node)
@@ -61,11 +64,24 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             result = self.visit(node)
             # the default return of the name visitor is the name string
             if isinstance(result, str):
-                # TODO: validate function calls
-                self.generator.convert_load_symbol(result)
+                if self.is_exception_name(result):
+                    self.generator.convert_new_exception()
+                else:
+                    # TODO: validate function calls
+                    self.generator.convert_load_symbol(result)
             return result
         else:
             return self.generator.convert_literal(node)
+
+    def is_exception_name(self, exc_id: str) -> bool:
+        global_symbols = globals()
+        if exc_id in global_symbols or exc_id in global_symbols['__builtins__']:
+            symbol = (global_symbols[exc_id]
+                      if exc_id in global_symbols
+                      else global_symbols['__builtins__'][exc_id])
+            if isclass(symbol) and issubclass(symbol, BaseException):
+                return True
+        return False
 
     def visit_Module(self, module: ast.Module):
         """
@@ -183,19 +199,45 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             self.visit_to_generate(ret.value)
             self.generator.insert_return()
 
-    def store_variable(self, var_id: str, value: ast.AST, index: ast.AST = None):
+    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST]], value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
-            if index is None:
-                # if index is None, then it is a variable assignment
+            if len(var_ids) == 1:
+                # it's a simple assignment
+                var_id, index = var_ids[0]
+                if index is None:
+                    # if index is None, then it is a variable assignment
+                    self.visit_to_generate(value)
+                    self.generator.convert_store_variable(var_id)
+                else:
+                    # if not, it is an array assignment
+                    self.generator.convert_load_symbol(var_id)
+                    self.visit_to_generate(index)
+                    value_address = self.visit_to_generate(value)
+                    self.generator.convert_set_item(value_address)
+
+            elif len(var_ids) > 0:
+                # it's a chained assignment
                 self.visit_to_generate(value)
-                self.generator.convert_store_variable(var_id)
-            else:
-                # if not, it is an array assignment
-                self.generator.convert_load_symbol(var_id)
-                self.visit_to_generate(index)
-                value_address = self.visit_to_generate(value)
-                self.generator.convert_set_item(value_address)
+                for pos, (var_id, index) in enumerate(reversed(var_ids)):
+                    if index is None:
+                        # if index is None, then it is a variable assignment
+                        if pos < len(var_ids) - 1:
+                            self.generator.duplicate_stack_top_item()
+                        self.generator.convert_store_variable(var_id)
+                    else:
+                        # if not, it is an array assignment
+                        if pos < len(var_ids) - 1:
+                            self.generator.convert_load_symbol(var_id)
+                            self.visit_to_generate(index)
+                            fix_index = VMCodeMapping.instance().bytecode_size
+                            self.generator.duplicate_stack_item(3)
+                        else:
+                            self.visit_to_generate(index)
+                            fix_index = VMCodeMapping.instance().bytecode_size
+                            self.generator.convert_load_symbol(var_id)
+                            self.generator.swap_reverse_stack_items(3)
+                        self.generator.convert_set_item(fix_index)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -204,7 +246,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param ann_assign: the python ast variable assignment node
         """
         var_id = self.visit(ann_assign.target)
-        self.store_variable(var_id, ann_assign.value)
+        self.store_variable((var_id, None), value=ann_assign.value)
 
     def visit_Assign(self, assign: ast.Assign):
         """
@@ -212,15 +254,19 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param assign: the python ast variable assignment node
         """
-        var_index = None
-        var_id = self.visit(assign.targets[0])
+        vars_ids: List[Tuple[str, Optional[ast.AST]]] = []
+        for target in assign.targets:
+            var_index = None
+            var_id = self.visit(target)
 
-        # if it is a tuple, then it is an array assignment
-        if isinstance(var_id, tuple):
-            var_index = var_id[1]
-            var_id: str = var_id[0]
+            # if it is a tuple, then it is an array assignment
+            if isinstance(var_id, tuple):
+                var_index = var_id[1]
+                var_id: str = var_id[0]
 
-        self.store_variable(var_id, assign.value, var_index)
+            vars_ids.append((var_id, var_index))
+
+        self.store_variable(*vars_ids, value=assign.value)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """
@@ -379,6 +425,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in while_node.orelse:
             self.visit_to_map(stmt, generate=True)
 
+        self.generator.convert_end_loop_else(start_addr, len(while_node.orelse) > 0)
+
     def visit_For(self, for_node: ast.For):
         """
         Visitor of for statement node
@@ -409,6 +457,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in for_node.orelse:
             self.visit_to_map(stmt, generate=True)
 
+        self.generator.convert_end_loop_else(start_address,
+                                             has_else=len(for_node.orelse) > 0,
+                                             pop_from_stack=2)
+
     def visit_If(self, if_node: ast.If):
         """
         Visitor of if statement node
@@ -427,6 +479,25 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 self.visit_to_map(stmt, generate=True)
 
         self.generator.convert_end_if(start_addr)
+
+    def visit_Expr(self, expr: ast.Expr, generate: bool = False):
+        """
+        Visitor of an expression node
+
+        :param expr: the python ast expression node
+        :param generate: if it should convert the value
+        """
+        last_stack = self.generator.stack_size
+        if generate:
+            value = self.visit_to_generate(expr.value)
+        else:
+            value = self.visit(expr.value)
+
+        new_stack = self.generator.stack_size
+        for x in range(last_stack, new_stack):
+            self.generator.remove_stack_top_item()
+
+        return value
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """
@@ -478,7 +549,42 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 VMCodeMapping.instance().bytecode_size
             )
             self.visit_to_generate(arg)
-        self.generator.convert_load_symbol(function_id, args_addresses)
+
+        if self.is_exception_name(function_id):
+            self.generator.convert_new_exception(len(call.args))
+        else:
+            self.generator.convert_load_symbol(function_id, args_addresses)
+
+    def visit_Raise(self, raise_node: ast.Raise):
+        """
+        Visitor of the raise node
+
+        :param raise_node: the python ast raise node
+        """
+        self.visit_to_map(raise_node.exc, generate=True)
+        self.generator.convert_raise_exception()
+
+    def visit_Try(self, try_node: ast.Try):
+        """
+        Visitor of the try node
+
+        :param try_node: the python ast try node
+        """
+        try_address: int = self.generator.convert_begin_try()
+        try_end: Optional[int] = None
+        for stmt in try_node.body:
+            self.visit_to_map(stmt, generate=True)
+
+        if len(try_node.handlers) == 1:
+            handler = try_node.handlers[0]
+            try_end = self.generator.convert_try_except(handler.name)
+            for stmt in handler.body:
+                self.visit_to_map(stmt, generate=True)
+
+        except_end = self.generator.convert_end_try(try_address, try_end)
+        for stmt in try_node.finalbody:
+            self.visit_to_map(stmt, generate=True)
+        self.generator.convert_end_try_finally(except_end, try_address, len(try_node.finalbody) > 0)
 
     def visit_Name(self, name: ast.Name) -> str:
         """
@@ -506,6 +612,18 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             value_id = value.id if isinstance(value, ast.Name) else value
             return '{0}.{1}'.format(value_id, attribute.attr)
         return attribute.attr
+
+    def visit_Continue(self, continue_node: ast.Continue):
+        """
+        :param continue_node: the python ast continue statement node
+        """
+        self.generator.convert_loop_continue()
+
+    def visit_Break(self, break_node: ast.Break):
+        """
+        :param break_node: the python ast break statement node
+        """
+        self.generator.convert_loop_break()
 
     def visit_Constant(self, constant: ast.Constant):
         """

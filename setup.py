@@ -4,7 +4,7 @@ from os import path
 from pkg_resources import parse_version
 # Always prefer setuptools over distutils
 # To use a consistent encoding
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 from boa3 import __version__ as version
 

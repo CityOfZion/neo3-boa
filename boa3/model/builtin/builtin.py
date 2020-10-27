@@ -7,6 +7,7 @@ from boa3.model.builtin.classmethod.clearmethod import ClearMethod
 from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
+from boa3.model.builtin.classmethod.popmethod import PopMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
@@ -18,7 +19,11 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
+from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
+from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.printmethod import PrintMethod
+from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
@@ -47,16 +52,21 @@ class Builtin:
 
     # builtin method
     Len = LenMethod()
+    IsInstance = IsInstanceMethod()
+    Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     NewEvent = CreateEventMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
+    Range = RangeMethod()
+    Exception = ExceptionMethod()
 
     # python class method
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
+    SequencePop = PopMethod()
     SequenceReverse = ReverseMethod()
     DictKeys = MapKeysMethod()
     DictValues = MapValuesMethod()
@@ -67,11 +77,14 @@ class Builtin:
     ConvertToStr = ToStrMethod
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
+                                                IsInstance,
+                                                Print,
                                                 ScriptHash,
                                                 ByteArray,
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
+                                                SequencePop,
                                                 SequenceReverse,
                                                 DictKeys,
                                                 DictValues,

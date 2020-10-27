@@ -4,6 +4,7 @@ from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestIf(BoaTest):
@@ -17,19 +18,20 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.PUSH1
             + Opcode.JMPIFNOT   # if True
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2     # a = a + 2
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/if_test/ConstantCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(2, result)
 
     def test_if_variable_condition(self):
         expected_output = (
@@ -40,19 +42,22 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2      # a = a + 2
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/if_test/VariableCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(0, result)
 
     def test_if_mismatched_type_condition(self):
         path = '%s/boa3_test/test_sc/if_test/MismatchedTypeCondition.py' % self.dirname
@@ -77,34 +82,39 @@ class TestIf(BoaTest):
             + b'\x02'
             + Opcode.PUSH0      # c = 0
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # d = c
+            + Opcode.PUSH0      # d = c
             + Opcode.STLOC1
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(17).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # c = c + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
-                + Opcode.LDARG1
-                + Opcode.JMPIFNOT   # if arg1
-                + Integer(6).to_byte_array(min_length=1, signed=True)
-                    + Opcode.LDLOC1     # d = d + 3
-                    + Opcode.PUSH3
-                    + Opcode.ADD
-                    + Opcode.STLOC1
-                + Opcode.LDLOC0     # c = c + d
-                + Opcode.LDLOC1
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Integer(13).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2      # c = c + 2
+            + Opcode.STLOC0
+            + Opcode.LDARG1
+            + Opcode.JMPIFNOT   # if arg1
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH3      # d = d + 3
+            + Opcode.STLOC1
+            + Opcode.PUSH2      # c = c + d
+            + Opcode.LDLOC1
+            + Opcode.ADD
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return c
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/if_test/NestedIf.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True, True)
+        self.assertEqual(5, result)
+        result = self.run_smart_contract(engine, path, 'Main', True, False)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False, True)
+        self.assertEqual(0, result)
+        result = self.run_smart_contract(engine, path, 'Main', False, False)
+        self.assertEqual(0, result)
 
     def test_if_else(self):
         expected_output = (
@@ -115,22 +125,25 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(8).to_byte_array(min_length=1, signed=True)
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Integer(6).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2      # a = a + 2
+            + Opcode.STLOC0
             + Opcode.JMP        # else
             + Integer(4).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH10     # a = 10
-                + Opcode.STLOC0
+            + Opcode.PUSH10     # a = 10
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/if_test/IfElse.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(10, result)
 
     def test_else_no_body(self):
         path = '%s/boa3_test/test_sc/if_test/ElseWithoutBody.py' % self.dirname
@@ -147,18 +160,16 @@ class TestIf(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # if arg0
-            + Integer(8).to_byte_array(min_length=1)
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Integer(6).to_byte_array(min_length=1)
+            + Opcode.PUSH2      # a = a + 2
+            + Opcode.STLOC0
             + Opcode.JMP
             + Integer(7).to_byte_array(min_length=1)
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # elif arg0
             + Integer(4).to_byte_array(min_length=1)
-                + Opcode.PUSH10     # a = 10
-                + Opcode.STLOC0
+            + Opcode.PUSH10     # a = 10
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
@@ -166,6 +177,12 @@ class TestIf(BoaTest):
         path = '%s/boa3_test/test_sc/if_test/IfElif.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(0, result)
 
     def test_elif_no_condition(self):
         path = '%s/boa3_test/test_sc/if_test/ElifWithoutCondition.py' % self.dirname
@@ -180,7 +197,7 @@ class TestIf(BoaTest):
             output = Boa3.compile(path)
 
     def test_if_relational_condition(self):
-        jmp_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -193,18 +210,21 @@ class TestIf(BoaTest):
             + Opcode.LT
             + Opcode.JMPIFNOT   # if c < 10
             + jmp_address
-                + Opcode.LDLOC0     # a = a + 2
-                + Opcode.PUSH2
-                + Opcode.ADD
-                + Opcode.STLOC0
+            + Opcode.PUSH2      # a = a + 2
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/if_test/RelationalCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 5)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(0, result)
 
     def test_if_multiple_branches(self):
         twenty = Integer(20).to_byte_array()
@@ -217,26 +237,26 @@ class TestIf(BoaTest):
             + Opcode.LT
             + Opcode.JMPIFNOT       # if arg0 < 0
             + Integer(6).to_byte_array(min_length=1)
-                + Opcode.PUSH0          # a = 0
-                + Opcode.STLOC0
+            + Opcode.PUSH0          # a = 0
+            + Opcode.STLOC0
             + Opcode.JMP
             + Integer(35).to_byte_array(min_length=1)
-                + Opcode.LDARG0
-                + Opcode.PUSH5
+            + Opcode.LDARG0
+            + Opcode.PUSH5
             + Opcode.LT
             + Opcode.JMPIFNOT       # elif arg0 < 5
             + Integer(6).to_byte_array(min_length=1)
-                + Opcode.PUSH5          # a = 5
-                + Opcode.STLOC0
+            + Opcode.PUSH5          # a = 5
+            + Opcode.STLOC0
             + Opcode.JMP
             + Integer(26).to_byte_array(min_length=1)
-                + Opcode.LDARG0
-                + Opcode.PUSH10
+            + Opcode.LDARG0
+            + Opcode.PUSH10
             + Opcode.LT
             + Opcode.JMPIFNOT       # elif arg0 < 10
             + Integer(6).to_byte_array(min_length=1)
-                + Opcode.PUSH10         # a = 10
-                + Opcode.STLOC0
+            + Opcode.PUSH10         # a = 10
+            + Opcode.STLOC0
             + Opcode.JMP
             + Integer(17).to_byte_array(min_length=1)
             + Opcode.LDARG0
@@ -244,24 +264,37 @@ class TestIf(BoaTest):
             + Opcode.LT
             + Opcode.JMPIFNOT       # elif arg0 < 15
             + Integer(6).to_byte_array(min_length=1)
-                + Opcode.PUSH15         # a = 15
-                + Opcode.STLOC0
+            + Opcode.PUSH15         # a = 15
+            + Opcode.STLOC0
             + Opcode.JMP            # else
             + Integer(8).to_byte_array(min_length=1)
-                + Opcode.PUSHDATA1      # a = 20
-                + Integer(len(twenty)).to_byte_array()
-                + twenty
-                + Opcode.CONVERT
-                + Type.int.stack_item
-                + Opcode.STLOC0
+            + Opcode.PUSHDATA1      # a = 20
+            + Integer(len(twenty)).to_byte_array()
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/if_test/MultipleBranches.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', -10)
+        self.assertEqual(0, result)
+        result = self.run_smart_contract(engine, path, 'Main', 2)
+        self.assertEqual(5, result)
+        result = self.run_smart_contract(engine, path, 'Main', 7)
+        self.assertEqual(10, result)
+        result = self.run_smart_contract(engine, path, 'Main', 13)
+        self.assertEqual(15, result)
+        result = self.run_smart_contract(engine, path, 'Main', 17)
+        self.assertEqual(20, result)
+        result = self.run_smart_contract(engine, path, 'Main', 23)
+        self.assertEqual(20, result)
 
     def test_if_expression_variable_condition(self):
         expected_output = (
@@ -270,19 +303,24 @@ class TestIf(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.JMPIFNOT   # a = 2 if arg0 else 3
-                + Integer(5).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH2      # 2
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2      # 2
             + Opcode.JMP        # else
             + Integer(3).to_byte_array(min_length=1, signed=True)
-                + Opcode.PUSH3      # 3
+            + Opcode.PUSH3      # 3
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/if_test/IfExpVariableCondition.py' % self.dirname
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(3, result)
 
     def test_if_expression_without_else_branch(self):
         path = '%s/boa3_test/test_sc/if_test/IfExpWithoutElse.py' % self.dirname

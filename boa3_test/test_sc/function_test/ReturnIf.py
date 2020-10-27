@@ -1,3 +1,7 @@
+from boa3.builtin import public
+
+
+@public
 def Main(number: int) -> int:
     # the function has a return to each condition
     if number % 3 == 1:

@@ -15,7 +15,11 @@ class ImportAnalyser(IAstAnalyser):
         self.can_be_imported: bool = False
         self._import_identifier: str = import_target
 
-        module_origin: str = importlib.util.find_spec(import_target).origin
+        try:
+            module_origin: str = importlib.util.find_spec(import_target).origin
+        except BaseException:
+            return
+
         path: List[str] = module_origin.split(os.sep)
         self.path: str = module_origin.replace(os.sep, '/')
 

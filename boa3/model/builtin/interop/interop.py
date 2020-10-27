@@ -1,8 +1,15 @@
 from enum import Enum
-from typing import List, Dict
+from typing import Dict, List
 
+from boa3.model.builtin.interop.blockchain.getcurrentheightmethod import CurrentHeightProperty
+from boa3.model.builtin.interop.contract.callmethod import CallMethod
+from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
+from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
+from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
+from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
+from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
 from boa3.model.builtin.interop.runtime.triggermethod import TriggerMethod
@@ -14,6 +21,8 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
 class InteropPackage(str, Enum):
+    Blockchain = 'blockchain'
+    Contract = 'contract'
     Runtime = 'runtime'
     Storage = 'storage'
 
@@ -30,6 +39,14 @@ class Interop:
             lst.extend(symbols)
         return lst
 
+    # Blockchain Interops
+    CurrentHeight = CurrentHeightProperty()
+
+    # Contract Interops
+    CallContract = CallMethod()
+    NeoScriptHash = NeoProperty()
+    GasScriptHash = GasProperty()
+
     # Runtime Interops
     CheckWitness = CheckWitnessMethod()
     Notify = NotifyMethod()
@@ -37,6 +54,9 @@ class Interop:
     TriggerType = TriggerTyping()
     GetTrigger = TriggerMethod(TriggerType)
     CallingScriptHash = CallingScriptHashProperty()
+    BlockTime = BlockTimeProperty()
+    GasLeft = GasLeftProperty()
+    InvocationCounter = InvocationCounterProperty()
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -44,12 +64,21 @@ class Interop:
     StorageDelete = StorageDeleteMethod()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
+        InteropPackage.Blockchain: [CurrentHeight
+                                    ],
+        InteropPackage.Contract: [CallContract,
+                                  NeoScriptHash,
+                                  GasScriptHash
+                                  ],
         InteropPackage.Runtime: [CheckWitness,
                                  Notify,
                                  Log,
                                  TriggerType,
                                  GetTrigger,
-                                 CallingScriptHash
+                                 CallingScriptHash,
+                                 BlockTime,
+                                 GasLeft,
+                                 InvocationCounter
                                  ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,

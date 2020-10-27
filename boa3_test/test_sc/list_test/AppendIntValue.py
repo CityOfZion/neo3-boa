@@ -1,7 +1,10 @@
 from typing import List
 
+from boa3.builtin import public
 
-def Main(op: str, args: list) -> List[int]:
+
+@public
+def Main() -> List[int]:
     a = [1, 2, 3]
     a.append(4)
     return a

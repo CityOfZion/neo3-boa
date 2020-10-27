@@ -1,4 +1,4 @@
-from boa3.builtin import metadata, NeoMetadata
+from boa3.builtin import NeoMetadata, metadata
 
 
 def Main() -> int:
@@ -12,4 +12,3 @@ def example() -> NeoMetadata:
     meta = NeoMetadata()
     meta.has_storage = True
     return meta
-
