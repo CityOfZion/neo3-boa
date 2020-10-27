@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2020-10-27
+### Added
+- Converted `time`, `height`, `gasLeft` and `invocationCounter` interops
+- Implemented compiler validation of `try finally` branch
+- Included execution tests in the unit tests using the TestEngine from the [C# compiler](https://github.com/neo-project/neo-devpack-dotnet)
+
+### Changed
+- Replaced the markdown **Python Supported Features** table to a html table in the README
+
+
 ## [0.4.0] - 2020-10-01
 ### Added
 - Included a neo3-boa's structure diagram in the README
@@ -43,7 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/CityOfZion/neo3-boa/compare/v0.2.1...v0.2.2

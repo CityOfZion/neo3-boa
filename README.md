@@ -11,7 +11,6 @@
 
 <p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo3-python">neo-mamba</a>  </p>
 
-</p>
 <p align="center">
   <a href="https://circleci.com/gh/CityOfZion/neo3-boa/tree/master">
     <img src="https://circleci.com/gh/CityOfZion/neo3-boa.svg?style=shield" alt="CircleCI.">
@@ -103,7 +102,7 @@ $ pip install neo3-boa
 ```
 
 ###### 2.1. (Optional) Run from source code
-If Pip is not available, you can run Neo3-Boa from source.
+If neo3-boa is not available via pip, you can run it from source.
 
 ###### 2.1.1 Clone neo3-boa
 ```shell
@@ -521,7 +520,7 @@ For an extensive collection of examples:
   </tbody>
   <tbody>
     <td>🔜</td>
-    <td>next release</td>
+    <td>backlog</td>
     <td>List type</td>
     <td>
       <pre>
@@ -561,7 +560,7 @@ For an extensive collection of examples:
   </tbody>
   <tbody>
     <td>🔜</td>
-    <td>backlog</td>
+    <td>next release</td>
     <td>Set type</td>
     <td>
       <pre>
@@ -633,6 +632,22 @@ For an extensive collection of examples:
   a: Optional[int] = 5
   a = 142
   a = None
+        </code>
+      </pre>
+    </td>
+    <td>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>next release</td>
+    <td>Union type</td>
+    <td>
+      <pre>
+        <code>
+  a: Union[int, str] = 5
+  a = 142
+  a = 'example'
         </code>
       </pre>
     </td>
@@ -795,20 +810,6 @@ For an extensive collection of examples:
   </tbody>
   <tbody>
     <td>🔜</td>
-    <td>next release</td>
-    <td>Built in function</td>
-    <td>
-      <pre>
-        <code>
-  a = reversed([1, 2, 3, 4])
-        </code>
-      </pre>
-    </td>
-    <td>
-    </td>
-  </tbody>
-  <tbody>
-    <td>🔜</td>
     <td>backlog</td>
     <td>Built in function</td>
     <td>
@@ -819,6 +820,7 @@ For an extensive collection of examples:
   c = min(1, 6, 2)
   d = pow(2, 2)
   e = sum(list_of_num, 0)
+  f = reversed([1, 2, 3, 4])
         </code>
       </pre>
     </td>
@@ -958,8 +960,8 @@ For an extensive collection of examples:
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>next release</td>
+    <td>✅</td>
+    <td>v0.5</td>
     <td>Try except with finally</td>
     <td>
       <pre>
