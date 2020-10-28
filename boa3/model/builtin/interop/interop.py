@@ -17,12 +17,14 @@ from boa3.model.builtin.interop.runtime.triggertype import TriggerType as Trigge
 from boa3.model.builtin.interop.storage.storagedeletemethod import StorageDeleteMethod
 from boa3.model.builtin.interop.storage.storagegetmethod import StorageGetMethod
 from boa3.model.builtin.interop.storage.storageputmethod import StoragePutMethod
+from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
 class InteropPackage(str, Enum):
     Blockchain = 'blockchain'
     Contract = 'contract'
+    Crypto = 'crypto'
     Runtime = 'runtime'
     Storage = 'storage'
 
@@ -63,6 +65,9 @@ class Interop:
     StoragePut = StoragePutMethod()
     StorageDelete = StorageDeleteMethod()
 
+    # Crypto Interops
+    Sha256 = Sha256Method()
+
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
         InteropPackage.Blockchain: [CurrentHeight
                                     ],
@@ -70,6 +75,8 @@ class Interop:
                                   NeoScriptHash,
                                   GasScriptHash
                                   ],
+        InteropPackage.Crypto: [Sha256
+                                ],
         InteropPackage.Runtime: [CheckWitness,
                                  Notify,
                                  Log,
