@@ -1,4 +1,6 @@
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Optional, Sequence
+
+from boa3.neo.vm.type.Integer import Integer
 
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItemType import StackItemType
@@ -30,17 +32,20 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
             raise ValueError
         value = item_value
 
-    elif item_type is StackItemType.ByteString:
+    elif item_type in (StackItemType.ByteString, StackItemType.Buffer):
         if not isinstance(item_value, str):
             raise ValueError
-        import base64
-        value = String.from_bytes(base64.b64decode(item_value))
 
-    elif item_type is StackItemType.Buffer:
-        if not isinstance(item_value, str):
-            raise ValueError
         import base64
-        value = base64.b64decode(item_value)
+        decoded: bytes = base64.b64decode(item_value)
+
+        if item_type is StackItemType.Buffer:
+            value = decoded
+        else:
+            try:
+                value = String.from_bytes(decoded)
+            except BaseException:
+                value = decoded
 
     elif item_type is StackItemType.Array:
         if not isinstance(item_value, Sequence) or isinstance(item_value, (str, bytes)):
@@ -58,6 +63,17 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
             value[stack_item_from_json(x['key'])] = stack_item_from_json(x['value'])
 
     return value
+
+
+def bytes_from_json(item: Dict[str, Any]) -> Optional[bytes]:
+    value = stack_item_from_json(item)
+
+    if isinstance(value, str):
+        value = String(value).to_bytes()
+    elif isinstance(value, int):
+        value = Integer(value).to_byte_array()
+
+    return value if isinstance(value, bytes) else None
 
 
 def contract_parameter_to_json(value: Any) -> Dict[str, Any]:

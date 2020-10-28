@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from boa3.neo.smart_contract.notification import Notification
-from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
+from boa3.neo.utils import bytes_from_json, contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
 
@@ -13,7 +13,7 @@ class TestEngine:
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
-        self._storage: Dict[str, Any] = {}
+        self._storage: Dict[bytes, Any] = {}
         self._notifications: List[Notification] = []
         self._error_message: Optional[str] = None
 
@@ -41,12 +41,12 @@ class TestEngine:
         return [n for n in self._notifications if n.name == event_name]
 
     @property
-    def storage(self) -> Dict[str, Any]:
+    def storage(self) -> Dict[bytes, Any]:
         return self._storage.copy()
 
     def storage_get(self, key: Union[str, bytes]) -> Any:
-        if isinstance(key, bytes):
-            key = String.from_bytes(key)
+        if isinstance(key, str):
+            key = String(key).to_bytes()
 
         if key in self._storage:
             return self._storage[key]
@@ -54,14 +54,19 @@ class TestEngine:
             return None
 
     def storage_put(self, key: Union[str, bytes], value: Any):
-        if isinstance(key, bytes):
-            key = String.from_bytes(key)
+        if isinstance(key, str):
+            key = String(key).to_bytes()
 
         self._storage[key] = value
 
+    def set_storage(self, storage: Dict[Union[str, bytes], Any]):
+        self._storage.clear()
+        for key, value in storage.items():
+            self.storage_put(key, value)
+
     def storage_delete(self, key: Union[str, bytes]):
-        if isinstance(key, bytes):
-            key = String.from_bytes(key)
+        if isinstance(key, str):
+            key = String(key).to_bytes()
 
         if key in self._storage:
             self._storage.pop(key)
@@ -70,10 +75,10 @@ class TestEngine:
         import json
         import subprocess
 
-        contract_parameters = [contract_parameter_to_json(x) for x in arguments]
-        param_json = json.dumps(contract_parameters).replace(' ', '')
+        test_engine_args = self.to_json(nef_path, method, *arguments)
+        param_json = json.dumps(test_engine_args).replace(' ', '')
 
-        process = subprocess.Popen(['dotnet', self._test_engine_path, nef_path, method, param_json],
+        process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
                                    text=True)
@@ -103,16 +108,34 @@ class TestEngine:
                     self._result_stack = [stack_item_from_json(result['result_stack'])]
 
             if 'notifications' in result:
-                json_notifications = result['notifications']
-                if not isinstance(json_notifications, list):
-                    json_notifications = [json_notifications]
+                json_storage = result['notifications']
+                if not isinstance(json_storage, list):
+                    json_storage = [json_storage]
 
                 notifications = []
-                for n in json_notifications:
+                for n in json_storage:
                     new = Notification.from_json(n)
                     if new is not None:
                         notifications.append(new)
                 self._notifications = notifications
+
+            if 'storage' in result:
+                json_storage = result['storage']
+                if not isinstance(json_storage, list):
+                    json_storage = [json_storage]
+
+                storage: Dict[bytes, Any] = {}
+                for storage_pair in json_storage:
+                    if not isinstance(storage_pair, dict) or list(storage_pair.keys()) != ['key', 'value']:
+                        continue
+
+                    key = bytes_from_json(storage_pair['key'])
+                    value = bytes_from_json(storage_pair['value'])
+
+                    if isinstance(key, bytes):
+                        storage[key] = value if isinstance(value, bytes) else b''
+
+                self._storage = storage
 
         except BaseException as e:
             self._error_message = str(e)
@@ -134,3 +157,13 @@ class TestEngine:
         self._storage = {}
         self._notifications = []
         self._error_message = None
+
+    def to_json(self, path: str, method: str, *args: Any) -> Dict[str, Any]:
+        return {
+            'path': path,
+            'method': method,
+            'arguments': [contract_parameter_to_json(x) for x in args],
+            'storage': [{'key': contract_parameter_to_json(key),
+                         'value': contract_parameter_to_json(value)
+                         } for key, value in self._storage.items()]
+        }

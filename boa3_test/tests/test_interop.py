@@ -514,7 +514,6 @@ class TestInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
-
     def test_ripemd160_str(self):
         string = String('test').to_bytes()
         expected_output = (
