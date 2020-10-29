@@ -15,6 +15,7 @@ class BoaTest(TestCase):
     ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
     MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
     VALUE_IS_OUT_OF_RANGE_MSG = 'The value is out of range'
+    STORAGE_VALUE_IS_OUT_OF_RANGE_MSG = 'Specified argument was out of the range of valid values.'
 
     @classmethod
     def setUpClass(cls):
@@ -79,13 +80,19 @@ class BoaTest(TestCase):
         return debug_info
 
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
-                           *arguments: Any, reset_engine: bool = False) -> Any:
+                           *arguments: Any, reset_engine: bool = False,
+                           fake_storage: Dict[str, Any] = None) -> Any:
+
         if smart_contract_path.endswith('.py'):
             if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
                 self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
 
-        result = test_engine.run(smart_contract_path, method, *arguments, reset_engine=reset_engine)
+        if isinstance(fake_storage, dict):
+            test_engine.set_storage(fake_storage)
+
+        result = test_engine.run(smart_contract_path, method, *arguments,
+                                 reset_engine=reset_engine)
 
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
             raise TestExecutionException(test_engine.error)

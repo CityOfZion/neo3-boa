@@ -1,7 +1,8 @@
-from boa3.builtin import NeoMetadata, metadata
+from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.interop.storage import put
 
 
+@public
 def Main(key: str):
     value: int = 123
     put(key, value)
