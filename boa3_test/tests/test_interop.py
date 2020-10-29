@@ -532,6 +532,25 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_hash160_str(self):
+        string = String('test').to_bytes()
+        expected_output = (
+                Opcode.PUSHDATA1
+                + Integer(len(string)).to_byte_array(min_length=1)
+                + string
+                + Opcode.SYSCALL
+                + Interop.Sha256.interop_method_hash
+                + Opcode.SYSCALL
+                + Interop.Ripemd160.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/Hash160Str.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
     def test_sha256_str(self):
         string = String('test').to_bytes()
         expected_output = (
