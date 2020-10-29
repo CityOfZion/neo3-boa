@@ -11,3 +11,7 @@ def ripemd160(key: Any) -> bytes:
 
 def hash160(key: Any) -> bytes:
     pass
+
+
+def hash256(key: Any) -> bytes:
+    pass
