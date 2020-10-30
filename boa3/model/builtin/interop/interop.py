@@ -20,6 +20,7 @@ from boa3.model.builtin.interop.storage.storageputmethod import StoragePutMethod
 from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
 from boa3.model.builtin.interop.crypto.ripemd160method import Ripemd160Method
 from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
+from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
@@ -71,6 +72,7 @@ class Interop:
     Sha256 = Sha256Method()
     Ripemd160 = Ripemd160Method()
     Hash160 = Hash160Method()
+    Hash256 = Hash256Method()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
         InteropPackage.Blockchain: [CurrentHeight
@@ -81,7 +83,8 @@ class Interop:
                                   ],
         InteropPackage.Crypto: [Sha256,
                                 Ripemd160,
-                                Hash160
+                                Hash160,
+                                Hash256
                                 ],
         InteropPackage.Runtime: [CheckWitness,
                                  Notify,
