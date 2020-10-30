@@ -7,3 +7,7 @@ def sha256(key: Any) -> bytes:
 
 def ripemd160(key: Any) -> bytes:
     pass
+
+
+def hash160(key: Any) -> bytes:
+    pass
