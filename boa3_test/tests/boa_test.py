@@ -16,6 +16,7 @@ class BoaTest(TestCase):
     MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
     VALUE_IS_OUT_OF_RANGE_MSG = 'The value is out of range'
     STORAGE_VALUE_IS_OUT_OF_RANGE_MSG = 'Specified argument was out of the range of valid values.'
+    CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
 
     @classmethod
     def setUpClass(cls):
@@ -78,6 +79,28 @@ class BoaTest(TestCase):
             import json
             debug_info = json.loads(dbgnfo.read(os.path.basename(path.replace('.py', '.debug.json'))))
         return debug_info
+
+    def get_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+        nef_output = path.replace('.py', '.nef')
+        manifest_output = path.replace('.py', '.manifest.json')
+
+        from boa3.neo.contracts.neffile import NefFile
+
+        if not os.path.isfile(nef_output):
+            output = bytes()
+        else:
+            with open(nef_output, mode='rb') as nef:
+                file = nef.read()
+                output = NefFile.deserialize(file).script
+
+        if not os.path.isfile(manifest_output):
+            manifest = {}
+        else:
+            with open(manifest_output) as manifest_output:
+                import json
+                manifest = json.loads(manifest_output.read())
+
+        return output, manifest
 
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
                            *arguments: Any, reset_engine: bool = False,

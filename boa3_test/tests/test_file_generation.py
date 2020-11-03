@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Tuple
+from typing import Dict
 
 from boa3 import constants
 from boa3.boa3 import Boa3
@@ -13,27 +13,6 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestFileGeneration(BoaTest):
-    def get_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
-        nef_output = path.replace('.py', '.nef')
-        manifest_output = path.replace('.py', '.manifest.json')
-
-        from boa3.neo.contracts.neffile import NefFile
-
-        if not os.path.isfile(nef_output):
-            output = bytes()
-        else:
-            with open(nef_output, mode='rb') as nef:
-                file = nef.read()
-                output = NefFile.deserialize(file).script
-
-        if not os.path.isfile(manifest_output):
-            manifest = {}
-        else:
-            with open(manifest_output) as manifest_output:
-                import json
-                manifest = json.loads(manifest_output.read())
-
-        return output, manifest
 
     def test_generate_files(self):
         path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname

@@ -9,6 +9,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -308,14 +309,32 @@ class TestInterop(BoaTest):
             + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
-            + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CallScriptHash.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        manifest_hash = manifest['abi']['hash']
+        call_hash = Integer(manifest_hash[2:], 16).to_byte_array()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine(self.dirname)
+        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
+        engine.add_contract(call_contract_path)
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
+        self.assertEqual(3, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, -24])
+        self.assertEqual(-66, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, 24])
+        self.assertEqual(-18, result)
 
     def test_call_contract_without_args(self):
         expected_output = (
@@ -327,14 +346,28 @@ class TestInterop(BoaTest):
             + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
-            + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CallScriptHashWithoutArgs.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        call_contract_path = '%s/boa3_test/test_sc/list_test/IntList.py' % self.dirname
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        manifest_hash = manifest['abi']['hash']
+        call_hash = Integer(manifest_hash[2:], 16).to_byte_array()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine(self.dirname)
+        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
+        engine.add_contract(call_contract_path)
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
+        self.assertEqual([1, 2, 3], result)
 
     def test_call_contract_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooManyArguments.py' % self.dirname
@@ -534,16 +567,16 @@ class TestInterop(BoaTest):
     def test_hash160_str(self):
         string = String('test').to_bytes()
         expected_output = (
-                Opcode.PUSHDATA1
-                + Integer(len(string)).to_byte_array(min_length=1)
-                + string
-                + Opcode.SYSCALL
-                + Interop.Sha256.interop_method_hash
-                + Opcode.SYSCALL
-                + Interop.Ripemd160.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.Sha256.interop_method_hash
+            + Opcode.SYSCALL
+            + Interop.Ripemd160.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/Hash160Str.py' % self.dirname
