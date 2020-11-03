@@ -671,3 +671,419 @@ class TestInterop(BoaTest):
     def test_base58_decode_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/Base58DecodeMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_check_multisig_with_ecdsa_secp256r1_str(self):
+        string = String('test').to_bytes()
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(string)).to_byte_array(min_length=1)
+                + string
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Str.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256r1_int(self):
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSH10
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Int.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256r1_bool(self):
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSH0
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Bool.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256r1_byte(self):
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+        byte_input4 = b'\x00\x01\x02'
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input4)).to_byte_array(min_length=1)
+                + byte_input4
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Byte.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256k1_str(self):
+        string = String('test').to_bytes()
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(string)).to_byte_array(min_length=1)
+                + string
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Str.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256k1_int(self):
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSH10
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Int.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256k1_bool(self):
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSH0
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Bool.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_check_multisig_with_ecdsa_secp256k1_byte(self):
+        byte_input0 = String('123').to_bytes()
+        byte_input1 = String('456').to_bytes()
+        byte_input2 = String('098').to_bytes()
+        byte_input3 = String('765').to_bytes()
+        byte_input4 = b'\x00\x01\x02'
+
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x02'
+                + b'\x00'
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input1)).to_byte_array(min_length=1)
+                + byte_input1
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input0)).to_byte_array(min_length=1)
+                + byte_input0
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input3)).to_byte_array(min_length=1)
+                + byte_input3
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input2)).to_byte_array(min_length=1)
+                + byte_input2
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.PUSH2
+                + Opcode.PACK
+                + Opcode.STLOC1
+                + Opcode.LDLOC1
+                + Opcode.LDLOC0
+                + Opcode.PUSHDATA1
+                + Integer(len(byte_input4)).to_byte_array(min_length=1)
+                + byte_input4
+                + Opcode.CONVERT
+                + Type.bytes.stack_item
+                + Opcode.SYSCALL
+                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+                + Opcode.DROP
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Byte.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
