@@ -24,8 +24,8 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
-            + Opcode.RET        # return
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/list_test/IntList.py' % self.dirname

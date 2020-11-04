@@ -15,6 +15,7 @@ class TestEngine:
         self._result_stack: List[Any] = []
         self._storage: Dict[bytes, Any] = {}
         self._notifications: List[Notification] = []
+        self._contract_paths: List[str] = []
         self._error_message: Optional[str] = None
 
     @property
@@ -70,6 +71,14 @@ class TestEngine:
 
         if key in self._storage:
             self._storage.pop(key)
+
+    @property
+    def contracts(self) -> List[str]:
+        return self._contract_paths.copy()
+
+    def add_contract(self, contract_nef_path: str):
+        if contract_nef_path.endswith('.nef') and contract_nef_path not in self._contract_paths:
+            self._contract_paths.append(contract_nef_path)
 
     def run(self, nef_path: str, method: str, *arguments: Any, reset_engine: bool = False) -> Any:
         import json
@@ -165,5 +174,6 @@ class TestEngine:
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': [{'key': contract_parameter_to_json(key),
                          'value': contract_parameter_to_json(value)
-                         } for key, value in self._storage.items()]
+                         } for key, value in self._storage.items()],
+            'contracts': [{'nef': contract_path} for contract_path in self._contract_paths]
         }
