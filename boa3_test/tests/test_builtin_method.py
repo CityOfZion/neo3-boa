@@ -585,12 +585,123 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(script_hash, result)
 
     def test_script_hash_variable(self):
+        script_hash = Integer(123).to_byte_array()
+        twenty = Integer(20).to_byte_array()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x00'
+            + Opcode.PUSHDATA1      # a = 123
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1      # a.to_script_hash()
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.JMPIFNOT
+            + Integer(36).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.str.stack_item
+            + Opcode.JMPIF
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.str.stack_item
+            + Opcode.SYSCALL
+            + Interop.Base58Decode.interop_method_hash
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.JMPGT
+            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.DEC
+            + Opcode.RIGHT
+            + Opcode.JMP
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.PUSH1
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariable.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_script_hash_variable_with_builtin(self):
+        script_hash = String('123').to_bytes()
+        twenty = Integer(20).to_byte_array()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x00'
+            + Opcode.PUSHDATA1      # a = 123
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1      # a.to_script_hash()
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.JMPIFNOT
+            + Integer(36).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.str.stack_item
+            + Opcode.JMPIF
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.str.stack_item
+            + Opcode.SYSCALL
+            + Interop.Base58Decode.interop_method_hash
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.JMPGT
+            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.DEC
+            + Opcode.RIGHT
+            + Opcode.JMP
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.PUSH1
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        from boa3.compiler.vmcodemapping import VMCodeMapping
+        self.assertEqual(expected_output, output)
 
     def test_script_hahs_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashTooManyParameters.py' % self.dirname
@@ -602,13 +713,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashMismatchedType.py' % self.dirname
-        # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_script_hash_builtin_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashBuiltinMismatchedType.py' % self.dirname
-        # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
 
