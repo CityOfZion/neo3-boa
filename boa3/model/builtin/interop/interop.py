@@ -7,10 +7,6 @@ from boa3.model.builtin.interop.blockchain.getcurrentheightmethod import Current
 from boa3.model.builtin.interop.contract.callmethod import CallMethod
 from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
 from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
-from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
-from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
-from boa3.model.builtin.interop.crypto.ripemd160method import Ripemd160Method
-from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
@@ -23,6 +19,12 @@ from boa3.model.builtin.interop.runtime.triggertype import TriggerType as Trigge
 from boa3.model.builtin.interop.storage.storagedeletemethod import StorageDeleteMethod
 from boa3.model.builtin.interop.storage.storagegetmethod import StorageGetMethod
 from boa3.model.builtin.interop.storage.storageputmethod import StoragePutMethod
+from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
+from boa3.model.builtin.interop.crypto.ripemd160method import Ripemd160Method
+from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
+from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
+from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256r1method import CheckMultisigWithECDsaSecp256r1Method
+from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256k1method import CheckMultisigWithECDsaSecp256k1Method
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
@@ -80,6 +82,8 @@ class Interop:
     Ripemd160 = Ripemd160Method()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
+    CheckMultisigWithECDsaSecp256r1 = CheckMultisigWithECDsaSecp256r1Method()
+    CheckMultisigWithECDsaSecp256k1 = CheckMultisigWithECDsaSecp256k1Method()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
         InteropPackage.Binary: [Base58Encode,
@@ -94,7 +98,9 @@ class Interop:
         InteropPackage.Crypto: [Sha256,
                                 Ripemd160,
                                 Hash160,
-                                Hash256
+                                Hash256,
+                                CheckMultisigWithECDsaSecp256r1,
+                                CheckMultisigWithECDsaSecp256k1
                                 ],
         InteropPackage.Runtime: [CheckWitness,
                                  Notify,
