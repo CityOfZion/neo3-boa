@@ -11,8 +11,12 @@ Welcome to neo3-boa's documentation!
    :caption: Contents:
 
    overview
+   project-structure
    install
+   compiling-your-smart-contract
+   debugger-ready
+   examples
+   python-supported-features
    package-reference
    contribute
    license
-   project-structure
