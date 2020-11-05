@@ -619,6 +619,98 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_base64_encode(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.Base64Encode.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/Base64Encode.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        import base64
+        engine = TestEngine(self.dirname)
+        expected_result = base64.b64encode(b'unit test')
+        if isinstance(expected_result, bytes):
+            expected_result = String.from_bytes(expected_result)
+        result = self.run_smart_contract(engine, path, 'Main', b'unit test')
+        self.assertEqual(expected_result, result)
+
+        expected_result = base64.b64encode(b'')
+        if isinstance(expected_result, bytes):
+            expected_result = String.from_bytes(expected_result)
+        result = self.run_smart_contract(engine, path, 'Main', b'')
+        self.assertEqual(expected_result, result)
+        
+        long_byte_string = (b'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
+                       b'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                       b'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                       b'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                       b'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                       b'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                       b'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                       b'est enim dictum massa, id aliquet justo magna in purus.')
+        expected_result = base64.b64encode(long_byte_string)
+        if isinstance(expected_result, bytes):
+            expected_result = String.from_bytes(expected_result)
+        result = self.run_smart_contract(engine, path, 'Main', long_byte_string)
+        self.assertEqual(expected_result, result)
+
+    def test_base64_encode_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/Base64EncodeMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_base64_decode(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.Base64Decode.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/Base64Decode.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        import base64
+        engine = TestEngine(self.dirname)
+        arg = base64.b64encode(b'unit test')
+        if isinstance(arg, bytes):
+            arg = String.from_bytes(arg)
+        result = self.run_smart_contract(engine, path, 'Main', arg)
+        self.assertEqual('unit test', result)
+
+        arg = base64.b64encode(b'')
+        if isinstance(arg, bytes):
+            arg = String.from_bytes(arg)
+        result = self.run_smart_contract(engine, path, 'Main', arg)
+        self.assertEqual('', result)
+
+        long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
+                       'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                       'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                       'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                       'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                       'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                       'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                       'est enim dictum massa, id aliquet justo magna in purus.')
+        arg = base64.b64encode(String(long_string).to_bytes())
+        if isinstance(arg, bytes):
+            arg = String.from_bytes(arg)
+        result = self.run_smart_contract(engine, path, 'Main', arg)
+        self.assertEqual(long_string, result)
+
+    def test_base64_decode_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/Base64DecodeMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     def test_base58_encode(self):
         expected_output = (
             Opcode.INITSLOT
