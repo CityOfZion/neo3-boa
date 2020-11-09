@@ -25,6 +25,8 @@ from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
 from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
 from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256r1method import CheckMultisigWithECDsaSecp256r1Method
 from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256k1method import CheckMultisigWithECDsaSecp256k1Method
+from boa3.model.builtin.interop.crypto.verifywithecdsasecp256r1 import VerifyWithECDsaSecp256r1Method
+from boa3.model.builtin.interop.crypto.verifywithecdsasecp256k1 import VerifyWithECDsaSecp256k1Method
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
@@ -84,6 +86,8 @@ class Interop:
     Hash256 = Hash256Method()
     CheckMultisigWithECDsaSecp256r1 = CheckMultisigWithECDsaSecp256r1Method()
     CheckMultisigWithECDsaSecp256k1 = CheckMultisigWithECDsaSecp256k1Method()
+    VerifyWithECDsaSecp256r1 = VerifyWithECDsaSecp256r1Method()
+    VerifyWithECDsaSecp256k1 = VerifyWithECDsaSecp256k1Method()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
         InteropPackage.Binary: [Base58Encode,
@@ -100,7 +104,9 @@ class Interop:
                                 Hash160,
                                 Hash256,
                                 CheckMultisigWithECDsaSecp256r1,
-                                CheckMultisigWithECDsaSecp256k1
+                                CheckMultisigWithECDsaSecp256k1,
+                                VerifyWithECDsaSecp256r1,
+                                VerifyWithECDsaSecp256k1
                                 ],
         InteropPackage.Runtime: [CheckWitness,
                                  Notify,

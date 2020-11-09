@@ -1120,3 +1120,235 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Byte.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256r1_str(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        string = b'unit test'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256r1Str.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256r1_bool(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH0
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256r1Bool.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256r1_int(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH10
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256r1Int.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256r1_bytes(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        string = b'unit test'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256r1Bytes.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256r1MismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_verify_with_ecdsa_secp256k1_str(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        string = b'unit test'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256k1Str.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256k1_bool(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH0
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256k1Bool.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256k1_int(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH10
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256k1Int.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256k1_bytes(self):
+        byte_input1 = b'publickey'
+        byte_input2 = b'signature'
+        string = b'unit test'
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.SYSCALL
+            + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256k1Bytes.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256k1MismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
