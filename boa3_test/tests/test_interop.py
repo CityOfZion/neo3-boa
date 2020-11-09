@@ -636,15 +636,15 @@ class TestInterop(BoaTest):
         import base64
         engine = TestEngine(self.dirname)
         expected_result = base64.b64encode(b'unit test')
-        if isinstance(expected_result, bytes):
-            expected_result = String.from_bytes(expected_result)
         result = self.run_smart_contract(engine, path, 'Main', b'unit test')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
         self.assertEqual(expected_result, result)
 
         expected_result = base64.b64encode(b'')
-        if isinstance(expected_result, bytes):
-            expected_result = String.from_bytes(expected_result)
         result = self.run_smart_contract(engine, path, 'Main', b'')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
         self.assertEqual(expected_result, result)
         
         long_byte_string = (b'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
@@ -656,9 +656,9 @@ class TestInterop(BoaTest):
                        b'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        b'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base64.b64encode(long_byte_string)
-        if isinstance(expected_result, bytes):
-            expected_result = String.from_bytes(expected_result)
         result = self.run_smart_contract(engine, path, 'Main', long_byte_string)
+        if isinstance(result, str):
+            result = String(result).to_bytes()
         self.assertEqual(expected_result, result)
 
     def test_base64_encode_mismatched_type(self):
@@ -681,16 +681,16 @@ class TestInterop(BoaTest):
 
         import base64
         engine = TestEngine(self.dirname)
-        arg = base64.b64encode(b'unit test')
-        if isinstance(arg, bytes):
-            arg = String.from_bytes(arg)
+        arg = String.from_bytes(base64.b64encode(b'unit test'))
         result = self.run_smart_contract(engine, path, 'Main', arg)
+        if isinstance(result, bytes):
+            result = String.from_bytes(result)
         self.assertEqual('unit test', result)
 
-        arg = base64.b64encode(b'')
-        if isinstance(arg, bytes):
-            arg = String.from_bytes(arg)
+        arg = String.from_bytes(base64.b64encode(b''))
         result = self.run_smart_contract(engine, path, 'Main', arg)
+        if isinstance(result, bytes):
+            result = String.from_bytes(result)
         self.assertEqual('', result)
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
@@ -701,10 +701,10 @@ class TestInterop(BoaTest):
                        'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
-        arg = base64.b64encode(String(long_string).to_bytes())
-        if isinstance(arg, bytes):
-            arg = String.from_bytes(arg)
+        arg = String.from_bytes(base64.b64encode(String(long_string).to_bytes()))
         result = self.run_smart_contract(engine, path, 'Main', arg)
+        if isinstance(result, bytes):
+            result = String.from_bytes(result)
         self.assertEqual(long_string, result)
 
     def test_base64_decode_mismatched_type(self):
