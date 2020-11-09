@@ -3,5 +3,5 @@ from boa3.builtin.interop.crypto import ripemd160
 
 
 @public
-def Main(test: str) -> bytes:
-    return ripemd160(test)
+def Main() -> bytes:
+    return ripemd160(True)
