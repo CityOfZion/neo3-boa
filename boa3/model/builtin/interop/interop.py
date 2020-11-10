@@ -12,6 +12,7 @@ from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProper
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
+from boa3.model.builtin.interop.runtime.getexecutingscripthashmethod import ExecutingScriptHashProperty
 from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
 from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
@@ -74,6 +75,7 @@ class Interop:
     TriggerType = TriggerTyping()
     GetTrigger = TriggerMethod(TriggerType)
     CallingScriptHash = CallingScriptHashProperty()
+    ExecutingScriptHash = ExecutingScriptHashProperty()
     BlockTime = BlockTimeProperty()
     GasLeft = GasLeftProperty()
     InvocationCounter = InvocationCounterProperty()
@@ -120,6 +122,7 @@ class Interop:
                                  TriggerType,
                                  GetTrigger,
                                  CallingScriptHash,
+                                 ExecutingScriptHash,
                                  BlockTime,
                                  GasLeft,
                                  InvocationCounter
