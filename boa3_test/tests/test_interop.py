@@ -444,6 +444,29 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooFewArguments.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
+    def test_update_contract(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\00'
+            + b'\02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.UpdateContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/interop_test/UpdateContract.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_update_contract_too_many_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/UpdateContractTooManyArguments.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_update_contract_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/UpdateContractTooFewArguments.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
     def test_get_neo_native_script_hash(self):
         value = NEO
         expected_output = (

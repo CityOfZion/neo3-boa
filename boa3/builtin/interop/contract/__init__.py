@@ -34,5 +34,20 @@ def call_contract(script_hash: bytes, method: str, args: Sequence = ()) -> Any:
     pass
 
 
+def update_contract(script: bytes, manifest: bytes):
+    """
+    Updates the executing smart contract given the script and the manifest
+
+    :param script: the new smart contract's script
+    :type script: bytes
+    :param manifest: the new smart contract's manifest
+    :type manifest: bytes
+
+    :raise Exception: raised if the script and the manifest are not a valid smart contract or the new contract is the
+        same as the old one.
+    """
+    pass
+
+
 NEO: bytes = b'\xde\x5f\x57\xd4\x30\xd3\xde\xce\x51\x1c\xf9\x75\xa8\xd3\x78\x48\xcb\x9e\x05\x25'
 GAS: bytes = b'\x66\x8e\x0c\x1f\x9d\x7b\x70\xa9\x9d\xd9\xe0\x6e\xad\xd4\xc7\x84\xd6\x41\xaf\xbc'
