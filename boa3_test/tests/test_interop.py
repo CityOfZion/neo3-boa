@@ -338,7 +338,7 @@ class TestInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/CreateScriptHash.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CreateContract.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -359,11 +359,11 @@ class TestInterop(BoaTest):
         self.assertEqual(manifest['features']['payable'], result[3])
 
     def test_create_contract_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/CreateScriptHashTooManyArguments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CreateContractTooManyArguments.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_create_contract_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/CreateScriptHashTooFewArguments.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/CreateContractTooFewArguments.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_call_contract(self):
