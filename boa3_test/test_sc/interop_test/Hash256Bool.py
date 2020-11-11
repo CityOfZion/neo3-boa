@@ -3,5 +3,5 @@ from boa3.builtin.interop.crypto import hash256
 
 
 @public
-def Main(test: str) -> bytes:
-    return hash256(test)
+def Main() -> bytes:
+    return hash256(True)

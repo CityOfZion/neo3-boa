@@ -575,15 +575,12 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_ripemd160_str(self):
-        string = String('test').to_bytes()
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(string)).to_byte_array(min_length=1)
-            + string
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.Ripemd160.interop_method_hash
-            + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -591,35 +588,79 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_hash160_str(self):
-        string = String('test').to_bytes()
-        expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(string)).to_byte_array(min_length=1)
-            + string
-            + Opcode.SYSCALL
-            + Interop.Sha256.interop_method_hash
-            + Opcode.SYSCALL
-            + Interop.Ripemd160.interop_method_hash
-            + Opcode.DROP
-            + Opcode.PUSHNULL
-            + Opcode.RET
-        )
+        import hashlib
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', b'unit test')
+        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
+        self.assertEqual(expected_result.digest(), result)
 
+        expected_result = hashlib.new('ripemd160', b'')
+        result = self.run_smart_contract(engine, path, 'Main', '')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_ripemd160_int(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Ripemd160Int.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_ripemd160_bool(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Ripemd160Bool.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_ripemd160_bytes(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Ripemd160Bytes.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', b'unit test')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_hash160_str(self):
+        import hashlib
         path = '%s/boa3_test/test_sc/interop_test/Hash160Str.py' % self.dirname
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
+        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
+        self.assertEqual(expected_result, result)
+
+    def test_hash160_int(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Hash160Int.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(10).to_byte_array()).digest())).digest()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_hash160_bool(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Hash160Bool.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(1).to_byte_array()).digest())).digest()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_hash160_bytes(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Hash160Bytes.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
 
     def test_sha256_str(self):
-        string = String('test').to_bytes()
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(string)).to_byte_array(min_length=1)
-            + string
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.Sha256.interop_method_hash
-            + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -627,24 +668,71 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-    def test_hash256_str(self):
-        string = String('test').to_bytes()
-        expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(string)).to_byte_array(min_length=1)
-            + string
-            + Opcode.SYSCALL
-            + Interop.Sha256.interop_method_hash
-            + Opcode.SYSCALL
-            + Interop.Sha256.interop_method_hash
-            + Opcode.DROP
-            + Opcode.PUSHNULL
-            + Opcode.RET
-        )
+        import hashlib
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(b'unit test')
+        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
+        self.assertEqual(expected_result.digest(), result)
 
+        expected_result = hashlib.sha256(b'')
+        result = self.run_smart_contract(engine, path, 'Main', '')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_sha256_int(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Sha256Int.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(Integer(10).to_byte_array())
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_sha256_bool(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Sha256Bool.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(Integer(1).to_byte_array())
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_sha256_bytes(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Sha256Bytes.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(b'unit test')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result.digest(), result)
+
+    def test_hash256_str(self):
+        import hashlib
         path = '%s/boa3_test/test_sc/interop_test/Hash256Str.py' % self.dirname
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
+        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
+        self.assertEqual(expected_result, result)
+
+    def test_hash256_int(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Hash256Int.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(hashlib.sha256(Integer(10).to_byte_array()).digest()).digest()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_hash256_bool(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Hash256Bool.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(hashlib.sha256(Integer(1).to_byte_array()).digest()).digest()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_hash256_bytes(self):
+        import hashlib
+        path = '%s/boa3_test/test_sc/interop_test/Hash256Bytes.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
 
     def test_base64_encode(self):
         expected_output = (
