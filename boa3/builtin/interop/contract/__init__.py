@@ -1,6 +1,22 @@
 from typing import Any, Sequence
 
 
+def create_contract(script: bytes, manifest: bytes) -> Any:
+    """
+    Creates a smart contract given the script and the manifest
+
+    :param script: the target smart contract's script
+    :type script: bytes
+    :param manifest: the manifest.json that describes how the script should behave
+    type manifest: bytes
+    :return: the result of the specified method.
+    :rtype: Any
+
+    :raise Exception: raised if the script or the manifest are not a valid smart contract.
+    """
+    pass
+
+
 def call_contract(script_hash: bytes, method: str, args: Sequence = ()) -> Any:
     """
     Calls a smart contract given the method and the arguments
@@ -14,23 +30,6 @@ def call_contract(script_hash: bytes, method: str, args: Sequence = ()) -> Any:
 
     :raise Exception: raised if the script hash is not a valid smart contract or the method was not found or the
         arguments aren't valid to the specified method.
-    """
-    pass
-
-
-def create_contract(script: bytes, manifest: bytes) -> Any:
-    """
-    Creates a smart contract given the script and the manifest
-
-    :param script: the target smart contract's script
-    :type script: bytes
-    :param manifest: the manifest.json that describes how the script should behave
-    type manifest: bytes
-    :return: the result of the specified method.
-    :rtype: Any
-
-    :raise Exception: raised if the length of either the script or manifest is zero or greater than the max length or
-        the smart contract already exists.
     """
     pass
 

@@ -105,8 +105,8 @@ class Interop:
                                 ],
         InteropPackage.Blockchain: [CurrentHeight
                                     ],
-        InteropPackage.Contract: [CallContract,
-                                  CreateContract,
+        InteropPackage.Contract: [CreateContract,
+                                  CallContract,
                                   NeoScriptHash,
                                   GasScriptHash
                                   ],
