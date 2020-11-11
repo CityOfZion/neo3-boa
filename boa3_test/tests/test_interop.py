@@ -404,6 +404,46 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/CallScriptHashTooFewArguments.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
+    def test_create_contract(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CreateContract.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/CreateScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        import json
+        call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        Boa3.compile_and_save(call_contract_path)
+
+        script, manifest = self.get_output(call_contract_path)
+        arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', script, arg_manifest)
+
+        self.assertEqual(4, len(result))
+        self.assertEqual(script, result[0])
+        self.assertEqual(manifest, json.loads(result[1]))
+        self.assertEqual(manifest['features']['storage'], result[2])
+        self.assertEqual(manifest['features']['payable'], result[3])
+
+    def test_create_contract_too_many_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/CreateScriptHashTooManyArguments.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_create_contract_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/CreateScriptHashTooFewArguments.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
     def test_get_neo_native_script_hash(self):
         value = NEO
         expected_output = (
