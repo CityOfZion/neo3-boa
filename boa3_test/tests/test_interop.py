@@ -453,6 +453,7 @@ class TestInterop(BoaTest):
             + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.UpdateContract.interop_method_hash
+            + Opcode.PUSHNULL
             + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/interop_test/UpdateContract.py' % self.dirname

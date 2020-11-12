@@ -14,4 +14,4 @@ class UpdateMethod(InteropMethod):
             'script': Variable(Type.bytes),
             'manifest': Variable(Type.bytes)
         }
-        super().__init__(identifier, syscall, args, return_type=Type.any)
+        super().__init__(identifier, syscall, args, return_type=Type.none)
