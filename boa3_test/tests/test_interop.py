@@ -468,6 +468,22 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/UpdateContractTooFewArguments.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
+    def test_destroy_contract(self):
+        expected_output = (
+                Opcode.SYSCALL
+                + Interop.DestroyContract.interop_method_hash
+                + Opcode.PUSHNULL
+                + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/DestroyContract.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_destroy_contract_too_many_parameters(self):
+        path = '%s/boa3_test/test_sc/interop_test/DestroyContractTooManyArguments.py' % self.dirname
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
     def test_get_neo_native_script_hash(self):
         value = NEO
         expected_output = (
