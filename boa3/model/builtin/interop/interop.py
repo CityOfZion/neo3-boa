@@ -8,6 +8,7 @@ from boa3.model.builtin.interop.binary.base64encodemethod import Base64EncodeMet
 from boa3.model.builtin.interop.blockchain.getcurrentheightmethod import CurrentHeightProperty
 from boa3.model.builtin.interop.contract.createmethod import CreateMethod
 from boa3.model.builtin.interop.contract.callmethod import CallMethod
+from boa3.model.builtin.interop.contract.updatemethod import UpdateMethod
 from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
 from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
@@ -67,6 +68,7 @@ class Interop:
     # Contract Interops
     CreateContract = CreateMethod()
     CallContract = CallMethod()
+    UpdateContract = UpdateMethod()
     NeoScriptHash = NeoProperty()
     GasScriptHash = GasProperty()
 
@@ -107,6 +109,7 @@ class Interop:
                                     ],
         InteropPackage.Contract: [CreateContract,
                                   CallContract,
+                                  UpdateContract,
                                   NeoScriptHash,
                                   GasScriptHash
                                   ],
