@@ -6,32 +6,36 @@ from boa3.model.builtin.interop.binary.base58encodemethod import Base58EncodeMet
 from boa3.model.builtin.interop.binary.base64decodemethod import Base64DecodeMethod
 from boa3.model.builtin.interop.binary.base64encodemethod import Base64EncodeMethod
 from boa3.model.builtin.interop.blockchain.getcurrentheightmethod import CurrentHeightProperty
-from boa3.model.builtin.interop.contract.createmethod import CreateMethod
 from boa3.model.builtin.interop.contract.callmethod import CallMethod
-from boa3.model.builtin.interop.contract.updatemethod import UpdateMethod
+from boa3.model.builtin.interop.contract.createmethod import CreateMethod
 from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
 from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
+from boa3.model.builtin.interop.contract.updatemethod import UpdateMethod
+from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256k1method import (
+    CheckMultisigWithECDsaSecp256k1Method)
+from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256r1method import (
+    CheckMultisigWithECDsaSecp256r1Method)
+from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
+from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
+from boa3.model.builtin.interop.crypto.ripemd160method import Ripemd160Method
+from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
+from boa3.model.builtin.interop.crypto.verifywithecdsasecp256k1 import VerifyWithECDsaSecp256k1Method
+from boa3.model.builtin.interop.crypto.verifywithecdsasecp256r1 import VerifyWithECDsaSecp256r1Method
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
 from boa3.model.builtin.interop.runtime.getexecutingscripthashmethod import ExecutingScriptHashProperty
 from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
 from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
+from boa3.model.builtin.interop.runtime.getnotificationsmethod import GetNotificationsMethod
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
+from boa3.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
 from boa3.model.builtin.interop.runtime.triggermethod import TriggerMethod
 from boa3.model.builtin.interop.runtime.triggertype import TriggerType as TriggerTyping
 from boa3.model.builtin.interop.storage.storagedeletemethod import StorageDeleteMethod
 from boa3.model.builtin.interop.storage.storagegetmethod import StorageGetMethod
 from boa3.model.builtin.interop.storage.storageputmethod import StoragePutMethod
-from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
-from boa3.model.builtin.interop.crypto.ripemd160method import Ripemd160Method
-from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
-from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
-from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256r1method import CheckMultisigWithECDsaSecp256r1Method
-from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256k1method import CheckMultisigWithECDsaSecp256k1Method
-from boa3.model.builtin.interop.crypto.verifywithecdsasecp256r1 import VerifyWithECDsaSecp256r1Method
-from boa3.model.builtin.interop.crypto.verifywithecdsasecp256k1 import VerifyWithECDsaSecp256k1Method
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 
 
@@ -83,6 +87,8 @@ class Interop:
     BlockTime = BlockTimeProperty()
     GasLeft = GasLeftProperty()
     InvocationCounter = InvocationCounterProperty()
+    NotificationType = NotificationType.build()
+    GetNotifications = GetNotificationsMethod(NotificationType)
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -122,16 +128,18 @@ class Interop:
                                 VerifyWithECDsaSecp256r1,
                                 VerifyWithECDsaSecp256k1
                                 ],
-        InteropPackage.Runtime: [CheckWitness,
-                                 Notify,
-                                 Log,
-                                 TriggerType,
-                                 GetTrigger,
+        InteropPackage.Runtime: [BlockTime,
                                  CallingScriptHash,
+                                 CheckWitness,
                                  ExecutingScriptHash,
-                                 BlockTime,
                                  GasLeft,
-                                 InvocationCounter
+                                 GetNotifications,
+                                 GetTrigger,
+                                 InvocationCounter,
+                                 Log,
+                                 NotificationType,
+                                 Notify,
+                                 TriggerType
                                  ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,

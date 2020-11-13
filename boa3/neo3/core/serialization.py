@@ -4,7 +4,7 @@ import abc
 import struct
 import sys
 from io import BytesIO, SEEK_END
-from typing import Union, Any, List, Type, TypeVar
+from typing import Any, List, Type, TypeVar, Union
 
 ISerializable_T = TypeVar('ISerializable_T', bound='ISerializable')
 

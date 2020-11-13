@@ -13,6 +13,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
@@ -158,29 +159,35 @@ class CodeGenerator:
                         module_globals.append(var_id)
         return module_globals
 
-    def get_symbol(self, identifier: str) -> ISymbol:
+    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None) -> ISymbol:
         """
         Gets a symbol in the symbol table by its id
 
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
-        if self._current_method is not None and identifier in self._current_method.symbols:
-            return self._current_method.symbols[identifier]
-        elif identifier in self.symbol_table:
-            return self.symbol_table[identifier]
+        if scope is not None and hasattr(scope, 'symbols') and isinstance(scope.symbols, dict):
+            if identifier in scope.symbols and isinstance(scope.symbols[identifier], ISymbol):
+                return scope.symbols[identifier]
+        else:
+            if self._current_method is not None and identifier in self._current_method.symbols:
+                return self._current_method.symbols[identifier]
+            elif identifier in self.symbol_table:
+                return self.symbol_table[identifier]
 
-        # the symbol may be a built in. If not, returns None
-        symbol = Builtin.get_symbol(identifier)
-        if symbol is not None:
-            return symbol
+            # the symbol may be a built in. If not, returns None
+            symbol = Builtin.get_symbol(identifier)
+            if symbol is not None:
+                return symbol
 
-        split = identifier.split('.')
-        if len(split) > 1:
-            attribute, symbol_id = '.'.join(split[:-1]), split[-1]
-            attr = self.get_symbol(attribute)
-            if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
-                return attr.symbols[symbol_id]
+            if not isinstance(identifier, str):
+                return symbol
+            split = identifier.split('.')
+            if len(split) > 1:
+                attribute, symbol_id = '.'.join(split[:-1]), split[-1]
+                attr = self.get_symbol(attribute)
+                if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
+                    return attr.symbols[symbol_id]
         return Type.none
 
     def initialize_static_fields(self):
@@ -849,6 +856,8 @@ class CodeGenerator:
             if isinstance(symbol, Property):
                 symbol = symbol.getter
                 params_addresses = []
+            elif isinstance(symbol, ClassType):
+                symbol = symbol.constructor_method()
 
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id, symbol)
@@ -992,6 +1001,42 @@ class CodeGenerator:
             self.__insert1(info, data)
             self._stack.pop()
             self._stack.pop()
+
+    def convert_class_symbol(self, class_type: ClassType, symbol_id: str, load: bool = True) -> Optional[int]:
+        """
+        Converts an class symbol
+
+        :param class_type:
+        :param symbol_id:
+        :param load:
+        """
+        if symbol_id in class_type.variables:
+            return self.convert_class_variable(class_type, symbol_id, load)
+        elif symbol_id in class_type.properties:
+            symbol = class_type.properties[symbol_id]
+            method = symbol.getter if load else symbol.setter
+
+            if isinstance(method, IBuiltinMethod):
+                self.convert_builtin_method_call(method)
+            else:
+                self.convert_method_call(method, 0)
+
+    def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
+        """
+        Converts an class variable
+
+        :param class_type:
+        :param symbol_id:
+        :param load:
+        """
+        if symbol_id in class_type.variables:
+            index = list(class_type.variables).index(symbol_id)
+
+            if load:
+                self.convert_literal(index)
+                self.convert_get_item()
+
+            return index
 
     def convert_operation(self, operation: IOperation):
         """

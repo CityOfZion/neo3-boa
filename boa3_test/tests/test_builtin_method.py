@@ -700,7 +700,6 @@ class TestBuiltinMethod(BoaTest):
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
-        from boa3.compiler.vmcodemapping import VMCodeMapping
         self.assertEqual(expected_output, output)
 
     def test_script_hahs_too_many_parameters(self):

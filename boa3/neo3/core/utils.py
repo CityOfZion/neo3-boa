@@ -3,8 +3,7 @@
 from collections import Iterable
 from enum import Enum
 
-from boa3.neo3.core import Size
-from boa3.neo3.core import serialization
+from boa3.neo3.core import Size, serialization
 
 
 def get_var_size(value: object) -> int:

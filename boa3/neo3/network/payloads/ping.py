@@ -3,8 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from random import randint
 
-from boa3.neo3.core import Size as s
-from boa3.neo3.core import serialization
+from boa3.neo3.core import Size as s, serialization
 
 
 class PingPayload(serialization.ISerializable):

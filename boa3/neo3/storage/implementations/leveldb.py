@@ -3,9 +3,8 @@ from __future__ import annotations
 from contextlib import suppress
 from copy import deepcopy
 
-from boa3.neo3 import storage
-from boa3.neo3 import storage_logger as logger
-from boa3.neo3.core import types, serialization
+from boa3.neo3 import storage, storage_logger as logger
+from boa3.neo3.core import serialization, types
 from boa3.neo3.network import payloads
 
 level_db_supported = False

@@ -4,9 +4,7 @@ import abc
 from enum import IntEnum
 from typing import List
 
-from boa3.neo3.core import Size as s, utils
-from boa3.neo3.core import serialization
-from boa3.neo3.core import types
+from boa3.neo3.core import Size as s, serialization, types, utils
 
 
 class InventoryType(IntEnum):

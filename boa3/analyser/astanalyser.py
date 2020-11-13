@@ -9,6 +9,7 @@ from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.expression import IExpression
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.type import IType, Type
 
 
@@ -78,6 +79,14 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 value = self.get_symbol(fun_rtype_id)
             else:
                 value = fun_rtype_id
+
+        if (isinstance(value, tuple)
+                and len(value) > 1
+                and hasattr(value[1], 'type')
+                and isinstance(value[1].type, ClassType)):
+            attribute_value = value[1]
+            if hasattr(attribute_value, 'type'):
+                attribute_value = attribute_value.type
 
         if isinstance(value, IType):
             return value

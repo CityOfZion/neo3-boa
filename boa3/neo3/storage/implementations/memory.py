@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 from copy import deepcopy
-from typing import Iterator, Tuple, Dict
+from typing import Dict, Iterator, Tuple
 
 from boa3.neo3 import storage
 from boa3.neo3.core import types

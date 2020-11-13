@@ -4,9 +4,11 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
 from boa3.exception import CompilerError, CompilerWarning
+from boa3.model.attribute import Attribute
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
+from boa3.model.expression import IExpression
 from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -17,6 +19,7 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
@@ -804,6 +807,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
         callable_target = self.validate_builtin_callable(callable_id, callable_target)
+        if isinstance(callable_target, ClassType):
+            callable_target = callable_target.constructor_method()
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
@@ -833,7 +838,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return self.get_type(callable_target)
 
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
-        arg0, callable_target, callable_id = self.visit(call.func)
+        attr: Attribute = self.visit(call.func)
+        arg0, callable_target, callable_id = attr.values
         arg0_identifier = self.visit(arg0)
         if isinstance(arg0_identifier, ast.Name):
             arg0_identifier = arg0_identifier.id
@@ -1052,7 +1058,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(result, str):
                 return self.get_symbol(result)
             else:
-                origin, value, attribute = result
+                origin, value, attribute = result.values
                 if value is None and isinstance(origin, ast.Name):
                     value = self.get_symbol(origin.id)
                 if value is not None:
@@ -1060,7 +1066,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return result
 
-    def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Tuple[ast.AST, Optional[ISymbol], str]]:
+    def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Attribute]:
         """
         Gets the attribute inside the ast node
 
@@ -1087,7 +1093,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
-        return attribute.value, attr_symbol, attribute.attr
+        attr_type = value.type if isinstance(value, IExpression) else value
+        # for checking during the code generation
+        if (isinstance(attr_type, ClassType) and
+                not (isinstance(attribute.value, ast.Name) and attribute.value.id == attr_type.identifier) and
+                (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
+            attribute.generate_value = True
+
+        return Attribute(attribute.value, attribute.attr, attr_symbol, attribute)
 
     def visit_Constant(self, constant: ast.Constant) -> Any:
         """

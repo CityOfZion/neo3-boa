@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Tuple, Optional, Iterator
+from typing import Iterator, Optional, Tuple
 
 from boa3.neo3 import storage
 from boa3.neo3.core import types

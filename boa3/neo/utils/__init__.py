@@ -91,7 +91,7 @@ def contract_parameter_to_json(value: Any) -> Dict[str, Any]:
     elif isinstance(value, str):
         stack_type = AbiType.String
         parameter_value = value
-    elif isinstance(value, bytes):
+    elif isinstance(value, (bytes, bytearray)):
         import base64
         stack_type = AbiType.ByteArray
         parameter_value = String.from_bytes(base64.b64encode(value))

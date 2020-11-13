@@ -1,5 +1,6 @@
-from typing import Any
+from typing import Any, List
 
+from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
 
 
@@ -69,3 +70,16 @@ calling_script_hash: bytes = b''
 get_time: int = 0
 gas_left: int = 0
 invocation_counter: int = 0
+
+
+def get_notifications(script_hash: bytes = bytes(20)) -> List[Notification]:
+    """
+    This method gets current invocation notifications from specific 'script_hash'
+
+    :param script_hash: must have 20 bytes, but if it's all zero 0000...0000 it refers to all existing notifications
+    (like a * wildcard)
+    :type script_hash: bytes
+    :return: It will return an array of all matched notifications
+    :rtype: List[Notification]
+    """
+    pass
