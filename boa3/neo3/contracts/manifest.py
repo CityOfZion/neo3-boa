@@ -4,10 +4,10 @@ import base64
 import binascii
 import json
 from enum import IntFlag
-from typing import List, Callable
+from typing import Callable, List
 
 from boa3.neo3 import contracts
-from boa3.neo3.core import serialization, types, IJson, cryptography, utils
+from boa3.neo3.core import IJson, cryptography, serialization, types, utils
 from boa3.neo3.core.serialization import BinaryReader, BinaryWriter
 
 

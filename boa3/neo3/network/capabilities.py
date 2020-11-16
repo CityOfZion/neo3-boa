@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from enum import IntEnum
 
-from boa3.neo3.core import serialization, Size as s
+from boa3.neo3.core import Size as s, serialization
 
 
 class NodeCapabilityType(IntEnum):

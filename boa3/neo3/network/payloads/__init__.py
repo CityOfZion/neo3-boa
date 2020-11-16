@@ -1,13 +1,13 @@
-from .address import NetworkAddress, AddrPayload, AddressState, DisconnectReason
-from .block import Header, Block, MerkleBlockPayload, HeadersPayload, TrimmedBlock, GetBlocksPayload, \
-    GetBlockDataPayload
+from .address import AddrPayload, AddressState, DisconnectReason, NetworkAddress
+from .block import Block, GetBlockDataPayload, GetBlocksPayload, Header, HeadersPayload, MerkleBlockPayload, \
+    TrimmedBlock
 from .consensus import ConsensusData, ConsensusPayload
 from .empty import EmptyPayload
 from .filter import FilterAddPayload, FilterLoadPayload
-from .inventory import InventoryPayload, InventoryType, IInventory
+from .inventory import IInventory, InventoryPayload, InventoryType
 from .ping import PingPayload
-from .transaction import Transaction, TransactionAttributeUsage, TransactionAttribute
-from .verification import Witness, WitnessScope, Cosigner
+from .transaction import Transaction, TransactionAttribute, TransactionAttributeUsage
+from .verification import Cosigner, Witness, WitnessScope
 from .version import VersionPayload
 
 __all__ = ['EmptyPayload', 'InventoryPayload', 'InventoryType', 'VersionPayload', 'NetworkAddress',

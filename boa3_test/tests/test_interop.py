@@ -825,15 +825,15 @@ class TestInterop(BoaTest):
         if isinstance(result, str):
             result = String(result).to_bytes()
         self.assertEqual(expected_result, result)
-        
+
         long_byte_string = (b'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
-                       b'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
-                       b'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
-                       b'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
-                       b'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
-                       b'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
-                       b'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
-                       b'est enim dictum massa, id aliquet justo magna in purus.')
+                            b'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                            b'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                            b'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                            b'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                            b'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                            b'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                            b'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base64.b64encode(long_byte_string)
         result = self.run_smart_contract(engine, path, 'Main', long_byte_string)
         if isinstance(result, str):
@@ -984,45 +984,45 @@ class TestInterop(BoaTest):
         byte_input3 = String('765').to_bytes()
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(string)).to_byte_array(min_length=1)
-                + string
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Str.py' % self.dirname
@@ -1036,43 +1036,43 @@ class TestInterop(BoaTest):
         byte_input3 = String('765').to_bytes()
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSH10
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSH10
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Int.py' % self.dirname
@@ -1086,43 +1086,43 @@ class TestInterop(BoaTest):
         byte_input3 = String('765').to_bytes()
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSH0
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSH0
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Bool.py' % self.dirname
@@ -1137,47 +1137,47 @@ class TestInterop(BoaTest):
         byte_input4 = b'\x00\x01\x02'
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input4)).to_byte_array(min_length=1)
-                + byte_input4
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input4)).to_byte_array(min_length=1)
+            + byte_input4
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256r1Byte.py' % self.dirname
@@ -1192,45 +1192,45 @@ class TestInterop(BoaTest):
         byte_input3 = String('765').to_bytes()
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(string)).to_byte_array(min_length=1)
-                + string
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Str.py' % self.dirname
@@ -1244,43 +1244,43 @@ class TestInterop(BoaTest):
         byte_input3 = String('765').to_bytes()
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSH10
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSH10
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Int.py' % self.dirname
@@ -1294,43 +1294,43 @@ class TestInterop(BoaTest):
         byte_input3 = String('765').to_bytes()
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSH0
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSH0
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Bool.py' % self.dirname
@@ -1345,47 +1345,47 @@ class TestInterop(BoaTest):
         byte_input4 = b'\x00\x01\x02'
 
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x02'
-                + b'\x00'
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input1)).to_byte_array(min_length=1)
-                + byte_input1
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input0)).to_byte_array(min_length=1)
-                + byte_input0
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input3)).to_byte_array(min_length=1)
-                + byte_input3
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input2)).to_byte_array(min_length=1)
-                + byte_input2
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.PUSH2
-                + Opcode.PACK
-                + Opcode.STLOC1
-                + Opcode.LDLOC1
-                + Opcode.LDLOC0
-                + Opcode.PUSHDATA1
-                + Integer(len(byte_input4)).to_byte_array(min_length=1)
-                + byte_input4
-                + Opcode.CONVERT
-                + Type.bytes.stack_item
-                + Opcode.SYSCALL
-                + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
-                + Opcode.DROP
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input1)).to_byte_array(min_length=1)
+            + byte_input1
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input0)).to_byte_array(min_length=1)
+            + byte_input0
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input3)).to_byte_array(min_length=1)
+            + byte_input3
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input2)).to_byte_array(min_length=1)
+            + byte_input2
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(byte_input4)).to_byte_array(min_length=1)
+            + byte_input4
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.SYSCALL
+            + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
+            + Opcode.DROP
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CheckMultisigWithECDsaSecp256k1Byte.py' % self.dirname
@@ -1623,3 +1623,43 @@ class TestInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/VerifyWithECDsaSecp256k1MismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_get_notifications(self):
+        path = '%s/boa3_test/test_sc/interop_test/GetNotifications.py' % self.dirname
+        output, manifest = self.compile_and_save(path)
+
+        abi_hash = manifest['abi']['hash']
+        script = bytearray()
+        for x in range(2, len(abi_hash), 2):
+            script.append(int(abi_hash[x:x + 2], 16))
+        script.reverse()
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'without_param', [])
+        self.assertEqual([], result)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
+        expected_result = []
+        for x in [1, 2, 3]:
+            expected_result.append([script,
+                                    'notify',
+                                    [x]])
+        self.assertEqual(expected_result, result)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'with_param', [], script)
+        self.assertEqual([], result)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], script)
+        expected_result = []
+        for x in [1, 2, 3]:
+            expected_result.append([script,
+                                    'notify',
+                                    [x]])
+        self.assertEqual(expected_result, result)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
+        self.assertEqual([], result)

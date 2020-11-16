@@ -5,7 +5,7 @@ from enum import IntEnum
 from typing import List
 
 from boa3.neo3 import contracts
-from boa3.neo3.core import types, IJson
+from boa3.neo3.core import IJson, types
 
 
 class ContractParameterType(IntEnum):

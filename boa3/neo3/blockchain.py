@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from boa3.neo3 import storage, settings
-from boa3.neo3.network import payloads, convenience
+from boa3.neo3 import settings, storage
+from boa3.neo3.network import convenience, payloads
 
 
 class Blockchain(convenience._Singleton):

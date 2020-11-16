@@ -1,6 +1,6 @@
 import mmh3  # type: ignore
 
-from boa3.neo3.core import serialization, types, Size as s
+from boa3.neo3.core import Size as s, serialization, types
 
 
 class StorageKey(serialization.ISerializable):

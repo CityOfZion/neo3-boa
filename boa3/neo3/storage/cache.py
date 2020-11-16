@@ -4,7 +4,7 @@ import abc
 from contextlib import suppress
 from copy import deepcopy
 from enum import Enum, auto
-from typing import Optional, Iterator, Tuple, TypeVar, Any
+from typing import Any, Iterator, Optional, Tuple, TypeVar
 
 from boa3.neo3 import storage
 from boa3.neo3.core import types

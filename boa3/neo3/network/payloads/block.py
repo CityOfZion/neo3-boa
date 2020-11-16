@@ -6,7 +6,7 @@ from typing import List
 
 from bitarray import bitarray  # type: ignore
 
-from boa3.neo3.core import Size as s, serialization, types, utils, cryptography as crypto, IClonable
+from boa3.neo3.core import IClonable, Size as s, cryptography as crypto, serialization, types, utils
 from boa3.neo3.network import payloads
 
 

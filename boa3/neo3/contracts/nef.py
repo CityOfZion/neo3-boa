@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 from typing import Tuple
 
-from boa3.neo3.core import serialization, types, Size as s, utils
+from boa3.neo3.core import Size as s, serialization, types, utils
 
 
 class Version(serialization.ISerializable):

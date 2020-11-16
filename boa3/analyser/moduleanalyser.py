@@ -15,6 +15,7 @@ from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
@@ -670,7 +671,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             # verifiy if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(func_id)
             func_symbol = func if func is not None else func_symbol
-            func_symbol = Builtin.Exception if func_symbol is Type.exception else func_symbol
+
+            if func_symbol is Type.exception:
+                func_symbol = Builtin.Exception
+            elif isinstance(func_symbol, ClassType):
+                func_symbol = func_symbol.constructor_method()
+
         if not isinstance(func_symbol, Callable):
             # the symbol doesn't exists
             self._log_error(

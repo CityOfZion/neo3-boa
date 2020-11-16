@@ -4,7 +4,7 @@ import hashlib
 from enum import IntEnum
 from typing import TypeVar
 
-from boa3.neo3.core import Size as s, serialization, utils, types
+from boa3.neo3.core import Size as s, serialization, types, utils
 from boa3.neo3.network import payloads
 
 ConsensusMessage_t = TypeVar('ConsensusMessage_t', bound='ConsensusMessage')
