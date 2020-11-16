@@ -1,6 +1,6 @@
 License
 -------
 
--  Open-source `Apache`_.
+-  Open-source `Apache 2.0`_.
 
-.. _Apache: https://github.com/CityOfZion/neo3-boa/blob/master/LICENSE.md
+.. _Apache 2.0: https://github.com/CityOfZion/neo3-boa/blob/master/LICENSE.md
