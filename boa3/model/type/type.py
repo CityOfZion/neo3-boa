@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from boa3.model.type.anytype import anyType
 from boa3.model.type.baseexceptiontype import BaseExceptionType
+from boa3.model.type.collection.genericcollectiontype import GenericCollectionType
 from boa3.model.type.collection.mapping.genericmappingtype import GenericMappingType
 from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.genericsequencetype import GenericSequenceType
@@ -108,5 +109,6 @@ class Type:
     sequence = GenericSequenceType()
     mutableSequence = GenericMutableSequenceType()
     mapping = GenericMappingType()
+    collection = GenericCollectionType()
     exception = BaseExceptionType()
     any = anyType

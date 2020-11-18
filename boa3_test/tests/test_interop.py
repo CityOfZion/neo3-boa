@@ -5,6 +5,7 @@ from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, Un
 from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
+from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -470,10 +471,10 @@ class TestInterop(BoaTest):
 
     def test_destroy_contract(self):
         expected_output = (
-                Opcode.SYSCALL
-                + Interop.DestroyContract.interop_method_hash
-                + Opcode.PUSHNULL
-                + Opcode.RET
+            Opcode.SYSCALL
+            + Interop.DestroyContract.interop_method_hash
+            + Opcode.PUSHNULL
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/DestroyContract.py' % self.dirname
@@ -1679,3 +1680,49 @@ class TestInterop(BoaTest):
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
         self.assertEqual([], result)
+
+    def test_create_interop_list(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\00'
+            + b'\01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.IteratorCreate.interop_method_hash
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/interop_test/IteratorCreateList.py' % self.dirname
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'list_iterator', [])
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+        result = self.run_smart_contract(engine, path, 'list_iterator', [1, 2, 3])
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+    def test_create_interop_dict(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\00'
+            + b'\01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.IteratorCreate.interop_method_hash
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/interop_test/IteratorCreateDict.py' % self.dirname
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'dict_iterator', {})
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+        result = self.run_smart_contract(engine, path, 'dict_iterator', {1: 2, 2: 4, 3: 6})
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+    def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/IteratorCreateMismatchedTypes.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

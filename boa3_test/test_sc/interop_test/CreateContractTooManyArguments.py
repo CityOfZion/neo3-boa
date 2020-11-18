@@ -1,4 +1,5 @@
 from typing import Any
+
 from boa3.builtin.interop.contract import create_contract
 
 
