@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Sequence
 
+from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItemType import StackItemType
@@ -11,6 +12,8 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
         return None
 
     item_type: StackItemType = StackItemType.get_stack_item_type(item['type'])
+    if item_type is StackItemType.InteropInterface:
+        return InteropInterface
     if item_type is StackItemType.Any or 'value' not in item:
         return None
 

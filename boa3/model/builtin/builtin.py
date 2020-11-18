@@ -95,7 +95,8 @@ class Builtin:
 
     @classmethod
     def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
-        return {method.identifier: method for method in Interop.interop_symbols(package)}
+        return {symbol.raw_identifier if hasattr(symbol, 'raw_identifier') else symbol.identifier: symbol
+                for symbol in Interop.interop_symbols(package)}
 
     # builtin decorator
     Public = PublicDecorator()
