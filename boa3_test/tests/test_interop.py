@@ -327,6 +327,33 @@ class TestInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
+    def test_get_entry_script_hash(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.EntryScriptHash.getter.interop_method_hash
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/EntryScriptHash.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_entry_script_hash_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/EntryScriptHashCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
     def test_create_contract(self):
         expected_output = (
             Opcode.INITSLOT

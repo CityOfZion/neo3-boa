@@ -9,12 +9,14 @@ __all__ = ['CheckWitnessMethod',
            'NotificationType',
            'NotifyMethod',
            'TriggerMethod',
-           'TriggerType'
+           'TriggerType',
+           'EntryScriptHashProperty'
            ]
 
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
+from boa3.model.builtin.interop.runtime.getentryscripthashmethod import EntryScriptHashProperty
 from boa3.model.builtin.interop.runtime.getexecutingscripthashmethod import ExecutingScriptHashProperty
 from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
 from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
