@@ -62,6 +62,7 @@ class Interop:
     GetTrigger = TriggerMethod(TriggerType)
     CallingScriptHash = CallingScriptHashProperty()
     ExecutingScriptHash = ExecutingScriptHashProperty()
+    Platform = PlatformProperty()
     BlockTime = BlockTimeProperty()
     GasLeft = GasLeftProperty()
     InvocationCounter = InvocationCounterProperty()
@@ -113,6 +114,7 @@ class Interop:
                                  CallingScriptHash,
                                  CheckWitness,
                                  ExecutingScriptHash,
+                                 Platform,
                                  GasLeft,
                                  GetNotifications,
                                  GetTrigger,

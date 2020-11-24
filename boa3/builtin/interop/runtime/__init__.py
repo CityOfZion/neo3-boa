@@ -69,6 +69,7 @@ executing_script_hash: bytes = b''
 calling_script_hash: bytes = b''
 get_time: int = 0
 gas_left: int = 0
+get_platform: str = ''
 invocation_counter: int = 0
 entry_script_hash: bytes = b''
 

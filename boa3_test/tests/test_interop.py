@@ -607,6 +607,35 @@ class TestInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
+    def test_get_platform(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.Platform.getter.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GetPlatform.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual('NEO', result)
+
+    def test_get_platform_cant_assign(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x01'
+            + Opcode.LDARG0
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/interop_test/GetPlatformCantAssign.py' % self.dirname
+        output = self.assertCompilerLogs(NameShadowing, path)
+        self.assertEqual(expected_output, output)
+
     def test_get_current_height(self):
         expected_output = (
             Opcode.SYSCALL
