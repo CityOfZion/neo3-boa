@@ -70,6 +70,7 @@ calling_script_hash: bytes = b''
 get_time: int = 0
 gas_left: int = 0
 invocation_counter: int = 0
+entry_script_hash: bytes = b''
 
 
 def get_notifications(script_hash: bytes = bytes(20)) -> List[Notification]:

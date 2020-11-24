@@ -67,6 +67,7 @@ class Interop:
     InvocationCounter = InvocationCounterProperty()
     NotificationType = NotificationType.build()
     GetNotifications = GetNotificationsMethod(NotificationType)
+    EntryScriptHash = EntryScriptHashProperty()
 
     # Storage Interops
     StorageGet = StorageGetMethod()
@@ -119,7 +120,8 @@ class Interop:
                                  Log,
                                  NotificationType,
                                  Notify,
-                                 TriggerType
+                                 TriggerType,
+                                 EntryScriptHash
                                  ],
         InteropPackage.Storage: [StorageGet,
                                  StoragePut,
