@@ -380,11 +380,13 @@ class TestInterop(BoaTest):
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', script, arg_manifest)
 
-        self.assertEqual(4, len(result))
+        del manifest['features']    # TODO: Remove when metadata is altered
+
+        self.assertEqual(2, len(result))
         self.assertEqual(script, result[0])
         self.assertEqual(manifest, json.loads(result[1]))
-        self.assertEqual(manifest['features']['storage'], result[2])
-        self.assertEqual(manifest['features']['payable'], result[3])
+
+
 
     def test_create_contract_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/interop_test/CreateContractTooManyArguments.py' % self.dirname
