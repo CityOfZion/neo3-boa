@@ -1782,8 +1782,7 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/JsonSerialize.py' % self.dirname
 
         engine = TestEngine(self.dirname)
-        test_input = {"one": 'um', "two": 'dois', "three": 'tres'}
-        # test_input = [1, 2, 3, 4]
+        test_input = {"one": 1, "two": 2, "three": 3}
         expected_result = String(json.dumps(test_input, separators=(',', ':'))).to_bytes()
         result = self.run_smart_contract(engine, path, 'main', test_input)
         if isinstance(result, str):
