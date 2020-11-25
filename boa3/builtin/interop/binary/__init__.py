@@ -1,3 +1,6 @@
+from typing import Any
+
+
 def base58_encode(key: str) -> bytes:
     """
     Encodes a string value using base58
@@ -42,5 +45,29 @@ def base64_decode(key: str) -> bytes:
     :type key: string
     :return: the decoded string as bytes.
     :rtype: bytes
+    """
+    pass
+
+
+def serialize(item: Any) -> bytes:
+    """
+    Serializes the given value into its bytes representation
+
+    :param item: value to be serialized
+    :type item: Any
+    :return: the serialized value
+    :rtype: bytes
+    """
+    pass
+
+
+def deserialize(data: bytes) -> Any:
+    """
+    Deserializes the given bytes value
+
+    :param data: serialized value
+    :type data: bytes
+    :return: the deserialized result
+    :rtype: Any
     """
     pass
