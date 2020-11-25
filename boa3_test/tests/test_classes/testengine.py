@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
+from boa3.neo import to_hex_str
 from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import bytes_from_json, contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
@@ -13,9 +14,13 @@ class TestEngine:
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
+
         self._storage: Dict[bytes, Any] = {}
         self._notifications: List[Notification] = []
+
+        self._accounts: List[bytes] = []
         self._contract_paths: List[str] = []
+
         self._error_message: Optional[str] = None
 
     @property
@@ -36,7 +41,7 @@ class TestEngine:
 
     @property
     def notifications(self) -> List[Notification]:
-        return self._notifications
+        return self._notifications.copy()
 
     def get_events(self, event_name: str) -> List[Notification]:
         return [n for n in self._notifications if n.name == event_name]
@@ -71,6 +76,10 @@ class TestEngine:
 
         if key in self._storage:
             self._storage.pop(key)
+
+    def add_signer_account(self, account: bytes):
+        if account not in self._accounts:
+            self._accounts.append(account)
 
     @property
     def contracts(self) -> List[str]:
@@ -175,5 +184,6 @@ class TestEngine:
             'storage': [{'key': contract_parameter_to_json(key),
                          'value': contract_parameter_to_json(value)
                          } for key, value in self._storage.items()],
-            'contracts': [{'nef': contract_path} for contract_path in self._contract_paths]
+            'contracts': [{'nef': contract_path} for contract_path in self._contract_paths],
+            "signerAccounts": [to_hex_str(address) for address in self._accounts]
         }
