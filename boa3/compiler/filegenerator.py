@@ -62,7 +62,7 @@ class FileGenerator:
 
         :return: the hex string representation of the hash
         """
-        return '0x' + to_hex_str(self._nef.script_hash)
+        return to_hex_str(self._nef.script_hash)
 
     def generate_nef_file(self) -> bytes:
         """

@@ -5,6 +5,7 @@ from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, Un
 from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
+from boa3.neo import to_script_hash
 from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -17,34 +18,28 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestInterop(BoaTest):
 
     def test_check_witness(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.CheckWitness.interop_method_hash
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/test_sc/interop_test/CheckWitness.py' % self.dirname
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', account)
+        self.assertEqual(False, result)
+
+        engine.add_signer_account(account)
+        result = self.run_smart_contract(engine, path, 'Main', account)
+        self.assertEqual(True, result)
 
     def test_check_witness_imported_as(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.CheckWitness.interop_method_hash
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/test_sc/interop_test/CheckWitnessImportedAs.py' % self.dirname
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', account)
+        self.assertEqual(False, result)
+
+        engine.add_signer_account(account)
+        result = self.run_smart_contract(engine, path, 'Main', account)
+        self.assertEqual(True, result)
 
     def test_check_witness_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/CheckWitnessMismatchedType.py' % self.dirname
