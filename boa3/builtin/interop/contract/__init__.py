@@ -1,7 +1,8 @@
 from typing import Any, Sequence
+from boa3.builtin.interop.contract.contract import Contract
 
 
-def create_contract(script: bytes, manifest: bytes) -> Any:
+def create_contract(script: bytes, manifest: bytes) -> Contract:
     """
     Creates a smart contract given the script and the manifest
 
@@ -9,7 +10,7 @@ def create_contract(script: bytes, manifest: bytes) -> Any:
     :type script: bytes
     :param manifest: the manifest.json that describes how the script should behave
     type manifest: bytes
-    :return: the result of the specified method.
+    :return: the contract that was created.
     :rtype: Any
 
     :raise Exception: raised if the script or the manifest are not a valid smart contract.

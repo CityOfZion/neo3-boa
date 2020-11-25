@@ -43,7 +43,8 @@ class Interop:
     CurrentHeight = CurrentHeightProperty()
 
     # Contract Interops
-    CreateContract = CreateMethod()
+    ContractType = ContractType.build()
+    CreateContract = CreateMethod(ContractType)
     CallContract = CallMethod()
     UpdateContract = UpdateMethod()
     DestroyContract = DestroyMethod()
@@ -98,7 +99,8 @@ class Interop:
                                   UpdateContract,
                                   DestroyContract,
                                   NeoScriptHash,
-                                  GasScriptHash
+                                  GasScriptHash,
+                                  ContractType
                                   ],
         InteropPackage.Crypto: [Sha256,
                                 Ripemd160,
