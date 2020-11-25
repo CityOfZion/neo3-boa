@@ -386,8 +386,6 @@ class TestInterop(BoaTest):
         self.assertEqual(script, result[0])
         self.assertEqual(manifest, json.loads(result[1]))
 
-
-
     def test_create_contract_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/interop_test/CreateContractTooManyArguments.py' % self.dirname
         self.assertCompilerLogs(UnexpectedArgument, path)

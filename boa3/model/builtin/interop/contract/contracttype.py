@@ -73,7 +73,7 @@ class ContractMethod(IBuiltinMethod):
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         return [
-            Opcode.NEWMAP,
+            (Opcode.NEWMAP, b''),
             (Opcode.PUSHDATA1, Integer(0).to_byte_array()),
             (Opcode.PUSH2, b''),
             (Opcode.PACK, b'')

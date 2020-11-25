@@ -1,10 +1,10 @@
 __all__ = ['CallMethod',
+           'ContractType',
            'CreateMethod',
            'DestroyMethod',
            'GasProperty',
            'NeoProperty',
-           'UpdateMethod',
-           'ContractType'
+           'UpdateMethod'
            ]
 
 from boa3.model.builtin.interop.contract.callmethod import CallMethod
