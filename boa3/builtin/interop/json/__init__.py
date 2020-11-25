@@ -5,13 +5,13 @@ def json_serialize(item: Any) -> bytes:
     """
     Serializes an item into a json
 
-    :param item: The item that will serialized
+    :param item: The item that will be serialized
     :type item: Any
     :return: The serialized item
     :rtype: bytes
 
-    :raise Exception: raised if item is an int value greater than MAX_SAFE_INTEGER or lower than MIN_SAFE_INTEGER, if
-        item is a dictionary that have a bytearray as key, if item isn't serializable or if item is too big.
+    :raise Exception: raised if the item is an integer value out of the Neo's accepted range, is a dictionary with a
+        bytearray key, or isn't serializable.
     """
     pass
 
