@@ -6,6 +6,7 @@ from boa3.model.builtin.interop.blockchain import *
 from boa3.model.builtin.interop.contract import *
 from boa3.model.builtin.interop.crypto import *
 from boa3.model.builtin.interop.iterator import *
+from boa3.model.builtin.interop.json import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.storage import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -17,6 +18,7 @@ class InteropPackage(str, Enum):
     Contract = 'contract'
     Crypto = 'crypto'
     Iterator = 'iterator'
+    Json = 'json'
     Runtime = 'runtime'
     Storage = 'storage'
 
@@ -54,6 +56,10 @@ class Interop:
     # Iterator Interops
     Iterator = IteratorType.build()
     IteratorCreate = IteratorMethod(Iterator)
+
+    # Json Interops
+    JsonDeserialize = JsonDeserializeMethod()
+    JsonSerialize = JsonSerializeMethod()
 
     # Runtime Interops
     CheckWitness = CheckWitnessMethod()
@@ -112,6 +118,9 @@ class Interop:
                                 VerifyWithECDsaSecp256k1
                                 ],
         InteropPackage.Iterator: [Iterator],
+        InteropPackage.Json: [JsonDeserialize,
+                              JsonSerialize
+                              ],
         InteropPackage.Runtime: [BlockTime,
                                  CallingScriptHash,
                                  CheckWitness,
