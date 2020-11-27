@@ -166,15 +166,12 @@ class TestEngine:
         self._gas_consumed = 0
         self._result_stack = []
         self._notifications = []
+        self._accounts = []
         self._error_message = None
 
     def reset_engine(self):
-        self._vm_state = VMState.NONE
-        self._gas_consumed = 0
-        self._result_stack = []
+        self.reset_state()
         self._storage = {}
-        self._notifications = []
-        self._error_message = None
 
     def to_json(self, path: str, method: str, *args: Any) -> Dict[str, Any]:
         return {

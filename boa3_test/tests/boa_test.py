@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 from unittest import TestCase
 
 from boa3.analyser.analyser import Analyser
@@ -104,7 +104,8 @@ class BoaTest(TestCase):
 
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
                            *arguments: Any, reset_engine: bool = False,
-                           fake_storage: Dict[str, Any] = None) -> Any:
+                           fake_storage: Dict[str, Any] = None,
+                           signer_accounts: Iterable[bytes] = ()) -> Any:
 
         if smart_contract_path.endswith('.py'):
             if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
@@ -113,6 +114,9 @@ class BoaTest(TestCase):
 
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)
+
+        for account in signer_accounts:
+            test_engine.add_signer_account(account)
 
         result = test_engine.run(smart_contract_path, method, *arguments,
                                  reset_engine=reset_engine)
