@@ -9,7 +9,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestTemplate(BoaTest):
 
     OWNER_SCRIPT_HASH = bytes(20)
-    OTHER_ACCOUNT = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+    OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+    OTHER_ACCOUNT_2 = bytes(range(20))
 
     # region HelloWorld
 
@@ -39,29 +40,25 @@ class TestTemplate(BoaTest):
         engine = TestEngine(self.dirname)
 
         # needs the owner signature
-        result = self.run_smart_contract(engine, path, 'deploy')
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+        result = self.run_smart_contract(engine, path, 'deploy',
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         # should return false if the signature isn't from the owner
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OTHER_ACCOUNT])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
 
         # must always return false after first execution
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
     def test_nep5_name(self):
@@ -99,9 +96,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(0, result)
 
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
@@ -114,59 +110,54 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_nep5_total_transfer(self):
-        transfered_amount = 10 * 10 ** 8  # 10 tokens
+        transferred_amount = 10 * 10 ** 8  # 10 tokens
 
         path = '%s/boa3_test/examples/nep5.py' % self.dirname
         engine = TestEngine(self.dirname)
 
         # should fail before running deploy
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT, transfered_amount)
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount,
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT, transfered_amount)
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount,
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         # other account doesn't have enough balance
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OTHER_ACCOUNT, self.OWNER_SCRIPT_HASH, transfered_amount,
-                                         signer_accounts=[self.OTHER_ACCOUNT])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         # should fail when any of the scripts' length is not 20
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
-                                    self.OWNER_SCRIPT_HASH, bytes(10), transfered_amount)
+                                    self.OWNER_SCRIPT_HASH, bytes(10), transferred_amount)
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
-                                    bytes(10), self.OTHER_ACCOUNT, transfered_amount)
+                                    bytes(10), self.OTHER_ACCOUNT_1, transferred_amount)
 
         # should fail when the amount is less than 0
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
-                                    self.OTHER_ACCOUNT, self.OWNER_SCRIPT_HASH, -10)
+                                    self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10)
 
         # doesn't fire the transfer event when transferring to yourself
         balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transfered_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transferred_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('transfer')
         self.assertEqual(0, len(transfer_events))
@@ -177,12 +168,11 @@ class TestTemplate(BoaTest):
 
         # doesn't fire the transfer event when transferring to yourself
         balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT)
+        balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT, transfered_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('transfer')
         self.assertEqual(1, len(transfer_events))
@@ -194,41 +184,40 @@ class TestTemplate(BoaTest):
         if isinstance(receiver, str):
             receiver = String(sender).to_bytes()
         self.assertEqual(self.OWNER_SCRIPT_HASH, sender)
-        self.assertEqual(self.OTHER_ACCOUNT, receiver)
-        self.assertEqual(transfered_amount, amount)
+        self.assertEqual(self.OTHER_ACCOUNT_1, receiver)
+        self.assertEqual(transferred_amount, amount)
 
         # transferring to yourself doesn't change the balance
         balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        balance_receiver_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT)
-        self.assertEqual(balance_sender_before - transfered_amount, balance_sender_after)
-        self.assertEqual(balance_receiver_before + transfered_amount, balance_receiver_after)
+        balance_receiver_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
+        self.assertEqual(balance_sender_before - transferred_amount, balance_sender_after)
+        self.assertEqual(balance_receiver_before + transferred_amount, balance_receiver_after)
 
     def test_nep5_verify(self):
         path = '%s/boa3_test/examples/nep5.py' % self.dirname
         engine = TestEngine(self.dirname)
 
         # should fail without signature
-        result = self.run_smart_contract(engine, path, 'verify')
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+        result = self.run_smart_contract(engine, path, 'verify',
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         # should fail if not signed by the owner
         result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OTHER_ACCOUNT])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
 
     # endregion
 
     # region ico
+
+    KYC_WHITELIST_PREFIX = b'KYCWhitelistApproved'
 
     def test_ico_compile(self):
         path = '%s/boa3_test/examples/ico.py' % self.dirname
@@ -239,29 +228,325 @@ class TestTemplate(BoaTest):
         engine = TestEngine(self.dirname)
 
         # needs the owner signature
-        result = self.run_smart_contract(engine, path, 'deploy')
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+        result = self.run_smart_contract(engine, path, 'deploy',
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         # should return false if the signature isn't from the owner
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OTHER_ACCOUNT])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(True, result)
 
         # must always return false after first execution
         result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        if isinstance(result, int) and result in (False, True):
-            result = bool(result)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
         self.assertEqual(False, result)
+
+    def test_ico_verify(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        result = self.run_smart_contract(engine, path, 'verify',
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'verify',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+    def test_ico_kyc_register(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        # don't include if not signed by the administrator
+        result = self.run_smart_contract(engine, path, 'kyc_register',
+                                         [self.OWNER_SCRIPT_HASH, bytes(22)])
+        self.assertEqual(0, result)
+
+        # don't include script hashes with size different than 20
+        result = self.run_smart_contract(engine, path, 'kyc_register',
+                                         [bytes(40), self.OWNER_SCRIPT_HASH, bytes(12)],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(1, result)
+        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OWNER_SCRIPT_HASH in engine.storage)
+
+        # script hashes already registered are returned as well
+        result = self.run_smart_contract(engine, path, 'kyc_register',
+                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(2, result)
+        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 in engine.storage)
+
+    def test_ico_kyc_remove(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        # don't remove if not signed by the administrator
+        result = self.run_smart_contract(engine, path, 'kyc_remove',
+                                         [self.OWNER_SCRIPT_HASH, bytes(22)])
+        self.assertEqual(0, result)
+
+        # script hashes that weren't registered are returned as well
+        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 not in engine.storage)
+        result = self.run_smart_contract(engine, path, 'kyc_remove',
+                                         [self.OTHER_ACCOUNT_1],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(1, result)
+        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 not in engine.storage)
+
+        # don't include script hashes with size different than 20
+        result = self.run_smart_contract(engine, path, 'kyc_remove',
+                                         [bytes(40), self.OWNER_SCRIPT_HASH, bytes(12)],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(1, result)
+
+    def test_ico_approve(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        approved_amount = 100 * 10 ** 8
+
+        # should fail when any of the scripts' length is not 20
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'approve',
+                                    self.OWNER_SCRIPT_HASH, bytes(10), approved_amount)
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'approve',
+                                    bytes(10), self.OTHER_ACCOUNT_1, approved_amount)
+
+        # should fail when the amount is less than 0
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'approve',
+                                    self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10)
+
+        # should fail if the origin doesn't sign
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        # should fail if origin and target are the same
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, approved_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        # should fail if any of the addresses is not included in the kyc
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'kyc_register',
+                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(2, result)
+
+        # should fail if the origin's balance is less than passed amount
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        # initialize account and owner's balance
+        result = self.run_smart_contract(engine, path, 'deploy',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+    def test_ico_allowance(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        approved_amount = 100 * 10 ** 8
+
+        result = self.run_smart_contract(engine, path, 'allowance', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'deploy',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'kyc_register',
+                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'allowance', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1)
+        self.assertEqual(approved_amount, result)
+
+    def test_ico_transferFrom(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        transferred_amount = 100 * 10 ** 8
+
+        # should fail when any of the scripts' length is not 20
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'transferFrom',
+                                    self.OWNER_SCRIPT_HASH, bytes(10), self.OTHER_ACCOUNT_2, transferred_amount)
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'transferFrom',
+                                    bytes(10), self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, transferred_amount)
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'transferFrom',
+                                    self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, bytes(30), transferred_amount)
+
+        # should fail when the amount is less than 0
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'transferFrom',
+                                    self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, -10)
+
+        # should fail if the sender doesn't sign
+        result = self.run_smart_contract(engine, path, 'transferFrom',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, transferred_amount,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        # should fail if the allowed amount is less than the given amount
+        result = self.run_smart_contract(engine, path, 'transferFrom',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, transferred_amount,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'deploy',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'kyc_register',
+                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'approve',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount * 2,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # doesn't fire the transfer event when transferring to yourself or amount is zero
+        balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        result = self.run_smart_contract(engine, path, 'transferFrom',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        self.assertEqual(0, len(engine.get_events('transfer')))
+        balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        self.assertEqual(balance_after, balance_before)
+
+        balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
+        result = self.run_smart_contract(engine, path, 'transferFrom',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_1, transferred_amount,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        self.assertEqual(0, len(engine.get_events('transfer')))
+        balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
+        self.assertEqual(balance_after, balance_before)
+
+        result = self.run_smart_contract(engine, path, 'transferFrom',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, 0,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        self.assertEqual(0, len(engine.get_events('transfer')))
+
+        balance_originator_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
+        result = self.run_smart_contract(engine, path, 'transferFrom',
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, transferred_amount,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        balance_originator_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        self.assertEqual(balance_originator_before - transferred_amount, balance_originator_after)
+        balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
+        self.assertEqual(balance_sender_before, balance_sender_after)
+        balance_receiver_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
+        self.assertEqual(balance_receiver_before + transferred_amount, balance_receiver_after)
+
+    def test_ico_mint(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        result = self.run_smart_contract(engine, path, 'deploy',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # should fail if amount isn't a positive number
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'mint', 0)
+
+        minted_amount = 10_000 * 10 ** 8
+        # should fail if not signed by the administrator
+        result = self.run_smart_contract(engine, path, 'mint', minted_amount,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
+        owner_balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+
+        result = self.run_smart_contract(engine, path, 'mint', minted_amount,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
+        self.assertEqual(total_supply_before + minted_amount, total_supply_after)
+        owner_balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        self.assertEqual(owner_balance_before + minted_amount, owner_balance_after)
+
+    def test_ico_refund(self):
+        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        # should fail script hash length is not 20
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'refund', bytes(10), 10_000, 10_000)
+
+        # should fail no amount is a positive number
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 0, 10_000)
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 10_000, 0)
+
+        # should fail if not signed by the owner
+        result = self.run_smart_contract(engine, path, 'refund',
+                                         self.OWNER_SCRIPT_HASH, 10_000, 10_000,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        self.assertEqual(False, result)
+
+        # TODO: Test if the refund is successful when update the TestEngine to make Neo/Gas transfers
 
     # endregion

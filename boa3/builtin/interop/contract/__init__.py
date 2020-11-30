@@ -1,4 +1,5 @@
 from typing import Any, Sequence
+
 from boa3.builtin.interop.contract.contract import Contract
 
 

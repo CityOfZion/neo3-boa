@@ -1,3 +1,5 @@
+import json
+
 from boa3.boa3 import Boa3
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType
@@ -13,7 +15,6 @@ from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
-import json
 
 
 class TestInterop(BoaTest):
@@ -883,15 +884,13 @@ class TestInterop(BoaTest):
         import base64
         engine = TestEngine(self.dirname)
         expected_result = base64.b64encode(b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main', b'unit test')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', b'unit test',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
         expected_result = base64.b64encode(b'')
-        result = self.run_smart_contract(engine, path, 'Main', b'')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', b'',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
         long_byte_string = (b'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
@@ -903,9 +902,8 @@ class TestInterop(BoaTest):
                             b'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                             b'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base64.b64encode(long_byte_string)
-        result = self.run_smart_contract(engine, path, 'Main', long_byte_string)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', long_byte_string,
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_base64_encode_mismatched_type(self):
@@ -929,15 +927,13 @@ class TestInterop(BoaTest):
         import base64
         engine = TestEngine(self.dirname)
         arg = String.from_bytes(base64.b64encode(b'unit test'))
-        result = self.run_smart_contract(engine, path, 'Main', arg)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', arg,
+                                         expected_result_type=bytes)
         self.assertEqual(b'unit test', result)
 
         arg = String.from_bytes(base64.b64encode(b''))
-        result = self.run_smart_contract(engine, path, 'Main', arg)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', arg,
+                                         expected_result_type=bytes)
         self.assertEqual(b'', result)
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
@@ -949,9 +945,8 @@ class TestInterop(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         arg = String.from_bytes(base64.b64encode(String(long_string).to_bytes()))
-        result = self.run_smart_contract(engine, path, 'Main', arg)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', arg,
+                                         expected_result_type=bytes)
         self.assertEqual(String(long_string).to_bytes(), result)
 
     def test_base64_decode_mismatched_type(self):
@@ -975,15 +970,13 @@ class TestInterop(BoaTest):
         import base58
         engine = TestEngine(self.dirname)
         expected_result = base58.b58encode('unit test')
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', 'unit test',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
         expected_result = base58.b58encode('')
-        result = self.run_smart_contract(engine, path, 'Main', '')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', '',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
@@ -995,9 +988,8 @@ class TestInterop(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base58.b58encode(long_string)
-        result = self.run_smart_contract(engine, path, 'Main', long_string)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', long_string,
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_base58_encode_mismatched_type(self):
@@ -1784,9 +1776,8 @@ class TestInterop(BoaTest):
         engine = TestEngine(self.dirname)
         test_input = {"one": 1, "two": 2, "three": 3}
         expected_result = String(json.dumps(test_input, separators=(',', ':'))).to_bytes()
-        result = self.run_smart_contract(engine, path, 'main', test_input)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'main', test_input,
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_int(self):
@@ -1794,9 +1785,8 @@ class TestInterop(BoaTest):
 
         engine = TestEngine(self.dirname)
         expected_result = String(json.dumps(10)).to_bytes()
-        result = self.run_smart_contract(engine, path, 'main')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_bool(self):
@@ -1804,9 +1794,8 @@ class TestInterop(BoaTest):
 
         engine = TestEngine(self.dirname)
         expected_result = String(json.dumps(1)).to_bytes()
-        result = self.run_smart_contract(engine, path, 'main')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_str(self):
@@ -1814,9 +1803,8 @@ class TestInterop(BoaTest):
 
         engine = TestEngine(self.dirname)
         expected_result = String(json.dumps('unit test')).to_bytes()
-        result = self.run_smart_contract(engine, path, 'main')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_bytes(self):
@@ -1824,9 +1812,8 @@ class TestInterop(BoaTest):
 
         engine = TestEngine(self.dirname)
         expected_result = b'"unit test"'
-        result = self.run_smart_contract(engine, path, 'main')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_json_deserialize(self):
