@@ -537,14 +537,11 @@ class TestTemplate(BoaTest):
 
         # should fail no amount is a positive number
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 0, 10_000)
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 10_000, 0)
+            self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 0, 0)
 
         # should fail if not signed by the owner
         result = self.run_smart_contract(engine, path, 'refund',
-                                         self.OWNER_SCRIPT_HASH, 10_000, 10_000,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+                                         self.OWNER_SCRIPT_HASH, 10_000, 10_000)
         self.assertEqual(False, result)
 
         # TODO: Test if the refund is successful when update the TestEngine to make Neo/Gas transfers
