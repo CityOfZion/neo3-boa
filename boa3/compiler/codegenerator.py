@@ -23,7 +23,7 @@ from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo, OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class CodeGenerator:

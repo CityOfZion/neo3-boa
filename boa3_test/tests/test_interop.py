@@ -11,6 +11,7 @@ from boa3.neo import to_script_hash
 from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -190,6 +191,16 @@ class TestInterop(BoaTest):
         path = '%s/boa3_test/test_sc/interop_test/Base58DecodeMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
+    def test_serialize_int(self):
+        path = '%s/boa3_test/test_sc/interop_test/SerializeInt.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'serialize_int',
+                                         expected_result_type=bytes)
+        expected_result = serialize(42)
+        self.assertEqual(expected_result, result)
+
     def test_serialize_bool(self):
         path = '%s/boa3_test/test_sc/interop_test/SerializeBool.py' % self.dirname
         self.compile_and_save(path)
@@ -197,7 +208,86 @@ class TestInterop(BoaTest):
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'serialize_bool',
                                          expected_result_type=bytes)
-        self.assertEqual(b'\x21\x01\x01', result)
+        expected_result = serialize(True)
+        self.assertEqual(expected_result, result)
+
+    def test_serialize_str(self):
+        path = '%s/boa3_test/test_sc/interop_test/SerializeStr.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'serialize_str',
+                                         expected_result_type=bytes)
+        expected_result = serialize('42')
+        self.assertEqual(expected_result, result)
+
+    def test_serialize_sequence(self):
+        path = '%s/boa3_test/test_sc/interop_test/SerializeSequence.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'serialize_sequence',
+                                         expected_result_type=bytes)
+        expected_result = serialize([2, 3, 5, 7])
+        self.assertEqual(expected_result, result)
+
+    def test_serialize_dict(self):
+        path = '%s/boa3_test/test_sc/interop_test/SerializeDict.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'serialize_dict',
+                                         expected_result_type=bytes)
+        expected_result = serialize({1: 1, 2: 1, 3: 2})
+        self.assertEqual(expected_result, result)
+
+    def test_deserialize(self):
+        path = '%s/boa3_test/test_sc/interop_test/Deserialize.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+
+        expected_result = 42
+        value = serialize(expected_result)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        self.assertEqual(expected_result, result)
+
+        expected_result = True
+        value = serialize(expected_result)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+
+        # it shouldn't be equal to the convertion, because it converts as an int instead of a boolean
+        self.assertEqual(expected_result, result)
+        self.assertNotEqual(type(expected_result), type(result))
+
+        value = StackItemType.Boolean + value[1:]
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        self.assertEqual(expected_result, result)
+        self.assertEqual(type(expected_result), type(result))
+
+        expected_result = '42'
+        value = serialize(expected_result)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        self.assertEqual(expected_result, result)
+
+        expected_result = b'42'
+        value = serialize(expected_result)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        self.assertEqual(expected_result, result)
+
+        expected_result = [1, '2', b'3']
+        value = serialize(expected_result)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        self.assertEqual(expected_result, result)
+
+        expected_result = {'int': 1, 'str': '2', 'bytes': b'3'}
+        value = serialize(expected_result)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        self.assertEqual(expected_result, result)
+
+    def test_deserialize_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/DeserializeMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
 

@@ -4,7 +4,7 @@ from typing import Any, Set
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.itype import IType
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class SequenceType(ICollectionType, ABC):

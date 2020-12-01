@@ -57,6 +57,8 @@ def serialize(item: Any) -> bytes:
     :type item: Any
     :return: the serialized value
     :rtype: bytes
+
+    :raise Exception: raised if the item's type is not serializable.
     """
     pass
 
@@ -69,5 +71,7 @@ def deserialize(data: bytes) -> Any:
     :type data: bytes
     :return: the deserialized result
     :rtype: Any
+
+    :raise Exception: raised when the date doesn't represent a serialized value.
     """
     pass

@@ -4,7 +4,7 @@ from typing import Any, Dict
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.symbol import ISymbol
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class IType(IdentifiedSymbol):
