@@ -1,4 +1,3 @@
-from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -16,10 +15,9 @@ class TestClass(BoaTest):
         script.reverse()
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'script_hash', [])
+        result = self.run_smart_contract(engine, path, 'script_hash', [],
+                                         expected_result_type=bytes)
         self.assertEqual(len(engine.notifications), 0)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
         self.assertEqual(bytes(20), result)
 
         result = self.run_smart_contract(engine, path, 'event_name', [])
@@ -57,9 +55,8 @@ class TestClass(BoaTest):
         script.reverse()
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'script_hash', script)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'script_hash', script,
+                                         expected_result_type=bytes)
         self.assertEqual(script, result)
 
         result = self.run_smart_contract(engine, path, 'event_name', 'unit test')

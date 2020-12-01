@@ -72,15 +72,15 @@ class TestStorage(BoaTest):
         self.assertEqual(b'', result)
 
         storage = {'example': 23}
-        result = self.run_smart_contract(engine, path, 'Main', 'example', fake_storage=storage)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', 'example',
+                                         fake_storage=storage,
+                                         expected_result_type=bytes)
         self.assertEqual(Integer(23).to_byte_array(), result)
 
         storage = {'test1': 23, 'test2': 42}
-        result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage=storage)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'Main', 'test2',
+                                         fake_storage=storage,
+                                         expected_result_type=bytes)
         self.assertEqual(Integer(42).to_byte_array(), result)
 
     def test_storage_get_mismatched_type(self):

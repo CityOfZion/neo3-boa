@@ -1,9 +1,11 @@
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple, Type
 from unittest import TestCase
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -104,7 +106,9 @@ class BoaTest(TestCase):
 
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
                            *arguments: Any, reset_engine: bool = False,
-                           fake_storage: Dict[str, Any] = None) -> Any:
+                           fake_storage: Dict[str, Any] = None,
+                           signer_accounts: Iterable[bytes] = (),
+                           expected_result_type: Type = None) -> Any:
 
         if smart_contract_path.endswith('.py'):
             if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
@@ -114,9 +118,22 @@ class BoaTest(TestCase):
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)
 
+        for account in signer_accounts:
+            test_engine.add_signer_account(account)
+
         result = test_engine.run(smart_contract_path, method, *arguments,
                                  reset_engine=reset_engine)
 
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
             raise TestExecutionException(test_engine.error)
+
+        if expected_result_type is not None:
+            if expected_result_type is not str and isinstance(result, str):
+                result = String(result).to_bytes()
+
+            if expected_result_type is bool:
+                if isinstance(result, bytes):
+                    result = Integer.from_bytes(result, signed=True)
+                if isinstance(result, int) and result in (False, True):
+                    result = bool(result)
         return result
