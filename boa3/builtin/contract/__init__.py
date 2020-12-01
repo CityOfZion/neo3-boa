@@ -8,3 +8,10 @@ Nep5TransferEvent = CreateNewEvent(
     ],
     'transfer'
 )
+
+
+def abort():
+    """
+    Abort the execution of a smart contract
+    """
+    pass
