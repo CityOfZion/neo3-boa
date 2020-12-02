@@ -35,28 +35,43 @@ class Interop:
             lst.extend(symbols)
         return lst
 
+    # Interop Types
+    ContractType = ContractType.build()
+    Iterator = IteratorType.build()
+    NotificationType = NotificationType.build()
+    TriggerType = TriggerType()
+
     # Binary Interops
-    Serialize = SerializeMethod()
-    Deserialize = DeserializeMethod()
     Base58Encode = Base58EncodeMethod()
     Base58Decode = Base58DecodeMethod()
     Base64Encode = Base64EncodeMethod()
     Base64Decode = Base64DecodeMethod()
+    Deserialize = DeserializeMethod()
+    Serialize = SerializeMethod()
 
     # Blockchain Interops
     CurrentHeight = CurrentHeightProperty()
+    GetContract = GetContractMethod(ContractType)
 
     # Contract Interops
-    ContractType = ContractType.build()
-    CreateContract = CreateMethod(ContractType)
     CallContract = CallMethod()
-    UpdateContract = UpdateMethod()
+    CreateContract = CreateMethod(ContractType)
     DestroyContract = DestroyMethod()
-    NeoScriptHash = NeoProperty()
     GasScriptHash = GasProperty()
+    NeoScriptHash = NeoProperty()
+    UpdateContract = UpdateMethod()
+
+    # Crypto Interops
+    CheckMultisigWithECDsaSecp256k1 = CheckMultisigWithECDsaSecp256k1Method()
+    CheckMultisigWithECDsaSecp256r1 = CheckMultisigWithECDsaSecp256r1Method()
+    Hash160 = Hash160Method()
+    Hash256 = Hash256Method()
+    Ripemd160 = Ripemd160Method()
+    Sha256 = Sha256Method()
+    VerifyWithECDsaSecp256k1 = VerifyWithECDsaSecp256k1Method()
+    VerifyWithECDsaSecp256r1 = VerifyWithECDsaSecp256r1Method()
 
     # Iterator Interops
-    Iterator = IteratorType.build()
     IteratorCreate = IteratorMethod(Iterator)
 
     # Json Interops
@@ -64,35 +79,23 @@ class Interop:
     JsonSerialize = JsonSerializeMethod()
 
     # Runtime Interops
-    CheckWitness = CheckWitnessMethod()
-    Notify = NotifyMethod()
-    Log = LogMethod()
-    TriggerType = TriggerType()
-    GetTrigger = TriggerMethod(TriggerType)
-    CallingScriptHash = CallingScriptHashProperty()
-    ExecutingScriptHash = ExecutingScriptHashProperty()
-    Platform = PlatformProperty()
     BlockTime = BlockTimeProperty()
-    GasLeft = GasLeftProperty()
-    InvocationCounter = InvocationCounterProperty()
-    NotificationType = NotificationType.build()
-    GetNotifications = GetNotificationsMethod(NotificationType)
+    CallingScriptHash = CallingScriptHashProperty()
+    CheckWitness = CheckWitnessMethod()
     EntryScriptHash = EntryScriptHashProperty()
+    ExecutingScriptHash = ExecutingScriptHashProperty()
+    GasLeft = GasLeftProperty()
+    GetNotifications = GetNotificationsMethod(NotificationType)
+    GetTrigger = TriggerMethod(TriggerType)
+    InvocationCounter = InvocationCounterProperty()
+    Log = LogMethod()
+    Notify = NotifyMethod()
+    Platform = PlatformProperty()
 
     # Storage Interops
+    StorageDelete = StorageDeleteMethod()
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
-    StorageDelete = StorageDeleteMethod()
-
-    # Crypto Interops
-    Sha256 = Sha256Method()
-    Ripemd160 = Ripemd160Method()
-    Hash160 = Hash160Method()
-    Hash256 = Hash256Method()
-    CheckMultisigWithECDsaSecp256r1 = CheckMultisigWithECDsaSecp256r1Method()
-    CheckMultisigWithECDsaSecp256k1 = CheckMultisigWithECDsaSecp256k1Method()
-    VerifyWithECDsaSecp256r1 = VerifyWithECDsaSecp256r1Method()
-    VerifyWithECDsaSecp256k1 = VerifyWithECDsaSecp256k1Method()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
         InteropPackage.Binary: [Base58Encode,
@@ -102,24 +105,25 @@ class Interop:
                                 Deserialize,
                                 Serialize
                                 ],
-        InteropPackage.Blockchain: [CurrentHeight
+        InteropPackage.Blockchain: [CurrentHeight,
+                                    GetContract
                                     ],
-        InteropPackage.Contract: [CreateContract,
-                                  CallContract,
-                                  UpdateContract,
+        InteropPackage.Contract: [CallContract,
+                                  ContractType,
+                                  CreateContract,
                                   DestroyContract,
-                                  NeoScriptHash,
                                   GasScriptHash,
-                                  ContractType
+                                  NeoScriptHash,
+                                  UpdateContract
                                   ],
-        InteropPackage.Crypto: [Sha256,
-                                Ripemd160,
+        InteropPackage.Crypto: [CheckMultisigWithECDsaSecp256k1,
+                                CheckMultisigWithECDsaSecp256r1,
                                 Hash160,
                                 Hash256,
-                                CheckMultisigWithECDsaSecp256r1,
-                                CheckMultisigWithECDsaSecp256k1,
-                                VerifyWithECDsaSecp256r1,
-                                VerifyWithECDsaSecp256k1
+                                Ripemd160,
+                                Sha256,
+                                VerifyWithECDsaSecp256k1,
+                                VerifyWithECDsaSecp256r1
                                 ],
         InteropPackage.Iterator: [Iterator],
         InteropPackage.Json: [JsonDeserialize,
@@ -128,8 +132,8 @@ class Interop:
         InteropPackage.Runtime: [BlockTime,
                                  CallingScriptHash,
                                  CheckWitness,
+                                 EntryScriptHash,
                                  ExecutingScriptHash,
-                                 Platform,
                                  GasLeft,
                                  GetNotifications,
                                  GetTrigger,
@@ -137,11 +141,12 @@ class Interop:
                                  Log,
                                  NotificationType,
                                  Notify,
-                                 TriggerType,
-                                 EntryScriptHash
+                                 Platform,
+                                 TriggerType
                                  ],
-        InteropPackage.Storage: [StorageGet,
-                                 StoragePut,
-                                 StorageDelete
+        InteropPackage.Storage: [StorageDelete,
+                                 StorageGet,
+                                 StoragePut
                                  ]
     }
+

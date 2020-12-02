@@ -1,17 +1,17 @@
-__all__ = ['CheckWitnessMethod',
-           'BlockTimeProperty',
+__all__ = ['BlockTimeProperty',
            'CallingScriptHashProperty',
+           'CheckWitnessMethod',
+           'EntryScriptHashProperty',
            'ExecutingScriptHashProperty',
-           'PlatformProperty',
            'GasLeftProperty',
-           'InvocationCounterProperty',
            'GetNotificationsMethod',
+           'InvocationCounterProperty',
            'LogMethod',
            'NotificationType',
            'NotifyMethod',
+           'PlatformProperty',
            'TriggerMethod',
            'TriggerType',
-           'EntryScriptHashProperty'
            ]
 
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
