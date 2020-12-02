@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable

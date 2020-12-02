@@ -1,6 +1,6 @@
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBuiltinMethod(BoaTest):

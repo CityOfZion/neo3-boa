@@ -36,6 +36,8 @@ class Interop:
         return lst
 
     # Binary Interops
+    Serialize = SerializeMethod()
+    Deserialize = DeserializeMethod()
     Base58Encode = Base58EncodeMethod()
     Base58Decode = Base58DecodeMethod()
     Base64Encode = Base64EncodeMethod()
@@ -96,7 +98,9 @@ class Interop:
         InteropPackage.Binary: [Base58Encode,
                                 Base58Decode,
                                 Base64Encode,
-                                Base64Decode
+                                Base64Decode,
+                                Deserialize,
+                                Serialize
                                 ],
         InteropPackage.Blockchain: [CurrentHeight
                                     ],

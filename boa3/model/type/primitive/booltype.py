@@ -2,7 +2,7 @@ from typing import Any
 
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class BoolType(PrimitiveType):

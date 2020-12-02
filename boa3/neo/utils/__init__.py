@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Sequence
 from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 
 

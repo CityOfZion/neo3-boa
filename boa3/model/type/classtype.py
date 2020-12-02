@@ -6,7 +6,7 @@ from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class ClassType(IType, ABC):
