@@ -318,6 +318,41 @@ class TestInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_get_contract(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.GetContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/interop_test/GetContract.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main', bytes(20))
+        self.assertEqual(None, result)
+
+        call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        Boa3.compile_and_save(call_contract_path)
+
+        script, manifest = self.get_output(call_contract_path)
+        manifest_hash = manifest['abi']['hash']
+        call_hash = Integer(manifest_hash[2:], 16).to_byte_array()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine.add_contract(call_contract_path)
+
+        del manifest['features']    # TODO: Remove when metadata is altered
+
+        arg_manifest = json.dumps(manifest, separators=(',', ':'))
+
+        result = self.run_smart_contract(engine, path, 'main', call_hash)
+        self.assertEqual(script, result[0])
+        self.assertEqual(json.loads(arg_manifest), json.loads(result[1]))
+
     # endregion
 
     # region Contract
