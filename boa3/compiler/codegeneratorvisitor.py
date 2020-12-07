@@ -293,10 +293,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param subscript: the python ast subscript node
         """
-        if isinstance(subscript.slice, ast.Index):
-            return self.visit_Subscript_Index(subscript)
-        elif isinstance(subscript.slice, ast.Slice):
+        if isinstance(subscript.slice, ast.Slice):
             return self.visit_Subscript_Slice(subscript)
+
+        return self.visit_Subscript_Index(subscript)
 
     def visit_Subscript_Index(self, subscript: ast.Subscript):
         """
@@ -307,7 +307,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         if isinstance(subscript.ctx, ast.Load):
             # get item
             self.visit_to_generate(subscript.value)
-            self.visit_to_generate(subscript.slice.value)
+            value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+            self.visit_to_generate(value)
             self.generator.convert_get_item()
         else:
             # set item
