@@ -137,4 +137,8 @@ class BoaTest(TestCase):
                     result = Integer.from_bytes(result, signed=True)
                 if isinstance(result, int) and result in (False, True):
                     result = bool(result)
+
+            if expected_result_type is bytearray and isinstance(result, bytes):
+                result = bytearray(result)
+
         return result

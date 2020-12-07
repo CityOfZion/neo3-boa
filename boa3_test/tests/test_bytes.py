@@ -6,6 +6,7 @@ from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -218,6 +219,21 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytesFromBytearray.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_assign_with_slice(self):
+        path = '%s/boa3_test/test_sc/bytes_test/AssignSlice.py' % self.dirname
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main', b'unittest',
+                                         expected_result_type=bytearray)
+        self.assertEqual(b'unittest'[1:2], result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'123',
+                                         expected_result_type=bytearray)
+        self.assertEqual(b'123'[1:2], result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', bytearray())
 
     def test_byte_array_get_value(self):
         expected_output = (

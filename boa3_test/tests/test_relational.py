@@ -3,6 +3,7 @@ from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -418,3 +419,18 @@ class TestRelational(BoaTest):
     def test_mixed_greater_or_equal_than_operation(self):
         path = '%s/boa3_test/test_sc/relational_test/MixedGreaterOrEqual.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_list_equality_with_slice(self):
+        path = '%s/boa3_test/test_sc/relational_test/ListEqualityWithSlice.py' % self.dirname
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main', ['unittest', '123'], 'unittest',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', ['unittest', '123'], '123',
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', [], '')

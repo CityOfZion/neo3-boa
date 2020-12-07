@@ -48,6 +48,43 @@ class TestString(BoaTest):
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'Main', '')
 
+    def test_string_get_value_to_variable(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # b = arg[0]
+            + Opcode.PUSH0
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PUSH1
+            + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.str.stack_item
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return b
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/string_test/GetValueToVariable.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 'unit')
+        self.assertEqual('u', result)
+        result = self.run_smart_contract(engine, path, 'Main', '123')
+        self.assertEqual('1', result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', '')
+
     def test_string_set_value(self):
         path = '%s/boa3_test/test_sc/string_test/SetValue.py' % self.dirname
         self.assertCompilerLogs(UnresolvedOperation, path)

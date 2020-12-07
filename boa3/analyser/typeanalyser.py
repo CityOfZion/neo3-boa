@@ -310,13 +310,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param subscript: the python ast subscript node
         :return: the type of the accessed value if it is valid. Type.none otherwise.
         """
-        if isinstance(subscript.slice, ast.Index):
-            return self.validate_get_or_set(subscript, subscript.slice)
-        elif isinstance(subscript.slice, ast.Slice):
+        if isinstance(subscript.slice, ast.Slice):
             return self.validate_slice(subscript, subscript.slice)
-        return Type.none
 
-    def validate_get_or_set(self, subscript: ast.Subscript, index_node: ast.Index) -> IType:
+        return self.validate_get_or_set(subscript, subscript.slice)
+
+    def validate_get_or_set(self, subscript: ast.Subscript, index_node: ast.AST) -> IType:
         """
         Verifies if the subscribed value is a sequence and if the index is valid to this sequence
 

@@ -617,10 +617,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(subscript.ctx, ast.Load):
             if isinstance(symbol, Collection):
-                values_type: Iterable[IType] = self.get_values_type(subscript.slice.value)
+                value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+                values_type: Iterable[IType] = self.get_values_type(value)
                 return symbol.build_collection(*values_type)
 
             symbol_type = self.get_type(symbol)
+            if isinstance(subscript.slice, ast.Slice):
+                return symbol_type
+
             if isinstance(symbol_type, SequenceType):
                 return symbol_type.value_type
 
