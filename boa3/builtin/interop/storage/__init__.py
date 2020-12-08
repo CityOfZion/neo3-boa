@@ -1,5 +1,7 @@
 from typing import Any
 
+from boa3.builtin.interop.storage.storagecontext import StorageContext
+
 
 def get(key: Any) -> bytes:
     """
@@ -9,6 +11,16 @@ def get(key: Any) -> bytes:
     :type key: str or bytes
     :return: the value corresponding to given key for current storage context
     :rtype: bytes
+    """
+    pass
+
+
+def get_context() -> StorageContext:
+    """
+    Gets current storage context
+
+    :return: the current storage context
+    :rtype: StorageContext
     """
     pass
 
