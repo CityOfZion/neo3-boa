@@ -48,8 +48,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._metadata: NeoMetadata = analyser.metadata
         self._current_method: Method = None
 
-        self._methods_id_calls: List[str] = []
-
         self.visit(self._tree)
 
     @property
@@ -802,10 +800,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param call: the python ast function call node
         :return: the result type of the called function
         """
-        included_method_id = isinstance(call.func, ast.Name)
-        if included_method_id:
-            self._methods_id_calls.append(call.func.id)
-
         if isinstance(call.func, ast.Name):
             callable_id: str = call.func.id
             callable_target = self.get_symbol(callable_id)
@@ -814,12 +808,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         callable_target = self.validate_builtin_callable(callable_id, callable_target)
 
-        limit_index = 2 if included_method_id else 1
-        if (not isinstance(callable_target, Callable)
-                and len(self._methods_id_calls) > limit_index - 1
-                and isinstance(self.get_symbol(self._methods_id_calls[-limit_index]), IBuiltinCallable)):
+        if not isinstance(callable_target, Callable):
             # if the outer call is a builtin, enable call even without the import
-            callable_target = Builtin.get_any_symbol(callable_id)
+            builtin_symbol = Builtin.get_any_symbol(callable_id)
+            if builtin_symbol is not None:
+                callable_target = builtin_symbol
 
         if isinstance(callable_target, ClassType):
             callable_target = callable_target.constructor_method()
@@ -831,8 +824,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         else:
             if callable_target is Builtin.NewEvent:
-                if included_method_id:
-                    self._methods_id_calls.pop()
                 return callable_target.return_type
             # TODO: change when kwargs is implemented
             if len(call.keywords) > 0:
@@ -847,16 +838,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._log_error(
                             CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
                         )
-                        if included_method_id:
-                            self._methods_id_calls.pop()
                         return callable_target.return_type
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
             self.update_callable_after_validation(call, callable_id, callable_target)
 
-        if included_method_id:
-            self._methods_id_calls.pop()
         return self.get_type(callable_target)
 
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
@@ -922,7 +909,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if callable_required_args <= len_call_args < len(callable_target.args):
             included_args = len_call_args - callable_required_args
-            call.args.extend(callable_target.defaults[included_args:])
+            for default in callable_target.defaults[included_args:]:
+                call.args.append(self.clone(default))
         return True
 
     def validate_passed_arguments(self, call: ast.Call, args_types: List[IType], callable_id: str, callable: Callable):

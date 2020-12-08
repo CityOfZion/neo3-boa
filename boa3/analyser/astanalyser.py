@@ -171,3 +171,19 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             elif isinstance(value, ast.AST):
                 self.update_line_and_col(value, origin)
         ast.fix_missing_locations(target)
+
+    def clone(self, node: ast.AST) -> ast.AST:
+        """
+        Clones an AST node
+
+        :param node: node to be cloned
+        :return:
+        """
+        clone: ast.AST = node.__class__()
+        clone._attributes = node._attributes
+        clone._fields = node._fields
+
+        for attr in node._attributes + node._fields:
+            clone.__setattr__(attr, node.__getattribute__(attr))
+
+        return clone
