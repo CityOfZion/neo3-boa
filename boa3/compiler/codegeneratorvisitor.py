@@ -481,8 +481,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in if_node.body:
             self.visit_to_map(stmt, generate=True)
 
+        ends_with_if = len(if_node.body) > 0 and isinstance(if_node.body[-1], ast.If)
+
         if len(if_node.orelse) > 0:
-            start_addr = self.generator.convert_begin_else(start_addr)
+            start_addr = self.generator.convert_begin_else(start_addr, ends_with_if)
             for stmt in if_node.orelse:
                 self.visit_to_map(stmt, generate=True)
 

@@ -331,3 +331,26 @@ class TestIf(BoaTest):
     def test_if_expression_mismatched_types(self):
         path = '%s/boa3_test/test_sc/if_test/MismatchedIfExp.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_inner_if_else(self):
+        path = '%s/boa3_test/test_sc/if_test/InnerIfElse.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main', 4, 3, 2, 1)
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 4, 3, 1, 2)
+        self.assertEqual(8, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 4, 1, 2, 3)
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 1, 2, 4, 3)
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 1, 2, 3, 4)
+        self.assertEqual(11, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 1, 3, 2, 4)
+        self.assertEqual(22, result)

@@ -488,57 +488,7 @@ class TestFunction(BoaTest):
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_inside_multiple_inner_if(self):
-        expected_output = (
-            Opcode.INITSLOT     # Main
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0     # if condition
-            + Opcode.JMPIFNOT
-            + Integer(29).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDARG0     # if condition
-            + Opcode.JMPIFNOT
-            + Integer(14).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDARG0     # if condition
-            + Opcode.JMPIFNOT
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH1          # return 1
-            + Opcode.RET
-            + Opcode.LDARG0     # if condition
-            + Opcode.JMPIFNOT
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH2          # return 2
-            + Opcode.RET
-            + Opcode.PUSH3      # else
-            + Opcode.RET            # return 3
-            + Opcode.LDARG0     # elif condition
-            + Opcode.JMPIFNOT
-            + Integer(9).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDARG0     # if condition
-            + Opcode.JMPIFNOT
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH4          # return 4
-            + Opcode.RET
-            + Opcode.PUSH5      # else
-            + Opcode.RET            # return 5
-            + Opcode.PUSH6      # else
-            + Opcode.RET            # return 6
-            + Opcode.LDARG0     # else
-            + Opcode.JMPIFNOT       # if condition
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH7          # return 7
-            + Opcode.RET
-            + Opcode.LDARG0         # if condition
-            + Opcode.JMPIFNOT
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH8          # return 8
-            + Opcode.RET
-            + Opcode.PUSH9          # else
-            + Opcode.RET                # return 9
-        )
-
         path = '%s/boa3_test/test_sc/function_test/ReturnMultipleInnerIf.py' % self.dirname
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', True)
