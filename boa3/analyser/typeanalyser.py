@@ -6,6 +6,7 @@ from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyse
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression
@@ -46,6 +47,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         from boa3.builtin import NeoMetadata
         self._metadata: NeoMetadata = analyser.metadata
         self._current_method: Method = None
+
+        self._methods_id_calls: List[str] = []
 
         self.visit(self._tree)
 
@@ -799,6 +802,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param call: the python ast function call node
         :return: the result type of the called function
         """
+        included_method_id = isinstance(call.func, ast.Name)
+        if included_method_id:
+            self._methods_id_calls.append(call.func.id)
+
         if isinstance(call.func, ast.Name):
             callable_id: str = call.func.id
             callable_target = self.get_symbol(callable_id)
@@ -806,8 +813,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
         callable_target = self.validate_builtin_callable(callable_id, callable_target)
+
+        limit_index = 2 if included_method_id else 1
+        if (not isinstance(callable_target, Callable)
+                and len(self._methods_id_calls) > limit_index - 1
+                and isinstance(self.get_symbol(self._methods_id_calls[-limit_index]), IBuiltinCallable)):
+            # if the outer call is a builtin, enable call even without the import
+            callable_target = Builtin.get_any_symbol(callable_id)
+
         if isinstance(callable_target, ClassType):
             callable_target = callable_target.constructor_method()
+
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
@@ -815,6 +831,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         else:
             if callable_target is Builtin.NewEvent:
+                if included_method_id:
+                    self._methods_id_calls.pop()
                 return callable_target.return_type
             # TODO: change when kwargs is implemented
             if len(call.keywords) > 0:
@@ -829,11 +847,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._log_error(
                             CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
                         )
+                        if included_method_id:
+                            self._methods_id_calls.pop()
                         return callable_target.return_type
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
             self.update_callable_after_validation(call, callable_id, callable_target)
+
+        if included_method_id:
+            self._methods_id_calls.pop()
         return self.get_type(callable_target)
 
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
@@ -1087,6 +1110,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(value, ISymbol):
             symbol = value
 
+        if isinstance(symbol, IExpression):
+            symbol = symbol.type
         if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
             attr_symbol = symbol.symbols[attribute.attr]
         else:

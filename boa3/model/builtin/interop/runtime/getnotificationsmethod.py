@@ -10,14 +10,17 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 class GetNotificationsMethod(InteropMethod):
 
     def __init__(self, notification_type: NotificationType):
+        from boa3.model.type.collection.sequence.uint160type import UInt160Type
         from boa3.model.type.type import Type
 
         identifier = 'get_notifications'
         syscall = 'System.Runtime.GetNotifications'
-        args: Dict[str, Variable] = {'script_hash': Variable(Type.bytes)}
-        args_default = ast.parse("{0}".format(bytes())
-                                 ).body[0].value
+        uint160 = UInt160Type.build()
 
+        args: Dict[str, Variable] = {'script_hash': Variable(uint160)}
+        args_default = ast.parse("{0}()".format(uint160.raw_identifier)
+                                 ).body[0].value
+        
         super().__init__(identifier, syscall, args, [args_default],
                          return_type=Type.list.build([notification_type]))
 

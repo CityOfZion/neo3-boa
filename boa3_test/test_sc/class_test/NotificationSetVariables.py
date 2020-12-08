@@ -2,10 +2,11 @@ from typing import Any, Tuple
 
 from boa3.builtin import public
 from boa3.builtin.interop.runtime import Notification
+from boa3.builtin.type import UInt160
 
 
 @public
-def script_hash(script: bytes) -> bytes:
+def script_hash(script: UInt160) -> bytes:
     x = Notification()
     x.script_hash = script
     return x.script_hash

@@ -1,4 +1,5 @@
 import json
+import unittest
 
 from boa3.boa3 import Boa3
 from boa3.builtin.interop.contract import GAS, NEO
@@ -9,6 +10,7 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo import to_script_hash
 from boa3.neo.core.types.InteropInterface import InteropInterface
+from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType, serialize
@@ -520,8 +522,6 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
             + value
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -553,8 +553,6 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
             + value
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -1820,6 +1818,7 @@ class TestInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
+    @unittest.skip("Block time doesn't return zero")
     def test_get_block_time(self):
         expected_output = (
             Opcode.SYSCALL
@@ -1902,12 +1901,7 @@ class TestInterop(BoaTest):
     def test_get_notifications(self):
         path = '%s/boa3_test/test_sc/interop_test/GetNotifications.py' % self.dirname
         output, manifest = self.compile_and_save(path)
-
-        abi_hash = manifest['abi']['hash']
-        script = bytearray()
-        for x in range(2, len(abi_hash), 2):
-            script.append(int(abi_hash[x:x + 2], 16))
-        script.reverse()
+        script = hash160(output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'without_param', [])

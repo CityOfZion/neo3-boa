@@ -29,11 +29,14 @@ from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
+from boa3.model.symbol import ISymbol
+from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.itype import IType
 
 
 class BoaPackage(str, Enum):
     Contract = 'contract'
+    Type = 'type'
 
 
 class Builtin:
@@ -41,6 +44,12 @@ class Builtin:
     def get_symbol(cls, symbol_id: str) -> Optional[Callable]:
         for name, method in vars(cls).items():
             if isinstance(method, IBuiltinCallable) and method.identifier == symbol_id:
+                return method
+
+    @classmethod
+    def get_any_symbol(cls, symbol_id: str) -> Optional[ISymbol]:
+        for name, method in vars(cls).items():
+            if isinstance(method, IdentifiedSymbol) and method.identifier == symbol_id:
                 return method
 
     @classmethod
@@ -105,6 +114,7 @@ class Builtin:
 
     # boa builtin type
     Event = EventType
+    UInt160 = UInt160Type.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -143,5 +153,6 @@ class Builtin:
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Nep5Transfer,
                               Abort
-                              ]
+                              ],
+        BoaPackage.Type: [UInt160]
     }

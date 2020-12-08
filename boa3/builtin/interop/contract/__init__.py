@@ -1,6 +1,7 @@
 from typing import Any, Sequence
 
 from boa3.builtin.interop.contract.contract import Contract
+from boa3.builtin.type import UInt160
 
 
 def create_contract(script: bytes, manifest: bytes) -> Contract:
@@ -19,13 +20,16 @@ def create_contract(script: bytes, manifest: bytes) -> Contract:
     pass
 
 
-def call_contract(script_hash: bytes, method: str, args: Sequence = ()) -> Any:
+def call_contract(script_hash: UInt160, method: str, args: Sequence = ()) -> Any:
     """
     Calls a smart contract given the method and the arguments
 
     :param script_hash: the target smart contract's script hash
+    :type script_hash: UInt160
     :param method: the name of the method to be executed
+    :type method: str
     :param args: the specified method's arguments
+    :type args: Sequence[Any]
 
     :return: the result of the specified method.
     :rtype: Any
@@ -58,5 +62,5 @@ def destroy_contract():
     pass
 
 
-NEO: bytes = b'\xde\x5f\x57\xd4\x30\xd3\xde\xce\x51\x1c\xf9\x75\xa8\xd3\x78\x48\xcb\x9e\x05\x25'
-GAS: bytes = b'\x66\x8e\x0c\x1f\x9d\x7b\x70\xa9\x9d\xd9\xe0\x6e\xad\xd4\xc7\x84\xd6\x41\xaf\xbc'
+NEO: UInt160 = UInt160(b'\xde\x5f\x57\xd4\x30\xd3\xde\xce\x51\x1c\xf9\x75\xa8\xd3\x78\x48\xcb\x9e\x05\x25')
+GAS: UInt160 = UInt160(b'\x66\x8e\x0c\x1f\x9d\x7b\x70\xa9\x9d\xd9\xe0\x6e\xad\xd4\xc7\x84\xd6\x41\xaf\xbc')

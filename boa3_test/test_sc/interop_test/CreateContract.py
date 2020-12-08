@@ -1,5 +1,5 @@
 from boa3.builtin import public
-from boa3.builtin.interop.contract import create_contract, Contract
+from boa3.builtin.interop.contract import Contract, create_contract
 
 
 @public
