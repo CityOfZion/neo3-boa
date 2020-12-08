@@ -836,25 +836,31 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return str.s
 
-    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
+    def visit_Tuple(self, tup_node: ast.Tuple) -> Optional[Tuple[Any, ...]]:
         """
         Visitor of literal tuple node
 
         :param tup_node: the python ast string node
         :return: the value of the tuple
         """
-        return tuple([self.get_type(value) for value in tup_node.elts])
+        result = [self.get_type(value) for value in tup_node.elts]
+        if Type.none in result:
+            return None
+        return tuple(result)
 
-    def visit_List(self, list_node: ast.List) -> List[Any]:
+    def visit_List(self, list_node: ast.List) -> Optional[List[Any]]:
         """
         Visitor of literal list node
 
         :param list_node: the python ast list node
         :return: the value of the list
         """
-        return [self.get_type(value) for value in list_node.elts]
+        result = [self.get_type(value) for value in list_node.elts]
+        if Type.none in result:
+            return None
+        return result
 
-    def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
+    def visit_Dict(self, dict_node: ast.Dict) -> Optional[Dict[Any, Any]]:
         """
         Visitor of literal dict node
 
@@ -870,6 +876,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 dictionary[key] = Type.get_generic_type(dictionary[key], value)
             else:
                 dictionary[key] = value
+
+        keys = set(dictionary.keys())
+        values = set(dictionary.values())
+
+        if Type.none in keys or Type.none in values:
+            return None
         return dictionary
 
     # endregion
