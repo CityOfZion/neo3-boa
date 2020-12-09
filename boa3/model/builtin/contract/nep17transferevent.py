@@ -15,4 +15,4 @@ class Nep17TransferEvent(IBuiltinEvent):
             'amount': Variable(Type.int)
         }
         super().__init__(identifier, args)
-        self.name = 'transfer'
+        self.name = 'Transfer'

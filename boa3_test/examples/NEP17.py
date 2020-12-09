@@ -1,10 +1,11 @@
 from typing import Any
 
+from boa3.builtin.type import UInt160
 from boa3.builtin import NeoMetadata, metadata, public
-from boa3.builtin.contract import Nep17TransferEvent
+from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract import call_contract
-from boa3.builtin.interop.runtime import calling_script_hash, check_witness
+from boa3.builtin.interop.contract import call_contract, NEO, GAS
+from boa3.builtin.interop.runtime import calling_script_hash, check_witness, notify
 from boa3.builtin.interop.storage import delete, get, put
 
 
@@ -21,6 +22,8 @@ def manifest_metadata() -> NeoMetadata:
     meta.author = "COZ"
     meta.description = "NEP-17 Example"
     meta.email = "contact@coz.io"
+    meta.has_storage = True     # TODO: Remove when neo_dev updates
+    meta.is_payable = True      # TODO: Remove when neo_dev updates
     return meta
 
 
@@ -30,7 +33,7 @@ def manifest_metadata() -> NeoMetadata:
 
 
 # Script hash of the contract owner
-OWNER = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+OWNER = UInt160(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
 SUPPLY_KEY = 'totalSupply'
 
 # Symbol of the Token
@@ -41,6 +44,12 @@ TOKEN_DECIMALS = 8
 
 # Total Supply of tokens in the system
 TOKEN_TOTAL_SUPPLY = 10_000_000 * 100_000_000  # 10m total supply * 10^8 (decimals)
+
+# Value of this NEP17 token corresponds to NEO
+AMOUNT_PER_NEO = 10
+
+# Value of this NEP17 token compared to GAS
+AMOUNT_PER_GAS = 2
 
 
 # -------------------------------------------
@@ -97,7 +106,7 @@ def totalSupply() -> int:
 
 
 @public
-def balanceOf(account: UInt160) -> int:   # TODO: change bytes to hash160 when possible
+def balanceOf(account: UInt160) -> int:
     """
     Get the current balance of an address
 
@@ -106,7 +115,8 @@ def balanceOf(account: UInt160) -> int:   # TODO: change bytes to hash160 when p
     :param account: the account address to retrieve the balance for
     :type account: bytes
     """
-    return get(account.toBytes()).to_int()
+    assert len(account) == 20
+    return get(account).to_int()
 
 
 @public
@@ -121,7 +131,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     :type from_address: bytes
     :param to_address: the address to transfer to
     :type to_address: bytes
-    :param amount: the amount of NEP5 tokens to transfer
+    :param amount: the amount of NEP17 tokens to transfer
     :type amount: int
     :param data: whatever data is pertinent to the onPayment method
     :type data: Any
@@ -170,10 +180,44 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
 
 
 def post_transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any):
+    """
+    Checks if the one receiving NEP17 tokens is a smart contract and if it's one the onPayment method will be called
+
+    :param from_address: the address of the sender
+    :type from_address: UInt160
+    :param to_address: the address of the receiver
+    :type to_address: UInt160
+    :param amount: the amount of cryptocurrency that is being sent
+    :type amount: int
+    :param data: any pertinent data that might validate the transaction
+    :type data: Any
+    """
     if to_address is not None:
         contract = get_contract(to_address)
-        if(contract is not None):
+        if contract is not None:
             call_contract(to_address, 'onPayment', [from_address, amount, data])
+
+
+def mint(account: UInt160, amount: int):
+    """
+    Mints new tokens
+
+    :param account: the address of the account that is sending cryptocurrency to this contract
+    :type account: UInt160
+    :param amount: the amount of gas to be refunded
+    :type amount: int
+    :raise AssertionError: raised if amount is less than than 0
+    """
+    assert amount >= 0
+    if amount != 0:
+        current_total_supply = totalSupply()
+        account_balance = balanceOf(account)
+
+        put(SUPPLY_KEY, current_total_supply + amount)
+        put(account, account_balance + amount)
+
+        on_transfer(UInt160(), account, amount)
+        post_transfer(UInt160(), account, amount, None)
 
 
 @public
@@ -206,3 +250,27 @@ def deploy() -> bool:
 
     on_transfer(b'', OWNER, TOKEN_TOTAL_SUPPLY)
     return True
+
+
+@public
+def onPayment(from_address: UInt160, amount: int, data: Any):
+    """
+    This method exists to check if this smart contract is receiving NEO or GAS so that it can mint a NEP17 token.
+    If it's no receiving a native token, than it will abort.
+
+    :param from_address: the address of the one who is trying to send cryptocurrency to this smart contract
+    :type from_address: UInt160
+    :param amount: the amount of cryptocurrency that is being sent to the this smart contract
+    :type amount: int
+    :param data: any pertinent data that might validate the transaction
+    :type data: Any
+    """
+    # Use calling_script_hash to identify if the incoming token is NEO or GAS
+    if calling_script_hash == NEO:
+        corresponding_amount = amount * AMOUNT_PER_NEO
+        mint(from_address, corresponding_amount)
+    elif calling_script_hash == GAS:
+        corresponding_amount = amount * AMOUNT_PER_GAS
+        mint(from_address, corresponding_amount)
+    else:
+        abort()
