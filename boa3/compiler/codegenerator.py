@@ -370,15 +370,16 @@ class CodeGenerator:
         self._insert_jump(OpcodeInfo.JMPIFNOT)
         return VMCodeMapping.instance().get_start_address(self.last_code)
 
-    def convert_begin_else(self, start_address: int) -> int:
+    def convert_begin_else(self, start_address: int, insert_jump: bool = False) -> int:
         """
         Converts the beginning of the if else statement
 
         :param start_address: the address of the if first opcode
+        :param insert_jump: whether should be included a jump to the end before the else branch
         :return: the address of the if else first opcode
         """
         # it will be updated when the if ends
-        self._insert_jump(OpcodeInfo.JMP)
+        self._insert_jump(OpcodeInfo.JMP, insert_jump=insert_jump)
 
         # updates the begin jmp with the target address
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
@@ -1193,17 +1194,18 @@ class CodeGenerator:
             if len(vmcodes) == 0:
                 self._missing_target.pop(target)
 
-    def _insert_jump(self, op_info: OpcodeInformation, jump_to: Union[int, VMCode] = 0):
+    def _insert_jump(self, op_info: OpcodeInformation, jump_to: Union[int, VMCode] = 0, insert_jump: bool = False):
         """
         Inserts a jump opcode into the bytecode
 
         :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
+        :param insert_jump: whether should be included a jump to the end before the else branch
         """
         if isinstance(jump_to, VMCode):
             jump_to = VMCodeMapping.instance().get_start_address(jump_to) - VMCodeMapping.instance().bytecode_size
 
-        if self.last_code.opcode is not Opcode.RET:
+        if self.last_code.opcode is not Opcode.RET or insert_jump:
             data: bytes = self._get_jump_data(op_info, jump_to)
             self.__insert1(op_info, data)
         for x in range(op_info.stack_items):
