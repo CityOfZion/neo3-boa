@@ -17,11 +17,7 @@ class StorageContextType(ClassType):
     def __init__(self):
         super().__init__('StorageContext')
 
-        from boa3.model.type.type import Type
-        self._variables: Dict[str, Variable] = {
-            'id': Variable(Type.int),
-            'is_read_only': Variable(Type.bool)
-        }
+        self._variables: Dict[str, Variable] = {}
         self._constructor: Method = None
 
     @property
@@ -72,10 +68,7 @@ class StorageContextMethod(IBuiltinMethod):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [
-            (Opcode.PUSH0, b''),
-            (Opcode.PUSH0, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PACK, b'')
+            (Opcode.NEWARRAY0, b'')
         ]
 
     @property
