@@ -215,6 +215,7 @@ class TestTemplate(BoaTest):
 
     # endregion
 
+
     # region ico
 
     KYC_WHITELIST_PREFIX = b'KYCWhitelistApproved'

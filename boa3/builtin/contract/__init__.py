@@ -9,6 +9,15 @@ Nep5TransferEvent = CreateNewEvent(
     'transfer'
 )
 
+Nep17TransferEvent = CreateNewEvent(
+    [
+        ('from_addr', bytes),   # TODO: change bytes to hash160 when possible
+        ('to_addr', bytes),   # TODO: change bytes to hash160 when possible
+        ('amount', int)
+    ],
+    'transfer'
+)
+
 
 def abort():
     """
