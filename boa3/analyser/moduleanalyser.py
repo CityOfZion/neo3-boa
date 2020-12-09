@@ -779,14 +779,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         iter_type = self.get_type(for_node.iter)
         targets = self.visit(for_node.target)
+        iterator_type = iter_type.value_type if hasattr(iter_type, 'value_type') else iter_type
 
-        if isinstance(iter_type, SequenceType):
-            if isinstance(targets, str):
-                self.__include_variable(targets, iter_type.value_type, source_node=for_node.target)
-            else:
-                for target in targets:
-                    if isinstance(target, str):
-                        self.__include_variable(target, iter_type.value_type, source_node=for_node.target)
+        if isinstance(targets, str):
+            self.__include_variable(targets, iterator_type, source_node=for_node.target)
+        elif isinstance(iter_type, SequenceType):
+            for target in targets:
+                if isinstance(target, str):
+                    self.__include_variable(target, iterator_type, source_node=for_node.target)
 
         # continue to walk through the tree
         self.generic_visit(for_node)

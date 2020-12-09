@@ -504,3 +504,7 @@ class TestFor(BoaTest):
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
+
+    def test_for_iterate_dict(self):
+        path = '%s/boa3_test/test_sc/for_test/ForIterateDict.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
