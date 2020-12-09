@@ -38,30 +38,10 @@ def log(message: str):
 
 def trigger() -> TriggerType:
     """
-    Verifies if the smart contract trigger is an application trigger.
+    Return the smart contract trigger type.
 
-    :return: a boolean value that represents whether the contract trigger is an application.
+    :return: a value that represents the contract trigger type.
     :rtype: TriggerType
-    """
-    pass
-
-
-def is_application_trigger() -> bool:
-    """
-    Verifies if the smart contract trigger is an application trigger.
-
-    :return: a boolean value that represents whether the contract trigger is an application.
-    :rtype: bool
-    """
-    pass
-
-
-def is_verification_trigger() -> bool:
-    """
-    Verifies if the smart contract trigger is an verification trigger.
-
-    :return: a boolean value that represents whether the contract trigger is a verification.
-    :rtype: bool
     """
     pass
 
