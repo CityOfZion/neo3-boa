@@ -844,7 +844,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the tuple
         """
         result = [self.get_type(value) for value in tup_node.elts]
-        if Type.none in result:
+        if Type.none in result and isinstance(tup_node.ctx, ast.Load):
+            # if can't define the type of any value, let it to be defined in the type checking
+            # only in load ctx because on store ctx means a tuple of variables to be assigned
             return None
         return tuple(result)
 
@@ -857,6 +859,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         result = [self.get_type(value) for value in list_node.elts]
         if Type.none in result:
+            # if can't define the type of any value, let it to be defined in the type checking
             return None
         return result
 
@@ -881,6 +884,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         values = set(dictionary.values())
 
         if Type.none in keys or Type.none in values:
+            # if can't define the type of any key or value, let it to be defined in the type checking
             return None
         return dictionary
 

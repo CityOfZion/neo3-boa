@@ -287,6 +287,11 @@ class TestList(BoaTest):
         path = '%s/boa3_test/test_sc/list_test/ArrayBoa2Test1.py' % self.dirname
         Boa3.compile(path)
 
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
     @unittest.skip("get values from inner arrays is not working as expected")
     def test_list_of_list(self):
         expected_output = (

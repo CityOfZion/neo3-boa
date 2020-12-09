@@ -387,3 +387,7 @@ class TestDict(BoaTest):
     def test_dict_boa2_test2(self):
         path = '%s/boa3_test/test_sc/dict_test/DictBoa2Test2.py' % self.dirname
         Boa3.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(7, result)
