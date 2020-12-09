@@ -101,3 +101,7 @@ class TestNone(BoaTest):
     def test_mismatched_type_after_reassign(self):
         path = self.get_contract_path('MismatchedTypesAfterReassign.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_none_test(self):
+        path = self.get_contract_path('NoneBoa2Test.py')
+        self.assertCompilerLogs(MismatchedTypes, path)

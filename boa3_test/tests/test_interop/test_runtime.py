@@ -489,3 +489,45 @@ class TestRuntimeInterop(BoaTest):
         path = self.get_contract_path('GetPlatformCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
+
+    def test_boa2_runtime_test(self):
+        path = self.get_contract_path('RuntimeBoa2Test.py')
+        engine = TestEngine()
+
+        new_block = engine.increase_block()
+        result = self.run_smart_contract(engine, path, 'main', 'get_time', 1)
+        self.assertEqual(new_block.timestamp, result)
+
+        from boa3.builtin.type import UInt160
+        result = self.run_smart_contract(engine, path, 'main', 'check_witness', UInt160(bytes(20)))
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'log', 'hello')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'notify', 1234)
+        self.assertEqual(True, result)
+        event_notifications = engine.get_events(event_name=Interop.Notify.name)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((1234,), event_notifications[0].arguments)
+
+        result = self.run_smart_contract(engine, path, 'main', 'get_trigger', 1234)
+        self.assertEqual(TriggerType.APPLICATION, result)
+
+    def test_boa2_trigger_type_test(self):
+        path = self.get_contract_path('TriggerTypeBoa2Test.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(0x40, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 2)
+        self.assertEqual(0x20, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'\x20', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(-1, result)

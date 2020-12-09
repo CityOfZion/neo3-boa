@@ -422,3 +422,53 @@ class TestStorageInterop(BoaTest):
     def test_storage_find_mismatched_type(self):
         path = self.get_contract_path('StorageFindMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_storage_test(self):
+        path = self.get_contract_path('StorageBoa2Test.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'sget', 'something', 'blah')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sput', 'something', 'blah')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sget', 'something', 'blah')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'blah', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sdel', 'something', 'blah')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sget', 'something', 'blah')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'', result)
+
+    def test_boa2_storage_test2(self):
+        path = self.get_contract_path('StorageBoa2Test.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'sget', 100, 10000000000)
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sput', 100, 10000000000)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sget', 100, 10000000000)
+        if isinstance(result, bytes):
+            result = Integer.from_bytes(result)
+        self.assertEqual(10000000000, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sdel', 100, 10000000000)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'sget', 100, 10000000000)
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'', result)

@@ -481,3 +481,34 @@ class TestBytes(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
         self.assertEqual(513, result)
+
+    def test_boa2_byte_array_test(self):
+        path = self.get_contract_path('BytearrayBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\t\x01\x02', result)
+
+    def test_boa2_byte_array_test2(self):
+        path = self.get_contract_path('BytearrayBoa2Test2.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_byte_array_test3(self):
+        path = self.get_contract_path('BytearrayBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(b'\x01\x02\xaa\xfe', result)
+
+    def test_boa2_slice_test(self):
+        path = self.get_contract_path('SliceBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x01\x02\x03\x04', result)
+
+    def test_boa2_slice_test2(self):
+        path = self.get_contract_path('SliceBoa2Test2.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04', result)

@@ -245,6 +245,37 @@ class TestList(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
+    def test_boa2_array_test(self):
+        path = self.get_contract_path('ArrayBoa2Test.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(6, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 2)
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 4)
+        self.assertEqual(8, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 8)
+        self.assertEqual(9, result)
+
+    def test_boa2_array_test2(self):
+        path = self.get_contract_path('ArrayBoa2Test2.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(b'\xa0', result)
+
+    def test_boa2_array_test3(self):
+        path = self.get_contract_path('ArrayBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([1, 2, 3], result)
+
     @unittest.skip("get values from inner arrays is not working as expected")
     def test_list_of_list(self):
         expected_output = (
@@ -319,6 +350,16 @@ class TestList(BoaTest):
 
         with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
             self.run_smart_contract(engine, path, 'Main', 'op', [])
+
+    def test_boa2_demo1(self):
+        path = self.get_contract_path('Demo1Boa2.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'add', 1, 3)
+        self.assertEqual(7, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'add', 2, 3)
+        self.assertEqual(8, result)
 
     # region TestSlicing
 
@@ -684,6 +725,12 @@ class TestList(BoaTest):
         path = self.get_contract_path('MismatchedTypeAppendWithBuiltin.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
+    def test_boa2_list_append_test(self):
+        path = self.get_contract_path('AppendBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([6, 7], result)
+
     # endregion
 
     # region TestClear
@@ -744,6 +791,12 @@ class TestList(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_boa2_list_reverse_test(self):
+        path = self.get_contract_path('ReverseBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(['blah', 4, 2, 1], result)
 
     # endregion
 
@@ -986,6 +1039,12 @@ class TestList(BoaTest):
     def test_list_pop_too_many_arguments(self):
         path = self.get_contract_path('PopListTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_boa2_list_remove_test(self):
+        path = self.get_contract_path('RemoveBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([16, 3, 4], result)
 
     # endregion
 

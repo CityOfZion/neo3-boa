@@ -532,3 +532,54 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_boa2_add_test(self):
+        path = self.get_contract_path('AddBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 2)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 23234)
+        self.assertEqual(23236, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', -112)
+        self.assertEqual(-110, result)
+
+    def test_boa2_add_test1(self):
+        path = self.get_contract_path('AddBoa2Test1.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 1, 2, 3, 4)
+        self.assertEqual(9, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0, 0, 0, 2)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', -2, 3, -6, 2)
+        self.assertEqual(-2, result)
+
+    def test_boa2_add_test2(self):
+        path = self.get_contract_path('AddBoa2Test2.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(3, result)
+
+    def test_boa2_add_test3(self):
+        path = self.get_contract_path('AddBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(-9, result)
+
+    def test_boa2_add_test4(self):
+        path = self.get_contract_path('AddBoa2Test4.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 1, 2, 3, 4)
+        self.assertEqual(-9, result)
+
+    def test_boa2_add_test_void(self):
+        path = self.get_contract_path('AddBoa2TestVoid.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        self.assertIsVoid(result)
