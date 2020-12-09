@@ -40,7 +40,7 @@ def trigger() -> TriggerType:
     """
     Return the smart contract trigger type.
 
-    :return: a boolean value that represents whether the contract trigger is an application.
+    :return: a value that represents the contract trigger type.
     :rtype: TriggerType
     """
     pass
