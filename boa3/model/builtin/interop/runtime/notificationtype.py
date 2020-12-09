@@ -5,6 +5,7 @@ from boa3.model.expression import IExpression
 from boa3.model.method import Method
 from boa3.model.property import Property
 from boa3.model.type.classtype import ClassType
+from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
@@ -19,7 +20,7 @@ class NotificationType(ClassType):
 
         from boa3.model.type.type import Type
         self._variables: Dict[str, Variable] = {
-            'script_hash': Variable(Type.bytes),
+            'script_hash': Variable(UInt160Type.build()),
             'event_name': Variable(Type.str),
             'state': Variable(Type.tuple)
         }

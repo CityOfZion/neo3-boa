@@ -8,11 +8,11 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class GetExecutingScriptHashMethod(InteropMethod):
     def __init__(self):
-        from boa3.model.type.type import Type
+        from boa3.model.type.collection.sequence.uint160type import UInt160Type
         identifier = '-get_executing_script_hash'
         syscall = 'System.Runtime.GetExecutingScriptHash'
         args: Dict[str, Variable] = {}
-        super().__init__(identifier, syscall, args, return_type=Type.bytes)
+        super().__init__(identifier, syscall, args, return_type=UInt160Type.build())
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:

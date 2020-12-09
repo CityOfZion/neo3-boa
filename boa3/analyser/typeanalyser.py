@@ -6,6 +6,7 @@ from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyse
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression
@@ -806,8 +807,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
         callable_target = self.validate_builtin_callable(callable_id, callable_target)
+
+        if not isinstance(callable_target, Callable):
+            # if the outer call is a builtin, enable call even without the import
+            builtin_symbol = Builtin.get_any_symbol(callable_id)
+            if builtin_symbol is not None:
+                callable_target = builtin_symbol
+
         if isinstance(callable_target, ClassType):
             callable_target = callable_target.constructor_method()
+
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             self._log_error(
@@ -834,6 +843,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
             self.update_callable_after_validation(call, callable_id, callable_target)
+
         return self.get_type(callable_target)
 
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
@@ -899,7 +909,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if callable_required_args <= len_call_args < len(callable_target.args):
             included_args = len_call_args - callable_required_args
-            call.args.extend(callable_target.defaults[included_args:])
+            for default in callable_target.defaults[included_args:]:
+                call.args.append(self.clone(default))
         return True
 
     def validate_passed_arguments(self, call: ast.Call, args_types: List[IType], callable_id: str, callable: Callable):
@@ -1087,6 +1098,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(value, ISymbol):
             symbol = value
 
+        if isinstance(symbol, IExpression):
+            symbol = symbol.type
         if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
             attr_symbol = symbol.symbols[attribute.attr]
         else:

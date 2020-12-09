@@ -2,10 +2,11 @@ from typing import Any, List
 
 from boa3.builtin import public
 from boa3.builtin.interop.runtime import Notification, get_notifications, notify
+from boa3.builtin.type import UInt160
 
 
 @public
-def with_param(args: List[Any], key: bytes) -> List[Notification]:
+def with_param(args: List[Any], key: UInt160) -> List[Notification]:
     notify_args(args)
     return get_notifications(key)
 

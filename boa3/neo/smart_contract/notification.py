@@ -44,6 +44,13 @@ class Notification:
         if not isinstance(value, list):
             value = [value]
 
+        if isinstance(script, str) and script.startswith('0x'):
+            bytes_script = bytearray()
+            for x in range(2, len(script), 2):
+                bytes_script.append(int(script[x:x + 2], 16))
+            bytes_script.reverse()
+            script = bytes(bytes_script)
+
         return cls(name, script, *value)
 
     def __str__(self) -> str:
