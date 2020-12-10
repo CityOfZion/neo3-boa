@@ -39,6 +39,7 @@ class Interop:
     ContractType = ContractType.build()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
+    StorageContextType = StorageContextType.build()
     TriggerType = TriggerType()
 
     # Binary Interops
@@ -94,6 +95,7 @@ class Interop:
 
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
+    StorageGetContext = StorageGetContextMethod(StorageContextType)
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
 
@@ -144,8 +146,10 @@ class Interop:
                                  Platform,
                                  TriggerType
                                  ],
-        InteropPackage.Storage: [StorageDelete,
+        InteropPackage.Storage: [StorageContextType,
+                                 StorageDelete,
                                  StorageGet,
+                                 StorageGetContext,
                                  StoragePut
                                  ]
     }

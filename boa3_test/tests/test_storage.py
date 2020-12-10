@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MetadataInformationMissing, MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
+from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -90,6 +91,20 @@ class TestStorage(BoaTest):
     def test_storage_get_without_metadata(self):
         path = '%s/boa3_test/test_sc/storage_test/StorageGetWithoutMetadata.py' % self.dirname
         self.assertCompilerLogs(MetadataInformationMissing, path)
+
+    def test_storage_get_context(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.StorageGetContext.interop_method_hash
+            + Opcode.RET
+        )
+        path = '%s/boa3_test/test_sc/storage_test/StorageGetContext.py' % self.dirname
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
 
     def test_storage_put_bytes_key_bytes_value(self):
         value = b'\x01\x02\x03'
