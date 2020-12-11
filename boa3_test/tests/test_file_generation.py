@@ -34,17 +34,15 @@ class TestFileGeneration(BoaTest):
         with open(expected_nef_output, 'rb') as nef_output:
             magic = nef_output.read(constants.SIZE_OF_INT32)
             compiler = nef_output.read(32)
-            version = nef_output.read(16)
-            hash = nef_output.read(constants.SIZE_OF_INT160)
-            check_sum = nef_output.read(constants.SIZE_OF_INT32)
+            version = nef_output.read(32)
             script_size = nef_output.read(1)
-            script = nef_output.read()
+            script = nef_output.read(int.from_bytes(script_size, BYTEORDER))
+            check_sum = nef_output.read(constants.SIZE_OF_INT32)
 
         self.assertEqual(int.from_bytes(script_size, BYTEORDER), len(script))
 
         nef = NefFile(script)._nef
         self.assertEqual(compiler.decode(ENCODING), nef.compiler)
-        self.assertEqual(hash, nef.script_hash.to_array())
         self.assertEqual(check_sum, nef.checksum)
         self.assertEqual(version, nef.version.to_array())
 

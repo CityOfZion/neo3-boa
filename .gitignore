@@ -9,5 +9,5 @@ build
 _build
 neo3_boa.egg-info
 /neo-devpack-dotnet/
-/TestEngine/
+/Neo.TestEngine/
 autopep8

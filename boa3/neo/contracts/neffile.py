@@ -24,7 +24,8 @@ class NefFile:
 
     @property
     def script_hash(self) -> bytes:
-        return self._nef.script_hash.to_array()
+        from boa3.neo.cryptography import hash160
+        return hash160(self.script)
 
     def _set_version(self, version: str):
         """
@@ -61,6 +62,6 @@ class NefFile:
             nef = NEF()
             nef.deserialize(reader)
 
-            nef_file = cls(b'')
+            nef_file = cls(nef.script)
             nef_file._nef = nef
         return nef_file

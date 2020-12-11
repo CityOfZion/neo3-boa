@@ -9,7 +9,7 @@ from boa3.neo3.vm import VMState
 
 class TestEngine:
     def __init__(self, root_path: str):
-        self._test_engine_path = '{0}/TestEngine/TestEngine.dll'.format(root_path)
+        self._test_engine_path = '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)
 
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0

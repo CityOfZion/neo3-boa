@@ -8,12 +8,7 @@ from boa3.neo.vm.type.Integer import Integer
 
 class TestNefFile(TestCase):
     test_version = '1.2.3'
-    test_version_bytes = (
-        Integer(1).to_byte_array(min_length=4)
-        + Integer(2).to_byte_array(min_length=4)
-        + Integer(3).to_byte_array(min_length=4)
-        + Integer(0).to_byte_array(min_length=4)
-    )
+    test_version_bytes = b'1.2.3.0'
     test_script = b'\x01\x02\x03'
 
     def create_test_nef(self, test_script):
@@ -37,6 +32,8 @@ class TestNefFile(TestCase):
         nef = self.create_test_nef(script)
         result = nef.serialize()
 
+        encoded_test_version = self.test_version_bytes + bytes(32 - len(self.test_version_bytes))
+
         self.assertEqual(len(result), len(nef._nef))
 
         # the first 4 bytes of the header are from nef magic
@@ -45,19 +42,15 @@ class TestNefFile(TestCase):
         self.assertEqual(result[start:end], nef._nef.compiler.encode(ENCODING))
 
         # the next 16 bytes are from the version, 4 bytes for each field
-        start, end = (end, end + 16)
-        self.assertEqual(result[start:end], self.test_version_bytes)
-
-        # the next 20 bytes are from the scripthash of the smart contract
-        start, end = (end, end + 20)
-        self.assertEqual(result[start:end], nef._nef.script_hash.to_array())
-
-        # the next 4 bytes are from the check sum of the nef file
-        start, end = (end, end + 4)
-        self.assertEqual(result[start:end], nef._nef.checksum)
+        start, end = (end, end + 32)
+        self.assertEqual(result[start:end], encoded_test_version)
 
         # the next byte is from the size of the smart contract
         # and the last bytes are from the script of the smart contract, up to 1MB
         self.assertEqual(result[end], len(nef._nef.script))
-        start, end = (end + 1, end + 1 + 1024 ** 2)
+        start, end = (end + 1, end + len(nef._nef.script) + 1)
         self.assertEqual(result[start:end], nef._nef.script)
+
+        # the next 4 bytes are from the check sum of the nef file
+        start, end = (end, end + 4)
+        self.assertEqual(result[start:end], nef._nef.checksum)
