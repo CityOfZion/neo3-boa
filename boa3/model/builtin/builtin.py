@@ -9,6 +9,7 @@ from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.popmethod import PopMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
+from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
@@ -85,6 +86,7 @@ class Builtin:
     ConvertToBytes = ToBytesMethod
     ConvertToInt = ToIntMethod
     ConvertToStr = ToStrMethod
+    ConvertToBool = ToBoolMethod
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 IsInstance,
@@ -100,7 +102,8 @@ class Builtin:
                                                 DictValues,
                                                 ConvertToBytes,
                                                 ConvertToInt,
-                                                ConvertToStr
+                                                ConvertToStr,
+                                                ConvertToBool
                                                 ]
 
     @classmethod
