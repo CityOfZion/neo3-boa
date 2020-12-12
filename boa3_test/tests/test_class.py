@@ -1,3 +1,5 @@
+from boa3.neo.vm.type.String import String
+
 from boa3.neo.cryptography import hash160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -45,11 +47,7 @@ class TestClass(BoaTest):
         path = '%s/boa3_test/test_sc/class_test/NotificationSetVariables.py' % self.dirname
         output, manifest = self.compile_and_save(path)
 
-        abi_hash = manifest['abi']['hash']
-        script = bytearray()
-        for x in range(2, len(abi_hash), 2):
-            script.append(int(abi_hash[x:x + 2], 16))
-        script.reverse()
+        script = hash160(output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'script_hash', script,
@@ -61,3 +59,24 @@ class TestClass(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'state', (1, 2, 3))
         self.assertEqual([1, 2, 3], result)
+
+    def test_contract_constructor(self):
+        path = '%s/boa3_test/test_sc/class_test/ContractConstructor.py' % self.dirname
+        output, manifest = self.compile_and_save(path)
+
+        import json
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'new_contract')
+        self.assertEqual(5, len(result))
+
+        if isinstance(result[2], str):
+            result[2] = String(result[2]).to_bytes()
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+
+        self.assertEqual(0, result[0])
+        self.assertEqual(0, result[1])
+        self.assertEqual(bytes(20), result[2])
+        self.assertEqual(bytes(), result[3])
+        self.assertEqual({}, result[4])
+

@@ -16,9 +16,13 @@ class ContractType(ClassType):
 
     def __init__(self):
         super().__init__('Contract')
-
         from boa3.model.type.type import Type
+        from boa3.model.type.collection.sequence.uint160type import UInt160Type
+
         self._variables: Dict[str, Variable] = {
+            'id': Variable(Type.int),
+            'update_counter': Variable(Type.int),
+            'hash': Variable(UInt160Type.build()),
             'script': Variable(Type.bytes),
             'manifest': Variable(Type.dict)
         }
@@ -75,7 +79,10 @@ class ContractMethod(IBuiltinMethod):
         return [
             (Opcode.NEWMAP, b''),
             (Opcode.PUSHDATA1, Integer(0).to_byte_array()),
-            (Opcode.PUSH2, b''),
+            (Opcode.PUSHDATA1, Integer(20).to_byte_array() + bytes(20)),
+            (Opcode.PUSH0, b''),
+            (Opcode.PUSH0, b''),
+            (Opcode.PUSH5, b''),
             (Opcode.PACK, b'')
         ]
 

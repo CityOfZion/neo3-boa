@@ -39,19 +39,28 @@ class Version(serialization.ISerializable):
                 and self.revision == other.revision)
 
     def __len__(self):
-        return s.uint32 + s.uint32 + s.uint32 + s.uint32
+        return s.uint64 + s.uint64 + s.uint64 + s.uint64
 
     def serialize(self, writer: serialization.BinaryWriter) -> None:
-        writer.write_int32(self.major)
-        writer.write_int32(self.minor)
-        writer.write_int32(self.build)
-        writer.write_int32(self.revision)
+        version_str = "{0}.{1}.{2}.{3}".format(self.major,
+                                               self.minor,
+                                               self.build,
+                                               self.revision)
+        from boa3.neo.vm.type.String import String
+        version_bytes = String(version_str).to_bytes() + bytes(s.uint64 * 4 - len(version_str))
+        writer.write_bytes(version_bytes)
 
     def deserialize(self, reader: serialization.BinaryReader) -> None:
-        self.major = reader.read_int32()
-        self.minor = reader.read_int32()
-        self.build = reader.read_int32()
-        self.revision = reader.read_int32()
+        version_str = reader.read_bytes(s.uint64 * 4).decode('utf-8')
+
+        import re
+        version_str = re.sub(r'\x00+', '', version_str)
+
+        major, minor, build, revision = version_str.split('.')
+        self.major = int(major)
+        self.minor = int(minor)
+        self.build = int(build)
+        self.revision = int(revision)
 
     @classmethod
     def _parse_component(self, c: str) -> Tuple[bool, int]:
@@ -113,17 +122,15 @@ class NEF(serialization.ISerializable):
             self.compiler = compiler_name[:32] + bytearray(32 - len(compiler_name)).decode('utf-8')
         self.version = version if version else Version()
         self.script = script if script else b''
-        self.script_hash: types.UInt160 = self.compute_script_hash()
         self.checksum = self.compute_checksum()
 
     def __len__(self):
         return (
             s.uint32  # magic
             + 32  # compiler
-            + (s.uint32 * 4)  # version
-            + s.uint160  # script hash
-            + s.uint32  # checksum
-            + utils.get_var_size(self.script))
+            + (s.uint64 * 4)  # version
+            + utils.get_var_size(self.script)
+            + s.uint32)  # checksum
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -132,36 +139,37 @@ class NEF(serialization.ISerializable):
                 and self.compiler == other.compiler
                 and self.version == other.version
                 and self.script == other.script
-                and self.script_hash == other.script_hash
                 and self.checksum == other.checksum)
 
     def serialize(self, writer: serialization.BinaryWriter) -> None:
         writer.write_uint32(self.magic)
         writer.write_bytes(self.compiler.encode('utf-8'))
         writer.write_bytes(self.version.to_array())
-        writer.write_bytes(self.script_hash.to_array())
-        writer.write_bytes(self.checksum)
         writer.write_var_bytes(self.script)
+        writer.write_bytes(self.checksum)
 
     def deserialize(self, reader: serialization.BinaryReader) -> None:
         self.magic = reader.read_uint32()
         self.compiler = reader.read_bytes(32).decode('utf-8')
-        self.version = Version.deserialize_from_bytes(reader.read_bytes(16))
-        self.script_hash = reader.read_serializable(types.UInt160)
+        self.version = Version.deserialize_from_bytes(reader.read_bytes(32))
+
+        self.script = reader.read_var_bytes()
         self.checksum = reader.read_bytes(4)
         if self.checksum != self.compute_checksum():
             raise ValueError("Deserialization error - invalid checksum")
 
-        self.script = reader.read_var_bytes()
-        if self.script_hash != self.compute_script_hash():
-            raise ValueError("Deserialization error - invalid script_hash")
-
+    def script_to_array(self):
+        from boa3.neo3.core.serialization import BinaryWriter
+        with BinaryWriter() as bw:
+            bw.write_var_bytes(self.script)
+            return bw._stream.getvalue()
+    
     def compute_checksum(self) -> bytes:
         data = (self.magic.to_bytes(4, 'little')
                 + self.compiler.encode('utf-8')
                 + self.version.to_array()
-                + self.script_hash.to_array())
-        return hashlib.sha256(hashlib.sha256(data).digest()).digest()[:4]
+                + self.script_to_array())
+        return hashlib.sha256(hashlib.sha256(data).digest()).digest()[:s.uint32]
 
     def compute_script_hash(self) -> types.UInt160:
         hash = hashlib.new('ripemd160', hashlib.sha256(self.script).digest()).digest()

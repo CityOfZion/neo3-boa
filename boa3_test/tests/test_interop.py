@@ -341,8 +341,7 @@ class TestInterop(BoaTest):
         Boa3.compile_and_save(call_contract_path)
 
         script, manifest = self.get_output(call_contract_path)
-        manifest_hash = manifest['abi']['hash']
-        call_hash = Integer(manifest_hash[2:], 16).to_byte_array()
+        call_hash = hash160(script)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine.add_contract(call_contract_path)
@@ -352,8 +351,10 @@ class TestInterop(BoaTest):
         arg_manifest = json.dumps(manifest, separators=(',', ':'))
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)
-        self.assertEqual(script, result[0])
-        self.assertEqual(json.loads(arg_manifest), json.loads(result[1]))
+        self.assertEqual(5, len(result))
+        self.assertEqual(call_hash, result[2])
+        self.assertEqual(script, result[3])
+        self.assertEqual(json.loads(arg_manifest), json.loads(result[4]))
 
     # endregion
 
@@ -380,8 +381,7 @@ class TestInterop(BoaTest):
         Boa3.compile_and_save(call_contract_path)
 
         contract, manifest = self.get_output(call_contract_path)
-        manifest_hash = manifest['abi']['hash']
-        call_hash = Integer(manifest_hash[2:], 16).to_byte_array()
+        call_hash = hash160(contract)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine = TestEngine(self.dirname)
@@ -417,8 +417,7 @@ class TestInterop(BoaTest):
         Boa3.compile_and_save(call_contract_path)
 
         contract, manifest = self.get_output(call_contract_path)
-        manifest_hash = manifest['abi']['hash']
-        call_hash = Integer(manifest_hash[2:], 16).to_byte_array()
+        call_hash = hash160(contract)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine = TestEngine(self.dirname)
@@ -439,14 +438,14 @@ class TestInterop(BoaTest):
 
     def test_create_contract(self):
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG1
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.CreateContract.interop_method_hash
-            + Opcode.RET
+                Opcode.INITSLOT
+                + b'\x00'
+                + b'\x02'
+                + Opcode.LDARG1
+                + Opcode.LDARG0
+                + Opcode.SYSCALL
+                + Interop.CreateContract.interop_method_hash
+                + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CreateContract.py' % self.dirname
@@ -456,17 +455,20 @@ class TestInterop(BoaTest):
         call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
         Boa3.compile_and_save(call_contract_path)
 
+        with open(call_contract_path.replace('.py', '.nef'), mode='rb') as nef:
+            nef_file = nef.read()
+
         script, manifest = self.get_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main', script, arg_manifest)
+        result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest)
 
         del manifest['features']    # TODO: Remove when metadata is altered
 
-        self.assertEqual(2, len(result))
-        self.assertEqual(script, result[0])
-        self.assertEqual(manifest, json.loads(result[1]))
+        self.assertEqual(5, len(result))
+        self.assertEqual(script, result[3])
+        self.assertEqual(manifest, json.loads(result[4]))
 
     def test_create_contract_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/interop_test/CreateContractTooManyArguments.py' % self.dirname

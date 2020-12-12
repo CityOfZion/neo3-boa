@@ -17,12 +17,13 @@ class FileGenerator:
     This class is responsible for generating the files.
     """
 
-    def __init__(self, bytecode: bytes, analyser: Analyser):
+    def __init__(self, bytecode: bytes, analyser: Analyser, entry_file: str):
         self._metadata = analyser.metadata
         self._symbols: Dict[str, ISymbol] = analyser.symbol_table
         import os
         self._files: List[str] = [analyser.path.replace(os.sep, '/')]
         self._nef: NefFile = NefFile(bytecode)
+        self._entry_file = entry_file
 
     @property
     def _public_methods(self) -> Dict[str, Method]:
@@ -94,6 +95,7 @@ class FileGenerator:
         """
         # TODO: fill the information of the manifest
         return {
+            "name": self._entry_file,
             "groups": [],
             "features": {
                 "storage": self._metadata.has_storage,
@@ -119,7 +121,6 @@ class FileGenerator:
         :return: a dictionary with the abi information
         """
         return {
-            "hash": self._nef_hash,
             "methods": self._get_abi_methods(),
             "events": self._get_abi_events()
         }

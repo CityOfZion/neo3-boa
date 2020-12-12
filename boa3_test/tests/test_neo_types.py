@@ -6,7 +6,7 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestNeoTypes(BoaTest):
 
-    def test_hash160_call_bytes(self):
+    def test_uint160_call_bytes(self):
         path = '%s/boa3_test/test_sc/neo_type_test/UInt160CallBytes.py' % self.dirname
 
         engine = TestEngine(self.dirname)
@@ -28,7 +28,7 @@ class TestNeoTypes(BoaTest):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
 
-    def test_hash160_call_int(self):
+    def test_uint160_call_int(self):
         path = '%s/boa3_test/test_sc/neo_type_test/UInt160CallInt.py' % self.dirname
         self.compile_and_save(path)
 
@@ -50,7 +50,7 @@ class TestNeoTypes(BoaTest):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
 
-    def test_hash160_call_without_args(self):
+    def test_uint160_call_without_args(self):
         path = '%s/boa3_test/test_sc/neo_type_test/UInt160CallWithoutArgs.py' % self.dirname
 
         engine = TestEngine(self.dirname)
@@ -58,7 +58,7 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(bytes(20), result)
 
-    def test_hash160_return_bytes(self):
+    def test_uint160_return_bytes(self):
         path = '%s/boa3_test/test_sc/neo_type_test/UInt160ReturnBytes.py' % self.dirname
 
         engine = TestEngine(self.dirname)
