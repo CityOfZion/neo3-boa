@@ -3,7 +3,6 @@ from unittest import TestCase
 from boa3.constants import ENCODING
 from boa3.neo import to_script_hash
 from boa3.neo.contracts.neffile import NefFile
-from boa3.neo.vm.type.Integer import Integer
 
 
 class TestNefFile(TestCase):

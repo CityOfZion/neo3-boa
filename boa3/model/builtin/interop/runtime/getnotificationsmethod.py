@@ -20,7 +20,7 @@ class GetNotificationsMethod(InteropMethod):
         args: Dict[str, Variable] = {'script_hash': Variable(uint160)}
         args_default = ast.parse("{0}()".format(uint160.raw_identifier)
                                  ).body[0].value
-        
+
         super().__init__(identifier, syscall, args, [args_default],
                          return_type=Type.list.build([notification_type]))
 

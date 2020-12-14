@@ -1,5 +1,4 @@
 import json
-import unittest
 
 from boa3.boa3 import Boa3
 from boa3.builtin.interop.contract import GAS, NEO
@@ -438,14 +437,14 @@ class TestInterop(BoaTest):
 
     def test_create_contract(self):
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x00'
-                + b'\x02'
-                + Opcode.LDARG1
-                + Opcode.LDARG0
-                + Opcode.SYSCALL
-                + Interop.CreateContract.interop_method_hash
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CreateContract.interop_method_hash
+            + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/CreateContract.py' % self.dirname
@@ -1820,7 +1819,6 @@ class TestInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
-    @unittest.skip("Block time doesn't return zero")
     def test_get_block_time(self):
         expected_output = (
             Opcode.SYSCALL
@@ -1833,8 +1831,9 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
+        new_block = engine.increase_block()
         result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(0, result)
+        self.assertEqual(new_block.timestamp, result)
 
     def test_block_time_cant_assign(self):
         expected_output = (
