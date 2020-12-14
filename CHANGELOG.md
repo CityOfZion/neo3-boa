@@ -6,6 +6,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2020-12-14
+### Added
+- Implemented cryptography methods
+  - SHA256, RIPEMD160, HASH160 and HASH256
+- Included Contract methods
+  - Create, Update and Destroy contract
+- Included ``base58`` and ``base64`` encoding/decoding
+- New Neo Interops
+  - GetExecutingScriptHash, GetEntryScriptHash and GetPlatform
+- Json and Binary serialization/deserialization
+- GetNotifications, for getting the list of events and values sent using ``notify()``
+- Implemented a method to abort smart contract execution
+- Included UInt160 type for compatibility with NEP17
+- GetCurrentStorageContext, for Storage Interops
+- New features in the TestEngine
+  - Included call other smart contracts
+  - Account witness
+  - Inclusion of blocks and transactions
+  
+
+### Changed
+- Improved examples' unit tests using TestEngine
+- Changed ``nef`` and ``manifest`` generation to be compatible with Neo's preview4
+
+
+### Fixed
+- Fixed the type checking for sequence slices
+- If-else branches inside each other weren't having the same execution flow as expected
+- Type attribution in ``for`` variable - was getting iterable type instead of iterable's values type
+
+
+### Removed
+- ``is_application_trigger`` and ``is_verification_trigger`` methods
+
+
 ## [0.5.0] - 2020-10-27
 ### Added
 - Converted `time`, `height`, `gasLeft` and `invocationCounter` interops
@@ -53,7 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.2.2...v0.3.0
