@@ -757,26 +757,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -809,26 +801,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -859,26 +843,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -910,26 +886,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -938,8 +906,6 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input4)).to_byte_array(min_length=1)
             + byte_input4
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
@@ -965,26 +931,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -1017,26 +975,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -1067,26 +1017,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -1118,26 +1060,18 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.PUSHDATA1
             + Integer(len(byte_input3)).to_byte_array(min_length=1)
             + byte_input3
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC1
@@ -1146,8 +1080,6 @@ class TestInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input4)).to_byte_array(min_length=1)
             + byte_input4
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
@@ -1167,13 +1099,9 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
@@ -1195,13 +1123,9 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH0
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
@@ -1221,13 +1145,9 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH10
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
@@ -1248,18 +1168,12 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
@@ -1283,13 +1197,9 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
@@ -1311,13 +1221,9 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH0
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
@@ -1337,13 +1243,9 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSH10
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
@@ -1364,18 +1266,12 @@ class TestInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
@@ -1769,8 +1665,6 @@ class TestInterop(BoaTest):
         expected_output = (
             Opcode.SYSCALL
             + Interop.CallingScriptHash.getter.interop_method_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -1796,8 +1690,6 @@ class TestInterop(BoaTest):
         expected_output = (
             Opcode.SYSCALL
             + Interop.ExecutingScriptHash.getter.interop_method_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -1938,8 +1830,6 @@ class TestInterop(BoaTest):
         expected_output = (
             Opcode.SYSCALL
             + Interop.EntryScriptHash.getter.interop_method_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 

@@ -2,7 +2,6 @@ import unittest
 
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import InternalError, UnresolvedOperation
-from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -14,30 +13,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestString(BoaTest):
 
     def test_string_get_value(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0     # arg[0]
-            + Opcode.PUSH0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH1
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.RET        # return
-        )
-
         path = '%s/boa3_test/test_sc/string_test/GetValue.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', 'unit')
@@ -49,32 +26,8 @@ class TestString(BoaTest):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_string_get_value_to_variable(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x01'
-            + Opcode.LDARG0     # b = arg[0]
-            + Opcode.PUSH0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH1
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # return b
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/test_sc/string_test/GetValueToVariable.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', 'unit')
@@ -90,100 +43,16 @@ class TestString(BoaTest):
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_string_slicing(self):
-        string_value = 'unit_test'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = 'unit_test'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1  # return a[2:3]
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.PUSH2
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH3      # size = 3 - 2
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.OVER
-            + Opcode.SUB
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.RET        # return
-        )
         path = '%s/boa3_test/test_sc/string_test/StringSlicingLiteralValues.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('i', result)
 
     def test_string_slicing_with_variables(self):
-        string_value = 'unit_test'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x03'
-            + b'\x00'
-            + Opcode.PUSH2      # a1 = 2
-            + Opcode.STLOC0
-            + Opcode.PUSH3      # a2 = 3
-            + Opcode.STLOC1
-            + Opcode.PUSHDATA1  # a = 'unit_test'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC2
-            + Opcode.PUSHDATA1  # return a[a1:a2]
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.PUSH2
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH3     # size = a2 - a1
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.OVER
-            + Opcode.SUB
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.RET        # return
-        )
         path = '%s/boa3_test/test_sc/string_test/StringSlicingVariableValues.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
