@@ -41,13 +41,10 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
         import base64
         decoded: bytes = base64.b64decode(item_value)
 
-        if item_type is StackItemType.Buffer:
+        try:
+            value = String.from_bytes(decoded)
+        except BaseException:
             value = decoded
-        else:
-            try:
-                value = String.from_bytes(decoded)
-            except BaseException:
-                value = decoded
 
     elif item_type is StackItemType.Array:
         if not isinstance(item_value, Sequence) or isinstance(item_value, (str, bytes)):

@@ -250,7 +250,8 @@ class TestInterop(BoaTest):
 
         expected_result = 42
         value = serialize(expected_result)
-        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value,
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
         expected_result = True
@@ -262,7 +263,8 @@ class TestInterop(BoaTest):
         self.assertNotEqual(type(expected_result), type(result))
 
         value = StackItemType.Boolean + value[1:]
-        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value,
+                                         expected_result_type=bool)
         self.assertEqual(expected_result, result)
         self.assertEqual(type(expected_result), type(result))
 
@@ -273,17 +275,20 @@ class TestInterop(BoaTest):
 
         expected_result = b'42'
         value = serialize(expected_result)
-        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value,
+                                         expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
         expected_result = [1, '2', b'3']
         value = serialize(expected_result)
         result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        expected_result[2] = String.from_bytes(expected_result[2])
         self.assertEqual(expected_result, result)
 
         expected_result = {'int': 1, 'str': '2', 'bytes': b'3'}
         value = serialize(expected_result)
         result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
+        expected_result['bytes'] = String.from_bytes(expected_result['bytes'])
         self.assertEqual(expected_result, result)
 
     def test_deserialize_mismatched_type(self):

@@ -91,7 +91,8 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
         self.assertEqual(b'unit_', result)
 
     @unittest.skip("slicing with negative arg is wrong")
@@ -166,7 +167,8 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
         self.assertEqual(b'uni', result)
 
     def test_string_slicing_omitted(self):
@@ -229,7 +231,8 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
         self.assertEqual(b'it_test', result)
 
     def test_string_slicing_omitted_stride(self):

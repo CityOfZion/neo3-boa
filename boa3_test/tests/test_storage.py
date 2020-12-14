@@ -69,7 +69,8 @@ class TestStorage(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main', 'example')
+        result = self.run_smart_contract(engine, path, 'Main', 'example',
+                                         expected_result_type=bytes)
         self.assertEqual(b'', result)
 
         storage = {'example': 23}
