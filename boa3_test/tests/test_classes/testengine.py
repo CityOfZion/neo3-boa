@@ -5,6 +5,8 @@ from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import bytes_from_json, contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
+from boa3_test.tests.test_classes.block import Block
+from boa3_test.tests.test_classes.transaction import Transaction
 
 
 class TestEngine:
@@ -17,6 +19,8 @@ class TestEngine:
 
         self._storage: Dict[bytes, Any] = {}
         self._notifications: List[Notification] = []
+        self._height: int = 0
+        self._blocks: List[Block] = []
 
         self._accounts: List[bytes] = []
         self._contract_paths: List[str] = []
@@ -88,6 +92,45 @@ class TestEngine:
     def add_contract(self, contract_nef_path: str):
         if contract_nef_path.endswith('.nef') and contract_nef_path not in self._contract_paths:
             self._contract_paths.append(contract_nef_path)
+
+    @property
+    def height(self) -> int:
+        return self.current_block.index if self.current_block is not None else self._height
+
+    @property
+    def blocks(self) -> List[Block]:
+        return sorted(self._blocks, key=lambda block: block.index)
+
+    @property
+    def current_block(self) -> Optional[Block]:
+        return self.blocks[-1] if len(self._blocks) > 0 else None
+
+    def increase_block(self, new_height: int = None) -> Block:
+        if self.current_block is None:
+            if new_height is None or new_height <= self._height:
+                new_height = self._height
+        else:
+            if new_height is None or new_height <= self._height:
+                new_height = self.height + 1
+            self._height = new_height
+
+        new_block = Block(new_height)
+        self.add_block(new_block)
+        return new_block
+
+    def add_block(self, block: Block) -> bool:
+        success = len(list(filter(lambda b: b.index == block.index, self._blocks))) == 0
+        if success:
+            self._blocks.append(block)
+        return success
+
+    def add_transaction(self, *transaction: Transaction):
+        if self.current_block is None:
+            self.increase_block()
+
+        current_block = self.current_block
+        for tx in transaction:
+            current_block.add_transaction(tx)
 
     def run(self, nef_path: str, method: str, *arguments: Any, reset_engine: bool = False) -> Any:
         import json
@@ -182,5 +225,7 @@ class TestEngine:
                          'value': contract_parameter_to_json(value)
                          } for key, value in self._storage.items()],
             'contracts': [{'nef': contract_path} for contract_path in self._contract_paths],
-            "signerAccounts": [to_hex_str(address) for address in self._accounts]
+            'signerAccounts': [to_hex_str(address) for address in self._accounts],
+            'height': self.height,
+            'blocks': [block.to_json() for block in self.blocks]
         }

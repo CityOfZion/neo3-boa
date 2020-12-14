@@ -6,7 +6,6 @@ from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyse
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.builtin.builtin import Builtin
-from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression

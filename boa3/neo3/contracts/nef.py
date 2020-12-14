@@ -163,7 +163,7 @@ class NEF(serialization.ISerializable):
         with BinaryWriter() as bw:
             bw.write_var_bytes(self.script)
             return bw._stream.getvalue()
-    
+
     def compute_checksum(self) -> bytes:
         data = (self.magic.to_bytes(4, 'little')
                 + self.compiler.encode('utf-8')

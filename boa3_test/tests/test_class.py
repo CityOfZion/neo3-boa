@@ -1,6 +1,5 @@
-from boa3.neo.vm.type.String import String
-
 from boa3.neo.cryptography import hash160
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -64,7 +63,6 @@ class TestClass(BoaTest):
         path = '%s/boa3_test/test_sc/class_test/ContractConstructor.py' % self.dirname
         output, manifest = self.compile_and_save(path)
 
-        import json
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'new_contract')
         self.assertEqual(5, len(result))
@@ -79,4 +77,3 @@ class TestClass(BoaTest):
         self.assertEqual(bytes(20), result[2])
         self.assertEqual(bytes(), result[3])
         self.assertEqual({}, result[4])
-
