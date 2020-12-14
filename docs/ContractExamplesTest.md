@@ -92,10 +92,10 @@
 
 ### Built in function
 
-- <a href="/boa3_test/test_sc/function_test/built_in_methods_test/LenBytes.py">LenBytes.py</a>,
-- <a href="/boa3_test/test_sc/function_test/built_in_methods_test/LenList.py">LenList.py</a>,
-- <a href="/boa3_test/test_sc/function_test/built_in_methods_test/LenString.py">LenString.py</a>,
-- <a href="/boa3_test/test_sc/function_test/built_in_methods_test/LenTuple.py">LenTuple.py</a>
+- <a href="/boa3_test/test_sc/built_in_methods_test/LenBytes.py">LenBytes.py</a>,
+- <a href="/boa3_test/test_sc/built_in_methods_test/LenList.py">LenList.py</a>,
+- <a href="/boa3_test/test_sc/built_in_methods_test/LenString.py">LenString.py</a>,
+- <a href="/boa3_test/test_sc/built_in_methods_test/LenTuple.py">LenTuple.py</a>
 
 ### Bytearray type
 
@@ -325,18 +325,18 @@
 ## v0.4
 ### Built in function
 
-- <a href="/boa3_test/test_sc/function_test/range_test/GetValue.py">GetValue.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeExpectedSequence.py">RangeExpectedSequence.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeGivenLen.py">RangeGivenLen.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeGivenStart.py">RangeGivenStart.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeGivenStep.py">RangeGivenStep.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingEndOmitted.py">RangeSlicingEndOmitted.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingLiteralValues.py">RangeSlicingLiteralValues.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingNegativeEnd.py">RangeSlicingNegativeEnd.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingNegativeStart.py">RangeSlicingNegativeStart.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingOmitted.py">RangeSlicingOmitted.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingStartOmitted.py">RangeSlicingStartOmitted.py</a>,
-- <a href="/boa3_test/test_sc/function_test/range_test/RangeSlicingVariableValues.py">RangeSlicingVariableValues.py</a>,
+- <a href="/boa3_test/test_sc/range_test/GetValue.py">GetValue.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeExpectedSequence.py">RangeExpectedSequence.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeGivenLen.py">RangeGivenLen.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeGivenStart.py">RangeGivenStart.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeGivenStep.py">RangeGivenStep.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingEndOmitted.py">RangeSlicingEndOmitted.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingLiteralValues.py">RangeSlicingLiteralValues.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingNegativeEnd.py">RangeSlicingNegativeEnd.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingNegativeStart.py">RangeSlicingNegativeStart.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingOmitted.py">RangeSlicingOmitted.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingStartOmitted.py">RangeSlicingStartOmitted.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingVariableValues.py">RangeSlicingVariableValues.py</a>,
 - <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolLiteral.py">IsInstanceBoolLiteral.py</a>,
 - <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolVariable.py">IsInstanceBoolVariable.py</a>,
 - <a href="/boa3_test/test_sc/built_in_methods_test/IsInstanceIntLiteral.py">IsInstanceIntLiteral.py</a>, 
@@ -372,5 +372,5 @@
 ## v0.5
 ### Try except with finally
 
-- <a href="/boa3_test/test_sc/function_test/exception_test/TryExceptFinally.py">TryExceptFinally.py</a>
+- <a href="/boa3_test/test_sc/exception_test/TryExceptFinally.py">TryExceptFinally.py</a>
 

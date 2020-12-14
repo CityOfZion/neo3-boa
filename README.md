@@ -793,7 +793,7 @@ For an extensive collection of examples:
 
 ## Neo Python Suite Projects
 
-- <b>[neo3-boa](https://github.com/CityOfZion/neo3-boa)</b>: Python smart contracts compiler.</br>
+- **[neo3-boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts compiler.</br>
 - [neo3-mamba](https://github.com/CityOfZion/neo-mamba): Python SDK for interacting with neo.</br>
 
 ## Opening a New Issue
