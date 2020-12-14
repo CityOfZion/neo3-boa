@@ -152,15 +152,7 @@ class TestBytes(BoaTest):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBytearrayBuiltin.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
-    def test_bytes_to_bool_true_1(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBool.py' % self.dirname
-        output = Boa3.compile(path)
-
-        engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x01')
-        self.assertEqual(True, result)
-
-    def test_bytes_to_bool_true_0(self):
+    def test_bytes_to_bool(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToBool.py' % self.dirname
         output = Boa3.compile(path)
 
@@ -168,22 +160,43 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x00')
         self.assertEqual(False, result)
 
-    def test_bytes_to_bool_true_2(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBool.py' % self.dirname
-        output = Boa3.compile(path)
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x01')
+        self.assertEqual(True, result)
 
-        engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x02')
         self.assertEqual(True, result)
 
     def test_bytes_to_bool_with_builtin(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltin.py' % self.dirname
         output = Boa3.compile(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x00')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x01')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x02')
+        self.assertEqual(True, result)
+
+    @unittest.skip("It is converting hardcoded b'\x00' to b''")
+    def test_bytes_to_bool_with_builtin_hard_coded_false(self):
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinHardCodedFalse.py' % self.dirname
+        output = Boa3.compile(path)
         # TODO: Instead of converting to b'\x00', it is converting to b''. Change this test when it is fixed.
 
-        # engine = TestEngine(self.dirname)
-        # result = self.run_smart_contract(engine, path, 'bytes_to_bool')
-        # self.assertEqual(False, result)
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool')
+        self.assertEqual(False, result)
+
+    def test_bytes_to_bool_with_builtin_hard_coded_true(self):
+        path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinHardCodedTrue.py' % self.dirname
+        output = Boa3.compile(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool')
+        self.assertEqual(True, result)
 
     def test_bytes_to_bool_mismatched_types(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinMismatchedTypes.py' % self.dirname
