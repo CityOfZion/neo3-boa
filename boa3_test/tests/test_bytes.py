@@ -437,7 +437,7 @@ class TestBytes(BoaTest):
     @unittest.skip("reverse items doesn't work with bytestring")
     def test_byte_array_reverse(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayReverse.py' % self.dirname
-        output = Boa3.compile(path)
+        Boa3.compile(path)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main',
@@ -446,7 +446,21 @@ class TestBytes(BoaTest):
 
     def test_byte_array_extend(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayExtend.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        Boa3.compile(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x01\x02\x03\x04\x05\x06', result)
+
+    def test_byte_array_extend_with_builtin(self):
+        path = '%s/boa3_test/test_sc/bytes_test/BytearrayExtendWithBuiltin.py' % self.dirname
+        Boa3.compile(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x01\x02\x03\x04\x05\x06', result)
 
     def test_byte_array_to_int(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytearrayToInt.py' % self.dirname

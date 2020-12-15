@@ -42,15 +42,19 @@ class ExtendMethod(IBuiltinMethod):
         return sequence_type.value_type.is_type_of(iterator_type.value_type)
 
     @property
-    def is_supported(self) -> bool:
-        # TODO: remove when bytearray.extend() is implemented
-        from boa3.model.type.type import Type
-        return self._arg_self.type is not Type.bytearray
+    def stores_on_slot(self) -> bool:
+        return True
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
+        from boa3.neo.vm.type.StackItem import StackItemType
         return [
+            (Opcode.OVER, b''),
+            (Opcode.ISTYPE, StackItemType.Array),
+            (Opcode.JMPIF, Integer(5).to_byte_array(signed=True, min_length=1)),
+            (Opcode.CAT, b''),
+            (Opcode.JMP, Integer(18).to_byte_array(signed=True, min_length=1)),
             (Opcode.UNPACK, b''),       # get the values, top of stack will be the array size
             (Opcode.JMP, Integer(9).to_byte_array(signed=True, min_length=1)),  # begin while
             (Opcode.DUP, b''),
