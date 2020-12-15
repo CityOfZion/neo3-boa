@@ -109,7 +109,8 @@ class BoaTest(TestCase):
                            *arguments: Any, reset_engine: bool = False,
                            fake_storage: Dict[str, Any] = None,
                            signer_accounts: Iterable[bytes] = (),
-                           expected_result_type: Type = None) -> Any:
+                           expected_result_type: Type = None,
+                           rollback_on_fault: bool = True) -> Any:
 
         if smart_contract_path.endswith('.py'):
             if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
@@ -123,7 +124,7 @@ class BoaTest(TestCase):
             test_engine.add_signer_account(account)
 
         result = test_engine.run(smart_contract_path, method, *arguments,
-                                 reset_engine=reset_engine)
+                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
 
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
             raise TestExecutionException(test_engine.error)

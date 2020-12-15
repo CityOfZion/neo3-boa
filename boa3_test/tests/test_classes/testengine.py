@@ -132,7 +132,8 @@ class TestEngine:
         for tx in transaction:
             current_block.add_transaction(tx)
 
-    def run(self, nef_path: str, method: str, *arguments: Any, reset_engine: bool = False) -> Any:
+    def run(self, nef_path: str, method: str, *arguments: Any, reset_engine: bool = False,
+            rollback_on_fault: bool = True) -> Any:
         import json
         import subprocess
 
@@ -168,35 +169,36 @@ class TestEngine:
                 else:
                     self._result_stack = [stack_item_from_json(result['result_stack'])]
 
-            if 'notifications' in result:
-                json_storage = result['notifications']
-                if not isinstance(json_storage, list):
-                    json_storage = [json_storage]
+            if self._vm_state is VMState.HALT or not rollback_on_fault:
+                if 'notifications' in result:
+                    json_storage = result['notifications']
+                    if not isinstance(json_storage, list):
+                        json_storage = [json_storage]
 
-                notifications = []
-                for n in json_storage:
-                    new = Notification.from_json(n)
-                    if new is not None:
-                        notifications.append(new)
-                self._notifications = notifications
+                    notifications = []
+                    for n in json_storage:
+                        new = Notification.from_json(n)
+                        if new is not None:
+                            notifications.append(new)
+                    self._notifications = notifications
 
-            if 'storage' in result:
-                json_storage = result['storage']
-                if not isinstance(json_storage, list):
-                    json_storage = [json_storage]
+                if 'storage' in result:
+                    json_storage = result['storage']
+                    if not isinstance(json_storage, list):
+                        json_storage = [json_storage]
 
-                storage: Dict[bytes, Any] = {}
-                for storage_pair in json_storage:
-                    if not isinstance(storage_pair, dict) or list(storage_pair.keys()) != ['key', 'value']:
-                        continue
+                    storage: Dict[bytes, Any] = {}
+                    for storage_pair in json_storage:
+                        if not isinstance(storage_pair, dict) or list(storage_pair.keys()) != ['key', 'value']:
+                            continue
 
-                    key = bytes_from_json(storage_pair['key'])
-                    value = bytes_from_json(storage_pair['value'])
+                        key = bytes_from_json(storage_pair['key'])
+                        value = bytes_from_json(storage_pair['value'])
 
-                    if isinstance(key, bytes):
-                        storage[key] = value if isinstance(value, bytes) else b''
+                        if isinstance(key, bytes):
+                            storage[key] = value if isinstance(value, bytes) else b''
 
-                self._storage = storage
+                    self._storage = storage
 
         except BaseException as e:
             self._error_message = str(e)
