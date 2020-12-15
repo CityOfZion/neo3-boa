@@ -1,9 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
-from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -67,63 +65,8 @@ class TestFor(BoaTest):
         self.assertEqual(23, result)
 
     def test_for_string_condition(self):
-        sequence = String('3515').to_bytes(min_length=1)
-        jmpif_address = Integer(24).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-27).to_byte_array(min_length=1, signed=True)
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x03'
-            + b'\x00'
-            + Opcode.PUSH0      # a = 0
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1  # b = ''
-            + Integer(0).to_byte_array(min_length=1)
-            + Opcode.STLOC1
-            + Opcode.PUSHDATA1  # for_sequence = '3515'
-            + Integer(len(sequence)).to_byte_array(min_length=1)
-            + sequence
-            + Opcode.PUSH0      # for_index = 0
-            + Opcode.JMP
-            + jmpif_address
-            + Opcode.OVER           # x = for_sequence[for_index]
-            + Opcode.OVER
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH1
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.STLOC2
-            + Opcode.LDLOC0         # a = a + 1
-            + Opcode.PUSH1
-            + Opcode.ADD
-            + Opcode.STLOC0
-            + Opcode.LDLOC2         # b = x
-            + Opcode.STLOC1
-            + Opcode.INC            # for_index = for_index + 1
-            + Opcode.DUP        # if for_index < len(for_sequence)
-            + Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.SIZE
-            + Opcode.LT
-            + Opcode.JMPIF      # end for
-            + jmp_address
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC1     # return b
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/test_sc/for_test/StringCondition.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')

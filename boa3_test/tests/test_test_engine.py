@@ -291,7 +291,7 @@ class TestTestEngine(BoaTest):
             'type': StackItemType.Buffer.name,
             'value': 'dW5pdHRlc3Q='
         }
-        expected_result = b'unittest'
+        expected_result = 'unittest'
         result = stack_item_from_json(stack_item)
         self.assertEqual(expected_result, result)
 

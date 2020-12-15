@@ -434,3 +434,21 @@ class TestRelational(BoaTest):
 
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'main', [], '')
+
+    def test_compare_same_value_hard_coded(self):
+        path = '%s/boa3_test/test_sc/relational_test/CompareSameValueHardCoded.py' % self.dirname
+        Boa3.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'testing_something',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+    def test_compare_same_value_argument(self):
+        path = '%s/boa3_test/test_sc/relational_test/CompareSameValueArgument.py' % self.dirname
+        Boa3.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'testing_something', bytes(20),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)

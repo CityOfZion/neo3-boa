@@ -69,7 +69,8 @@ class TestStorage(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main', 'example')
+        result = self.run_smart_contract(engine, path, 'Main', 'example',
+                                         expected_result_type=bytes)
         self.assertEqual(b'', result)
 
         storage = {'example': 23}
@@ -107,32 +108,8 @@ class TestStorage(BoaTest):
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
     def test_storage_put_bytes_key_bytes_value(self):
-        value = b'\x01\x02\x03'
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01'
-            + b'\x01'
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.bytes.stack_item
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.bytes.stack_item
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.StoragePut.storage_context_hash
-            + Opcode.SYSCALL
-            + Interop.StoragePut.interop_method_hash
-            + Opcode.PUSHNULL
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/test_sc/storage_test/StoragePutBytesKeyBytesValue.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         stored_value = b'\x01\x02\x03'
@@ -249,32 +226,8 @@ class TestStorage(BoaTest):
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
     def test_storage_put_str_key_bytes_value(self):
-        value = b'\x01\x02\x03'
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01'
-            + b'\x01'
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.bytes.stack_item
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.bytes.stack_item
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.StoragePut.storage_context_hash
-            + Opcode.SYSCALL
-            + Interop.StoragePut.interop_method_hash
-            + Opcode.PUSHNULL
-            + Opcode.RET
-        )
-
         path = '%s/boa3_test/test_sc/storage_test/StoragePutStrKeyBytesValue.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         stored_value = b'\x01\x02\x03'

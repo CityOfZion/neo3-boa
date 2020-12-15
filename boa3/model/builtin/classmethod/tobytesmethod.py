@@ -92,6 +92,11 @@ class StrToBytesMethod(ToBytesMethod):
             self_type = Type.str
         super().__init__(self_type)
 
+    @property
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        # string and bytes' stack item are the same
+        return []
+
     def build(self, value: Any):
         if type(value) == type(self.args['self'].type):
             return self

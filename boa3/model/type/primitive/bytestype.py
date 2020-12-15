@@ -28,7 +28,7 @@ class BytesType(SequenceType, PrimitiveType):
 
     @property
     def stack_item(self) -> StackItemType:
-        return StackItemType.Buffer
+        return StackItemType.ByteString
 
     @property
     def default_value(self) -> Any:
