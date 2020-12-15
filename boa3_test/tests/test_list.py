@@ -1108,86 +1108,19 @@ class TestList(BoaTest):
 
     def test_list_extend_tuple_value(self):
         path = '%s/boa3_test/test_sc/list_test/ExtendTupleValue.py' % self.dirname
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x02'
-            + Opcode.PUSH3      # a = [1, 2, 3]
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # a.extend((4, 5, 6))
-            + Opcode.PUSH6      # (4, 5, 6)
-            + Opcode.PUSH5
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.UNPACK     # a.extend
-            + Opcode.JMP
-            + Integer(9).to_byte_array(signed=True, min_length=1)
-            + Opcode.DUP
-            + Opcode.INC
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.ROLL
-            + Opcode.APPEND
-            + Opcode.DEC
-            + Opcode.DUP
-            + Opcode.JMPIF
-            + Integer(-8).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, 4, 5, 6], result)
 
     def test_list_extend_any_value(self):
-        four = String('4').to_bytes(min_length=1)
         path = '%s/boa3_test/test_sc/list_test/ExtendAnyValue.py' % self.dirname
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x02'
-            + Opcode.PUSH3      # a = [1, 2, 3]
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # a.extend(4)
-            + Opcode.PUSH1      # ('4', 5, True)
-            + Opcode.PUSH5
-            + Opcode.PUSHDATA1
-            + Integer(len(four)).to_byte_array()
-            + four
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.UNPACK     # a.extend
-            + Opcode.JMP
-            + Integer(9).to_byte_array(signed=True, min_length=1)
-            + Opcode.DUP
-            + Opcode.INC
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.ROLL
-            + Opcode.APPEND
-            + Opcode.DEC
-            + Opcode.DUP
-            + Opcode.JMPIF
-            + Integer(-8).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, '4', 5, 1], result)
 
     def test_list_extend_mismatched_type(self):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeExtendValue.py' % self.dirname
@@ -1199,43 +1132,11 @@ class TestList(BoaTest):
 
     def test_list_extend_with_builtin(self):
         path = '%s/boa3_test/test_sc/list_test/ExtendWithBuiltin.py' % self.dirname
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x02'
-            + Opcode.PUSH3      # a = [1, 2, 3]
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # list.extend(a, [4, 5, 6])
-            + Opcode.PUSH6      # [4, 5, 6]
-            + Opcode.PUSH5
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.UNPACK     # a.extend
-            + Opcode.JMP
-            + Integer(9).to_byte_array(signed=True, min_length=1)
-            + Opcode.DUP
-            + Opcode.INC
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.ROLL
-            + Opcode.APPEND
-            + Opcode.DEC
-            + Opcode.DUP
-            + Opcode.JMPIF
-            + Integer(-8).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3, 4, 5, 6], result)
 
     def test_list_extend_with_builtin_mismatched_type(self):
         path = '%s/boa3_test/test_sc/list_test/MismatchedTypeExtendWithBuiltin.py' % self.dirname
