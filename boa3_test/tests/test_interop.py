@@ -1,5 +1,7 @@
 import json
 
+from boa3 import constants
+
 from boa3.boa3 import Boa3
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType
@@ -329,8 +331,16 @@ class TestInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(Interop.GetContract.method_name)).to_byte_array(min_length=1)
+            + String(Interop.GetContract.method_name).to_bytes()
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
+            + constants.MANAGEMENT_SCRIPT
             + Opcode.SYSCALL
-            + Interop.GetContract.interop_method_hash
+            + Interop.CallContract.interop_method_hash
             + Opcode.RET
         )
         path = '%s/boa3_test/test_sc/interop_test/GetContract.py' % self.dirname
@@ -350,7 +360,8 @@ class TestInterop(BoaTest):
 
         engine.add_contract(call_contract_path)
 
-        del manifest['features']    # TODO: Remove when metadata is altered
+        del manifest['features']     # TODO: Remove when metadata is altered
+        del manifest['safemethods']  # TODO: Remove when metadata is altered
 
         arg_manifest = json.dumps(manifest, separators=(',', ':'))
 
@@ -447,8 +458,16 @@ class TestInterop(BoaTest):
             + b'\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(Interop.CreateContract.method_name)).to_byte_array(min_length=1)
+            + String(Interop.CreateContract.method_name).to_bytes()
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
+            + constants.MANAGEMENT_SCRIPT
             + Opcode.SYSCALL
-            + Interop.CreateContract.interop_method_hash
+            + Interop.CallContract.interop_method_hash
             + Opcode.RET
         )
 
@@ -468,7 +487,8 @@ class TestInterop(BoaTest):
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest)
 
-        del manifest['features']    # TODO: Remove when metadata is altered
+        del manifest['features']     # TODO: Remove when metadata is altered
+        del manifest['safemethods']  # TODO: Remove when metadata is altered
 
         self.assertEqual(5, len(result))
         self.assertEqual(script, result[3])
@@ -489,11 +509,20 @@ class TestInterop(BoaTest):
             + b'\02'
             + Opcode.LDARG1
             + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(Interop.UpdateContract.method_name)).to_byte_array(min_length=1)
+            + String(Interop.UpdateContract.method_name).to_bytes()
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
+            + constants.MANAGEMENT_SCRIPT
             + Opcode.SYSCALL
-            + Interop.UpdateContract.interop_method_hash
+            + Interop.CallContract.interop_method_hash
             + Opcode.PUSHNULL
             + Opcode.RET
         )
+
         path = '%s/boa3_test/test_sc/interop_test/UpdateContract.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -508,8 +537,15 @@ class TestInterop(BoaTest):
 
     def test_destroy_contract(self):
         expected_output = (
-            Opcode.SYSCALL
-            + Interop.DestroyContract.interop_method_hash
+            Opcode.NEWARRAY0
+            + Opcode.PUSHDATA1
+            + Integer(len(Interop.DestroyContract.method_name)).to_byte_array(min_length=1)
+            + String(Interop.DestroyContract.method_name).to_bytes()
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
+            + constants.MANAGEMENT_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
             + Opcode.PUSHNULL
             + Opcode.RET
         )

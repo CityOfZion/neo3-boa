@@ -1,15 +1,16 @@
 from typing import Dict
 
+from boa3.model.builtin.interop.contract.contractmanagementmethod import ContractManagementMethod
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.variable import Variable
 
 
-class UpdateMethod(InteropMethod):
+class UpdateMethod(ContractManagementMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
         identifier = 'update_contract'
-        syscall = 'System.Contract.Update'
+        syscall = 'update'
         args: Dict[str, Variable] = {
             'script': Variable(Type.bytes),
             'manifest': Variable(Type.bytes)

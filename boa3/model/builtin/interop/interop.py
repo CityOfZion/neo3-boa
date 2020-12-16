@@ -60,6 +60,7 @@ class Interop:
     DestroyContract = DestroyMethod()
     GasScriptHash = GasProperty()
     NeoScriptHash = NeoProperty()
+    ManagementContractScriptHash = ManagementContract
     UpdateContract = UpdateMethod()
 
     # Crypto Interops
