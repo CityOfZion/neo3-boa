@@ -1,11 +1,13 @@
 from typing import Any, Dict, List, Optional, Union
 
+from boa3 import constants
 from boa3.neo import to_hex_str
 from boa3.neo.smart_contract.notification import Notification
-from boa3.neo.utils import bytes_from_json, contract_parameter_to_json, stack_item_from_json
+from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
+from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.transaction import Transaction
 
 
@@ -17,7 +19,7 @@ class TestEngine:
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
 
-        self._storage: Dict[bytes, Any] = {}
+        self._storage: Storage = Storage()
         self._notifications: List[Notification] = []
         self._height: int = 0
         self._blocks: List[Block] = []
@@ -26,6 +28,7 @@ class TestEngine:
         self._contract_paths: List[str] = []
 
         self._error_message: Optional[str] = None
+        self._neo_balance_prefix: bytes = b'\x14'
 
     @property
     def error(self) -> Optional[str]:
@@ -51,7 +54,7 @@ class TestEngine:
         return [n for n in self._notifications if n.name == event_name]
 
     @property
-    def storage(self) -> Dict[bytes, Any]:
+    def storage(self) -> Storage:
         return self._storage.copy()
 
     def storage_get(self, key: Union[str, bytes]) -> Any:
@@ -80,6 +83,12 @@ class TestEngine:
 
         if key in self._storage:
             self._storage.pop(key)
+
+    def add_neo(self, script_hash: bytes, amount: int) -> bool:
+        return self._storage.add_token(constants.NEO_SCRIPT, script_hash, amount)
+
+    def add_gas(self, script_hash: bytes, amount: int) -> bool:
+        return self._storage.add_token(constants.GAS_SCRIPT, script_hash, amount)
 
     def add_signer_account(self, account: bytes):
         if account not in self._accounts:
@@ -184,21 +193,7 @@ class TestEngine:
 
                 if 'storage' in result:
                     json_storage = result['storage']
-                    if not isinstance(json_storage, list):
-                        json_storage = [json_storage]
-
-                    storage: Dict[bytes, Any] = {}
-                    for storage_pair in json_storage:
-                        if not isinstance(storage_pair, dict) or list(storage_pair.keys()) != ['key', 'value']:
-                            continue
-
-                        key = bytes_from_json(storage_pair['key'])
-                        value = bytes_from_json(storage_pair['value'])
-
-                        if isinstance(key, bytes):
-                            storage[key] = value if isinstance(value, bytes) else b''
-
-                    self._storage = storage
+                    self._storage = Storage.from_json(json_storage)
 
         except BaseException as e:
             self._error_message = str(e)
@@ -216,16 +211,14 @@ class TestEngine:
 
     def reset_engine(self):
         self.reset_state()
-        self._storage = {}
+        self._storage.clear()
 
     def to_json(self, path: str, method: str, *args: Any) -> Dict[str, Any]:
         return {
             'path': path,
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
-            'storage': [{'key': contract_parameter_to_json(key),
-                         'value': contract_parameter_to_json(value)
-                         } for key, value in self._storage.items()],
+            'storage': self._storage.to_json(),
             'contracts': [{'nef': contract_path} for contract_path in self._contract_paths],
             'signerAccounts': [to_hex_str(address) for address in self._accounts],
             'height': self.height,
