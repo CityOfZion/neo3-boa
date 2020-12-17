@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Union
 
+from boa3.neo.vm.type.String import String
+
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.Integer import Integer
 
@@ -74,7 +76,13 @@ class Storage:
     def __setitem__(self, key: bytes, value: Any):
         from boa3.neo.vm.type import StackItem
         storage_key = StorageKey(key)
-        self._dict[storage_key] = StorageItem(StackItem.serialize(value))
+        if isinstance(value, int):
+            storage_value = Integer(value).to_byte_array()
+        elif isinstance(value, str):
+            storage_value = String(value).to_bytes()
+        else:
+            storage_value = StackItem.serialize(value)
+        self._dict[storage_key] = StorageItem(storage_value)
 
 
 class StorageKey:
