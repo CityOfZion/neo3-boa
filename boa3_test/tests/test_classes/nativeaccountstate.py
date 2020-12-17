@@ -18,8 +18,4 @@ class NativeAccountState:
                 + b'!\x00\x00'
                 )
 
-    # @classmethod
-    # def deserialize(cls, data: bytes):
-    #     result = StackItem.
-
 
