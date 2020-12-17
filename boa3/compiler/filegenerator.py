@@ -149,7 +149,8 @@ class FileGenerator:
                     "type": arg.type.abi_type
                 } for arg_id, arg in method.args.items()
             ],
-            "returntype": method.type.abi_type
+            "returntype": method.type.abi_type,
+            "safe": True
         }
 
     def _get_abi_events(self) -> List[Dict[str, Any]]:

@@ -30,6 +30,9 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :return: the number of arguments if opcode is not empty. Zero otherwise.
         """
         if len(self.opcode) > 0:
+            if self.pack_arguments:
+                return 1
+
             num_args = self._args_on_stack
             if num_args < 0:
                 return 0
@@ -107,6 +110,15 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :param arguments: list of arguments to be reordered
         """
         pass
+
+    @property
+    def pack_arguments(self) -> bool:
+        """
+        Return whether this method requires its parameters to be packed into an array
+
+        :return: whether this method requires an array
+        """
+        return False
 
     @property
     def body(self) -> Optional[str]:

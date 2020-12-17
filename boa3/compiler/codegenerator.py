@@ -951,6 +951,9 @@ class CodeGenerator:
         store_opcode: OpcodeInformation = None
         store_data: bytes = b''
 
+        if function.pack_arguments:
+            self.convert_new_array(len(function.args))
+
         if function.stores_on_slot and 0 < len(function.args) <= len(args_address):
             address = args_address[-len(function.args)]
             load_instr = VMCodeMapping.instance().code_map[address]
