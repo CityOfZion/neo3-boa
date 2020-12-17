@@ -15,6 +15,7 @@ from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
+from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -604,7 +605,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(expr.value.lineno, expr.value.col_offset, value)
                 )
 
-    def visit_Subscript(self, subscript: ast.Subscript):
+    def visit_Subscript(self, subscript: ast.Subscript) -> Union[str, IType]:
         """
         Verifies if it is the types in the subscription are valid
 
@@ -624,6 +625,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol_type = self.get_type(symbol)
             if isinstance(subscript.slice, ast.Slice):
                 return symbol_type
+
+            if isinstance(symbol, UnionType) or isinstance(symbol_type, UnionType):
+                if not isinstance(symbol_type, UnionType):
+                    symbol_type = symbol
+                index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+                union_types = self.visit(index)
+                return symbol_type.build(union_types)
 
             if isinstance(symbol_type, SequenceType):
                 return symbol_type.value_type

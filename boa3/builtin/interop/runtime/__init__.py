@@ -1,11 +1,11 @@
-from typing import Any, List
+from typing import Any, List, Union
 
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
 from boa3.builtin.type import UInt160
 
 
-def check_witness(hash_or_pubkey: bytes) -> bool:
+def check_witness(hash_or_pubkey: Union[bytes, UInt160]) -> bool:
     """
     Verifies that the transactions or block of the calling contract has validated the required script hash.
 

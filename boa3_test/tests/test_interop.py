@@ -1,7 +1,6 @@
 import json
 
 from boa3 import constants
-
 from boa3.boa3 import Boa3
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType

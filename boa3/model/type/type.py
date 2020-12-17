@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.anytype import anyType
 from boa3.model.type.baseexceptiontype import BaseExceptionType
 from boa3.model.type.collection.genericcollectiontype import GenericCollectionType
@@ -111,4 +112,7 @@ class Type:
     mapping = GenericMappingType()
     collection = GenericCollectionType()
     exception = BaseExceptionType()
+
+    # Annotation types
+    union = UnionType()
     any = anyType

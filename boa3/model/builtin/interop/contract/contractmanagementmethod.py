@@ -20,10 +20,13 @@ class ContractManagementMethod(InteropMethod):
         from boa3.neo.vm.type.String import String
 
         method = String(self._sys_call).to_bytes()
-        return ([
-                    (Opcode.PUSHDATA1, Integer(len(method)).to_byte_array(min_length=1) + method)
-                ] + Interop.ManagementContractScriptHash.getter.opcode
-                + Interop.CallContract.opcode)
+        opcode = [
+            (Opcode.PUSHDATA1, Integer(len(method)).to_byte_array(min_length=1) + method)
+        ]
+        return (opcode
+                + Interop.ManagementContractScriptHash.getter.opcode
+                + Interop.CallContract.opcode
+                )
 
     @property
     def pack_arguments(self) -> bool:

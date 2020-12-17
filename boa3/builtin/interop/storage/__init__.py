@@ -1,9 +1,9 @@
-from typing import Any
+from typing import Union
 
 from boa3.builtin.interop.storage.storagecontext import StorageContext
 
 
-def get(key: Any) -> bytes:
+def get(key: Union[str, bytes]) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
 
@@ -25,7 +25,7 @@ def get_context() -> StorageContext:
     pass
 
 
-def put(key: Any, value: Any):
+def put(key: Union[str, bytes], value: Union[int, str, bytes]):
     """
     Inserts a given value in the key-value format into the persistent storage.
 
@@ -37,7 +37,7 @@ def put(key: Any, value: Any):
     pass
 
 
-def delete(key: Any):
+def delete(key: Union[str, bytes]):
     """
     Removes a given key from the persistent storage if exists.
 

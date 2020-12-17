@@ -6,7 +6,6 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
-
 __all__ = ['GetManagementContractScriptHashMethod',
            'ManagementContract'
            ]
