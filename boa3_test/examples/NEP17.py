@@ -266,10 +266,9 @@ def onPayment(from_address: UInt160, amount: int, data: Any):
     :type data: Any
     """
     # Use calling_script_hash to identify if the incoming token is NEO or GAS
-    if calling_script_hash == UInt160(b'\xb6\x72\x0f\xef\x7e\x7e\xb7\x3f\x25\xaf\xb4\x70\xf5\x87\x99\x7c\xe3\xe2\x46\x0a'): # TODO: change all to NEO
-        a = 1
-        # corresponding_amount = amount * AMOUNT_PER_NEO
-        # mint(from_address, corresponding_amount)
+    if calling_script_hash == NEO:
+        corresponding_amount = amount * AMOUNT_PER_NEO
+        mint(from_address, corresponding_amount)
     elif calling_script_hash == GAS:
         corresponding_amount = amount * AMOUNT_PER_GAS
         mint(from_address, corresponding_amount)

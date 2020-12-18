@@ -162,7 +162,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             for stmt in function.body:
                 self.visit_to_map(stmt)
 
-            self.generator.convert_end_method()
+            self.generator.convert_end_method(function.name)
             self.current_method = None
 
     def visit_arguments(self, arguments: ast.arguments) -> Dict[str, Variable]:

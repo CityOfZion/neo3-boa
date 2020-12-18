@@ -245,7 +245,7 @@ class CodeGenerator:
             method.init_bytecode = self.last_code
         self._current_method = method
 
-    def convert_end_method(self):
+    def convert_end_method(self, method_id: Optional[str] = None):
         """
         Converts the end of the method
         """
@@ -255,6 +255,12 @@ class CodeGenerator:
 
         if self.last_code.opcode is not Opcode.RET:
             self.insert_return()
+
+        # TODO: remove this when the None return in void methods is fixed
+        if method_id == 'onPayment':
+            address = self.last_code_start_address
+            self.remove_stack_top_item()
+            VMCodeMapping.instance().move_to_end(address, address)
 
         self._current_method.end_bytecode = self.last_code
         self._current_method = None
@@ -1273,7 +1279,7 @@ class CodeGenerator:
                 self._stack.pop()
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
-            if pos > 0:
+            if pos > 0 and len(self._stack) > 0:
                 self._stack.pop(-pos)
 
     def swap_reverse_stack_items(self, no_items: int = 0):

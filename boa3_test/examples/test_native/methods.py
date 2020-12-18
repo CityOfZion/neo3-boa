@@ -88,3 +88,8 @@ def verify() -> bool:
     :return: whether the transaction signature is correct
     """
     return check_witness(OWNER)
+
+
+@public
+def onPayment(from_address: UInt160, amount: int, data: Any):
+    pass
