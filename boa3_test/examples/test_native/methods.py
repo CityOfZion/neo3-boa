@@ -3,7 +3,7 @@ from typing import Any
 from boa3.builtin.type import UInt160
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.interop.contract import call_contract, NEO, GAS
-from boa3.builtin.interop.runtime import calling_script_hash, check_witness
+from boa3.builtin.interop.runtime import check_witness
 
 
 # -------------------------------------------
@@ -25,8 +25,8 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
-    meta.has_storage = True     # TODO: Remove when neo_dev updates
-    meta.is_payable = True      # TODO: Remove when neo_dev updates
+    meta.has_storage = True     # TODO: Remove when test engine updates
+    meta.is_payable = True      # TODO: Remove when test engine updates
     return meta
 
 
@@ -38,8 +38,7 @@ def transfer_neo(from_address: UInt160, to_address: UInt160, amount: UInt160, da
     :return: whether the transfer was successful.
     :rtype: bool
     """
-    reverse_neo = UInt160(b'\xb6\x72\x0f\xef\x7e\x7e\xb7\x3f\x25\xaf\xb4\x70\xf5\x87\x99\x7c\xe3\xe2\x46\x0a')
-    return call_contract(reverse_neo, 'transfer', [from_address, to_address, amount, data])
+    return call_contract(NEO, 'transfer', [from_address, to_address, amount, data])
 
 
 @public
@@ -58,8 +57,7 @@ def balanceOf_neo(account: UInt160) -> Any:
     """
     Checks the balance of NEO at an account
     """
-    reverse_neo = UInt160(b'\xb6\x72\x0f\xef\x7e\x7e\xb7\x3f\x25\xaf\xb4\x70\xf5\x87\x99\x7c\xe3\xe2\x46\x0a')
-    return call_contract(reverse_neo, 'balanceOf', [account])
+    return call_contract(NEO, 'balanceOf', [account])
 
 
 @public
