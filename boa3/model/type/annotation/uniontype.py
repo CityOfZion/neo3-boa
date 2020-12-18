@@ -21,6 +21,8 @@ class UnionType(IType):
     def _is_type_of(self, value: Any) -> bool:
         if not isinstance(self._union_types, Iterable):
             return False
+        if isinstance(value, UnionType):
+            return self._union_types == value._union_types
         return any(t.is_type_of(value) for t in self._union_types)
 
     @classmethod

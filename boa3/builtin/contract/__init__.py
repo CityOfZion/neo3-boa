@@ -1,4 +1,5 @@
 from boa3.builtin import CreateNewEvent
+from boa3.builtin.type import UInt160
 
 Nep5TransferEvent = CreateNewEvent(
     [
@@ -7,6 +8,15 @@ Nep5TransferEvent = CreateNewEvent(
         ('amount', int)
     ],
     'transfer'
+)
+
+Nep17TransferEvent = CreateNewEvent(
+    [
+        ('from_addr', UInt160),
+        ('to_addr', UInt160),
+        ('amount', int)
+    ],
+    'Transfer'
 )
 
 

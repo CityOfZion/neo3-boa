@@ -13,8 +13,9 @@ from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
-from boa3.model.builtin.contract.abortmethod import AbortMethod
 from boa3.model.builtin.contract.nep5transferevent import Nep5TransferEvent
+from boa3.model.builtin.contract.nep17transferevent import Nep17TransferEvent
+from boa3.model.builtin.contract.abortmethod import AbortMethod
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
@@ -112,8 +113,8 @@ class Builtin:
                 for symbol in Interop.interop_symbols(package)}
 
     # builtin decorator
-    Public = PublicDecorator()
     Metadata = MetadataDecorator()
+    Public = PublicDecorator()
 
     # boa builtin type
     Event = EventType
@@ -121,6 +122,7 @@ class Builtin:
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
+    Nep17Transfer = Nep17TransferEvent()
 
     # boa smart contract methods
     Abort = AbortMethod()
@@ -154,8 +156,9 @@ class Builtin:
         return cls.boa_symbols()
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
-        BoaPackage.Contract: [Nep5Transfer,
-                              Abort
+        BoaPackage.Contract: [Abort,
+                              Nep17Transfer,
+                              Nep5Transfer,
                               ],
         BoaPackage.Type: [UInt160]
     }
