@@ -2,8 +2,8 @@ import json
 
 from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import TriggerType
+from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
 from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
@@ -558,7 +558,7 @@ class TestInterop(BoaTest):
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_get_neo_native_script_hash(self):
-        value = NEO
+        value = NEO_SCRIPT
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
@@ -589,7 +589,7 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_get_gas_native_script_hash(self):
-        value = GAS
+        value = GAS_SCRIPT
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()

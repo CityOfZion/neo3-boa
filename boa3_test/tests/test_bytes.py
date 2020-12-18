@@ -151,11 +151,9 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x02')
         self.assertEqual(True, result)
 
-    @unittest.skip("It is converting hardcoded b'\x00' to b''")
     def test_bytes_to_bool_with_builtin_hard_coded_false(self):
         path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinHardCodedFalse.py' % self.dirname
         output = Boa3.compile(path)
-        # TODO: Instead of converting to b'\x00', it is converting to b''. Change this test when it is fixed.
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'bytes_to_bool')

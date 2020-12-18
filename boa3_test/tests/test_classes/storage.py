@@ -1,9 +1,8 @@
 from typing import Any, Dict, List, Union
 
-from boa3.neo.vm.type.String import String
-
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 
 
 class Storage:
