@@ -630,7 +630,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if not isinstance(symbol_type, UnionType):
                     symbol_type = symbol
                 index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
-                union_types = self.visit(index)
+                if isinstance(index, ast.Tuple):
+                    union_types = [self.get_type(value) for value in index.elts]
+                else:
+                    union_types = self.visit(index)
                 return symbol_type.build(union_types)
 
             if isinstance(symbol_type, SequenceType):

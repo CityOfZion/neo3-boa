@@ -81,3 +81,11 @@ class TestUnion(BoaTest):
     def test_union_isinstance_validation(self):
         path = '%s/boa3_test/test_sc/union_test/UnionIsInstanceValidation.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_union_int_none(self):
+        path = '%s/boa3_test/test_sc/union_test/UnionIntNone.py' % self.dirname
+        output = Boa3.compile(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(42, result)
