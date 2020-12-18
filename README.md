@@ -503,8 +503,8 @@ For an extensive collection of examples:
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>next release</td>
+    <td>?</td>
+    <td>v0.6.1</td>
     <td>Union type</td>
     <td>
       <pre>
@@ -516,6 +516,7 @@ For an extensive collection of examples:
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#union-type">List of examples</a>
     </td>
   </tbody>
   <tbody>
