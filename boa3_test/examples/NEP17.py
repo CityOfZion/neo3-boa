@@ -19,11 +19,11 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
-    meta.author = "COZ"
+    meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "NEP-17 Example"
     meta.email = "contact@coz.io"
-    meta.has_storage = True     # TODO: Remove when neo_dev updates
-    meta.is_payable = True      # TODO: Remove when neo_dev updates
+    meta.has_storage = True     # TODO: Remove when test engine updates
+    meta.is_payable = True      # TODO: Remove when test engine updates
     return meta
 
 
@@ -216,8 +216,8 @@ def mint(account: UInt160, amount: int):
         put(SUPPLY_KEY, current_total_supply + amount)
         put(account, account_balance + amount)
 
-        on_transfer(UInt160(), account, amount)
-        post_transfer(UInt160(), account, amount, None)
+        on_transfer(UInt160(), account, amount)     # TODO: Change to None when isinstance is implemented
+        post_transfer(UInt160(), account, amount, None)     # TODO: Change to None when isinstance is implemented
 
 
 @public
@@ -248,7 +248,7 @@ def deploy() -> bool:
     put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
     put(OWNER, TOKEN_TOTAL_SUPPLY)
 
-    on_transfer(b'', OWNER, TOKEN_TOTAL_SUPPLY)
+    on_transfer(UInt160(), OWNER, TOKEN_TOTAL_SUPPLY)   # TODO: Change to None when isinstance is implemented
     return True
 
 
