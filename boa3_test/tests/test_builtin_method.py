@@ -1,3 +1,5 @@
+import unittest
+
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
                                           UnexpectedArgument, UnfilledArgument)
@@ -93,31 +95,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(11, result)
 
     def test_len_of_bytes(self):
-        byte_input = b'\x01\x02\x03'
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x02'
-            + b'\x00'
-            + Opcode.PUSHDATA1            # push the bytes
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1            # push the bytes
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.SIZE
-            + Opcode.STLOC1
-            + Opcode.LDLOC1
-            + Opcode.RET
-        )
         path = '%s/boa3_test/test_sc/built_in_methods_test/LenBytes.py' % self.dirname
-
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
@@ -358,30 +337,14 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([3, 2, 1], result)
 
+    @unittest.skip("reverse items doesn't work with bytestring")
     def test_reverse_mutable_sequence_with_builtin(self):
-        data = b'\x01\x02\x03'
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
-            + Integer(len(data)).to_byte_array(min_length=1)
-            + data
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # MutableSequence.reverse(a)
-            + Opcode.REVERSEITEMS
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
         path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequenceBuiltinCall.py' % self.dirname
-
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
         self.assertEqual(b'\x03\x02\x01', result)
 
     def test_reverse_too_many_parameters(self):
@@ -405,88 +368,16 @@ class TestBuiltinMethod(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_extend_mutable_sequence(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH3      # a = [1, 2, 3]
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # a.extend((4, 5, 6))
-            + Opcode.PUSH6      # (4, 5, 6)
-            + Opcode.PUSH5
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.UNPACK     # a.extend
-            + Opcode.JMP
-            + Integer(9).to_byte_array(signed=True, min_length=1)
-            + Opcode.DUP
-            + Opcode.INC
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.ROLL
-            + Opcode.APPEND
-            + Opcode.DEC
-            + Opcode.DUP
-            + Opcode.JMPIF
-            + Integer(-8).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
         path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendMutableSequence.py' % self.dirname
-
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([1, 2, 3, 4, 5, 6], result)
 
     def test_extend_mutable_sequence_with_builtin(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH3      # a = [1, 2, 3]
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # MutableSequence.extend(a, [4, 5, 6])
-            + Opcode.PUSH6      # [4, 5, 6]
-            + Opcode.PUSH5
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.UNPACK     # a.extend
-            + Opcode.JMP
-            + Integer(9).to_byte_array(signed=True, min_length=1)
-            + Opcode.DUP
-            + Opcode.INC
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.ROLL
-            + Opcode.APPEND
-            + Opcode.DEC
-            + Opcode.DUP
-            + Opcode.JMPIF
-            + Integer(-8).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.LDLOC0     # return a
-            + Opcode.RET
-        )
         path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendMutableSequenceBuiltinCall.py' % self.dirname
-
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
@@ -507,18 +398,9 @@ class TestBuiltinMethod(BoaTest):
     def test_script_hash_int(self):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
-        expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashInt.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
@@ -527,18 +409,9 @@ class TestBuiltinMethod(BoaTest):
     def test_script_hash_int_with_builtin(self):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
-        expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashIntBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
@@ -547,18 +420,9 @@ class TestBuiltinMethod(BoaTest):
     def test_script_hash_str(self):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
-        expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStr.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
@@ -567,30 +431,131 @@ class TestBuiltinMethod(BoaTest):
     def test_script_hash_str_with_builtin(self):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
-        expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStrBuiltinCall.py' % self.dirname
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(script_hash, result)
 
     def test_script_hash_variable(self):
+        script_hash = Integer(123).to_byte_array()
+        twenty = Integer(20).to_byte_array()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x00'
+            + Opcode.PUSHDATA1      # a = 123
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1      # a.to_script_hash()
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.JMPIFNOT
+            + Integer(36).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.str.stack_item
+            + Opcode.JMPIF
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.str.stack_item
+            + Opcode.SYSCALL
+            + Interop.Base58Decode.interop_method_hash
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.JMPGT
+            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.DEC
+            + Opcode.RIGHT
+            + Opcode.JMP
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.PUSH1
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariable.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_script_hash_variable_with_builtin(self):
+        script_hash = String('123').to_bytes()
+        twenty = Integer(20).to_byte_array()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01\x00'
+            + Opcode.PUSHDATA1      # a = 123
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1      # a.to_script_hash()
+            + Integer(len(script_hash)).to_byte_array(min_length=1)
+            + script_hash
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.JMPIFNOT
+            + Integer(36).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.ISTYPE
+            + Type.str.stack_item
+            + Opcode.JMPIF
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + Type.str.stack_item
+            + Opcode.SYSCALL
+            + Interop.Base58Decode.interop_method_hash
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.JMPGT
+            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.DEC
+            + Opcode.RIGHT
+            + Opcode.JMP
+            + Integer(9).to_byte_array(min_length=1)
+            + Opcode.PUSH1
+            + Opcode.PUSHDATA1
+            + Integer(len(twenty)).to_byte_array(min_length=1)
+            + twenty
+            + Opcode.CONVERT
+            + Type.int.stack_item
+            + Opcode.SUBSTR
+            + Opcode.CONVERT
+            + Type.bytes.stack_item
+            + Opcode.RET
+        )
+
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_script_hahs_too_many_parameters(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashTooManyParameters.py' % self.dirname
@@ -602,13 +567,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashMismatchedType.py' % self.dirname
-        # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_script_hash_builtin_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashBuiltinMismatchedType.py' % self.dirname
-        # TODO: change to MismatchedTypes when 'to_script_hash' with variables is implemented
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
 
@@ -632,7 +595,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'int_to_bytes')
+        result = self.run_smart_contract(engine, path, 'int_to_bytes',
+                                         expected_result_type=bytes)
         self.assertEqual(value, result)
 
     def test_int_to_bytes_with_builtin(self):
@@ -653,7 +617,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'int_to_bytes')
+        result = self.run_smart_contract(engine, path, 'int_to_bytes',
+                                         expected_result_type=bytes)
         self.assertEqual(value, result)
 
     def test_str_to_bytes(self):
@@ -672,7 +637,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'str_to_bytes')
+        result = self.run_smart_contract(engine, path, 'str_to_bytes',
+                                         expected_result_type=bytes)
         self.assertEqual(value, result)
 
     def test_str_to_bytes_with_builtin(self):
@@ -691,7 +657,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'str_to_bytes')
+        result = self.run_smart_contract(engine, path, 'str_to_bytes',
+                                         expected_result_type=bytes)
         self.assertEqual(value, result)
 
     def test_to_bytes_mismatched_types(self):

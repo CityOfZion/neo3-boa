@@ -8,9 +8,9 @@ from typing import List, Optional
 
 import aiodns  # type: ignore
 
-from boa3.neo3 import network_logger as logger, settings, blockchain
+from boa3.neo3 import blockchain, network_logger as logger, settings
 from boa3.neo3.core import msgrouter
-from boa3.neo3.network import node, payloads, convenience, message
+from boa3.neo3.network import convenience, message, node, payloads
 
 
 def is_ip_address(hostname: str) -> bool:

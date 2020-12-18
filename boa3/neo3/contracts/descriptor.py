@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import binascii
 
-from boa3.neo3.core import IJson, types, cryptography
+from boa3.neo3.core import IJson, cryptography, types
 
 
 class ContractPermissionDescriptor(IJson):

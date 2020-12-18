@@ -9,10 +9,13 @@ from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.popmethod import PopMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
+from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
 from boa3.model.builtin.contract.nep5transferevent import Nep5TransferEvent
+from boa3.model.builtin.contract.nep17transferevent import Nep17TransferEvent
+from boa3.model.builtin.contract.abortmethod import AbortMethod
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
@@ -28,11 +31,14 @@ from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
+from boa3.model.symbol import ISymbol
+from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.itype import IType
 
 
 class BoaPackage(str, Enum):
     Contract = 'contract'
+    Type = 'type'
 
 
 class Builtin:
@@ -40,6 +46,12 @@ class Builtin:
     def get_symbol(cls, symbol_id: str) -> Optional[Callable]:
         for name, method in vars(cls).items():
             if isinstance(method, IBuiltinCallable) and method.identifier == symbol_id:
+                return method
+
+    @classmethod
+    def get_any_symbol(cls, symbol_id: str) -> Optional[ISymbol]:
+        for name, method in vars(cls).items():
+            if isinstance(method, IdentifiedSymbol) and method.identifier == symbol_id:
                 return method
 
     @classmethod
@@ -75,6 +87,7 @@ class Builtin:
     ConvertToBytes = ToBytesMethod
     ConvertToInt = ToIntMethod
     ConvertToStr = ToStrMethod
+    ConvertToBool = ToBoolMethod
 
     _python_builtins: List[IdentifiedSymbol] = [Len,
                                                 IsInstance,
@@ -90,28 +103,36 @@ class Builtin:
                                                 DictValues,
                                                 ConvertToBytes,
                                                 ConvertToInt,
-                                                ConvertToStr
+                                                ConvertToStr,
+                                                ConvertToBool
                                                 ]
 
     @classmethod
     def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
-        return {method.identifier: method for method in Interop.interop_symbols(package)}
+        return {symbol.raw_identifier if hasattr(symbol, 'raw_identifier') else symbol.identifier: symbol
+                for symbol in Interop.interop_symbols(package)}
 
     # builtin decorator
-    Public = PublicDecorator()
     Metadata = MetadataDecorator()
+    Public = PublicDecorator()
 
     # boa builtin type
     Event = EventType
+    UInt160 = UInt160Type.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
+    Nep17Transfer = Nep17TransferEvent()
+
+    # boa smart contract methods
+    Abort = AbortMethod()
 
     _boa_builtins: List[IdentifiedSymbol] = [Public,
                                              NewEvent,
                                              Event,
                                              Metadata,
-                                             NeoMetadataType
+                                             NeoMetadataType,
+                                             ScriptHash
                                              ]
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = \
@@ -135,6 +156,9 @@ class Builtin:
         return cls.boa_symbols()
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
-        BoaPackage.Contract: [Nep5Transfer
-                              ]
+        BoaPackage.Contract: [Abort,
+                              Nep17Transfer,
+                              Nep5Transfer,
+                              ],
+        BoaPackage.Type: [UInt160]
     }

@@ -4,7 +4,7 @@ import hashlib
 from enum import IntFlag
 from typing import List
 
-from boa3.neo3.core import serialization, utils, types, cryptography, Size as s
+from boa3.neo3.core import Size as s, cryptography, serialization, types, utils
 from boa3.neo3.network import payloads
 
 

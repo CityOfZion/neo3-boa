@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from boa3.neo3.core import serialization, utils, IClonable
+from boa3.neo3.core import IClonable, serialization, utils
 
 
 class StorageItem(serialization.ISerializable, IClonable):

@@ -13,6 +13,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
@@ -22,7 +23,7 @@ from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo, OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class CodeGenerator:
@@ -158,29 +159,35 @@ class CodeGenerator:
                         module_globals.append(var_id)
         return module_globals
 
-    def get_symbol(self, identifier: str) -> ISymbol:
+    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None) -> ISymbol:
         """
         Gets a symbol in the symbol table by its id
 
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
-        if self._current_method is not None and identifier in self._current_method.symbols:
-            return self._current_method.symbols[identifier]
-        elif identifier in self.symbol_table:
-            return self.symbol_table[identifier]
+        if scope is not None and hasattr(scope, 'symbols') and isinstance(scope.symbols, dict):
+            if identifier in scope.symbols and isinstance(scope.symbols[identifier], ISymbol):
+                return scope.symbols[identifier]
+        else:
+            if self._current_method is not None and identifier in self._current_method.symbols:
+                return self._current_method.symbols[identifier]
+            elif identifier in self.symbol_table:
+                return self.symbol_table[identifier]
 
-        # the symbol may be a built in. If not, returns None
-        symbol = Builtin.get_symbol(identifier)
-        if symbol is not None:
-            return symbol
+            # the symbol may be a built in. If not, returns None
+            symbol = Builtin.get_symbol(identifier)
+            if symbol is not None:
+                return symbol
 
-        split = identifier.split('.')
-        if len(split) > 1:
-            attribute, symbol_id = '.'.join(split[:-1]), split[-1]
-            attr = self.get_symbol(attribute)
-            if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
-                return attr.symbols[symbol_id]
+            if not isinstance(identifier, str):
+                return symbol
+            split = identifier.split('.')
+            if len(split) > 1:
+                attribute, symbol_id = '.'.join(split[:-1]), split[-1]
+                attr = self.get_symbol(attribute)
+                if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
+                    return attr.symbols[symbol_id]
         return Type.none
 
     def initialize_static_fields(self):
@@ -238,7 +245,7 @@ class CodeGenerator:
             method.init_bytecode = self.last_code
         self._current_method = method
 
-    def convert_end_method(self):
+    def convert_end_method(self, method_id: Optional[str] = None):
         """
         Converts the end of the method
         """
@@ -248,6 +255,12 @@ class CodeGenerator:
 
         if self.last_code.opcode is not Opcode.RET:
             self.insert_return()
+
+        # TODO: remove this when the None return in void methods is fixed
+        if method_id == 'onPayment':
+            address = self.last_code_start_address
+            self.remove_stack_top_item()
+            VMCodeMapping.instance().move_to_end(address, address)
 
         self._current_method.end_bytecode = self.last_code
         self._current_method = None
@@ -363,15 +376,16 @@ class CodeGenerator:
         self._insert_jump(OpcodeInfo.JMPIFNOT)
         return VMCodeMapping.instance().get_start_address(self.last_code)
 
-    def convert_begin_else(self, start_address: int) -> int:
+    def convert_begin_else(self, start_address: int, insert_jump: bool = False) -> int:
         """
         Converts the beginning of the if else statement
 
         :param start_address: the address of the if first opcode
+        :param insert_jump: whether should be included a jump to the end before the else branch
         :return: the address of the if else first opcode
         """
         # it will be updated when the if ends
-        self._insert_jump(OpcodeInfo.JMP)
+        self._insert_jump(OpcodeInfo.JMP, insert_jump=insert_jump)
 
         # updates the begin jmp with the target address
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
@@ -849,6 +863,8 @@ class CodeGenerator:
             if isinstance(symbol, Property):
                 symbol = symbol.getter
                 params_addresses = []
+            elif isinstance(symbol, ClassType):
+                symbol = symbol.constructor_method()
 
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id, symbol)
@@ -941,6 +957,9 @@ class CodeGenerator:
         store_opcode: OpcodeInformation = None
         store_data: bytes = b''
 
+        if function.pack_arguments:
+            self.convert_new_array(len(function.args))
+
         if function.stores_on_slot and 0 < len(function.args) <= len(args_address):
             address = args_address[-len(function.args)]
             load_instr = VMCodeMapping.instance().code_map[address]
@@ -992,6 +1011,42 @@ class CodeGenerator:
             self.__insert1(info, data)
             self._stack.pop()
             self._stack.pop()
+
+    def convert_class_symbol(self, class_type: ClassType, symbol_id: str, load: bool = True) -> Optional[int]:
+        """
+        Converts an class symbol
+
+        :param class_type:
+        :param symbol_id:
+        :param load:
+        """
+        if symbol_id in class_type.variables:
+            return self.convert_class_variable(class_type, symbol_id, load)
+        elif symbol_id in class_type.properties:
+            symbol = class_type.properties[symbol_id]
+            method = symbol.getter if load else symbol.setter
+
+            if isinstance(method, IBuiltinMethod):
+                self.convert_builtin_method_call(method)
+            else:
+                self.convert_method_call(method, 0)
+
+    def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
+        """
+        Converts an class variable
+
+        :param class_type:
+        :param symbol_id:
+        :param load:
+        """
+        if symbol_id in class_type.variables:
+            index = list(class_type.variables).index(symbol_id)
+
+            if load:
+                self.convert_literal(index)
+                self.convert_get_item()
+
+            return index
 
     def convert_operation(self, operation: IOperation):
         """
@@ -1148,17 +1203,18 @@ class CodeGenerator:
             if len(vmcodes) == 0:
                 self._missing_target.pop(target)
 
-    def _insert_jump(self, op_info: OpcodeInformation, jump_to: Union[int, VMCode] = 0):
+    def _insert_jump(self, op_info: OpcodeInformation, jump_to: Union[int, VMCode] = 0, insert_jump: bool = False):
         """
         Inserts a jump opcode into the bytecode
 
         :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
+        :param insert_jump: whether should be included a jump to the end before the else branch
         """
         if isinstance(jump_to, VMCode):
             jump_to = VMCodeMapping.instance().get_start_address(jump_to) - VMCodeMapping.instance().bytecode_size
 
-        if self.last_code.opcode is not Opcode.RET:
+        if self.last_code.opcode is not Opcode.RET or insert_jump:
             data: bytes = self._get_jump_data(op_info, jump_to)
             self.__insert1(op_info, data)
         for x in range(op_info.stack_items):
@@ -1223,7 +1279,7 @@ class CodeGenerator:
                 self._stack.pop()
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
-            if pos > 0:
+            if pos > 0 and len(self._stack) > 0:
                 self._stack.pop(-pos)
 
     def swap_reverse_stack_items(self, no_items: int = 0):

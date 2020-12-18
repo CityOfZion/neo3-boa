@@ -1,13 +1,11 @@
 import hashlib
 
 import ecdsa as _ecdsa  # type: ignore
-from bitcoin import (  # type: ignore
-    decompress as bitcoin_decompress,
-    change_curve as bitcoin_change_curve,
-    ecdsa_raw_sign as bitcoin_ecdsa_raw_sign)
+from bitcoin import (change_curve as bitcoin_change_curve, decompress as bitcoin_decompress,
+                     ecdsa_raw_sign as bitcoin_ecdsa_raw_sign)  # type: ignore
 
 from .bloomfilter import BloomFilter
-from .ecc import (EllipticCurve, ECDSA)  # type: ignore
+from .ecc import (ECDSA, EllipticCurve)  # type: ignore
 from .keypair import KeyPair
 from .merkletree import MerkleTree
 

@@ -6,9 +6,11 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 from boa3.exception.CompilerError import CompilerError, InternalError
 from boa3.exception.CompilerWarning import CompilerWarning
+from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.type import IType, Type
 
 
@@ -78,6 +80,11 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 value = self.get_symbol(fun_rtype_id)
             else:
                 value = fun_rtype_id
+
+        if (isinstance(value, Attribute)
+                and isinstance(value.attr_symbol, IExpression)
+                and isinstance(value.attr_symbol.type, ClassType)):
+            value = value.attr_symbol
 
         if isinstance(value, IType):
             return value
@@ -164,3 +171,19 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             elif isinstance(value, ast.AST):
                 self.update_line_and_col(value, origin)
         ast.fix_missing_locations(target)
+
+    def clone(self, node: ast.AST) -> ast.AST:
+        """
+        Clones an AST node
+
+        :param node: node to be cloned
+        :return:
+        """
+        clone: ast.AST = node.__class__()
+        clone._attributes = node._attributes
+        clone._fields = node._fields
+
+        for attr in node._attributes + node._fields:
+            clone.__setattr__(attr, node.__getattribute__(attr))
+
+        return clone

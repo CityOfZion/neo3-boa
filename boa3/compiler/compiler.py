@@ -17,6 +17,7 @@ class Compiler:
     def __init__(self):
         self.bytecode: bytearray = bytearray()
         self._analyser: Analyser = None
+        self._entry_smart_contract: str = ''
 
     def compile(self, path: str, log: bool = True) -> bytes:
         """
@@ -30,6 +31,7 @@ class Compiler:
         filepath, filename = os.path.split(fullpath)
 
         logging.info('Started compiling\t{0}'.format(filename))
+        self._entry_smart_contract = os.path.splitext(filename)[0]
         self._analyse(fullpath, log)
         return self._compile()
 
@@ -76,7 +78,7 @@ class Compiler:
                 or len(self.bytecode) == 0):
             raise NotLoadedException
 
-        generator = FileGenerator(self.bytecode, self._analyser)
+        generator = FileGenerator(self.bytecode, self._analyser, self._entry_smart_contract)
         with open(output_path, 'wb+') as nef_file:
             nef_bytes = generator.generate_nef_file()
             nef_file.write(nef_bytes)

@@ -15,6 +15,8 @@ from boa3.model.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
+from boa3.model.type.annotation.uniontype import UnionType
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
@@ -603,7 +605,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(expr.value.lineno, expr.value.col_offset, value)
                 )
 
-    def visit_Subscript(self, subscript: ast.Subscript):
+    def visit_Subscript(self, subscript: ast.Subscript) -> Union[str, IType]:
         """
         Verifies if it is the types in the subscription are valid
 
@@ -616,10 +618,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(subscript.ctx, ast.Load):
             if isinstance(symbol, Collection):
-                values_type: Iterable[IType] = self.get_values_type(subscript.slice.value)
+                value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+                values_type: Iterable[IType] = self.get_values_type(value)
                 return symbol.build_collection(*values_type)
 
             symbol_type = self.get_type(symbol)
+            if isinstance(subscript.slice, ast.Slice):
+                return symbol_type
+
+            if isinstance(symbol, UnionType) or isinstance(symbol_type, UnionType):
+                if not isinstance(symbol_type, UnionType):
+                    symbol_type = symbol
+                index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+                if isinstance(index, ast.Tuple):
+                    union_types = [self.get_type(value) for value in index.elts]
+                else:
+                    union_types = self.visit(index)
+                return symbol_type.build(union_types)
+
             if isinstance(symbol_type, SequenceType):
                 return symbol_type.value_type
 
@@ -670,7 +686,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             # verifiy if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(func_id)
             func_symbol = func if func is not None else func_symbol
-            func_symbol = Builtin.Exception if func_symbol is Type.exception else func_symbol
+
+            if func_symbol is Type.exception:
+                func_symbol = Builtin.Exception
+            elif isinstance(func_symbol, ClassType):
+                func_symbol = func_symbol.constructor_method()
+
         if not isinstance(func_symbol, Callable):
             # the symbol doesn't exists
             self._log_error(
@@ -769,14 +790,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         iter_type = self.get_type(for_node.iter)
         targets = self.visit(for_node.target)
+        iterator_type = iter_type.value_type if hasattr(iter_type, 'value_type') else iter_type
 
-        if isinstance(iter_type, SequenceType):
-            if isinstance(targets, str):
-                self.__include_variable(targets, iter_type.value_type, source_node=for_node.target)
-            else:
-                for target in targets:
-                    if isinstance(target, str):
-                        self.__include_variable(target, iter_type.value_type, source_node=for_node.target)
+        if isinstance(targets, str):
+            self.__include_variable(targets, iterator_type, source_node=for_node.target)
+        elif isinstance(iter_type, SequenceType):
+            for target in targets:
+                if isinstance(target, str):
+                    self.__include_variable(target, iterator_type, source_node=for_node.target)
 
         # continue to walk through the tree
         self.generic_visit(for_node)
@@ -826,25 +847,34 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return str.s
 
-    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
+    def visit_Tuple(self, tup_node: ast.Tuple) -> Optional[Tuple[Any, ...]]:
         """
         Visitor of literal tuple node
 
         :param tup_node: the python ast string node
         :return: the value of the tuple
         """
-        return tuple([self.get_type(value) for value in tup_node.elts])
+        result = [self.get_type(value) for value in tup_node.elts]
+        if Type.none in result and isinstance(tup_node.ctx, ast.Load):
+            # if can't define the type of any value, let it to be defined in the type checking
+            # only in load ctx because on store ctx means a tuple of variables to be assigned
+            return None
+        return tuple(result)
 
-    def visit_List(self, list_node: ast.List) -> List[Any]:
+    def visit_List(self, list_node: ast.List) -> Optional[List[Any]]:
         """
         Visitor of literal list node
 
         :param list_node: the python ast list node
         :return: the value of the list
         """
-        return [self.get_type(value) for value in list_node.elts]
+        result = [self.get_type(value) for value in list_node.elts]
+        if Type.none in result:
+            # if can't define the type of any value, let it to be defined in the type checking
+            return None
+        return result
 
-    def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
+    def visit_Dict(self, dict_node: ast.Dict) -> Optional[Dict[Any, Any]]:
         """
         Visitor of literal dict node
 
@@ -860,6 +890,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 dictionary[key] = Type.get_generic_type(dictionary[key], value)
             else:
                 dictionary[key] = value
+
+        keys = set(dictionary.keys())
+        values = set(dictionary.values())
+
+        if Type.none in keys or Type.none in values:
+            # if can't define the type of any key or value, let it to be defined in the type checking
+            return None
         return dictionary
 
     # endregion

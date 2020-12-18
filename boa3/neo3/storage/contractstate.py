@@ -1,7 +1,7 @@
 import hashlib
 
 from boa3.neo3.contracts import manifest
-from boa3.neo3.core import serialization, IClonable, utils, types
+from boa3.neo3.core import IClonable, serialization, types, utils
 from boa3.neo3.core.serialization import BinaryReader, BinaryWriter
 
 

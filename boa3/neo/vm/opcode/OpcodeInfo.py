@@ -21,12 +21,12 @@ class OpcodeInfo:
 
     # region Constants
 
-    PUSHINT8 = OpcodeInformation(Opcode.PUSHINT8)
-    PUSHINT16 = OpcodeInformation(Opcode.PUSHINT16)
-    PUSHINT32 = OpcodeInformation(Opcode.PUSHINT32)
-    PUSHINT64 = OpcodeInformation(Opcode.PUSHINT64)
-    PUSHINT128 = OpcodeInformation(Opcode.PUSHINT128)
-    PUSHINT256 = OpcodeInformation(Opcode.PUSHINT256)
+    PUSHINT8 = OpcodeInformation(Opcode.PUSHINT8, 1)
+    PUSHINT16 = OpcodeInformation(Opcode.PUSHINT16, 2)
+    PUSHINT32 = OpcodeInformation(Opcode.PUSHINT32, 4)
+    PUSHINT64 = OpcodeInformation(Opcode.PUSHINT64, 8)
+    PUSHINT128 = OpcodeInformation(Opcode.PUSHINT128, 16)
+    PUSHINT256 = OpcodeInformation(Opcode.PUSHINT256, 32)
 
     # Convert the next four bytes to an address, and push the address onto the stack.
     PUSHA = OpcodeInformation(Opcode.PUSHA, 4)

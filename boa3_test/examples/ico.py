@@ -5,6 +5,7 @@ from boa3.builtin.contract import Nep5TransferEvent
 from boa3.builtin.interop.contract import GAS, NEO, call_contract
 from boa3.builtin.interop.runtime import calling_script_hash, check_witness
 from boa3.builtin.interop.storage import delete, get, put
+from boa3.builtin.type import UInt160
 
 
 # -------------------------------------------
@@ -39,7 +40,7 @@ TRANSFER_ALLOWANCE_PREFIX = b'TransferAllowancePrefix_'
 
 
 # Script hash of the contract owner
-TOKEN_OWNER = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+TOKEN_OWNER = UInt160(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
 
 # Name of the Token
 TOKEN_NAME = 'ICO Template'

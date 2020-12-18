@@ -1,7 +1,9 @@
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Optional, Sequence
 
+from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 
 
@@ -10,6 +12,8 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
         return None
 
     item_type: StackItemType = StackItemType.get_stack_item_type(item['type'])
+    if item_type is StackItemType.InteropInterface:
+        return InteropInterface
     if item_type is StackItemType.Any or 'value' not in item:
         return None
 
@@ -30,17 +34,17 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
             raise ValueError
         value = item_value
 
-    elif item_type is StackItemType.ByteString:
+    elif item_type in (StackItemType.ByteString, StackItemType.Buffer):
         if not isinstance(item_value, str):
             raise ValueError
-        import base64
-        value = String.from_bytes(base64.b64decode(item_value))
 
-    elif item_type is StackItemType.Buffer:
-        if not isinstance(item_value, str):
-            raise ValueError
         import base64
-        value = base64.b64decode(item_value)
+        decoded: bytes = base64.b64decode(item_value)
+
+        try:
+            value = String.from_bytes(decoded)
+        except BaseException:
+            value = decoded
 
     elif item_type is StackItemType.Array:
         if not isinstance(item_value, Sequence) or isinstance(item_value, (str, bytes)):
@@ -60,6 +64,17 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
     return value
 
 
+def bytes_from_json(item: Dict[str, Any]) -> Optional[bytes]:
+    value = stack_item_from_json(item)
+
+    if isinstance(value, str):
+        value = String(value).to_bytes()
+    elif isinstance(value, int):
+        value = Integer(value).to_byte_array()
+
+    return value if isinstance(value, bytes) else None
+
+
 def contract_parameter_to_json(value: Any) -> Dict[str, Any]:
     if value is None:
         return {'type': AbiType.Any}
@@ -76,7 +91,7 @@ def contract_parameter_to_json(value: Any) -> Dict[str, Any]:
     elif isinstance(value, str):
         stack_type = AbiType.String
         parameter_value = value
-    elif isinstance(value, bytes):
+    elif isinstance(value, (bytes, bytearray)):
         import base64
         stack_type = AbiType.ByteArray
         parameter_value = String.from_bytes(base64.b64encode(value))

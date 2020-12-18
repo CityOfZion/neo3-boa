@@ -1,13 +1,19 @@
 from typing import Any, Sequence
 
+from boa3.builtin.interop.contract.contract import Contract
+from boa3.builtin.type import UInt160
 
-def call_contract(script_hash: bytes, method: str, args: Sequence = ()) -> Any:
+
+def call_contract(script_hash: UInt160, method: str, args: Sequence = ()) -> Any:
     """
     Calls a smart contract given the method and the arguments
 
     :param script_hash: the target smart contract's script hash
+    :type script_hash: UInt160
     :param method: the name of the method to be executed
+    :type method: str
     :param args: the specified method's arguments
+    :type args: Sequence[Any]
 
     :return: the result of the specified method.
     :rtype: Any
@@ -18,5 +24,43 @@ def call_contract(script_hash: bytes, method: str, args: Sequence = ()) -> Any:
     pass
 
 
-NEO: bytes = b'\xde\x5f\x57\xd4\x30\xd3\xde\xce\x51\x1c\xf9\x75\xa8\xd3\x78\x48\xcb\x9e\x05\x25'
-GAS: bytes = b'\x66\x8e\x0c\x1f\x9d\x7b\x70\xa9\x9d\xd9\xe0\x6e\xad\xd4\xc7\x84\xd6\x41\xaf\xbc'
+def create_contract(nef_file: bytes, manifest: bytes) -> Contract:
+    """
+    Creates a smart contract given the script and the manifest
+
+    :param nef_file: the target smart contract's compiled nef
+    :type nef_file: bytes
+    :param manifest: the manifest.json that describes how the script should behave
+    type manifest: bytes
+    :return: the contract that was created.
+    :rtype: Any
+
+    :raise Exception: raised if the nef or the manifest are not a valid smart contract.
+    """
+    pass
+
+
+def update_contract(nef_file: bytes, manifest: bytes):
+    """
+    Updates the executing smart contract given the script and the manifest
+
+    :param nef_file: the new smart contract's compiled nef
+    :type nef_file: bytes
+    :param manifest: the new smart contract's manifest
+    :type manifest: bytes
+
+    :raise Exception: raised if the nef and the manifest are not a valid smart contract or the new contract is the
+        same as the old one.
+    """
+    pass
+
+
+def destroy_contract():
+    """
+    Destroy the executing smart contract
+    """
+    pass
+
+
+NEO: UInt160 = UInt160()  # not real value
+GAS: UInt160 = UInt160()  # not real value

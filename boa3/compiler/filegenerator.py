@@ -17,12 +17,13 @@ class FileGenerator:
     This class is responsible for generating the files.
     """
 
-    def __init__(self, bytecode: bytes, analyser: Analyser):
+    def __init__(self, bytecode: bytes, analyser: Analyser, entry_file: str):
         self._metadata = analyser.metadata
         self._symbols: Dict[str, ISymbol] = analyser.symbol_table
         import os
         self._files: List[str] = [analyser.path.replace(os.sep, '/')]
         self._nef: NefFile = NefFile(bytecode)
+        self._entry_file = entry_file
 
     @property
     def _public_methods(self) -> Dict[str, Method]:
@@ -62,7 +63,7 @@ class FileGenerator:
 
         :return: the hex string representation of the hash
         """
-        return '0x' + to_hex_str(self._nef.script_hash)
+        return to_hex_str(self._nef.script_hash)
 
     def generate_nef_file(self) -> bytes:
         """
@@ -94,6 +95,7 @@ class FileGenerator:
         """
         # TODO: fill the information of the manifest
         return {
+            "name": self._entry_file,
             "groups": [],
             "features": {
                 "storage": self._metadata.has_storage,
@@ -119,7 +121,6 @@ class FileGenerator:
         :return: a dictionary with the abi information
         """
         return {
-            "hash": self._nef_hash,
             "methods": self._get_abi_methods(),
             "events": self._get_abi_events()
         }
@@ -148,7 +149,8 @@ class FileGenerator:
                     "type": arg.type.abi_type
                 } for arg_id, arg in method.args.items()
             ],
-            "returntype": method.type.abi_type
+            "returntype": method.type.abi_type,
+            "safe": False
         }
 
     def _get_abi_events(self) -> List[Dict[str, Any]]:

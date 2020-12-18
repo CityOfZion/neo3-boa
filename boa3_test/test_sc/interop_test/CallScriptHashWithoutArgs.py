@@ -1,5 +1,10 @@
+from typing import Any
+
+from boa3.builtin import public
 from boa3.builtin.interop.contract import call_contract
+from boa3.builtin.type import UInt160
 
 
-def Main(scripthash: bytes, method: str):
-    call_contract(scripthash, method)
+@public
+def Main(scripthash: UInt160, method: str) -> Any:
+    return call_contract(scripthash, method)

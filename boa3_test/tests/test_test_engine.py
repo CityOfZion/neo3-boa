@@ -1,6 +1,6 @@
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -291,7 +291,7 @@ class TestTestEngine(BoaTest):
             'type': StackItemType.Buffer.name,
             'value': 'dW5pdHRlc3Q='
         }
-        expected_result = b'unittest'
+        expected_result = 'unittest'
         result = stack_item_from_json(stack_item)
         self.assertEqual(expected_result, result)
 

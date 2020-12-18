@@ -8,7 +8,7 @@ from typing import Dict
 
 from boa3.neo3 import blockchain, network_logger as logger
 from boa3.neo3.core import msgrouter
-from boa3.neo3.network import payloads, convenience
+from boa3.neo3.network import convenience, payloads
 
 
 class SyncManager(convenience._Singleton):

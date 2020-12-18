@@ -4,7 +4,7 @@ from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItemType import StackItemType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class BytesType(SequenceType, PrimitiveType):
@@ -28,7 +28,7 @@ class BytesType(SequenceType, PrimitiveType):
 
     @property
     def stack_item(self) -> StackItemType:
-        return StackItemType.Buffer
+        return StackItemType.ByteString
 
     @property
     def default_value(self) -> Any:

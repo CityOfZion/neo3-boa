@@ -14,7 +14,14 @@ class StoragePutMethod(InteropMethod):
         identifier = 'put'
         syscall = 'System.Storage.Put'
         self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
-        args: Dict[str, Variable] = {'key': Variable(Type.bytes), 'value': Variable(Type.bytes)}
+        args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
+                                                                       Type.str
+                                                                       ])),
+                                     'value': Variable(Type.union.build([Type.bytes,
+                                                                         Type.str,
+                                                                         Type.int
+                                                                         ]))
+                                     }
         super().__init__(identifier, syscall, args, return_type=Type.none)
 
     @property
@@ -30,21 +37,8 @@ class StoragePutMethod(InteropMethod):
         if len(params) != len(args):
             return False
 
-        return (self._validate_key_type(params[0].type)
-                and self._validate_value_type(params[1].type))
-
-    def _validate_key_type(self, key_type: IType):
-        # TODO: refactor when `Union` type is implemented
-        from boa3.model.type.type import Type
-        return Type.str.is_type_of(key_type) or Type.bytes.is_type_of(key_type)
-
-    def _validate_value_type(self, key_type: IType):
-        # TODO: refactor when `Union` type is implemented
-        from boa3.model.type.type import Type
-        return (Type.str.is_type_of(key_type)
-                or Type.int.is_type_of(key_type)
-                or Type.bool.is_type_of(key_type)
-                or Type.bytes.is_type_of(key_type))
+        return (self.key_arg.type.is_type_of(params[0].type)
+                and self.value_arg.type.is_type_of(params[1].type))
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:

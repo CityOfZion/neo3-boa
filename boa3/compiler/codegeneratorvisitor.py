@@ -6,12 +6,14 @@ from boa3.compiler.codegenerator import CodeGenerator
 from boa3.compiler.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
+from boa3.model.expression import IExpression
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -160,7 +162,7 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             for stmt in function.body:
                 self.visit_to_map(stmt)
 
-            self.generator.convert_end_method()
+            self.generator.convert_end_method(function.name)
             self.current_method = None
 
     def visit_arguments(self, arguments: ast.arguments) -> Dict[str, Variable]:
@@ -213,7 +215,12 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                     # if not, it is an array assignment
                     self.generator.convert_load_symbol(var_id)
                     self.visit_to_generate(index)
+
+                    aux_index = VMCodeMapping.instance().bytecode_size
                     value_address = self.visit_to_generate(value)
+                    if isinstance(value, ast.Name):
+                        value_address = aux_index
+
                     self.generator.convert_set_item(value_address)
 
             elif len(var_ids) > 0:
@@ -286,10 +293,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param subscript: the python ast subscript node
         """
-        if isinstance(subscript.slice, ast.Index):
-            return self.visit_Subscript_Index(subscript)
-        elif isinstance(subscript.slice, ast.Slice):
+        if isinstance(subscript.slice, ast.Slice):
             return self.visit_Subscript_Slice(subscript)
+
+        return self.visit_Subscript_Index(subscript)
 
     def visit_Subscript_Index(self, subscript: ast.Subscript):
         """
@@ -300,7 +307,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         if isinstance(subscript.ctx, ast.Load):
             # get item
             self.visit_to_generate(subscript.value)
-            self.visit_to_generate(subscript.slice.value)
+            value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+            self.visit_to_generate(value)
             self.generator.convert_get_item()
         else:
             # set item
@@ -473,8 +481,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         for stmt in if_node.body:
             self.visit_to_map(stmt, generate=True)
 
+        ends_with_if = len(if_node.body) > 0 and isinstance(if_node.body[-1], ast.If)
+
         if len(if_node.orelse) > 0:
-            start_addr = self.generator.convert_begin_else(start_addr)
+            start_addr = self.generator.convert_begin_else(start_addr, ends_with_if)
             for stmt in if_node.orelse:
                 self.visit_to_map(stmt, generate=True)
 
@@ -524,15 +534,18 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         self.visit_to_generate(assert_node.test)
         self.generator.convert_assert()
 
-    def visit_Call(self, call: ast.Call):
+    def visit_Call(self, call: ast.Call) -> IType:
         """
         Visitor of a function call node
 
         :param call: the python ast function call node
+        :returns: The called function return type
         """
         # the parameters are included into the stack in the reversed order
         function_id = self.visit(call.func)
         symbol = self.generator.get_symbol(function_id)
+        if isinstance(symbol, ClassType):
+            symbol = symbol.constructor_method()
         args_addresses: List[int] = []
 
         if isinstance(symbol, IBuiltinMethod) and symbol.push_self_first():
@@ -554,6 +567,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             self.generator.convert_new_exception(len(call.args))
         else:
             self.generator.convert_load_symbol(function_id, args_addresses)
+
+        return symbol.type if isinstance(symbol, IExpression) else symbol
 
     def visit_Raise(self, raise_node: ast.Raise):
         """
@@ -602,15 +617,25 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :param attribute: the python ast attribute node
         :return: the identifier of the attribute
         """
-        if self.generator.get_symbol(attribute.attr) is not Type.none:
+        if self.generator.get_symbol(attribute.attr) is not Type.none and not hasattr(attribute, 'generate_value'):
             return attribute.attr
 
         value = attribute.value
         if isinstance(value, ast.Attribute):
             value = self.visit(value)
+        elif hasattr(attribute, 'generate_value') and attribute.generate_value:
+            result = self.visit_to_generate(attribute.value)
+            if isinstance(result, str):
+                x = self.generator.get_symbol(result)
+                result = x.type if isinstance(x, IExpression) else x
+            if isinstance(result, ClassType):
+                index = self.generator.convert_class_symbol(result, attribute.attr, isinstance(attribute.ctx, ast.Load))
+                return result, index
+
         if isinstance(value, (ast.Name, str)):
             value_id = value.id if isinstance(value, ast.Name) else value
             return '{0}.{1}'.format(value_id, attribute.attr)
+
         return attribute.attr
 
     def visit_Continue(self, continue_node: ast.Continue):

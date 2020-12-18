@@ -1,9 +1,11 @@
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple, Type
 from unittest import TestCase
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -15,6 +17,9 @@ class BoaTest(TestCase):
     ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
     MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
     VALUE_IS_OUT_OF_RANGE_MSG = 'The value is out of range'
+    STORAGE_VALUE_IS_OUT_OF_RANGE_MSG = 'Specified argument was out of the range of valid values.'
+    CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
+    ABORTED_CONTRACT_MSG = 'ABORT is executed'
 
     @classmethod
     def setUpClass(cls):
@@ -78,15 +83,63 @@ class BoaTest(TestCase):
             debug_info = json.loads(dbgnfo.read(os.path.basename(path.replace('.py', '.debug.json'))))
         return debug_info
 
+    def get_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+        nef_output = path.replace('.py', '.nef')
+        manifest_output = path.replace('.py', '.manifest.json')
+
+        from boa3.neo.contracts.neffile import NefFile
+
+        if not os.path.isfile(nef_output):
+            output = bytes()
+        else:
+            with open(nef_output, mode='rb') as nef:
+                file = nef.read()
+                output = NefFile.deserialize(file).script
+
+        if not os.path.isfile(manifest_output):
+            manifest = {}
+        else:
+            with open(manifest_output) as manifest_output:
+                import json
+                manifest = json.loads(manifest_output.read())
+
+        return output, manifest
+
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
-                           *arguments: Any, reset_engine: bool = False) -> Any:
+                           *arguments: Any, reset_engine: bool = False,
+                           fake_storage: Dict[str, Any] = None,
+                           signer_accounts: Iterable[bytes] = (),
+                           expected_result_type: Type = None,
+                           rollback_on_fault: bool = True) -> Any:
+
         if smart_contract_path.endswith('.py'):
             if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
                 self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
 
-        result = test_engine.run(smart_contract_path, method, *arguments, reset_engine=reset_engine)
+        if isinstance(fake_storage, dict):
+            test_engine.set_storage(fake_storage)
+
+        for account in signer_accounts:
+            test_engine.add_signer_account(account)
+
+        result = test_engine.run(smart_contract_path, method, *arguments,
+                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
 
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
             raise TestExecutionException(test_engine.error)
+
+        if expected_result_type is not None:
+            if expected_result_type is not str and isinstance(result, str):
+                result = String(result).to_bytes()
+
+            if expected_result_type is bool:
+                if isinstance(result, bytes):
+                    result = Integer.from_bytes(result, signed=True)
+                if isinstance(result, int) and result in (False, True):
+                    result = bool(result)
+
+            if expected_result_type is bytearray and isinstance(result, bytes):
+                result = bytearray(result)
+
         return result
