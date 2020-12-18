@@ -5,7 +5,7 @@ from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop.blockchain import get_contract
 from boa3.builtin.interop.contract import call_contract, NEO, GAS
-from boa3.builtin.interop.runtime import calling_script_hash, check_witness, notify
+from boa3.builtin.interop.runtime import calling_script_hash, check_witness
 from boa3.builtin.interop.storage import delete, get, put
 
 

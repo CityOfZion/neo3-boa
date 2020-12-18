@@ -113,8 +113,8 @@ class BoaTest(TestCase):
                            rollback_on_fault: bool = True) -> Any:
 
         if smart_contract_path.endswith('.py'):
-            if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
-                self.compile_and_save(smart_contract_path, log=False)
+            # if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
+            self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
 
         if isinstance(fake_storage, dict):
