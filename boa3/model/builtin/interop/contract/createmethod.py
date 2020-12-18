@@ -2,7 +2,6 @@ from typing import Dict
 
 from boa3.model.builtin.interop.contract.contractmanagementmethod import ContractManagementMethod
 from boa3.model.builtin.interop.contract.contracttype import ContractType
-from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.variable import Variable
 
 
@@ -13,7 +12,7 @@ class CreateMethod(ContractManagementMethod):
         identifier = 'create_contract'
         syscall = 'deploy'
         args: Dict[str, Variable] = {
-            'script': Variable(Type.bytes),
+            'nef_file': Variable(Type.bytes),
             'manifest': Variable(Type.bytes)
         }
 

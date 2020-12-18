@@ -1,18 +1,18 @@
 from typing import Any
 
-from boa3.model.type.primitive.primitivetype import PrimitiveType
+from boa3.model.type.primitive.inttype import IntType
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItem import StackItemType
 
 
-class BoolType(PrimitiveType):
+class BoolType(IntType):
     """
     A class used to represent Python bool type
     """
 
     def __init__(self):
-        identifier = 'bool'
-        super().__init__(identifier)
+        super().__init__()
+        self._identifier = 'bool'
 
     @property
     def default_value(self) -> Any:

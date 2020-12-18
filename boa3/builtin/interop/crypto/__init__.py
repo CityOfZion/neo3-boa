@@ -5,9 +5,9 @@ def sha256(key: Any) -> bytes:
     """
     Encrypts a key using SHA-256.
 
-    :param key: the key to be encripted
+    :param key: the key to be encrypted
     :type key: Any
-    :return: a byte value that represents the encripted key
+    :return: a byte value that represents the encrypted key
     :rtype: bytes
     """
     pass
@@ -17,9 +17,9 @@ def ripemd160(key: Any) -> bytes:
     """
     Encrypts a key using RIPEMD-160.
 
-    :param key: the key to be encripted
+    :param key: the key to be encrypted
     :type key: Any
-    :return: a byte value that represents the encripted key
+    :return: a byte value that represents the encrypted key
     :rtype: bytes
     """
     pass
@@ -29,9 +29,9 @@ def hash160(key: Any) -> bytes:
     """
     Encrypts a key using HASH160.
 
-    :param key: the key to be encripted
+    :param key: the key to be encrypted
     :type key: Any
-    :return: a byte value that represents the encripted key
+    :return: a byte value that represents the encrypted key
     :rtype: bytes
     """
     pass
@@ -41,9 +41,9 @@ def hash256(key: Any) -> bytes:
     """
     Encrypts a key using HASH256.
 
-    :param key: the key to be encripted
+    :param key: the key to be encrypted
     :type key: Any
-    :return: a byte value that represents the encripted key
+    :return: a byte value that represents the encrypted key
     :rtype: bytes
     """
     pass
