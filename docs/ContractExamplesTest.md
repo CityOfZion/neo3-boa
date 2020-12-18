@@ -28,6 +28,10 @@
   - [Try except](#try-except)
 - [v0.5](#v05)
   - [Try except with finally](#try-except-with-finally)
+- [v0.6](#v06)
+  - [v0.6.1](#v061)
+    - [Union type](#union-type)
+    - [Bytearray type](#bytearray-type-v061)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -373,4 +377,19 @@
 ### Try except with finally
 
 - <a href="/boa3_test/test_sc/exception_test/TryExceptFinally.py">TryExceptFinally.py</a>
+
+## v0.6
+### v0.6.1
+#### Union type
+
+- <a href="/boa3_test/test_sc/union_test/UnionIntNone.py">UnionIntNone.py</a>
+- <a href="/boa3_test/test_sc/union_test/UnionIsInstanceValidation.py">UnionIsInstanceValidation.py</a>
+- <a href="/boa3_test/test_sc/union_test/UnionReturn.py">UnionReturn.py</a>
+- <a href="/boa3_test/test_sc/union_test/UnionVariableArgument.py">UnionVariableArgument.py</a>
+- <a href="/boa3_test/test_sc/union_test/UnionVariableReassign.py">UnionVariableReassign.py</a>
+
+#### Bytearray type
+
+- <a href="/boa3_test/test_sc/bytes_test/BytearrayExtend.py">BytearrayExtend.py</a>
+- <a href="/boa3_test/test_sc/bytes_test/BytearrayExtendWithBuiltin.py">BytearrayExtendWithBuiltin.py</a>
 
