@@ -102,7 +102,7 @@ def totalSupply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return TOKEN_TOTAL_SUPPLY
+    return get(SUPPLY_KEY).to_int()
 
 
 @public
@@ -200,7 +200,7 @@ def post_transfer(from_address: UInt160, to_address: UInt160, amount: int, data:
 
 def mint(account: UInt160, amount: int):
     """
-    Mints new tokens
+    Mints new tokens. This is not a NEP-17 standard method, it's only being use to complement the onPayment method
 
     :param account: the address of the account that is sending cryptocurrency to this contract
     :type account: UInt160
@@ -255,8 +255,14 @@ def deploy() -> bool:
 @public
 def onPayment(from_address: UInt160, amount: int, data: Any):
     """
-    This method exists to check if this smart contract is receiving NEO or GAS so that it can mint a NEP17 token.
-    If it's no receiving a native token, than it will abort.
+    NEP-17 affirms :"if the receiver is a deployed contract, the function MUST call onPayment method on receiver
+    contract with the data parameter from transfer AFTER firing the Transfer event. If the receiver doesn't want to
+    receive this transfer it MUST call ABORT." Therefore, since this is a smart contract, onPayment must exists.
+
+    There is no guideline as to how it should verify the transaction and it's up to the user to make this verification.
+
+    For instance, this onPayment method checks if this smart contract is receiving NEO or GAS so that it can mint a
+    NEP17 token. If it's not receiving a native token, than it will abort.
 
     :param from_address: the address of the one who is trying to send cryptocurrency to this smart contract
     :type from_address: UInt160
