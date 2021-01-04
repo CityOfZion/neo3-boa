@@ -543,6 +543,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         """
         # the parameters are included into the stack in the reversed order
         function_id = self.visit(call.func)
+        if not isinstance(function_id, str):
+            return Type.none
+
         symbol = self.generator.get_symbol(function_id)
         if isinstance(symbol, ClassType):
             symbol = symbol.constructor_method()

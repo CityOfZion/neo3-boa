@@ -1020,16 +1020,22 @@ class CodeGenerator:
         :param symbol_id:
         :param load:
         """
+        method: Method
+
         if symbol_id in class_type.variables:
             return self.convert_class_variable(class_type, symbol_id, load)
         elif symbol_id in class_type.properties:
             symbol = class_type.properties[symbol_id]
             method = symbol.getter if load else symbol.setter
+        elif symbol_id in class_type.instance_methods:
+            method = class_type.instance_methods[symbol_id]
+        else:
+            return
 
-            if isinstance(method, IBuiltinMethod):
-                self.convert_builtin_method_call(method)
-            else:
-                self.convert_method_call(method, 0)
+        if isinstance(method, IBuiltinMethod):
+            self.convert_builtin_method_call(method)
+        else:
+            self.convert_method_call(method, 0)
 
     def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
         """

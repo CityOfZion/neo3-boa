@@ -503,7 +503,7 @@ For an extensive collection of examples:
     </td>
   </tbody>
   <tbody>
-    <td>?</td>
+    <td>✅</td>
     <td>v0.6.1</td>
     <td>Union type</td>
     <td>
