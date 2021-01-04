@@ -1,3 +1,9 @@
+# -------------------------------------------
+# This standard is deprecated
+# Please check the NEP17 example
+# -------------------------------------------
+
+
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep5TransferEvent
 from boa3.builtin.interop.runtime import calling_script_hash, check_witness

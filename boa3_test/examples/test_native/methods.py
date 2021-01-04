@@ -1,10 +1,9 @@
 from typing import Any
 
-from boa3.builtin.type import UInt160
 from boa3.builtin import NeoMetadata, metadata, public
-from boa3.builtin.interop.contract import call_contract, NEO, GAS
+from boa3.builtin.interop.contract import GAS, NEO, call_contract
 from boa3.builtin.interop.runtime import check_witness
-
+from boa3.builtin.type import UInt160
 
 # -------------------------------------------
 # TOKEN SETTINGS

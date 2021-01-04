@@ -79,3 +79,18 @@ class TestNeoTypes(BoaTest):
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
+
+    def test_uint160_concat_with_bytes(self):
+        path = '%s/boa3_test/test_sc/neo_type_test/UInt160ConcatWithBytes.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        value = bytes(20)
+        result = self.run_smart_contract(engine, path, 'uint160_method', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value + b'123', result)
+
+        value = bytes(range(20))
+        result = self.run_smart_contract(engine, path, 'uint160_method', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value + b'123', result)
