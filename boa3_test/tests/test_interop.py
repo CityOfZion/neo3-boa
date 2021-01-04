@@ -1394,6 +1394,31 @@ class TestInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'has_next', {})
         self.assertEqual(False, result)
 
+    def test_iterator_value(self):
+        path = '%s/boa3_test/test_sc/interop_test/IteratorValue.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'list_iterator', [1])
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'list_iterator', [])
+        self.assertEqual(None, result)
+
+        result = self.run_smart_contract(engine, path, 'dict_iterator', {1: 5, 7: 9})
+        self.assertEqual(5, result)
+
+        result = self.run_smart_contract(engine, path, 'dict_iterator', {})
+        self.assertEqual(None, result)
+
+    def test_iterator_value_dict_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/IteratorDictValueMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_iterator_value_list_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/IteratorListValueMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     # endregion
 
     # region Json

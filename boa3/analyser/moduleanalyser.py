@@ -520,6 +520,21 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     symbol_id=str(target_type)
                 )
             )
+
+        if isinstance(target_type, ClassType):
+            args = []
+            for arg in target.args:
+                result = self.visit(arg)
+                if (isinstance(result, str) and not isinstance(arg, (ast.Str, ast.Constant))
+                        and result in self._current_scope.symbols):
+                    result = self.get_type(self._current_scope.symbols[result])
+                args.append(result)
+
+            init = target_type.constructor_method()
+            if hasattr(init, 'build'):
+                init = init.build(args)
+            target_type = init.return_type
+
         return self.get_type(target_type)
 
     def get_enumerate_type(self, var_type: IType) -> IType:
