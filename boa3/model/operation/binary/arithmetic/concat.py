@@ -32,10 +32,13 @@ class Concat(BinaryOperation):
 
         left_valid_type = next((valid_type for valid_type in self._valid_types
                                 if valid_type.is_type_of(left)), None)
+        if left_valid_type is None:
+            return False
+
         right_valid_type = next((valid_type for valid_type in self._valid_types
                                  if valid_type.is_type_of(right)), None)
 
-        return left_valid_type == right_valid_type
+        return right_valid_type is not None and left_valid_type == right_valid_type
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):
