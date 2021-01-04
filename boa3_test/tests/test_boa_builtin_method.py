@@ -14,3 +14,13 @@ class TestBuiltinMethod(BoaTest):
 
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, path, 'main', True)
+
+    def test_exit(self):
+        path = '%s/boa3_test/test_sc/boa_built_in_methods_test/Exit.py' % self.dirname
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main', False)
+        self.assertEqual(123, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+            self.run_smart_contract(engine, path, 'main', True)

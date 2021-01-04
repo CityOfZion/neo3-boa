@@ -16,6 +16,7 @@ from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
 from boa3.model.builtin.contract.nep5transferevent import Nep5TransferEvent
 from boa3.model.builtin.contract.nep17transferevent import Nep17TransferEvent
 from boa3.model.builtin.contract.abortmethod import AbortMethod
+from boa3.model.builtin.contract.exitmethod import ExitMethod
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
@@ -126,6 +127,7 @@ class Builtin:
 
     # boa smart contract methods
     Abort = AbortMethod()
+    Exit = ExitMethod()
 
     _boa_builtins: List[IdentifiedSymbol] = [Public,
                                              NewEvent,
@@ -157,6 +159,7 @@ class Builtin:
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
+                              Exit,
                               Nep17Transfer,
                               Nep5Transfer,
                               ],

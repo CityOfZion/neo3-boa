@@ -25,3 +25,10 @@ def abort():
     Abort the execution of a smart contract
     """
     pass
+
+
+def exit():
+    """
+    Abort the execution of a smart contract
+    """
+    pass
