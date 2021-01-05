@@ -10,12 +10,9 @@ class StorageGetContextMethod(InteropMethod):
     def __init__(self, storage_context_type: StorageContextType):
         identifier = 'get_context'
         syscall = 'System.Storage.GetContext'
+        self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
         args: Dict[str, Variable] = {}
         super().__init__(identifier, syscall, args, return_type=storage_context_type)
-
-    @property
-    def requires_storage(self) -> bool:
-        return True
 
     @property
     def storage_context_hash(self) -> bytes:

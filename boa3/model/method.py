@@ -24,7 +24,6 @@ class Method(Callable):
         super().__init__(args, defaults, return_type, is_public, origin_node)
 
         self.imported_symbols = {}
-        self._requires_storage: bool = False
         self._symbols = {}
         self.locals: Dict[str, Variable] = {}
 
@@ -85,15 +84,6 @@ class Method(Callable):
                 self.imported_symbols[symbol_id] = symbol
 
     @property
-    def requires_storage(self) -> bool:
-        """
-        This method requires blockchain storage access
-
-        :return: True if the method uses storage features. False otherwise.
-        """
-        return self._requires_storage
-
-    @property
     def origin(self) -> ast.AST:
         """
         Returns the method origin ast node.
@@ -101,9 +91,6 @@ class Method(Callable):
         :return: the ast node that describes this method. None if it is not from a ast.
         """
         return self._origin_node
-
-    def set_storage(self):
-        self._requires_storage = True
 
     def debug_map(self) -> List[DebugInstruction]:
         """

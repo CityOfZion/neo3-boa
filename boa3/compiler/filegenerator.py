@@ -97,10 +97,6 @@ class FileGenerator:
         return {
             "name": self._entry_file,
             "groups": [],
-            "features": {
-                "storage": self._metadata.has_storage,
-                "payable": self._metadata.is_payable
-            },
             "abi": self._get_abi_info(),
             "permissions": [
                 {
@@ -109,7 +105,6 @@ class FileGenerator:
                 }
             ],
             "trusts": [],
-            "safemethods": [],
             "supportedstandards": [],
             "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }

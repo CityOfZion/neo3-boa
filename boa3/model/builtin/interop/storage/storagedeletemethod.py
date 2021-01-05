@@ -17,10 +17,6 @@ class StorageDeleteMethod(InteropMethod):
         args: Dict[str, Variable] = {'key': Variable(Type.bytes)}
         super().__init__(identifier, syscall, args, return_type=Type.none)
 
-    @property
-    def requires_storage(self) -> bool:
-        return True
-
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
             return False

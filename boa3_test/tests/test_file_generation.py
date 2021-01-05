@@ -350,17 +350,6 @@ class TestFileGeneration(BoaTest):
             self.assertIn(method['name'], methods)
             self.assertEqual(method['offset'], methods[method['name']].start_address)
 
-    def test_generate_manifest_file_storage_feature(self):
-        path = '%s/boa3_test/test_sc/storage_test/StorageGetBytesKey.py' % self.dirname
-        manifest_path = path.replace('.py', '.manifest.json')
-
-        output, manifest = self.compile_and_save(path)
-        self.assertTrue(os.path.exists(manifest_path))
-
-        self.assertIn('features', manifest)
-        self.assertIn('storage', manifest['features'])
-        self.assertEqual(True, manifest['features']['storage'])
-
     def test_generate_debug_info_with_multiple_flows(self):
         path = '%s/boa3_test/test_sc/generation_test/GenerationWithMultipleFlows.py' % self.dirname
 

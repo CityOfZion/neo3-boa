@@ -24,8 +24,7 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
-    meta.has_storage = True     # TODO: Remove when test engine updates
-    meta.is_payable = True      # TODO: Remove when test engine updates
+    meta.description = "This is an example smart contract for testing use cases of NEP-17 example"
     return meta
 
 

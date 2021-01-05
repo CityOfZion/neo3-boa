@@ -22,8 +22,6 @@ def manifest_metadata() -> NeoMetadata:
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "NEP-17 Example"
     meta.email = "contact@coz.io"
-    meta.has_storage = True     # TODO: Remove when test engine updates
-    meta.is_payable = True      # TODO: Remove when test engine updates
     return meta
 
 

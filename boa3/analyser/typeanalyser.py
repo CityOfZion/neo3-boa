@@ -43,10 +43,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
-        from boa3.builtin import NeoMetadata
-        self._metadata: NeoMetadata = analyser.metadata
         self._current_method: Method = None
-
         self.visit(self._tree)
 
     @property
@@ -941,19 +938,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.symbols[callable_target.identifier] = callable_target
             call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
                                  ctx=ast.Load(), id=callable_target.identifier)
-
-        # validates if metadata matches callable's requirements
-        if hasattr(callable_target, 'requires_storage') and callable_target.requires_storage:
-            if not self._metadata.has_storage:
-                self._log_error(
-                    CompilerError.MetadataInformationMissing(
-                        line=call.func.lineno, col=call.func.col_offset,
-                        symbol_id=callable_target.identifier,
-                        metadata_attr_id='has_storage'
-                    )
-                )
-            else:
-                self._current_method.set_storage()
 
     def visit_Raise(self, raise_node: ast.Raise):
         """
