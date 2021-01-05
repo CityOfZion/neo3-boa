@@ -28,6 +28,7 @@ from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
+from boa3.model.builtin.method.exitmethod import ExitMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -68,6 +69,7 @@ class Builtin:
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     NewEvent = CreateEventMethod()
+    Exit = ExitMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -89,22 +91,23 @@ class Builtin:
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
 
-    _python_builtins: List[IdentifiedSymbol] = [Len,
+    _python_builtins: List[IdentifiedSymbol] = [ByteArray,
+                                                ConvertToBool,
+                                                ConvertToBytes,
+                                                ConvertToInt,
+                                                ConvertToStr,
+                                                DictKeys,
+                                                DictValues,
+                                                Exit,
                                                 IsInstance,
+                                                Len,
                                                 Print,
                                                 ScriptHash,
-                                                ByteArray,
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
                                                 SequencePop,
-                                                SequenceReverse,
-                                                DictKeys,
-                                                DictValues,
-                                                ConvertToBytes,
-                                                ConvertToInt,
-                                                ConvertToStr,
-                                                ConvertToBool
+                                                SequenceReverse
                                                 ]
 
     @classmethod

@@ -10,6 +10,7 @@ from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 
 
 class TestBuiltinMethod(BoaTest):
@@ -951,3 +952,16 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(True, result)
 
     # endregion
+
+    # region exit test
+
+    def test_exit(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/Exit.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'main', False)
+        self.assertEqual(123, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+            self.run_smart_contract(engine, path, 'main', True)
+
+    # end region
