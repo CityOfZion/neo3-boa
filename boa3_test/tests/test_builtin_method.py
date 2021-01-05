@@ -957,7 +957,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_exit(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/Exit.py' % self.dirname
-
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'main', False)
         self.assertEqual(123, result)
