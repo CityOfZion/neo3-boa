@@ -21,7 +21,6 @@ class TestBytes(BoaTest):
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -203,7 +202,6 @@ class TestBytes(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # b = a
             + Opcode.STLOC1
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -362,7 +360,6 @@ class TestBytes(BoaTest):
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -384,7 +381,6 @@ class TestBytes(BoaTest):
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
             + Opcode.STLOC1
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 

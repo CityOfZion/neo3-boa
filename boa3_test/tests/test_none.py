@@ -16,7 +16,6 @@ class TestNone(BoaTest):
             + b'\x00'
             + Opcode.PUSHNULL
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -35,7 +34,6 @@ class TestNone(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)

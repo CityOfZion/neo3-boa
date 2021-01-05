@@ -15,7 +15,6 @@ class TestImport(BoaTest):
             + b'\x00'
             + Opcode.NEWARRAY0
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/import_test/ImportTyping.py' % self.dirname
@@ -29,7 +28,6 @@ class TestImport(BoaTest):
             + b'\x00'
             + Opcode.NEWARRAY0
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         path = '%s/boa3_test/test_sc/import_test/ImportTypingWithAlias.py' % self.dirname

@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
@@ -52,6 +53,9 @@ class BoaTest(TestCase):
         if len([exception for exception in log.records if isinstance(exception.msg, expected_logged_exception)]) <= 0:
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output
+
+    def assertIsVoid(self, obj: Any, msg=None):
+        self.assertEqual(VoidType, obj, msg)
 
     def compile_and_save(self, path: str, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')

@@ -106,19 +106,19 @@ class TestStorage(BoaTest):
         engine = TestEngine(self.dirname)
         stored_value = b'\x01\x02\x03'
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' not in engine.storage)
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
@@ -143,7 +143,6 @@ class TestStorage(BoaTest):
             + Interop.StoragePut.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -154,19 +153,19 @@ class TestStorage(BoaTest):
         engine = TestEngine(self.dirname)
         stored_value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' not in engine.storage)
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
@@ -189,7 +188,6 @@ class TestStorage(BoaTest):
             + Interop.StoragePut.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -200,19 +198,19 @@ class TestStorage(BoaTest):
         engine = TestEngine(self.dirname)
         stored_value = String('123').to_bytes()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' not in engine.storage)
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
@@ -224,19 +222,19 @@ class TestStorage(BoaTest):
         engine = TestEngine(self.dirname)
         stored_value = b'\x01\x02\x03'
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' not in engine.storage)
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
@@ -261,7 +259,6 @@ class TestStorage(BoaTest):
             + Interop.StoragePut.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -272,19 +269,19 @@ class TestStorage(BoaTest):
         engine = TestEngine(self.dirname)
         stored_value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' not in engine.storage)
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
@@ -307,7 +304,6 @@ class TestStorage(BoaTest):
             + Interop.StoragePut.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -318,19 +314,19 @@ class TestStorage(BoaTest):
         engine = TestEngine(self.dirname)
         stored_value = String('123').to_bytes()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test1'])
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue(b'test1' not in engine.storage)
         self.assertTrue(b'test2' in engine.storage)
         self.assertEqual(stored_value, engine.storage[b'test2'])
@@ -353,7 +349,6 @@ class TestStorage(BoaTest):
             + Interop.StorageDelete.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StorageDelete.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -363,12 +358,12 @@ class TestStorage(BoaTest):
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', b'example')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertFalse(b'example' in engine.storage)
 
         storage = {'example': 23}
         result = self.run_smart_contract(engine, path, 'Main', b'example', fake_storage=storage)
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue('example' in storage)
         self.assertFalse(b'example' in engine.storage)
 
@@ -382,7 +377,6 @@ class TestStorage(BoaTest):
             + Interop.StorageDelete.storage_context_hash
             + Opcode.SYSCALL
             + Interop.StorageDelete.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -392,12 +386,12 @@ class TestStorage(BoaTest):
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', 'example')
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertFalse(b'example' in engine.storage)
 
         storage = {'example': 23}
         result = self.run_smart_contract(engine, path, 'Main', 'example', fake_storage=storage)
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
         self.assertTrue('example' in storage)
         self.assertFalse(b'example' in engine.storage)
 

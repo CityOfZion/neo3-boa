@@ -9,8 +9,8 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBuiltinMethod(BoaTest):
@@ -680,13 +680,16 @@ class TestBuiltinMethod(BoaTest):
             + Type.int.stack_item
             + Opcode.SYSCALL
             + Interop.Log.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/PrintInt.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
 
     def test_print_str(self):
         value = String('str').to_bytes()
@@ -696,13 +699,16 @@ class TestBuiltinMethod(BoaTest):
             + value
             + Opcode.SYSCALL
             + Interop.Log.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/built_in_methods_test/PrintStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
 
     def test_print_list(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/PrintList.py' % self.dirname

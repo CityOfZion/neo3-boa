@@ -29,7 +29,6 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -54,7 +53,6 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -75,7 +73,6 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         output = Boa3.compile(path)
@@ -100,8 +97,7 @@ class TestAny(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0         # SequenceFunction(bool_tuple)
             + Opcode.CALL
-            + Integer(51).to_byte_array(min_length=1, signed=True)
-            + Opcode.DROP
+            + Integer(45).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSHDATA1      # SequenceFunction([True, 1, 'ok'])
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
@@ -109,14 +105,12 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(40).to_byte_array(min_length=1, signed=True)
-            + Opcode.DROP
+            + Integer(35).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSHDATA1      # SequenceFunction('some_string')
             + Integer(len(some_string)).to_byte_array()
             + some_string
             + Opcode.CALL
-            + Integer(24).to_byte_array(min_length=1, signed=True)
-            + Opcode.DROP
+            + Integer(20).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSHDATA1      # SequenceFunction((True, 1, 'ok'))
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
@@ -124,24 +118,20 @@ class TestAny(BoaTest):
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(13).to_byte_array(min_length=1, signed=True)
-            + Opcode.DROP
+            + Integer(10).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSH3          # SequenceFunction([1, 2, 3])
             + Opcode.PUSH2
             + Opcode.PUSH1
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.DROP
-            + Opcode.PUSHNULL
+            + Integer(3).to_byte_array(min_length=1, signed=True)
             + Opcode.RET        # return
             + Opcode.INITSLOT   # SequenceFunction
             + b'\x01'
             + b'\x01'
             + Opcode.LDARG0         # a = sequence
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -193,7 +183,6 @@ class TestAny(BoaTest):
             + Opcode.STLOC4
             + Opcode.LDLOC3     # a = bool_tuple
             + Opcode.STLOC4
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -219,7 +208,6 @@ class TestAny(BoaTest):
             + Opcode.PUSHDATA1  # str_sequence = 'some_string'
             + Integer(len(some_string)).to_byte_array() + some_string
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -266,7 +254,6 @@ class TestAny(BoaTest):
             + Opcode.PUSH4
             + Opcode.PACK
             + Opcode.STLOC4
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -296,7 +283,6 @@ class TestAny(BoaTest):
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC2
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 

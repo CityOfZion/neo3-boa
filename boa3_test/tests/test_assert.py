@@ -214,10 +214,13 @@ class TestAssert(BoaTest):
             + Opcode.JMPIFNOT + Integer(3).to_byte_array(signed=True, min_length=1)
             + Opcode.SIZE
             + Opcode.ASSERT
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/assert_test/AssertAny.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertIsVoid(result)

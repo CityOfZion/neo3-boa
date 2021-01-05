@@ -53,7 +53,6 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -72,7 +71,6 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -97,7 +95,6 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # array length
             + Opcode.PACK
             + Opcode.STLOC3
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -184,7 +181,6 @@ class TestList(BoaTest):
             + Opcode.PUSH3      # list length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -199,7 +195,6 @@ class TestList(BoaTest):
             + b'\x00'
             + Opcode.NEWARRAY0
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 

@@ -209,7 +209,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
                 var_id, index = var_ids[0]
                 if index is None:
                     # if index is None, then it is a variable assignment
-                    self.visit_to_generate(value)
+                    result_type = self.visit_to_generate(value)
+
+                    if result_type is Type.none and not self.generator.is_none_inserted():
+                        self.generator.convert_literal(None)
                     self.generator.convert_store_variable(var_id)
                 else:
                     # if not, it is an array assignment

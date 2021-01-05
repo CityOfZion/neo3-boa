@@ -26,7 +26,6 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         compiler_output = compiler.compile(path)
@@ -59,7 +58,6 @@ class TestVariable(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.STLOC0     # variable address
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -74,7 +72,6 @@ class TestVariable(BoaTest):
             + b'\x00'
             + Opcode.PUSH1      # assignment value
             + Opcode.STLOC0     # variable address
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -93,7 +90,6 @@ class TestVariable(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.STARG0         # variable address
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -112,8 +108,7 @@ class TestVariable(BoaTest):
             + Opcode.DUP            # b = True
             + Opcode.STLOC1
             + Opcode.STLOC0         # a = True
-            + Opcode.PUSHNULL   # return
-            + Opcode.RET
+            + Opcode.RET        # return
         )
 
         path = '%s/boa3_test/test_sc/variable_test/MultipleAssignments.py' % self.dirname
@@ -148,8 +143,7 @@ class TestVariable(BoaTest):
             + Opcode.PICK
             + Opcode.SETITEM
             + Opcode.STLOC1         # c = 2
-            + Opcode.PUSHNULL   # return
-            + Opcode.RET
+            + Opcode.RET        # return
         )
 
         path = '%s/boa3_test/test_sc/variable_test/MultipleAssignmentsSetSequence.py' % self.dirname
@@ -184,8 +178,7 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0
             + Opcode.REVERSE3
             + Opcode.SETITEM
-            + Opcode.PUSHNULL   # return
-            + Opcode.RET
+            + Opcode.RET        # return
         )
 
         path = '%s/boa3_test/test_sc/variable_test/MultipleAssignmentsSetSequenceLast.py' % self.dirname
@@ -222,7 +215,6 @@ class TestVariable(BoaTest):
             + Opcode.PUSH7
             + Opcode.STLOC          # variable index greater than 6 uses another opcode
             + b'\x07'
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -544,6 +536,13 @@ class TestVariable(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', -140)
         self.assertEqual(-140, result)
+
+    def test_assign_void_function_call(self):
+        path = '%s/boa3_test/test_sc/variable_test/AssignVoidFunctionCall.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(None, result)

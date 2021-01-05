@@ -24,7 +24,6 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -53,7 +52,6 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -72,7 +70,6 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -97,7 +94,6 @@ class TestTuple(BoaTest):
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC3
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -112,7 +108,6 @@ class TestTuple(BoaTest):
             + b'\x00'
             + Opcode.NEWARRAY0
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
