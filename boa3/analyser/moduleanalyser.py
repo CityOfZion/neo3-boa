@@ -49,7 +49,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.imported_nodes: List[ast.AST] = []
         self.visit(self._tree)
 
-        self._validate_metadata_symbols()
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
@@ -248,47 +247,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 # if the function was defined correctly, sets the metadata object of the smart contract
                 self._metadata = obj
                 self._metadata_node = function  # for error messages only
-
-    def _validate_metadata_symbols(self):
-        """
-        Validates if the symbols match the requirements from the given metadata
-        """
-        if self._metadata is not None:
-            if self._metadata.is_payable:
-                """
-                Payable smart contracts requires the implementation of a 'verify' function, that must implement the
-                following signature:
-
-                ```
-                @public
-                def verify(*args) -> bool
-                ```
-                """
-                verify_id: str = 'verify'
-                if (verify_id not in self.global_symbols  # couldn't find verify
-                        or not isinstance(self.global_symbols[verify_id], Method)  # verify is not a function
-                        or self.global_symbols[verify_id].origin is None  # verify is not a user function
-                    ):
-                    self._log_error(
-                        CompilerError.MetadataImplementationMissing(
-                            line=self._metadata_node.lineno, col=self._metadata_node.col_offset,
-                            symbol_id=verify_id,
-                            metadata_attr_id='is_payable'
-                        )
-                    )
-                elif (self.global_symbols[verify_id].return_type != Type.bool
-                      or not self.global_symbols[verify_id].is_public
-                      ):
-                    actual = self.global_symbols[verify_id]
-                    expected = Method(actual.args, Type.bool, True)
-                    self._log_error(
-                        CompilerError.MetadataIncorrectImplementation(
-                            line=actual.origin.lineno, col=actual.origin.col_offset,
-                            symbol_id=verify_id,
-                            expected_symbol=expected,
-                            actual_symbol=actual
-                        )
-                    )
 
     # endregion
 

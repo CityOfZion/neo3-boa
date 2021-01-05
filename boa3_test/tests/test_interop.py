@@ -358,10 +358,6 @@ class TestInterop(BoaTest):
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine.add_contract(call_contract_path)
-
-        del manifest['features']     # TODO: Remove when metadata is altered
-        del manifest['safemethods']  # TODO: Remove when metadata is altered
-
         arg_manifest = json.dumps(manifest, separators=(',', ':'))
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)
@@ -485,9 +481,6 @@ class TestInterop(BoaTest):
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest)
-
-        del manifest['features']     # TODO: Remove when metadata is altered
-        del manifest['safemethods']  # TODO: Remove when metadata is altered
 
         self.assertEqual(5, len(result))
         self.assertEqual(script, result[3])

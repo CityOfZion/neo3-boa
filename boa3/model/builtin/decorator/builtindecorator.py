@@ -23,7 +23,3 @@ class IBuiltinDecorator(IBuiltinCallable, Method, ABC):
         :return: True if all arguments are valid. False otherwise.
         """
         pass
-
-    @property
-    def requires_storage(self) -> bool:
-        return False

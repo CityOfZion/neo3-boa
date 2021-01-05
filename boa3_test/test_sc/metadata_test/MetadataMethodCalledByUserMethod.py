@@ -10,5 +10,5 @@ def Main() -> int:
 def example() -> NeoMetadata:
     # this function won't exist in the scope of the smart contract, so it can't be called by other functions
     meta = NeoMetadata()
-    meta.has_storage = True
+    meta.description = ''
     return meta

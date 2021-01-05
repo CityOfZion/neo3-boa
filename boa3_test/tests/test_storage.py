@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MetadataInformationMissing, MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.core.types.InteropInterface import InteropInterface
@@ -37,10 +37,6 @@ class TestStorage(BoaTest):
         path = '%s/boa3_test/test_sc/storage_test/StorageGetBytesKey.py' % self.dirname
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
-
-        self.assertIn('features', manifest)
-        self.assertIn('storage', manifest['features'])
-        self.assertEqual(True, manifest['features']['storage'])
 
     def test_storage_get_str_key(self):
         expected_output = (
@@ -88,10 +84,6 @@ class TestStorage(BoaTest):
     def test_storage_get_mismatched_type(self):
         path = '%s/boa3_test/test_sc/storage_test/StorageGetMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
-
-    def test_storage_get_without_metadata(self):
-        path = '%s/boa3_test/test_sc/storage_test/StorageGetWithoutMetadata.py' % self.dirname
-        self.assertCompilerLogs(MetadataInformationMissing, path)
 
     def test_storage_get_context(self):
         expected_output = (

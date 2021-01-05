@@ -138,13 +138,10 @@ class Builtin:
                                              ScriptHash
                                              ]
 
-    metadata_fields: Dict[str, Union[type, Tuple[type]]] = \
-        {
-            'author': (str, type(None)),
-            'email': (str, type(None)),
-            'description': (str, type(None)),
-            'has_storage': bool,
-            'is_payable': bool
+    metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
+        'author': (str, type(None)),
+        'email': (str, type(None)),
+        'description': (str, type(None))
     }
 
     @classmethod
