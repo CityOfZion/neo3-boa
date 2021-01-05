@@ -23,6 +23,8 @@ class IteratorType(ClassType, ICollectionType):
         self._constructor: Method = None
         self._origin_collection: ICollectionType = collection
 
+        self._methods = None
+
     @property
     def identifier(self) -> str:
         return '{0}[{1}, {2}]'.format(self._identifier, self.key_type.identifier, self.item_type.identifier)
@@ -41,7 +43,12 @@ class IteratorType(ClassType, ICollectionType):
 
     @property
     def instance_methods(self) -> Dict[str, Method]:
-        return {}
+        if self._methods is None:
+            from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
+            self._methods = {
+                'next': IteratorNextMethod()
+            }
+        return self._methods.copy()
 
     def constructor_method(self) -> Method:
         # was having a problem with recursive import
