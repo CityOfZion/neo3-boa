@@ -16,7 +16,6 @@ from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
 from boa3.model.builtin.contract.nep5transferevent import Nep5TransferEvent
 from boa3.model.builtin.contract.nep17transferevent import Nep17TransferEvent
 from boa3.model.builtin.contract.abortmethod import AbortMethod
-from boa3.model.builtin.contract.exitmethod import ExitMethod
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.interop.interop import Interop
@@ -29,6 +28,7 @@ from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
+from boa3.model.builtin.method.exitmethod import ExitMethod
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -69,6 +69,7 @@ class Builtin:
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     NewEvent = CreateEventMethod()
+    Exit = ExitMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -90,22 +91,23 @@ class Builtin:
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
 
-    _python_builtins: List[IdentifiedSymbol] = [Len,
+    _python_builtins: List[IdentifiedSymbol] = [ByteArray,
+                                                ConvertToBool,
+                                                ConvertToBytes,
+                                                ConvertToInt,
+                                                ConvertToStr,
+                                                DictKeys,
+                                                DictValues,
+                                                Exit,
                                                 IsInstance,
+                                                Len,
                                                 Print,
                                                 ScriptHash,
-                                                ByteArray,
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
                                                 SequencePop,
-                                                SequenceReverse,
-                                                DictKeys,
-                                                DictValues,
-                                                ConvertToBytes,
-                                                ConvertToInt,
-                                                ConvertToStr,
-                                                ConvertToBool
+                                                SequenceReverse
                                                 ]
 
     @classmethod
@@ -127,7 +129,6 @@ class Builtin:
 
     # boa smart contract methods
     Abort = AbortMethod()
-    Exit = ExitMethod()
 
     _boa_builtins: List[IdentifiedSymbol] = [Public,
                                              NewEvent,
@@ -159,7 +160,6 @@ class Builtin:
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
-                              Exit,
                               Nep17Transfer,
                               Nep5Transfer,
                               ],
