@@ -971,3 +971,17 @@ class TestBuiltinMethod(BoaTest):
             self.run_smart_contract(engine, path, 'main', True)
 
     # end region
+
+    # region max test
+
+    def test_max_int(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/MaxInt.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        value1 = 10
+        value2 = 999
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+    # end region
