@@ -134,6 +134,12 @@ class TestEngine:
             self._blocks.append(block)
         return success
 
+    def get_transactions(self) -> List[Transaction]:
+        txs = []
+        for block in self._blocks:
+            txs.extend(block.get_transactions())
+        return txs
+
     def add_transaction(self, *transaction: Transaction):
         if self.current_block is None:
             self.increase_block()
@@ -195,6 +201,22 @@ class TestEngine:
                 if 'storage' in result:
                     json_storage = result['storage']
                     self._storage = Storage.from_json(json_storage)
+
+                if 'blocks' in result:
+                    blocks_json = result['blocks']
+                    if not isinstance(blocks_json, list):
+                        blocks_json = [blocks_json]
+
+                    self._blocks = sorted([Block.from_json(js) for js in blocks_json],
+                                          key=lambda b: b.index)
+
+                if 'transaction' in result and self._vm_state is VMState.HALT:
+                    block = self.current_block
+                    if block is None:
+                        block = self.increase_block(self.height)
+
+                    tx = Transaction.from_json(result['transaction'])
+                    block.add_transaction(tx)
 
         except BaseException as e:
             self._error_message = str(e)
