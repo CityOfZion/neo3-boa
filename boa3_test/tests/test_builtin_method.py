@@ -984,4 +984,12 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', value1, value2)
         self.assertEqual(expected_result, result)
 
+    def test_max_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/MaxTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_max_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/MaxMismatchedTypes.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
     # end region
