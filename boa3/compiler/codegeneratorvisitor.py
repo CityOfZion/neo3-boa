@@ -197,9 +197,11 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param ret: the python ast return node
         """
-        if ret.value is not None:
-            self.visit_to_generate(ret.value)
-            self.generator.insert_return()
+        if self.current_method.return_type is not Type.none:
+            result = self.visit_to_generate(ret.value)
+            if result is Type.none and not self.generator.is_none_inserted():
+                self.generator.convert_literal(None)
+        self.generator.insert_return()
 
     def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST]], value: ast.AST):
         # if the value is None, it is a variable declaration
@@ -547,7 +549,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         # the parameters are included into the stack in the reversed order
         function_id = self.visit(call.func)
         if not isinstance(function_id, str):
-            return Type.none
+            if not isinstance(function_id, tuple) or len(function_id) != 2:
+                return Type.none
+
+            class_type, identifier = function_id
+            if (isinstance(class_type, ClassType) and identifier in class_type.symbols
+                    and isinstance(class_type.symbols[identifier], IExpression)):
+                return class_type.symbols[identifier].type
+            else:
+                return Type.none
 
         symbol = self.generator.get_symbol(function_id)
         if isinstance(symbol, ClassType):

@@ -2,7 +2,8 @@ __all__ = ['VoidType']
 
 
 class _Void:
-    pass
+    def __repr__(self) -> str:
+        return 'Void'
 
 
 VoidType = _Void()
