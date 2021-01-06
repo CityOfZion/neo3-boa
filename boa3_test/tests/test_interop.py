@@ -348,7 +348,7 @@ class TestInterop(BoaTest):
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'main', bytes(20))
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
         Boa3.compile_and_save(call_contract_path)
@@ -511,7 +511,6 @@ class TestInterop(BoaTest):
             + constants.MANAGEMENT_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -538,7 +537,6 @@ class TestInterop(BoaTest):
             + constants.MANAGEMENT_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -813,7 +811,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -855,7 +852,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -897,7 +893,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -942,7 +937,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -987,7 +981,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1029,7 +1022,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1071,7 +1063,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1116,7 +1107,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.CheckMultisigWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1141,7 +1131,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1163,7 +1152,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1185,7 +1173,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1210,7 +1197,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256r1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1239,7 +1225,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1261,7 +1246,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1283,7 +1267,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1308,7 +1291,6 @@ class TestInterop(BoaTest):
             + Opcode.SYSCALL
             + Interop.VerifyWithECDsaSecp256k1.interop_method_hash
             + Opcode.DROP
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1396,13 +1378,13 @@ class TestInterop(BoaTest):
         self.assertEqual(1, result)
 
         result = self.run_smart_contract(engine, path, 'list_iterator', [])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result = self.run_smart_contract(engine, path, 'dict_iterator', {1: 5, 7: 9})
         self.assertEqual(5, result)
 
         result = self.run_smart_contract(engine, path, 'dict_iterator', {})
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
     def test_iterator_value_dict_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/IteratorDictValueMismatchedType.py' % self.dirname
@@ -1528,7 +1510,6 @@ class TestInterop(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1537,7 +1518,8 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
@@ -1555,7 +1537,6 @@ class TestInterop(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1564,7 +1545,8 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
@@ -1582,7 +1564,6 @@ class TestInterop(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1591,7 +1572,8 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
@@ -1609,7 +1591,6 @@ class TestInterop(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1618,7 +1599,8 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
@@ -1641,7 +1623,6 @@ class TestInterop(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -1650,7 +1631,8 @@ class TestInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
@@ -1669,13 +1651,16 @@ class TestInterop(BoaTest):
             + string
             + Opcode.SYSCALL
             + Interop.Log.interop_method_hash
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
         path = '%s/boa3_test/test_sc/interop_test/LogStr.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
 
     def test_get_trigger(self):
         expected_output = (

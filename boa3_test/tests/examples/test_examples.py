@@ -22,7 +22,7 @@ class TestTemplate(BoaTest):
         path = '%s/boa3_test/examples/HelloWorld.py' % self.dirname
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsNone(result)
+        self.assertIsVoid(result)
 
         self.assertTrue(b'hello' in engine.storage)
         self.assertEqual(b'world', engine.storage[b'hello'])

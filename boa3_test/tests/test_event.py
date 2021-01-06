@@ -20,8 +20,7 @@ class TestEvent(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL       # return
-            + Opcode.RET
+            + Opcode.RET       # return
         )
 
         path = '%s/boa3_test/test_sc/event_test/EventWithoutArguments.py' % self.dirname
@@ -29,7 +28,8 @@ class TestEvent(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=event_id)
@@ -48,8 +48,7 @@ class TestEvent(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL       # return
-            + Opcode.RET
+            + Opcode.RET       # return
         )
 
         path = '%s/boa3_test/test_sc/event_test/EventWithArgument.py' % self.dirname
@@ -57,7 +56,8 @@ class TestEvent(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=event_id)
@@ -76,8 +76,7 @@ class TestEvent(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL       # return
-            + Opcode.RET
+            + Opcode.RET      # return
         )
 
         path = '%s/boa3_test/test_sc/event_test/EventWithName.py' % self.dirname
@@ -85,7 +84,8 @@ class TestEvent(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=event_id)
@@ -108,8 +108,7 @@ class TestEvent(BoaTest):
             + event_name
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
-            + Opcode.PUSHNULL       # return
-            + Opcode.RET
+            + Opcode.RET       # return
         )
 
         path = '%s/boa3_test/test_sc/event_test/EventNep5Transfer.py' % self.dirname
@@ -117,7 +116,8 @@ class TestEvent(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine(self.dirname)
-        self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
+        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
+        self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
 
         event_notifications = engine.get_events(event_name=event_id)

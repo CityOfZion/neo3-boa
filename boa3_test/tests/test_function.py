@@ -83,14 +83,13 @@ class TestFunction(BoaTest):
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', 5)
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
 
     def test_no_return_hint_function_without_return_statement(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'           # num local variables
             + b'\x01'           # num arguments
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
@@ -100,7 +99,7 @@ class TestFunction(BoaTest):
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', 5)
-        self.assertEqual(None, result)
+        self.assertIsVoid(result)
 
     def test_return_type_hint_function_with_empty_return(self):
         path = '%s/boa3_test/test_sc/function_test/ExpectingReturnFunction.py' % self.dirname
@@ -141,12 +140,11 @@ class TestFunction(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
-        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.CALL             # TestFunction()
             + called_function_address
-            + Opcode.DROP
             + Opcode.PUSH1          # return True
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
@@ -154,7 +152,6 @@ class TestFunction(BoaTest):
             + b'\x00'
             + Opcode.PUSH1          # a = 1
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET            # return
         )
 
@@ -191,14 +188,13 @@ class TestFunction(BoaTest):
         self.assertEqual(1, result)
 
     def test_call_void_function_with_literal_args(self):
-        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.PUSH2            # TestAdd(1, 2)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
-            + Opcode.DROP
             + Opcode.PUSH1          # return True
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
@@ -208,7 +204,6 @@ class TestFunction(BoaTest):
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET            # return
         )
 
@@ -252,7 +247,7 @@ class TestFunction(BoaTest):
         self.assertEqual(3, result)
 
     def test_call_void_function_with_variable_args(self):
-        called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT     # Main
@@ -266,7 +261,6 @@ class TestFunction(BoaTest):
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
-            + Opcode.DROP
             + Opcode.PUSH1          # return True
             + Opcode.RET
             + Opcode.INITSLOT   # TestFunction
@@ -276,7 +270,6 @@ class TestFunction(BoaTest):
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET            # return
         )
 
@@ -718,10 +711,10 @@ class TestFunction(BoaTest):
         engine = TestEngine(self.dirname)
 
         result = self.run_smart_contract(engine, path, 'main', 'calculate', [1])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result = self.run_smart_contract(engine, path, 'main', 'calc', [1, 2, 3])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result = self.run_smart_contract(engine, path, 'calculate', 1, [10, 3])
         self.assertEqual(13, result)

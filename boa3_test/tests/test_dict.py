@@ -29,7 +29,6 @@ class TestDict(BoaTest):
             + Opcode.PUSH13
             + Opcode.SETITEM
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -66,7 +65,6 @@ class TestDict(BoaTest):
             + Opcode.PUSH3
             + Opcode.SETITEM
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -97,7 +95,6 @@ class TestDict(BoaTest):
             + nine
             + Opcode.SETITEM
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -148,7 +145,6 @@ class TestDict(BoaTest):
             + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -163,7 +159,6 @@ class TestDict(BoaTest):
             + b'\x00'
             + Opcode.NEWMAP  # a = {}
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -190,7 +185,6 @@ class TestDict(BoaTest):
             + Opcode.PUSH13
             + Opcode.SETITEM
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -223,7 +217,6 @@ class TestDict(BoaTest):
             + Opcode.PUSH2
             + Opcode.SETITEM
             + Opcode.STLOC3
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 

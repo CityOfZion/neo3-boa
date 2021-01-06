@@ -59,7 +59,6 @@ class TestUnion(BoaTest):
             + Opcode.STLOC2
             + Opcode.LDLOC2     # b = c
             + Opcode.STLOC1
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 

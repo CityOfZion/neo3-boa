@@ -112,15 +112,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             self._validate_return(function)
 
-            if (len(function.body) > 0
-                    and not isinstance(function.body[-1], ast.Return)
-                    and method.return_type is Type.none):
-                # include return None in void functions
-                default_value: str = str(method.return_type.default_value)
-                node: ast.AST = ast.parse(default_value).body[0].value
-                function.body.append(
-                    ast.Return(lineno=function.lineno, col_offset=function.col_offset, value=node)
-                )
             self._current_method = None
         elif (isinstance(method, Event)  # events don't have return
               and function.returns is not None):

@@ -103,6 +103,10 @@ class CodeGenerator:
         """
         return len(self._stack)
 
+    def _stack_pop(self, index: int = -1) -> IType:
+        if len(self._stack) > 0:
+            return self._stack.pop(index)
+
     @property
     def last_code_start_address(self) -> int:
         """
@@ -158,6 +162,14 @@ class CodeGenerator:
                     if isinstance(var, Variable) and var_id not in module_globals:
                         module_globals.append(var_id)
         return module_globals
+
+    def is_none_inserted(self) -> bool:
+        """
+        Checks whether the last insertion is null
+
+        :return: whether the last value is null
+        """
+        return self.last_code.opcode is Opcode.PUSHNULL
 
     def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None) -> ISymbol:
         """
@@ -652,7 +664,7 @@ class CodeGenerator:
                 and value_type.stack_item != stack_top_type.stack_item
                 and value_type.stack_item is not Type.any.stack_item):
             self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
-            self._stack.pop()
+            self._stack_pop()
             self._stack.append(value_type)
 
     def convert_new_map(self, map_type: IType):
@@ -690,9 +702,9 @@ class CodeGenerator:
         else:
             self.convert_literal(length)
             self.__insert1(OpcodeInfo.PACK)
-            self._stack.pop()  # array size
+            self._stack_pop()  # array size
             for x in range(length):
-                self._stack.pop()
+                self._stack_pop()
             self._stack.append(array_type)
 
     def _set_array_item(self, value_start_address: int):
@@ -712,9 +724,9 @@ class CodeGenerator:
             self._set_array_item(value_start_address)
 
         self.__insert1(OpcodeInfo.SETITEM)
-        self._stack.pop()  # value
-        self._stack.pop()  # index
-        self._stack.pop()  # array or map
+        self._stack_pop()  # value
+        self._stack_pop()  # index
+        self._stack_pop()  # array or map
 
     def _get_array_item(self):
         """
@@ -734,15 +746,15 @@ class CodeGenerator:
             self.convert_get_substring()
         else:
             self.__insert1(OpcodeInfo.PICKITEM)
-            self._stack.pop()
+            self._stack_pop()
 
     def convert_get_substring(self):
         """
         Converts the end of get a substring
         """
-        self._stack.pop()  # length
-        self._stack.pop()  # start
-        self._stack.pop()  # original string
+        self._stack_pop()  # length
+        self._stack_pop()  # start
+        self._stack_pop()  # original string
         self.__insert1(OpcodeInfo.SUBSTR)
         self._stack.append(Type.bytes)  # substr returns a buffer instead of a bytestring
         self.convert_cast(Type.str)
@@ -806,7 +818,7 @@ class CodeGenerator:
 
                 # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
                 self.__insert1(OpcodeInfo.MIN)
-                self._stack.pop()
+                self._stack_pop()
                 self.convert_get_array_slice(array)
 
     def convert_get_array_beginning(self):
@@ -818,8 +830,8 @@ class CodeGenerator:
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
                 self.__insert1(OpcodeInfo.LEFT)
-                self._stack.pop()  # length
-                self._stack.pop()  # original array
+                self._stack_pop()  # length
+                self._stack_pop()  # original array
             else:
                 array = self._stack[-2]
                 self.convert_literal(0)
@@ -837,8 +849,8 @@ class CodeGenerator:
                                               StackItemType.Buffer):
                 self.convert_operation(BinaryOp.Sub)
                 self.__insert1(OpcodeInfo.RIGHT)
-                self._stack.pop()  # length
-                self._stack.pop()  # original array
+                self._stack_pop()  # length
+                self._stack_pop()  # original array
             else:
                 array = self._stack[-3]
                 self.swap_reverse_stack_items(2)
@@ -916,7 +928,7 @@ class CodeGenerator:
                     self.__insert1(op_info, Integer(index).to_byte_array())
                 else:
                     self.__insert1(op_info)
-                self._stack.pop()
+                self._stack_pop()
 
     def _get_variable_info(self, var_id: str) -> Tuple[int, bool, bool]:
         """
@@ -979,7 +991,7 @@ class CodeGenerator:
             self._update_jump(jump, VMCodeMapping.instance().bytecode_size)
 
         for _ in range(function.args_on_stack):
-            self._stack.pop()
+            self._stack_pop()
         if function.return_type not in (None, Type.none):
             self._stack.append(function.return_type)
 
@@ -993,8 +1005,10 @@ class CodeGenerator:
         self.__insert_code(CallCode(function))
 
         for arg in range(num_args):
-            self._stack.pop()
-        self._stack.append(function.return_type)
+            self._stack_pop()
+
+        if function.return_type is not Type.none:
+            self._stack.append(function.return_type)
 
     def convert_event_call(self, event: Event):
         """
@@ -1009,8 +1023,8 @@ class CodeGenerator:
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)
             self.__insert1(info, data)
-            self._stack.pop()
-            self._stack.pop()
+            self._stack_pop()
+            self._stack_pop()
 
     def convert_class_symbol(self, class_type: ClassType, symbol_id: str, load: bool = True) -> Optional[int]:
         """
@@ -1065,7 +1079,7 @@ class CodeGenerator:
             self.__insert1(op_info, data)
 
         for op in range(operation.op_on_stack):
-            self._stack.pop()
+            self._stack_pop()
         self._stack.append(operation.result)
 
     def convert_assert(self):
@@ -1102,14 +1116,14 @@ class CodeGenerator:
         if exception_args_len > 1:
             self.convert_new_array(exception_args_len)
 
-        self._stack.pop()
+        self._stack_pop()
         self._stack.append(Type.exception)
 
     def convert_raise_exception(self):
         if len(self._stack) == 0:
             self.convert_literal(Builtin.Exception.default_message)
 
-        self._stack.pop()
+        self._stack_pop()
         self.__insert1(OpcodeInfo.THROW)
 
     def __insert1(self, op_info: OpcodeInformation, data: bytes = None):
@@ -1224,7 +1238,7 @@ class CodeGenerator:
             data: bytes = self._get_jump_data(op_info, jump_to)
             self.__insert1(op_info, data)
         for x in range(op_info.stack_items):
-            self._stack.pop()
+            self._stack_pop()
 
     def _update_jump(self, jump_address: int, updated_jump_to: int):
         """
@@ -1263,7 +1277,7 @@ class CodeGenerator:
             opcode: Opcode = Opcode.get_dup(pos)
             if opcode is Opcode.PICK and pos > 0:
                 self.convert_literal(pos - 1)
-                self._stack.pop()
+                self._stack_pop()
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
             self._stack.append(self._stack[-pos])
@@ -1282,11 +1296,11 @@ class CodeGenerator:
             opcode: Opcode = Opcode.get_drop(pos)
             if opcode is Opcode.XDROP:
                 self.convert_literal(pos - 1)
-                self._stack.pop()
+                self._stack_pop()
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
             if pos > 0 and len(self._stack) > 0:
-                self._stack.pop(-pos)
+                self._stack_pop(-pos)
 
     def swap_reverse_stack_items(self, no_items: int = 0):
         # n = 0 -> value varies in runtime

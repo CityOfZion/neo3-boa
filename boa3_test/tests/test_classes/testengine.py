@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from boa3 import constants
 from boa3.neo import to_hex_str
+from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
@@ -199,7 +200,7 @@ class TestEngine:
             self._error_message = str(e)
 
         # TODO: convert the result to the return type of the function in the manifest
-        return self._result_stack[-1] if len(self._result_stack) > 0 else None
+        return self._result_stack[-1] if len(self._result_stack) > 0 else VoidType
 
     def reset_state(self):
         self._vm_state = VMState.NONE

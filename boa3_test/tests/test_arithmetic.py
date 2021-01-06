@@ -411,7 +411,6 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -429,7 +428,6 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.SUB
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -447,7 +445,6 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.MUL
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -469,7 +466,6 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.DIV
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -487,7 +483,6 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.MOD
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -507,7 +502,6 @@ class TestArithmetic(BoaTest):
             + Opcode.CONVERT
             + Type.str.stack_item
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -529,7 +523,6 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + BinaryOp.StrMul.bytecode
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 

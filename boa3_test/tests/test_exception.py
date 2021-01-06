@@ -28,7 +28,6 @@ class TestException(BoaTest):
             + Integer(len(self.EXCEPTION_EMPTY_MESSAGE)).to_byte_array(signed=True, min_length=1)
             + self.EXCEPTION_EMPTY_MESSAGE
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -57,7 +56,6 @@ class TestException(BoaTest):
             + Integer(len(exception_message)).to_byte_array(signed=True, min_length=1)
             + exception_message
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -85,7 +83,6 @@ class TestException(BoaTest):
             + Integer(len(self.EXCEPTION_EMPTY_MESSAGE)).to_byte_array(signed=True, min_length=1)
             + self.EXCEPTION_EMPTY_MESSAGE
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -115,7 +112,6 @@ class TestException(BoaTest):
             + Integer(4).to_byte_array(signed=True, min_length=1)
             + Opcode.LDLOC0         # raise x
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -149,7 +145,6 @@ class TestException(BoaTest):
             + Integer(len(exception_message)).to_byte_array(signed=True, min_length=1)
             + exception_message
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
@@ -177,7 +172,6 @@ class TestException(BoaTest):
             + Integer(len(self.EXCEPTION_EMPTY_MESSAGE)).to_byte_array(signed=True, min_length=1)
             + self.EXCEPTION_EMPTY_MESSAGE
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
