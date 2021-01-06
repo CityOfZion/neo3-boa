@@ -988,7 +988,7 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/MaxTooFewParameters.py' % self.dirname
         self.assertCompilerLogs(UnfilledArgument, path)
 
-    def test_max_too_few_parameters(self):
+    def test_max_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/MaxMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
