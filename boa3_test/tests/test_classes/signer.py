@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from boa3.neo import from_hex_str
 from boa3.neo.core.types.UInt import UInt160
 
 
@@ -15,6 +16,12 @@ class Signer:
         return {
             'account': str(self._account)
         }
+
+    @classmethod
+    def from_json(cls, json: Dict[str, Any]):
+        account_hex = json['account']
+        account = UInt160(from_hex_str(account_hex))
+        return cls(account)
 
     def __str__(self) -> str:
         return self._account.__str__()

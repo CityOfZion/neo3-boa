@@ -35,3 +35,21 @@ def to_hex_str(data_bytes: bytes) -> str:
         data_bytes = bytearray(data_bytes)
     data_bytes.reverse()
     return '0x' + data_bytes.hex()
+
+
+def from_hex_str(hex_string: str) -> bytes:
+    """
+    Converts a string hex representation to the equivalent bytes.
+
+    :param hex_string: data hex representation.
+    :type hex_string: str
+
+    :return: the represented bytes
+    :rtype: bytes
+    """
+    if hex_string.startswith('0x'):
+        hex_string = hex_string[2:]
+
+    data_bytes = bytearray.fromhex(hex_string)
+    data_bytes.reverse()
+    return bytes(data_bytes)
