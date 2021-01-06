@@ -54,8 +54,9 @@ class BoaTest(TestCase):
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output
 
-    def assertIsVoid(self, obj: Any, msg=None):
-        self.assertEqual(VoidType, obj, msg)
+    def assertIsVoid(self, obj: Any):
+        if obj is not VoidType:
+            self.fail('{0} is not Void'.format(obj))
 
     def compile_and_save(self, path: str, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
@@ -117,7 +118,9 @@ class BoaTest(TestCase):
                            rollback_on_fault: bool = True) -> Any:
 
         if smart_contract_path.endswith('.py'):
-            if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
+            if not (os.path.isfile(smart_contract_path.replace('.py', '.nef'))
+                    and os.path.isfile(smart_contract_path.replace('.py', '.manifest.json'))):
+                # both .nef and .manifest.json are required to execute the smart contract
                 self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
 

@@ -1050,6 +1050,7 @@ class CodeGenerator:
             self.convert_builtin_method_call(method)
         else:
             self.convert_method_call(method, 0)
+        return symbol_id
 
     def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
         """

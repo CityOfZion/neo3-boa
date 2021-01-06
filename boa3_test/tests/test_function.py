@@ -85,6 +85,66 @@ class TestFunction(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertIsVoid(result)
 
+    def test_no_return_hint_function_with_condition_empty_return_statement(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # if a > 10
+            + Opcode.PUSH10
+            + Opcode.GT
+            + Opcode.JMPIFNOT
+            + Integer(3).to_byte_array()
+            + Opcode.RET            # return
+            + Opcode.LDARG0
+            + Opcode.PUSH10
+            + Opcode.MOD
+            + Opcode.STLOC0
+            + Opcode.RET        # return
+        )
+
+        path = '%s/boa3_test/test_sc/function_test/ConditionEmptyReturnFunction.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 5)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'Main', 50)
+        self.assertIsVoid(result)
+
+    def test_empty_return_with_optional_return_type(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # if a % 2 == 1
+            + Opcode.PUSH2
+            + Opcode.MOD
+            + Opcode.PUSH1
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array()
+            + Opcode.PUSHNULL       # return
+            + Opcode.RET
+            + Opcode.LDARG0     # return a // 2
+            + Opcode.PUSH2
+            + Opcode.DIV
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/function_test/EmptyReturnWithOptionalReturnType.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main', 5)
+        self.assertIsNone(result)
+
+        result = self.run_smart_contract(engine, path, 'Main', 50)
+        self.assertEqual(25, result)
+
     def test_no_return_hint_function_without_return_statement(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -424,6 +484,34 @@ class TestFunction(BoaTest):
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
+
+    def test_return_void_function(self):
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.CALL         # Main
+            + called_function_address  # return TestFunction()
+            + Opcode.PUSHNULL
+            + Opcode.RET
+            + Opcode.INITSLOT   # TestFunction
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH1          # a = 1
+            + Opcode.STLOC0
+            + Opcode.RET            # return
+        )
+
+        path = '%s/boa3_test/test_sc/function_test/ReturnVoidFunction.py' % self.dirname
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsNone(result)
+
+    def test_return_void_function_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/function_test/ReturnVoidFunctionMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_return_inside_if(self):
         expected_output = (
