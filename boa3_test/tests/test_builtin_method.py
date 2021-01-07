@@ -990,6 +990,27 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/MaxMismatchedTypes.py' % self.dirname
+
+    # end region
+
+    # region min test
+
+    def test_min_int(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/MinInt.py' % self.dirname
+        engine = TestEngine(self.dirname)
+
+        val1 = 50
+        val2 = 1
+        expected_result = min(val1, val2)
+        result = self.run_smart_contract(engine, path, 'main', val1, val2)
+        self.assertEqual(expected_result, result)
+
+    def test_min_too_few_parameters(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/MinTooFewParameters.py' % self.dirname
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_min_mismatched_types(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/MinMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # end region
