@@ -26,6 +26,7 @@ from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
 from boa3.model.builtin.method.exitmethod import ExitMethod
 from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.maxmethod import MaxMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
@@ -70,6 +71,7 @@ class Builtin:
     ScriptHash = ScriptHashMethod()
     NewEvent = CreateEventMethod()
     Exit = ExitMethod()
+    Max = MaxMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -101,6 +103,7 @@ class Builtin:
                                                 Exit,
                                                 IsInstance,
                                                 Len,
+                                                Max,
                                                 Print,
                                                 ScriptHash,
                                                 SequenceAppend,
