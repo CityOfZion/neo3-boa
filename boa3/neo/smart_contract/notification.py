@@ -4,6 +4,10 @@ from boa3.neo.utils import stack_item_from_json
 
 
 class Notification:
+    _event_name_key = 'eventName'
+    _script_hash_key = 'scripthash'
+    _value_key = 'value'
+
     def __init__(self, event_name: str, script_hash: bytes, *value: Any):
         self._event_name: str = event_name
         self._script_hash: bytes = script_hash
@@ -31,13 +35,13 @@ class Notification:
         :rtype: Notification
         """
         keys = set(json.keys())
-        if not keys.issubset(['eventName', 'scriptHash', 'value']):
+        if not keys.issubset([cls._event_name_key, cls._script_hash_key, cls._value_key]):
             return None
 
-        name: str = json["eventName"] if "eventName" in json else ""
-        script: bytes = json["scriptHash"] if "scriptHash" in json else b''
+        name: str = json[cls._event_name_key] if cls._event_name_key in json else ""
+        script: bytes = json[cls._script_hash_key] if cls._script_hash_key in json else b''
         try:
-            value: Any = stack_item_from_json(json["value"]) if "value" in json else []
+            value: Any = stack_item_from_json(json[cls._value_key]) if cls._value_key in json else []
         except ValueError:
             value = []
 
