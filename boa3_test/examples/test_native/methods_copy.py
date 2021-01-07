@@ -12,7 +12,7 @@ from boa3.builtin.type import UInt160
 
 
 # Script hash of the contract owner
-OWNER = UInt160(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+OWNER = UInt160(b'\xf6dCI\x8d8x\xd3+\x99NN\x12\x83\xc6\x93D!\xda\xfe')
 
 
 # -------------------------------------------
