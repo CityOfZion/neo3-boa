@@ -990,6 +990,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_mismatched_types(self):
         path = '%s/boa3_test/test_sc/built_in_methods_test/MaxMismatchedTypes.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
 
     # end region
 
