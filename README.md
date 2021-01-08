@@ -32,11 +32,15 @@
 - [Quickstart](#quickstart)
   - [Installation](#installation)
     - [Pip (Recomended)](#pip-recomended)
-    - [Build from Source](#build-from-source)
+    - [Build from Source (Optional)](#build-from-source-optional)
   - [Compiling your Smart Contract](#compiling-your-smart-contract)
     - [Using CLI](#using-cli)
     - [Using Python Script](#using-python-script)
   - [Configuring the Debugger](#configuring-the-debugger)
+  - [TestEngine](#testengine)
+    - [Downloading](#downloading)
+    - [Updating](#updating)
+    - [Testing](#testing)
 - [Docs](#docs)
 - [Reference Examples](#reference-examples)
 - [Python Supported Features](#python-supported-features)
@@ -80,9 +84,9 @@ Installation requires Python 3.8 or later.
 ### Installation 
 Make sure you have installed MSVC v142 - Build tools VS 2019 C++ x64/x86 (v14.24). You can do this by installing Visual Studio 2019 and add C++ development features.
 
-###### 1. Make a Python 3 virtual environment and activate it:
+##### Make a Python 3 virtual environment and activate it:
 
-Linux / Mac OS:
+On Linux / Mac OS:
 ```shell
 $ python3 -m venv venv
 $ source venv/bin/activate
@@ -95,20 +99,22 @@ $ python3 -m venv venv
 $ venv/Scripts/activate.bat
 ```
 
-###### 2. Install Neo3-Boa using Pip
+##### Pip (Recomended)
+
+###### Install Neo3-Boa using Pip:
 
 ```shell
 $ pip install neo3-boa
 ```
 
-###### 2.1. (Optional) Run from source code
+##### Build from Source (Optional)
 If neo3-boa is not available via pip, you can run it from source.
 
-###### 2.1.1 Clone neo3-boa
+###### Clone neo3-boa:
 ```shell
 $ git clone https://github.com/CityOfZion/neo3-boa.git
 ```
-###### 2.1.2 Install project dependencies
+###### Install project dependencies:
 ```shell
 $ pip install -e .
 ```
@@ -133,7 +139,7 @@ from boa3.boa3 import Boa3
 Boa3.compile_and_save('path/to/your/file.py')
 ```
 
-### Debugger ready
+### Configuring the Debugger
 Neo3-boa is compatible with the [Neo Debugger](https://github.com/neo-project/neo-debugger).
 Debugger launch configuration example:
 ```
@@ -160,10 +166,60 @@ Debugger launch configuration example:
 }
 ```
 
+### TestEngine
+
+#### Downloading
+
+Clone neo-devpack-dotnet on neo3-boa root folder and compile the TestEngine  
+
+```shell
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
+$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
+```
+
+#### Updating
+
+Go into the neo-devpack-dotnet, pull and recompile
+```shell
+${path-to-folder}/neo-devpack-dotnet git pull
+${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
+```
+
+#### Testing
+
+Create a Python Script, import the TestEngine and BoaTest class, make a Test class that inherits BoaTest, and define a
+method to test your smart contract.
+In this method you'll need to call `self.run_smart_contract()` and then assert to see if your result is right. 
+
+Your Python Script should look something like this:
+
+```python
+from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
+
+class TestHelloWorld(BoaTest):
+    def test_hello_world_main(self):
+        path = '%s/boa3_test/examples/HelloWorld.py' % self.dirname
+        engine = TestEngine(self.dirname)
+        
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+```
+
+Be sure to give `run_smart_contract()` a read to understand its parameters and check the plethora of tests at 
+<a href="/boa3_test/test/test_classes">test_classes</a> if the TestEngine usage is still unclear.
+
+<br>
+
+> Note: If you modify your smart contract, and the .nef file still exists, BoaTest won't automatically compile your contract 
+again. Therefore, you should compile your contract whenever you change something in it and want to test it once more.
+
+
+
 ## Docs
 You can [read the docs here](https://docs.coz.io/neo3/boa/index.html). Please check our examples for reference.
 
-## Examples
+## Reference Examples
 
 For an extensive collection of examples:
 - [Smart contract examples](/boa3_test/examples)
