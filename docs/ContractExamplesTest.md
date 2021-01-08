@@ -31,7 +31,7 @@
 - [v0.6](#v06)
   - [v0.6.1](#v061)
     - [Union type](#union-type)
-    - [Bytearray type](#bytearray-type-v061)
+    - [Bytearray type](#bytearray-type-1)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -109,7 +109,7 @@
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayClear.py">BytearrayClear.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayFromLiteralBytes.py">BytearrayFromLiteralBytes.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayFromVariableBytes.py">BytearrayFromVariableBytes.py</a>, 
-- <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValuet.py">BytearrayGetValue.py</a>, 
+- <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValue.py">BytearrayGetValue.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValueNegativeIndex.py">BytearrayGetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayReverse.py">BytearrayReverse.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearraySetValue.py">BytearraySetValue.py</a>, 
@@ -169,8 +169,7 @@
 
 - <a href="/boa3_test/test_sc/variable_test/GetGlobalValueWrittenAfter.py">GetGlobalValueWrittenAfter.py</a>, 
 - <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentBetweenFunctions.py">GlobalAssignmentBetweenFunctions.py</a>, 
-- <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>, 
-- <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>, 
+- <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>,
 - <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py">GlobalAssignmentWithType.py</a>, 
 - <a href="/boa3_test/test_sc/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py">GlobalDeclarationWithArgumentWrittenAfter.py</a>, 
 - <a href="/boa3_test/test_sc/variable_test/ManyGlobalAssignments.py">ManyGlobalAssignments.py</a>
