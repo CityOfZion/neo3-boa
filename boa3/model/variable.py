@@ -24,6 +24,9 @@ class Variable(IExpression):
     def type(self) -> IType:
         return self._var_type
 
+    def __repr__(self) -> str:
+        return '{0}({1})'.format(self.__class__.__name__, self.__str__())
+
     def __str__(self) -> str:
         return str(self.type)
 

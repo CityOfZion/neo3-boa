@@ -21,6 +21,9 @@ class IType(IdentifiedSymbol):
     def shadowing_name(self) -> str:
         return 'type'
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def __str__(self) -> str:
         return self.identifier
 
@@ -98,3 +101,56 @@ class IType(IdentifiedSymbol):
         :return: a dictionary that maps each symbol in the class type with its name
         """
         return {}
+
+    def union_type(self, other_type):
+        """
+        Gets a type that is an union of `self` and `other_type`
+
+        :param other_type: type that'll be united with `self`
+        :type other_type: IType
+        :return: an union of this type and other_type
+        :rtype: IType
+        """
+        from boa3.model.type.annotation.uniontype import UnionType
+        return UnionType.build((self, other_type))
+
+    def except_type(self, other_type):
+        """
+        Gets a type that is type of `self` but is not type of `other_type`.
+        If `other_type` is an implementation of `self`, returns `self`
+
+        :param other_type: type that won't be allowed in the resulting type
+        :type other_type: IType
+        :return: an union of this type and the exclusion of other_type
+        :rtype: IType
+        """
+        return self
+
+    def intersect_type(self, other_type):
+        """
+        Gets a type that is the intersection of `self` but is not type of `other_type`.
+        If `other_type` is an implementation of `self`, returns `other_type`
+        If `other_type` and `self` has no values in common, returns None
+
+        :param other_type: type that'll be intersected with self
+        :type other_type: IType
+        :return: an intersection of this type and the exclusion of other_type
+        :rtype: IType
+        """
+        if self.is_type_of(other_type):
+            return other_type
+        if other_type.is_type_of(self):
+            return self
+
+        from boa3.model.type.annotation.uniontype import UnionType
+        if isinstance(other_type, UnionType):
+            same_types = [x for x in other_type.union_types if self.is_type_of(x)]
+            if len(same_types) == 0:
+                return self
+            elif len(same_types) == 1:
+                return same_types[0]
+            else:
+                return UnionType.build(same_types)
+
+        from boa3.model.type.type import Type
+        return Type.none
