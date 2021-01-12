@@ -10,7 +10,7 @@ class TestNefFile(TestCase):
     test_version_bytes = b'1.2.3.0'
     test_script = b'\x01\x02\x03'
 
-    def create_test_nef(self, test_script):
+    def create_test_nef(self, test_script) -> NefFile:
         nef = NefFile(test_script)
         nef._set_version(self.test_version)
         return nef

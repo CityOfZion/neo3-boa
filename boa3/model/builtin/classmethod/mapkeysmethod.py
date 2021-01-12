@@ -45,7 +45,7 @@ class MapKeysMethod(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return None
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, MappingType):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import boa3
 from boa3.neo.contracts import NEF, Version
 from boa3.neo.core import BinaryReader, BinaryWriter
@@ -50,7 +52,7 @@ class NefFile:
         return result
 
     @classmethod
-    def deserialize(cls, bts: bytes):
+    def deserialize(cls, bts: bytes) -> NefFile:
         """
         Deserialize the NefFile object
 

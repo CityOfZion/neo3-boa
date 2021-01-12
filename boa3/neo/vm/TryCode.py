@@ -80,7 +80,7 @@ class TryCode(VMCode):
                     .to_byte_array(signed=True, min_length=min_len))
 
     @property
-    def raw_data(self):
+    def raw_data(self) -> bytes:
         catch_data: bytes = self._get_raw_data(self._except_start_code)
         finally_data: bytes = self._get_raw_data(self._finally_start_code)
 

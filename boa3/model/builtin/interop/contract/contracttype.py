@@ -51,7 +51,7 @@ class ContractType(ClassType):
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None):
+    def build(cls, value: Any = None) -> IType:
         if value is None or cls._is_type_of(value):
             return _Contract
 

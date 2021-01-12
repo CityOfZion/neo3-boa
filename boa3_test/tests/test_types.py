@@ -2,6 +2,7 @@ import ast
 
 from boa3.analyser.analyser import Analyser
 from boa3.analyser.typeanalyser import TypeAnalyser
+from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.collection.sequence.mutable.listtype import ListType
 from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.type.type import Type
@@ -83,7 +84,8 @@ class TestTypes(BoaTest):
     def test_any_tuple_constant(self):
         input = (1, '2', False)
         node = ast.parse(str(input)).body[0].value
-        expected_output = TupleType(Type.any)
+        expected_output = TupleType(UnionType.build([Type.str,
+                                                    Type.int]))
 
         typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)
@@ -123,7 +125,8 @@ class TestTypes(BoaTest):
     def test_any_list_constant(self):
         input = [1, '2', False]
         node = ast.parse(str(input)).body[0].value
-        expected_output = ListType(Type.any)
+        expected_output = ListType(UnionType.build([Type.int,
+                                                    Type.str]))
 
         typeanalyser = TypeAnalyser(Analyser(node), {})
         output = typeanalyser.get_type(input)

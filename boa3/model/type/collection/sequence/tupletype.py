@@ -27,7 +27,7 @@ class TupleType(SequenceType):
         return Type.int
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
             values_types: Set[IType] = cls.get_types(value)
             return cls(values_types)

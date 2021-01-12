@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Union
 
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
@@ -9,14 +11,14 @@ class Storage:
     def __init__(self):
         self._dict: Dict[StorageKey, StorageItem] = {}
 
-    def pop(self, key: bytes):
+    def pop(self, key: bytes) -> StorageItem:
         storage_key = StorageKey(key)
         return self._dict.pop(storage_key)
 
     def clear(self):
         return self._dict.clear()
 
-    def copy(self):
+    def copy(self) -> Storage:
         storage = Storage()
         storage._dict = self._dict.copy()
         return storage
@@ -28,7 +30,7 @@ class Storage:
                 ]
 
     @classmethod
-    def from_json(cls, json: Union[Dict[str, Any], List[Dict[str, Any]]]):
+    def from_json(cls, json: Union[Dict[str, Any], List[Dict[str, Any]]]) -> Storage:
         if not isinstance(json, list):
             json = [json]
 
@@ -95,7 +97,7 @@ class StorageKey:
                 }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]):
+    def from_json(cls, json: Dict[str, Any]) -> StorageKey:
         k = stack_item_from_json(json['key'])
         if isinstance(k, str):
             from boa3.neo.vm.type.String import String
@@ -111,7 +113,7 @@ class StorageKey:
     def __str__(self) -> str:
         return self._key.__str__()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self._key.__hash__()
 
 
@@ -130,7 +132,7 @@ class StorageItem:
                 }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]):
+    def from_json(cls, json: Dict[str, Any]) -> StorageItem:
         value = stack_item_from_json(json['value'])
         if isinstance(value, str):
             from boa3.neo.vm.type.String import String

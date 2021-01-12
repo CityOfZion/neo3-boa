@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 from typing import Any, Dict, List, Optional
 
@@ -22,7 +24,7 @@ class Transaction:
         }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]):
+    def from_json(cls, json: Dict[str, Any]) -> Transaction:
         script = base64.b64decode(json['script'])
         tx = cls(script)
         if 'signers' in json:

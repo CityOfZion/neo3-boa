@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
@@ -139,7 +141,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         return None
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         """
         Creates a method instance with the given value as self
 

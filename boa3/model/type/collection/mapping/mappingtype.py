@@ -81,7 +81,7 @@ class MappingType(ICollectionType, ABC):
         return super().filter_types(values_type)
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
             if isinstance(value, dict):
                 keys = list(value.keys())

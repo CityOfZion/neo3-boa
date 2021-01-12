@@ -3,6 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
+from boa3.analyser.symbolscope import SymbolScope
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.builtin.builtin import Builtin
@@ -44,6 +45,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.symbols: Dict[str, ISymbol] = symbol_table
 
         self._current_method: Method = None
+        self._scope_stack: List[SymbolScope] = []
         self.visit(self._tree)
 
     @property
@@ -73,6 +75,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
         if not isinstance(symbol_id, str):
             return Variable(self.get_type(symbol_id))
+
+        if len(self._scope_stack) > 0:
+            for scope in self._scope_stack[::-1]:
+                if symbol_id in scope:
+                    return scope[symbol_id]
+
         if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
             return self._current_method.symbols[symbol_id]
@@ -81,6 +89,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return self.modules[symbol_id]
         else:
             return super().get_symbol(symbol_id)
+
+    def new_local_scope(self, symbols: Dict[str, ISymbol]):
+        self._scope_stack.append(SymbolScope(symbols))
+
+    def pop_local_scope(self) -> SymbolScope:
+        return self._scope_stack.pop()
 
     def visit_Module(self, module: ast.Module):
         """
@@ -470,12 +484,26 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param if_node: the python ast if statement node
         """
-        self.validate_if(if_node)
+        is_instance_if, is_instance_else = self.validate_if(if_node)
+
         # continue to walk through the tree
+        pop_scope_stack = False
+        if len(is_instance_if) > 0:
+            self.new_local_scope(is_instance_if)
+            pop_scope_stack = True
         for stmt in if_node.body:
             self.visit(stmt)
+        if pop_scope_stack:
+            self.pop_local_scope()
+            pop_scope_stack = False
+
+        if len(is_instance_else) > 0:
+            self.new_local_scope(is_instance_else)
+            pop_scope_stack = True
         for stmt in if_node.orelse:
             self.visit(stmt)
+        if pop_scope_stack:
+            self.pop_local_scope()
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """
@@ -483,17 +511,31 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param if_node: the python ast if expression node
         """
-        self.validate_if(if_node)
+        is_instance_if, is_instance_else = self.validate_if(if_node)
         body = if_node.body
         orelse = if_node.orelse
         if_value = body[-1] if isinstance(body, list) and len(body) > 0 else body
         else_value = orelse[-1] if isinstance(orelse, list) and len(orelse) > 0 else orelse
 
+        pop_scope_stack = False
+        if len(is_instance_if) > 0:
+            self.new_local_scope(is_instance_if)
+            pop_scope_stack = True
         if_type: IType = self.get_type(if_value)
+        if pop_scope_stack:
+            self.pop_local_scope()
+            pop_scope_stack = False
+
+        if len(is_instance_else) > 0:
+            self.new_local_scope(is_instance_else)
+            pop_scope_stack = True
         else_type: IType = self.get_type(else_value)
+        if pop_scope_stack:
+            self.pop_local_scope()
+
         return Type.get_generic_type(if_type, else_type)
 
-    def validate_if(self, if_node: ast.AST):
+    def validate_if(self, if_node: ast.AST) -> Tuple[Dict[str, ISymbol], Dict[str, ISymbol]]:
         """
         Verifies if the type of if test is valid
 
@@ -510,6 +552,71 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     actual_type_id=test_type.identifier,
                     expected_type_id=Type.bool.identifier)
             )
+
+        return self._get_is_instance_function_calls(if_node.test)
+
+    def _get_is_instance_function_calls(self, node: ast.AST) -> Tuple[Dict[str, ISymbol], Dict[str, ISymbol]]:
+        from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
+        is_instance_objs = [x for x, symbol in self.symbols.items()
+                            if isinstance(symbol, IsInstanceMethod)]
+        is_instance_objs.append(isinstance.__name__)
+
+        is_instance_symbols = {}
+        is_not_instance_symbols = {}
+
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, type(BinaryOp.And)):
+            conditions = node.values
+        else:
+            conditions = [node]
+
+        for condition in conditions:
+            negate = False
+            if isinstance(condition, ast.UnaryOp) and isinstance(condition.op, type(UnaryOp.Not)):
+                condition = condition.operand
+                negate = True
+
+            if (isinstance(condition, ast.Call) and isinstance(condition.func, ast.Name)
+                    and condition.func.id in is_instance_objs and len(condition.args) == 2):
+                original = self.get_symbol(condition.args[0])
+                if isinstance(original, Variable) and isinstance(condition.args[0], ast.Name):
+                    original_id = condition.args[0].id
+                    original_type = (original.type
+                                     if original_id not in is_instance_symbols
+                                     else is_instance_symbols[original_id])
+
+                    instance_obj = self.get_symbol(condition.func.id)
+                    if isinstance(instance_obj, type(Builtin.IsInstance)):
+                        is_instance_type = instance_obj._instances_type
+                        if isinstance(is_instance_type, list):
+                            is_instance_type = Type.union.build(is_instance_type)
+                    else:
+                        is_instance_type = self.get_type(condition.args[1])
+                    is_instance_type = is_instance_type.intersect_type(original_type)
+                    negation = original_type.except_type(is_instance_type)
+                    resulting_type = is_instance_type if not negate else negation
+
+                    if original_id not in is_not_instance_symbols:
+                        is_instance_symbols[original_id] = resulting_type
+                    else:
+                        is_instance_symbols[original_id] = is_instance_symbols[original_id].except_type(resulting_type)
+
+                    if len(is_instance_symbols) == 1:
+                        is_not_instance_symbols[original_id] = is_instance_type if negate else negation
+                    elif len(is_not_instance_symbols) > 1:
+                        is_not_instance_symbols.clear()
+
+        for key, value in is_instance_symbols.copy().items():
+            if value == self.get_type(self.get_symbol(key)):
+                is_instance_symbols.pop(key)
+            else:
+                is_instance_symbols[key] = Variable(value)
+
+        for key, value in is_not_instance_symbols.copy().items():
+            if value == self.get_type(self.get_symbol(key)):
+                is_not_instance_symbols.pop(key)
+            else:
+                is_not_instance_symbols[key] = Variable(value)
+        return is_instance_symbols, is_not_instance_symbols
 
     def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
         """

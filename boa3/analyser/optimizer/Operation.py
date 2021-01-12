@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import ast
 from enum import Enum, auto
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
@@ -23,7 +25,7 @@ class Operation(Enum):
         return self._symmetric
 
     @classmethod
-    def get_operation(cls, op: Union[ast.operator, IOperation]):
+    def get_operation(cls, op: Union[ast.operator, IOperation]) -> Optional[Operation]:
         op = op.operator if isinstance(op, IOperation) else op
         if op is Operator.Plus or isinstance(op, (ast.Add, ast.UAdd)):
             return cls.Add

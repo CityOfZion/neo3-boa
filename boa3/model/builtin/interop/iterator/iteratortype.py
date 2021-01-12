@@ -79,7 +79,7 @@ class IteratorType(ClassType, ICollectionType):
         return self._origin_collection.is_valid_key(key_type)
 
     @classmethod
-    def build(cls, value: Any = None):
+    def build(cls, value: Any = None) -> IType:
         if isinstance(value, ICollectionType):
             return IteratorType(value)
         else:

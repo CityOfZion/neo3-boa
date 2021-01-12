@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional
 
 from boa3.neo import from_hex_str
@@ -42,7 +44,7 @@ class Block:
         }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]):
+    def from_json(cls, json: Dict[str, Any]) -> Block:
         # 'index' and 'timestamp' fields are required
         block = cls(int(json['index']))
         block._timestamp = int(json['timestamp'])

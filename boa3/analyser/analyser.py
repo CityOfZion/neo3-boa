@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 from typing import Dict
 
@@ -32,7 +34,7 @@ class Analyser(object):
         self.filename: str = path if path is None else os.path.realpath(path)
 
     @staticmethod
-    def analyse(path: str, log: bool = False):
+    def analyse(path: str, log: bool = False) -> Analyser:
         """
         Analyses the syntax of the Python code
 

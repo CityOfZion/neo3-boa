@@ -33,7 +33,7 @@ class StrType(SequenceType, PrimitiveType):
         return StackItemType.ByteString
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
             from boa3.model.type.type import Type
             return Type.str

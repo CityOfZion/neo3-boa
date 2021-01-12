@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any, Iterable, Set, Union
 
+from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.itype import IType
+from boa3.model.type.primitive.primitivetype import PrimitiveType
 
 
 class ICollectionType(IType, ABC):
@@ -50,11 +54,13 @@ class ICollectionType(IType, ABC):
         pass
 
     def _get_collection_type(self, values_type: Set[IType]):
-        if len(values_type) != 1:
+        if len(values_type) == 0:
             from boa3.model.type.anytype import anyType
             val_type: IType = anyType
-        else:
+        elif len(values_type) == 1:
             val_type: IType = list(values_type)[0]
+        else:
+            val_type: IType = UnionType.build(values_type)
 
         return val_type
 
@@ -85,10 +91,24 @@ class ICollectionType(IType, ABC):
             if any(t is Type.any or t is Type.none for t in values_type):
                 return {Type.any}
 
-            if any(not isinstance(x, ICollectionType) for x in values_type):
-                return {Type.any}
-            # verifies if all the types are the same collection with different arguments
+            actual_types = list(values_type)[:1]
+            for value in list(values_type)[1:]:
+                other = next((x for x in actual_types
+                              if x.is_type_of(value) or value.is_type_of(x)), None)
 
+                if other is not None and value.is_type_of(other):
+                    actual_types.remove(other)
+                    other = None
+
+                if other is None:
+                    actual_types.append(value)
+            values_type = set(actual_types)
+
+            if any(not isinstance(x, ICollectionType) for x in values_type):
+                return values_type
+            if all(isinstance(x, PrimitiveType) for x in values_type):
+                return values_type
+            # verifies if all the types are the same collection with different arguments
             if not all(isinstance(x, ICollectionType) for x in values_type):
                 return {Type.get_generic_type(*values_type)}
             else:
@@ -114,7 +134,7 @@ class ICollectionType(IType, ABC):
         return values_type
 
     @classmethod
-    def build_collection(cls, *value_type: Union[IType, Iterable]):
+    def build_collection(cls, *value_type: Union[IType, Iterable]) -> ICollectionType:
         """
         Creates a collection type instance with the given value
 

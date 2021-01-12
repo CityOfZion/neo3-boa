@@ -354,3 +354,78 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 1, 3, 2, 4)
         self.assertEqual(22, result)
+
+    def test_if_is_instance_condition(self):
+        path = '%s/boa3_test/test_sc/if_test/IfIsInstanceCondition.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'example', 4)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'example', '123')
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'example', -70)
+        self.assertEqual(-70, result)
+
+        result = self.run_smart_contract(engine, path, 'example', True)
+        self.assertEqual(-1, result)
+
+    def test_if_else_is_instance_condition(self):
+        path = '%s/boa3_test/test_sc/if_test/IfElseIsInstanceCondition.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'example', 4)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'example', '123')
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'example', -70)
+        self.assertEqual(-70, result)
+
+        result = self.run_smart_contract(engine, path, 'example', True)
+        self.assertEqual(-1, result)
+
+    def test_if_else_is_instance_condition_with_union_variable(self):
+        path = '%s/boa3_test/test_sc/if_test/IfElseIsInstanceConditionWithUnionVariable.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'example', 4,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x04', result)
+
+        result = self.run_smart_contract(engine, path, 'example', '123',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'123', result)
+
+        result = self.run_smart_contract(engine, path, 'example', -70,
+                                         expected_result_type=bytes)
+        self.assertEqual(Integer(-70).to_byte_array(), result)
+
+        result = self.run_smart_contract(engine, path, 'example', True,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x01', result)
+
+    def test_if_else_multiple_is_instance_condition_with_union_variable(self):
+        path = '%s/boa3_test/test_sc/if_test/IfElseMultipleIsInstanceConditionWithUnionVariable.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'example', 4)
+        self.assertEqual(16, result)
+
+        result = self.run_smart_contract(engine, path, 'example', [b'123456', b'789'])
+        self.assertEqual(6, result)
+
+        result = self.run_smart_contract(engine, path, 'example', -70)
+        self.assertEqual(4900, result)
+
+        result = self.run_smart_contract(engine, path, 'example', [])
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'example', b'True')
+        self.assertEqual(4, result)

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 from boa3.neo.vm.type.Integer import Integer
 
@@ -27,7 +29,7 @@ class Opcode(bytes, Enum):
     PUSHDATA4 = b'\x0E'
 
     @staticmethod
-    def get_literal_push(integer: int):
+    def get_literal_push(integer: int) -> Optional[Opcode]:
         """
         Gets the push opcode to the respective integer
 
@@ -101,7 +103,7 @@ class Opcode(bytes, Enum):
             return None
 
     @property
-    def __larger_opcode(self) -> Dict[bytes, bytes]:
+    def __larger_opcode(self) -> Dict[Opcode, Opcode]:
         """
         A map of each opcode with its larger equivalent
 
@@ -237,7 +239,7 @@ class Opcode(bytes, Enum):
     CLEAR = b'\x49'
 
     @staticmethod
-    def get_drop(position: int):
+    def get_drop(position: int) -> Optional[Opcode]:
         """
         Gets the opcode to remove the item n back in the stack
 
@@ -264,7 +266,7 @@ class Opcode(bytes, Enum):
     PICK = b'\x4D'
 
     @staticmethod
-    def get_dup(position: int):
+    def get_dup(position: int) -> Optional[Opcode]:
         """
         Gets the opcode to duplicate the item n back in the stack
 
@@ -299,7 +301,7 @@ class Opcode(bytes, Enum):
     REVERSEN = b'\x55'
 
     @staticmethod
-    def get_reverse(no_stack_items: int):
+    def get_reverse(no_stack_items: int) -> Optional[Opcode]:
         """
         Gets the opcode to reverse n items on the stack
 
@@ -329,7 +331,7 @@ class Opcode(bytes, Enum):
     INITSLOT = b'\x57'
 
     @staticmethod
-    def get_store(index: int, local: bool, is_arg: bool = False) -> bytes:
+    def get_store(index: int, local: bool, is_arg: bool = False) -> Opcode:
         """
         Gets the opcode to store the variable
 
@@ -359,7 +361,7 @@ class Opcode(bytes, Enum):
                 return Opcode.STSFLD
 
     @staticmethod
-    def get_load(index: int, local: bool, is_arg: bool = False):
+    def get_load(index: int, local: bool, is_arg: bool = False) -> Opcode:
         """
         Gets the opcode to load the variable
 
@@ -395,7 +397,7 @@ class Opcode(bytes, Enum):
                 or self.LDARG0 <= self <= self.LDARG)
 
     @staticmethod
-    def get_store_from_load(load_opcode):
+    def get_store_from_load(load_opcode) -> Optional[Opcode]:
         """
         Gets the store slot opcode equivalent to the given load slot opcode.
 
