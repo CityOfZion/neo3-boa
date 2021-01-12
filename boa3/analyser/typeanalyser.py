@@ -1186,6 +1186,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
+        if attr_symbol is None and hasattr(symbol, 'symbols'):
+            # if it couldn't find the symbol in the attribute symbols, raise unresolved reference
+            self._log_error(
+                CompilerError.UnresolvedReference(
+                    attribute.lineno, attribute.col_offset,
+                    symbol_id='{0}.{1}'.format(symbol.identifier, attribute.attr)
+                ))
+
         attr_type = value.type if isinstance(value, IExpression) else value
         # for checking during the code generation
         if (isinstance(attr_type, ClassType) and

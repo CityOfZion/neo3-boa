@@ -1,5 +1,3 @@
-from typing import Any
-
 from boa3.builtin import public
 
 
