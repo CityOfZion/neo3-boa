@@ -18,8 +18,7 @@ If applicable, add screenshots to help explain your problem and the solution or 
 
 **Platform:**
  - OS: [e.g. Windows 10 x64]
- - Version: [e.g. neo3-boa v0.4]
- - Python version: [e.g. Python 3.8]
+ - Python version: [e.g. Python 3.7]
 
 **(Optional) Additional context**
 Add any other context about the problem here. 

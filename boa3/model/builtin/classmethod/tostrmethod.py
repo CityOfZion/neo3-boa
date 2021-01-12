@@ -56,7 +56,7 @@ class _ConvertToStrMethod(ToStrMethod):
     def __init__(self):
         super().__init__(None)
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, BytesType):
             return BytesToStrMethod(value)
         # if it is not a valid type, show mismatched type with bytes
@@ -73,7 +73,7 @@ class BytesToStrMethod(ToStrMethod):
             self_type = Type.bytes
         super().__init__(self_type)
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, BytesType):

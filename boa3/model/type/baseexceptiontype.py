@@ -17,7 +17,7 @@ class BaseExceptionType(IType):
         return True
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
             return cls()
 

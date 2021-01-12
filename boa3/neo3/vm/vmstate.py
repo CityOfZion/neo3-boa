@@ -1,6 +1,8 @@
 """
     Place holder until the VM package gets fully implemented.
 """
+from __future__ import annotations
+
 from enum import IntEnum
 
 
@@ -11,7 +13,7 @@ class VMState(IntEnum):
     BREAK = 4
 
     @classmethod
-    def get_vm_state(cls, state_name: str):
+    def get_vm_state(cls, state_name: str) -> VMState:
         try:
             return VMState[state_name]
         except BaseException:

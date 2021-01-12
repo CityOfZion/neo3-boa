@@ -46,7 +46,7 @@ class __EventType(IType):
         return AbiType.Void
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         return EventType
 
     @classmethod

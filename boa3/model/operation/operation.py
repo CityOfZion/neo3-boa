@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from boa3.model.operation.operator import Operator
 from boa3.model.type.itype import IType
@@ -92,7 +94,7 @@ class IOperation(ABC):
 
     @classmethod
     @abstractmethod
-    def build(cls, *operands: IType):
+    def build(cls, *operands: IType) -> Optional[IOperation]:
         """
         Creates an operation with the given operands types
 

@@ -30,7 +30,7 @@ class UnionType(IType):
         return any(t.is_type_of(value) for t in self._union_types)
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if isinstance(value, Iterable):
             types = set(value)
         else:
@@ -41,7 +41,7 @@ class UnionType(IType):
                 return list(types)[0]
             return cls(types)
 
-    def except_type(self, other_type):
+    def except_type(self, other_type) -> IType:
         """
         Gets a type that is type of `self` but is not type of `other_type`.
         If `other_type` is an implementation of `self`, returns `self`
@@ -63,7 +63,7 @@ class UnionType(IType):
             from boa3.model.type.type import Type
             return Type.none if len(new_union) == 0 else new_union[0]
         else:
-            return UnionType(new_union)
+            return UnionType(set(new_union))
 
     def __hash__(self):
         return hash(self.identifier)

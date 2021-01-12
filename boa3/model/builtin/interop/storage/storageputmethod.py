@@ -1,6 +1,7 @@
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
@@ -55,7 +56,7 @@ class StoragePutMethod(InteropMethod):
     def value_arg(self) -> Variable:
         return self.args['value']
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if not isinstance(value, (Sized, Iterable)):
             return self
         num_args: int = len(self.args)

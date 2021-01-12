@@ -63,7 +63,7 @@ class PrintMethod(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return None
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, list) and len(value) == 1:
             value = value[0]
         if type(value) == type(self._arg_values.type):

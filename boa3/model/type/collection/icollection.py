@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any, Iterable, Set, Union
 
@@ -132,7 +134,7 @@ class ICollectionType(IType, ABC):
         return values_type
 
     @classmethod
-    def build_collection(cls, *value_type: Union[IType, Iterable]):
+    def build_collection(cls, *value_type: Union[IType, Iterable]) -> ICollectionType:
         """
         Creates a collection type instance with the given value
 

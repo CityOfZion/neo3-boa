@@ -85,7 +85,7 @@ class PopMethod(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return None
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, Iterable) and len(value) > 0:
             if len(value) == 1:
                 value = value[0]

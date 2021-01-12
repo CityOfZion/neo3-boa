@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -50,7 +52,7 @@ class VMCode:
         return data
 
     @property
-    def raw_data(self):
+    def raw_data(self) -> bytes:
         """
         Gets the Neo VM raw data of the code
 
@@ -81,7 +83,7 @@ class VMCode:
         return self.info.opcode
 
     @property
-    def target(self):
+    def target(self) -> VMCode:
         """
         Gets the target code of this code
 

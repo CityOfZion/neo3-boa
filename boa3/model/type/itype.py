@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from typing import Any, Dict
 
@@ -83,7 +85,7 @@ class IType(IdentifiedSymbol):
 
     @classmethod
     @abstractmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         """
         Creates a type instance with the given value
 
@@ -102,7 +104,7 @@ class IType(IdentifiedSymbol):
         """
         return {}
 
-    def union_type(self, other_type):
+    def union_type(self, other_type) -> IType:
         """
         Gets a type that is an union of `self` and `other_type`
 
@@ -114,7 +116,7 @@ class IType(IdentifiedSymbol):
         from boa3.model.type.annotation.uniontype import UnionType
         return UnionType.build((self, other_type))
 
-    def except_type(self, other_type):
+    def except_type(self, other_type) -> IType:
         """
         Gets a type that is type of `self` but is not type of `other_type`.
         If `other_type` is an implementation of `self`, returns `self`
@@ -126,7 +128,7 @@ class IType(IdentifiedSymbol):
         """
         return self
 
-    def intersect_type(self, other_type):
+    def intersect_type(self, other_type) -> IType:
         """
         Gets a type that is the intersection of `self` but is not type of `other_type`.
         If `other_type` is an implementation of `self`, returns `other_type`

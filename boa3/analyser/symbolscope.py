@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Dict
 
 from boa3.model.symbol import ISymbol
@@ -7,7 +8,7 @@ class SymbolScope:
     def __init__(self, symbols: Dict[str, ISymbol] = None):
         self._symbols = symbols.copy() if symbols is not None else {}
 
-    def copy(self):
+    def copy(self) -> SymbolScope:
         return SymbolScope(self._symbols)
 
     def __getitem__(self, item: str) -> ISymbol:

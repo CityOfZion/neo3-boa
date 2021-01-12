@@ -18,7 +18,7 @@ class __AnyType(IType):
         return AbiType.Any
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         from boa3.model.type.type import Type
         return Type.any
 

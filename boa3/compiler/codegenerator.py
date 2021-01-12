@@ -202,7 +202,7 @@ class CodeGenerator:
                     return attr.symbols[symbol_id]
         return Type.none
 
-    def initialize_static_fields(self):
+    def initialize_static_fields(self) -> bool:
         """
         Converts the signature of the method
 

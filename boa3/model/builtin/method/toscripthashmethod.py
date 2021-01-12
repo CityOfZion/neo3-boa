@@ -76,7 +76,7 @@ class ScriptHashMethod(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return None
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if 'self' in self.args and self.args['self'].type is not Type.any:
             return self
 

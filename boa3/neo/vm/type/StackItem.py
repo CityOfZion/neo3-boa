@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Any
 
@@ -18,7 +20,7 @@ class StackItemType(bytes, Enum):
     InteropInterface = b'\x60'
 
     @classmethod
-    def get_stack_item_type(cls, stack_item_type: str):
+    def get_stack_item_type(cls, stack_item_type: str) -> StackItemType:
         try:
             return StackItemType[stack_item_type]
         except BaseException:

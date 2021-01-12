@@ -1,6 +1,7 @@
 from typing import Any
 
 from boa3.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
+from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
 
 
@@ -18,7 +19,7 @@ class ByteArrayType(BytesType, MutableSequenceType):
         return bytearray()
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         from boa3.model.type.type import Type
         return Type.bytearray
 

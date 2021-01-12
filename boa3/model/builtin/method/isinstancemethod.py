@@ -101,7 +101,7 @@ class IsInstanceMethod(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, list) and self.validate_parameters(*value):
             return IsInstanceMethod(value[-1])
         return super().build(value)

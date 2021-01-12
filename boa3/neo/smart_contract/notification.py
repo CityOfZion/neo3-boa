@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Tuple
 
 from boa3.neo.utils import stack_item_from_json
@@ -26,7 +28,7 @@ class Notification:
         return self._value
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]):
+    def from_json(cls, json: Dict[str, Any]) -> Notification:
         """
         Creates a Notification object from a json.
 

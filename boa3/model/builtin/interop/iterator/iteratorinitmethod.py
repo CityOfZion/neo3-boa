@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional, Sequence
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.interop.iterator.iteratortype import IteratorType
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.variable import Variable
 
@@ -29,7 +30,7 @@ class IteratorMethod(InteropMethod):
     def _entry_arg(self) -> Variable:
         return self.args['entry']
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, Sequence) and len(value) == 1:
             argument = value[0]
         else:

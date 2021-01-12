@@ -5,6 +5,7 @@ from boa3.model.expression import IExpression
 from boa3.model.method import Method
 from boa3.model.property import Property
 from boa3.model.type.classtype import ClassType
+from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
@@ -43,7 +44,7 @@ class StorageContextType(ClassType):
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None):
+    def build(cls, value: Any = None) -> IType:
         if value is None or cls._is_type_of(value):
             return _StorageContext
 
