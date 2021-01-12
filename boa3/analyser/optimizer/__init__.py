@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, Set
 
 
@@ -12,7 +14,7 @@ class ScopeValue:
         scope._values = self._values.copy()
         scope._assigned_variables = self._assigned_variables.copy()
         scope._parent_scope = self
-        return
+        return scope
 
     def previous_scope(self) -> Optional[ScopeValue]:
         return self._parent_scope
