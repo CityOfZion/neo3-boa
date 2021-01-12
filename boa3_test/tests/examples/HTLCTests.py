@@ -62,7 +62,7 @@ class TestTemplate(BoaTest):
         path = '%s/boa3_test/examples/HTLC.py' % self.dirname
         engine = TestEngine(self.dirname)
         path_contract1 = '%s/boa3_test/examples/test_native/methods.py' % self.dirname
-        path_contract2 = '%s/boa3_test/examples/test_native/methods_copy.py' % self.dirname
+        path_contract2 = '%s/boa3_test/examples/test_native/example_contract_for_htlc.py' % self.dirname
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
@@ -98,7 +98,7 @@ class TestTemplate(BoaTest):
         path = '%s/boa3_test/examples/HTLC.py' % self.dirname
         engine = TestEngine(self.dirname)
         path_contract1 = '%s/boa3_test/examples/test_native/methods.py' % self.dirname
-        path_contract2 = '%s/boa3_test/examples/test_native/methods_copy.py' % self.dirname
+        path_contract2 = '%s/boa3_test/examples/test_native/example_contract_for_htlc.py' % self.dirname
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
@@ -140,7 +140,7 @@ class TestTemplate(BoaTest):
         path = '%s/boa3_test/examples/HTLC.py' % self.dirname
         engine = TestEngine(self.dirname)
         path_contract1 = '%s/boa3_test/examples/test_native/methods.py' % self.dirname
-        path_contract2 = '%s/boa3_test/examples/test_native/methods_copy.py' % self.dirname
+        path_contract2 = '%s/boa3_test/examples/test_native/example_contract_for_htlc.py' % self.dirname
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 

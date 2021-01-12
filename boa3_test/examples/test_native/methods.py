@@ -5,6 +5,9 @@ from boa3.builtin.interop.contract import GAS, NEO, call_contract
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.type import UInt160
 
+# This smart contract is being used to call Neo's native tokens (NEO and GAS).
+# Though, in the future, the TestEngine will have a method that allows to call NEO and GAS, rendering this smart contract useless
+# TODO: delete this smart contract and change HTLC tests when the TestEngine gets updated
 
 # -------------------------------------------
 # TOKEN SETTINGS

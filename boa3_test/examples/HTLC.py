@@ -27,7 +27,7 @@ def manifest_metadata() -> NeoMetadata:
 # VARIABLES SETTINGS
 # -------------------------------------------
 
-OWNER = UInt160(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+OWNER = UInt160()
 OTHER_PERSON: bytes = b'person b'
 ADDRESS_PREFIX: bytes = b'address'
 AMOUNT_PREFIX: bytes = b'amount'
@@ -69,7 +69,7 @@ def deploy() -> bool:
     """
     if not check_witness(OWNER):
         return False
-    if get(DEPLOYED).to_bool() == True:
+    if get(DEPLOYED).to_bool():
         return False
 
     put(OWNER, OWNER)
@@ -110,7 +110,7 @@ def atomic_swap(owner_address: UInt160, owner_token: bytes, owner_amount: int, o
     # the parameter amount must be greater than 0. If not, this method should throw an exception.
     assert owner_amount > 0 and other_person_amount > 0
 
-    if get(NOT_INITIALIZED).to_bool() == True and verify():
+    if get(NOT_INITIALIZED).to_bool() and verify():
         put(ADDRESS_PREFIX + OWNER, owner_address)
         put(TOKEN_PREFIX + OWNER, owner_token)
         put(AMOUNT_PREFIX + OWNER, owner_amount)
@@ -142,7 +142,7 @@ def onPayment(from_address: UInt160, amount: int, data: Any):
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
     assert len(from_address) == 20
 
-    if get(NOT_INITIALIZED).to_bool() == False:
+    if not get(NOT_INITIALIZED).to_bool():
         # Used to check if the one who's transferring to this contract is the OWNER
         address = get(ADDRESS_PREFIX + OWNER)
         # Used to check if OWNER already transfer to this smart contract
