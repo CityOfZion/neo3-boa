@@ -11,8 +11,8 @@ class Nep17TransferEvent(IBuiltinEvent):
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
         identifier = 'Nep17TransferEvent'
         args: Dict[str, Variable] = {
-            'from_addr': Variable(UInt160Type.build()),
-            'to_addr': Variable(UInt160Type.build()),
+            'from_addr': Variable(Type.union.build([Type.none, UInt160Type.build()])),
+            'to_addr': Variable(Type.union.build([Type.none, UInt160Type.build()])),
             'amount': Variable(Type.int)
         }
         super().__init__(identifier, args)
