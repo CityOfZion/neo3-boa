@@ -6,6 +6,10 @@ class Iterator:
         pass
 
     @property
+    def key(self) -> Any:
+        return None
+
+    @property
     def value(self) -> Any:
         return None
 

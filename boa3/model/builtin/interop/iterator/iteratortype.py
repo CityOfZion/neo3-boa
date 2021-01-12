@@ -41,8 +41,10 @@ class IteratorType(ClassType, ICollectionType):
     def properties(self) -> Dict[str, Property]:
         if self._properties is None:
             from boa3.model.builtin.interop.iterator.getiteratorvalue import IteratorValueProperty
+            from boa3.model.builtin.interop.iterator.getiteratorkey import IteratorKeyProperty
             self._properties = {
-                'value': IteratorValueProperty(self)
+                'value': IteratorValueProperty(self),
+                'key': IteratorKeyProperty(self)
             }
 
         return self._properties.copy()

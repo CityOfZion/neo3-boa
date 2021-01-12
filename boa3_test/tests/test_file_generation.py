@@ -271,7 +271,7 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
     def test_generate_manifest_file_with_notify_event(self):
-        path = '%s/boa3_test/test_sc/interop_test/NotifySequence.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifySequence.py' % self.dirname
         expected_manifest_output = path.replace('.py', '.manifest.json')
         output, manifest = self.compile_and_save(path)
 
