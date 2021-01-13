@@ -119,7 +119,7 @@ class ICollectionType(IType, ABC):
             if all(isinstance(x, collection_type) for x in values_type):
                 # if all the types are the same sequence type, build this sequence with any as parameters
                 types = set(value.item_type for value in values_type)
-                values_type = {collection_type(values_type=types)}
+                values_type = {collection_type.build(types)}
             else:
                 generic_type: IType = Type.get_generic_type(*values_type)
                 if (isinstance(generic_type, ICollectionType)
