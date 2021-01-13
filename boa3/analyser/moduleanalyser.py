@@ -748,6 +748,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         value_id = attribute.value.id if isinstance(attribute.value, ast.Name) else None
         value: ISymbol = self.get_symbol(value_id) if value_id is not None else self.visit(attribute.value)
 
+        if isinstance(value, Variable):
+            value = value.type
         if hasattr(value, 'symbols') and attribute.attr in value.symbols:
             return value.symbols[attribute.attr]
         elif Builtin.get_symbol(attribute.attr) is not None:

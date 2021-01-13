@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Collection
 
 
@@ -14,4 +16,7 @@ class Iterator:
         return None
 
     def next(self) -> bool:
+        pass
+
+    def concat(self, other: Iterator) -> Iterator:
         pass

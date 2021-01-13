@@ -913,9 +913,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
-            self._log_error(
-                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
-            )
+            # if it is None, the error was already logged
+            if callable_id is not None:
+                self._log_error(
+                    CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
+                )
         else:
             if callable_target is Builtin.NewEvent:
                 return callable_target.return_type
@@ -923,10 +925,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if len(call.keywords) > 0:
                 raise NotImplementedError
 
+            private_identifier = None  # used for validating internal builtin methods
             if self.validate_callable_arguments(call, callable_target):
                 args = [self.get_type(param) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
+                    if callable_target.raw_identifier.startswith('-'):
+                        private_identifier = callable_target.raw_identifier
                     callable_target: IBuiltinMethod = callable_target.build(args)
                     if not callable_target.is_supported:
                         self._log_error(
@@ -936,6 +941,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
+            if private_identifier is not None and callable_target.identifier != private_identifier:
+                # updates the callable_id for validation of internal builtin that accepts generic variables
+                callable_id = private_identifier
             self.update_callable_after_validation(call, callable_id, callable_target)
 
         return self.get_type(callable_target)
@@ -1193,6 +1201,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     attribute.lineno, attribute.col_offset,
                     symbol_id='{0}.{1}'.format(symbol.identifier, attribute.attr)
                 ))
+            return Attribute(attribute.value, None, attr_symbol, attribute)
 
         attr_type = value.type if isinstance(value, IExpression) else value
         # for checking during the code generation

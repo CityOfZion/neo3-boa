@@ -81,6 +81,7 @@ class Interop:
 
     # Iterator Interops
     IteratorCreate = IteratorMethod(Iterator)
+    IteratorConcat = IteratorConcatMethod(Iterator)
 
     # Json Interops
     JsonDeserialize = JsonDeserializeMethod()
@@ -135,7 +136,8 @@ class Interop:
                                 VerifyWithECDsaSecp256r1
                                 ],
         InteropPackage.Enumerator: [Enumerator],
-        InteropPackage.Iterator: [Iterator],
+        InteropPackage.Iterator: [Iterator,
+                                  IteratorConcat],
         InteropPackage.Json: [JsonDeserialize,
                               JsonSerialize
                               ],

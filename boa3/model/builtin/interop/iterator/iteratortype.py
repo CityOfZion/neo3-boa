@@ -59,8 +59,10 @@ class IteratorType(ClassType, ICollectionType):
     def instance_methods(self) -> Dict[str, Method]:
         if self._methods is None:
             from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
+            from boa3.model.builtin.interop.iterator.iteratorconcatmethod import IteratorConcatMethod
             self._methods = {
-                'next': IteratorNextMethod()
+                'next': IteratorNextMethod(),
+                'concat': IteratorConcatMethod(self)
             }
         return self._methods.copy()
 
@@ -92,6 +94,14 @@ class IteratorType(ClassType, ICollectionType):
     @classmethod
     def _is_type_of(cls, value: Any):
         return isinstance(value, IteratorType)
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, IteratorType):
+            return False
+        return self.valid_key == other.valid_key and self.value_type == other.value_type
+
+    def __hash__(self) -> int:
+        return self._origin_collection.__hash__()
 
 
 _Iterator = IteratorType()

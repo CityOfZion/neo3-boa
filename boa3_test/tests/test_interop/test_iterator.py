@@ -120,3 +120,35 @@ class TestIteratorInterop(BoaTest):
     def test_iterator_key_list_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorListKeyMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_iterator_concat(self):
+        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorConcat.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'concat_iterators', [1], {'1': 5, '7': 9})
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+        result = self.run_smart_contract(engine, path, 'concat_and_get_result', [1], {'1': 5, '7': 9})
+        self.assertEqual({0: 1, '1': 5, '7': 9}, result)
+
+    def test_iterator_concat_with_defined_types(self):
+        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorConcatWithDefinedTypes.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'concat_iterators',
+                                         ['1', '2', '3'], {1: False, 10: True})
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+        result = self.run_smart_contract(engine, path, 'concat_and_get_result',
+                                         ['1', '2', '3'], {1: False, 10: True})
+        self.assertEqual({0: '1', 1: '2', 2: '3', 10: True}, result)
+
+        result = self.run_smart_contract(engine, path, 'concat_and_get_result',
+                                         ['1', '2', '3'], {5: False, 10: True})
+        self.assertEqual({0: '1', 1: '2', 2: '3', 5: False, 10: True}, result)
+
+    def test_iterator_concat_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorConcatMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
