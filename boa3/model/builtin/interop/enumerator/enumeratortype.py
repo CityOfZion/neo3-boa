@@ -10,13 +10,13 @@ from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 
-class IteratorType(ClassType, ICollectionType):
+class EnumeratorType(ClassType):
     """
     A class used to represent Neo Iterator class
     """
 
     def __init__(self, collection: ICollectionType = None):
-        super().__init__('Iterator')
+        super().__init__('Enumerator')
 
         if collection is None:
             from boa3.model.type.type import Type
@@ -33,7 +33,7 @@ class IteratorType(ClassType, ICollectionType):
 
     @property
     def identifier(self) -> str:
-        return '{0}[{1}, {2}]'.format(self._identifier, self.valid_key.identifier, self.item_type.identifier)
+        return '{0}[{1}]'.format(self._identifier, self.item_type.identifier)
 
     @property
     def variables(self) -> Dict[str, Variable]:
@@ -42,12 +42,7 @@ class IteratorType(ClassType, ICollectionType):
     @property
     def properties(self) -> Dict[str, Property]:
         if self._properties is None:
-            from boa3.model.builtin.interop.iterator.getiteratorvalue import IteratorValueProperty
-            from boa3.model.builtin.interop.iterator.getiteratorkey import IteratorKeyProperty
-            self._properties = {
-                'value': IteratorValueProperty(self),
-                'key': IteratorKeyProperty(self)
-            }
+            self._properties = {}
 
         return self._properties.copy()
 
@@ -58,17 +53,14 @@ class IteratorType(ClassType, ICollectionType):
     @property
     def instance_methods(self) -> Dict[str, Method]:
         if self._methods is None:
-            from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
-            self._methods = {
-                'next': IteratorNextMethod()
-            }
+            self._methods = {}
         return self._methods.copy()
 
     def constructor_method(self) -> Method:
         # was having a problem with recursive import
         if self._constructor is None:
-            from boa3.model.builtin.interop.iterator.iteratorinitmethod import IteratorMethod
-            self._constructor: Method = IteratorMethod(self)
+            from boa3.model.builtin.interop.enumerator.enumeratorinitmethod import EnumeratorMethod
+            self._constructor: Method = EnumeratorMethod(self)
         return self._constructor
 
     @property
@@ -83,15 +75,15 @@ class IteratorType(ClassType, ICollectionType):
         return self._origin_collection.is_valid_key(key_type)
 
     @classmethod
-    def build(cls, value: Any = None) -> IteratorType:
+    def build(cls, value: Any = None) -> EnumeratorType:
         if isinstance(value, ICollectionType):
-            return IteratorType(value)
+            return EnumeratorType(value)
         else:
-            return _Iterator
+            return _Enumerator
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, IteratorType)
+        return isinstance(value, EnumeratorType)
 
 
-_Iterator = IteratorType()
+_Enumerator = EnumeratorType()
