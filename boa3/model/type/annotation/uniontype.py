@@ -41,7 +41,7 @@ class UnionType(IType):
                 return list(types)[0]
             return cls(types)
 
-    def except_type(self, other_type) -> IType:
+    def except_type(self, other_type: IType) -> IType:
         """
         Gets a type that is type of `self` but is not type of `other_type`.
         If `other_type` is an implementation of `self`, returns `self`
@@ -64,6 +64,24 @@ class UnionType(IType):
             return Type.none if len(new_union) == 0 else new_union[0]
         else:
             return UnionType(set(new_union))
+
+    def intersect_type(self, other_type: IType) -> IType:
+        if self.is_type_of(other_type):
+            return other_type
+        if other_type.is_type_of(self):
+            return self
+
+        if isinstance(other_type, type(self)):
+            other_types = [x for x in other_type.union_types if self.is_type_of(x)]
+            self_types = [x for x in self.union_types if other_type.is_type_of(x)]
+
+            common_types = other_types + self_types
+            if len(common_types) == 1:
+                return common_types[0]
+            elif len(common_types) > 1:
+                return self.build(common_types)
+
+        return super().intersect_type(other_type)
 
     def __hash__(self):
         return hash(self.identifier)
