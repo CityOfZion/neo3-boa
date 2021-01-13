@@ -77,6 +77,9 @@ class EnumeratorType(ClassType):
     def build(cls, value: Any = None) -> EnumeratorType:
         if isinstance(value, ICollectionType):
             return EnumeratorType(value)
+        elif isinstance(value, IType):
+            from boa3.model.type.type import Type
+            return EnumeratorType(Type.list.build([value]))
         else:
             return _Enumerator
 

@@ -58,12 +58,15 @@ class IteratorType(ClassType, ICollectionType):
     @property
     def instance_methods(self) -> Dict[str, Method]:
         if self._methods is None:
-            from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
             from boa3.model.builtin.interop.iterator.iteratorconcatmethod import IteratorConcatMethod
+            from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
+            from boa3.model.builtin.interop.iterator.iteratorkeysmethod import IteratorKeysMethod
             from boa3.model.builtin.interop.iterator.iteratorvaluesmethod import IteratorValuesMethod
+
             self._methods = {
                 'next': IteratorNextMethod(),
                 'concat': IteratorConcatMethod(self),
+                'keys': IteratorKeysMethod(self),
                 'values': IteratorValuesMethod(self)
             }
         return self._methods.copy()
@@ -73,6 +76,7 @@ class IteratorType(ClassType, ICollectionType):
         if self._constructor is None:
             from boa3.model.builtin.interop.iterator.iteratorinitmethod import IteratorMethod
             self._constructor: Method = IteratorMethod(self)
+
         return self._constructor
 
     @property

@@ -5,14 +5,14 @@ from boa3.model.builtin.interop.iterator.iteratortype import IteratorType
 from boa3.model.variable import Variable
 
 
-class IteratorValuesMethod(InteropMethod):
+class IteratorKeysMethod(InteropMethod):
     def __init__(self, iterator: IteratorType):
-        syscall = 'System.Iterator.Values'
-        identifier = '-iterator_values'
+        syscall = 'System.Iterator.Keys'
+        identifier = '-iterator_keys'
         args: Dict[str, Variable] = {'self': Variable(iterator)}
 
         from boa3.model.builtin.interop.enumerator import EnumeratorType
-        return_type = EnumeratorType.build(iterator.value_type)
+        return_type = EnumeratorType.build(iterator.key_type)
         super().__init__(identifier, syscall, args, return_type=return_type)
 
     @property
