@@ -547,6 +547,9 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         :returns: The called function return type
         """
         # the parameters are included into the stack in the reversed order
+        last_address = VMCodeMapping.instance().bytecode_size
+        last_stack = self.generator.stack_size
+
         function_id = self.visit(call.func)
         if not isinstance(function_id, str):
             if not isinstance(function_id, tuple) or len(function_id) != 2:
@@ -555,14 +558,24 @@ class VisitorCodeGenerator(ast.NodeVisitor):
             class_type, identifier = function_id
             if (isinstance(class_type, ClassType) and identifier in class_type.symbols
                     and isinstance(class_type.symbols[identifier], IExpression)):
-                return class_type.symbols[identifier].type
+                symbol = class_type.symbols[identifier]
+                function_id = identifier
             else:
                 return Type.none
+        else:
+            symbol = self.generator.get_symbol(function_id)
 
-        symbol = self.generator.get_symbol(function_id)
         if isinstance(symbol, ClassType):
             symbol = symbol.constructor_method()
         args_addresses: List[int] = []
+
+        if VMCodeMapping.instance().bytecode_size > last_address:
+            # remove opcodes inserted during the evaluation of the symbol
+            VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
+        if last_stack < self.generator.stack_size:
+            # remove any additional values pushed to the stack dutin the evalution of the symbol
+            for _ in range(self.generator.stack_size - last_stack):
+                self.generator._stack_pop()
 
         if isinstance(symbol, IBuiltinMethod) and symbol.push_self_first():
             args = call.args[1:]
@@ -581,6 +594,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         if self.is_exception_name(function_id):
             self.generator.convert_new_exception(len(call.args))
+        elif isinstance(symbol, IBuiltinMethod):
+            self.generator.convert_builtin_method_call(symbol, args_addresses)
         else:
             self.generator.convert_load_symbol(function_id, args_addresses)
 

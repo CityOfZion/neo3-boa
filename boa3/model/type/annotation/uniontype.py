@@ -36,6 +36,10 @@ class UnionType(IType):
         else:
             types = {value}
 
+        from boa3.model.type.type import Type
+        if any(t is Type.any for t in types):
+            return Type.any
+
         if all(isinstance(t, IType) for t in types):
             if len(types) == 1:
                 return list(types)[0]

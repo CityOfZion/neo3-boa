@@ -178,6 +178,16 @@ class VMCodeMapping:
             self.insert_code(code)
         self._update_targets()
 
+    def remove_opcodes(self, first_code_address: int, last_code_address: int):
+        if last_code_address < first_code_address:
+            first_code_address, last_code_address = last_code_address, first_code_address
+
+        for index in sorted(self._codes).copy():
+            if first_code_address <= index <= last_code_address:
+                self._codes.pop(index)
+
+        self._update_addresses()
+
     def _update_targets(self):
         from boa3.neo.vm.type.Integer import Integer
         for address, code in self.code_map.items():
