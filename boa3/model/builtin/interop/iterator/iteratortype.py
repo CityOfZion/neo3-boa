@@ -60,9 +60,11 @@ class IteratorType(ClassType, ICollectionType):
         if self._methods is None:
             from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
             from boa3.model.builtin.interop.iterator.iteratorconcatmethod import IteratorConcatMethod
+            from boa3.model.builtin.interop.iterator.iteratorvaluesmethod import IteratorValuesMethod
             self._methods = {
                 'next': IteratorNextMethod(),
-                'concat': IteratorConcatMethod(self)
+                'concat': IteratorConcatMethod(self),
+                'values': IteratorValuesMethod(self)
             }
         return self._methods.copy()
 

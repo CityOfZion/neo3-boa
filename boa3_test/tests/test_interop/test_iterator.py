@@ -152,3 +152,26 @@ class TestIteratorInterop(BoaTest):
     def test_iterator_concat_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorConcatMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_iterator_values(self):
+        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorValues.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'list_iterator', [1])
+        self.assertEqual(InteropInterface, result)
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+        result = self.run_smart_contract(engine, path, 'list_iterator', [])
+        self.assertIsNone(result)
+
+        result = self.run_smart_contract(engine, path, 'dict_iterator', {1: 5, 7: 9})
+        self.assertEqual(InteropInterface, result)
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+        result = self.run_smart_contract(engine, path, 'dict_iterator', {})
+        self.assertIsNone(result)
+
+    def test_iterator_values_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorValuesMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
