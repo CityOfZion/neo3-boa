@@ -74,3 +74,26 @@ class TestEnumeratorInterop(BoaTest):
     def test_create_enumerator_mismatched_type(self):
         path = '%s/boa3_test/test_sc/interop_test/enumerator/EnumeratorCreateMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
+        
+    def test_enumerator_concat(self):
+        path = '%s/boa3_test/test_sc/interop_test/enumerator/EnumeratorConcat.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'concat_enumerators', [1], ['4', '2'])
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+    def test_enumerator_concat_with_defined_types(self):
+        path = '%s/boa3_test/test_sc/interop_test/enumerator/EnumeratorConcatWithDefinedTypes.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'concat_enumerators',
+                                         ['1', '2', '3'], [1, 10])
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+    def test_enumerator_concat_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/enumerator/EnumeratorConcatMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)

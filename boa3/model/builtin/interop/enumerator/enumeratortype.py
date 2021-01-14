@@ -52,7 +52,10 @@ class EnumeratorType(ClassType):
     @property
     def instance_methods(self) -> Dict[str, Method]:
         if self._methods is None:
-            self._methods = {}
+            from boa3.model.builtin.interop.enumerator.enumeratorconcatmethod import EnumeratorConcatMethod
+            self._methods = {
+                'concat': EnumeratorConcatMethod(self)
+            }
         return self._methods.copy()
 
     def constructor_method(self) -> Method:

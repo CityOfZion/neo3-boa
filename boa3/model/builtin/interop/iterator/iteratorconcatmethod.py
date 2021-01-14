@@ -12,9 +12,8 @@ class IteratorConcatMethod(InteropMethod):
         syscall = 'System.Iterator.Concat'
         identifier = '-iterator_concat'
 
-        iterator_type = IteratorType.build()
         if other_type is None:
-            other_type = iterator_type
+            other_type = IteratorType.build()
         args: Dict[str, Variable] = {'self': Variable(iterator),
                                      'other': Variable(other_type)}
 
