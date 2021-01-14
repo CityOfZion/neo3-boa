@@ -14,7 +14,7 @@ class StoragePutMethod(InteropMethod):
         from boa3.model.type.type import Type
         identifier = 'put'
         syscall = 'System.Storage.Put'
-        self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
+        # TODO: refactor to accept StorageContext as argument
         args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
                                                                        Type.str
                                                                        ])),
@@ -39,14 +39,8 @@ class StoragePutMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        opcodes = [(Opcode.SYSCALL, self.storage_context_hash)]
-        opcodes.extend(super().opcode)
-        return opcodes
-
-    @property
-    def storage_context_hash(self) -> bytes:
-        # TODO: refactor when default arguments are implemented
-        return self._method_hash(self._storage_context)
+        from boa3.model.builtin.interop.interop import Interop
+        return Interop.StorageGetContext.opcode + super().opcode
 
     @property
     def key_arg(self) -> Variable:

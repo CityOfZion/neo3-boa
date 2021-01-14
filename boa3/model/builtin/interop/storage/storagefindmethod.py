@@ -1,5 +1,6 @@
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
+from boa3.model.builtin.interop.enumerator import EnumeratorType
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -8,17 +9,19 @@ from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class StorageGetMethod(InteropMethod):
+class StorageFindMethod(InteropMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
-        identifier = 'get'
-        syscall = 'System.Storage.Get'
+        identifier = 'find'
+        syscall = 'System.Storage.Find'
         # TODO: refactor to accept StorageContext as argument
-        args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
-                                                                       Type.str
-                                                                       ]))}
-        super().__init__(identifier, syscall, args, return_type=Type.bytes)
+        args: Dict[str, Variable] = {'prefix': Variable(Type.union.build([Type.bytes,
+                                                                          Type.str
+                                                                          ]))}
+
+        return_type = EnumeratorType.build(Type.list.build([Type.bytes]))  # return an Enumerator[bytes]
+        super().__init__(identifier, syscall, args, return_type=return_type)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -29,33 +32,16 @@ class StorageGetMethod(InteropMethod):
         if len(params) != len(args):
             return False
 
-        return self.key_arg.type.is_type_of(params[0].type)
+        return self.prefix_arg.type.is_type_of(params[0].type)
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
-        from boa3.model.type.type import Type
-        from boa3.neo.vm.type.Integer import Integer
-
-        opcodes = Interop.StorageGetContext.opcode + super().opcode
-        opcodes.extend([
-            (Opcode.DUP, b''),
-            (Opcode.ISNULL, b''),
-            (Opcode.JMPIFNOT, Integer(7).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DROP, b''),
-            (Opcode.PUSHDATA1, b'\x00'),
-            (Opcode.CONVERT, Type.bytes.stack_item),
-        ])
-        return opcodes
+        return Interop.StorageGetContext.opcode + super().opcode
 
     @property
-    def storage_context_hash(self) -> bytes:
-        # TODO: refactor when default arguments are implemented
-        return self._method_hash(self._storage_context)
-
-    @property
-    def key_arg(self) -> Variable:
-        return self.args['key']
+    def prefix_arg(self) -> Variable:
+        return self.args['prefix']
 
     def build(self, value: Any) -> IBuiltinMethod:
         exp: List[IExpression] = []
@@ -74,8 +60,8 @@ class StorageGetMethod(InteropMethod):
             return self
 
         method = self
-        key_type: IType = exp[0].type
-        if not method.key_arg.type.is_type_of(key_type):
-            method = StorageGetMethod()
-            method.args['key'] = Variable(key_type)
+        prefix_type: IType = exp[0].type
+        if not method.prefix_arg.type.is_type_of(prefix_type):
+            method = StorageFindMethod()
+            method.args['prefix'] = Variable(prefix_type)
         return method

@@ -1,11 +1,10 @@
 from boa3.boa3 import Boa3
-from boa3.builtin.interop.contract import NEO, GAS
+from boa3.builtin.interop.contract import GAS, NEO
 from boa3.neo import to_script_hash
+from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3.neo.cryptography import hash160
 
 
 class TestTemplate(BoaTest):
@@ -122,7 +121,7 @@ class TestTemplate(BoaTest):
 
         # starting atomic swap by using the atomic_swap method
         result = self.run_smart_contract(engine, path, 'atomic_swap', contract_address1, NEO, transferred_amount_neo,
-                                         contract_address2, GAS,transferred_amount_gas,
+                                         contract_address2, GAS, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)

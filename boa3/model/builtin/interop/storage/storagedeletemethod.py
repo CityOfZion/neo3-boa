@@ -14,7 +14,7 @@ class StorageDeleteMethod(InteropMethod):
         from boa3.model.type.type import Type
         identifier = 'delete'
         syscall = 'System.Storage.Delete'
-        self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
+        # TODO: refactor to accept StorageContext as argument
         args: Dict[str, Variable] = {'key': Variable(Type.bytes)}
         super().__init__(identifier, syscall, args, return_type=Type.none)
 
@@ -36,9 +36,8 @@ class StorageDeleteMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        opcodes = [(Opcode.SYSCALL, self.storage_context_hash)]
-        opcodes.extend(super().opcode)
-        return opcodes
+        from boa3.model.builtin.interop.interop import Interop
+        return Interop.StorageGetContext.opcode + super().opcode
 
     @property
     def storage_context_hash(self) -> bytes:

@@ -10,7 +10,7 @@ from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestStorage(BoaTest):
+class TestStorageInterop(BoaTest):
 
     def test_storage_get_bytes_key(self):
         expected_output = (
@@ -19,7 +19,7 @@ class TestStorage(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StorageGet.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StorageGet.interop_method_hash
             + Opcode.DUP
@@ -34,7 +34,7 @@ class TestStorage(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StorageGetBytesKey.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetBytesKey.py' % self.dirname
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -45,7 +45,7 @@ class TestStorage(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StorageGet.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StorageGet.interop_method_hash
             + Opcode.DUP
@@ -60,7 +60,7 @@ class TestStorage(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StorageGetStrKey.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetStrKey.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -82,7 +82,7 @@ class TestStorage(BoaTest):
         self.assertEqual(Integer(42).to_byte_array(), result)
 
     def test_storage_get_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/storage_test/StorageGetMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_get_context(self):
@@ -91,7 +91,7 @@ class TestStorage(BoaTest):
             + Interop.StorageGetContext.interop_method_hash
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/storage_test/StorageGetContext.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetContext.py' % self.dirname
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -100,7 +100,7 @@ class TestStorage(BoaTest):
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
     def test_storage_put_bytes_key_bytes_value(self):
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutBytesKeyBytesValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutBytesKeyBytesValue.py' % self.dirname
         output = Boa3.compile(path)
 
         engine = TestEngine(self.dirname)
@@ -140,13 +140,13 @@ class TestStorage(BoaTest):
             + Opcode.CONVERT + Type.int.stack_item
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StoragePut.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutBytesKeyIntValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutBytesKeyIntValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -185,13 +185,13 @@ class TestStorage(BoaTest):
             + value
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StoragePut.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutBytesKeyStrValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutBytesKeyStrValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -216,7 +216,7 @@ class TestStorage(BoaTest):
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
     def test_storage_put_str_key_bytes_value(self):
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutStrKeyBytesValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutStrKeyBytesValue.py' % self.dirname
         output = Boa3.compile(path)
 
         engine = TestEngine(self.dirname)
@@ -256,13 +256,13 @@ class TestStorage(BoaTest):
             + Opcode.CONVERT + Type.int.stack_item
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StoragePut.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutStrKeyIntValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutStrKeyIntValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -301,13 +301,13 @@ class TestStorage(BoaTest):
             + value
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StoragePut.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StoragePut.interop_method_hash
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutStrKeyStrValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutStrKeyStrValue.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -332,11 +332,11 @@ class TestStorage(BoaTest):
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
     def test_storage_put_mismatched_type_key(self):
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutMismatchedTypeKey.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutMismatchedTypeKey.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_put_mismatched_type_value(self):
-        path = '%s/boa3_test/test_sc/storage_test/StoragePutMismatchedTypeValue.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutMismatchedTypeValue.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_delete_bytes_key(self):
@@ -346,13 +346,13 @@ class TestStorage(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StorageDelete.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StorageDelete.interop_method_hash
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StorageDeleteBytesKey.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageDeleteBytesKey.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -374,13 +374,13 @@ class TestStorage(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.SYSCALL
-            + Interop.StorageDelete.storage_context_hash
+            + Interop.StorageGetContext.interop_method_hash
             + Opcode.SYSCALL
             + Interop.StorageDelete.interop_method_hash
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/storage_test/StorageDeleteStrKey.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageDeleteStrKey.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -396,5 +396,27 @@ class TestStorage(BoaTest):
         self.assertFalse(b'example' in engine.storage)
 
     def test_storage_delete_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/storage_test/StorageDeleteMismatchedType.py' % self.dirname
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageDeleteMismatchedType.py' % self.dirname
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_storage_find_bytes_prefix(self):
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageFindBytesPrefix.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', b'example')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+    def test_storage_find_str_prefix(self):
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageFindStrPrefix.py' % self.dirname
+        self.compile_and_save(path)
+
+        engine = TestEngine(self.dirname)
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+    def test_storage_find_mismatched_type(self):
+        path = '%s/boa3_test/test_sc/interop_test/storage/StorageFindMismatchedType.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
