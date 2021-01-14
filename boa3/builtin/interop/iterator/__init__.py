@@ -23,5 +23,8 @@ class Iterator:
     def concat(self, other: Iterator) -> Iterator:
         pass
 
+    def keys(self) -> Enumerator:
+        pass
+
     def values(self) -> Enumerator:
         pass
