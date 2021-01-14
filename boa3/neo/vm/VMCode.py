@@ -104,3 +104,6 @@ class VMCode:
 
     def __str__(self) -> str:
         return self.opcode.name + ' ' + self.data.hex()
+
+    def __repr__(self) -> str:
+        return str(self)

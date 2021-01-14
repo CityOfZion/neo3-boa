@@ -150,3 +150,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :rtype: IBuiltinMethod
         """
         return self
+
+    def not_supported_str(self, callable_id: str) -> str:
+        return '{0}({1})'.format(callable_id,
+                                 ','.join([arg.type.identifier for arg in self.args.values()]))

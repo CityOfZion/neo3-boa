@@ -935,7 +935,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     callable_target: IBuiltinMethod = callable_target.build(args)
                     if not callable_target.is_supported:
                         self._log_error(
-                            CompilerError.NotSupportedOperation(call.lineno, call.col_offset, callable_id)
+                            CompilerError.NotSupportedOperation(call.lineno, call.col_offset,
+                                                                callable_target.not_supported_str(callable_id))
                         )
                         return callable_target.return_type
 

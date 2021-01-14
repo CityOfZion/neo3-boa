@@ -957,6 +957,14 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', {})
         self.assertEqual(True, result)
 
+    def test_isinstance_many_types_with_class(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypesWithClass.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
+    def test_isinstance_class(self):
+        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceClass.py' % self.dirname
+        self.assertCompilerLogs(NotSupportedOperation, path)
+
     # endregion
 
     # region exit test
@@ -970,7 +978,7 @@ class TestBuiltinMethod(BoaTest):
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, path, 'main', True)
 
-    # end region
+    # endregion
 
     # region max test
 
@@ -992,7 +1000,7 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/MaxMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
-    # end region
+    # endregion
 
     # region min test
 
@@ -1014,4 +1022,4 @@ class TestBuiltinMethod(BoaTest):
         path = '%s/boa3_test/test_sc/built_in_methods_test/MinMismatchedTypes.py' % self.dirname
         self.assertCompilerLogs(MismatchedTypes, path)
 
-    # end region
+    # endregion
