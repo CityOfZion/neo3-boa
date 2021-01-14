@@ -1,12 +1,12 @@
 from typing import Union
 
 from boa3.builtin import public
-from boa3.builtin.interop.enumerator import Enumerator
+from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage import find, put
 
 
 @public
-def find_by_prefix(prefix: str) -> Enumerator:
+def find_by_prefix(prefix: str) -> Iterator:
     return find(prefix)
 
 

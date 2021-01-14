@@ -1,6 +1,5 @@
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
-from boa3.model.builtin.interop.enumerator import EnumeratorType
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -11,17 +10,26 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class StorageFindMethod(InteropMethod):
 
-    def __init__(self):
+    def __init__(self, prefix_type: IType = None):
         from boa3.model.type.type import Type
         identifier = 'find'
         syscall = 'System.Storage.Find'
         # TODO: refactor to accept StorageContext as argument
-        args: Dict[str, Variable] = {'prefix': Variable(Type.union.build([Type.bytes,
-                                                                          Type.str
-                                                                          ]))}
 
-        return_type = EnumeratorType.build(Type.list.build([Type.bytes]))  # return an Enumerator[bytes]
+        if prefix_type is None:
+            prefix_type = Type.union.build([Type.bytes,
+                                            Type.str
+                                            ])
+        args: Dict[str, Variable] = {'prefix': Variable(prefix_type)}
+
+        from boa3.model.builtin.interop.iterator import IteratorType
+        return_type = IteratorType.build(Type.dict.build([prefix_type,  # return an Iterator[prefix, bytes]
+                                                          Type.bytes]))
         super().__init__(identifier, syscall, args, return_type=return_type)
+
+    @property
+    def identifier(self) -> str:
+        return '-{0}_{1}'.format(self._identifier, self.prefix_arg.type.identifier)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -61,7 +69,6 @@ class StorageFindMethod(InteropMethod):
 
         method = self
         prefix_type: IType = exp[0].type
-        if not method.prefix_arg.type.is_type_of(prefix_type):
-            method = StorageFindMethod()
-            method.args['prefix'] = Variable(prefix_type)
+        if type(method.prefix_arg.type) != type(prefix_type):
+            method = StorageFindMethod(prefix_type)
         return method
