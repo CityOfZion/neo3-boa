@@ -28,7 +28,6 @@ class EnumeratorType(ClassType):
         self._methods = None
         self._properties = None
 
-        self.key_type = self._origin_collection.valid_key
         self.item_type = self._origin_collection.item_type
 
     @property

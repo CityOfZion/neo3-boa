@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Collection
 
+from boa3.builtin.interop.enumerator import Enumerator
+
 
 class Iterator:
     def __init__(self, entry: Collection):
@@ -19,4 +21,7 @@ class Iterator:
         pass
 
     def concat(self, other: Iterator) -> Iterator:
+        pass
+
+    def values(self) -> Enumerator:
         pass
