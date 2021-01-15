@@ -19,7 +19,17 @@ class IsInstanceMethod(IBuiltinMethod):
         }
 
         super().__init__(identifier, args, return_type=Type.bool)
-        self._instances_type: List[IType] = [target_type if isinstance(target_type, IType) else Type.none]
+
+        from boa3.model.type.collection.sequence.tupletype import TupleType
+        from boa3.model.type.annotation.uniontype import UnionType
+        if not isinstance(target_type, IType):
+            instances = [Type.none]
+        elif isinstance(target_type, TupleType) and isinstance(target_type.item_type, UnionType):
+            instances = target_type.item_type.union_types
+        else:
+            instances = [target_type]
+
+        self._instances_type: List[IType] = instances
 
     def set_instance_type(self, value: List[IType]):
         new_list = []
@@ -41,6 +51,21 @@ class IsInstanceMethod(IBuiltinMethod):
         types = list({tpe.raw_identifier for tpe in self._instances_type})
         types.sort()
         return '-{0}_of_{1}'.format(self._identifier, '_or_'.join(types))
+
+    @property
+    def is_supported(self) -> bool:
+        from boa3.model.type.classtype import ClassType
+        return not any(isinstance(param, ClassType) for param in self._instances_type)
+
+    def not_supported_str(self, callable_id: str) -> str:
+        types = (self._instances_type[0].identifier if len(self._instances_type) == 1
+                 else '({0})'.format(', '.join([arg.identifier for arg in self._instances_type])))
+
+        return '{0}({1}, {2})'.format(callable_id, self.arg_x, types)
+
+    @property
+    def arg_x(self) -> Variable:
+        return self.args['x']
 
     def validate_parameters(self, *params: Union[IExpression, IType]) -> bool:
         if len(params) != 2:
