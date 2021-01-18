@@ -155,7 +155,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
             return False
 
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
-    if from_address != to_address and amount == 0:
+    if from_address != to_address and amount != 0:
         if from_balance == amount:
             delete(from_address)
         else:
