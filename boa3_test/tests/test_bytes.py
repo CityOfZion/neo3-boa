@@ -155,7 +155,7 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
 
         engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'bytes_to_bool')
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool', expected_result_type=bool)
         self.assertEqual(False, result)
 
     def test_bytes_to_bool_with_builtin_hard_coded_true(self):
