@@ -5,7 +5,6 @@ from boa3.model.builtin.interop.binary import *
 from boa3.model.builtin.interop.blockchain import *
 from boa3.model.builtin.interop.contract import *
 from boa3.model.builtin.interop.crypto import *
-from boa3.model.builtin.interop.enumerator import *
 from boa3.model.builtin.interop.iterator import *
 from boa3.model.builtin.interop.json import *
 from boa3.model.builtin.interop.runtime import *
@@ -18,7 +17,6 @@ class InteropPackage(str, Enum):
     Blockchain = 'blockchain'
     Contract = 'contract'
     Crypto = 'crypto'
-    Enumerator = 'enumerator'
     Iterator = 'iterator'
     Json = 'json'
     Runtime = 'runtime'
@@ -39,7 +37,6 @@ class Interop:
 
     # Interop Types
     ContractType = ContractType.build()
-    Enumerator = EnumeratorType.build()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
     StorageContextType = StorageContextType.build()
@@ -76,12 +73,8 @@ class Interop:
     VerifyWithECDsaSecp256k1 = VerifyWithECDsaSecp256k1Method()
     VerifyWithECDsaSecp256r1 = VerifyWithECDsaSecp256r1Method()
 
-    # Enumerator Interops
-    EnumeratorCreate = EnumeratorMethod(Enumerator)
-
     # Iterator Interops
     IteratorCreate = IteratorMethod(Iterator)
-    IteratorConcat = IteratorConcatMethod(Iterator)
 
     # Json Interops
     JsonDeserialize = JsonDeserializeMethod()
@@ -136,9 +129,7 @@ class Interop:
                                 VerifyWithECDsaSecp256k1,
                                 VerifyWithECDsaSecp256r1
                                 ],
-        InteropPackage.Enumerator: [Enumerator],
-        InteropPackage.Iterator: [Iterator,
-                                  IteratorConcat],
+        InteropPackage.Iterator: [Iterator],
         InteropPackage.Json: [JsonDeserialize,
                               JsonSerialize
                               ],

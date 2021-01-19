@@ -8,7 +8,7 @@ from boa3.model.variable import Variable
 class IteratorNextMethod(InteropMethod):
     def __init__(self):
         from boa3.model.type.type import Type
-        syscall = 'System.Enumerator.Next'
+        syscall = 'System.Iterator.Next'
         identifier = '-iterator_next'
         args: Dict[str, Variable] = {'self': Variable(IteratorType.build())}
         super().__init__(identifier, syscall, args, return_type=Type.bool)

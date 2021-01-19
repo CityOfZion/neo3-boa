@@ -618,7 +618,7 @@ class TestFunction(BoaTest):
             + Opcode.LDARG0     # for_sequence = arg0
             + Opcode.PUSH0      # for_index = 0
             + Opcode.JMP        # begin for
-            + Integer(17).to_byte_array(min_length=1, signed=True)
+            + Integer(18).to_byte_array(min_length=1, signed=True)
             + Opcode.OVER     # value = for_sequence[for_index]
             + Opcode.OVER
             + Opcode.DUP
@@ -631,6 +631,7 @@ class TestFunction(BoaTest):
             + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.STLOC0
+            + Opcode.CLEAR
             + Opcode.LDLOC0     # return value
             + Opcode.RET
             + Opcode.INC     # for_index = for_index + 1
@@ -640,7 +641,7 @@ class TestFunction(BoaTest):
             + Opcode.SIZE
             + Opcode.LT
             + Opcode.JMPIF
-            + Integer(-20).to_byte_array(min_length=1, signed=True)
+            + Integer(-21).to_byte_array(min_length=1, signed=True)
             + Opcode.DROP
             + Opcode.DROP
             + Opcode.PUSH5      # else

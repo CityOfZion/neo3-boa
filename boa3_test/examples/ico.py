@@ -1,4 +1,4 @@
-from typing import List, Any, Union
+from typing import Any, List, Union
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent

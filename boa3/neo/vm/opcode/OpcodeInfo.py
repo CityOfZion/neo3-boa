@@ -146,6 +146,8 @@ class OpcodeInfo:
     CALL_L = OpcodeInformation(Opcode.CALL_L, 4)
     # Pop the address of a function from the stack, and call the function.
     CALLA = OpcodeInformation(Opcode.CALLA)
+    # Calls the function which is described by the token.
+    CALLT = OpcodeInformation(Opcode.CALLT, 2)
     # It turns the vm state to FAULT immediately, and cannot be caught.
     ABORT = OpcodeInformation(Opcode.ABORT)
     # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT.

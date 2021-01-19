@@ -344,7 +344,7 @@ class TestFor(BoaTest):
             + Opcode.ADD
             + Opcode.STLOC0
             + Opcode.JMP                # break
-            + Integer(16).to_byte_array(min_length=1, signed=True)
+            + Integer(14).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0         # a += 1
             + Opcode.PUSH1
             + Opcode.ADD
@@ -362,7 +362,6 @@ class TestFor(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-
         path = '%s/boa3_test/test_sc/for_test/ForBreak.py' % self.dirname
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
@@ -372,8 +371,8 @@ class TestFor(BoaTest):
         self.assertEqual(6, result)
 
     def test_for_break_else(self):
-        jmpif_address = Integer(32).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-35).to_byte_array(min_length=1, signed=True)
+        jmpif_address = Integer(33).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-36).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -409,13 +408,14 @@ class TestFor(BoaTest):
             + Opcode.PUSH0
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
-            + Integer(8).to_byte_array(min_length=1, signed=True)
+            + Integer(9).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0             # a += x
             + Opcode.LDLOC2
             + Opcode.ADD
             + Opcode.STLOC0
+            + Opcode.PUSH1
             + Opcode.JMP                # break
-            + Integer(20).to_byte_array(min_length=1, signed=True)
+            + Integer(15).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0         # a += 1
             + Opcode.PUSH1
             + Opcode.ADD
@@ -428,14 +428,14 @@ class TestFor(BoaTest):
             + Opcode.LT
             + Opcode.JMPIF      # end for
             + jmp_address
+            + Opcode.PUSH0
+            + Opcode.REVERSE3
             + Opcode.DROP
             + Opcode.DROP
+            + Opcode.JMPIF
+            + Integer(4).to_byte_array(signed=True)
             + Opcode.PUSHM1         # a = -1
             + Opcode.STLOC0
-            + Opcode.JMP        # else
-            + Integer(4).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.DROP
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )

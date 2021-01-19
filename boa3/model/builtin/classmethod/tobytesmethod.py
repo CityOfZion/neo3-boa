@@ -26,10 +26,6 @@ class ToBytesMethod(IBuiltinMethod, ABC):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
-    @property
-    def stores_on_slot(self) -> bool:
-        return True
-
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 1:
             return False

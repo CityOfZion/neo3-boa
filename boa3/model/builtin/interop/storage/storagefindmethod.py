@@ -45,7 +45,15 @@ class StorageFindMethod(InteropMethod):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
-        return Interop.StorageGetContext.opcode + super().opcode
+        from boa3.neo.vm.type.Integer import Integer
+        from boa3.neo3.contracts import FindOptions
+        find_options = Integer(FindOptions.NONE).to_byte_array(signed=True, min_length=1)
+
+        return ([(Opcode.PUSHDATA1, Integer(len(find_options)).to_byte_array(min_length=1) + find_options),
+                 (Opcode.SWAP, b'')
+                 ]
+                + Interop.StorageGetContext.opcode
+                + super().opcode)
 
     @property
     def prefix_arg(self) -> Variable:

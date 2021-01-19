@@ -33,8 +33,14 @@ class TestFileGeneration(BoaTest):
         self.assertTrue(os.path.exists(expected_nef_output))
         with open(expected_nef_output, 'rb') as nef_output:
             magic = nef_output.read(constants.SIZE_OF_INT32)
-            compiler = nef_output.read(32)
-            version = nef_output.read(32)
+            compiler_with_version = nef_output.read(64)
+            compiler, version = compiler_with_version.rsplit(b'-', maxsplit=1)
+            version = version[:32]
+
+            nef_output.read(2)  # reserved
+            nef_output.read(1)  # TODO: method tokens
+            nef_output.read(2)  # reserved
+
             script_size = nef_output.read(1)
             script = nef_output.read(int.from_bytes(script_size, BYTEORDER))
             check_sum = nef_output.read(constants.SIZE_OF_INT32)
