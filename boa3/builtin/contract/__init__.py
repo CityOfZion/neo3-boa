@@ -1,4 +1,5 @@
 from typing import Union
+
 from boa3.builtin import CreateNewEvent
 from boa3.builtin.type import UInt160
 

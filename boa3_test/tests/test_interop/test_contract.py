@@ -10,6 +10,7 @@ from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.contracts import CallFlags
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -18,6 +19,7 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestContractInterop(BoaTest):
 
     def test_call_contract(self):
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -25,6 +27,11 @@ class TestContractInterop(BoaTest):
             + Opcode.LDARG2
             + Opcode.LDARG1
             + Opcode.LDARG0
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -54,6 +61,7 @@ class TestContractInterop(BoaTest):
         self.assertEqual(-18, result)
 
     def test_call_contract_without_args(self):
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -61,6 +69,11 @@ class TestContractInterop(BoaTest):
             + Opcode.NEWARRAY0
             + Opcode.LDARG1
             + Opcode.LDARG0
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -94,6 +107,7 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_create_contract(self):
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -102,12 +116,20 @@ class TestContractInterop(BoaTest):
             + Opcode.LDARG0
             + Opcode.PUSH2
             + Opcode.PACK
+            + Opcode.DUP
+            + Opcode.PUSHNULL
+            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(Interop.CreateContract.method_name)).to_byte_array(min_length=1)
             + String(Interop.CreateContract.method_name).to_bytes()
             + Opcode.PUSHDATA1
             + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
             + constants.MANAGEMENT_SCRIPT
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -120,17 +142,14 @@ class TestContractInterop(BoaTest):
         call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
         Boa3.compile_and_save(call_contract_path)
 
-        with open(call_contract_path.replace('.py', '.nef'), mode='rb') as nef:
-            nef_file = nef.read()
-
-        script, manifest = self.get_output(call_contract_path)
+        nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
         engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest)
 
         self.assertEqual(5, len(result))
-        self.assertEqual(script, result[3])
+        self.assertEqual(nef_file, result[3])
         self.assertEqual(manifest, json.loads(result[4]))
 
     def test_create_contract_too_many_parameters(self):
@@ -142,6 +161,7 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_update_contract(self):
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
             Opcode.INITSLOT
             + b'\00'
@@ -156,6 +176,11 @@ class TestContractInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
             + constants.MANAGEMENT_SCRIPT
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -174,6 +199,7 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_destroy_contract(self):
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
             Opcode.NEWARRAY0
             + Opcode.PUSHDATA1
@@ -182,6 +208,11 @@ class TestContractInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
             + constants.MANAGEMENT_SCRIPT
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET

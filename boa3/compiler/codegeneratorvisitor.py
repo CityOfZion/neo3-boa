@@ -197,6 +197,8 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         :param ret: the python ast return node
         """
+        if self.generator.stack_size > 0:
+            self.generator.clear_stack(True)
         if self.current_method.return_type is not Type.none:
             result = self.visit_to_generate(ret.value)
             if result is Type.none and not self.generator.is_none_inserted():
@@ -435,10 +437,11 @@ class VisitorCodeGenerator(ast.NodeVisitor):
         self.visit_to_map(while_node.test, generate=True)
         self.generator.convert_end_while(start_addr, test_address)
 
+        else_begin_address: int = self.generator.last_code_start_address
         for stmt in while_node.orelse:
             self.visit_to_map(stmt, generate=True)
 
-        self.generator.convert_end_loop_else(start_addr, len(while_node.orelse) > 0)
+        self.generator.convert_end_loop_else(start_addr, else_begin_address, len(while_node.orelse) > 0)
 
     def visit_For(self, for_node: ast.For):
         """
@@ -466,13 +469,15 @@ class VisitorCodeGenerator(ast.NodeVisitor):
 
         condition_address = self.generator.convert_end_for(start_address)
         self.include_instruction(for_node, condition_address)
+        else_begin = self.generator.last_code_start_address
 
         for stmt in for_node.orelse:
             self.visit_to_map(stmt, generate=True)
 
         self.generator.convert_end_loop_else(start_address,
+                                             else_begin,
                                              has_else=len(for_node.orelse) > 0,
-                                             pop_from_stack=2)
+                                             is_for=True)
 
     def visit_If(self, if_node: ast.If):
         """

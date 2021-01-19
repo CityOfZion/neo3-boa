@@ -192,10 +192,12 @@ class Opcode(bytes, Enum):
     CALL_L = b'\x35'
     # Pop the address of a function from the stack, and call the function.
     CALLA = b'\x36'
+    # Calls the function which is described by the token.
+    CALLT = b'\x37'
     # It turns the vm state to FAULT immediately, and cannot be caught.
-    ABORT = b'\x37'
+    ABORT = b'\x38'
     # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT.
-    ASSERT = b'\x38'
+    ASSERT = b'\x39'
     # Pop the top value of the stack, and throw it.
     THROW = b'\x3A'
     # TRY CatchOffset(sbyte) FinallyOffset(sbyte). If there's no catch body, set CatchOffset 0. If there's no finally
@@ -221,7 +223,7 @@ class Opcode(bytes, Enum):
     SYSCALL = b'\x41'
 
     def has_target(self) -> bool:
-        return self.JMP <= self <= self.CALL_L or self.TRY <= self <= self.ENDFINALLY
+        return self.JMP <= self <= self.CALL_L or self.TRY <= self < self.ENDFINALLY
 
     # endregion
 
@@ -517,8 +519,8 @@ class Opcode(bytes, Enum):
 
     # region Splice
 
-    NEWBUFFER = b'\x88',
-    MEMCPY = b'\x89',
+    NEWBUFFER = b'\x88'
+    MEMCPY = b'\x89'
     # Concatenates two strings.
     CAT = b'\x8B'
     # Returns a section of a string.

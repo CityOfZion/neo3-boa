@@ -168,7 +168,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # won't be able to refund, because not enough time has passed
-        result = self.run_smart_contract(engine, path, 'refund', 'unit test',
+        result = self.run_smart_contract(engine, path, 'refund',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
@@ -177,7 +177,7 @@ class TestTemplate(BoaTest):
         # get_time only changes value when a new block enters the blockchain
         engine.increase_block()
         # will be able to refund, because enough time has passed
-        result = self.run_smart_contract(engine, path, 'refund', 'unit test',
+        result = self.run_smart_contract(engine, path, 'refund',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)

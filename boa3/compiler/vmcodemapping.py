@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
@@ -47,6 +47,22 @@ class VMCodeMapping:
         :return: a dictionary that maps each instruction with its address. The keys are ordered by the address.
         """
         return {key: self._codes[key] for key in sorted(self._codes)}
+
+    def targeted_address(self) -> Dict[int, List[int]]:
+        """
+        Gets a dictionary that maps each address to the opcodes that targets it
+
+        :return: a dictionary that maps the targeted instructions to its source.
+        """
+        target_maps = {}
+        for address, code in self.code_map.items():
+            if code.opcode.has_target() and code.target is not None and code.target is not code:
+                target = self.get_start_address(code.target)
+                if target not in target_maps:
+                    target_maps[target] = [address]
+                else:
+                    target_maps[target].append(address)
+        return target_maps
 
     def bytecode(self) -> bytes:
         """
@@ -120,6 +136,14 @@ class VMCodeMapping:
             return 0
         return self.get_start_address(vm_code) + vm_code.size - 1  # start + size returns next opcode address
 
+    def get_opcodes(self, addresses: List[int]) -> List[VMCode]:
+        codes = []
+        for index in sorted(addresses):
+            if index in self._codes:
+                codes.append(self._codes[index])
+
+        return codes
+
     def update_vm_code(self, vm_code: VMCode, opcode: OpcodeInformation, data: bytes = bytes()):
         """
         Updates the information from an inserted code
@@ -154,39 +178,6 @@ class VMCodeMapping:
                     updated_codes[new_address] = self._codes.pop(address)
             last_code = code
         self._codes.update(updated_codes)
-
-    def move_to_end(self, first_code_address: int, last_code_address: int):
-        """
-        Moves a set of instructions to the end of the current bytecode
-
-        :param first_code_address: first instruction start address
-        :param last_code_address: last instruction end address
-        """
-        if last_code_address < first_code_address:
-            return
-
-        moved_codes: List[VMCode] = []
-        for address in list(self.code_map):
-            if first_code_address <= address <= last_code_address:
-                moved_codes.append(self._codes.pop(address))
-            elif address > last_code_address:
-                break
-
-        self._update_addresses(first_code_address)
-
-        for code in moved_codes:
-            self.insert_code(code)
-        self._update_targets()
-
-    def remove_opcodes(self, first_code_address: int, last_code_address: int):
-        if last_code_address < first_code_address:
-            first_code_address, last_code_address = last_code_address, first_code_address
-
-        for index in sorted(self._codes).copy():
-            if first_code_address <= index <= last_code_address:
-                self._codes.pop(index)
-
-        self._update_addresses()
 
     def _update_targets(self):
         from boa3.neo.vm.type.Integer import Integer
@@ -230,12 +221,84 @@ class VMCodeMapping:
                         instr_with_small_codes.remove(code)
             current_size = self.bytecode_size
 
+    def _validate_targets(self, code_or_address: Union[int, VMCode]):
+        if isinstance(code_or_address, int):
+            address = code_or_address
+            code = self.get_code(address)
+        else:
+            code = code_or_address
+            address = self.get_start_address(code)
+
+        targeted_addresses = self.targeted_address()
+
+        if address in targeted_addresses:
+            next_address = self.get_end_address(code) + 1
+            next_code = self._codes[next_address]
+            for source in targeted_addresses[address]:
+                self._codes[source].set_target(next_code)
+
+    def move_to_end(self, first_code_address: int, last_code_address: int):
+        """
+        Moves a set of instructions to the end of the current bytecode
+
+        :param first_code_address: first instruction start address
+        :param last_code_address: last instruction end address
+        """
+        if last_code_address < first_code_address:
+            return
+
+        moved_codes: List[VMCode] = []
+        for address in list(self.code_map):
+            if first_code_address <= address <= last_code_address:
+                moved_codes.append(self._codes.pop(address))
+            elif address > last_code_address:
+                break
+
+        self._update_addresses(first_code_address)
+
+        for code in moved_codes:
+            self.insert_code(code)
+        self._update_targets()
+
+    def remove_opcodes(self, first_code_address: int, last_code_address: int):
+        if last_code_address < first_code_address:
+            first_code_address, last_code_address = last_code_address, first_code_address
+
+        map_codes = self._codes.copy()
+        for index in sorted(map_codes):
+            if first_code_address <= index <= last_code_address:
+                self._validate_targets(index)
+                self._codes.pop(index)
+
+        self._update_addresses()
+
+    def remove_opcodes_by_addresses(self, addresses: List[int]):
+        for index in sorted(self._codes).copy():
+            if index in addresses:
+                self._validate_targets(index)
+                self._codes.pop(index)
+
+        self._update_addresses()
+
+    def remove_opcodes_by_code(self, codes: List[VMCode]):
+        code_map = self.code_map
+        addresses = list(code_map.keys()).copy()
+        code_list = list(code_map.values()).copy()
+
+        for code in codes:
+            if code in code_list:
+                self._validate_targets(code)
+                self._codes.pop(addresses[code_list.index(code)])
+
+        self._update_addresses()
+
     def _remove_empty_targets(self):
         """
         Checks if each instruction that requires a target has one set and remove those that don't
         """
         for code in list(self._codes.values()).copy():
-            if code.opcode.has_target() and code.target is None:
+            if code.opcode.has_target() and (code.target is None or code.target is code):
+                self._validate_targets(code)
                 index = self.get_start_address(code)
                 self._codes.pop(index)
                 self._update_addresses(index)

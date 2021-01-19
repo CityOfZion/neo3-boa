@@ -39,6 +39,8 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_get_contract(self):
+        from boa3.neo3.contracts import CallFlags
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'
@@ -51,6 +53,11 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
             + constants.MANAGEMENT_SCRIPT
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -67,6 +74,7 @@ class TestBlockchainInterop(BoaTest):
         Boa3.compile_and_save(call_contract_path)
 
         script, manifest = self.get_output(call_contract_path)
+        nef, manifest = self.get_bytes_output(call_contract_path)
         call_hash = hash160(script)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
@@ -76,5 +84,5 @@ class TestBlockchainInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', call_hash)
         self.assertEqual(5, len(result))
         self.assertEqual(call_hash, result[2])
-        self.assertEqual(script, result[3])
+        self.assertEqual(nef, result[3])
         self.assertEqual(json.loads(arg_manifest), json.loads(result[4]))
