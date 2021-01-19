@@ -79,7 +79,7 @@ The diagram bellow shows the basic building blocks of the Neo3-Boa project.
 
 ## Quickstart
 
-Installation requires Python 3.8 or later.
+Installation requires Python 3.7 or later.
 
 ### Installation 
 Make sure you have installed MSVC v142 - Build tools VS 2019 C++ x64/x86 (v14.24). You can do this by installing Visual Studio 2019 and add C++ development features.
@@ -96,7 +96,7 @@ On Windows:
 
 ```shell
 $ python3 -m venv venv
-$ venv/Scripts/activate.bat
+$ venv\Scripts\activate.bat
 ```
 
 ##### Pip (Recomended)
