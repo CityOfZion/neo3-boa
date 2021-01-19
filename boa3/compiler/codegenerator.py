@@ -1037,7 +1037,9 @@ class CodeGenerator:
         from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
         if isinstance(function, IsInstanceMethod) and len(args_address) > 1:
             # TODO: remove this if when isinstance with classes is fixed
-            self._opcodes_to_remove.extend(args_address[:-1])
+            for address in args_address:
+                if VMCodeMapping.instance().get_code(address).opcode is Opcode.PUSHNULL:
+                    self._opcodes_to_remove.append(address)
 
         for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)

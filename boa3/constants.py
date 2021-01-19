@@ -17,6 +17,6 @@ BYTEORDER = 'little'
 
 INITIALIZE_METHOD_ID = '_initialize'
 
-NEO_SCRIPT = from_hex_str('0x4961bf0ab79370b23dc45cde29f568d0e0fa6e93')
-GAS_SCRIPT = from_hex_str('0x9ac04cf223f646de5f7faccafe34e30e5d4382a2')
-MANAGEMENT_SCRIPT = from_hex_str('0xbee421fdbb3e791265d2104cb34934f53fcc0e45')
+NEO_SCRIPT = from_hex_str('0xf617baca689d1abddedda7c3b80675c4ac21e932')
+GAS_SCRIPT = from_hex_str('0x75844530eb44f4715a42950bb59b4d7ace0b2f3d')
+MANAGEMENT_SCRIPT = from_hex_str('0xa501d7d7d10983673b61b7a2d3a813b36f9f0e43')
