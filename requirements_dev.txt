@@ -1,12 +1,10 @@
 autopep8==1.4.4
 base58==1.0.3
-bitarray==1.0.1
 bitcoin==1.1.42
 bump2version==1.0.0
 coverage==4.5.4
 ecdsa==0.15
 Events==0.3
-mmh3==2.5.1
 mpmath==1.1.0
 pycodestyle==2.5.0
 Sphinx==1.6.4
