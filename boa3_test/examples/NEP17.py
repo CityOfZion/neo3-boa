@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
@@ -31,7 +31,7 @@ def manifest_metadata() -> NeoMetadata:
 
 
 # Script hash of the contract owner
-OWNER = UInt160(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+OWNER = UInt160()
 SUPPLY_KEY = 'totalSupply'
 
 # Symbol of the Token
@@ -111,7 +111,7 @@ def balanceOf(account: UInt160) -> int:
     The parameter account must be a 20-byte address represented by a UInt160.
 
     :param account: the account address to retrieve the balance for
-    :type account: bytes
+    :type account: UInt160
     """
     assert len(account) == 20
     return get(account).to_int()
@@ -122,13 +122,13 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     """
     Transfers an amount of NEP17 tokens from one account to another
 
-    If the method succeeds, it must fire the `transfer` event and must return true, even if the amount is 0,
+    If the method succeeds, it must fire the `Transfer` event and must return true, even if the amount is 0,
     or from and to are the same address.
 
     :param from_address: the address to transfer from
-    :type from_address: bytes
+    :type from_address: UInt160
     :param to_address: the address to transfer to
-    :type to_address: bytes
+    :type to_address: UInt160
     :param amount: the amount of NEP17 tokens to transfer
     :type amount: int
     :param data: whatever data is pertinent to the onPayment method
@@ -154,20 +154,15 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         if not check_witness(from_address):
             return False
 
-    # if the `to_address` is a deployed contract, the function should check the payable flag of this contract
-    # TODO: include example when objects are implemented
+    # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
+    if from_address != to_address and amount != 0:
+        if from_balance == amount:
+            delete(from_address)
+        else:
+            put(from_address, from_balance - amount)
 
-    if from_address == to_address:
-        # transfer to self
-        return True
-
-    if from_balance == amount:
-        delete(from_address)
-    else:
-        put(from_address, from_balance - amount)
-
-    to_balance = get(to_address).to_int()
-    put(to_address, to_balance + amount)
+        to_balance = get(to_address).to_int()
+        put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -177,7 +172,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     return True
 
 
-def post_transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any):
+def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], amount: int, data: Any):
     """
     Checks if the one receiving NEP17 tokens is a smart contract and if it's one the onPayment method will be called
 
@@ -190,9 +185,9 @@ def post_transfer(from_address: UInt160, to_address: UInt160, amount: int, data:
     :param data: any pertinent data that might validate the transaction
     :type data: Any
     """
-    if to_address is not None:
+    if not isinstance(to_address, None):    # TODO: change to 'is not None' when `is` semantic is implemented
         contract = get_contract(to_address)
-        if contract is not None:
+        if not isinstance(contract, None):      # TODO: change to 'is not None' when `is` semantic is implemented
             call_contract(to_address, 'onPayment', [from_address, amount, data])
 
 
@@ -214,8 +209,8 @@ def mint(account: UInt160, amount: int):
         put(SUPPLY_KEY, current_total_supply + amount)
         put(account, account_balance + amount)
 
-        on_transfer(UInt160(), account, amount)     # TODO: Change to None when isinstance is implemented
-        post_transfer(UInt160(), account, amount, None)     # TODO: Change to None when isinstance is implemented
+        on_transfer(None, account, amount)
+        post_transfer(None, account, amount, None)
 
 
 @public
@@ -246,7 +241,7 @@ def deploy() -> bool:
     put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
     put(OWNER, TOKEN_TOTAL_SUPPLY)
 
-    on_transfer(UInt160(), OWNER, TOKEN_TOTAL_SUPPLY)   # TODO: Change to None when isinstance is implemented
+    on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
     return True
 
 
