@@ -186,33 +186,24 @@ ${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestE
 
 #### Testing
 
-Create a Python Script, import the TestEngine and BoaTest class, make a Test class that inherits BoaTest, and define a
-method to test your smart contract.
-In this method you'll need to call `self.run_smart_contract()` and then assert to see if your result is right. 
+Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function
+you'll need to call the method `run()`. It's parameters are the path of the compiled smart contract, the smart
+contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
 
 Your Python Script should look something like this:
 
 ```python
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.neo.smart_contract.VoidType import VoidType
 
-class TestHelloWorld(BoaTest):
-    def test_hello_world_main(self):
-        path = '%s/boa3_test/examples/HelloWorld.py' % self.dirname
-        engine = TestEngine(self.dirname)
-        
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
+def test_hello_world_main():
+    root_folder = '{path-to-folder}'
+    path = '%s/boa3_test/examples/HelloWorld.nef' % root_folder
+    engine = TestEngine(root_folder)
+
+    result = engine.run(path, 'Main')
+    assert result is VoidType
 ```
-
-Be sure to give `run_smart_contract()` a read to understand its parameters and check the plethora of 
-<a href="/boa3_test/tests/">tests</a> if the TestEngine usage is still unclear.
-
-<br>
-
-> Note: If you modify your smart contract, and the .nef file still exists, BoaTest won't automatically compile your contract 
-again. Therefore, you should compile your contract whenever you change something in it and want to test it once more.
-
 
 
 ## Docs
