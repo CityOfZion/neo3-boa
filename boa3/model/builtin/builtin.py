@@ -147,7 +147,8 @@ class Builtin:
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
         'author': (str, type(None)),
         'email': (str, type(None)),
-        'description': (str, type(None))
+        'description': (str, type(None)),
+        'extras': dict
     }
 
     @classmethod

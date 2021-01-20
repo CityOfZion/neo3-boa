@@ -141,3 +141,23 @@ class TestMetadata(BoaTest):
         self.assertEqual('test@test.com', manifest['extra']['Email'])
         self.assertIn('Description', manifest['extra'])
         self.assertEqual('This is an example', manifest['extra']['Description'])
+
+    def test_metadata_info_extras(self):
+        expected_output = (
+            Opcode.PUSH5        # return 5
+            + Opcode.RET
+        )
+
+        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoNewExtras.py' % self.dirname
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+        self.assertIn('extra', manifest)
+        self.assertIsNotNone(manifest['extra'])
+        self.assertIn('unittest1', manifest['extra'])
+        self.assertEqual('string', manifest['extra']['unittest1'])
+        self.assertIn('unittest2', manifest['extra'])
+        self.assertEqual(123, manifest['extra']['unittest2'])
+        self.assertIn('unittest3', manifest['extra'])
+        self.assertEqual(True, manifest['extra']['unittest3'])
+        self.assertIn('unittest4', manifest['extra'])
+        self.assertEqual(['list', 3210], manifest['extra']['unittest4'])
