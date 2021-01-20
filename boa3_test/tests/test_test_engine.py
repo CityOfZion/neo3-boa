@@ -354,3 +354,12 @@ class TestTestEngine(BoaTest):
         engine = TestEngine(self.dirname)
         result = engine.run(path, 'Sub', 50, 20)
         self.assertEqual(30, result)
+
+    def test_test_engine_not_found_error(self):
+        # if the TestEngine is correctly installed a error should not occur
+        engine = TestEngine(self.dirname)
+
+        # however, if the TestEngine is not in the directory it will raise an Exception
+        with self.assertRaises(FileNotFoundError):
+            engine = TestEngine('%s/boa3_test' % self.dirname)
+

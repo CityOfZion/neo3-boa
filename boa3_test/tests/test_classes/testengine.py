@@ -18,8 +18,9 @@ class TestEngine:
         if path.exists('{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)):
             self._test_engine_path = '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)
         else:
-            raise Exception("Can not open file 'Neo.TestEngine/Neo.TestEngine.dll'. No such file exists."
-                            "\nVisit the docs or the README file and search for 'TestEngine' to correctly install it.")
+            raise FileNotFoundError("File at " + '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path) + " was not "
+                                    "found.\nVisit the docs or the README file and search for 'TestEngine' to correctly"
+                                    " install it.")
 
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
