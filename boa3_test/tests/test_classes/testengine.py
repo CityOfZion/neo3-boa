@@ -10,11 +10,17 @@ from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.transaction import Transaction
+from os import path
 
 
 class TestEngine:
     def __init__(self, root_path: str):
-        self._test_engine_path = '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)
+        if path.exists('{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)):
+            self._test_engine_path = '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)
+        else:
+            raise FileNotFoundError("File at " + '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path) + " was not "
+                                    "found.\nVisit the docs or the README file and search for 'TestEngine' to correctly"
+                                    " install it.")
 
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
