@@ -25,7 +25,7 @@ Testing
 ^^^^^^^
 
 Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function
-you'll need to call the method `run()`. It's parameters are the path of the compiled smart contract, the smart
+you'll need to call the method `run()`. Its parameters are the path of the compiled smart contract, the smart
 contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
 
 Your Python Script should look something like this:
