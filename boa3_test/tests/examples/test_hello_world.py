@@ -5,13 +5,15 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestTemplate(BoaTest):
 
+    default_folder: str = 'examples'
+
     def test_hello_world_compile(self):
-        path = '%s/boa3_test/examples/HelloWorld.py' % self.dirname
+        path = self.get_contract_path('HelloWorld.py')
         Boa3.compile(path)
 
     def test_hello_world_main(self):
-        path = '%s/boa3_test/examples/HelloWorld.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('HelloWorld.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 

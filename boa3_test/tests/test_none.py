@@ -7,8 +7,10 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestNone(BoaTest):
 
+    default_folder: str = 'test_sc/none_test'
+
     def test_variable_none(self):
-        path = '%s/boa3_test/test_sc/none_test/VariableNone.py' % self.dirname
+        path = self.get_contract_path('VariableNone.py')
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -22,7 +24,7 @@ class TestNone(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_none_tuple(self):
-        path = '%s/boa3_test/test_sc/none_test/NoneTuple.py' % self.dirname
+        path = self.get_contract_path('NoneTuple.py')
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -49,11 +51,11 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/none_test/NoneIdentity.py' % self.dirname
+        path = self.get_contract_path('NoneIdentity.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', None)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 5)
@@ -72,11 +74,11 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/none_test/NoneNotIdentity.py' % self.dirname
+        path = self.get_contract_path('NoneNotIdentity.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', None)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 5)
@@ -85,17 +87,17 @@ class TestNone(BoaTest):
         self.assertEqual(True, result)
 
     def test_none_equality(self):
-        path = '%s/boa3_test/test_sc/none_test/NoneEquality.py' % self.dirname
+        path = self.get_contract_path('NoneEquality.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_int_operation(self):
-        path = '%s/boa3_test/test_sc/none_test/MismatchedTypesInOperation.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypesInOperation.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_assign(self):
-        path = '%s/boa3_test/test_sc/none_test/MismatchedTypesAssign.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypesAssign.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_after_reassign(self):
-        path = '%s/boa3_test/test_sc/none_test/MismatchedTypesAfterReassign.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypesAfterReassign.py')
         self.assertCompilerLogs(MismatchedTypes, path)

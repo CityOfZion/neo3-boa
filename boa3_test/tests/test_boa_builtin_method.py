@@ -5,10 +5,12 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestBuiltinMethod(BoaTest):
 
-    def test_abort(self):
-        path = '%s/boa3_test/test_sc/boa_built_in_methods_test/Abort.py' % self.dirname
+    default_folder: str = 'test_sc/boa_built_in_methods_test'
 
-        engine = TestEngine(self.dirname)
+    def test_abort(self):
+        path = self.get_contract_path('Abort.py')
+
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', False)
         self.assertEqual(123, result)
 

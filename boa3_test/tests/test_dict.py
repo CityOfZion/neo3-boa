@@ -10,6 +10,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestDict(BoaTest):
 
+    default_folder: str = 'test_sc/dict_test'
+
     def test_dict_int_keys(self):
         expected_output = (
             Opcode.INITSLOT
@@ -32,7 +34,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/IntKeyDict.py' % self.dirname
+        path = self.get_contract_path('IntKeyDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -68,7 +70,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/StrKeyDict.py' % self.dirname
+        path = self.get_contract_path('StrKeyDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -98,7 +100,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/AnyValueDict.py' % self.dirname
+        path = self.get_contract_path('AnyValueDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -148,7 +150,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/DictOfDict.py' % self.dirname
+        path = self.get_contract_path('DictOfDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -162,7 +164,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/EmptyDictAssignment.py' % self.dirname
+        path = self.get_contract_path('EmptyDictAssignment.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -188,7 +190,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/TypeHintAssignment.py' % self.dirname
+        path = self.get_contract_path('TypeHintAssignment.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -220,7 +222,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/VariableDict.py' % self.dirname
+        path = self.get_contract_path('VariableDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -235,11 +237,11 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/GetValue.py' % self.dirname
+        path = self.get_contract_path('GetValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', {0: 'zero'})
         self.assertEqual('zero', result)
 
@@ -247,7 +249,7 @@ class TestDict(BoaTest):
             self.run_smart_contract(engine, path, 'Main', {1: 'one'})
 
     def test_dict_get_value_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeGetValue.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeGetValue.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_set_value(self):
@@ -267,18 +269,18 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/SetValue.py' % self.dirname
+        path = self.get_contract_path('SetValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', {0: 'zero'})
         self.assertEqual({0: 'ok'}, result)
         result = self.run_smart_contract(engine, path, 'Main', {1: 'one'})
         self.assertEqual({0: 'ok', 1: 'one'}, result)
 
     def test_dict_set_value_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeSetValue.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeSetValue.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_keys(self):
@@ -317,16 +319,16 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/KeysDict.py' % self.dirname
+        path = self.get_contract_path('KeysDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(['one', 'two', 'three'], result)
 
     def test_dict_keys_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeKeysDict.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeKeysDict.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_values(self):
@@ -365,22 +367,22 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/dict_test/ValuesDict.py' % self.dirname
+        path = self.get_contract_path('ValuesDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([1, 2, 3], result)
 
     def test_dict_values_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/dict_test/MismatchedTypeValuesDict.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeValuesDict.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_dict_boa2_test2(self):
-        path = '%s/boa3_test/test_sc/dict_test/DictBoa2Test2.py' % self.dirname
+        path = self.get_contract_path('DictBoa2Test2.py')
         Boa3.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(7, result)

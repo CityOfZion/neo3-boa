@@ -10,6 +10,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestFunction(BoaTest):
 
+    default_folder: str = 'test_sc/function_test'
+
     def test_integer_function(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -19,11 +21,11 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/IntegerFunction.py' % self.dirname
+        path = self.get_contract_path('IntegerFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'Main', -1)
@@ -38,11 +40,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/StringFunction.py' % self.dirname
+        path = self.get_contract_path('StringFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('42', result)
 
@@ -53,20 +55,20 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/BoolFunction.py' % self.dirname
+        path = self.get_contract_path('BoolFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
     def test_none_function(self):
-        path = '%s/boa3_test/test_sc/function_test/NoneFunction.py' % self.dirname
+        path = self.get_contract_path('NoneFunction.py')
         self.assertCompilerLogs(InternalError, path)
 
     def test_arg_without_type_hint(self):
-        path = '%s/boa3_test/test_sc/function_test/ArgWithoutTypeHintFunction.py' % self.dirname
+        path = self.get_contract_path('ArgWithoutTypeHintFunction.py')
         self.assertCompilerLogs(TypeHintMissing, path)
 
     def test_no_return_hint_function_with_empty_return_statement(self):
@@ -77,11 +79,11 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/EmptyReturnFunction.py' % self.dirname
+        path = self.get_contract_path('EmptyReturnFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertIsVoid(result)
 
@@ -103,11 +105,11 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ConditionEmptyReturnFunction.py' % self.dirname
+        path = self.get_contract_path('ConditionEmptyReturnFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertIsVoid(result)
 
@@ -134,11 +136,11 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/function_test/EmptyReturnWithOptionalReturnType.py' % self.dirname
+        path = self.get_contract_path('EmptyReturnWithOptionalReturnType.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertIsNone(result)
 
@@ -153,28 +155,28 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/NoReturnFunction.py' % self.dirname
+        path = self.get_contract_path('NoReturnFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertIsVoid(result)
 
     def test_return_type_hint_function_with_empty_return(self):
-        path = '%s/boa3_test/test_sc/function_test/ExpectingReturnFunction.py' % self.dirname
+        path = self.get_contract_path('ExpectingReturnFunction.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_multiple_return_function(self):
-        path = '%s/boa3_test/test_sc/function_test/MultipleReturnFunction.py' % self.dirname
+        path = self.get_contract_path('MultipleReturnFunction.py')
         self.assertCompilerLogs(TooManyReturns, path)
 
     def test_tuple_function(self):
-        path = '%s/boa3_test/test_sc/function_test/TupleFunction.py' % self.dirname
+        path = self.get_contract_path('TupleFunction.py')
         self.assertCompilerLogs(TooManyReturns, path)
 
     def test_default_return(self):
-        path = '%s/boa3_test/test_sc/function_test/DefaultReturn.py' % self.dirname
+        path = self.get_contract_path('DefaultReturn.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_empty_list_return(self):
@@ -183,20 +185,20 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/function_test/EmptyListReturn.py' % self.dirname
+        path = self.get_contract_path('EmptyListReturn.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
     def test_mismatched_return_type(self):
-        path = '%s/boa3_test/test_sc/function_test/MismatchedReturnType.py' % self.dirname
+        path = self.get_contract_path('MismatchedReturnType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_return_type_with_if(self):
-        path = '%s/boa3_test/test_sc/function_test/MismatchedReturnTypeWithIf.py' % self.dirname
+        path = self.get_contract_path('MismatchedReturnTypeWithIf.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
@@ -215,11 +217,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallVoidFunctionWithoutArgs.py' % self.dirname
+        path = self.get_contract_path('CallVoidFunctionWithoutArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
@@ -239,11 +241,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return 1
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithoutArgs.py' % self.dirname
+        path = self.get_contract_path('CallReturnFunctionWithoutArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
@@ -267,11 +269,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallVoidFunctionWithLiteralArgs.py' % self.dirname
+        path = self.get_contract_path('CallVoidFunctionWithLiteralArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
@@ -298,11 +300,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithLiteralArgs.py' % self.dirname
+        path = self.get_contract_path('CallReturnFunctionWithLiteralArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
 
@@ -333,11 +335,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallVoidFunctionWithVariableArgs.py' % self.dirname
+        path = self.get_contract_path('CallVoidFunctionWithVariableArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
@@ -368,11 +370,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionWithVariableArgs.py' % self.dirname
+        path = self.get_contract_path('CallReturnFunctionWithVariableArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'TestAdd', 1, 2)
         self.assertEqual(1, len(engine.result_stack))
         self.assertEqual(3, engine.result_stack[-1])
@@ -402,11 +404,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallReturnFunctionOnReturn.py' % self.dirname
+        path = self.get_contract_path('CallReturnFunctionOnReturn.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
 
@@ -447,11 +449,11 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallFunctionWithoutVariables.py' % self.dirname
+        path = self.get_contract_path('CallFunctionWithoutVariables.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1)
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', 2)
@@ -477,11 +479,11 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/function_test/CallFunctionWrittenBefore.py' % self.dirname
+        path = self.get_contract_path('CallFunctionWrittenBefore.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
 
@@ -501,16 +503,16 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnVoidFunction.py' % self.dirname
+        path = self.get_contract_path('ReturnVoidFunction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsNone(result)
 
     def test_return_void_function_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnVoidFunctionMismatchedType.py' % self.dirname
+        path = self.get_contract_path('ReturnVoidFunctionMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_return_inside_if(self):
@@ -544,11 +546,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return arg0
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnIf.py' % self.dirname
+        path = self.get_contract_path('ReturnIf.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 4)
         self.assertEqual(3, result)
         result = self.run_smart_contract(engine, path, 'Main', 5)
@@ -557,28 +559,28 @@ class TestFunction(BoaTest):
         self.assertEqual(6, result)
 
     def test_missing_return_inside_if(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnIfMissing.py' % self.dirname
+        path = self.get_contract_path('ReturnIfMissing.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_missing_return_inside_elif(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnElifMissing.py' % self.dirname
+        path = self.get_contract_path('ReturnElifMissing.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_missing_return_inside_else(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnElseMissing.py' % self.dirname
+        path = self.get_contract_path('ReturnElseMissing.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_inside_multiple_inner_if(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnMultipleInnerIf.py' % self.dirname
+        path = self.get_contract_path('ReturnMultipleInnerIf.py')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(9, result)
 
     def test_missing_return_inside_multiple_inner_if(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnMultipleInnerIfMissing.py' % self.dirname
+        path = self.get_contract_path('ReturnMultipleInnerIfMissing.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_if_expression(self):
@@ -596,18 +598,18 @@ class TestFunction(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnIfExpression.py' % self.dirname
+        path = self.get_contract_path('ReturnIfExpression.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(5, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(10, result)
 
     def test_return_if_expression_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnIfExpressionMismatched.py' % self.dirname
+        path = self.get_contract_path('ReturnIfExpressionMismatched.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_return_inside_for(self):
@@ -648,11 +650,11 @@ class TestFunction(BoaTest):
             + Opcode.RET          # return 5
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnFor.py' % self.dirname
+        path = self.get_contract_path('ReturnFor.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3])
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', (2, 5, 7))
@@ -701,11 +703,11 @@ class TestFunction(BoaTest):
             + Opcode.RET          # return x
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnForOnlyOnElse.py' % self.dirname
+        path = self.get_contract_path('ReturnForOnlyOnElse.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3])
         self.assertEqual(6, result)
         result = self.run_smart_contract(engine, path, 'Main', (2, 5, 7))
@@ -714,7 +716,7 @@ class TestFunction(BoaTest):
         self.assertEqual(0, result)
 
     def test_missing_return_inside_for_else(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnForElseMissing.py' % self.dirname
+        path = self.get_contract_path('ReturnForElseMissing.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_return_inside_while(self):
@@ -741,11 +743,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return x
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnWhile.py' % self.dirname
+        path = self.get_contract_path('ReturnWhile.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertEqual(6, result)
         result = self.run_smart_contract(engine, path, 'Main', 3)
@@ -777,11 +779,11 @@ class TestFunction(BoaTest):
             + Opcode.RET            # return x
         )
 
-        path = '%s/boa3_test/test_sc/function_test/ReturnWhileOnlyOnElse.py' % self.dirname
+        path = self.get_contract_path('ReturnWhileOnlyOnElse.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'Main', 3)
@@ -792,12 +794,12 @@ class TestFunction(BoaTest):
         self.assertEqual(100, result)
 
     def test_missing_return_inside_while_without_else(self):
-        path = '%s/boa3_test/test_sc/function_test/ReturnWhileWithoutElse.py' % self.dirname
+        path = self.get_contract_path('ReturnWhileWithoutElse.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_multiple_function_large_call(self):
-        path = '%s/boa3_test/test_sc/function_test/MultipleFunctionLargeCall.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('MultipleFunctionLargeCall.py')
+        engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'main', 'calculate', [1])
         self.assertIsNone(result)
@@ -862,11 +864,11 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/function_test/FunctionWithDefaultArgument.py' % self.dirname
+        path = self.get_contract_path('FunctionWithDefaultArgument.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([6, 11], result)
 
@@ -905,20 +907,20 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/function_test/FunctionWithOnlyDefaultArguments.py' % self.dirname
+        path = self.get_contract_path('FunctionWithOnlyDefaultArguments.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([6, 9, 11, 0], result)
 
     def test_function_with_default_argument_between_other_args(self):
-        path = '%s/boa3_test/test_sc/function_test/FunctionWithDefaultArgumentBetweenArgs.py' % self.dirname
+        path = self.get_contract_path('FunctionWithDefaultArgumentBetweenArgs.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_call_function_with_kwargs(self):
-        path = '%s/boa3_test/test_sc/function_test/CallFunctionWithKwargs.py' % self.dirname
+        path = self.get_contract_path('CallFunctionWithKwargs.py')
         self.assertCompilerLogs(InternalError, path)

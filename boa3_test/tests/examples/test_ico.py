@@ -7,6 +7,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestTemplate(BoaTest):
 
+    default_folder: str = 'examples'
+
     OWNER_SCRIPT_HASH = bytes(20)
     OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
     OTHER_ACCOUNT_2 = bytes(range(20))
@@ -14,12 +16,12 @@ class TestTemplate(BoaTest):
     KYC_WHITELIST_PREFIX = b'KYCWhitelistApproved'
 
     def test_ico_compile(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
+        path = self.get_contract_path('ico.py')
         Boa3.compile(path)
 
     def test_ico_deploy(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         # needs the owner signature
         result = self.run_smart_contract(engine, path, 'deploy',
@@ -44,8 +46,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(False, result)
 
     def test_ico_verify(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'verify',
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
@@ -58,8 +60,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
     def test_ico_totalSupply(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
         total_supply = 10_000_000 * 10 ** 8
 
         result = self.run_smart_contract(engine, path, 'totalSupply',
@@ -76,22 +78,22 @@ class TestTemplate(BoaTest):
         self.assertEqual(total_supply, result)
 
     def test_ico_symbol(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'symbol')
         self.assertEqual('ICO', result)
 
     def test_ico_decimals(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'decimals')
         self.assertEqual(8, result)
 
     def test_ico_total_balance_of(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(0, result)
 
@@ -110,8 +112,8 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_ico_kyc_register(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         # don't include if not signed by the administrator
         result = self.run_smart_contract(engine, path, 'kyc_register',
@@ -133,8 +135,8 @@ class TestTemplate(BoaTest):
         self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 in engine.storage)
 
     def test_ico_kyc_remove(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         # don't remove if not signed by the administrator
         result = self.run_smart_contract(engine, path, 'kyc_remove',
@@ -156,8 +158,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(1, result)
 
     def test_ico_approve(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         approved_amount = 100 * 10 ** 8
 
@@ -219,8 +221,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
     def test_ico_allowance(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         approved_amount = 100 * 10 ** 8
 
@@ -247,8 +249,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(approved_amount, result)
 
     def test_ico_transferFrom(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         transferred_amount = 100 * 10 ** 8
 
@@ -347,8 +349,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(balance_receiver_before, balance_receiver_after)
 
     def test_ico_mint(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -379,8 +381,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(owner_balance_before + minted_amount, owner_balance_after)
 
     def test_ico_refund(self):
-        path = '%s/boa3_test/examples/ico.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('ico.py')
+        engine = TestEngine()
         transferred_amount = 10_000
 
         # should fail script hash length is not 20

@@ -9,6 +9,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestUnion(BoaTest):
 
+    default_folder: str = 'test_sc/union_test'
+
     def test_union_return(self):
         integer = Integer(42).to_byte_array()
         string = String('42').to_bytes()
@@ -31,11 +33,11 @@ class TestUnion(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/union_test/UnionReturn.py' % self.dirname
+        path = self.get_contract_path('UnionReturn.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', True)
         self.assertEqual(42, result)
 
@@ -61,15 +63,15 @@ class TestUnion(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/union_test/UnionVariableReassign.py' % self.dirname
+        path = self.get_contract_path('UnionVariableReassign.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_union_variable_argument(self):
-        path = '%s/boa3_test/test_sc/union_test/UnionVariableArgument.py' % self.dirname
+        path = self.get_contract_path('UnionVariableArgument.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 'unittest')
         self.assertEqual('string', result)
 
@@ -77,10 +79,10 @@ class TestUnion(BoaTest):
         self.assertEqual('boolean', result)
 
     def test_union_isinstance_validation(self):
-        path = '%s/boa3_test/test_sc/union_test/UnionIsInstanceValidation.py' % self.dirname
+        path = self.get_contract_path('UnionIsInstanceValidation.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 'unittest')
         self.assertEqual('unittest', result)
 
@@ -88,9 +90,9 @@ class TestUnion(BoaTest):
         self.assertEqual('boolean', result)
 
     def test_union_int_none(self):
-        path = '%s/boa3_test/test_sc/union_test/UnionIntNone.py' % self.dirname
+        path = self.get_contract_path('UnionIntNone.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(42, result)

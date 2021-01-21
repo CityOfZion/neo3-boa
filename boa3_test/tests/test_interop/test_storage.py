@@ -12,6 +12,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestStorageInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/storage'
+
     def test_storage_get_bytes_key(self):
         expected_output = (
             Opcode.INITSLOT
@@ -34,7 +36,7 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetBytesKey.py' % self.dirname
+        path = self.get_contract_path('StorageGetBytesKey.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -60,11 +62,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetStrKey.py' % self.dirname
+        path = self.get_contract_path('StorageGetStrKey.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'example',
                                          expected_result_type=bytes)
         self.assertEqual(b'', result)
@@ -82,7 +84,7 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(Integer(42).to_byte_array(), result)
 
     def test_storage_get_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetMismatchedType.py' % self.dirname
+        path = self.get_contract_path('StorageGetMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_get_context(self):
@@ -91,19 +93,19 @@ class TestStorageInterop(BoaTest):
             + Interop.StorageGetContext.interop_method_hash
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageGetContext.py' % self.dirname
+        path = self.get_contract_path('StorageGetContext.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
     def test_storage_put_bytes_key_bytes_value(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutBytesKeyBytesValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutBytesKeyBytesValue.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         stored_value = b'\x01\x02\x03'
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
         self.assertIsVoid(result)
@@ -146,11 +148,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutBytesKeyIntValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutBytesKeyIntValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         stored_value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
         self.assertIsVoid(result)
@@ -191,11 +193,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutBytesKeyStrValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutBytesKeyStrValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         stored_value = String('123').to_bytes()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
         self.assertIsVoid(result)
@@ -216,10 +218,10 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
     def test_storage_put_str_key_bytes_value(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutStrKeyBytesValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutStrKeyBytesValue.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         stored_value = b'\x01\x02\x03'
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
         self.assertIsVoid(result)
@@ -262,11 +264,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutStrKeyIntValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutStrKeyIntValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         stored_value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
         self.assertIsVoid(result)
@@ -307,11 +309,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutStrKeyStrValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutStrKeyStrValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         stored_value = String('123').to_bytes()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
         self.assertIsVoid(result)
@@ -332,11 +334,11 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(stored_value, engine.storage[b'test2'])
 
     def test_storage_put_mismatched_type_key(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutMismatchedTypeKey.py' % self.dirname
+        path = self.get_contract_path('StoragePutMismatchedTypeKey.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_put_mismatched_type_value(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StoragePutMismatchedTypeValue.py' % self.dirname
+        path = self.get_contract_path('StoragePutMismatchedTypeValue.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_delete_bytes_key(self):
@@ -352,11 +354,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageDeleteBytesKey.py' % self.dirname
+        path = self.get_contract_path('StorageDeleteBytesKey.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', b'example')
         self.assertIsVoid(result)
         self.assertFalse(b'example' in engine.storage)
@@ -380,11 +382,11 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageDeleteStrKey.py' % self.dirname
+        path = self.get_contract_path('StorageDeleteStrKey.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'example')
         self.assertIsVoid(result)
         self.assertFalse(b'example' in engine.storage)
@@ -396,27 +398,27 @@ class TestStorageInterop(BoaTest):
         self.assertFalse(b'example' in engine.storage)
 
     def test_storage_delete_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageDeleteMismatchedType.py' % self.dirname
+        path = self.get_contract_path('StorageDeleteMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_storage_find_bytes_prefix(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageFindBytesPrefix.py' % self.dirname
+        path = self.get_contract_path('StorageFindBytesPrefix.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', b'example')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
         # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
 
     def test_storage_find_str_prefix(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageFindStrPrefix.py' % self.dirname
+        path = self.get_contract_path('StorageFindStrPrefix.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
         # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
 
     def test_storage_find_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/storage/StorageFindMismatchedType.py' % self.dirname
+        path = self.get_contract_path('StorageFindMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)

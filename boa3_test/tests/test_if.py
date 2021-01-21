@@ -9,6 +9,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestIf(BoaTest):
 
+    default_folder: str = 'test_sc/if_test'
+
     def test_if_constant_condition(self):
         expected_output = (
             Opcode.INITSLOT
@@ -25,11 +27,11 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/if_test/ConstantCondition.py' % self.dirname
+        path = self.get_contract_path('ConstantCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(2, result)
 
@@ -49,28 +51,28 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/if_test/VariableCondition.py' % self.dirname
+        path = self.get_contract_path('VariableCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(0, result)
 
     def test_if_mismatched_type_condition(self):
-        path = '%s/boa3_test/test_sc/if_test/MismatchedTypeCondition.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeCondition.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_if_no_condition(self):
-        path = '%s/boa3_test/test_sc/if_test/IfWithoutCondition.py' % self.dirname
+        path = self.get_contract_path('IfWithoutCondition.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_if_no_body(self):
-        path = '%s/boa3_test/test_sc/if_test/IfWithoutBody.py' % self.dirname
+        path = self.get_contract_path('IfWithoutBody.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -102,11 +104,11 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/if_test/NestedIf.py' % self.dirname
+        path = self.get_contract_path('NestedIf.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(5, result)
         result = self.run_smart_contract(engine, path, 'Main', True, False)
@@ -135,18 +137,18 @@ class TestIf(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/if_test/IfElse.py' % self.dirname
+        path = self.get_contract_path('IfElse.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(10, result)
 
     def test_else_no_body(self):
-        path = '%s/boa3_test/test_sc/if_test/ElseWithoutBody.py' % self.dirname
+        path = self.get_contract_path('ElseWithoutBody.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -174,24 +176,24 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/if_test/IfElif.py' % self.dirname
+        path = self.get_contract_path('IfElif.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(0, result)
 
     def test_elif_no_condition(self):
-        path = '%s/boa3_test/test_sc/if_test/ElifWithoutCondition.py' % self.dirname
+        path = self.get_contract_path('ElifWithoutCondition.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_elif_no_body(self):
-        path = '%s/boa3_test/test_sc/if_test/ElifWithoutBody.py' % self.dirname
+        path = self.get_contract_path('ElifWithoutBody.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -216,11 +218,11 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/if_test/RelationalCondition.py' % self.dirname
+        path = self.get_contract_path('RelationalCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 5)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'Main', 10)
@@ -278,11 +280,11 @@ class TestIf(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/if_test/MultipleBranches.py' % self.dirname
+        path = self.get_contract_path('MultipleBranches.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', -10)
         self.assertEqual(0, result)
         result = self.run_smart_contract(engine, path, 'Main', 2)
@@ -312,31 +314,31 @@ class TestIf(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/if_test/IfExpVariableCondition.py' % self.dirname
+        path = self.get_contract_path('IfExpVariableCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(3, result)
 
     def test_if_expression_without_else_branch(self):
-        path = '%s/boa3_test/test_sc/if_test/IfExpWithoutElse.py' % self.dirname
+        path = self.get_contract_path('IfExpWithoutElse.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_if_expression_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/if_test/MismatchedIfExp.py' % self.dirname
+        path = self.get_contract_path('MismatchedIfExp.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_inner_if_else(self):
-        path = '%s/boa3_test/test_sc/if_test/InnerIfElse.py' % self.dirname
+        path = self.get_contract_path('InnerIfElse.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 4, 3, 2, 1)
         self.assertEqual(3, result)
 
@@ -356,10 +358,10 @@ class TestIf(BoaTest):
         self.assertEqual(22, result)
 
     def test_if_is_instance_condition(self):
-        path = '%s/boa3_test/test_sc/if_test/IfIsInstanceCondition.py' % self.dirname
+        path = self.get_contract_path('IfIsInstanceCondition.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'example', 4)
         self.assertEqual(4, result)
 
@@ -373,10 +375,10 @@ class TestIf(BoaTest):
         self.assertEqual(-1, result)
 
     def test_if_else_is_instance_condition(self):
-        path = '%s/boa3_test/test_sc/if_test/IfElseIsInstanceCondition.py' % self.dirname
+        path = self.get_contract_path('IfElseIsInstanceCondition.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'example', 4)
         self.assertEqual(4, result)
 
@@ -390,10 +392,10 @@ class TestIf(BoaTest):
         self.assertEqual(-1, result)
 
     def test_if_else_is_instance_condition_with_union_variable(self):
-        path = '%s/boa3_test/test_sc/if_test/IfElseIsInstanceConditionWithUnionVariable.py' % self.dirname
+        path = self.get_contract_path('IfElseIsInstanceConditionWithUnionVariable.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'example', 4,
                                          expected_result_type=bytes)
         self.assertEqual(b'\x04', result)
@@ -411,10 +413,10 @@ class TestIf(BoaTest):
         self.assertEqual(b'\x01', result)
 
     def test_if_else_multiple_is_instance_condition_with_union_variable(self):
-        path = '%s/boa3_test/test_sc/if_test/IfElseMultipleIsInstanceConditionWithUnionVariable.py' % self.dirname
+        path = self.get_contract_path('IfElseMultipleIsInstanceConditionWithUnionVariable.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'example', 4)
         self.assertEqual(16, result)
 

@@ -169,11 +169,13 @@ Debugger launch configuration example:
 
 #### Downloading
 
-Clone neo-devpack-dotnet on neo3-boa root folder and compile the TestEngine.
+Clone neo-devpack-dotnet project and compile the TestEngine.
+
+> Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
-$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable
+$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 
 #### Updating
@@ -181,7 +183,7 @@ $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o 
 Go into the neo-devpack-dotnet, pull and recompile.
 ```shell
 ${path-to-folder}/neo-devpack-dotnet git pull
-${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
+${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 
 #### Testing
@@ -197,7 +199,7 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3.neo.smart_contract.VoidType import VoidType
 
 def test_hello_world_main():
-    root_folder = '{path-to-folder}'
+    root_folder = '{path-to-test-engine-folder}'
     path = '%s/boa3_test/examples/HelloWorld.nef' % root_folder
     engine = TestEngine(root_folder)
 
@@ -214,6 +216,16 @@ You can [read the docs here](https://docs.coz.io/neo3/boa/index.html). Please ch
 For an extensive collection of examples:
 - [Smart contract examples](/boa3_test/examples)
 - [Features tests](/boa3_test/test_sc)
+
+## Tests
+
+Install [`neo3-boa`](#installation) and the [`TestEngine`](#testengine) and run the following command
+
+> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/env.py)
+
+```
+python -m unittest discover boa3_test
+```
 
 ## Python Supported Features
 
