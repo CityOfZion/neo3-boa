@@ -19,8 +19,8 @@ On Windows::
     $ python3 -m venv venv
     $ venv\Scripts\activate.bat
 
-Pip (Recomended)
-^^^^^^^^^^^^^^^^
+Pip (Recommended)
+^^^^^^^^^^^^^^^^^
 
 ::
 
