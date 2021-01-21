@@ -12,11 +12,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestString(BoaTest):
 
+    default_folder: str = 'test_sc/string_test'
+
     def test_string_get_value(self):
-        path = '%s/boa3_test/test_sc/string_test/GetValue.py' % self.dirname
+        path = self.get_contract_path('GetValue.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'unit')
         self.assertEqual('u', result)
         result = self.run_smart_contract(engine, path, 'Main', '123')
@@ -26,10 +28,10 @@ class TestString(BoaTest):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_string_get_value_to_variable(self):
-        path = '%s/boa3_test/test_sc/string_test/GetValueToVariable.py' % self.dirname
+        path = self.get_contract_path('GetValueToVariable.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'unit')
         self.assertEqual('u', result)
         result = self.run_smart_contract(engine, path, 'Main', '123')
@@ -39,22 +41,22 @@ class TestString(BoaTest):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_string_set_value(self):
-        path = '%s/boa3_test/test_sc/string_test/SetValue.py' % self.dirname
+        path = self.get_contract_path('SetValue.py')
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_string_slicing(self):
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingLiteralValues.py' % self.dirname
+        path = self.get_contract_path('StringSlicingLiteralValues.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('i', result)
 
     def test_string_slicing_with_variables(self):
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingVariableValues.py' % self.dirname
+        path = self.get_contract_path('StringSlicingVariableValues.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('i', result)
 
@@ -86,11 +88,11 @@ class TestString(BoaTest):
             + Opcode.LEFT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingNegativeStart.py' % self.dirname
+        path = self.get_contract_path('StringSlicingNegativeStart.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'unit_', result)
@@ -127,11 +129,11 @@ class TestString(BoaTest):
             + Opcode.RIGHT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingNegativeEnd.py' % self.dirname
+        path = self.get_contract_path('StringSlicingNegativeEnd.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(b'test', result)
 
@@ -162,11 +164,11 @@ class TestString(BoaTest):
             + Opcode.LEFT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingStartOmitted.py' % self.dirname
+        path = self.get_contract_path('StringSlicingStartOmitted.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'uni', result)
@@ -188,11 +190,11 @@ class TestString(BoaTest):
             + byte_input
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingOmitted.py' % self.dirname
+        path = self.get_contract_path('StringSlicingOmitted.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('unit_test', result)
 
@@ -226,19 +228,19 @@ class TestString(BoaTest):
             + Opcode.RIGHT
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingEndOmitted.py' % self.dirname
+        path = self.get_contract_path('StringSlicingEndOmitted.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'it_test', result)
 
     def test_string_slicing_omitted_stride(self):
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingWithStride.py' % self.dirname
+        path = self.get_contract_path('StringSlicingWithStride.py')
         self.assertCompilerLogs(InternalError, path)
 
     def test_string_slicing_omitted_with_stride(self):
-        path = '%s/boa3_test/test_sc/string_test/StringSlicingOmittedWithStride.py' % self.dirname
+        path = self.get_contract_path('StringSlicingOmittedWithStride.py')
         self.assertCompilerLogs(InternalError, path)

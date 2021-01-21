@@ -13,6 +13,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestBlockchainInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/blockchain'
+
     def test_get_current_height(self):
         expected_output = (
             Opcode.SYSCALL
@@ -20,7 +22,7 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/blockchain/CurrentHeight.py' % self.dirname
+        path = self.get_contract_path('CurrentHeight.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -34,7 +36,7 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/blockchain/CurrentHeightCantAssign.py' % self.dirname
+        path = self.get_contract_path('CurrentHeightCantAssign.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -62,15 +64,15 @@ class TestBlockchainInterop(BoaTest):
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/interop_test/blockchain/GetContract.py' % self.dirname
+        path = self.get_contract_path('GetContract.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', bytes(20))
         self.assertIsNone(result)
 
-        call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
 
         script, manifest = self.get_output(call_contract_path)

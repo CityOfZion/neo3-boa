@@ -14,14 +14,19 @@ from os import path
 
 
 class TestEngine:
-    def __init__(self, root_path: str):
-        if path.exists('{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)):
-            self._test_engine_path = '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)
-        else:
-            raise FileNotFoundError("File at " + '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path) + " was not "
-                                    "found.\nVisit the docs or the README file and search for 'TestEngine' to correctly"
-                                    " install it.")
+    def __init__(self, root_path: Optional[str] = None):
+        if root_path is None:
+            import env
+            root_path = env.TEST_ENGINE_DIRECTORY
 
+        engine_path = '{0}/Neo.TestEngine.dll'.format(root_path)
+        if not path.exists(engine_path):
+            raise FileNotFoundError(
+                "File at {0} was not found.\n"
+                "Visit the docs or the README file and search for 'TestEngine' to correctly install it."
+                .format(engine_path))
+
+        self._test_engine_path = engine_path
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []

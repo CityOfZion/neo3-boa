@@ -8,6 +8,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestIteratorInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/iterator'
+
     def test_create_iterator_list(self):
         expected_output = (
             Opcode.INITSLOT
@@ -18,11 +20,11 @@ class TestIteratorInterop(BoaTest):
             + Interop.IteratorCreate.interop_method_hash
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorCreateList.py' % self.dirname
+        path = self.get_contract_path('IteratorCreateList.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'list_iterator', [])
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
@@ -39,11 +41,11 @@ class TestIteratorInterop(BoaTest):
             + Interop.IteratorCreate.interop_method_hash
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorCreateDict.py' % self.dirname
+        path = self.get_contract_path('IteratorCreateDict.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'dict_iterator', {})
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
@@ -51,14 +53,14 @@ class TestIteratorInterop(BoaTest):
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
     def test_create_iterator_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorCreateMismatchedTypes.py' % self.dirname
+        path = self.get_contract_path('IteratorCreateMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_iterator_next(self):
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorNext.py' % self.dirname
+        path = self.get_contract_path('IteratorNext.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'has_next', [1])
         self.assertEqual(True, result)
 
@@ -72,10 +74,10 @@ class TestIteratorInterop(BoaTest):
         self.assertEqual(False, result)
 
     def test_iterator_value(self):
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorValue.py' % self.dirname
+        path = self.get_contract_path('IteratorValue.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'list_iterator', [1])
         self.assertEqual(1, result)
 
@@ -89,9 +91,9 @@ class TestIteratorInterop(BoaTest):
         self.assertIsNone(result)
 
     def test_iterator_value_dict_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorDictValueMismatchedType.py' % self.dirname
+        path = self.get_contract_path('IteratorDictValueMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_iterator_value_list_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/iterator/IteratorListValueMismatchedType.py' % self.dirname
+        path = self.get_contract_path('IteratorListValueMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)

@@ -10,6 +10,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestCryptoInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/crypto'
+
     def test_ripemd160_str(self):
         expected_output = (
             Opcode.INITSLOT
@@ -20,12 +22,12 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Ripemd160Str.py' % self.dirname
+        path = self.get_contract_path('Ripemd160Str.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         import hashlib
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', b'unit test')
         result = self.run_smart_contract(engine, path, 'Main', 'unit test')
         self.assertEqual(expected_result.digest(), result)
@@ -36,56 +38,56 @@ class TestCryptoInterop(BoaTest):
 
     def test_ripemd160_int(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Ripemd160Int.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Ripemd160Int.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_bool(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Ripemd160Bool.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Ripemd160Bool.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_bytes(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Ripemd160Bytes.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Ripemd160Bytes.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', b'unit test')
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
     def test_hash160_str(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash160Str.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash160Str.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
         result = self.run_smart_contract(engine, path, 'Main', 'unit test')
         self.assertEqual(expected_result, result)
 
     def test_hash160_int(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash160Int.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash160Int.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(10).to_byte_array()).digest())).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
 
     def test_hash160_bool(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash160Bool.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash160Bool.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(1).to_byte_array()).digest())).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
 
     def test_hash160_bytes(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash160Bytes.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash160Bytes.py')
+        engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
@@ -100,12 +102,12 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Sha256Str.py' % self.dirname
+        path = self.get_contract_path('Sha256Str.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         import hashlib
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         expected_result = hashlib.sha256(b'unit test')
         result = self.run_smart_contract(engine, path, 'Main', 'unit test')
         self.assertEqual(expected_result.digest(), result)
@@ -116,56 +118,56 @@ class TestCryptoInterop(BoaTest):
 
     def test_sha256_int(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Sha256Int.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Sha256Int.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(Integer(10).to_byte_array())
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_bool(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Sha256Bool.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Sha256Bool.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(Integer(1).to_byte_array())
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_bytes(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Sha256Bytes.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Sha256Bytes.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(b'unit test')
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
     def test_hash256_str(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash256Str.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash256Str.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
         result = self.run_smart_contract(engine, path, 'Main', 'unit test')
         self.assertEqual(expected_result, result)
 
     def test_hash256_int(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash256Int.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash256Int.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(Integer(10).to_byte_array()).digest()).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
 
     def test_hash256_bool(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash256Bool.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash256Bool.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(Integer(1).to_byte_array()).digest()).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
 
     def test_hash256_bytes(self):
         import hashlib
-        path = '%s/boa3_test/test_sc/interop_test/crypto/Hash256Bytes.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Hash256Bytes.py')
+        engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
@@ -210,7 +212,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256r1Str.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256r1Str.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -251,7 +253,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256r1Int.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256r1Int.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -292,7 +294,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256r1Bool.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256r1Bool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -336,7 +338,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256r1Byte.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256r1Byte.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -380,7 +382,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256k1Str.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256k1Str.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -421,7 +423,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256k1Int.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256k1Int.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -462,7 +464,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256k1Bool.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256k1Bool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -506,7 +508,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/CheckMultisigWithECDsaSecp256k1Byte.py' % self.dirname
+        path = self.get_contract_path('CheckMultisigWithECDsaSecp256k1Byte.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -530,7 +532,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256r1Str.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256r1Str.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -551,7 +553,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256r1Bool.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256r1Bool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -572,7 +574,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256r1Int.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256r1Int.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -596,12 +598,12 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256r1Bytes.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256r1Bytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256r1MismatchedType.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256r1MismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256k1_str(self):
@@ -624,7 +626,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256k1Str.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256k1Str.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -645,7 +647,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256k1Bool.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -666,7 +668,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256k1Int.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256k1Int.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -690,10 +692,10 @@ class TestCryptoInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256k1Bytes.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256k1Bytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/crypto/VerifyWithECDsaSecp256k1MismatchedType.py' % self.dirname
+        path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)

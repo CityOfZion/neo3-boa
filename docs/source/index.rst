@@ -16,6 +16,7 @@ Welcome to neo3-boa's documentation!
    compiling-your-smart-contract
    debugger-ready
    testengine
+   unit-tests
    examples
    python-supported-features
    package-reference

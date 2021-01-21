@@ -15,11 +15,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestRuntimeInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/runtime'
+
     def test_check_witness(self):
-        path = '%s/boa3_test/test_sc/interop_test/runtime/CheckWitness.py' % self.dirname
+        path = self.get_contract_path('CheckWitness.py')
         account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', account)
         self.assertEqual(False, result)
 
@@ -28,10 +30,10 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(True, result)
 
     def test_check_witness_imported_as(self):
-        path = '%s/boa3_test/test_sc/interop_test/runtime/CheckWitnessImportedAs.py' % self.dirname
+        path = self.get_contract_path('CheckWitnessImportedAs.py')
         account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', account)
         self.assertEqual(False, result)
 
@@ -40,7 +42,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(True, result)
 
     def test_check_witness_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/runtime/CheckWitnessMismatchedType.py' % self.dirname
+        path = self.get_contract_path('CheckWitnessMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_notify_str(self):
@@ -61,11 +63,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifyStr.py' % self.dirname
+        path = self.get_contract_path('NotifyStr.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -88,11 +90,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifyInt.py' % self.dirname
+        path = self.get_contract_path('NotifyInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -115,11 +117,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifyBool.py' % self.dirname
+        path = self.get_contract_path('NotifyBool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -142,11 +144,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifyNone.py' % self.dirname
+        path = self.get_contract_path('NotifyNone.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -174,11 +176,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifySequence.py' % self.dirname
+        path = self.get_contract_path('NotifySequence.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -188,7 +190,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(([2, 3, 5, 7],), event_notifications[0].arguments)
 
     def test_log_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/runtime/LogMismatchedValueInt.py' % self.dirname
+        path = self.get_contract_path('LogMismatchedValueInt.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_log_str(self):
@@ -202,11 +204,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/LogStr.py' % self.dirname
+        path = self.get_contract_path('LogStr.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
@@ -217,11 +219,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/Trigger.py' % self.dirname
+        path = self.get_contract_path('Trigger.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(TriggerType.APPLICATION, result)
 
@@ -239,11 +241,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/TriggerApplication.py' % self.dirname
+        path = self.get_contract_path('TriggerApplication.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
@@ -261,11 +263,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/TriggerVerification.py' % self.dirname
+        path = self.get_contract_path('TriggerVerification.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(False, result)
 
@@ -276,7 +278,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/CallingScriptHash.py' % self.dirname
+        path = self.get_contract_path('CallingScriptHash.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -290,7 +292,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/CallingScriptHashCantAssign.py' % self.dirname
+        path = self.get_contract_path('CallingScriptHashCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -301,7 +303,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/ExecutingScriptHash.py' % self.dirname
+        path = self.get_contract_path('ExecutingScriptHash.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -315,7 +317,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/ExecutingScriptHashCantAssign.py' % self.dirname
+        path = self.get_contract_path('ExecutingScriptHashCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -326,11 +328,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/BlockTime.py' % self.dirname
+        path = self.get_contract_path('BlockTime.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         new_block = engine.increase_block()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(new_block.timestamp, result)
@@ -345,7 +347,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/BlockTimeCantAssign.py' % self.dirname
+        path = self.get_contract_path('BlockTimeCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -356,7 +358,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/GasLeft.py' % self.dirname
+        path = self.get_contract_path('GasLeft.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -370,7 +372,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/GasLeftCantAssign.py' % self.dirname
+        path = self.get_contract_path('GasLeftCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -381,7 +383,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/InvocationCounter.py' % self.dirname
+        path = self.get_contract_path('InvocationCounter.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -395,20 +397,20 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/InvocationCounterCantAssign.py' % self.dirname
+        path = self.get_contract_path('InvocationCounterCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_notifications(self):
-        path = '%s/boa3_test/test_sc/interop_test/runtime/GetNotifications.py' % self.dirname
+        path = self.get_contract_path('GetNotifications.py')
         output, manifest = self.compile_and_save(path)
         script = hash160(output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'without_param', [])
         self.assertEqual([], result)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
         expected_result = []
         for x in [1, 2, 3]:
@@ -417,11 +419,11 @@ class TestRuntimeInterop(BoaTest):
                                     [x]])
         self.assertEqual(expected_result, result)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'with_param', [], script)
         self.assertEqual([], result)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], script)
         expected_result = []
         for x in [1, 2, 3]:
@@ -430,7 +432,7 @@ class TestRuntimeInterop(BoaTest):
                                     [x]])
         self.assertEqual(expected_result, result)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
         self.assertEqual([], result)
 
@@ -441,7 +443,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/EntryScriptHash.py' % self.dirname
+        path = self.get_contract_path('EntryScriptHash.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -455,7 +457,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/EntryScriptHashCantAssign.py' % self.dirname
+        path = self.get_contract_path('EntryScriptHashCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -466,11 +468,11 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/GetPlatform.py' % self.dirname
+        path = self.get_contract_path('GetPlatform.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual('NEO', result)
 
@@ -484,6 +486,6 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/runtime/GetPlatformCantAssign.py' % self.dirname
+        path = self.get_contract_path('GetPlatformCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)

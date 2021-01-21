@@ -8,6 +8,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestFor(BoaTest):
 
+    default_folder: str = 'test_sc/for_test'
+
     def test_for_tuple_condition(self):
         jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-22).to_byte_array(min_length=1, signed=True)
@@ -56,28 +58,28 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/for_test/TupleCondition.py' % self.dirname
+        path = self.get_contract_path('TupleCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(23, result)
 
     def test_for_string_condition(self):
-        path = '%s/boa3_test/test_sc/for_test/StringCondition.py' % self.dirname
+        path = self.get_contract_path('StringCondition.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('5', result)
 
     def test_for_mismatched_type_condition(self):
-        path = '%s/boa3_test/test_sc/for_test/MismatchedTypeCondition.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeCondition.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_for_no_condition(self):
-        path = '%s/boa3_test/test_sc/for_test/NoCondition.py' % self.dirname
+        path = self.get_contract_path('NoCondition.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -163,11 +165,11 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/for_test/NestedFor.py' % self.dirname
+        path = self.get_contract_path('NestedFor.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(529, result)
 
@@ -225,11 +227,11 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/for_test/ForElse.py' % self.dirname
+        path = self.get_contract_path('ForElse.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(24, result)
 
@@ -292,11 +294,11 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/for_test/ForContinue.py' % self.dirname
+        path = self.get_contract_path('ForContinue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(20, result)
 
@@ -362,11 +364,11 @@ class TestFor(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/for_test/ForBreak.py' % self.dirname
+        path = self.get_contract_path('ForBreak.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
 
@@ -440,14 +442,14 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/for_test/ForBreakElse.py' % self.dirname
+        path = self.get_contract_path('ForBreakElse.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
 
     def test_for_iterate_dict(self):
-        path = '%s/boa3_test/test_sc/for_test/ForIterateDict.py' % self.dirname
+        path = self.get_contract_path('ForIterateDict.py')
         self.assertCompilerLogs(MismatchedTypes, path)

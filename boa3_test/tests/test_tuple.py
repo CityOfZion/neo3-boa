@@ -13,6 +13,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestTuple(BoaTest):
 
+    default_folder: str = 'test_sc/tuple_test'
+
     def test_tuple_int_values(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -27,7 +29,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/IntTuple.py' % self.dirname
+        path = self.get_contract_path('IntTuple.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -55,7 +57,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/StrTuple.py' % self.dirname
+        path = self.get_contract_path('StrTuple.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -73,7 +75,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/BoolTuple.py' % self.dirname
+        path = self.get_contract_path('BoolTuple.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -97,7 +99,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/VariableTuple.py' % self.dirname
+        path = self.get_contract_path('VariableTuple.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -111,7 +113,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py' % self.dirname
+        path = self.get_contract_path('EmptyTupleAssignment.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -134,11 +136,11 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/GetValue.py' % self.dirname
+        path = self.get_contract_path('GetValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
@@ -148,19 +150,19 @@ class TestTuple(BoaTest):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_non_sequence_get_value(self):
-        path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeGetValue.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeGetValue.py')
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_tuple_set_value(self):
-        path = '%s/boa3_test/test_sc/tuple_test/SetValue.py' % self.dirname
+        path = self.get_contract_path('SetValue.py')
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_non_sequence_set_value(self):
-        path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeSetValue.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeSetValue.py')
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_tuple_index_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/tuple_test/MismatchedTypeTupleIndex.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeTupleIndex.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     @unittest.skip("get values from inner arrays is not working as expected")
@@ -193,11 +195,11 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/TupleOfTuple.py' % self.dirname
+        path = self.get_contract_path('TupleOfTuple.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
         self.assertEqual(1, result)
 
@@ -225,11 +227,11 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/Nep5Main.py' % self.dirname
+        path = self.get_contract_path('Nep5Main.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'op', (1, 2, 3, 4))
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', 'op', ('a', False))
@@ -323,11 +325,11 @@ class TestTuple(BoaTest):
             + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingLiteralValues.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingLiteralValues.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2], result)
 
@@ -420,11 +422,11 @@ class TestTuple(BoaTest):
             + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingVariableValues.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingVariableValues.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2], result)
 
@@ -505,11 +507,11 @@ class TestTuple(BoaTest):
             + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeStart.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingNegativeStart.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
@@ -588,11 +590,11 @@ class TestTuple(BoaTest):
             + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingNegativeEnd.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingNegativeEnd.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1], result)
 
@@ -671,11 +673,11 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingStartOmitted.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingStartOmitted.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1, 2], result)
 
@@ -698,11 +700,11 @@ class TestTuple(BoaTest):
             + Opcode.PACK
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmitted.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingOmitted.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1, 2, 3, 4, 5], result)
 
@@ -781,18 +783,18 @@ class TestTuple(BoaTest):
             + Opcode.DROP
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingEndOmitted.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingEndOmitted.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
     def test_tuple_slicing_omitted_stride(self):
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingWithStride.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingWithStride.py')
         self.assertCompilerLogs(InternalError, path)
 
     def test_tuple_slicing_omitted_with_stride(self):
-        path = '%s/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithStride.py' % self.dirname
+        path = self.get_contract_path('TupleSlicingOmittedWithStride.py')
         self.assertCompilerLogs(InternalError, path)

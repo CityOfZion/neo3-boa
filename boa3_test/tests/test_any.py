@@ -8,9 +8,11 @@ from boa3_test.tests.boa_test import BoaTest
 
 class TestAny(BoaTest):
 
+    default_folder: str = 'test_sc/any_test'
+
     def test_any_variable_assignments(self):
         two = String('2').to_bytes()
-        path = '%s/boa3_test/test_sc/any_test/AnyVariableAssignments.py' % self.dirname
+        path = self.get_contract_path('AnyVariableAssignments.py')
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -35,12 +37,12 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_variable_assignment_with_any(self):
-        path = '%s/boa3_test/test_sc/any_test/VariableAssignmentWithAny.py' % self.dirname
+        path = self.get_contract_path('VariableAssignmentWithAny.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_any_list(self):
         ok = String('ok').to_bytes()
-        path = '%s/boa3_test/test_sc/any_test/AnyList.py' % self.dirname
+        path = self.get_contract_path('AnyList.py')
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -60,7 +62,7 @@ class TestAny(BoaTest):
 
     def test_any_tuple(self):
         ok = String('ok').to_bytes()
-        path = '%s/boa3_test/test_sc/any_test/AnyTuple.py' % self.dirname
+        path = self.get_contract_path('AnyTuple.py')
 
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -79,7 +81,7 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_any_operation(self):
-        path = '%s/boa3_test/test_sc/any_test/OperationWithAny.py' % self.dirname
+        path = self.get_contract_path('OperationWithAny.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_function_any_param(self):
@@ -135,7 +137,7 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/any_test/FunctionAnyParam.py' % self.dirname
+        path = self.get_contract_path('FunctionAnyParam.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -186,16 +188,16 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/any_test/AnySequenceAssignments.py' % self.dirname
+        path = self.get_contract_path('AnySequenceAssignments.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_int_sequence_any_assignments(self):
-        path = '%s/boa3_test/test_sc/any_test/IntSequenceAnyAssignment.py' % self.dirname
+        path = self.get_contract_path('IntSequenceAnyAssignment.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_str_sequence_any_assignments(self):
-        path = '%s/boa3_test/test_sc/any_test/StrSequenceAnyAssignment.py' % self.dirname
+        path = self.get_contract_path('StrSequenceAnyAssignment.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_str_sequence_str_assignment(self):
@@ -211,7 +213,7 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/any_test/StrSequenceStrAssignment.py' % self.dirname
+        path = self.get_contract_path('StrSequenceStrAssignment.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -257,7 +259,7 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/any_test/SequenceOfAnySequence.py' % self.dirname
+        path = self.get_contract_path('SequenceOfAnySequence.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -286,10 +288,10 @@ class TestAny(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/any_test/SequenceOfIntSequence.py' % self.dirname
+        path = self.get_contract_path('SequenceOfIntSequence.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_sequence_of_int_sequence_fail(self):
-        path = '%s/boa3_test/test_sc/any_test/SequenceOfAnyIntSequence.py' % self.dirname
+        path = self.get_contract_path('SequenceOfAnyIntSequence.py')
         self.assertCompilerLogs(MismatchedTypes, path)

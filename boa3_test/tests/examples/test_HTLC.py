@@ -9,17 +9,19 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestTemplate(BoaTest):
 
+    default_folder: str = 'examples'
+
     OWNER_SCRIPT_HASH = bytes(20)
     OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
     OTHER_ACCOUNT_2 = bytes(range(20))
 
     def test_HTLC_compile(self):
-        path = '%s/boa3_test/examples/HTLC.py' % self.dirname
+        path = self.get_contract_path('HTLC.py')
         Boa3.compile(path)
 
     def test_HTLC_deploy(self):
-        path = '%s/boa3_test/examples/HTLC.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('HTLC.py')
+        engine = TestEngine()
 
         # deploying the smart contract
         result = self.run_smart_contract(engine, path, 'deploy',
@@ -34,8 +36,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(False, result)
 
     def test_HTLC_atomic_swap(self):
-        path = '%s/boa3_test/examples/HTLC.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('HTLC.py')
+        engine = TestEngine()
 
         # can not atomic_swap() without deploying first
         result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO, 10 * 10**8,
@@ -58,10 +60,10 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
     def test_HTLC_onPayment(self):
-        path = '%s/boa3_test/examples/HTLC.py' % self.dirname
-        engine = TestEngine(self.dirname)
-        path_contract1 = '%s/boa3_test/examples/test_native/methods.py' % self.dirname
-        path_contract2 = '%s/boa3_test/examples/test_native/example_contract_for_htlc.py' % self.dirname
+        path = self.get_contract_path('HTLC.py')
+        engine = TestEngine()
+        path_contract1 = self.get_contract_path('test_native/methods.py')
+        path_contract2 = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
@@ -94,10 +96,10 @@ class TestTemplate(BoaTest):
         # TODO: Test if onPayment is successful when update the TestEngine to make Neo/Gas transfers
 
     def test_HTLC_withdraw(self):
-        path = '%s/boa3_test/examples/HTLC.py' % self.dirname
-        engine = TestEngine(self.dirname)
-        path_contract1 = '%s/boa3_test/examples/test_native/methods.py' % self.dirname
-        path_contract2 = '%s/boa3_test/examples/test_native/example_contract_for_htlc.py' % self.dirname
+        path = self.get_contract_path('HTLC.py')
+        engine = TestEngine()
+        path_contract1 = self.get_contract_path('test_native/methods.py')
+        path_contract2 = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
@@ -136,10 +138,10 @@ class TestTemplate(BoaTest):
         # TODO: Test if the withdraw is successful when update the TestEngine to make Neo/Gas transfers
 
     def test_HTLC_refund(self):
-        path = '%s/boa3_test/examples/HTLC.py' % self.dirname
-        engine = TestEngine(self.dirname)
-        path_contract1 = '%s/boa3_test/examples/test_native/methods.py' % self.dirname
-        path_contract2 = '%s/boa3_test/examples/test_native/example_contract_for_htlc.py' % self.dirname
+        path = self.get_contract_path('HTLC.py')
+        engine = TestEngine()
+        path_contract1 = self.get_contract_path('test_native/methods.py')
+        path_contract2 = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 

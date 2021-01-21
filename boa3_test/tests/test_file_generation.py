@@ -14,8 +14,10 @@ from boa3_test.tests.boa_test import BoaTest
 
 class TestFileGeneration(BoaTest):
 
+    default_folder: str = 'test_sc/generation_test'
+
     def test_generate_files(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname
+        path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
@@ -26,7 +28,7 @@ class TestFileGeneration(BoaTest):
         self.assertTrue(os.path.exists(expected_debug_info_output))
 
     def test_generate_nef_file(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname
+        path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output = path.replace('.py', '.nef')
         Boa3.compile_and_save(path)
 
@@ -53,7 +55,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(version, nef.version.to_array())
 
     def test_generate_manifest_file_with_decorator(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname
+        path = self.get_contract_path('GenerationWithDecorator.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         output, manifest = self.compile_and_save(path)
 
@@ -107,7 +109,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_manifest_file_without_decorator(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithoutDecorator.py' % self.dirname
+        path = self.get_contract_path('GenerationWithoutDecorator.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         output, manifest = self.compile_and_save(path)
 
@@ -122,7 +124,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_manifest_file_with_event(self):
-        path = '%s/boa3_test/test_sc/event_test/EventWithArgument.py' % self.dirname
+        path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         compiler = Compiler()
         compiler.compile_and_save(path, path.replace('.py', '.nef'))
@@ -157,7 +159,7 @@ class TestFileGeneration(BoaTest):
                                  event_param['type'])
 
     def test_generate_manifest_file_with_nep5_transfer_event(self):
-        path = '%s/boa3_test/test_sc/event_test/EventNep5Transfer.py' % self.dirname
+        path = self.get_contract_path('test_sc/event_test', 'EventNep5Transfer.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         compiler = Compiler()
         compiler.compile_and_save(path, path.replace('.py', '.nef'))
@@ -192,7 +194,7 @@ class TestFileGeneration(BoaTest):
                                  event_param['type'])
 
     def test_generate_nefdbgnfo_file(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname
+        path = self.get_contract_path('GenerationWithDecorator.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
@@ -239,7 +241,7 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
 
     def test_generate_nefdbgnfo_file_with_event(self):
-        path = '%s/boa3_test/test_sc/event_test/EventWithArgument.py' % self.dirname
+        path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
@@ -277,7 +279,7 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
     def test_generate_manifest_file_with_notify_event(self):
-        path = '%s/boa3_test/test_sc/interop_test/runtime/NotifySequence.py' % self.dirname
+        path = self.get_contract_path('test_sc/interop_test/runtime', 'NotifySequence.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         output, manifest = self.compile_and_save(path)
 
@@ -297,7 +299,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(AbiType.Any, notify_event['parameters'][0]['type'])
 
     def test_generate_without_main(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithoutMain.py' % self.dirname
+        path = self.get_contract_path('GenerationWithoutMain.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         output, manifest = self.compile_and_save(path)
 
@@ -313,7 +315,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_without_main_and_public_methods(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithoutMainAndPublicMethods.py' % self.dirname
+        path = self.get_contract_path('GenerationWithoutMainAndPublicMethods.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         output, manifest = self.compile_and_save(path)
 
@@ -329,7 +331,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_manifest_file_abi_method_offset(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname
+        path = self.get_contract_path('GenerationWithDecorator.py')
         manifest_path = path.replace('.py', '.manifest.json')
 
         compiler = Compiler()
@@ -357,7 +359,7 @@ class TestFileGeneration(BoaTest):
             self.assertEqual(method['offset'], methods[method['name']].start_address)
 
     def test_generate_debug_info_with_multiple_flows(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithMultipleFlows.py' % self.dirname
+        path = self.get_contract_path('GenerationWithMultipleFlows.py')
 
         compiler = Compiler()
         compiler.compile_and_save(path, path.replace('.py', '.nef'))
@@ -402,7 +404,7 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
 
     def test_generate_init_method(self):
-        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py' % self.dirname
+        path = self.get_contract_path('test_sc/variable_test', 'GlobalAssignmentWithType.py')
 
         compiler = Compiler()
         compiler.compile_and_save(path, path.replace('.py', '.nef'))

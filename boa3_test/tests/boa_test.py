@@ -2,6 +2,7 @@ import os
 from typing import Any, Dict, Iterable, Optional, Tuple, Type
 from unittest import TestCase
 
+import env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
 from boa3.neo.smart_contract.VoidType import VoidType
@@ -22,9 +23,15 @@ class BoaTest(TestCase):
     CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
     ABORTED_CONTRACT_MSG = 'ABORT is executed'
 
+    default_folder: str = ''
+
     @classmethod
     def setUpClass(cls):
-        cls.dirname = '/'.join(os.path.abspath(__file__).split(os.sep)[:-3])
+        folders = os.path.abspath(__file__).split(os.sep)
+        cls.dirname = '/'.join(folders[:-3])
+        cls.test_root_dir = '/'.join(folders[-3:-2])
+        cls.default_test_folder = ('{0}/{1}'.format(cls.test_root_dir, cls.default_folder)
+                                   if len(cls.default_folder) else cls.test_root_dir)
 
         super(BoaTest, cls).setUpClass()
 
@@ -57,6 +64,45 @@ class BoaTest(TestCase):
     def assertIsVoid(self, obj: Any):
         if obj is not VoidType:
             self.fail('{0} is not Void'.format(obj))
+
+    def get_contract_path(self, *args: str) -> str:
+        """
+        Usages:
+            get_contract_path(contract_name)
+            get_contract_path(dir_folder, contract_name)
+            get_contract_path(root_path, dir_folder, contract_name)
+        """
+        type_error_message = 'get_contract_path() takes {0} positional argument but {1} were given'
+        num_args = len(args)
+        if num_args == 0:
+            raise TypeError(type_error_message.format(2, num_args + 1))
+        if num_args > 3:
+            raise TypeError(type_error_message.format(4, num_args + 1))
+
+        values = [None, self.default_test_folder, env.PROJECT_ROOT_DIRECTORY]
+        for index, value in enumerate(reversed(args)):
+            values[index] = value
+
+        contract_name, dir_folder, root_path = values
+
+        from os import path
+        if not path.exists(dir_folder) and root_path is env.PROJECT_ROOT_DIRECTORY:
+            path_folder = '{0}/{1}'.format(root_path, dir_folder)
+            if not path.exists(path_folder) and not dir_folder.startswith(self.test_root_dir):
+                test_inner_folder = (self.test_root_dir if dir_folder.startswith(self.default_folder)
+                                     else self.default_test_folder)
+
+                path_folder = '{0}/{1}/{2}'.format(root_path, test_inner_folder, dir_folder)
+
+            dir_folder = path_folder
+
+        if not contract_name.endswith('.py'):
+            contract_name = contract_name + '.py'
+
+        path = '{0}/{1}'.format(dir_folder, contract_name)
+        if not os.path.isfile(path):
+            raise FileNotFoundError(path)
+        return path
 
     def compile_and_save(self, path: str, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')

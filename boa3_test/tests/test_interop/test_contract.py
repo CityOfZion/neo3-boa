@@ -18,6 +18,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestContractInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/contract'
+
     def test_call_contract(self):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         expected_output = (
@@ -37,18 +39,18 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/CallScriptHash.py' % self.dirname
+        path = self.get_contract_path('CallScriptHash.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
 
         contract, manifest = self.get_output(call_contract_path)
         call_hash = hash160(contract)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
         engine.add_contract(call_contract_path)
@@ -79,18 +81,18 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/CallScriptHashWithoutArgs.py' % self.dirname
+        path = self.get_contract_path('CallScriptHashWithoutArgs.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        call_contract_path = '%s/boa3_test/test_sc/list_test/IntList.py' % self.dirname
+        call_contract_path = self.get_contract_path('test_sc/list_test', 'IntList.py')
         Boa3.compile_and_save(call_contract_path)
 
         contract, manifest = self.get_output(call_contract_path)
         call_hash = hash160(contract)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         engine.add_contract(call_contract_path)
@@ -99,11 +101,11 @@ class TestContractInterop(BoaTest):
         self.assertEqual([1, 2, 3], result)
 
     def test_call_contract_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/CallScriptHashTooManyArguments.py' % self.dirname
+        path = self.get_contract_path('CallScriptHashTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_call_contract_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/CallScriptHashTooFewArguments.py' % self.dirname
+        path = self.get_contract_path('CallScriptHashTooFewArguments.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_create_contract(self):
@@ -135,17 +137,17 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/CreateContract.py' % self.dirname
+        path = self.get_contract_path('CreateContract.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        call_contract_path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
 
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest)
 
         self.assertEqual(5, len(result))
@@ -153,11 +155,11 @@ class TestContractInterop(BoaTest):
         self.assertEqual(manifest, json.loads(result[4]))
 
     def test_create_contract_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/CreateContractTooManyArguments.py' % self.dirname
+        path = self.get_contract_path('CreateContractTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_create_contract_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/CreateContractTooFewArguments.py' % self.dirname
+        path = self.get_contract_path('CreateContractTooFewArguments.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_update_contract(self):
@@ -186,16 +188,16 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/UpdateContract.py' % self.dirname
+        path = self.get_contract_path('UpdateContract.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_update_contract_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/UpdateContractTooManyArguments.py' % self.dirname
+        path = self.get_contract_path('UpdateContractTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_update_contract_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/UpdateContractTooFewArguments.py' % self.dirname
+        path = self.get_contract_path('UpdateContractTooFewArguments.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_destroy_contract(self):
@@ -218,12 +220,12 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/DestroyContract.py' % self.dirname
+        path = self.get_contract_path('DestroyContract.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_destroy_contract_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/interop_test/contract/DestroyContractTooManyArguments.py' % self.dirname
+        path = self.get_contract_path('DestroyContractTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_get_neo_native_script_hash(self):
@@ -235,11 +237,11 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/NeoScriptHash.py' % self.dirname
+        path = self.get_contract_path('NeoScriptHash.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(value, result)
 
@@ -253,7 +255,7 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/NeoScriptHashCantAssign.py' % self.dirname
+        path = self.get_contract_path('NeoScriptHashCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -266,11 +268,11 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/GasScriptHash.py' % self.dirname
+        path = self.get_contract_path('GasScriptHash.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(value, result)
 
@@ -284,6 +286,6 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/contract/GasScriptHashCantAssign.py' % self.dirname
+        path = self.get_contract_path('GasScriptHashCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)

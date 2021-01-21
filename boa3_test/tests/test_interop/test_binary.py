@@ -10,6 +10,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestBinaryInterop(BoaTest):
 
+    default_folder: str = 'test_sc/interop_test/binary'
+
     def test_base64_encode(self):
         expected_output = (
             Opcode.INITSLOT
@@ -20,12 +22,12 @@ class TestBinaryInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base64Encode.py' % self.dirname
+        path = self.get_contract_path('Base64Encode.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         import base64
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         expected_result = base64.b64encode(b'unit test')
         result = self.run_smart_contract(engine, path, 'Main', b'unit test',
                                          expected_result_type=bytes)
@@ -50,7 +52,7 @@ class TestBinaryInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_base64_encode_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base64EncodeMismatchedType.py' % self.dirname
+        path = self.get_contract_path('Base64EncodeMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_base64_decode(self):
@@ -63,12 +65,12 @@ class TestBinaryInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base64Decode.py' % self.dirname
+        path = self.get_contract_path('Base64Decode.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         import base64
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         arg = String.from_bytes(base64.b64encode(b'unit test'))
         result = self.run_smart_contract(engine, path, 'Main', arg,
                                          expected_result_type=bytes)
@@ -93,7 +95,7 @@ class TestBinaryInterop(BoaTest):
         self.assertEqual(String(long_string).to_bytes(), result)
 
     def test_base64_decode_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base64DecodeMismatchedType.py' % self.dirname
+        path = self.get_contract_path('Base64DecodeMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_base58_encode(self):
@@ -106,12 +108,12 @@ class TestBinaryInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base58Encode.py' % self.dirname
+        path = self.get_contract_path('Base58Encode.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         import base58
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         expected_result = base58.b58encode('unit test')
         result = self.run_smart_contract(engine, path, 'Main', 'unit test',
                                          expected_result_type=bytes)
@@ -136,7 +138,7 @@ class TestBinaryInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_base58_encode_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base58EncodeMismatchedType.py' % self.dirname
+        path = self.get_contract_path('Base58EncodeMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_base58_decode(self):
@@ -149,12 +151,12 @@ class TestBinaryInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base58Decode.py' % self.dirname
+        path = self.get_contract_path('Base58Decode.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         import base58
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         arg = base58.b58encode('unit test')
         result = self.run_smart_contract(engine, path, 'Main', arg)
         self.assertEqual('unit test', result)
@@ -176,64 +178,64 @@ class TestBinaryInterop(BoaTest):
         self.assertEqual(long_string, result)
 
     def test_base58_decode_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/Base58DecodeMismatchedType.py' % self.dirname
+        path = self.get_contract_path('Base58DecodeMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_serialize_int(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/SerializeInt.py' % self.dirname
+        path = self.get_contract_path('SerializeInt.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_int',
                                          expected_result_type=bytes)
         expected_result = serialize(42)
         self.assertEqual(expected_result, result)
 
     def test_serialize_bool(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/SerializeBool.py' % self.dirname
+        path = self.get_contract_path('SerializeBool.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_bool',
                                          expected_result_type=bytes)
         expected_result = serialize(True)
         self.assertEqual(expected_result, result)
 
     def test_serialize_str(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/SerializeStr.py' % self.dirname
+        path = self.get_contract_path('SerializeStr.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_str',
                                          expected_result_type=bytes)
         expected_result = serialize('42')
         self.assertEqual(expected_result, result)
 
     def test_serialize_sequence(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/SerializeSequence.py' % self.dirname
+        path = self.get_contract_path('SerializeSequence.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_sequence',
                                          expected_result_type=bytes)
         expected_result = serialize([2, 3, 5, 7])
         self.assertEqual(expected_result, result)
 
     def test_serialize_dict(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/SerializeDict.py' % self.dirname
+        path = self.get_contract_path('SerializeDict.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_dict',
                                          expected_result_type=bytes)
         expected_result = serialize({1: 1, 2: 1, 3: 2})
         self.assertEqual(expected_result, result)
 
     def test_deserialize(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/Deserialize.py' % self.dirname
+        path = self.get_contract_path('Deserialize.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
 
         expected_result = 42
         value = serialize(expected_result)
@@ -279,5 +281,5 @@ class TestBinaryInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_deserialize_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/interop_test/binary/DeserializeMismatchedType.py' % self.dirname
+        path = self.get_contract_path('DeserializeMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)

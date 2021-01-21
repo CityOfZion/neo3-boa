@@ -15,6 +15,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestBuiltinMethod(BoaTest):
 
+    default_folder: str = 'test_sc/built_in_methods_test'
+
     # region len test
 
     def test_len_of_tuple(self):
@@ -34,12 +36,12 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC1     # return b
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenTuple.py' % self.dirname
+        path = self.get_contract_path('LenTuple.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
 
@@ -60,12 +62,12 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC1     # return b
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenList.py' % self.dirname
+        path = self.get_contract_path('LenList.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
 
@@ -86,33 +88,33 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.SIZE
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenString.py' % self.dirname
+        path = self.get_contract_path('LenString.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(11, result)
 
     def test_len_of_bytes(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenBytes.py' % self.dirname
+        path = self.get_contract_path('LenBytes.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(3, result)
 
     def test_len_of_no_collection(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenMismatchedType.py' % self.dirname
+        path = self.get_contract_path('LenMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_len_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenTooManyParameters.py' % self.dirname
+        path = self.get_contract_path('LenTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_len_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/LenTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('LenTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -120,11 +122,11 @@ class TestBuiltinMethod(BoaTest):
     # region append test
 
     def test_append_tuple(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTuple.py' % self.dirname
+        path = self.get_contract_path('AppendTuple.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_append_sequence(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendSequence.py' % self.dirname
+        path = self.get_contract_path('AppendSequence.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_append_mutable_sequence(self):
@@ -155,12 +157,12 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendMutableSequence.py' % self.dirname
+        path = self.get_contract_path('AppendMutableSequence.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'append_example')
         self.assertEqual([1, 2, 3, 4], result)
 
@@ -192,21 +194,21 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendMutableSequenceBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('AppendMutableSequenceBuiltinCall.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'append_example')
         self.assertEqual([1, 2, 3, 4], result)
 
     def test_append_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTooManyParameters.py' % self.dirname
+        path = self.get_contract_path('AppendTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_append_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/AppendTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('AppendTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -214,7 +216,7 @@ class TestBuiltinMethod(BoaTest):
     # region clear test
 
     def test_clear_tuple(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTuple.py' % self.dirname
+        path = self.get_contract_path('ClearTuple.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_clear_mutable_sequence(self):
@@ -248,12 +250,12 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearMutableSequence.py' % self.dirname
+        path = self.get_contract_path('ClearMutableSequence.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'clear_example')
         self.assertEqual([], result)
 
@@ -288,21 +290,21 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearMutableSequenceBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('ClearMutableSequenceBuiltinCall.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'clear_example')
         self.assertEqual([], result)
 
     def test_clear_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTooManyParameters.py' % self.dirname
+        path = self.get_contract_path('ClearTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_clear_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ClearTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('ClearTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -310,7 +312,7 @@ class TestBuiltinMethod(BoaTest):
     # region reverse test
 
     def test_reverse_tuple(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTuple.py' % self.dirname
+        path = self.get_contract_path('ReverseTuple.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_reverse_mutable_sequence(self):
@@ -329,31 +331,31 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.LDLOC0     # return a
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequence.py' % self.dirname
+        path = self.get_contract_path('ReverseMutableSequence.py')
 
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([3, 2, 1], result)
 
     @unittest.skip("reverse items doesn't work with bytestring")
     def test_reverse_mutable_sequence_with_builtin(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseMutableSequenceBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('ReverseMutableSequenceBuiltinCall.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x03\x02\x01', result)
 
     def test_reverse_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTooManyParameters.py' % self.dirname
+        path = self.get_contract_path('ReverseTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_reverse_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ReverseTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('ReverseTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -361,35 +363,35 @@ class TestBuiltinMethod(BoaTest):
     # region extend test
 
     def test_extend_tuple(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTuple.py' % self.dirname
+        path = self.get_contract_path('ExtendTuple.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_extend_sequence(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendSequence.py' % self.dirname
+        path = self.get_contract_path('ExtendSequence.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_extend_mutable_sequence(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendMutableSequence.py' % self.dirname
+        path = self.get_contract_path('ExtendMutableSequence.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([1, 2, 3, 4, 5, 6], result)
 
     def test_extend_mutable_sequence_with_builtin(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendMutableSequenceBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('ExtendMutableSequenceBuiltinCall.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([1, 2, 3, 4, 5, 6], result)
 
     def test_extend_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTooManyParameters.py' % self.dirname
+        path = self.get_contract_path('ExtendTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_extend_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ExtendTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('ExtendTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     # endregion
@@ -400,10 +402,10 @@ class TestBuiltinMethod(BoaTest):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashInt.py' % self.dirname
+        path = self.get_contract_path('ScriptHashInt.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(script_hash, result)
 
@@ -411,10 +413,10 @@ class TestBuiltinMethod(BoaTest):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashIntBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('ScriptHashIntBuiltinCall.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(script_hash, result)
 
@@ -422,10 +424,10 @@ class TestBuiltinMethod(BoaTest):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStr.py' % self.dirname
+        path = self.get_contract_path('ScriptHashStr.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(script_hash, result)
 
@@ -433,10 +435,10 @@ class TestBuiltinMethod(BoaTest):
         from boa3.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashStrBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('ScriptHashStrBuiltinCall.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(script_hash, result)
 
@@ -497,7 +499,7 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariable.py' % self.dirname
+        path = self.get_contract_path('ScriptHashVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -554,24 +556,24 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashVariableBuiltinCall.py' % self.dirname
+        path = self.get_contract_path('ScriptHashVariableBuiltinCall.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_script_hahs_too_many_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashTooManyParameters.py' % self.dirname
+        path = self.get_contract_path('ScriptHashTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_script_hash_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('ScriptHashTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_script_hash_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashMismatchedType.py' % self.dirname
+        path = self.get_contract_path('ScriptHashMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_script_hash_builtin_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ScriptHashBuiltinMismatchedType.py' % self.dirname
+        path = self.get_contract_path('ScriptHashBuiltinMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
@@ -591,11 +593,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IntToBytes.py' % self.dirname
+        path = self.get_contract_path('IntToBytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'int_to_bytes',
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
@@ -613,11 +615,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IntToBytesWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('IntToBytesWithBuiltin.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'int_to_bytes',
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
@@ -633,11 +635,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/StrToBytes.py' % self.dirname
+        path = self.get_contract_path('StrToBytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'str_to_bytes',
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
@@ -653,17 +655,17 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/StrToBytesWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('StrToBytesWithBuiltin.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'str_to_bytes',
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
     def test_to_bytes_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/ToBytesMismatchedType.py' % self.dirname
+        path = self.get_contract_path('ToBytesMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
@@ -683,11 +685,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintInt.py' % self.dirname
+        path = self.get_contract_path('PrintInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
@@ -702,24 +704,24 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintStr.py' % self.dirname
+        path = self.get_contract_path('PrintStr.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
     def test_print_list(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintList.py' % self.dirname
+        path = self.get_contract_path('PrintList.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_print_many_values(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintManyValues.py' % self.dirname
+        path = self.get_contract_path('PrintManyValues.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_print_missing_outer_function_return(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/PrintIntMissingFunctionReturn.py' % self.dirname
+        path = self.get_contract_path('PrintIntMissingFunctionReturn.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     # endregion
@@ -739,11 +741,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceIntLiteral.py' % self.dirname
+        path = self.get_contract_path('IsInstanceIntLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
@@ -758,11 +760,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceIntVariable.py' % self.dirname
+        path = self.get_contract_path('IsInstanceIntVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -783,11 +785,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolLiteral.py' % self.dirname
+        path = self.get_contract_path('IsInstanceBoolLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(False, result)
 
@@ -802,11 +804,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceBoolVariable.py' % self.dirname
+        path = self.get_contract_path('IsInstanceBoolVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -825,11 +827,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceStrLiteral.py' % self.dirname
+        path = self.get_contract_path('IsInstanceStrLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
@@ -844,11 +846,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceStrVariable.py' % self.dirname
+        path = self.get_contract_path('IsInstanceStrVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -864,11 +866,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceListLiteral.py' % self.dirname
+        path = self.get_contract_path('IsInstanceListLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
@@ -880,11 +882,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleLiteral.py' % self.dirname
+        path = self.get_contract_path('IsInstanceTupleLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
@@ -899,11 +901,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceTupleVariable.py' % self.dirname
+        path = self.get_contract_path('IsInstanceTupleVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -943,11 +945,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypes.py' % self.dirname
+        path = self.get_contract_path('IsInstanceManyTypes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -958,11 +960,11 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(True, result)
 
     def test_isinstance_many_types_with_class(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceManyTypesWithClass.py' % self.dirname
+        path = self.get_contract_path('IsInstanceManyTypesWithClass.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_isinstance_class(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/IsInstanceClass.py' % self.dirname
+        path = self.get_contract_path('IsInstanceClass.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     # endregion
@@ -970,8 +972,8 @@ class TestBuiltinMethod(BoaTest):
     # region exit test
 
     def test_exit(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/Exit.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('Exit.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', False)
         self.assertEqual(123, result)
 
@@ -983,8 +985,8 @@ class TestBuiltinMethod(BoaTest):
     # region max test
 
     def test_max_int(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/MaxInt.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('MaxInt.py')
+        engine = TestEngine()
 
         value1 = 10
         value2 = 999
@@ -993,11 +995,11 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_max_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/MaxTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('MaxTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_max_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/MaxMismatchedTypes.py' % self.dirname
+        path = self.get_contract_path('MaxMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
@@ -1005,8 +1007,8 @@ class TestBuiltinMethod(BoaTest):
     # region min test
 
     def test_min_int(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/MinInt.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('MinInt.py')
+        engine = TestEngine()
 
         val1 = 50
         val2 = 1
@@ -1015,11 +1017,11 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_min_too_few_parameters(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/MinTooFewParameters.py' % self.dirname
+        path = self.get_contract_path('MinTooFewParameters.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_min_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/built_in_methods_test/MinMismatchedTypes.py' % self.dirname
+        path = self.get_contract_path('MinMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion

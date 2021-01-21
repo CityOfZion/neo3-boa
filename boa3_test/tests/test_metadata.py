@@ -7,13 +7,15 @@ from boa3_test.tests.boa_test import BoaTest
 
 class TestMetadata(BoaTest):
 
+    default_folder: str = 'test_sc/metadata_test'
+
     def test_metadata_info_method(self):
         expected_output = (
             Opcode.PUSH5        # return 5
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoMethod.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoMethod.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -26,11 +28,11 @@ class TestMetadata(BoaTest):
         self.assertIsNone(manifest['extra'])
 
     def test_metadata_info_method_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoMethodMismatchedReturn.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoMethodMismatchedReturn.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_metadata_info_method_no_return(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoMethodNoReturn.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoMethodNoReturn.py')
         self.assertCompilerLogs(MissingReturnStatement, path)
 
     def test_metadata_info_multiple_method(self):
@@ -39,7 +41,7 @@ class TestMetadata(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoMultipleMethod.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoMultipleMethod.py')
         self.assertCompilerLogs(RedeclaredSymbol, path)
 
         output, manifest = self.compile_and_save(path)
@@ -51,19 +53,19 @@ class TestMetadata(BoaTest):
         self.assertEqual('func1', manifest['extra']['Description'])
 
     def test_metadata_method_with_args(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataMethodWithArgs.py' % self.dirname
+        path = self.get_contract_path('MetadataMethodWithArgs.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     def test_metadata_method_called_by_user_method(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataMethodCalledByUserMethod.py' % self.dirname
+        path = self.get_contract_path('MetadataMethodCalledByUserMethod.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_metadata_object_call_user_method(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataObjectCallUserMethod.py' % self.dirname
+        path = self.get_contract_path('MetadataObjectCallUserMethod.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_metadata_object_type_user_method(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataObjectTypeUserMethod.py' % self.dirname
+        path = self.get_contract_path('MetadataObjectTypeUserMethod.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_metadata_info_author(self):
@@ -72,7 +74,7 @@ class TestMetadata(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoAuthor.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoAuthor.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -82,7 +84,7 @@ class TestMetadata(BoaTest):
         self.assertEqual('Test', manifest['extra']['Author'])
 
     def test_metadata_info_author_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoAuthorMismatchedType.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoAuthorMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_metadata_info_email(self):
@@ -91,7 +93,7 @@ class TestMetadata(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoEmail.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoEmail.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -101,7 +103,7 @@ class TestMetadata(BoaTest):
         self.assertEqual('test@test.com', manifest['extra']['Email'])
 
     def test_metadata_info_email_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoEmailMismatchedType.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoEmailMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_metadata_info_description(self):
@@ -110,7 +112,7 @@ class TestMetadata(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoDescription.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoDescription.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
@@ -120,7 +122,7 @@ class TestMetadata(BoaTest):
         self.assertEqual('This is an example', manifest['extra']['Description'])
 
     def test_metadata_info_description_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoDescriptionMismatchedType.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_metadata_info_extras(self):
@@ -129,7 +131,7 @@ class TestMetadata(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoExtras.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoExtras.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 

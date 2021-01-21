@@ -10,6 +10,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestEvent(BoaTest):
 
+    default_folder: str = 'test_sc/event_test'
+
     def test_event_without_arguments(self):
         event_id = 'Event'
         event_name = String(event_id).to_bytes(min_length=1)
@@ -23,11 +25,11 @@ class TestEvent(BoaTest):
             + Opcode.RET       # return
         )
 
-        path = '%s/boa3_test/test_sc/event_test/EventWithoutArguments.py' % self.dirname
+        path = self.get_contract_path('EventWithoutArguments.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -51,11 +53,11 @@ class TestEvent(BoaTest):
             + Opcode.RET       # return
         )
 
-        path = '%s/boa3_test/test_sc/event_test/EventWithArgument.py' % self.dirname
+        path = self.get_contract_path('EventWithArgument.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -79,11 +81,11 @@ class TestEvent(BoaTest):
             + Opcode.RET      # return
         )
 
-        path = '%s/boa3_test/test_sc/event_test/EventWithName.py' % self.dirname
+        path = self.get_contract_path('EventWithName.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -111,11 +113,11 @@ class TestEvent(BoaTest):
             + Opcode.RET       # return
         )
 
-        path = '%s/boa3_test/test_sc/event_test/EventNep5Transfer.py' % self.dirname
+        path = self.get_contract_path('EventNep5Transfer.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
         self.assertIsVoid(result)
         self.assertGreater(len(engine.notifications), 0)
@@ -125,9 +127,9 @@ class TestEvent(BoaTest):
         self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
 
     def test_event_with_return(self):
-        path = '%s/boa3_test/test_sc/event_test/EventWithoutTypes.py' % self.dirname
+        path = self.get_contract_path('EventWithoutTypes.py')
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_event_call_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/event_test/MismatchedTypeCallEvent.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeCallEvent.py')
         self.assertCompilerLogs(MismatchedTypes, path)
