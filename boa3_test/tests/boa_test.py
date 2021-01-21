@@ -89,10 +89,9 @@ class BoaTest(TestCase):
         if not path.exists(dir_folder) and root_path is env.PROJECT_ROOT_DIRECTORY:
             path_folder = '{0}/{1}'.format(root_path, dir_folder)
             if not path.exists(path_folder) and not dir_folder.startswith(self.test_root_dir):
-                test_inner_folder = (self.default_test_folder if dir_folder.startswith(self.default_folder)
-                                     else self.test_root_dir)
-
-                path_folder = '{0}/{1}/{2}'.format(root_path, test_inner_folder, dir_folder)
+                path_folder = '{0}/{1}/{2}'.format(root_path, self.test_root_dir, dir_folder)
+                if not path.exists(path_folder):
+                    path_folder = '{0}/{1}/{2}'.format(root_path, self.default_test_folder, dir_folder)
 
             dir_folder = path_folder
 
