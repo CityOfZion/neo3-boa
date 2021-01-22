@@ -144,13 +144,13 @@ class TestMetadata(BoaTest):
         self.assertIn('Description', manifest['extra'])
         self.assertEqual('This is an example', manifest['extra']['Description'])
 
-    def test_metadata_info_extras(self):
+    def test_metadata_info_new_extras(self):
         expected_output = (
             Opcode.PUSH5        # return 5
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/metadata_test/MetadataInfoNewExtras.py' % self.dirname
+        path = self.get_contract_path('MetadataInfoNewExtras.py')
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
         self.assertIn('extra', manifest)
