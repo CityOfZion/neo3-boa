@@ -5,6 +5,7 @@ from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
 from boa3.constants import BYTEORDER, ENCODING
+from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.model.event import Event
 from boa3.model.method import Method
 from boa3.neo.contracts.neffile import NefFile
@@ -457,3 +458,15 @@ class TestFileGeneration(BoaTest):
         # validate sequence points
         self.assertIn('sequence-points', debug_method)
         self.assertEqual(0, len(debug_method['sequence-points']))
+
+    def test_compiler_error(self):
+        path = self.get_contract_path('test_sc/built_in_methods_test', 'ClearTooManyParameters.py')
+
+        with self.assertRaises(NotLoadedException):
+            Boa3.compile(path)
+
+        with self.assertRaises(NotLoadedException):
+            Boa3.compile_and_save(path)
+
+        with self.assertRaises(NotLoadedException):
+            self.compile_and_save(path)

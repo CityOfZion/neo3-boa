@@ -37,16 +37,18 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         return len(self.errors) > 0
 
     def _log_error(self, error: CompilerError):
-        if self._log and not any(err == error for err in self.errors):
+        if not any(err == error for err in self.errors):
             # don't include duplicated errors
             self.errors.append(error)
-            logging.error(error)
+            if self._log:
+                logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
-        if self._log and not any(warn == warning for warn in self.errors):
+        if not any(warn == warning for warn in self.errors):
             # don't include duplicated warnings
             self.warnings.append(warning)
-            logging.warning(warning)
+            if self._log:
+                logging.warning(warning)
 
     def visit(self, node: ast.AST) -> Any:
         try:
