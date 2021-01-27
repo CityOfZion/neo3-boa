@@ -1018,7 +1018,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def validate_passed_arguments(self, call: ast.Call, args_types: List[IType], callable_id: str, callable: Callable):
         if isinstance(callable, IBuiltinMethod):
-            builtin_analyser = BuiltinFunctionCallAnalyser(self, call, callable_id, callable)
+            builtin_analyser = BuiltinFunctionCallAnalyser(self, call, callable_id, callable, self._log)
             if builtin_analyser.validate():
                 self.errors.extend(builtin_analyser.errors)
                 self.warnings.extend(builtin_analyser.warnings)
