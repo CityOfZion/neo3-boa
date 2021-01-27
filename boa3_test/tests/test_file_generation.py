@@ -470,3 +470,19 @@ class TestFileGeneration(BoaTest):
 
         with self.assertRaises(NotLoadedException):
             self.compile_and_save(path)
+
+    def test_generation_with_recursive_function(self):
+        path = self.get_contract_path('test_sc/function_test', 'RecursiveFunction.py')
+        self.compile_and_save(path)
+
+        from boa3_test.tests.test_classes.testengine import TestEngine
+        engine = TestEngine()
+
+        expected = self.fact(57)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected, result)
+
+    def fact(self, f: int) -> int:
+        if f <= 1:
+            return 1
+        return f * self.fact(f - 1)

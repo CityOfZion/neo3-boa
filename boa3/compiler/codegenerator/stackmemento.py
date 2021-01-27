@@ -11,6 +11,7 @@ class StackMemento:
     """
     This class is responsible for managing the simulation of the blockchain stack during the code generation
     """
+
     def __init__(self):
         self._stacks: List[Tuple[VMCode, NeoStack]] = []
         self._current_stack: NeoStack = NeoStack()

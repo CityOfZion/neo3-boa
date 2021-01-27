@@ -461,4 +461,3 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 8, expected_result_type=bool)
         self.assertEqual(False, result)
-
