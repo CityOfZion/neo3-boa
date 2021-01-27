@@ -21,8 +21,8 @@ def get_native_token_data(token_script: bytes) -> Tuple[Optional[bytes], Optiona
 
 
 class NativeTokenId(IntEnum):
-    NEO = -1
-    GAS = -2
+    NEO = -2
+    GAS = -3
 
 
 class NativeTokenPrefix(IntEnum):
