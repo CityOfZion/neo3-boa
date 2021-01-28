@@ -1040,9 +1040,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         # if the arguments are not generic, include the specified method in the symbol table
         if (isinstance(callable_target, IBuiltinMethod)
                 and callable_target.identifier != callable_id
-                and callable_target.raw_identifier == callable_id
-                and callable_target.identifier not in self.symbols):
-            self.symbols[callable_target.identifier] = callable_target
+                and callable_target.raw_identifier == callable_id):
+            if callable_target.identifier not in self.symbols:
+                self.symbols[callable_target.identifier] = callable_target
             call.func = ast.Name(lineno=call.func.lineno, col_offset=call.func.col_offset,
                                  ctx=ast.Load(), id=callable_target.identifier)
 
