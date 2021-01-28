@@ -36,7 +36,11 @@ class ScopeValue:
         different_values = []
 
         for key in common_keys:
-            values = {scope[key] for scope in other_scopes}
+            values = []
+            for scope in other_scopes:
+                if scope[key] not in values:
+                    values.append(scope[key])
+
             if len(values) == 1:
                 new_values[key] = values.pop()
             else:

@@ -94,6 +94,8 @@ class BoaTest(TestCase):
                     path_folder = '{0}/{1}/{2}'.format(root_path, self.default_test_folder, dir_folder)
 
             dir_folder = path_folder
+        else:
+            dir_folder = '{0}/{1}'.format(root_path, dir_folder)
 
         if not contract_name.endswith('.py'):
             contract_name = contract_name + '.py'
