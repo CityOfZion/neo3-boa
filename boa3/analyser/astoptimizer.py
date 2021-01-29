@@ -47,7 +47,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         except BaseException:
             return Undefined
 
-    def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
+    def parse_to_node(self, expression: str, origin: ast.AST = None, is_origin_str: bool = False) -> Union[ast.AST, Sequence[ast.AST]]:
         """
         Parses an expression to an ast.
 
@@ -56,6 +56,9 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         :return: the parsed node
         :rtype: ast.AST or Sequence[ast.AST]
         """
+        if is_origin_str and not expression.startswith(("'", '"')):
+            expression = "'{0}'".format(expression)
+
         new_node = self.visit(super().parse_to_node(expression, origin))
         if hasattr(new_node, 'op'):
             new_node.op = Operator.get_operation(new_node.op)
@@ -139,7 +142,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
             value = self._evaluate_binary_operation(left_value, right_value, bin_op.op)
             if value is not None:
                 self.has_changes = True
-                return self.parse_to_node(str(value), bin_op)
+                return self.parse_to_node(str(value), bin_op, isinstance(value, str))
             return bin_op
         except ValueError:
             return bin_op
@@ -233,7 +236,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
                     un_op.operand.n = value
                     self.update_line_and_col(un_op.operand, un_op)
                     return un_op.operand
-                return self.parse_to_node(str(value), un_op)
+                return self.parse_to_node(str(value), un_op, isinstance(value, str))
             return un_op
         except ValueError:
             return un_op
