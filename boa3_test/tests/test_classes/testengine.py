@@ -166,7 +166,6 @@ class TestEngine:
 
         test_engine_args = self.to_json(nef_path, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
-
         process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,

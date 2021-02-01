@@ -276,12 +276,6 @@ class CodeGenerator:
         if self.last_code.opcode is not Opcode.RET:
             self.insert_return()
 
-        # TODO: remove this when the None return in void methods is fixed
-        if method_id == 'onPayment':
-            address = self.last_code_start_address
-            self.remove_stack_top_item()
-            VMCodeMapping.instance().move_to_end(address, address)
-
         self._current_method.end_bytecode = self.last_code
         self._current_method = None
         self._stack.clear()
