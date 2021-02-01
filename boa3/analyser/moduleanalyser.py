@@ -588,8 +588,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         value = self.visit(subscript.value)
         symbol = self.get_symbol(value) if isinstance(value, str) else value
-        # if isinstance(symbol, IExpression):
-        #     symbol = symbol.type
 
         if isinstance(subscript.ctx, ast.Load):
             if isinstance(symbol, Collection):
