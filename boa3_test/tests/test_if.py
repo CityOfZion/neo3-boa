@@ -431,3 +431,34 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'example', b'True')
         self.assertEqual(4, result)
+
+    def test_variable_in_if_scopes(self):
+        path = self.get_contract_path('VariablesInIfScopes.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1, expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 2, expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 3, expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 4, expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 5, expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 6, expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 7, expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 8, expected_result_type=bool)
+        self.assertEqual(False, result)
+

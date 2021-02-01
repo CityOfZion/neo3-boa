@@ -61,6 +61,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return list(self.symbols.keys())[index]
 
     @property
+    def _current_scope(self) -> Optional[SymbolScope]:
+        return self._scope_stack[-1] if len(self._scope_stack) > 0 else None
+
+    @property
     def _modules_symbols(self) -> Dict[str, ISymbol]:
         """
         Gets all the symbols in the modules scopes.
@@ -294,6 +298,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var.set_type(value_type)
             target_type = var.type
 
+        if self._current_scope is not None:
+            if isinstance(node, ast.Name) and node.id not in self._current_scope:
+                target_type = value_type
+                self._current_scope.include_symbol(node.id, Variable(value_type))
+
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
             self._log_error(
                 CompilerError.MismatchedTypes(
@@ -487,23 +496,35 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_instance_if, is_instance_else = self.validate_if(if_node)
 
         # continue to walk through the tree
-        pop_scope_stack = False
-        if len(is_instance_if) > 0:
-            self.new_local_scope(is_instance_if)
-            pop_scope_stack = True
+        self.new_local_scope(is_instance_if)
         for stmt in if_node.body:
             self.visit(stmt)
-        if pop_scope_stack:
-            self.pop_local_scope()
-            pop_scope_stack = False
+        is_instance_if = self.pop_local_scope().symbols
 
-        if len(is_instance_else) > 0:
-            self.new_local_scope(is_instance_else)
-            pop_scope_stack = True
+        self.new_local_scope(is_instance_else)
         for stmt in if_node.orelse:
             self.visit(stmt)
-        if pop_scope_stack:
-            self.pop_local_scope()
+        is_instance_else = self.pop_local_scope().symbols
+
+        last_scope = self._current_scope if len(self._scope_stack) > 1 else self._current_method
+        # updates the outer scope for each variable that is changed in both branches
+        intersected_ids = is_instance_if.keys() & is_instance_else.keys()
+        for changed_symbol in intersected_ids:
+            new_value_type_if_branch = self.get_type(is_instance_if[changed_symbol])
+            new_value_type_else_branch = self.get_type(is_instance_else[changed_symbol])
+            new_type = Type.union.build([new_value_type_if_branch, new_value_type_else_branch])
+            last_scope.include_symbol(changed_symbol, Variable(new_type))
+
+        # updates with the variables assigned in a branch that doesn't exist in the outer scope
+        for new_symbol in {key for key in is_instance_if if key not in intersected_ids}:
+            new_value_type = self.get_type(is_instance_if[new_symbol])
+            new_type = Type.union.build([new_value_type, Type.none])
+            last_scope.include_symbol(new_symbol, Variable(new_type))
+
+        for new_symbol in {key for key in is_instance_else if key not in intersected_ids}:
+            new_value_type = self.get_type(is_instance_else[new_symbol])
+            new_type = Type.union.build([new_value_type, Type.none])
+            last_scope.include_symbol(new_symbol, Variable(new_type))
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """
@@ -517,21 +538,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if_value = body[-1] if isinstance(body, list) and len(body) > 0 else body
         else_value = orelse[-1] if isinstance(orelse, list) and len(orelse) > 0 else orelse
 
-        pop_scope_stack = False
-        if len(is_instance_if) > 0:
-            self.new_local_scope(is_instance_if)
-            pop_scope_stack = True
+        self.new_local_scope(is_instance_if)
         if_type: IType = self.get_type(if_value)
-        if pop_scope_stack:
-            self.pop_local_scope()
-            pop_scope_stack = False
+        self.pop_local_scope()
 
-        if len(is_instance_else) > 0:
-            self.new_local_scope(is_instance_else)
-            pop_scope_stack = True
+        self.new_local_scope(is_instance_else)
         else_type: IType = self.get_type(else_value)
-        if pop_scope_stack:
-            self.pop_local_scope()
+        self.pop_local_scope()
 
         return Type.get_generic_type(if_type, else_type)
 
