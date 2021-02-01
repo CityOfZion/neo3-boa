@@ -300,7 +300,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if self._current_scope is not None:
             if isinstance(node, ast.Name) and node.id not in self._current_scope:
-                target_type = value_type
+                if not isinstance(value_type, Collection):
+                    target_type = value_type
+                elif not (isinstance(type(value_type), type(target_type)) and
+                          (value_type.value_type is Type.any or value_type.valid_key is Type.any)):
+                    # if the collection is generic, let the validation for the outer scope
+                    value_type = target_type
+
                 self._current_scope.include_symbol(node.id, Variable(value_type))
 
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
