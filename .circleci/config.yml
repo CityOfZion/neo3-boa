@@ -12,7 +12,7 @@ orbs:
   python: circleci/python@0.2.1
 
 jobs:
-  unit-test-37:
+  unit-test-37: &unit-test
     working_directory: ~/neo3-boa
     executor: python37-executor
     steps:
@@ -28,41 +28,19 @@ jobs:
       - run:
           name: Test
           command: |
+            sudo apt-get update
+            sudo apt-get install -y apt-transport-https
             wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
             sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt-get update; \
-              sudo apt-get install -y apt-transport-https && \
-              sudo apt-get update && \
+            sudo apt-get update && \
               sudo apt-get install -y dotnet-sdk-5.0
             git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
             dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
             python -m unittest discover boa3_test
 
   unit-test-38:
-    working_directory: ~/neo3-boa
+    <<: *unit-test
     executor: python38-executor
-    steps:
-      - checkout
-      - python/load-cache
-
-      - run:
-          name: Install Dependencies
-          command: |
-            sudo pip install -r requirements_dev.txt
-
-      - python/save-cache
-      - run:
-          name: Test
-          command: |
-            wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-            sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt-get update; \
-              sudo apt-get install -y apt-transport-https && \
-              sudo apt-get update && \
-              sudo apt-get install -y dotnet-sdk-5.0
-            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
-            dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
-            python -m unittest discover boa3_test
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
