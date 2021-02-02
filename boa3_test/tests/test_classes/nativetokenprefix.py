@@ -7,7 +7,7 @@ from boa3.neo.vm.type.Integer import Integer
 
 def get_native_token_data(token_script: bytes) -> Tuple[Optional[bytes], Optional[int]]:
     prefix: Optional[NativeTokenPrefix] = None
-    token_id: Optional[NativeTokenId] = None
+    token_id: NativeTokenId = NativeTokenId.NONE
 
     if token_script is constants.NEO_SCRIPT:
         prefix = NativeTokenPrefix.NEO
@@ -21,10 +21,15 @@ def get_native_token_data(token_script: bytes) -> Tuple[Optional[bytes], Optiona
 
 
 class NativeTokenId(IntEnum):
-    NEO = -2
-    GAS = -3
+    ContractManagement = -1
+    NEO = -3
+    GAS = -4
+
+    NONE = 0
 
 
 class NativeTokenPrefix(IntEnum):
     NEO = 20
     GAS = 20
+
+    NONE = 0
