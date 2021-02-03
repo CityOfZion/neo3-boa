@@ -71,7 +71,7 @@ class TryCode(VMCode):
         if opcode is None:
             return bytes(min_len)
         else:
-            from boa3.compiler.vmcodemapping import VMCodeMapping
+            from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
             code_mapping = VMCodeMapping.instance()
             self_start = code_mapping.get_start_address(self)
             target_start = code_mapping.get_start_address(opcode)

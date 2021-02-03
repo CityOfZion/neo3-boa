@@ -1,7 +1,7 @@
 import ast
 
 from boa3.analyser.analyser import Analyser
-from boa3.compiler.codegenerator import CodeGenerator
+from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.model.type.type import Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -12,7 +12,7 @@ from boa3_test.tests.boa_test import BoaTest
 
 class TestConstant(BoaTest):
     def build_code_generator(self) -> CodeGenerator:
-        from boa3.compiler.vmcodemapping import VMCodeMapping
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         VMCodeMapping.reset()
         return CodeGenerator({})
 

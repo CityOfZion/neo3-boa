@@ -72,7 +72,7 @@ class Callable(IExpression, ABC):
         if self.init_bytecode is None and self.init_defaults_bytecode is None:
             return self.init_address
         else:
-            from boa3.compiler.vmcodemapping import VMCodeMapping
+            from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
             return VMCodeMapping.instance().get_start_address(self.init_bytecode)
 
     @property
@@ -90,5 +90,5 @@ class Callable(IExpression, ABC):
         if self.end_bytecode is None:
             return self.start_address
         else:
-            from boa3.compiler.vmcodemapping import VMCodeMapping
+            from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
             return VMCodeMapping.instance().get_end_address(self.end_bytecode)

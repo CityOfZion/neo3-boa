@@ -1,3 +1,4 @@
+from os import path
 from typing import Any, Dict, List, Optional, Union
 
 from boa3 import constants
@@ -10,7 +11,6 @@ from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.transaction import Transaction
-from os import path
 
 
 class TestEngine:

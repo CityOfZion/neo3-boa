@@ -96,7 +96,7 @@ class Method(Callable):
         """
         Returns a list with the debug information of each mapped Python instruction inside this method
         """
-        from boa3.compiler.vmcodemapping import VMCodeMapping
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         return sorted(self._debug_map, key=lambda instr: VMCodeMapping.instance().get_start_address(instr.code))
 
     def include_instruction(self, instr_info: DebugInstruction):
