@@ -277,7 +277,7 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_approve(self):
         path = self.get_contract_path('wrapped_neo.py')
-        path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_neo.py')
+        path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_tokens.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -330,7 +330,7 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_allowance(self):
         path = self.get_contract_path('wrapped_neo.py')
-        path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_neo.py')
+        path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_tokens.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -372,9 +372,9 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[aux_contract_address])
         self.assertEqual(allowed_amount, result)
 
-    def test_wrapped_neo_transferFrom(self):
+    def test_wrapped_neo_transfer_from(self):
         path = self.get_contract_path('wrapped_neo.py')
-        path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_neo.py')
+        path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_tokens.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -409,7 +409,7 @@ class TestTemplate(BoaTest):
 
         # this transfer will fail,
         # because OTHER_SCRIPT_HASH is not allowed to transfer more than aux_contract_address approved
-        result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
+        result = self.run_smart_contract(engine, path, 'transfer_from', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount + 1 * 10 ** 8, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
@@ -421,7 +421,7 @@ class TestTemplate(BoaTest):
         balance_spender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', aux_contract_address)
         balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
-        result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
+        result = self.run_smart_contract(engine, path, 'transfer_from', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
@@ -462,7 +462,7 @@ class TestTemplate(BoaTest):
 
         transferred_amount = allowed_amount - 4 * 10 ** 8
 
-        result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
+        result = self.run_smart_contract(engine, path, 'transfer_from', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
@@ -476,18 +476,18 @@ class TestTemplate(BoaTest):
 
         # should fail when any of the scripts' length is not 20
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
+            self.run_smart_contract(engine, path, 'transfer_from',
                                     self.OWNER_SCRIPT_HASH, bytes(10), self.OTHER_ACCOUNT_1, allowed_amount, None)
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
+            self.run_smart_contract(engine, path, 'transfer_from',
                                     bytes(10), self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, allowed_amount, None)
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
+            self.run_smart_contract(engine, path, 'transfer_from',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, bytes(10), allowed_amount, None)
 
         # should fail when the amount is less than 0
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
+            self.run_smart_contract(engine, path, 'transfer_from',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_2, -10, None)
 
     def test_wrapped_neo_onPayment(self):

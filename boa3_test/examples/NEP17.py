@@ -135,7 +135,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     :type data: Any
 
     :return: whether the transfer was successful
-    :raise AssertionError: raised if `from_address` or `to_address` length is not 20 or if `amount` if less than zero.
+    :raise AssertionError: raised if `from_address` or `to_address` length is not 20 or if `amount` is less than zero.
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
     assert len(from_address) == 20 and len(to_address) == 20
