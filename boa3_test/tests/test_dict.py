@@ -386,3 +386,11 @@ class TestDict(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(7, result)
+
+    def test_dict_any_key_and_value(self):
+        path = self.get_contract_path('DictAnyKeyAndValue.py')
+        Boa3.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(66, result)

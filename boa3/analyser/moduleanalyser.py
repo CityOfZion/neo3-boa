@@ -609,8 +609,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     union_types = self.visit(index)
                 return symbol_type.build(union_types)
 
-            if isinstance(symbol_type, SequenceType):
-                return symbol_type.value_type
+            if isinstance(symbol_type, Collection):
+                return symbol_type.item_type
 
         return value
 
