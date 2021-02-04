@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict, List, Optional, Union
 
 from boa3.neo.vm.VMCode import VMCode
@@ -8,7 +10,7 @@ class VMCodeMapping:
     """
     This class is responsible for managing the Neo VM instruction during the bytecode generation.
     """
-    _instance = None  # type:VMCodeMapping
+    _instance: VMCodeMapping = None
 
     @classmethod
     def instance(cls):

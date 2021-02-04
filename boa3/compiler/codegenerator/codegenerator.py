@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.analyser import Analyser
-from boa3.compiler.vmcodemapping import VMCodeMapping
+from boa3.compiler.codegenerator.stackmemento import NeoStack, StackMemento
+from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.constants import ENCODING
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -14,6 +15,7 @@ from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
+from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
@@ -42,7 +44,7 @@ class CodeGenerator:
         :return: the Neo VM bytecode
         """
         VMCodeMapping.reset()
-        from boa3.compiler.codegeneratorvisitor import VisitorCodeGenerator
+        from boa3.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
         generator = CodeGenerator(analyser.symbol_table)
         visitor = VisitorCodeGenerator(generator)
@@ -73,7 +75,7 @@ class CodeGenerator:
         self._inserted_loop_breaks: Dict[int, List[int]] = {}
 
         self._opcodes_to_remove: List[int] = []
-        self._stack: List[IType] = []  # simulates neo execution stack
+        self._stack_states: StackMemento = StackMemento()  # simulates neo execution stack
         self.initialized_static_fields: bool = False
 
     @property
@@ -103,6 +105,10 @@ class CodeGenerator:
             return None
 
     @property
+    def _stack(self) -> NeoStack:
+        return self._stack_states.current_stack
+
+    @property
     def stack_size(self) -> int:
         """
         Gets the size of the stack
@@ -110,6 +116,9 @@ class CodeGenerator:
         :return: the size of the stack of converted values
         """
         return len(self._stack)
+
+    def _stack_append(self, value_type: IType):
+        self._stack_states.append(value_type, self.last_code)
 
     def _stack_pop(self, index: int = -1) -> IType:
         if len(self._stack) > 0:
@@ -335,7 +344,7 @@ class CodeGenerator:
         """
         self.__insert1(OpcodeInfo.INC)      # index += 1
         if len(self._stack) < 1 or self._stack[-1] is not Type.int:
-            self._stack.append(Type.int)
+            self._stack_append(Type.int)
         for_increment = self.last_code_start_address
         test_address = VMCodeMapping.instance().bytecode_size
         self._update_continue_jumps(start_address, for_increment)
@@ -471,7 +480,7 @@ class CodeGenerator:
         self._insert_jump(OpcodeInfo.JMP)
         last_try_code = self.last_code_start_address
 
-        self._stack.append(Type.exception)  # when reaching the except body, an exception was raised
+        self._stack_append(Type.exception)  # when reaching the except body, an exception was raised
         if exception_id is None:
             self.remove_stack_top_item()
 
@@ -539,7 +548,20 @@ class CodeGenerator:
         jmp_address = VMCodeMapping.instance().bytecode_size
         self._insert_jump(OpcodeInfo.JMPNE)     # if index < 0
 
-        self.duplicate_stack_item(2)                    # index += len(array)
+        state = self._stack_states.get_state(value_index) if isinstance(value_index, int) else self._stack
+        # get position of collection relative to top
+        index_of_last = -1
+        for index, value in reversed(list(enumerate(state))):
+            if isinstance(value, ICollectionType):
+                index_of_last = index
+                break
+
+        if index_of_last >= 0:
+            pos_from_top = len(state) - index_of_last
+        else:
+            pos_from_top = 2
+
+        self.duplicate_stack_item(pos_from_top)     # index += len(array)
         self.convert_builtin_method_call(Builtin.Len)
         self.convert_operation(BinaryOp.Add)
 
@@ -630,13 +652,13 @@ class CodeGenerator:
         if opcode is not None:
             op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
-            self._stack.append(Type.int)
+            self._stack_append(Type.int)
         else:
             opcode = Opcode.get_literal_push(-value)
             if opcode is not None:
                 op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
                 self.__insert1(op_info)
-                self._stack.append(Type.int)
+                self._stack_append(Type.int)
                 self.convert_operation(UnaryOp.Negative)
             else:
                 array = Integer(value).to_byte_array(signed=True)
@@ -664,7 +686,7 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.PUSH1)
         else:
             self.__insert1(OpcodeInfo.PUSH0)
-        self._stack.append(Type.bool)
+        self._stack_append(Type.bool)
 
     def convert_byte_array(self, array: bytes):
         """
@@ -691,14 +713,14 @@ class CodeGenerator:
 
         data = Integer(data_len).to_byte_array(min_length=op_info.data_len) + data
         self.__insert1(op_info, data)
-        self._stack.append(Type.str)  # push data pushes a ByteString value in the stack
+        self._stack_append(Type.str)  # push data pushes a ByteString value in the stack
 
     def insert_none(self):
         """
         Converts None literal
         """
         self.__insert1(OpcodeInfo.PUSHNULL)
-        self._stack.append(Type.none)
+        self._stack_append(Type.none)
 
     def convert_cast(self, value_type: IType):
         """
@@ -711,7 +733,7 @@ class CodeGenerator:
                 and value_type.stack_item is not Type.any.stack_item):
             self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
             self._stack_pop()
-            self._stack.append(value_type)
+            self._stack_append(value_type)
 
     def convert_new_map(self, map_type: IType):
         """
@@ -720,7 +742,7 @@ class CodeGenerator:
         :param map_type: the Neo Boa type of the map
         """
         self.__insert1(OpcodeInfo.NEWMAP)
-        self._stack.append(map_type)
+        self._stack_append(map_type)
 
     def convert_new_empty_array(self, length: int, array_type: IType):
         """
@@ -734,7 +756,7 @@ class CodeGenerator:
         else:
             self.convert_literal(length)
             self.__insert1(OpcodeInfo.NEWARRAY)
-        self._stack.append(array_type)
+        self._stack_append(array_type)
 
     def convert_new_array(self, length: int, array_type: IType = Type.list):
         """
@@ -751,7 +773,7 @@ class CodeGenerator:
             self._stack_pop()  # array size
             for x in range(length):
                 self._stack_pop()
-            self._stack.append(array_type)
+            self._stack_append(array_type)
 
     def _set_array_item(self, value_start_address: int):
         """
@@ -802,7 +824,7 @@ class CodeGenerator:
         self._stack_pop()  # start
         self._stack_pop()  # original string
         self.__insert1(OpcodeInfo.SUBSTR)
-        self._stack.append(Type.bytes)  # substr returns a buffer instead of a bytestring
+        self._stack_append(Type.bytes)  # substr returns a buffer instead of a bytestring
         self.convert_cast(Type.str)
 
     def convert_get_array_slice(self, array: SequenceType):
@@ -839,7 +861,6 @@ class CodeGenerator:
         self.remove_stack_top_item()        # data from external scopes
         self.remove_stack_top_item()
         self.remove_stack_top_item()
-
 
     def convert_get_sub_array(self, value_addresses: List[int] = None):
         """
@@ -951,7 +972,7 @@ class CodeGenerator:
                 self.__insert1(op_info, Integer(index).to_byte_array())
             else:
                 self.__insert1(op_info)
-            self._stack.append(var.type)
+            self._stack_append(var.type)
 
         elif hasattr(var.type, 'get_value'):
             # the variable is a type constant
@@ -1048,7 +1069,7 @@ class CodeGenerator:
         for _ in range(function.args_on_stack):
             self._stack_pop()
         if function.return_type not in (None, Type.none):
-            self._stack.append(function.return_type)
+            self._stack_append(function.return_type)
 
     def convert_method_call(self, function: Method, num_args: int):
         """
@@ -1063,7 +1084,7 @@ class CodeGenerator:
             self._stack_pop()
 
         if function.return_type is not Type.none:
-            self._stack.append(function.return_type)
+            self._stack_append(function.return_type)
 
     def convert_event_call(self, event: Event):
         """
@@ -1136,7 +1157,7 @@ class CodeGenerator:
 
         for op in range(operation.op_on_stack):
             self._stack_pop()
-        self._stack.append(operation.result)
+        self._stack_append(operation.result)
 
     def convert_assert(self):
         asserted_type = self._stack[-1] if len(self._stack) > 0 else Type.any
@@ -1173,7 +1194,7 @@ class CodeGenerator:
             self.convert_new_array(exception_args_len)
 
         self._stack_pop()
-        self._stack.append(Type.exception)
+        self._stack_append(Type.exception)
 
     def convert_raise_exception(self):
         if len(self._stack) == 0:
@@ -1336,7 +1357,7 @@ class CodeGenerator:
                 self._stack_pop()
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
-            self._stack.append(self._stack[-pos])
+            self._stack_append(self._stack[-pos])
 
     def clear_stack(self, clear_if_in_loop: bool = False):
         if not clear_if_in_loop or len(self._current_for) > 0:
@@ -1371,5 +1392,4 @@ class CodeGenerator:
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
             if no_items > 0:
-                reverse = list(reversed(self._stack[-no_items:]))
-                self._stack = self._stack[:-no_items] + reverse
+                self._stack.reverse(-no_items)

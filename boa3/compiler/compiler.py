@@ -2,7 +2,7 @@ import logging
 import os
 
 from boa3.analyser.analyser import Analyser
-from boa3.compiler.codegenerator import CodeGenerator
+from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.filegenerator import FileGenerator
 from boa3.exception.NotLoadedException import NotLoadedException
 

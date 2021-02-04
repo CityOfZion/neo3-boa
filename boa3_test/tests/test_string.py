@@ -1,5 +1,3 @@
-import unittest
-
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import InternalError, UnresolvedOperation
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -54,7 +52,6 @@ class TestString(BoaTest):
 
     def test_string_slicing_with_variables(self):
         path = self.get_contract_path('StringSlicingVariableValues.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -97,76 +94,15 @@ class TestString(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(b'unit_', result)
 
-    @unittest.skip("slicing with negative arg is wrong")
-    def test_string_slicing_negative_end(self):
-        string_value = 'unit_test'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = 'unit_test'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1  # return a[-4:]
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.DUP            # size of the substring: len(a) - (len(a) - 4) = 4
-            + Opcode.SIZE
-            + Opcode.PUSH4
-            + Opcode.NEGATE
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.SUB
-            + Opcode.RIGHT
-            + Opcode.RET        # return
-        )
-        path = self.get_contract_path('StringSlicingNegativeEnd.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+    def test_string_slicing_negative_end_omitted(self):
+        path = self.get_contract_path('StringSlicingNegativeEndOmitted.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(b'test', result)
+        self.assertEqual('test', result)
 
     def test_string_slicing_start_omitted(self):
-        string_value = 'unit_test'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = 'unit_test'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1  # return a[:3]
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.PUSH3            # size of the substring: 3
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.LEFT
-            + Opcode.RET        # return
-        )
         path = self.get_contract_path('StringSlicingStartOmitted.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -199,38 +135,7 @@ class TestString(BoaTest):
         self.assertEqual('unit_test', result)
 
     def test_string_slicing_end_omitted(self):
-        string_value = 'unit_test'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = 'unit_test'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1  # return a[2:]
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.DUP            # size of the substring: len(a) - 2
-            + Opcode.SIZE
-            + Opcode.PUSH2
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.SUB
-            + Opcode.RIGHT
-            + Opcode.RET        # return
-        )
         path = self.get_contract_path('StringSlicingEndOmitted.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',

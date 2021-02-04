@@ -2,8 +2,8 @@ import ast
 from inspect import isclass
 from typing import Dict, List, Optional, Tuple
 
-from boa3.compiler.codegenerator import CodeGenerator
-from boa3.compiler.vmcodemapping import VMCodeMapping
+from boa3.compiler.codegenerator.codegenerator import CodeGenerator
+from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
