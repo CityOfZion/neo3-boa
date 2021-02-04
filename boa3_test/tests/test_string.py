@@ -149,3 +149,10 @@ class TestString(BoaTest):
     def test_string_slicing_omitted_with_stride(self):
         path = self.get_contract_path('StringSlicingOmittedWithStride.py')
         self.assertCompilerLogs(InternalError, path)
+
+    def test_string_simple_concat(self):
+        path = self.get_contract_path('StringSimpleConcat.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual('bye worldhi', result)
