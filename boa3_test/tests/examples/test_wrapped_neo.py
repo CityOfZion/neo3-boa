@@ -514,7 +514,7 @@ class TestTemplate(BoaTest):
 
         # the smart contract will abort if some address other than NEO calls the onPayment method
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
-            self.run_smart_contract(engine, path, 'onPayment', aux_contract_address, minted_amount, None,
+            self.run_smart_contract(engine, path, 'onNEP17Payment', aux_contract_address, minted_amount, None,
                                     signer_accounts=[aux_contract_address])
 
         neo_wrapped_before = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', wrapped_neo_address)

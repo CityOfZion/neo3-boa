@@ -246,7 +246,7 @@ def deploy() -> bool:
 
 
 @public
-def onPayment(from_address: UInt160, amount: int, data: Any):
+def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     """
     NEP-17 affirms :"if the receiver is a deployed contract, the function MUST call onPayment method on receiver
     contract with the data parameter from transfer AFTER firing the Transfer event. If the receiver doesn't want to

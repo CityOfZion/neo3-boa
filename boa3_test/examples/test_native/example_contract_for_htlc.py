@@ -91,5 +91,5 @@ def verify() -> bool:
 
 
 @public
-def onPayment(from_address: UInt160, amount: int, data: Any):
+def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     pass
