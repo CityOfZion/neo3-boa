@@ -125,7 +125,7 @@ def atomic_swap(owner_address: UInt160, owner_token: bytes, owner_amount: int, o
 
 
 @public
-def onPayment(from_address: UInt160, amount: int, data: Any):
+def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     """
     Since this is a deployed contract, transfer will be calling this onPayment method with the data parameter from
     transfer. If someone is doing a not required transfer, then ABORT will be called.

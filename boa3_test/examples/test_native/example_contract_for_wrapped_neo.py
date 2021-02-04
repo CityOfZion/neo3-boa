@@ -34,5 +34,5 @@ def calling_approve(address: UInt160, spender: UInt160, amount: int) -> Any:
 
 # Always accept cryptocurrency
 @public
-def onPayment(from_address: UInt160, amount: int, data: Any):
+def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     a = 1
