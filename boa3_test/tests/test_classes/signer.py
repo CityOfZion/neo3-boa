@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from boa3.neo import from_hex_str
-from boa3.neo.core.types.UInt import UInt160
+from boa3.neo3.core.types import UInt160
 
 
 class Signer:

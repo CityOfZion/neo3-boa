@@ -1,14 +1,14 @@
 from boa3.boa3 import Boa3
+from boa3.constants import NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestTemplate(BoaTest):
+class TestNEP17Template(BoaTest):
 
     default_folder: str = 'examples'
 
@@ -192,7 +192,6 @@ class TestTemplate(BoaTest):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
         path = self.get_contract_path('NEP17.py')
-        path_native_tokens = self.get_contract_path('examples/test_native', 'methods.py')
         engine = TestEngine()
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -200,8 +199,7 @@ class TestTemplate(BoaTest):
         output, manifest = self.compile_and_save(path)
         nep17_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_native_tokens)
-        test_address = hash160(output)
+        test_address = bytes(range(20))
 
         result = self.run_smart_contract(engine, path, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -211,8 +209,8 @@ class TestTemplate(BoaTest):
         engine.add_neo(test_address, transferred_amount)
 
         # fire the Transfer event if sender is NEO when transferring to NEP17 script hash
-        neo_balance_sender_before = self.run_smart_contract(engine, path_native_tokens, 'balanceOf_neo', test_address)
-        neo_balance_nep17_before = self.run_smart_contract(engine, path_native_tokens, 'balanceOf_neo', nep17_address)
+        neo_balance_sender_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', test_address)
+        neo_balance_nep17_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', nep17_address)
         nep17_balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', test_address)
 
         # TODO: Test if the onPayment method is successful when update the TestEngine to make Neo/Gas transfers

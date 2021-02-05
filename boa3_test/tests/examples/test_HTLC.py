@@ -7,7 +7,7 @@ from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestTemplate(BoaTest):
+class TestHTLCTemplate(BoaTest):
 
     default_folder: str = 'examples'
 
@@ -62,15 +62,12 @@ class TestTemplate(BoaTest):
     def test_HTLC_onPayment(self):
         path = self.get_contract_path('HTLC.py')
         engine = TestEngine()
-        path_contract1 = self.get_contract_path('test_native/methods.py')
-        path_contract2 = self.get_contract_path('test_native/example_contract_for_htlc.py')
+        example_contract = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
-        output, manifest = self.compile_and_save(path_contract1)
-        contract_address1 = hash160(output)
-
-        output, manifest = self.compile_and_save(path_contract2)
+        output, manifest = self.compile_and_save(example_contract)
+        contract_address1 = bytes(range(20))
         contract_address2 = hash160(output)
 
         output, manifest = self.compile_and_save(path)
@@ -98,15 +95,12 @@ class TestTemplate(BoaTest):
     def test_HTLC_withdraw(self):
         path = self.get_contract_path('HTLC.py')
         engine = TestEngine()
-        path_contract1 = self.get_contract_path('test_native/methods.py')
-        path_contract2 = self.get_contract_path('test_native/example_contract_for_htlc.py')
+        example_contract = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
-        output, manifest = self.compile_and_save(path_contract1)
-        contract_address1 = hash160(output)
-
-        output, manifest = self.compile_and_save(path_contract2)
+        output, manifest = self.compile_and_save(example_contract)
+        contract_address1 = bytes(range(20))
         contract_address2 = hash160(output)
 
         output, manifest = self.compile_and_save(path)
@@ -140,15 +134,12 @@ class TestTemplate(BoaTest):
     def test_HTLC_refund(self):
         path = self.get_contract_path('HTLC.py')
         engine = TestEngine()
-        path_contract1 = self.get_contract_path('test_native/methods.py')
-        path_contract2 = self.get_contract_path('test_native/example_contract_for_htlc.py')
+        example_contract = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
 
-        output, manifest = self.compile_and_save(path_contract1)
-        contract_address1 = hash160(output)
-
-        output, manifest = self.compile_and_save(path_contract2)
+        output, manifest = self.compile_and_save(example_contract)
+        contract_address1 = bytes(range(20))
         contract_address2 = hash160(output)
 
         output, manifest = self.compile_and_save(path)

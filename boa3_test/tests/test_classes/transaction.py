@@ -4,7 +4,7 @@ import base64
 from typing import Any, Dict, List, Optional
 
 from boa3.neo import from_hex_str, to_hex_str
-from boa3.neo.core.types.UInt import UInt256
+from boa3.neo3.core.types import UInt256
 from boa3_test.tests.test_classes.signer import Signer
 from boa3_test.tests.test_classes.witness import Witness
 
