@@ -33,4 +33,3 @@ class CallMethod(InteropMethod):
             (Opcode.ROT, b''),
             (Opcode.ROT, b'')
         ] + super().opcode
-

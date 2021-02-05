@@ -364,4 +364,3 @@ class TestTestEngine(BoaTest):
         # however, if the TestEngine is not in the directory it will raise an Exception
         with self.assertRaises(FileNotFoundError):
             engine = TestEngine('{0}/boa3_test'.format(engine_path))
-
