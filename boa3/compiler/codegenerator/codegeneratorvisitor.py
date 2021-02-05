@@ -2,6 +2,7 @@ import ast
 from inspect import isclass
 from typing import Dict, List, Optional, Tuple
 
+from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
@@ -12,13 +13,12 @@ from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
-from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
 
-class VisitorCodeGenerator(ast.NodeVisitor):
+class VisitorCodeGenerator(IAstAnalyser):
     """
     This class is responsible for walk through the ast.
 
@@ -29,12 +29,10 @@ class VisitorCodeGenerator(ast.NodeVisitor):
     """
 
     def __init__(self, generator: CodeGenerator):
+        super().__init__(ast.parse(""), log=True)
         self.generator = generator
         self.current_method: Optional[Method] = None
-
-    @property
-    def symbols(self) -> Dict[str, ISymbol]:
-        return self.generator.symbol_table
+        self.symbols = generator.symbol_table
 
     def include_instruction(self, node: ast.AST, address: int):
         if self.current_method is not None and address in VMCodeMapping.instance().code_map:

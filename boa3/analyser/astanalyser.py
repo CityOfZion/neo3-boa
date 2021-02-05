@@ -136,7 +136,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         :return: the parsed node
         :rtype: ast.AST or Sequence[ast.AST]
         """
-        node = ast.parse(expression)
+        node = ast.parse(expression, filename='<{0}>'.format(type(self).__name__))
         if origin is not None:
             self.update_line_and_col(node, origin)
 
