@@ -113,6 +113,15 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         pass
 
+    def validate_negative_arguments(self) -> List[int]:
+        """
+        Returns a list of the arguments that have to be positive values and need validation.
+
+        :return: list with the arguments indexes that need to be fixed.
+        :rtype: List[int]
+        """
+        return []
+
     @property
     def pack_arguments(self) -> bool:
         """

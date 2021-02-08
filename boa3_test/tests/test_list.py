@@ -998,6 +998,13 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([1, '4', 2, 3], result)
 
+    def test_list_insert_int_negative_index(self):
+        path = self.get_contract_path('InsertIntNegativeIndex.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 4, 2, 3], result)
+
     def test_list_insert_int_with_builtin(self):
         path = self.get_contract_path('InsertIntWithBuiltin.py')
 

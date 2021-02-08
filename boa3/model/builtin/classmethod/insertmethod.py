@@ -42,6 +42,9 @@ class InsertMethod(IBuiltinMethod):
             return False
         return sequence_type.key_type.is_type_of(index_type) and sequence_type.value_type.is_type_of(value_type)
 
+    def validate_negative_arguments(self) -> List[int]:
+        return [list(self.args).index('__index')]
+
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
