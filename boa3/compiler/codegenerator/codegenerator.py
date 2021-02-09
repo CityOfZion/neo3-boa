@@ -1049,6 +1049,20 @@ class CodeGenerator:
                 store_opcode = OpcodeInfo.get_info(store)
                 store_data = load_instr.data
 
+        fix_negatives = function.validate_negative_arguments()
+        if len(fix_negatives) > 0:
+            args_end_addresses = args_address[1:]
+            args_end_addresses.append(self.bytecode_size)
+
+            if function.push_self_first():
+                addresses = args_end_addresses[:1] + list(reversed(args_end_addresses[1:]))
+            else:
+                addresses = list(reversed(args_end_addresses))
+
+            for arg in sorted(fix_negatives, reverse=True):
+                if len(addresses) > arg:
+                    self.fix_negative_index(addresses[arg])
+
         from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
         if isinstance(function, IsInstanceMethod) and len(args_address) > 1:
             # TODO: remove this if when isinstance with classes is fixed

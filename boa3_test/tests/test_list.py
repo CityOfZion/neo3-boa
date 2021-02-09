@@ -679,6 +679,8 @@ class TestList(BoaTest):
 
     # endregion
 
+    # region TestClear
+
     def test_list_clear(self):
         path = self.get_contract_path('ClearList.py')
 
@@ -735,6 +737,8 @@ class TestList(BoaTest):
         )
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    # endregion
 
     # region TestExtend
 
@@ -975,5 +979,37 @@ class TestList(BoaTest):
     def test_list_pop_too_many_arguments(self):
         path = self.get_contract_path('PopListTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
+
+    # endregion
+
+    # region TestInsert
+
+    def test_list_insert_int_value(self):
+        path = self.get_contract_path('InsertIntValue.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 4, 3], result)
+
+    def test_list_insert_any_value(self):
+        path = self.get_contract_path('InsertAnyValue.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, '4', 2, 3], result)
+
+    def test_list_insert_int_negative_index(self):
+        path = self.get_contract_path('InsertIntNegativeIndex.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 4, 2, 3], result)
+
+    def test_list_insert_int_with_builtin(self):
+        path = self.get_contract_path('InsertIntWithBuiltin.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 4, 3], result)
 
     # endregion
