@@ -3,6 +3,7 @@ from __future__ import annotations
 import binascii
 from typing import Type, Union
 
+from boa3.neo import to_hex_str
 from boa3.neo3.core import serialization
 
 __all__ = ['UInt160', 'UInt256']
@@ -68,11 +69,12 @@ class _UIntBase(serialization.ISerializable):
         slice_length = 4 if len(self._data) >= 4 else len(self._data)
         return int.from_bytes(self._data[:slice_length], 'little')
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ Convert the data to a human readable format (data is in reverse byte order). """
-        db = bytearray(self._data)
-        db.reverse()
-        return db.hex()
+        return to_hex_str(self._data)
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def _compare_to(self, other) -> int:
         if not isinstance(other, _UIntBase):

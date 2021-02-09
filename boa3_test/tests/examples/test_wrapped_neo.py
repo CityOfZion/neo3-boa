@@ -1,25 +1,27 @@
 from boa3.boa3 import Boa3
+from boa3.constants import NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTemplate(BoaTest):
+
+    default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
     OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
     OTHER_ACCOUNT_2 = bytes(range(20))
 
     def test_wrapped_neo_compile(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         Boa3.compile(path)
 
     def test_wrapped_neo_deploy(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
 
         # needs the owner signature
@@ -45,13 +47,13 @@ class TestTemplate(BoaTest):
         self.assertEqual(False, result)
 
     def test_wrapped_neo_symbol(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'symbol')
         self.assertEqual('zNEO', result)
 
     def test_wrapped_neo_decimals(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'decimals')
         self.assertEqual(8, result)
@@ -59,7 +61,7 @@ class TestTemplate(BoaTest):
     def test_wrapped_neo_total_supply(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(0, result)
@@ -73,7 +75,7 @@ class TestTemplate(BoaTest):
     def test_wrapped_neo_total_balance_of(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(0, result)
@@ -95,7 +97,7 @@ class TestTemplate(BoaTest):
     def test_wrapped_neo_total_transfer(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
 
         # should fail before running deploy
@@ -187,7 +189,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(balance_receiver_before + transferred_amount, balance_receiver_after)
 
     def test_wrapped_neo_verify(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
 
         # should fail without signature
@@ -207,8 +209,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
     def test_wrapped_neo_burn(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
-        aux_native_tokens_path = self.get_contract_path('examples/test_native', 'methods.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
 
         output, manifest = self.compile_and_save(path)
@@ -224,8 +225,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # burning zNEO will end up giving NEO to the one who burned it
-        neo_wrapped_before = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', wrapped_neo_address)
-        neo_owner_before = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', self.OWNER_SCRIPT_HASH)
+        neo_wrapped_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_owner_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
         zneo_owner_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         # in this case, NEO will be given to the OWNER_SCRIPT_HASH
         result = self.run_smart_contract(engine, path, 'burn', self.OWNER_SCRIPT_HASH, burned_amount,
@@ -258,8 +259,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(burned_amount, amount)
 
         # balance after burning
-        neo_wrapped_after = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', wrapped_neo_address)
-        neo_owner_after = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', self.OWNER_SCRIPT_HASH)
+        neo_wrapped_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_owner_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
         zneo_owner_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(neo_wrapped_before - burned_amount, neo_wrapped_after)
         self.assertEqual(neo_owner_before + burned_amount, neo_owner_after)
@@ -275,7 +276,7 @@ class TestTemplate(BoaTest):
                                     signer_accounts=[self.OWNER_SCRIPT_HASH])
 
     def test_wrapped_neo_approve(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_neo.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
@@ -328,7 +329,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(allowed_amount, amount)
 
     def test_wrapped_neo_allowance(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_neo.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
@@ -372,7 +373,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(allowed_amount, result)
 
     def test_wrapped_neo_transferFrom(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
+        path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_neo.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
@@ -490,20 +491,15 @@ class TestTemplate(BoaTest):
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_2, -10, None)
 
     def test_wrapped_neo_onPayment(self):
-        path = self.get_contract_path('examples', 'wrapped_neo.py')
-        aux_native_tokens_path = self.get_contract_path('examples/test_native', 'methods.py')
+        path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
         output, manifest = self.compile_and_save(path)
         wrapped_neo_address = hash160(output)
-        output, manifest = self.compile_and_save(aux_native_tokens_path)
-        aux_contract_address = hash160(output)
+        aux_contract_address = bytes(range(20))
 
         minted_amount = 10 * 10 ** 8
-
-        engine.add_contract(path.replace('.py', '.nef'))
-
         # deploying wrapped_neo smart contract
         result = self.run_smart_contract(engine, path, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -517,13 +513,13 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'onNEP17Payment', aux_contract_address, minted_amount, None,
                                     signer_accounts=[aux_contract_address])
 
-        neo_wrapped_before = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', wrapped_neo_address)
-        neo_aux_before = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', aux_contract_address)
+        neo_wrapped_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_aux_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_contract_address)
         zneo_aux_before = self.run_smart_contract(engine, path, 'balanceOf', aux_contract_address)
         # transferring NEO to the wrapped_neo_address will mint them
-        result = self.run_smart_contract(engine, aux_native_tokens_path, 'transfer_neo',
+        result = self.run_smart_contract(engine, NEO_SCRIPT, 'transfer',
                                          aux_contract_address, wrapped_neo_address, minted_amount, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         signer_accounts=[aux_contract_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
@@ -552,8 +548,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(minted_amount, amount)
 
         # balance after burning
-        neo_wrapped_after = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', wrapped_neo_address)
-        neo_aux_after = self.run_smart_contract(engine, aux_native_tokens_path, 'balanceOf_neo', aux_contract_address)
+        neo_wrapped_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_aux_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_contract_address)
         zneo_aux_after = self.run_smart_contract(engine, path, 'balanceOf', aux_contract_address)
         self.assertEqual(neo_wrapped_before + minted_amount, neo_wrapped_after)
         self.assertEqual(neo_aux_before - minted_amount, neo_aux_after)

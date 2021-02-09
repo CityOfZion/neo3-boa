@@ -7,6 +7,7 @@ from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
+from boa3.neo3.core.types import UInt160
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
@@ -159,7 +160,7 @@ class TestEngine:
         for tx in transaction:
             current_block.add_transaction(tx)
 
-    def run(self, nef_path: str, method: str, *arguments: Any, reset_engine: bool = False,
+    def run(self, nef_path: Union[str, UInt160], method: str, *arguments: Any, reset_engine: bool = False,
             rollback_on_fault: bool = True) -> Any:
         import json
         import subprocess
@@ -246,9 +247,10 @@ class TestEngine:
         self.reset_state()
         self._storage.clear()
 
-    def to_json(self, path: str, method: str, *args: Any) -> Dict[str, Any]:
+    def to_json(self, path: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
         return {
-            'path': path,
+            'path': path if isinstance(path, str) else '',
+            'scripthash': str(path) if isinstance(path, UInt160) else None,
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),

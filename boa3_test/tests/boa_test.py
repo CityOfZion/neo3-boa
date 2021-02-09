@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Iterable, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
 import env
@@ -179,19 +179,22 @@ class BoaTest(TestCase):
 
         return output, manifest
 
-    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
+    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: Union[str, bytes], method: str,
                            *arguments: Any, reset_engine: bool = False,
                            fake_storage: Dict[str, Any] = None,
                            signer_accounts: Iterable[bytes] = (),
                            expected_result_type: Type = None,
                            rollback_on_fault: bool = True) -> Any:
 
-        if smart_contract_path.endswith('.py'):
+        if isinstance(smart_contract_path, str) and smart_contract_path.endswith('.py'):
             if not (os.path.isfile(smart_contract_path.replace('.py', '.nef'))
                     and os.path.isfile(smart_contract_path.replace('.py', '.manifest.json'))):
                 # both .nef and .manifest.json are required to execute the smart contract
                 self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
+        elif isinstance(smart_contract_path, bytes):
+            from boa3.neo3.core.types import UInt160
+            smart_contract_path = UInt160(smart_contract_path)
 
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)
