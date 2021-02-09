@@ -103,7 +103,9 @@ class BinaryOp:
         valid_operations: List[BinaryOperation] = []
         for id, op in vars(cls).items():
             if isinstance(op, BinaryOperation) and op.operator is operator:
-                if left_operand in op._valid_types:
+                left = next((valid_type for valid_type in op._valid_types if valid_type.is_type_of(left_operand)),
+                            None)
+                if left is not None:
                     return op.build(left_operand, op.right_type)
                 else:
                     valid_operations.append(op)

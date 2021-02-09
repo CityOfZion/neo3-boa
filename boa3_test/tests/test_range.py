@@ -313,6 +313,13 @@ class TestRange(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2], result)
 
+    def test_range_slicing_start_larger_than_ending(self):
+        path = self.get_contract_path('RangeSlicingStartLargerThanEnding.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([], result)
+
     def test_range_slicing_with_variables(self):
         path = self.get_contract_path('RangeSlicingVariableValues.py')
 

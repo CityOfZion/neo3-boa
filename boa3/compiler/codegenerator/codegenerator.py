@@ -820,10 +820,22 @@ class CodeGenerator:
         """
         Converts the end of get a substring
         """
+        # if given substring size is negative, return empty string
+        self.duplicate_stack_top_item()
+        self.convert_literal(0)
+        self.convert_operation(BinaryOp.GtE)
+
+        self._insert_jump(OpcodeInfo.JMPIF)
+        jmp_address = self.last_code_start_address
+        self.remove_stack_top_item()
+        self.convert_literal(0)
+
         self._stack_pop()  # length
         self._stack_pop()  # start
         self._stack_pop()  # original string
+
         self.__insert1(OpcodeInfo.SUBSTR)
+        self._update_jump(jmp_address, self.last_code_start_address)
         self._stack_append(Type.bytes)  # substr returns a buffer instead of a bytestring
         self.convert_cast(Type.str)
 

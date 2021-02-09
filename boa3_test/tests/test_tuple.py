@@ -247,6 +247,13 @@ class TestTuple(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2], result)
 
+    def test_tuple_slicing_start_larger_than_ending(self):
+        path = self.get_contract_path('TupleSlicingStartLargerThanEnding.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([], result)
+
     def test_tuple_slicing_with_variables(self):
         path = self.get_contract_path('TupleSlicingVariableValues.py')
 
