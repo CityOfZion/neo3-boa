@@ -883,9 +883,11 @@ class CodeGenerator:
         # top: length, index, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
             if value_addresses is not None:
-                opcodes = [VMCodeMapping.instance().code_map[address] for address in value_addresses]
-                for code in opcodes:
-                    self.fix_negative_index(VMCodeMapping.instance().get_end_address(code) + 1)
+                # use the next value address to found where the opcodes to fix the value sign should be
+                end_value_opcodes = value_addresses[1:]
+                for code in reversed(end_value_opcodes):
+                    self.fix_negative_index(code)
+                self.fix_negative_index()  # fix the last value sign
 
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
