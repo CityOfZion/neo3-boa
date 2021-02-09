@@ -1018,7 +1018,6 @@ class TestList(BoaTest):
 
     def test_list_remove_value(self):
         path = self.get_contract_path('RemoveValue.py')
-        self.compile_and_save(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4], 3)
