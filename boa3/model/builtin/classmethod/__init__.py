@@ -5,6 +5,7 @@ __all__ = ['AppendMethod',
            'MapKeysMethod',
            'MapValuesMethod',
            'PopMethod',
+           'RemoveMethod',
            'ReverseMethod',
            'ToBoolMethod',
            'ToBytesMethod',
@@ -18,6 +19,7 @@ from boa3.model.builtin.classmethod.insertmethod import InsertMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.popmethod import PopMethod
+from boa3.model.builtin.classmethod.removemethod import RemoveMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
