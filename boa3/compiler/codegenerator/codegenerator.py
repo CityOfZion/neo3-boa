@@ -820,10 +820,22 @@ class CodeGenerator:
         """
         Converts the end of get a substring
         """
+        # if given substring size is negative, return empty string
+        self.duplicate_stack_top_item()
+        self.convert_literal(0)
+        self.convert_operation(BinaryOp.GtE)
+
+        self._insert_jump(OpcodeInfo.JMPIF)
+        jmp_address = self.last_code_start_address
+        self.remove_stack_top_item()
+        self.convert_literal(0)
+
         self._stack_pop()  # length
         self._stack_pop()  # start
         self._stack_pop()  # original string
+
         self.__insert1(OpcodeInfo.SUBSTR)
+        self._update_jump(jmp_address, self.last_code_start_address)
         self._stack_append(Type.bytes)  # substr returns a buffer instead of a bytestring
         self.convert_cast(Type.str)
 
@@ -871,9 +883,11 @@ class CodeGenerator:
         # top: length, index, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
             if value_addresses is not None:
-                opcodes = [VMCodeMapping.instance().code_map[address] for address in value_addresses]
-                for code in opcodes:
-                    self.fix_negative_index(VMCodeMapping.instance().get_end_address(code) + 1)
+                # use the next value address to found where the opcodes to fix the value sign should be
+                end_value_opcodes = value_addresses[1:]
+                for code in reversed(end_value_opcodes):
+                    self.fix_negative_index(code)
+                self.fix_negative_index()  # fix the last value sign
 
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):

@@ -50,6 +50,15 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('i', result)
 
+    def test_string_slicing_start_larger_than_ending(self):
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        path = self.get_contract_path('StringSlicingStartLargerThanEnding.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual('', result)
+
     def test_string_slicing_with_variables(self):
         path = self.get_contract_path('StringSlicingVariableValues.py')
 

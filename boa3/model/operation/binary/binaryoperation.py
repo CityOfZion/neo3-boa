@@ -70,4 +70,7 @@ class BinaryOperation(IOperation, ABC):
         :return: The built operation if the operands are valid. None otherwise
         :rtype: BinaryOperation or None
         """
-        return cls(left, right)
+        operation = cls(left, right)
+        if operation.validate_type(left, right):
+            return operation
+        return cls(left, left)

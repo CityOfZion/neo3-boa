@@ -717,7 +717,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if operation is not None:
             return operation
         else:
-            expected_op: BinaryOperation = BinaryOp.get_operation_by_operator(operator, l_type)
+            expected_op: BinaryOperation = BinaryOp.get_operation_by_operator(operator,
+                                                                              l_type if left is not None else r_type)
             expected_types = (expected_op.left_type.identifier, expected_op.right_type.identifier)
             raise CompilerError.MismatchedTypes(0, 0, expected_types, actual_types)
 
