@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
 from boa3.model.method import Method
 from boa3.model.property import Property
@@ -6,6 +6,7 @@ from boa3.model.type.classtype import ClassType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItem import StackItemType
 
@@ -63,6 +64,22 @@ class UInt160Type(BytesType, ClassType):
     @classmethod
     def _is_type_of(cls, value: Any):
         return isinstance(value, UInt160Type)
+
+    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+        from boa3.neo.vm.type.Integer import Integer
+        push_int_opcode, size_data = Opcode.get_push_and_data(20)
+
+        return [
+            (Opcode.DUP, b''),                  # if isinstance(value, bytes):
+            (Opcode.ISTYPE, self.stack_item),
+            (Opcode.JMPIFNOT, Integer(7 + len(size_data)).to_byte_array(min_length=1)),
+            (Opcode.SIZE, b''),                     # return len(value) == 20
+            (push_int_opcode, size_data),
+            (Opcode.NUMEQUAL, b''),
+            (Opcode.JMP, Integer(4).to_byte_array(min_length=1)),
+            (Opcode.DROP, b''),
+            (Opcode.PUSH0, b''),                # return False
+        ]
 
 
 _UInt160 = UInt160Type()

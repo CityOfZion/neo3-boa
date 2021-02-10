@@ -1,11 +1,10 @@
+from typing import Any
+
 from boa3.builtin import public
-from boa3.builtin.type import UInt160
+from boa3.builtin.interop.contract.contract import Contract
 
 
 @public
-def Main(value: bytes) -> bool:
-    if len(value) == 20:
-        value = UInt160(value)
-
+def Main(value: Any) -> bool:
     # not supported because boa builtin classes don't work with isinstance yet
-    return isinstance(value, UInt160)
+    return isinstance(value, Contract)

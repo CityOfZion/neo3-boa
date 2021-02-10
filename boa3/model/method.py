@@ -125,3 +125,14 @@ class Method(Callable):
                            None)
         if instruction is not None:
             self._debug_map.remove(instruction)
+
+    def args_to_be_generated(self) -> List[int]:
+        """
+        Gets the indexes of the arguments that must be generated.
+        If method has `self` arg, it must be in this list.
+
+        By default, all the arguments are generated.
+
+        :return: A list with the indexes of the arguments that must be generated
+        """
+        return list(range(len(self.args)))

@@ -951,15 +951,16 @@ class CodeGenerator:
         :param symbol_id: the symbol identifier
         :param params_addresses: a list with each function arguments' first addresses
         """
-        if not params_addresses:
-            params_addresses = []
         symbol = self.get_symbol(symbol_id)
         if symbol is not Type.none:
             if isinstance(symbol, Property):
                 symbol = symbol.getter
                 params_addresses = []
-            elif isinstance(symbol, ClassType):
+            elif isinstance(symbol, ClassType) and params_addresses is not None:
                 symbol = symbol.constructor_method()
+
+            if not params_addresses:
+                params_addresses = []
 
             if isinstance(symbol, Variable):
                 self.convert_load_variable(symbol_id, symbol)
@@ -1076,13 +1077,6 @@ class CodeGenerator:
             for arg in sorted(fix_negatives, reverse=True):
                 if len(addresses) > arg:
                     self.fix_negative_index(addresses[arg])
-
-        from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
-        if isinstance(function, IsInstanceMethod) and len(args_address) > 1:
-            # TODO: remove this if when isinstance with classes is fixed
-            for address in args_address:
-                if VMCodeMapping.instance().get_code(address).opcode is Opcode.PUSHNULL:
-                    self._opcodes_to_remove.append(address)
 
         for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)
