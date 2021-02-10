@@ -61,11 +61,14 @@ class Opcode(bytes, Enum):
                 opcode = Opcode.PUSHINT8
             elif len(data) == 2:
                 opcode = Opcode.PUSHINT16
-            elif len(data) == 4:
+            elif len(data) <= 4:
+                data = Integer(integer).to_byte_array(signed=True, min_length=4)
                 opcode = Opcode.PUSHINT32
-            elif len(data) == 8:
+            elif len(data) <= 8:
+                data = Integer(integer).to_byte_array(signed=True, min_length=8)
                 opcode = Opcode.PUSHINT64
-            elif len(data) == 16:
+            elif len(data) <= 16:
+                data = Integer(integer).to_byte_array(signed=True, min_length=16)
                 opcode = Opcode.PUSHINT128
             else:
                 data = data[:32]
