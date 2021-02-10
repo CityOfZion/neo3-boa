@@ -13,6 +13,4 @@ def main() -> bool:
 
     j3 = MYSHA
 
-#    print(j2)
-
     return j2 == j3

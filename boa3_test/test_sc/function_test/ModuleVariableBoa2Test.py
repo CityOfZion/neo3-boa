@@ -8,9 +8,6 @@ WHAT = 5
 
 @public
 def main() -> int:
-    """
-    :return:
-    """
 
     j = CONST
 
@@ -20,7 +17,4 @@ def main() -> int:
 
 
 def bleh() -> int:
-    """
-    :return:
-    """
     return 2 + WHAT

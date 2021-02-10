@@ -20,22 +20,10 @@ def main() -> int:
 
 
 def add(a: int, b: int, c: int, d: int, e: int) -> int:
-    """
-    :param a:
-    :param b:
-    :param c:
-    :param d:
-    :param e:
-    :return:
-    """
     result = a + b + c + d + e
 
     return result
 
 
 def get_first_item(array_item: List[int]) -> int:
-    """
-    :param array_item:
-    :return:
-    """
     return array_item[0]

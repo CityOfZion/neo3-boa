@@ -1,5 +1,3 @@
-import unittest
-
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.neo.vm.opcode.Opcode import Opcode
