@@ -22,3 +22,6 @@ Welcome to neo3-boa's documentation!
    package-reference
    contribute
    license
+   getting-started
+   code-reference
+   
