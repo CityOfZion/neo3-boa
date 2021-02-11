@@ -20,9 +20,9 @@
 import os
 import sys
 
-import boa3
-
 sys.path.insert(0, os.path.abspath('../../'))
+
+import boa3
 
 # -- General configuration ------------------------------------------------
 

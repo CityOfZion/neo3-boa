@@ -1,5 +1,6 @@
 from typing import Union
 
+from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.storagecontext import StorageContext
 
 
@@ -43,5 +44,17 @@ def delete(key: Union[str, bytes]):
 
     :param key: the identifier in the store for the new value
     :type key: str or bytes
+    """
+    pass
+
+
+def find(prefix: Union[str, bytes]) -> Iterator:
+    """
+    Searches in the storage for keys that start with the given prefix
+
+    :param prefix: prefix to find the storage keys
+    :type prefix: str or bytes
+    :return: an iterator with the search results
+    :rtype: Iterator
     """
     pass

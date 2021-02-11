@@ -17,5 +17,3 @@ class NativeAccountState:
                 + StackItem.serialize(self.balance)
                 + b'!\x00\x00'
                 )
-
-

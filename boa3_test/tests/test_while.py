@@ -8,6 +8,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestWhile(BoaTest):
 
+    default_folder: str = 'test_sc/while_test'
+
     def test_while_constant_condition(self):
         jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
@@ -31,11 +33,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/ConstantCondition.py' % self.dirname
+        path = self.get_contract_path('ConstantCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(0, result)
 
@@ -72,11 +74,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/VariableCondition.py' % self.dirname
+        path = self.get_contract_path('VariableCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', -2)
         self.assertEqual(0, result)
         result = self.run_smart_contract(engine, path, 'Main', 5)
@@ -85,11 +87,11 @@ class TestWhile(BoaTest):
         self.assertEqual(16, result)
 
     def test_while_mismatched_type_condition(self):
-        path = '%s/boa3_test/test_sc/while_test/MismatchedTypeCondition.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeCondition.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_while_no_condition(self):
-        path = '%s/boa3_test/test_sc/while_test/NoCondition.py' % self.dirname
+        path = self.get_contract_path('NoCondition.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -143,11 +145,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/NestedWhile.py' % self.dirname
+        path = self.get_contract_path('NestedWhile.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(8, result)
 
@@ -178,11 +180,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/WhileElse.py' % self.dirname
+        path = self.get_contract_path('WhileElse.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
@@ -217,11 +219,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/RelationalCondition.py' % self.dirname
+        path = self.get_contract_path('RelationalCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(20, result)
 
@@ -260,11 +262,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/MultipleRelationalCondition.py' % self.dirname
+        path = self.get_contract_path('MultipleRelationalCondition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', '', 1)
         self.assertEqual(0, result)
         result = self.run_smart_contract(engine, path, 'Main', '', 10)
@@ -331,11 +333,11 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/WhileContinue.py' % self.dirname
+        path = self.get_contract_path('WhileContinue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(20, result)
 
@@ -402,28 +404,28 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/while_test/WhileBreak.py' % self.dirname
+        path = self.get_contract_path('WhileBreak.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
 
     def test_boa2_while_test(self):
-        path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('WhileBoa2Test.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(24, result)
 
     def test_boa2_while_test1(self):
-        path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test1.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('WhileBoa2Test1.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
 
     def test_boa2_while_test2(self):
-        path = '%s/boa3_test/test_sc/while_test/WhileBoa2Test2.py' % self.dirname
-        engine = TestEngine(self.dirname)
+        path = self.get_contract_path('WhileBoa2Test2.py')
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)

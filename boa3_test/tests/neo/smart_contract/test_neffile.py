@@ -10,7 +10,7 @@ class TestNefFile(TestCase):
     test_version_bytes = b'1.2.3.0'
     test_script = b'\x01\x02\x03'
 
-    def create_test_nef(self, test_script):
+    def create_test_nef(self, test_script) -> NefFile:
         nef = NefFile(test_script)
         nef._set_version(self.test_version)
         return nef
@@ -36,13 +36,24 @@ class TestNefFile(TestCase):
         self.assertEqual(len(result), len(nef._nef))
 
         # the first 4 bytes of the header are from nef magic
-        # the next 32 bytes of the header are from the compiler id
-        start, end = (4, 36)
-        self.assertEqual(result[start:end], nef._nef.compiler.encode(ENCODING))
+        # the next 64 bytes of the header are from the compiler id + version
+        start, end = (4, 68)
+        compiler, version = result[start:end].rsplit(b'-', maxsplit=1)
+        self.assertEqual(compiler, nef._nef.compiler.encode(ENCODING))
+        self.assertEqual(version[:32], encoded_test_version)
 
-        # the next 16 bytes are from the version, 4 bytes for each field
-        start, end = (end, end + 32)
-        self.assertEqual(result[start:end], encoded_test_version)
+        # the next 2 bytes are reserved for future changes. Have to be zero
+        start, end = (end, end + 2)
+        self.assertEqual(bytes(2), result[start: end])
+
+        # the next bytes is the size of the method tokens
+        # and the following are the tokens itself
+        start, end = (end, end + 1)
+        self.assertEqual(bytes(1), result[start: end])
+
+        # the next 2 bytes are reserved for future changes. Have to be zero
+        start, end = (end, end + 2)
+        self.assertEqual(bytes(2), result[start: end])
 
         # the next byte is from the size of the smart contract
         # and the last bytes are from the script of the smart contract, up to 1MB

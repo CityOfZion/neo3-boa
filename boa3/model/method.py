@@ -24,7 +24,6 @@ class Method(Callable):
         super().__init__(args, defaults, return_type, is_public, origin_node)
 
         self.imported_symbols = {}
-        self._requires_storage: bool = False
         self._symbols = {}
         self.locals: Dict[str, Variable] = {}
 
@@ -85,15 +84,6 @@ class Method(Callable):
                 self.imported_symbols[symbol_id] = symbol
 
     @property
-    def requires_storage(self) -> bool:
-        """
-        This method requires blockchain storage access
-
-        :return: True if the method uses storage features. False otherwise.
-        """
-        return self._requires_storage
-
-    @property
     def origin(self) -> ast.AST:
         """
         Returns the method origin ast node.
@@ -102,14 +92,11 @@ class Method(Callable):
         """
         return self._origin_node
 
-    def set_storage(self):
-        self._requires_storage = True
-
     def debug_map(self) -> List[DebugInstruction]:
         """
         Returns a list with the debug information of each mapped Python instruction inside this method
         """
-        from boa3.compiler.vmcodemapping import VMCodeMapping
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         return sorted(self._debug_map, key=lambda instr: VMCodeMapping.instance().get_start_address(instr.code))
 
     def include_instruction(self, instr_info: DebugInstruction):
@@ -138,3 +125,14 @@ class Method(Callable):
                            None)
         if instruction is not None:
             self._debug_map.remove(instruction)
+
+    def args_to_be_generated(self) -> List[int]:
+        """
+        Gets the indexes of the arguments that must be generated.
+        If method has `self` arg, it must be in this list.
+
+        By default, all the arguments are generated.
+
+        :return: A list with the indexes of the arguments that must be generated
+        """
+        return list(range(len(self.args)))

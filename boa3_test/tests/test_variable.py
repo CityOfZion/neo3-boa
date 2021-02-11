@@ -15,8 +15,10 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestVariable(BoaTest):
 
+    default_folder: str = 'test_sc/variable_test'
+
     def test_declaration_with_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/DeclarationWithType.py' % self.dirname
+        path = self.get_contract_path('DeclarationWithType.py')
 
         test_variable_id = 'a'
         test_method_id = 'Main'
@@ -26,7 +28,6 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
         compiler_output = compiler.compile(path)
@@ -45,7 +46,7 @@ class TestVariable(BoaTest):
         self.assertTrue(test_variable_id in method_symbol_table)
 
     def test_declaration_without_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/DeclarationWithoutType.py' % self.dirname
+        path = self.get_contract_path('DeclarationWithoutType.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_assignment_with_type(self):
@@ -59,11 +60,10 @@ class TestVariable(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.STLOC0     # variable address
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/AssignmentWithType.py' % self.dirname
+        path = self.get_contract_path('AssignmentWithType.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -74,11 +74,10 @@ class TestVariable(BoaTest):
             + b'\x00'
             + Opcode.PUSH1      # assignment value
             + Opcode.STLOC0     # variable address
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/AssignmentWithoutType.py' % self.dirname
+        path = self.get_contract_path('AssignmentWithoutType.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -93,11 +92,10 @@ class TestVariable(BoaTest):
             + Integer(len(byte_input)).to_byte_array(min_length=1)
             + byte_input
             + Opcode.STARG0         # variable address
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/ArgumentAssignment.py' % self.dirname
+        path = self.get_contract_path('ArgumentAssignment.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -112,11 +110,10 @@ class TestVariable(BoaTest):
             + Opcode.DUP            # b = True
             + Opcode.STLOC1
             + Opcode.STLOC0         # a = True
-            + Opcode.PUSHNULL   # return
-            + Opcode.RET
+            + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/MultipleAssignments.py' % self.dirname
+        path = self.get_contract_path('MultipleAssignments.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -148,11 +145,10 @@ class TestVariable(BoaTest):
             + Opcode.PICK
             + Opcode.SETITEM
             + Opcode.STLOC1         # c = 2
-            + Opcode.PUSHNULL   # return
-            + Opcode.RET
+            + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/MultipleAssignmentsSetSequence.py' % self.dirname
+        path = self.get_contract_path('MultipleAssignmentsSetSequence.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -184,20 +180,19 @@ class TestVariable(BoaTest):
             + Opcode.LDLOC0
             + Opcode.REVERSE3
             + Opcode.SETITEM
-            + Opcode.PUSHNULL   # return
-            + Opcode.RET
+            + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/MultipleAssignmentsSetSequenceLast.py' % self.dirname
+        path = self.get_contract_path('MultipleAssignmentsSetSequenceLast.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeMultipleAssignments.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeMultipleAssignments.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_tuple_multiple_assignments(self):
-        path = '%s/boa3_test/test_sc/variable_test/AssignmentWithTuples.py' % self.dirname
+        path = self.get_contract_path('AssignmentWithTuples.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_many_assignments(self):
@@ -222,11 +217,10 @@ class TestVariable(BoaTest):
             + Opcode.PUSH7
             + Opcode.STLOC          # variable index greater than 6 uses another opcode
             + b'\x07'
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/ManyAssignments.py' % self.dirname
+        path = self.get_contract_path('ManyAssignments.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -239,11 +233,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/ReturnArgument.py' % self.dirname
+        path = self.get_contract_path('ReturnArgument.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'Main', -140)
@@ -260,11 +254,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/ReturnLocalVariable.py' % self.dirname
+        path = self.get_contract_path('ReturnLocalVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', -140)
@@ -281,50 +275,50 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/AssignLocalWithArgument.py' % self.dirname
+        path = self.get_contract_path('AssignLocalWithArgument.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'Main', -140)
         self.assertEqual(-140, result)
 
     def test_using_undeclared_variable(self):
-        path = '%s/boa3_test/test_sc/variable_test/UsingUndeclaredVariable.py' % self.dirname
+        path = self.get_contract_path('UsingUndeclaredVariable.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_return_undeclared_variable(self):
-        path = '%s/boa3_test/test_sc/variable_test/ReturnUndeclaredVariable.py' % self.dirname
+        path = self.get_contract_path('ReturnUndeclaredVariable.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_assign_value_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignValue.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAssignValue.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_binary_operation_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignBinOp.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAssignBinOp.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_unary_operation_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignUnOp.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAssignUnOp.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_mixed_operations_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignMixedOp.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAssignMixedOp.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_sequence_get_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignSequenceGet.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAssignSequenceGet.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_assign_sequence_set_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAssignSequenceSet.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAssignSequenceSet.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_aug_assign_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/variable_test/MismatchedTypeAugAssign.py' % self.dirname
+        path = self.get_contract_path('MismatchedTypeAugAssign.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_global_declaration_with_assignment(self):
@@ -337,16 +331,16 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0    # a = 10
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py' % self.dirname
+        path = self.get_contract_path('GlobalDeclarationWithArgumentWrittenAfter.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(10, result)
 
     def test_global_declaration_without_assignment(self):
-        path = '%s/boa3_test/test_sc/variable_test/GlobalDeclarationWithoutAssignment.py' % self.dirname
+        path = self.get_contract_path('GlobalDeclarationWithoutAssignment.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_global_assignment_with_type(self):
@@ -359,11 +353,11 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0    # a = 10
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py' % self.dirname
+        path = self.get_contract_path('GlobalAssignmentWithType.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(10, result)
 
@@ -377,16 +371,16 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0    # a = 10
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithoutType.py' % self.dirname
+        path = self.get_contract_path('GlobalAssignmentWithoutType.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(10, result)
 
     def test_global_tuple_multiple_assignments(self):
-        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentWithTuples.py' % self.dirname
+        path = self.get_contract_path('GlobalAssignmentWithTuples.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_many_global_assignments(self):
@@ -423,11 +417,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/variable_test/ManyGlobalAssignments.py' % self.dirname
+        path = self.get_contract_path('ManyGlobalAssignments.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7], result)
 
@@ -445,11 +439,11 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD1
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentBetweenFunctions.py' % self.dirname
+        path = self.get_contract_path('GlobalAssignmentBetweenFunctions.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'example')
@@ -488,11 +482,11 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD + b'\x07'   # variable index greater than 6 uses another opcode
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/GetGlobalValueWrittenAfter.py' % self.dirname
+        path = self.get_contract_path('GetGlobalValueWrittenAfter.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7], result)
 
@@ -511,11 +505,11 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/AssignLocalWithArgumentShadowingGlobal.py' % self.dirname
+        path = self.get_contract_path('AssignLocalWithArgumentShadowingGlobal.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'Main', -140)
@@ -536,14 +530,21 @@ class TestVariable(BoaTest):
             + Opcode.STSFLD0
             + Opcode.RET
         )
-        path = '%s/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py' % self.dirname
+        path = self.get_contract_path('GlobalAssignmentInFunctionWithArgument.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        engine = TestEngine(self.dirname)
         result = self.run_smart_contract(engine, path, 'Main', -140)
         self.assertEqual(-140, result)
+
+    def test_assign_void_function_call(self):
+        path = self.get_contract_path('AssignVoidFunctionCall.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(None, result)

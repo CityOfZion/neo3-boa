@@ -1,37 +1,35 @@
 Installation
 ============
 
-This version of the compiler requires Python 3.8 or later
-
-.. note::
-   Make sure you have installed MSVC v142 - Build tools VS 2019 C++ x64/x86 (v14.24). You can do this by installing `Visual Studio`_ and adding C++ development features.
+This version of the compiler requires Python 3.7 or later.
 
 Set Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Make a Python 3 virtual environment and activate it:
 
-Linux/Mac OS::
+On Linux/Mac OS::
 
     $ python3 -m venv venv
     $ source venv/bin/activate
 
-Windows::
+
+On Windows::
 
     $ python3 -m venv venv
-    $ venv/Scripts/activate.bat
+    $ venv\Scripts\activate.bat
 
-Using pip (Recomended)
-^^^^^^^^^^^^^^^^^^^^^^
+Pip (Recommended)
+^^^^^^^^^^^^^^^^^
 
 ::
 
     pip install neo3-boa
 
-If neo3-boa is not available via pip, you can build it from source.
 
-Build from Source
-^^^^^^^^^^^^^^^^^
+Build from Source (Optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If neo3-boa is not available via pip, you can build it from source.
 
 ::
 

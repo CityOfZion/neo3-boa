@@ -74,9 +74,7 @@ class InternalError(CompilerError):
     def _error_message(self) -> Optional[str]:
         message = "Internal compiler error"
         if self.raised_exception is not None:
-            message += ". %s" % type(self.raised_exception).__name__
-            if len(self.raised_exception.args) > 0:
-                message += ": %s" % self.raised_exception.args
+            message += ". {0}: {1}".format(type(self.raised_exception).__name__, str(self.raised_exception))
         return message
 
 

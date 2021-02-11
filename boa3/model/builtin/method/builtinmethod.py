@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
@@ -111,6 +113,15 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         pass
 
+    def validate_negative_arguments(self) -> List[int]:
+        """
+        Returns a list of the arguments that have to be positive values and need validation.
+
+        :return: list with the arguments indexes that need to be fixed.
+        :rtype: List[int]
+        """
+        return []
+
     @property
     def pack_arguments(self) -> bool:
         """
@@ -139,7 +150,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         return None
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         """
         Creates a method instance with the given value as self
 
@@ -148,3 +159,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :rtype: IBuiltinMethod
         """
         return self
+
+    def not_supported_str(self, callable_id: str) -> str:
+        return '{0}({1})'.format(callable_id,
+                                 ','.join([arg.type.identifier for arg in self.args.values()]))

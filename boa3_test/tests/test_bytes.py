@@ -11,6 +11,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestBytes(BoaTest):
 
+    default_folder: str = 'test_sc/bytes_test'
+
     def test_bytes_literal_value(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -21,11 +23,10 @@ class TestBytes(BoaTest):
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytesLiteral.py' % self.dirname
+        path = self.get_contract_path('BytesLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -48,11 +49,11 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytesGetValue.py' % self.dirname
+        path = self.get_contract_path('BytesGetValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', b'0')
@@ -77,57 +78,57 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytesGetValueNegativeIndex.py' % self.dirname
+        path = self.get_contract_path('BytesGetValueNegativeIndex.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
         self.assertEqual(3, result)
         result = self.run_smart_contract(engine, path, 'Main', b'0')
         self.assertEqual(48, result)
 
     def test_bytes_set_value(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesSetValue.py' % self.dirname
+        path = self.get_contract_path('BytesSetValue.py')
         self.assertCompilerLogs(UnresolvedOperation, path)
 
     def test_bytes_clear(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesClear.py' % self.dirname
+        path = self.get_contract_path('BytesClear.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_reverse(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesReverse.py' % self.dirname
+        path = self.get_contract_path('BytesReverse.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_int(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToInt.py' % self.dirname
+        path = self.get_contract_path('BytesToInt.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
         self.assertEqual(513, result)
 
     def test_bytes_to_int_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytesToIntWithBuiltin.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
         self.assertEqual(513, result)
 
     def test_bytes_to_int_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltinMismatchedTypes.py' % self.dirname
+        path = self.get_contract_path('BytesToIntWithBuiltinMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_int_with_byte_array_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToIntWithBytearrayBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytesToIntWithBytearrayBuiltin.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_bool(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBool.py' % self.dirname
+        path = self.get_contract_path('BytesToBool.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x00')
         self.assertEqual(False, result)
 
@@ -138,10 +139,10 @@ class TestBytes(BoaTest):
         self.assertEqual(True, result)
 
     def test_bytes_to_bool_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytesToBoolWithBuiltin.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x00')
         self.assertEqual(False, result)
 
@@ -152,43 +153,43 @@ class TestBytes(BoaTest):
         self.assertEqual(True, result)
 
     def test_bytes_to_bool_with_builtin_hard_coded_false(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinHardCodedFalse.py' % self.dirname
+        path = self.get_contract_path('BytesToBoolWithBuiltinHardCodedFalse.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
-        result = self.run_smart_contract(engine, path, 'bytes_to_bool')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool', expected_result_type=bool)
         self.assertEqual(False, result)
 
     def test_bytes_to_bool_with_builtin_hard_coded_true(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinHardCodedTrue.py' % self.dirname
+        path = self.get_contract_path('BytesToBoolWithBuiltinHardCodedTrue.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool')
         self.assertEqual(True, result)
 
     def test_bytes_to_bool_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToBoolWithBuiltinMismatchedTypes.py' % self.dirname
+        path = self.get_contract_path('BytesToBoolWithBuiltinMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_to_str(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToStr.py' % self.dirname
+        path = self.get_contract_path('BytesToStr.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_str')
         self.assertEqual('abc', result)
 
     def test_bytes_to_str_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytesToStrWithBuiltin.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_str')
         self.assertEqual('123', result)
 
     def test_bytes_to_str_mismatched_types(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltinMismatchedTypes.py' % self.dirname
+        path = self.get_contract_path('BytesToStrWithBuiltinMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_bytes_from_byte_array(self):
@@ -203,18 +204,17 @@ class TestBytes(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # b = a
             + Opcode.STLOC1
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytesFromBytearray.py' % self.dirname
+        path = self.get_contract_path('BytesFromBytearray.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_assign_with_slice(self):
-        path = '%s/boa3_test/test_sc/bytes_test/AssignSlice.py' % self.dirname
+        path = self.get_contract_path('AssignSlice.py')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', b'unittest',
                                          expected_result_type=bytearray)
         self.assertEqual(b'unittest'[1:2], result)
@@ -245,11 +245,11 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayGetValue.py' % self.dirname
+        path = self.get_contract_path('BytearrayGetValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'Main', b'0')
@@ -274,11 +274,11 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayGetValueNegativeIndex.py' % self.dirname
+        path = self.get_contract_path('BytearrayGetValueNegativeIndex.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', bytes([1, 2, 3]))
         self.assertEqual(3, result)
         result = self.run_smart_contract(engine, path, 'Main', b'0')
@@ -306,11 +306,11 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytearraySetValue.py' % self.dirname
+        path = self.get_contract_path('BytearraySetValue.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', b'123')
         self.assertEqual(b'\x0123', result)
         result = self.run_smart_contract(engine, path, 'Main', b'0')
@@ -338,18 +338,18 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytearraySetValueNegativeIndex.py' % self.dirname
+        path = self.get_contract_path('BytearraySetValueNegativeIndex.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', b'123')
         self.assertEqual(b'12\x01', result)
         result = self.run_smart_contract(engine, path, 'Main', b'0')
         self.assertEqual(b'\x01', result)
 
     def test_byte_array_literal_value(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayLiteral.py' % self.dirname
+        path = self.get_contract_path('BytearrayLiteral.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_byte_array_from_literal_bytes(self):
@@ -362,11 +362,10 @@ class TestBytes(BoaTest):
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayFromLiteralBytes.py' % self.dirname
+        path = self.get_contract_path('BytearrayFromLiteralBytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -384,102 +383,132 @@ class TestBytes(BoaTest):
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
             + Opcode.STLOC1
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayFromVariableBytes.py' % self.dirname
+        path = self.get_contract_path('BytearrayFromVariableBytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_byte_array_string(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayFromString.py' % self.dirname
+        path = self.get_contract_path('BytearrayFromString.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_byte_array_append(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppend.py' % self.dirname
+        path = self.get_contract_path('BytearrayAppend.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x01\x02\x03\x04', result)
 
     def test_byte_array_append_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppendWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytearrayAppendWithBuiltin.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x01\x02\x03\x04', result)
 
     def test_byte_array_append_mutable_sequence_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayAppendWithMutableSequence.py' % self.dirname
+        path = self.get_contract_path('BytearrayAppendWithMutableSequence.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x01\x02\x03\x04', result)
 
     def test_byte_array_clear(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayClear.py' % self.dirname
+        path = self.get_contract_path('BytearrayClear.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'', result)
 
     @unittest.skip("reverse items doesn't work with bytestring")
     def test_byte_array_reverse(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayReverse.py' % self.dirname
+        path = self.get_contract_path('BytearrayReverse.py')
         Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x03\x02\x01', result)
 
     def test_byte_array_extend(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayExtend.py' % self.dirname
+        path = self.get_contract_path('BytearrayExtend.py')
         Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x01\x02\x03\x04\x05\x06', result)
 
     def test_byte_array_extend_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayExtendWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytearrayExtendWithBuiltin.py')
         Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x01\x02\x03\x04\x05\x06', result)
 
     def test_byte_array_to_int(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayToInt.py' % self.dirname
+        path = self.get_contract_path('BytearrayToInt.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
         self.assertEqual(513, result)
 
     def test_byte_array_to_int_with_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayToIntWithBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytearrayToIntWithBuiltin.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
         self.assertEqual(513, result)
 
     def test_byte_array_to_int_with_bytes_builtin(self):
-        path = '%s/boa3_test/test_sc/bytes_test/BytearrayToIntWithBytesBuiltin.py' % self.dirname
+        path = self.get_contract_path('BytearrayToIntWithBytesBuiltin.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
         self.assertEqual(513, result)
+
+    def test_boa2_byte_array_test(self):
+        path = self.get_contract_path('BytearrayBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\t\x01\x02', result)
+
+    def test_boa2_byte_array_test2(self):
+        path = self.get_contract_path('BytearrayBoa2Test2.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_byte_array_test3(self):
+        path = self.get_contract_path('BytearrayBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(b'\x01\x02\xaa\xfe', result)
+
+    def test_boa2_slice_test(self):
+        path = self.get_contract_path('SliceBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x01\x02\x03\x04', result)
+
+    def test_boa2_slice_test2(self):
+        path = self.get_contract_path('SliceBoa2Test2.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04', result)

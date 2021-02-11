@@ -6,13 +6,15 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestClass(BoaTest):
 
+    default_folder: str = 'test_sc/class_test'
+
     def test_notification_get_variables(self):
-        path = '%s/boa3_test/test_sc/class_test/NotificationGetVariables.py' % self.dirname
+        path = self.get_contract_path('NotificationGetVariables.py')
         output, manifest = self.compile_and_save(path)
 
         script = hash160(output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'script_hash', [],
                                          expected_result_type=bytes)
         self.assertEqual(len(engine.notifications), 0)
@@ -43,12 +45,12 @@ class TestClass(BoaTest):
         self.assertEqual(['1'], result)
 
     def test_notification_set_variables(self):
-        path = '%s/boa3_test/test_sc/class_test/NotificationSetVariables.py' % self.dirname
+        path = self.get_contract_path('NotificationSetVariables.py')
         output, manifest = self.compile_and_save(path)
 
         script = hash160(output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'script_hash', script,
                                          expected_result_type=bytes)
         self.assertEqual(script, result)
@@ -60,10 +62,10 @@ class TestClass(BoaTest):
         self.assertEqual([1, 2, 3], result)
 
     def test_contract_constructor(self):
-        path = '%s/boa3_test/test_sc/class_test/ContractConstructor.py' % self.dirname
+        path = self.get_contract_path('ContractConstructor.py')
         output, manifest = self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'new_contract')
         self.assertEqual(5, len(result))
 

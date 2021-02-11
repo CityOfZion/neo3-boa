@@ -1,5 +1,4 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -9,6 +8,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestUnion(BoaTest):
+
+    default_folder: str = 'test_sc/union_test'
 
     def test_union_return(self):
         integer = Integer(42).to_byte_array()
@@ -32,11 +33,11 @@ class TestUnion(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/union_test/UnionReturn.py' % self.dirname
+        path = self.get_contract_path('UnionReturn.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', True)
         self.assertEqual(42, result)
 
@@ -59,19 +60,18 @@ class TestUnion(BoaTest):
             + Opcode.STLOC2
             + Opcode.LDLOC2     # b = c
             + Opcode.STLOC1
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/union_test/UnionVariableReassign.py' % self.dirname
+        path = self.get_contract_path('UnionVariableReassign.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_union_variable_argument(self):
-        path = '%s/boa3_test/test_sc/union_test/UnionVariableArgument.py' % self.dirname
+        path = self.get_contract_path('UnionVariableArgument.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 'unittest')
         self.assertEqual('string', result)
 
@@ -79,13 +79,20 @@ class TestUnion(BoaTest):
         self.assertEqual('boolean', result)
 
     def test_union_isinstance_validation(self):
-        path = '%s/boa3_test/test_sc/union_test/UnionIsInstanceValidation.py' % self.dirname
-        self.assertCompilerLogs(MismatchedTypes, path)
-
-    def test_union_int_none(self):
-        path = '%s/boa3_test/test_sc/union_test/UnionIntNone.py' % self.dirname
+        path = self.get_contract_path('UnionIsInstanceValidation.py')
         output = Boa3.compile(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 'unittest')
+        self.assertEqual('unittest', result)
+
+        result = self.run_smart_contract(engine, path, 'main', False)
+        self.assertEqual('boolean', result)
+
+    def test_union_int_none(self):
+        path = self.get_contract_path('UnionIntNone.py')
+        output = Boa3.compile(path)
+
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(42, result)

@@ -119,7 +119,7 @@ class NEF(serialization.ISerializable):
         if compiler_name is None:
             self.compiler = 'unknown'
         else:
-            self.compiler = compiler_name[:32] + bytearray(32 - len(compiler_name)).decode('utf-8')
+            self.compiler = compiler_name[:32]
         self.version = version if version else Version()
         self.script = script if script else b''
         self.checksum = self.compute_checksum()
@@ -129,6 +129,9 @@ class NEF(serialization.ISerializable):
             s.uint32  # magic
             + 32  # compiler
             + (s.uint64 * 4)  # version
+            + 2   # reserve
+            + utils.get_var_size(bytes())   # TODO: method tokens
+            + 2   # reserve
             + utils.get_var_size(self.script)
             + s.uint32)  # checksum
 
@@ -141,17 +144,31 @@ class NEF(serialization.ISerializable):
                 and self.script == other.script
                 and self.checksum == other.checksum)
 
+    @property
+    def compiler_with_version(self) -> bytes:
+        result = '{0}-'.format(self.compiler).encode('utf-8') + self.version.to_array()
+        return result[:64] + bytes(64 - len(result))
+
     def serialize(self, writer: serialization.BinaryWriter) -> None:
         writer.write_uint32(self.magic)
-        writer.write_bytes(self.compiler.encode('utf-8'))
-        writer.write_bytes(self.version.to_array())
+        writer.write_bytes(self.compiler_with_version)
+
+        writer.write_uint16(0)    # 2 reserved bytes
+        writer.write_var_bytes(bytes())   # TODO: method tokens
+        writer.write_uint16(0)    # 2 reserved bytes
+
         writer.write_var_bytes(self.script)
         writer.write_bytes(self.checksum)
 
     def deserialize(self, reader: serialization.BinaryReader) -> None:
         self.magic = reader.read_uint32()
-        self.compiler = reader.read_bytes(32).decode('utf-8')
-        self.version = Version.deserialize_from_bytes(reader.read_bytes(32))
+        compiler_with_version = reader.read_bytes(64).decode('utf-8')
+        self.compiler, version = compiler_with_version.rsplit('-', maxsplit=1)
+        self.version = Version.deserialize_from_bytes(version[:32].encode('utf-8'))
+
+        assert reader.read_uint16() == 0    # 2 reserved bytes
+        reader.read_var_int(128)            # TODO: method tokens
+        assert reader.read_uint16() == 0    # 2 reserved bytes
 
         self.script = reader.read_var_bytes()
         self.checksum = reader.read_bytes(4)
@@ -164,11 +181,20 @@ class NEF(serialization.ISerializable):
             bw.write_var_bytes(self.script)
             return bw._stream.getvalue()
 
+    def tokens_to_array(self):
+        from boa3.neo3.core.serialization import BinaryWriter
+        with BinaryWriter() as bw:
+            bw.write_var_bytes(bytes())
+            return bw._stream.getvalue()
+
     def compute_checksum(self) -> bytes:
         data = (self.magic.to_bytes(4, 'little')
-                + self.compiler.encode('utf-8')
-                + self.version.to_array()
+                + self.compiler_with_version
+                + bytes(2)  # reserved bytes
+                + self.tokens_to_array()   # TODO: method tokens
+                + bytes(2)  # reserved bytes
                 + self.script_to_array())
+
         return hashlib.sha256(hashlib.sha256(data).digest()).digest()[:s.uint32]
 
     def compute_script_hash(self) -> types.UInt160:

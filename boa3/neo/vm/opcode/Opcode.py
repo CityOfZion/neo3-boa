@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 from boa3.neo.vm.type.Integer import Integer
 
@@ -27,7 +29,7 @@ class Opcode(bytes, Enum):
     PUSHDATA4 = b'\x0E'
 
     @staticmethod
-    def get_literal_push(integer: int):
+    def get_literal_push(integer: int) -> Optional[Opcode]:
         """
         Gets the push opcode to the respective integer
 
@@ -40,6 +42,39 @@ class Opcode(bytes, Enum):
             return Opcode(Integer(opcode_value).to_byte_array())
         else:
             return None
+
+    @staticmethod
+    def get_push_and_data(integer: int) -> Tuple[Opcode, bytes]:
+        """
+        Gets the push opcode and data to the respective integer
+
+        :param integer: value that will be pushed
+        :return: the respective opcode and its required data
+        :rtype: Tuple[Opcode, bytes]
+        """
+        if -1 <= integer <= 16:
+            opcode_value: int = Integer.from_bytes(Opcode.PUSH0) + integer
+            return Opcode(Integer(opcode_value).to_byte_array()), b''
+        else:
+            data = Integer(integer).to_byte_array(signed=True, min_length=1)
+            if len(data) == 1:
+                opcode = Opcode.PUSHINT8
+            elif len(data) == 2:
+                opcode = Opcode.PUSHINT16
+            elif len(data) <= 4:
+                data = Integer(integer).to_byte_array(signed=True, min_length=4)
+                opcode = Opcode.PUSHINT32
+            elif len(data) <= 8:
+                data = Integer(integer).to_byte_array(signed=True, min_length=8)
+                opcode = Opcode.PUSHINT64
+            elif len(data) <= 16:
+                data = Integer(integer).to_byte_array(signed=True, min_length=16)
+                opcode = Opcode.PUSHINT128
+            else:
+                data = data[:32]
+                opcode = Opcode.PUSHINT256
+
+            return opcode, data
 
     # The number -1 is pushed onto the stack.
     PUSHM1 = b'\x0F'
@@ -101,7 +136,7 @@ class Opcode(bytes, Enum):
             return None
 
     @property
-    def __larger_opcode(self) -> Dict[bytes, bytes]:
+    def __larger_opcode(self) -> Dict[Opcode, Opcode]:
         """
         A map of each opcode with its larger equivalent
 
@@ -190,10 +225,12 @@ class Opcode(bytes, Enum):
     CALL_L = b'\x35'
     # Pop the address of a function from the stack, and call the function.
     CALLA = b'\x36'
+    # Calls the function which is described by the token.
+    CALLT = b'\x37'
     # It turns the vm state to FAULT immediately, and cannot be caught.
-    ABORT = b'\x37'
+    ABORT = b'\x38'
     # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT.
-    ASSERT = b'\x38'
+    ASSERT = b'\x39'
     # Pop the top value of the stack, and throw it.
     THROW = b'\x3A'
     # TRY CatchOffset(sbyte) FinallyOffset(sbyte). If there's no catch body, set CatchOffset 0. If there's no finally
@@ -219,7 +256,7 @@ class Opcode(bytes, Enum):
     SYSCALL = b'\x41'
 
     def has_target(self) -> bool:
-        return self.JMP <= self <= self.CALL_L or self.TRY <= self <= self.ENDFINALLY
+        return self.JMP <= self <= self.CALL_L or self.TRY <= self < self.ENDFINALLY
 
     # endregion
 
@@ -237,7 +274,7 @@ class Opcode(bytes, Enum):
     CLEAR = b'\x49'
 
     @staticmethod
-    def get_drop(position: int):
+    def get_drop(position: int) -> Optional[Opcode]:
         """
         Gets the opcode to remove the item n back in the stack
 
@@ -264,7 +301,7 @@ class Opcode(bytes, Enum):
     PICK = b'\x4D'
 
     @staticmethod
-    def get_dup(position: int):
+    def get_dup(position: int) -> Optional[Opcode]:
         """
         Gets the opcode to duplicate the item n back in the stack
 
@@ -299,7 +336,7 @@ class Opcode(bytes, Enum):
     REVERSEN = b'\x55'
 
     @staticmethod
-    def get_reverse(no_stack_items: int):
+    def get_reverse(no_stack_items: int) -> Optional[Opcode]:
         """
         Gets the opcode to reverse n items on the stack
 
@@ -329,7 +366,7 @@ class Opcode(bytes, Enum):
     INITSLOT = b'\x57'
 
     @staticmethod
-    def get_store(index: int, local: bool, is_arg: bool = False) -> bytes:
+    def get_store(index: int, local: bool, is_arg: bool = False) -> Opcode:
         """
         Gets the opcode to store the variable
 
@@ -359,7 +396,7 @@ class Opcode(bytes, Enum):
                 return Opcode.STSFLD
 
     @staticmethod
-    def get_load(index: int, local: bool, is_arg: bool = False):
+    def get_load(index: int, local: bool, is_arg: bool = False) -> Opcode:
         """
         Gets the opcode to load the variable
 
@@ -395,7 +432,7 @@ class Opcode(bytes, Enum):
                 or self.LDARG0 <= self <= self.LDARG)
 
     @staticmethod
-    def get_store_from_load(load_opcode):
+    def get_store_from_load(load_opcode) -> Optional[Opcode]:
         """
         Gets the store slot opcode equivalent to the given load slot opcode.
 
@@ -515,8 +552,8 @@ class Opcode(bytes, Enum):
 
     # region Splice
 
-    NEWBUFFER = b'\x88',
-    MEMCPY = b'\x89',
+    NEWBUFFER = b'\x88'
+    MEMCPY = b'\x89'
     # Concatenates two strings.
     CAT = b'\x8B'
     # Returns a section of a string.
@@ -658,3 +695,6 @@ class Opcode(bytes, Enum):
     CONVERT = b'\xDB'
 
     # endregion
+
+    def __repr__(self) -> str:
+        return str(self)

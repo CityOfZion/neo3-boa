@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from boa3.model.symbol import ISymbol
+from boa3.model.type.itype import IType
 from boa3.model.type.primitive.inttype import IntType
 
 
@@ -19,7 +20,7 @@ class TriggerType(IntType):
         return Trigger.ALL
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
             from boa3.model.builtin.interop.interop import Interop
             return Interop.TriggerType

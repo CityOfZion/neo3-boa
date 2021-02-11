@@ -8,6 +8,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestMultipleExpressions(BoaTest):
 
+    default_folder: str = 'test_sc'
+
     def test_multiple_arithmetic_expressions(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -25,11 +27,11 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py' % self.dirname
+        path = self.get_contract_path('arithmetic_test', 'MultipleExpressionsInLine.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(3, result)
         result = self.run_smart_contract(engine, path, 'Main', 5, -7)
@@ -57,11 +59,11 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py' % self.dirname
+        path = self.get_contract_path('relational_test', 'MultipleExpressionsInLine.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 5, -7)
@@ -95,11 +97,11 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py' % self.dirname
+        path = self.get_contract_path('logical_test', 'MultipleExpressionsInLine.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, False, False)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', False, True, False)
@@ -151,11 +153,11 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py' % self.dirname
+        path = self.get_contract_path('tuple_test', 'MultipleExpressionsInLine.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2])
         self.assertEqual(5, result)
         result = self.run_smart_contract(engine, path, 'Main', [-5, -7])
@@ -200,11 +202,11 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py' % self.dirname
+        path = self.get_contract_path('list_test', 'MultipleExpressionsInLine.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [2, 1])
         self.assertEqual(7, result)
         result = self.run_smart_contract(engine, path, 'Main', [-7, 5])

@@ -1,6 +1,7 @@
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
@@ -13,7 +14,7 @@ class StoragePutMethod(InteropMethod):
         from boa3.model.type.type import Type
         identifier = 'put'
         syscall = 'System.Storage.Put'
-        self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
+        # TODO: refactor to accept StorageContext as argument
         args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
                                                                        Type.str
                                                                        ])),
@@ -23,10 +24,6 @@ class StoragePutMethod(InteropMethod):
                                                                          ]))
                                      }
         super().__init__(identifier, syscall, args, return_type=Type.none)
-
-    @property
-    def requires_storage(self) -> bool:
-        return True
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -42,14 +39,8 @@ class StoragePutMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        opcodes = [(Opcode.SYSCALL, self.storage_context_hash)]
-        opcodes.extend(super().opcode)
-        return opcodes
-
-    @property
-    def storage_context_hash(self) -> bytes:
-        # TODO: refactor when default arguments are implemented
-        return self._method_hash(self._storage_context)
+        from boa3.model.builtin.interop.interop import Interop
+        return Interop.StorageGetContext.opcode + super().opcode
 
     @property
     def key_arg(self) -> Variable:
@@ -59,7 +50,7 @@ class StoragePutMethod(InteropMethod):
     def value_arg(self) -> Variable:
         return self.args['value']
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if not isinstance(value, (Sized, Iterable)):
             return self
         num_args: int = len(self.args)

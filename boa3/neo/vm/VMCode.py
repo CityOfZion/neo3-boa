@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -50,7 +52,7 @@ class VMCode:
         return data
 
     @property
-    def raw_data(self):
+    def raw_data(self) -> bytes:
         """
         Gets the Neo VM raw data of the code
 
@@ -59,7 +61,7 @@ class VMCode:
         if self.target is None:
             return self._data
         else:
-            from boa3.compiler.vmcodemapping import VMCodeMapping
+            from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
             code_mapping = VMCodeMapping.instance()
             self_start = code_mapping.get_start_address(self)
             target_start = code_mapping.get_start_address(self.target)
@@ -81,7 +83,7 @@ class VMCode:
         return self.info.opcode
 
     @property
-    def target(self):
+    def target(self) -> VMCode:
         """
         Gets the target code of this code
 
@@ -102,3 +104,6 @@ class VMCode:
 
     def __str__(self) -> str:
         return self.opcode.name + ' ' + self.data.hex()
+
+    def __repr__(self) -> str:
+        return str(self)

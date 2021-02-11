@@ -1,6 +1,7 @@
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
@@ -13,13 +14,9 @@ class StorageDeleteMethod(InteropMethod):
         from boa3.model.type.type import Type
         identifier = 'delete'
         syscall = 'System.Storage.Delete'
-        self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
+        # TODO: refactor to accept StorageContext as argument
         args: Dict[str, Variable] = {'key': Variable(Type.bytes)}
         super().__init__(identifier, syscall, args, return_type=Type.none)
-
-    @property
-    def requires_storage(self) -> bool:
-        return True
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -39,9 +36,8 @@ class StorageDeleteMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        opcodes = [(Opcode.SYSCALL, self.storage_context_hash)]
-        opcodes.extend(super().opcode)
-        return opcodes
+        from boa3.model.builtin.interop.interop import Interop
+        return Interop.StorageGetContext.opcode + super().opcode
 
     @property
     def storage_context_hash(self) -> bytes:
@@ -52,7 +48,7 @@ class StorageDeleteMethod(InteropMethod):
     def key_arg(self) -> Variable:
         return self.args['key']
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         exp: List[IExpression] = []
         if isinstance(value, Sized):
             if len(value) > 1 or not isinstance(value, Iterable):

@@ -31,12 +31,16 @@
   - [Project Structure](#project-structure)
 - [Quickstart](#quickstart)
   - [Installation](#installation)
-    - [Pip (Recomended)](#pip-recomended)
-    - [Build from Source](#build-from-source)
+    - [Pip (Recommended)](#pip-recommended)
+    - [Build from Source (Optional)](#build-from-source-optional)
   - [Compiling your Smart Contract](#compiling-your-smart-contract)
     - [Using CLI](#using-cli)
     - [Using Python Script](#using-python-script)
   - [Configuring the Debugger](#configuring-the-debugger)
+  - [TestEngine](#testengine)
+    - [Downloading](#downloading)
+    - [Updating](#updating)
+    - [Testing](#testing)
 - [Docs](#docs)
 - [Reference Examples](#reference-examples)
 - [Python Supported Features](#python-supported-features)
@@ -56,7 +60,7 @@ Neo-boa is part of the Neo Python Framework, aimed to allow the full development
 We want Python developers to feel comfortable when trying neo3-boa for the first time. It should look and behave like regular Python. For this reason we decided to avoid adding new keywords, but use decorators and helper functions instead.
 
 ##### Neo Python Framework
-In the real world, simply coding a smart contract is not enough. Developers need to debug, deploy and invoke it. Therefore it’s important for this tool to be part of a bigger Python framework. To help the developers and avoid a bad user experience, we need to use logs and inform errors with details.
+In the real world, simply coding a smart contract is not enough. Developers need to debug, deploy and invoke it. Therefore, it’s important for this tool to be part of a bigger Python framework. To help the developers and avoid a bad user experience, we need to use logs and inform errors with details.
 
 ##### Testing against Neo VM
 We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo repository already contains a class called TestEngine that is capable of running tests using C# smart-contracts. It will be adjusted to support compiled smart-contracts.
@@ -75,14 +79,13 @@ The diagram bellow shows the basic building blocks of the Neo3-Boa project.
 
 ## Quickstart
 
-Installation requires Python 3.8 or later.
+Installation requires Python 3.7 or later.
 
 ### Installation 
-Make sure you have installed MSVC v142 - Build tools VS 2019 C++ x64/x86 (v14.24). You can do this by installing Visual Studio 2019 and add C++ development features.
 
-###### 1. Make a Python 3 virtual environment and activate it:
+##### Make a Python 3 virtual environment and activate it:
 
-Linux / Mac OS:
+On Linux / Mac OS:
 ```shell
 $ python3 -m venv venv
 $ source venv/bin/activate
@@ -92,23 +95,25 @@ On Windows:
 
 ```shell
 $ python3 -m venv venv
-$ venv/Scripts/activate.bat
+$ venv\Scripts\activate.bat
 ```
 
-###### 2. Install Neo3-Boa using Pip
+##### Pip (Recommended)
+
+###### Install Neo3-Boa using Pip:
 
 ```shell
 $ pip install neo3-boa
 ```
 
-###### 2.1. (Optional) Run from source code
+##### Build from Source (Optional)
 If neo3-boa is not available via pip, you can run it from source.
 
-###### 2.1.1 Clone neo3-boa
+###### Clone neo3-boa:
 ```shell
 $ git clone https://github.com/CityOfZion/neo3-boa.git
 ```
-###### 2.1.2 Install project dependencies
+###### Install project dependencies:
 ```shell
 $ pip install -e .
 ```
@@ -133,7 +138,7 @@ from boa3.boa3 import Boa3
 Boa3.compile_and_save('path/to/your/file.py')
 ```
 
-### Debugger ready
+### Configuring the Debugger
 Neo3-boa is compatible with the [Neo Debugger](https://github.com/neo-project/neo-debugger).
 Debugger launch configuration example:
 ```
@@ -160,14 +165,67 @@ Debugger launch configuration example:
 }
 ```
 
+### TestEngine
+
+#### Downloading
+
+Clone neo-devpack-dotnet project and compile the TestEngine.
+
+> Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
+
+```shell
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable
+$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
+```
+
+#### Updating
+
+Go into the neo-devpack-dotnet, pull and recompile.
+```shell
+${path-to-folder}/neo-devpack-dotnet git pull
+${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj
+```
+
+#### Testing
+
+Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function
+you'll need to call the method `run()`. Its parameters are the path of the compiled smart contract, the smart
+contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
+
+Your Python Script should look something like this:
+
+```python
+from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.neo.smart_contract.VoidType import VoidType
+
+def test_hello_world_main():
+    root_folder = '{path-to-test-engine-folder}'
+    path = '%s/boa3_test/examples/HelloWorld.nef' % root_folder
+    engine = TestEngine(root_folder)
+
+    result = engine.run(path, 'Main')
+    assert result is VoidType
+```
+
+
 ## Docs
 You can [read the docs here](https://docs.coz.io/neo3/boa/index.html). Please check our examples for reference.
 
-## Examples
+## Reference Examples
 
 For an extensive collection of examples:
 - [Smart contract examples](/boa3_test/examples)
 - [Features tests](/boa3_test/test_sc)
+
+## Tests
+
+Install [`neo3-boa`](#installation) and the [`TestEngine`](#testengine) and run the following command
+
+> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/env.py)
+
+```
+python -m unittest discover boa3_test
+```
 
 ## Python Supported Features
 
@@ -413,8 +471,8 @@ For an extensive collection of examples:
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.7</td>
     <td>List type</td>
     <td>
       <pre>
@@ -425,6 +483,7 @@ For an extensive collection of examples:
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#list-type-2">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -503,7 +562,7 @@ For an extensive collection of examples:
     </td>
   </tbody>
   <tbody>
-    <td>?</td>
+    <td>✅</td>
     <td>v0.6.1</td>
     <td>Union type</td>
     <td>
@@ -623,6 +682,22 @@ For an extensive collection of examples:
     </td>
     <td>
       <a href="/docs/ContractExamplesTest.md#built-in-function-1">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.7</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = max(7, 12)
+  b = min(1, 6)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-2">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -794,7 +869,7 @@ For an extensive collection of examples:
 
 ## Neo Python Suite Projects
 
-- **[neo3-boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts compiler.</br>
+- **[neo3-boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts' compiler.</br>
 - [neo3-mamba](https://github.com/CityOfZion/neo-mamba): Python SDK for interacting with neo.</br>
 
 ## Opening a New Issue

@@ -1,3 +1,9 @@
+# -------------------------------------------
+# This standard is deprecated
+# Please check the NEP17 example
+# -------------------------------------------
+
+
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep5TransferEvent
 from boa3.builtin.interop.runtime import calling_script_hash, check_witness
@@ -16,8 +22,9 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
-    meta.has_storage = True
-    meta.is_payable = True
+    meta.author = "Mirella Medeiros and Ricardo Prado. COZ in partnership with Simpli"
+    meta.description = "NEP-5 Example"
+    meta.email = "contact@coz.io"
     return meta
 
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, Set
 
 
@@ -7,15 +9,15 @@ class ScopeValue:
         self._assigned_variables: Set[str] = set()
         self._parent_scope: Optional[ScopeValue] = None
 
-    def new_scope(self):
+    def new_scope(self) -> ScopeValue:
         scope = ScopeValue()
         scope._values = self._values.copy()
         scope._assigned_variables = self._assigned_variables.copy()
         scope._parent_scope = self
-        return scope  # type: ScopeValue
+        return scope
 
-    def previous_scope(self):
-        return self._parent_scope  # type:Optional[ScopeValue]
+    def previous_scope(self) -> Optional[ScopeValue]:
+        return self._parent_scope
 
     def update_values(self, *scopes, is_loop_scope: bool = False):
         other_scopes = [scope for scope in scopes if isinstance(scope, ScopeValue) and scope._parent_scope == self]
@@ -34,7 +36,11 @@ class ScopeValue:
         different_values = []
 
         for key in common_keys:
-            values = {scope[key] for scope in other_scopes}
+            values = []
+            for scope in other_scopes:
+                if scope[key] not in values:
+                    values.append(scope[key])
+
             if len(values) == 1:
                 new_values[key] = values.pop()
             else:

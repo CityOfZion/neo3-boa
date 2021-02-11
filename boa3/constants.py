@@ -1,5 +1,7 @@
 import sys
 
+from boa3.neo import from_hex_str
+
 SYS_VERSION_INFO = sys.version_info
 
 ONE_BYTE_MAX_VALUE = 255
@@ -15,6 +17,6 @@ BYTEORDER = 'little'
 
 INITIALIZE_METHOD_ID = '_initialize'
 
-NEO_SCRIPT = b'\xb6\x72\x0f\xef\x7e\x7e\xb7\x3f\x25\xaf\xb4\x70\xf5\x87\x99\x7c\xe3\xe2\x46\x0a'
-GAS_SCRIPT = b'\xfb\xed\xfe\x2e\xd2\x22\x65\x92\xb6\x48\xc4\xda\x97\xb9\xc9\xcd\x5d\xc1\xa6\xa6'
-MANAGEMENT_SCRIPT = b'\xab\xd6\xe8\xad\x9f\x41\t\x41\x37\x65\x91\xcd\xdf\x9a\xd6\x82\r\xb7\x97\xcd'
+NEO_SCRIPT = from_hex_str('0xf61eebf573ea36593fd43aa150c055ad7906ab83')
+GAS_SCRIPT = from_hex_str('0x70e2301955bf1e74cbb31d18c2f96972abadb328')
+MANAGEMENT_SCRIPT = from_hex_str('0xa501d7d7d10983673b61b7a2d3a813b36f9f0e43')

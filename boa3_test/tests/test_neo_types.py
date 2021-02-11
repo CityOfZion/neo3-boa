@@ -6,10 +6,12 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestNeoTypes(BoaTest):
 
-    def test_uint160_call_bytes(self):
-        path = '%s/boa3_test/test_sc/neo_type_test/UInt160CallBytes.py' % self.dirname
+    default_folder: str = 'test_sc/neo_type_test'
 
-        engine = TestEngine(self.dirname)
+    def test_uint160_call_bytes(self):
+        path = self.get_contract_path('UInt160CallBytes.py')
+
+        engine = TestEngine()
         value = bytes(20)
         result = self.run_smart_contract(engine, path, 'uint160', value,
                                          expected_result_type=bytes)
@@ -29,10 +31,10 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint160_call_int(self):
-        path = '%s/boa3_test/test_sc/neo_type_test/UInt160CallInt.py' % self.dirname
+        path = self.get_contract_path('UInt160CallInt.py')
         self.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint160', 0,
                                          expected_result_type=bytes)
         self.assertEqual(bytes(20), result)
@@ -51,17 +53,17 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint160_call_without_args(self):
-        path = '%s/boa3_test/test_sc/neo_type_test/UInt160CallWithoutArgs.py' % self.dirname
+        path = self.get_contract_path('UInt160CallWithoutArgs.py')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint160',
                                          expected_result_type=bytes)
         self.assertEqual(bytes(20), result)
 
     def test_uint160_return_bytes(self):
-        path = '%s/boa3_test/test_sc/neo_type_test/UInt160ReturnBytes.py' % self.dirname
+        path = self.get_contract_path('UInt160ReturnBytes.py')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         value = bytes(20)
         result = self.run_smart_contract(engine, path, 'uint160', value,
                                          expected_result_type=bytes)
@@ -79,3 +81,18 @@ class TestNeoTypes(BoaTest):
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
+
+    def test_uint160_concat_with_bytes(self):
+        path = self.get_contract_path('UInt160ConcatWithBytes.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        value = bytes(20)
+        result = self.run_smart_contract(engine, path, 'uint160_method', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value + b'123', result)
+
+        value = bytes(range(20))
+        result = self.run_smart_contract(engine, path, 'uint160_method', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value + b'123', result)

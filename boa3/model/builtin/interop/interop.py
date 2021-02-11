@@ -96,6 +96,7 @@ class Interop:
 
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
+    StorageFind = StorageFindMethod()
     StorageGetContext = StorageGetContextMethod(StorageContextType)
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
@@ -149,6 +150,7 @@ class Interop:
                                  ],
         InteropPackage.Storage: [StorageContextType,
                                  StorageDelete,
+                                 StorageFind,
                                  StorageGet,
                                  StorageGetContext,
                                  StoragePut

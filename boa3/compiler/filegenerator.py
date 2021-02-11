@@ -97,10 +97,6 @@ class FileGenerator:
         return {
             "name": self._entry_file,
             "groups": [],
-            "features": {
-                "storage": self._metadata.has_storage,
-                "payable": self._metadata.is_payable
-            },
             "abi": self._get_abi_info(),
             "permissions": [
                 {
@@ -109,7 +105,6 @@ class FileGenerator:
                 }
             ],
             "trusts": [],
-            "safemethods": [],
             "supportedstandards": [],
             "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }
@@ -138,7 +133,7 @@ class FileGenerator:
         return methods
 
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
-        from boa3.compiler.vmcodemapping import VMCodeMapping
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         return {
             "name": method_id,
             "offset": (VMCodeMapping.instance().get_start_address(method.start_bytecode)
@@ -210,7 +205,7 @@ class FileGenerator:
         ]
 
     def _get_method_debug_info(self, method_id: str, method: Method) -> Dict[str, Any]:
-        from boa3.compiler.vmcodemapping import VMCodeMapping
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         return {
             "id": str(id(method)),
             "name": ',{0}'.format(method_id),  # TODO: include module name

@@ -26,10 +26,6 @@ class ToBytesMethod(IBuiltinMethod, ABC):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
-    @property
-    def stores_on_slot(self) -> bool:
-        return True
-
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 1:
             return False
@@ -58,7 +54,7 @@ class _ConvertToBytesMethod(ToBytesMethod):
     def __init__(self):
         super().__init__(None)
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, IntType):
             return IntToBytesMethod(value)
         elif isinstance(value, StrType):
@@ -77,7 +73,7 @@ class IntToBytesMethod(ToBytesMethod):
             self_type = Type.int
         super().__init__(self_type)
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, IntType):
@@ -97,7 +93,7 @@ class StrToBytesMethod(ToBytesMethod):
         # string and bytes' stack item are the same
         return []
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, StrType):

@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Iterable, Set
+from typing import Any, Iterable, Set, Sized
 
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.itype import IType
@@ -81,8 +81,9 @@ class MappingType(ICollectionType, ABC):
         return super().filter_types(values_type)
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
+            # value is an instance of mapping
             if isinstance(value, dict):
                 keys = list(value.keys())
                 values = list(value.values())
@@ -93,3 +94,22 @@ class MappingType(ICollectionType, ABC):
             keys_types: Set[IType] = cls.get_types(keys)
             values_types: Set[IType] = cls.get_types(values)
             return cls(keys_types, values_types)
+
+        elif isinstance(value, Sized) and len(value) == 2:
+            # value is a tuple with two lists of types for contructing the map
+            keys_type, values_type = value
+
+            if not isinstance(keys_type, Iterable):
+                keys_type = {keys_type}
+            else:
+                keys_type = set(keys_type)
+
+            if not isinstance(values_type, Iterable):
+                values_types = {values_type}
+            else:
+                values_types = set(values_type)
+
+            if all(isinstance(k, IType) for k in keys_type) and all(isinstance(v, IType) for v in values_types):
+                return cls(keys_type, values_type)
+
+        return super(MappingType, cls).build(value)

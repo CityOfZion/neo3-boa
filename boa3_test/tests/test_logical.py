@@ -7,6 +7,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestLogical(BoaTest):
 
+    default_folder: str = 'test_sc/logical_test'
+
     def test_boolean_and(self):
         expected_output = (
             Opcode.INITSLOT
@@ -18,11 +20,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/BoolAnd.py' % self.dirname
+        path = self.get_contract_path('BoolAnd.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, False)
@@ -43,11 +45,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/BoolOr.py' % self.dirname
+        path = self.get_contract_path('BoolOr.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, False)
@@ -67,11 +69,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/BoolNot.py' % self.dirname
+        path = self.get_contract_path('BoolNot.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -90,11 +92,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/BoolOrThreeElements.py' % self.dirname
+        path = self.get_contract_path('BoolOrThreeElements.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, False, False)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', False, True, False)
@@ -105,11 +107,11 @@ class TestLogical(BoaTest):
         self.assertEqual(True, result)
 
     def test_mismatched_type_binary_operation(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandAnd.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandAnd.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_unary_operation(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandNot.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandNot.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_operations(self):
@@ -126,11 +128,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/MixedOperations.py' % self.dirname
+        path = self.get_contract_path('MixedOperations.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, False, False)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', False, True, False)
@@ -151,11 +153,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicAndBool.py' % self.dirname
+        path = self.get_contract_path('LogicAndBool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, False)
@@ -174,11 +176,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicAndInt.py' % self.dirname
+        path = self.get_contract_path('LogicAndInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 4, 6)
         self.assertEqual(4 & 6, result)
         result = self.run_smart_contract(engine, path, 'Main', 40, 6)
@@ -187,7 +189,7 @@ class TestLogical(BoaTest):
         self.assertEqual(-4 & 32, result)
 
     def test_mismatched_type_logic_and(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandLogicAnd.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandLogicAnd.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_logic_or_with_bool_operand(self):
@@ -201,11 +203,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicOrBool.py' % self.dirname
+        path = self.get_contract_path('LogicOrBool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, False)
@@ -224,11 +226,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicOrInt.py' % self.dirname
+        path = self.get_contract_path('LogicOrInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 4, 6)
         self.assertEqual(4 | 6, result)
         result = self.run_smart_contract(engine, path, 'Main', 40, 6)
@@ -237,7 +239,7 @@ class TestLogical(BoaTest):
         self.assertEqual(-4 | 32, result)
 
     def test_mismatched_type_logic_or(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandLogicOr.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandLogicOr.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_logic_not_with_bool_operand(self):
@@ -250,11 +252,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicNotBool.py' % self.dirname
+        path = self.get_contract_path('LogicNotBool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True)
         self.assertEqual(-2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
@@ -270,11 +272,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicNotInt.py' % self.dirname
+        path = self.get_contract_path('LogicNotInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 4)
         self.assertEqual(-5, result)
         result = self.run_smart_contract(engine, path, 'Main', 40)
@@ -283,7 +285,7 @@ class TestLogical(BoaTest):
         self.assertEqual(3, result)
 
     def test_mismatched_type_logic_not(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandLogicNot.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandLogicNot.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_logic_xor_with_bool_operand(self):
@@ -297,11 +299,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicXorBool.py' % self.dirname
+        path = self.get_contract_path('LogicXorBool.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', True, False)
@@ -320,11 +322,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicXorInt.py' % self.dirname
+        path = self.get_contract_path('LogicXorInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 4, 6)
         self.assertEqual(4 ^ 6, result)
         result = self.run_smart_contract(engine, path, 'Main', 40, 6)
@@ -333,7 +335,7 @@ class TestLogical(BoaTest):
         self.assertEqual(-4 ^ 32, result)
 
     def test_mismatched_type_logic_xor(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandLogicXor.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandLogicXor.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_logic_left_shift(self):
@@ -347,11 +349,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicLeftShift.py' % self.dirname
+        path = self.get_contract_path('LogicLeftShift.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', int('100', 2), 2)
         self.assertEqual(int('10000', 2), result)
         result = self.run_smart_contract(engine, path, 'Main', int('11', 2), 1)
@@ -360,7 +362,7 @@ class TestLogical(BoaTest):
         self.assertEqual(int('1010100000', 2), result)
 
     def test_mismatched_type_logic_left_shift(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandLogicLeftShift.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandLogicLeftShift.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_logic_right_shift(self):
@@ -374,11 +376,11 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/logical_test/LogicRightShift.py' % self.dirname
+        path = self.get_contract_path('LogicRightShift.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', int('10000', 2), 2)
         self.assertEqual(int('100', 2), result)
         result = self.run_smart_contract(engine, path, 'Main', int('110', 2), 1)
@@ -387,5 +389,47 @@ class TestLogical(BoaTest):
         self.assertEqual(int('101010', 2), result)
 
     def test_mismatched_type_logic_right_shift(self):
-        path = '%s/boa3_test/test_sc/logical_test/MismatchedOperandLogicRightShift.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandLogicRightShift.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_logic_test(self):
+        path = self.get_contract_path('BinOpBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', '&', 4, 4)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '|', 4, 3)
+        self.assertEqual(7, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '|', 4, 8)
+        self.assertEqual(12, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '^', 4, 4)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '^', 4, 2)
+        self.assertEqual(6, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '>>', 16, 2)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '>>', 16, 0)
+        self.assertEqual(16, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '%', 16, 2)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '%', 16, 11)
+        self.assertEqual(5, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '//', 16, 2)
+        self.assertEqual(8, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '//', 16, 7)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '~', 16, 0)
+        self.assertEqual(-17, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '~', -3, 0)
+        self.assertEqual(2, result)

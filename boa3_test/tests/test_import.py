@@ -8,6 +8,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestImport(BoaTest):
 
+    default_folder: str = 'test_sc/import_test'
+
     def test_import_typing(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -15,10 +17,9 @@ class TestImport(BoaTest):
             + b'\x00'
             + Opcode.NEWARRAY0
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/import_test/ImportTyping.py' % self.dirname
+        path = self.get_contract_path('ImportTyping.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -29,10 +30,9 @@ class TestImport(BoaTest):
             + b'\x00'
             + Opcode.NEWARRAY0
             + Opcode.STLOC0
-            + Opcode.PUSHNULL
             + Opcode.RET        # return
         )
-        path = '%s/boa3_test/test_sc/import_test/ImportTypingWithAlias.py' % self.dirname
+        path = self.get_contract_path('ImportTypingWithAlias.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -49,11 +49,11 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/ImportUserModule.py' % self.dirname
+        path = self.get_contract_path('ImportUserModule.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
@@ -70,11 +70,11 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/ImportUserModuleWithAlias.py' % self.dirname
+        path = self.get_contract_path('ImportUserModuleWithAlias.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
@@ -91,11 +91,11 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/FromImportWithGlobalVariables.py' % self.dirname
+        path = self.get_contract_path('FromImportWithGlobalVariables.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
@@ -111,16 +111,16 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/FromImportVariable.py' % self.dirname
+        path = self.get_contract_path('FromImportVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
     def test_typing_python_library(self):
-        path = '%s/boa3_test/test_sc/import_test/ImportPythonLib.py' % self.dirname
+        path = self.get_contract_path('ImportPythonLib.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_from_typing_import(self):
@@ -133,7 +133,7 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/import_test/FromImportTyping.py' % self.dirname
+        path = self.get_contract_path('FromImportTyping.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -143,12 +143,12 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/FromImportTypingWithAlias.py' % self.dirname
+        path = self.get_contract_path('FromImportTypingWithAlias.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_from_typing_import_not_supported_type(self):
-        path = '%s/boa3_test/test_sc/import_test/FromImportTypingNotImplementedType.py' % self.dirname
+        path = self.get_contract_path('FromImportTypingNotImplementedType.py')
         self.assertCompilerLogs(UnresolvedReference, path)
 
     def test_from_import_user_module(self):
@@ -165,11 +165,11 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/FromImportUserModule.py' % self.dirname
+        path = self.get_contract_path('FromImportUserModule.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
@@ -187,14 +187,14 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = '%s/boa3_test/test_sc/import_test/FromImportUserModuleWithAlias.py' % self.dirname
+        path = self.get_contract_path('FromImportUserModuleWithAlias.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
     def test_import_non_existent_package(self):
-        path = '%s/boa3_test/test_sc/import_test/ImportNonExistantPackage.py' % self.dirname
+        path = self.get_contract_path('ImportNonExistantPackage.py')
         self.assertCompilerLogs(UnresolvedReference, path)

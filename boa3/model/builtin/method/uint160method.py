@@ -99,7 +99,7 @@ class UInt160Method(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return
 
-    def build(self, value: Any):
+    def build(self, value: Any) -> IBuiltinMethod:
         if type(value) == type(self._arg_object.type):
             return self
         if isinstance(value, list):

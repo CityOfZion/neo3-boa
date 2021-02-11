@@ -51,10 +51,6 @@ class NeoMetadata:
     """
     This class stores the smart contract manifest information.
 
-    :ivar has_storage: is a boolean value indicating whether the contract has a storage. False by default.
-    :type has_storage: bool
-    :ivar is_payable: is a boolean value indicating whether the contract accepts transfers. False by default.
-    :type is_payable: bool
     :ivar author: the smart contract author. None by default;
     :type author: str or None
     :ivar email: the smart contract author email. None by default;
@@ -66,14 +62,11 @@ class NeoMetadata:
     def __init__(self):
         from typing import Optional
 
-        # features
-        self.has_storage: bool = False
-        self.is_payable: bool = False
-
         # extras
         self.author: Optional[str] = None
         self.email: Optional[str] = None
         self.description: Optional[str] = None
+        self.extras: Dict[str, Any] = {}
 
     @property
     def extra(self) -> Dict[str, Any]:
@@ -82,7 +75,7 @@ class NeoMetadata:
 
         :return: a dictionary that maps each extra value with its name. Empty by default.
         """
-        extra = {}
+        extra = self.extras.copy()
         if isinstance(self.author, str):
             extra['Author'] = self.author
         if isinstance(self.email, str):

@@ -10,8 +10,7 @@ def Main():
 @metadata
 def manifest() -> NeoMetadata:
     meta = NeoMetadata()
-    meta.author = 'Neo'
-    meta.email = 'dev@neo.org'
+    meta.author = "COZ in partnership with Simpli"
+    meta.email = "contact@coz.io"
     meta.description = 'This is a contract example'
-    meta.has_storage = True
     return meta

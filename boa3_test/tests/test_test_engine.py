@@ -347,10 +347,20 @@ class TestTestEngine(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_run(self):
-        path = '%s/boa3_test/test_sc/generation_test/GenerationWithDecorator.py' % self.dirname
+        path = self.get_contract_path('test_sc/generation_test', 'GenerationWithDecorator.py')
         self.compile_and_save(path)
         path = path.replace('.py', '.nef')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = engine.run(path, 'Sub', 50, 20)
         self.assertEqual(30, result)
+
+    def test_test_engine_not_found_error(self):
+        # if the TestEngine is correctly installed a error should not occur
+        import env
+        engine_path = env.TEST_ENGINE_DIRECTORY
+        engine = TestEngine(engine_path)
+
+        # however, if the TestEngine is not in the directory it will raise an Exception
+        with self.assertRaises(FileNotFoundError):
+            engine = TestEngine('{0}/boa3_test'.format(engine_path))

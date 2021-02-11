@@ -31,7 +31,10 @@
 - [v0.6](#v06)
   - [v0.6.1](#v061)
     - [Union type](#union-type)
-    - [Bytearray type](#bytearray-type-v061)
+    - [Bytearray type](#bytearray-type-1)
+- [v0.7](#v07)
+  - [Built in function](#built-in-function-2)
+  - [List type](#list-type-2)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -109,7 +112,7 @@
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayClear.py">BytearrayClear.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayFromLiteralBytes.py">BytearrayFromLiteralBytes.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayFromVariableBytes.py">BytearrayFromVariableBytes.py</a>, 
-- <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValuet.py">BytearrayGetValue.py</a>, 
+- <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValue.py">BytearrayGetValue.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayGetValueNegativeIndex.py">BytearrayGetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayReverse.py">BytearrayReverse.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytearraySetValue.py">BytearraySetValue.py</a>, 
@@ -169,8 +172,7 @@
 
 - <a href="/boa3_test/test_sc/variable_test/GetGlobalValueWrittenAfter.py">GetGlobalValueWrittenAfter.py</a>, 
 - <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentBetweenFunctions.py">GlobalAssignmentBetweenFunctions.py</a>, 
-- <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>, 
-- <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>, 
+- <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentInFunctionWithArgument.py">GlobalAssignmentInFunctionWithArgument.py</a>,
 - <a href="/boa3_test/test_sc/variable_test/GlobalAssignmentWithType.py">GlobalAssignmentWithType.py</a>, 
 - <a href="/boa3_test/test_sc/variable_test/GlobalDeclarationWithArgumentWrittenAfter.py">GlobalDeclarationWithArgumentWrittenAfter.py</a>, 
 - <a href="/boa3_test/test_sc/variable_test/ManyGlobalAssignments.py">ManyGlobalAssignments.py</a>
@@ -392,4 +394,20 @@
 
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayExtend.py">BytearrayExtend.py</a>
 - <a href="/boa3_test/test_sc/bytes_test/BytearrayExtendWithBuiltin.py">BytearrayExtendWithBuiltin.py</a>
+
+## v0.7
+### Built in function
+
+- <a href="/boa3_test/test_sc/built_in_methods_test/MaxInt.py">MaxInt.py</a>
+- <a href="/boa3_test/test_sc/built_in_methods_test/MinInt.py">MinInt.py</a>
+
+### List type
+
+- <a href="/boa3_test/test_sc/list_test/InsertAnyValue.py">InsertAnyValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/InsertIntNegativeIndex.py">InsertIntNegativeIndex.py</a>
+- <a href="/boa3_test/test_sc/list_test/InsertIntValue.py">InsertIntValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/InsertIntWithBuiltin.py">InsertIntWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/list_test/RemoveIntValue.py">RemoveIntValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/RemoveIntWithBuiltin.py">RemoveIntWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/list_test/RemoveValue.py">RemoveValue.py</a>
 

@@ -1,9 +1,11 @@
 import os
-from typing import Any, Dict, Iterable, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
+import env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
@@ -21,9 +23,15 @@ class BoaTest(TestCase):
     CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
     ABORTED_CONTRACT_MSG = 'ABORT is executed'
 
+    default_folder: str = ''
+
     @classmethod
     def setUpClass(cls):
-        cls.dirname = '/'.join(os.path.abspath(__file__).split(os.sep)[:-3])
+        folders = os.path.abspath(__file__).split(os.sep)
+        cls.dirname = '/'.join(folders[:-3])
+        cls.test_root_dir = '/'.join(folders[-3:-2])
+        cls.default_test_folder = ('{0}/{1}'.format(cls.test_root_dir, cls.default_folder)
+                                   if len(cls.default_folder) else cls.test_root_dir)
 
         super(BoaTest, cls).setUpClass()
 
@@ -52,6 +60,53 @@ class BoaTest(TestCase):
         if len([exception for exception in log.records if isinstance(exception.msg, expected_logged_exception)]) <= 0:
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output
+
+    def assertIsVoid(self, obj: Any):
+        if obj is not VoidType:
+            self.fail('{0} is not Void'.format(obj))
+
+    def get_contract_path(self, *args: str) -> str:
+        """
+        Usages:
+            get_contract_path(contract_name)
+            get_contract_path(dir_folder, contract_name)
+            get_contract_path(root_path, dir_folder, contract_name)
+        """
+        type_error_message = 'get_contract_path() takes {0} positional argument but {1} were given'
+        num_args = len(args)
+        if num_args == 0:
+            raise TypeError(type_error_message.format(2, num_args + 1))
+        if num_args > 3:
+            raise TypeError(type_error_message.format(4, num_args + 1))
+
+        values = [None, self.default_test_folder, env.PROJECT_ROOT_DIRECTORY]
+        for index, value in enumerate(reversed(args)):
+            values[index] = value
+
+        contract_name, dir_folder, root_path = values
+
+        from os import path
+        if not path.exists(dir_folder) and root_path is env.PROJECT_ROOT_DIRECTORY:
+            path_folder = '{0}/{1}'.format(root_path, dir_folder)
+            if not path.exists(path_folder) and not dir_folder.startswith(self.test_root_dir):
+                path_folder = '{0}/{1}/{2}'.format(root_path, self.test_root_dir, dir_folder)
+                if not path.exists(path_folder):
+                    path_folder = '{0}/{1}/{2}'.format(root_path, self.default_test_folder, dir_folder)
+
+            dir_folder = path_folder
+        else:
+            if path.exists(dir_folder):
+                dir_folder = os.path.abspath(dir_folder)
+            else:
+                dir_folder = '{0}/{1}'.format(root_path, dir_folder)
+
+        if not contract_name.endswith('.py'):
+            contract_name = contract_name + '.py'
+
+        path = '{0}/{1}'.format(dir_folder, contract_name)
+        if not os.path.isfile(path):
+            raise FileNotFoundError(path)
+        return path
 
     def compile_and_save(self, path: str, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
@@ -105,17 +160,41 @@ class BoaTest(TestCase):
 
         return output, manifest
 
-    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: str, method: str,
+    def get_bytes_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+        nef_output = path.replace('.py', '.nef')
+        manifest_output = path.replace('.py', '.manifest.json')
+
+        if not os.path.isfile(nef_output):
+            output = bytes()
+        else:
+            with open(nef_output, mode='rb') as nef:
+                output = nef.read()
+
+        if not os.path.isfile(manifest_output):
+            manifest = {}
+        else:
+            with open(manifest_output) as manifest_output:
+                import json
+                manifest = json.loads(manifest_output.read())
+
+        return output, manifest
+
+    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: Union[str, bytes], method: str,
                            *arguments: Any, reset_engine: bool = False,
                            fake_storage: Dict[str, Any] = None,
                            signer_accounts: Iterable[bytes] = (),
                            expected_result_type: Type = None,
                            rollback_on_fault: bool = True) -> Any:
 
-        if smart_contract_path.endswith('.py'):
-            if not os.path.isfile(smart_contract_path.replace('.py', '.nef')):
+        if isinstance(smart_contract_path, str) and smart_contract_path.endswith('.py'):
+            if not (os.path.isfile(smart_contract_path.replace('.py', '.nef'))
+                    and os.path.isfile(smart_contract_path.replace('.py', '.manifest.json'))):
+                # both .nef and .manifest.json are required to execute the smart contract
                 self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
+        elif isinstance(smart_contract_path, bytes):
+            from boa3.neo3.core.types import UInt160
+            smart_contract_path = UInt160(smart_contract_path)
 
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)

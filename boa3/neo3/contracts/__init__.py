@@ -1,12 +1,7 @@
-from .abi import (ContractABI, ContractEventDescriptor, ContractMethodDescriptor, ContractParameterDefinition,
-                  ContractParameterType)
-from .contracttypes import (TriggerType)
-from .descriptor import (ContractPermissionDescriptor)
-from .manifest import (ContractFeatures, ContractGroup, ContractManifest, ContractPermission, WildcardContainer)
-from .nef import (NEF, Version)
+from boa3.neo3.contracts.callflags import CallFlags
+from boa3.neo3.contracts.contracttypes import TriggerType
+from boa3.neo3.contracts.findoptions import FindOptions
 
-__all__ = ['ContractParameterType',
-           'TriggerType',
-           'ContractMethodDescriptor',
-           'ContractEventDescriptor',
-           'ContractParameterDefinition']
+__all__ = ['CallFlags',
+           'FindOptions',
+           'TriggerType']

@@ -9,6 +9,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestArithmetic(BoaTest):
 
+    default_folder: str = 'test_sc/arithmetic_test'
+
     def test_addition_operation(self):
         expected_output = (
             Opcode.INITSLOT
@@ -20,11 +22,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Addition.py' % self.dirname
+        path = self.get_contract_path('Addition.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'add', 1, 2)
         self.assertEqual(3, result)
         result = self.run_smart_contract(engine, path, 'add', -42, -24)
@@ -38,11 +40,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionLiteral.py' % self.dirname
+        path = self.get_contract_path('AdditionLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'add_one_two')
         self.assertEqual(3, result)
 
@@ -57,11 +59,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionLiteralAndVariable.py' % self.dirname
+        path = self.get_contract_path('AdditionLiteralAndVariable.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'add_one', 1)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'add_one', -10)
@@ -80,11 +82,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionVariableAndLiteral.py' % self.dirname
+        path = self.get_contract_path('AdditionVariableAndLiteral.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'add_one', 1)
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'add_one', -10)
@@ -103,11 +105,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Subtraction.py' % self.dirname
+        path = self.get_contract_path('Subtraction.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'sub', 10, 3)
         self.assertEqual(7, result)
         result = self.run_smart_contract(engine, path, 'sub', -42, -24)
@@ -126,11 +128,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Multiplication.py' % self.dirname
+        path = self.get_contract_path('Multiplication.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'mult', 10, 3)
         self.assertEqual(30, result)
         result = self.run_smart_contract(engine, path, 'mult', -42, -2)
@@ -141,7 +143,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(0, result)
 
     def test_division_operation(self):
-        path = '%s/boa3_test/test_sc/arithmetic_test/Division.py' % self.dirname
+        path = self.get_contract_path('Division.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_integer_division_operation(self):
@@ -155,11 +157,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/IntegerDivision.py' % self.dirname
+        path = self.get_contract_path('IntegerDivision.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'floor_div', 10, 3)
         self.assertEqual(3, result)
         result = self.run_smart_contract(engine, path, 'floor_div', -42, -9)
@@ -178,11 +180,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Modulo.py' % self.dirname
+        path = self.get_contract_path('Modulo.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'mod', 10, 3)
         self.assertEqual(1, result)
         result = self.run_smart_contract(engine, path, 'mod', -42, -9)
@@ -199,11 +201,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Positive.py' % self.dirname
+        path = self.get_contract_path('Positive.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'plus', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'plus', -1)
@@ -221,11 +223,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Negative.py' % self.dirname
+        path = self.get_contract_path('Negative.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'minus', 10)
         self.assertEqual(-10, result)
         result = self.run_smart_contract(engine, path, 'minus', -1)
@@ -246,18 +248,18 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/Concatenation.py' % self.dirname
+        path = self.get_contract_path('Concatenation.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'concat', 'a', 'b')
         self.assertEqual('ab', result)
         result = self.run_smart_contract(engine, path, 'concat', 'unit', 'test')
         self.assertEqual('unittest', result)
 
     def test_power_operation(self):
-        path = '%s/boa3_test/test_sc/arithmetic_test/Power.py' % self.dirname
+        path = self.get_contract_path('Power.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_str_multiplication_operation(self):
@@ -271,22 +273,22 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/StringMultiplication.py' % self.dirname
+        path = self.get_contract_path('StringMultiplication.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'str_mult', 'a', 4)
         self.assertEqual('aaaa', result)
         result = self.run_smart_contract(engine, path, 'str_mult', 'unit', 50)
         self.assertEqual('unit' * 50, result)
 
     def test_mismatched_type_binary_operation(self):
-        path = '%s/boa3_test/test_sc/arithmetic_test/MismatchedOperandBinary.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandBinary.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mismatched_type_unary_operation(self):
-        path = '%s/boa3_test/test_sc/arithmetic_test/MismatchedOperandUnary.py' % self.dirname
+        path = self.get_contract_path('MismatchedOperandUnary.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_sequence_addition(self):
@@ -302,11 +304,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeElements.py' % self.dirname
+        path = self.get_contract_path('AdditionThreeElements.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'add_four', 1, 2)
         self.assertEqual(7, result)
         result = self.run_smart_contract(engine, path, 'add_four', -42, -24)
@@ -323,19 +325,19 @@ class TestArithmetic(BoaTest):
             + Opcode.ADD
             + Opcode.RET
         )
-        path_1 = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeValuesUnordered1.py' % self.dirname
+        path_1 = self.get_contract_path('AdditionThreeValuesUnordered1.py')
         output_1 = Boa3.compile(path_1)
         self.assertEqual(expected_output, output_1)
 
-        path_2 = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeValuesUnordered2.py' % self.dirname
+        path_2 = self.get_contract_path('AdditionThreeValuesUnordered2.py')
         output_2 = Boa3.compile(path_2)
         self.assertEqual(expected_output, output_2)
 
-        path_3 = '%s/boa3_test/test_sc/arithmetic_test/AdditionThreeValuesUnordered3.py' % self.dirname
+        path_3 = self.get_contract_path('AdditionThreeValuesUnordered3.py')
         output_3 = Boa3.compile(path_3)
         self.assertEqual(expected_output, output_3)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result_1 = self.run_smart_contract(engine, path_1, 'add_six', 5)
         result_2 = self.run_smart_contract(engine, path_2, 'add_six', 5)
         result_3 = self.run_smart_contract(engine, path_2, 'add_six', 5)
@@ -368,11 +370,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/MixedOperations.py' % self.dirname
+        path = self.get_contract_path('MixedOperations.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'mixed', 10, 20, 30, 40, 50)
         self.assertEqual(10 + 30 * 50 + 40 // 20, result)
 
@@ -394,11 +396,11 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/WithParentheses.py' % self.dirname
+        path = self.get_contract_path('WithParentheses.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'mixed', 10, 20, 30, 40, 50)
         self.assertEqual(10 + 30 * (50 + 40) // 20, result)
 
@@ -411,11 +413,10 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/AdditionAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('AdditionAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -429,11 +430,10 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.SUB
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/SubtractionAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('SubtractionAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -447,17 +447,16 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.MUL
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/MultiplicationAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('MultiplicationAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_division_augmented_assignment(self):
-        path = '%s/boa3_test/test_sc/arithmetic_test/DivisionAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('DivisionAugmentedAssignment.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_integer_division_augmented_assignment(self):
@@ -469,11 +468,10 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.DIV
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/IntegerDivisionAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('IntegerDivisionAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -487,11 +485,10 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + Opcode.MOD
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/ModuloAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('ModuloAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
@@ -507,17 +504,16 @@ class TestArithmetic(BoaTest):
             + Opcode.CONVERT
             + Type.str.stack_item
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/ConcatenationAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('ConcatenationAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
 
     def test_power_augmented_assignment(self):
-        path = '%s/boa3_test/test_sc/arithmetic_test/PowerAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('PowerAugmentedAssignment.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_str_multiplication_operation_augmented_assignment(self):
@@ -529,11 +525,61 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG1
             + BinaryOp.StrMul.bytecode
             + Opcode.STARG0
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/arithmetic_test/StringMultiplicationAugmentedAssignment.py' % self.dirname
+        path = self.get_contract_path('StringMultiplicationAugmentedAssignment.py')
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_boa2_add_test(self):
+        path = self.get_contract_path('AddBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 2)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 23234)
+        self.assertEqual(23236, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', -112)
+        self.assertEqual(-110, result)
+
+    def test_boa2_add_test1(self):
+        path = self.get_contract_path('AddBoa2Test1.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 1, 2, 3, 4)
+        self.assertEqual(9, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0, 0, 0, 2)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', -2, 3, -6, 2)
+        self.assertEqual(-2, result)
+
+    def test_boa2_add_test2(self):
+        path = self.get_contract_path('AddBoa2Test2.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(3, result)
+
+    def test_boa2_add_test3(self):
+        path = self.get_contract_path('AddBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(-9, result)
+
+    def test_boa2_add_test4(self):
+        path = self.get_contract_path('AddBoa2Test4.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 1, 2, 3, 4)
+        self.assertEqual(-9, result)
+
+    def test_boa2_add_test_void(self):
+        path = self.get_contract_path('AddBoa2TestVoid.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        self.assertIsVoid(result)

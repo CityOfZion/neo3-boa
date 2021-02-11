@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from boa3.model.operation.operation import IOperation
 from boa3.model.type.itype import IType
@@ -41,14 +43,14 @@ class BinaryOperation(IOperation, ABC):
         pass
 
     @classmethod
-    def build(cls, *operands: IType):
+    def build(cls, *operands: IType) -> Optional[BinaryOperation]:
         if len(operands) == 1:
             return cls._build_with_left_arg(operands[0])
         if len(operands) == 2:
             return cls._build_with_two_args(operands[0], operands[1])
 
     @classmethod
-    def _build_with_left_arg(cls, left: IType):
+    def _build_with_left_arg(cls, left: IType) -> Optional[BinaryOperation]:
         """
         Creates a binary operation with the given operands types
 
@@ -59,7 +61,7 @@ class BinaryOperation(IOperation, ABC):
         return cls(left)
 
     @classmethod
-    def _build_with_two_args(cls, left: IType, right: IType):
+    def _build_with_two_args(cls, left: IType, right: IType) -> Optional[BinaryOperation]:
         """
         Creates a binary operation with the given operands types
 
@@ -68,4 +70,7 @@ class BinaryOperation(IOperation, ABC):
         :return: The built operation if the operands are valid. None otherwise
         :rtype: BinaryOperation or None
         """
-        return cls(left, right)
+        operation = cls(left, right)
+        if operation.validate_type(left, right):
+            return operation
+        return cls(left, left)

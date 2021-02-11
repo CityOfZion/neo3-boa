@@ -31,7 +31,7 @@ class GenericCollectionType(ICollectionType):
         return isinstance(value, ICollectionType)
 
     @classmethod
-    def build(cls, value: Any):
+    def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
             if isinstance(value, dict):
                 keys = list(value.keys())

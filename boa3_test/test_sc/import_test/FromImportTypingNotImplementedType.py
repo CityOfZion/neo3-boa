@@ -1,5 +1,5 @@
-from typing import Iterable
+from typing import Reversible
 
 
 def Main():
-    a: Iterable = []
+    a: Reversible = []

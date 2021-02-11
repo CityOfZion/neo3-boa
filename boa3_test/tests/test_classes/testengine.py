@@ -1,10 +1,13 @@
+from os import path
 from typing import Any, Dict, List, Optional, Union
 
 from boa3 import constants
 from boa3.neo import to_hex_str
+from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
+from boa3.neo3.core.types import UInt160
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
@@ -12,9 +15,19 @@ from boa3_test.tests.test_classes.transaction import Transaction
 
 
 class TestEngine:
-    def __init__(self, root_path: str):
-        self._test_engine_path = '{0}/Neo.TestEngine/Neo.TestEngine.dll'.format(root_path)
+    def __init__(self, root_path: Optional[str] = None):
+        if root_path is None:
+            import env
+            root_path = env.TEST_ENGINE_DIRECTORY
 
+        engine_path = '{0}/Neo.TestEngine.dll'.format(root_path)
+        if not path.exists(engine_path):
+            raise FileNotFoundError(
+                "File at {0} was not found.\n"
+                "Visit the docs or the README file and search for 'TestEngine' to correctly install it."
+                .format(engine_path))
+
+        self._test_engine_path = engine_path
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
@@ -133,6 +146,12 @@ class TestEngine:
             self._blocks.append(block)
         return success
 
+    def get_transactions(self) -> List[Transaction]:
+        txs = []
+        for block in self._blocks:
+            txs.extend(block.get_transactions())
+        return txs
+
     def add_transaction(self, *transaction: Transaction):
         if self.current_block is None:
             self.increase_block()
@@ -141,14 +160,13 @@ class TestEngine:
         for tx in transaction:
             current_block.add_transaction(tx)
 
-    def run(self, nef_path: str, method: str, *arguments: Any, reset_engine: bool = False,
+    def run(self, nef_path: Union[str, UInt160], method: str, *arguments: Any, reset_engine: bool = False,
             rollback_on_fault: bool = True) -> Any:
         import json
         import subprocess
 
         test_engine_args = self.to_json(nef_path, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
-
         process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
@@ -195,11 +213,27 @@ class TestEngine:
                     json_storage = result['storage']
                     self._storage = Storage.from_json(json_storage)
 
+                if 'blocks' in result:
+                    blocks_json = result['blocks']
+                    if not isinstance(blocks_json, list):
+                        blocks_json = [blocks_json]
+
+                    self._blocks = sorted([Block.from_json(js) for js in blocks_json],
+                                          key=lambda b: b.index)
+
+                if 'transaction' in result and self._vm_state is VMState.HALT:
+                    block = self.current_block
+                    if block is None:
+                        block = self.increase_block(self.height)
+
+                    tx = Transaction.from_json(result['transaction'])
+                    block.add_transaction(tx)
+
         except BaseException as e:
             self._error_message = str(e)
 
         # TODO: convert the result to the return type of the function in the manifest
-        return self._result_stack[-1] if len(self._result_stack) > 0 else None
+        return self._result_stack[-1] if len(self._result_stack) > 0 else VoidType
 
     def reset_state(self):
         self._vm_state = VMState.NONE
@@ -213,9 +247,10 @@ class TestEngine:
         self.reset_state()
         self._storage.clear()
 
-    def to_json(self, path: str, method: str, *args: Any) -> Dict[str, Any]:
+    def to_json(self, path: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
         return {
-            'path': path,
+            'path': path if isinstance(path, str) else '',
+            'scripthash': str(path) if isinstance(path, UInt160) else None,
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),

@@ -12,6 +12,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestException(BoaTest):
 
+    default_folder: str = 'test_sc/exception_test'
+
     EXCEPTION_EMPTY_MESSAGE = String(Builtin.Exception.default_message).to_bytes()
 
     def test_raise_exception_empty_message(self):
@@ -28,15 +30,14 @@ class TestException(BoaTest):
             + Integer(len(self.EXCEPTION_EMPTY_MESSAGE)).to_byte_array(signed=True, min_length=1)
             + self.EXCEPTION_EMPTY_MESSAGE
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/RaiseExceptionEmptyMessage.py' % self.dirname
+        path = self.get_contract_path('RaiseExceptionEmptyMessage.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
         with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
@@ -57,15 +58,14 @@ class TestException(BoaTest):
             + Integer(len(exception_message)).to_byte_array(signed=True, min_length=1)
             + exception_message
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/RaiseExceptionWithMessage.py' % self.dirname
+        path = self.get_contract_path('RaiseExceptionWithMessage.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
         with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
@@ -85,15 +85,14 @@ class TestException(BoaTest):
             + Integer(len(self.EXCEPTION_EMPTY_MESSAGE)).to_byte_array(signed=True, min_length=1)
             + self.EXCEPTION_EMPTY_MESSAGE
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/RaiseExceptionWithoutCall.py' % self.dirname
+        path = self.get_contract_path('RaiseExceptionWithoutCall.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
         with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
@@ -115,15 +114,14 @@ class TestException(BoaTest):
             + Integer(4).to_byte_array(signed=True, min_length=1)
             + Opcode.LDLOC0         # raise x
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/RaiseVariableException.py' % self.dirname
+        path = self.get_contract_path('RaiseVariableException.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
         with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
@@ -149,15 +147,14 @@ class TestException(BoaTest):
             + Integer(len(exception_message)).to_byte_array(signed=True, min_length=1)
             + exception_message
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/RaiseExceptionVariableMessage.py' % self.dirname
+        path = self.get_contract_path('RaiseExceptionVariableMessage.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
         with self.assertRaises(TestExecutionException, msg=message):
@@ -177,22 +174,21 @@ class TestException(BoaTest):
             + Integer(len(self.EXCEPTION_EMPTY_MESSAGE)).to_byte_array(signed=True, min_length=1)
             + self.EXCEPTION_EMPTY_MESSAGE
             + Opcode.THROW
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/RaiseSpecificException.py' % self.dirname
+        path = self.get_contract_path('RaiseSpecificException.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
         with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_mismatched_type(self):
-        path = '%s/boa3_test/test_sc/exception_test/RaiseMismatchedType.py' % self.dirname
+        path = self.get_contract_path('RaiseMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_try_except_without_exception(self):
@@ -216,11 +212,11 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/TryExceptWithoutException.py' % self.dirname
+        path = self.get_contract_path('TryExceptWithoutException.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test_try_except', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'test_try_except', -110)
@@ -247,11 +243,11 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/TryExceptBaseException.py' % self.dirname
+        path = self.get_contract_path('TryExceptBaseException.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test_try_except', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'test_try_except', -110)
@@ -278,18 +274,18 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/TryExceptSpecificException.py' % self.dirname
+        path = self.get_contract_path('TryExceptSpecificException.py')
         output = self.assertCompilerLogs(UsingSpecificException, path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test_try_except', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'test_try_except', -110)
         self.assertEqual(-110, result)
 
     def test_try_except_with_name(self):
-        path = '%s/boa3_test/test_sc/exception_test/TryExceptWithName.py' % self.dirname
+        path = self.get_contract_path('TryExceptWithName.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_try_except_finally(self):
@@ -325,11 +321,11 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/exception_test/TryExceptFinally.py' % self.dirname
+        path = self.get_contract_path('TryExceptFinally.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test_try_except', 10)
         self.assertEqual(24, result)
         result = self.run_smart_contract(engine, path, 'test_try_except', -110)

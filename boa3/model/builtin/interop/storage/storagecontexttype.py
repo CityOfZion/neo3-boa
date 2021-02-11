@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -43,7 +45,7 @@ class StorageContextType(ClassType):
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None):
+    def build(cls, value: Any = None) -> StorageContextType:
         if value is None or cls._is_type_of(value):
             return _StorageContext
 

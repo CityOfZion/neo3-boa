@@ -10,10 +10,10 @@ from boa3.model.type.itype import IType
 
 
 class BuiltinFunctionCallAnalyser(IAstAnalyser):
-    def __init__(self, origin: IAstAnalyser, call: ast.Call, method_id: str, builtin_method: IBuiltinMethod):
+    def __init__(self, origin: IAstAnalyser, call: ast.Call, method_id: str, builtin_method: IBuiltinMethod, log: bool):
         self._method: IBuiltinMethod = builtin_method
         self.method_id: str = method_id
-        super().__init__(call)
+        super().__init__(call, log=log)
 
         self._origin: IAstAnalyser = origin
 
@@ -72,8 +72,14 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
                 self.call.args[-1] = last_arg.elts[-1]
                 return
 
-        if not isinstance(last_arg, ast.Name) or (last_arg.id != args_types[-1].identifier
-                                                  and last_arg.id != args_types[-1].raw_identifier):
+        from boa3.model.type.type import Type
+        is_ast_valid = (isinstance(last_arg, ast.Name)
+                        or (isinstance(last_arg, ast.NameConstant) and args_types[-1] is Type.none))
+        is_id_valid = (hasattr(last_arg, 'id')
+                       and last_arg.id != args_types[-1].identifier
+                       and last_arg.id != args_types[-1].raw_identifier)
+
+        if not is_ast_valid or is_id_valid:
             # if the value is not the identifier of a type
             self._log_error(
                 CompilerError.MismatchedTypes(

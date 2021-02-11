@@ -9,6 +9,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestRelational(BoaTest):
 
+    default_folder: str = 'test_sc/relational_test'
+
     def test_number_equality_operation(self):
         expected_output = (
             Opcode.INITSLOT
@@ -20,11 +22,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumEquality.py' % self.dirname
+        path = self.get_contract_path('NumEquality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 2)
@@ -41,18 +43,18 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumInequality.py' % self.dirname
+        path = self.get_contract_path('NumInequality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 2)
         self.assertEqual(False, result)
 
     def test_number_inequality_operation_2(self):
-        path = '%s/boa3_test/test_sc/relational_test/NumInequalityPython2.py' % self.dirname
+        path = self.get_contract_path('NumInequalityPython2.py')
 
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
@@ -68,11 +70,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumLessThan.py' % self.dirname
+        path = self.get_contract_path('NumLessThan.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 2)
@@ -91,11 +93,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumLessOrEqual.py' % self.dirname
+        path = self.get_contract_path('NumLessOrEqual.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 2)
@@ -114,11 +116,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumGreaterThan.py' % self.dirname
+        path = self.get_contract_path('NumGreaterThan.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 2)
@@ -137,11 +139,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumGreaterOrEqual.py' % self.dirname
+        path = self.get_contract_path('NumGreaterOrEqual.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 2)
@@ -150,7 +152,7 @@ class TestRelational(BoaTest):
         self.assertEqual(True, result)
 
     def test_identity_operation(self):
-        path = '%s/boa3_test/test_sc/relational_test/NumIdentity.py' % self.dirname
+        path = self.get_contract_path('NumIdentity.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
 
     def test_boolean_equality_operation(self):
@@ -164,11 +166,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/BoolEquality.py' % self.dirname
+        path = self.get_contract_path('BoolEquality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, False)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', True, True)
@@ -185,11 +187,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/BoolInequality.py' % self.dirname
+        path = self.get_contract_path('BoolInequality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', True, False)
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, True)
@@ -210,11 +212,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/NumRange.py' % self.dirname
+        path = self.get_contract_path('NumRange.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 2, 5)
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 2, 1, 5)
@@ -235,11 +237,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/StrEquality.py' % self.dirname
+        path = self.get_contract_path('StrEquality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'test')
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'unit')
@@ -256,11 +258,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/StrInequality.py' % self.dirname
+        path = self.get_contract_path('StrInequality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'test')
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'unit')
@@ -277,11 +279,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/StrLessThan.py' % self.dirname
+        path = self.get_contract_path('StrLessThan.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'test', 'unit')
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'unit')
@@ -300,11 +302,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/StrLessOrEqual.py' % self.dirname
+        path = self.get_contract_path('StrLessOrEqual.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'test', 'unit')
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'unit')
@@ -323,11 +325,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/StrGreaterThan.py' % self.dirname
+        path = self.get_contract_path('StrGreaterThan.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'test', 'unit')
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'unit')
@@ -346,11 +348,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/StrGreaterOrEqual.py' % self.dirname
+        path = self.get_contract_path('StrGreaterOrEqual.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'test', 'unit')
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'unit')
@@ -369,11 +371,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/MixedEquality.py' % self.dirname
+        path = self.get_contract_path('MixedEquality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 'unit')
         self.assertEqual(False, result)
         result = self.run_smart_contract(engine, path, 'Main', 123, '123')
@@ -392,11 +394,11 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/relational_test/MixedInequality.py' % self.dirname
+        path = self.get_contract_path('MixedInequality.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 1, 'unit')
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', 123, '123')
@@ -405,25 +407,25 @@ class TestRelational(BoaTest):
         self.assertEqual(True, result)
 
     def test_mixed_less_than_operation(self):
-        path = '%s/boa3_test/test_sc/relational_test/MixedLessThan.py' % self.dirname
+        path = self.get_contract_path('MixedLessThan.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_less_or_equal_than_operation(self):
-        path = '%s/boa3_test/test_sc/relational_test/MixedLessOrEqual.py' % self.dirname
+        path = self.get_contract_path('MixedLessOrEqual.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_greater_than_operation(self):
-        path = '%s/boa3_test/test_sc/relational_test/MixedGreaterThan.py' % self.dirname
+        path = self.get_contract_path('MixedGreaterThan.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_mixed_greater_or_equal_than_operation(self):
-        path = '%s/boa3_test/test_sc/relational_test/MixedGreaterOrEqual.py' % self.dirname
+        path = self.get_contract_path('MixedGreaterOrEqual.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_list_equality_with_slice(self):
-        path = '%s/boa3_test/test_sc/relational_test/ListEqualityWithSlice.py' % self.dirname
+        path = self.get_contract_path('ListEqualityWithSlice.py')
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', ['unittest', '123'], 'unittest',
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -436,19 +438,44 @@ class TestRelational(BoaTest):
             self.run_smart_contract(engine, path, 'main', [], '')
 
     def test_compare_same_value_hard_coded(self):
-        path = '%s/boa3_test/test_sc/relational_test/CompareSameValueHardCoded.py' % self.dirname
+        path = self.get_contract_path('CompareSameValueHardCoded.py')
         Boa3.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'testing_something',
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
     def test_compare_same_value_argument(self):
-        path = '%s/boa3_test/test_sc/relational_test/CompareSameValueArgument.py' % self.dirname
+        path = self.get_contract_path('CompareSameValueArgument.py')
         Boa3.compile_and_save(path)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'testing_something', bytes(20),
                                          expected_result_type=bool)
         self.assertEqual(True, result)
+
+    def test_boa2_equality_test2(self):
+        path = self.get_contract_path('Equality2Boa2Test.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 2)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 4)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 5)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 6)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 7)
+        self.assertEqual(False, result)

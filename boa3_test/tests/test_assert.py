@@ -10,6 +10,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestAssert(BoaTest):
 
+    default_folder: str = 'test_sc/assert_test'
+
     def test_assert_unary_boolean_operation(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -22,11 +24,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertUnaryOperation.py' % self.dirname
+        path = self.get_contract_path('AssertUnaryOperation.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', False, 10)
         self.assertEqual(10, result)
 
@@ -46,11 +48,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertBinaryOperation.py' % self.dirname
+        path = self.get_contract_path('AssertBinaryOperation.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10, 20)
         self.assertEqual(10, result)
 
@@ -70,11 +72,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertWithMessage.py' % self.dirname
+        path = self.get_contract_path('AssertWithMessage.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
@@ -92,11 +94,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertInt.py' % self.dirname
+        path = self.get_contract_path('AssertInt.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
         result = self.run_smart_contract(engine, path, 'Main', -10)
@@ -116,11 +118,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertStr.py' % self.dirname
+        path = self.get_contract_path('AssertStr.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'unittest')
         self.assertEqual('unittest', result)
 
@@ -138,11 +140,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertBytes.py' % self.dirname
+        path = self.get_contract_path('AssertBytes.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', b'unittest')
         self.assertEqual(b'unittest', String(result).to_bytes())
 
@@ -162,11 +164,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertList.py' % self.dirname
+        path = self.get_contract_path('AssertList.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3])
         self.assertEqual(3, result)
 
@@ -186,11 +188,11 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertDict.py' % self.dirname
+        path = self.get_contract_path('AssertDict.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine(self.dirname)
+        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 5})
         self.assertEqual(2, result)
 
@@ -214,10 +216,23 @@ class TestAssert(BoaTest):
             + Opcode.JMPIFNOT + Integer(3).to_byte_array(signed=True, min_length=1)
             + Opcode.SIZE
             + Opcode.ASSERT
-            + Opcode.PUSHNULL
             + Opcode.RET
         )
 
-        path = '%s/boa3_test/test_sc/assert_test/AssertAny.py' % self.dirname
+        path = self.get_contract_path('AssertAny.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertIsVoid(result)
+
+    def test_boa2_throw_test(self):
+        path = self.get_contract_path('ThrowBoa2Test.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(True, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', 4)
