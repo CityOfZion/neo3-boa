@@ -1079,3 +1079,34 @@ class TestList(BoaTest):
         self.assertEqual([1, 2, 4, 3], result)
 
     # endregion
+
+    # region TestRemove
+
+    def test_list_remove_value(self):
+        path = self.get_contract_path('RemoveValue.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4], 3)
+        self.assertEqual([1, 2, 4], result)
+
+        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 2, 3], 3)
+        self.assertEqual([1, 2, 2, 3], result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4], 6)
+
+    def test_list_remove_int_value(self):
+        path = self.get_contract_path('RemoveIntValue.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([10, 30], result)
+
+    def test_list_remove_int_with_builtin(self):
+        path = self.get_contract_path('RemoveIntWithBuiltin.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([10, 20], result)
+
+    # endregion

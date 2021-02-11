@@ -63,6 +63,7 @@ class Builtin:
     SequenceExtend = ExtendMethod()
     SequenceInsert = InsertMethod()
     SequencePop = PopMethod()
+    SequenceRemove = RemoveMethod()
     SequenceReverse = ReverseMethod()
     DictKeys = MapKeysMethod()
     DictValues = MapValuesMethod()
@@ -92,6 +93,7 @@ class Builtin:
                                                 SequenceExtend,
                                                 SequenceInsert,
                                                 SequencePop,
+                                                SequenceRemove,
                                                 SequenceReverse
                                                 ]
 
