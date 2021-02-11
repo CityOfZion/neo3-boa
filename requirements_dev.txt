@@ -5,3 +5,5 @@ coverage==4.5.4
 pycodestyle==2.5.0
 Sphinx==1.6.4
 sphinx-rtd-theme==0.2.4
+twine>=1.10.0
+wheel>=0.30.0
