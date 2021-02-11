@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented Storage.Find interop
 - Included new smart contract examples
   - Atomic Swap
-  - Wrapped Neo
+  - Wrapped Token
 - Included Python 3.7 unit tests in CircleCI workflow
 - Implemented Python built-in functions
   - `exit`, `min` and `max`
