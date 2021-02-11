@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List, Tuple
 
 from boa3.model.method import Method
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.StackItem import StackItemType
 
 
@@ -51,5 +52,10 @@ class ClassType(IType, ABC):
     def constructor_method(self) -> Method:
         pass
 
+    @property
     def stack_item(self) -> StackItemType:
         return StackItemType.Array
+
+    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+        # TODO: Implement when the validation of created types is fixed
+        return []

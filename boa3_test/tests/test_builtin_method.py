@@ -729,40 +729,14 @@ class TestBuiltinMethod(BoaTest):
     # region isinstance test
 
     def test_isinstance_int_literal(self):
-        value = Integer(123).to_byte_array()
-        expected_output = (
-            Opcode.PUSHDATA1        # isinstance(123, int)
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.ISTYPE
-            + Type.int.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceIntLiteral.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
     def test_isinstance_int_variable(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0         # isinstance(a, int)
-            + Opcode.ISTYPE
-            + Type.int.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceIntVariable.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
@@ -773,40 +747,14 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(False, result)
 
     def test_isinstance_bool_literal(self):
-        value = Integer(123).to_byte_array()
-        expected_output = (
-            Opcode.PUSHDATA1        # isinstance(123, bool)
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.ISTYPE
-            + Type.bool.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceBoolLiteral.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(False, result)
 
     def test_isinstance_bool_variable(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0         # isinstance(a, bool)
-            + Opcode.ISTYPE
-            + Type.bool.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceBoolVariable.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
@@ -817,38 +765,14 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(False, result)
 
     def test_isinstance_str_literal(self):
-        value = String('123').to_bytes()
-        expected_output = (
-            Opcode.PUSHDATA1        # isinstance('123', str)
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.ISTYPE
-            + Type.str.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceStrLiteral.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
     def test_isinstance_str_variable(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0         # isinstance(a, str)
-            + Opcode.ISTYPE
-            + Type.str.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceStrVariable.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
@@ -859,51 +783,21 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(True, result)
 
     def test_isinstance_list_literal(self):
-        expected_output = (
-            Opcode.NEWARRAY0        # isinstance([], list)
-            + Opcode.ISTYPE
-            + Type.list.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceListLiteral.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
     def test_isinstance_tuple_literal(self):
-        expected_output = (
-            Opcode.NEWARRAY0        # isinstance([], tuple)
-            + Opcode.ISTYPE
-            + Type.tuple.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceTupleLiteral.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(True, result)
 
     def test_isinstance_tuple_variable(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0         # isinstance(a, tuple)
-            + Opcode.ISTYPE
-            + Type.tuple.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceTupleVariable.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
@@ -916,38 +810,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(True, result)
 
     def test_isinstance_many_types(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0         # isinstance(a, tuple)
-            + Opcode.DUP
-            + Opcode.ISTYPE
-            + Type.list.stack_item
-            + Opcode.JMPIF
-            + Integer(16).to_byte_array(min_length=1, signed=True)
-            + Opcode.DUP
-            + Opcode.ISTYPE
-            + Type.int.stack_item
-            + Opcode.JMPIF
-            + Integer(11).to_byte_array(min_length=1, signed=True)
-            + Opcode.DUP
-            + Opcode.ISTYPE
-            + Type.bool.stack_item
-            + Opcode.JMPIF
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-            + Opcode.ISTYPE
-            + Type.dict.stack_item
-            + Opcode.JMP
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.DROP
-            + Opcode.PUSH1
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IsInstanceManyTypes.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 10)
@@ -961,7 +824,46 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_many_types_with_class(self):
         path = self.get_contract_path('IsInstanceManyTypesWithClass.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', 42,
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(10),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', [],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', 'some string',
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(20),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', None,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 4},
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+    def test_isinstance_uint160(self):
+        path = self.get_contract_path('IsInstanceUInt160.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', bytes(10),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(20),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(30),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'Main', 42,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
 
     def test_isinstance_class(self):
         path = self.get_contract_path('IsInstanceClass.py')

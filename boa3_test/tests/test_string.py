@@ -51,7 +51,6 @@ class TestString(BoaTest):
         self.assertEqual('i', result)
 
     def test_string_slicing_start_larger_than_ending(self):
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         path = self.get_contract_path('StringSlicingStartLargerThanEnding.py')
         self.compile_and_save(path)
 

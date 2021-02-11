@@ -576,18 +576,23 @@ class VisitorCodeGenerator(IAstAnalyser):
             # remove opcodes inserted during the evaluation of the symbol
             VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
         if last_stack < self.generator.stack_size:
-            # remove any additional values pushed to the stack dutin the evalution of the symbol
+            # remove any additional values pushed to the stack during the evalution of the symbol
             for _ in range(self.generator.stack_size - last_stack):
                 self.generator._stack_pop()
 
+        if isinstance(symbol, Method):
+            args_to_generate = [arg for index, arg in enumerate(call.args) if index in symbol.args_to_be_generated()]
+        else:
+            args_to_generate = call.args
+
         if isinstance(symbol, IBuiltinMethod) and symbol.push_self_first():
-            args = call.args[1:]
+            args = args_to_generate[1:]
             args_addresses.append(
                 VMCodeMapping.instance().bytecode_size
             )
             self.visit_to_generate(call.args[0])
         else:
-            args = call.args
+            args = args_to_generate
 
         for arg in reversed(args):
             args_addresses.append(

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from boa3.neo.vm.type.Integer import Integer
 
@@ -42,6 +42,39 @@ class Opcode(bytes, Enum):
             return Opcode(Integer(opcode_value).to_byte_array())
         else:
             return None
+
+    @staticmethod
+    def get_push_and_data(integer: int) -> Tuple[Opcode, bytes]:
+        """
+        Gets the push opcode and data to the respective integer
+
+        :param integer: value that will be pushed
+        :return: the respective opcode and its required data
+        :rtype: Tuple[Opcode, bytes]
+        """
+        if -1 <= integer <= 16:
+            opcode_value: int = Integer.from_bytes(Opcode.PUSH0) + integer
+            return Opcode(Integer(opcode_value).to_byte_array()), b''
+        else:
+            data = Integer(integer).to_byte_array(signed=True, min_length=1)
+            if len(data) == 1:
+                opcode = Opcode.PUSHINT8
+            elif len(data) == 2:
+                opcode = Opcode.PUSHINT16
+            elif len(data) <= 4:
+                data = Integer(integer).to_byte_array(signed=True, min_length=4)
+                opcode = Opcode.PUSHINT32
+            elif len(data) <= 8:
+                data = Integer(integer).to_byte_array(signed=True, min_length=8)
+                opcode = Opcode.PUSHINT64
+            elif len(data) <= 16:
+                data = Integer(integer).to_byte_array(signed=True, min_length=16)
+                opcode = Opcode.PUSHINT128
+            else:
+                data = data[:32]
+                opcode = Opcode.PUSHINT256
+
+            return opcode, data
 
     # The number -1 is pushed onto the stack.
     PUSHM1 = b'\x0F'
@@ -662,3 +695,6 @@ class Opcode(bytes, Enum):
     CONVERT = b'\xDB'
 
     # endregion
+
+    def __repr__(self) -> str:
+        return str(self)
