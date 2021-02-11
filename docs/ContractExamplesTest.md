@@ -398,8 +398,8 @@
 ## v0.7
 ### Built in function
 
-- <a href="/boa3_test/test_sc/range_test/MaxInt.py">MaxInt.py</a>
-- <a href="/boa3_test/test_sc/range_test/MinInt.py">MinInt.py</a>
+- <a href="/boa3_test/test_sc/built_in_methods_test/MaxInt.py">MaxInt.py</a>
+- <a href="/boa3_test/test_sc/built_in_methods_test/MinInt.py">MinInt.py</a>
 
 ### List type
 
