@@ -471,8 +471,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.7</td>
     <td>List type</td>
     <td>
       <pre>
@@ -483,6 +483,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#list-type-2">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -681,6 +682,22 @@ python -m unittest discover boa3_test
     </td>
     <td>
       <a href="/docs/ContractExamplesTest.md#built-in-function-1">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.7</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = max(7, 12)
+  b = min(1, 6)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-2">List of examples</a>
     </td>
   </tbody>
   <tbody>
