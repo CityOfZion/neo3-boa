@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.7.0] - 2021-02-11
+### Added
+- Support to [Neo 3 preview 5](https://github.com/neo-project/neo/tree/v3.0.0-preview5)
+- Included `Iterator` interops
+- Implemented Storage.Find interop
+- Included new smart contract examples
+  - Atomic Swap
+  - Wrapped Neo
+- Included Python 3.7 unit tests in CircleCI workflow
+- Implemented Python built-in functions
+  - `exit`, `min` and `max`
+  - `list` methods `insert` and `remove`
+
+### Changed
+- Improved compilation with `isinstance` function semantic for Python types
+- Updated README file with how to use TestEngine
+
+### Fixed
+- Fixed operation validation when using non-primitive types
+  - Couldn't use `UInt160` values in `bytes` operations for example
+- Invalid stack size when calling void functions
+- Compilation failing because of concatenation with `bytes` values
+- Variable types in different scopes causing conflict during compilation
+- Fixed conversion of sequence slicing with negative indexes
+
+
 ## [0.6.1] - 2020-12-18
 ### Added
 - Included a NEP-17 example
@@ -105,7 +131,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.4.0...v0.5.0
