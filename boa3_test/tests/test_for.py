@@ -453,3 +453,49 @@ class TestFor(BoaTest):
     def test_for_iterate_dict(self):
         path = self.get_contract_path('ForIterateDict.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_iteration_test(self):
+        path = self.get_contract_path('IterBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(18, result)
+
+    def test_boa2_iteration_test2(self):
+        path = self.get_contract_path('IterBoa2Test2.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(8, result)
+
+    def test_boa2_iteration_test3(self):
+        path = self.get_contract_path('IterBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(7, result)
+
+    def test_boa2_iteration_test4(self):
+        path = self.get_contract_path('IterBoa2Test4.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_iteration_test5(self):
+        path = self.get_contract_path('IterBoa2Test5.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(51, result)
+
+    def test_boa2_iteration_test6(self):
+        path = self.get_contract_path('IterBoa2Test6.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(10, result)
+
+    def test_boa2_iteration_test7(self):
+        path = self.get_contract_path('IterBoa2Test7.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(12, result)
+
+    def test_boa2_iteration_test8(self):
+        path = self.get_contract_path('IterBoa2Test8.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(6, result)

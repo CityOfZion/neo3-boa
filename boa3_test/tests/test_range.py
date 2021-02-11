@@ -750,3 +750,9 @@ class TestRange(BoaTest):
     def test_range_slicing_omitted_with_stride(self):
         path = self.get_contract_path('RangeSlicingOmittedWithStride.py')
         self.assertCompilerLogs(InternalError, path)
+
+    def test_boa2_range_test(self):
+        path = self.get_contract_path('RangeBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(list(range(100, 120)), result)

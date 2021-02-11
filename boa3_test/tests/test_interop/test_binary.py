@@ -283,3 +283,29 @@ class TestBinaryInterop(BoaTest):
     def test_deserialize_mismatched_type(self):
         path = self.get_contract_path('DeserializeMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_serialization_test1(self):
+        path = self.get_contract_path('SerializationBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 1, expected_result_type=bytes)
+        expected_result = serialize(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'])
+        self.assertEqual(expected_result, result)
+
+    def test_boa2_serialization_test2(self):
+        path = self.get_contract_path('SerializationBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 2, expected_result_type=bytes)
+        expected_result = serialize(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'])
+        self.assertEqual(expected_result, result)
+
+    def test_boa2_serialization_test3(self):
+        path = self.get_contract_path('SerializationBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        self.assertEqual(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'], result)
+
+    def test_boa2_serialization_test4(self):
+        path = self.get_contract_path('SerializationBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', 4)
+        self.assertEqual(['j', 3, 5], result)

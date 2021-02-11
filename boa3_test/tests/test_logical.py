@@ -391,3 +391,45 @@ class TestLogical(BoaTest):
     def test_mismatched_type_logic_right_shift(self):
         path = self.get_contract_path('MismatchedOperandLogicRightShift.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_boa2_logic_test(self):
+        path = self.get_contract_path('BinOpBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', '&', 4, 4)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '|', 4, 3)
+        self.assertEqual(7, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '|', 4, 8)
+        self.assertEqual(12, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '^', 4, 4)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '^', 4, 2)
+        self.assertEqual(6, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '>>', 16, 2)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '>>', 16, 0)
+        self.assertEqual(16, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '%', 16, 2)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '%', 16, 11)
+        self.assertEqual(5, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '//', 16, 2)
+        self.assertEqual(8, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '//', 16, 7)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '~', 16, 0)
+        self.assertEqual(-17, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '~', -3, 0)
+        self.assertEqual(2, result)

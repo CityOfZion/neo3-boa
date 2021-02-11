@@ -165,3 +165,31 @@ class TestString(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual('bye worldhi', result)
+
+    def test_boa2_string_concat_test(self):
+        path = self.get_contract_path('ConcatBoa2Test.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual('helloworld', result)
+
+    def test_boa2_string_concat_test2(self):
+        path = self.get_contract_path('ConcatBoa2Test2.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'concat', ['hello', 'world'])
+        self.assertEqual('helloworld', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'blah', ['hello', 'world'])
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'concat', ['blah'])
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'concat', ['hello', 'world', 'third'])
+        self.assertEqual('helloworld', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'concat', ['1', 'neo'])
+        self.assertEqual('1neo', result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'concat', ['', 'neo'])
+        self.assertEqual('neo', result)

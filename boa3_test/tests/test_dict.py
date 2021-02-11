@@ -381,7 +381,6 @@ class TestDict(BoaTest):
 
     def test_dict_boa2_test2(self):
         path = self.get_contract_path('DictBoa2Test2.py')
-        Boa3.compile_and_save(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -394,3 +393,50 @@ class TestDict(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(66, result)
+
+    def test_boa2_dict_test1(self):
+        path = self.get_contract_path('DictBoa2Test1.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        from typing import Dict
+        self.assertIsInstance(result, Dict)
+
+    def test_boa2_dict_test3(self):
+        path = self.get_contract_path('DictBoa2Test3.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        from typing import Dict
+        self.assertIsInstance(result, Dict)
+        self.assertEqual(result, {})
+
+    def test_boa2_dict_test4(self):
+        path = self.get_contract_path('DictBoa2Test4.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(10, result)
+
+    def test_boa2_dict_test5_should_not_compile(self):
+        # this doesn't compile in boa2, but should compile here
+        path = self.get_contract_path('DictBoa2Test5ShouldNotCompile.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(result, {'a': 2})
+
+    def test_boa2_dict_test6_should_not_compile(self):
+        # this doesn't compile in boa2, but should compile here
+        path = self.get_contract_path('DictBoa2Test6ShouldNotCompile.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(result, {'a': 1, 'b': 2})
+
+    def test_boa2_dict_test_keys(self):
+        path = self.get_contract_path('DictBoa2TestKeys.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual('abblahmzmcallltrs', result)
+
+    def test_boa2_dict_test_values(self):
+        path = self.get_contract_path('DictBoa2TestValues.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(55, result)
