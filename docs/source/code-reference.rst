@@ -4,9 +4,25 @@
 2.1 Python Supported Features
 =============================
 
-.. csv-table:: 
-   :header: "name", "firstname", "age"
-   :widths: 10, 10, 30, 60, 10
-   
-   "✅", "John", 40 , 40, 40
-   "Smith", "John, Junior", 20, 20s
+.. list-table::
+   :widths: 5 50 45
+   :header-rows: 1
+   :align: center
+
+   * - Status
+     - Converts"
+     - Example Code
+   * - ✅
+     - Local variable declarations and assignments
+     - ::
+
+         def func():
+            foo: int = 42
+            bar = foo
+   * - ✅
+     - Local variable declarations and assignments
+     - ::
+
+         def func():
+            foo: int = 42
+            bar = foo
