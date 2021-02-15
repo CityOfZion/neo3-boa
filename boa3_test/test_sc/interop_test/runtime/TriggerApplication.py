@@ -1,8 +1,7 @@
 from boa3.builtin import public
-
-from boa3.builtin.interop.runtime import TriggerType, trigger
+from boa3.builtin.interop.runtime import TriggerType, get_trigger
 
 
 @public
 def Main() -> bool:
-    return trigger() == TriggerType.APPLICATION
+    return get_trigger() == TriggerType.APPLICATION

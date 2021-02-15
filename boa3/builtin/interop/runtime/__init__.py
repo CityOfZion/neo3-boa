@@ -37,7 +37,7 @@ def log(message: str):
     pass
 
 
-def trigger() -> TriggerType:
+def get_trigger() -> TriggerType:
     """
     Return the smart contract trigger type.
 

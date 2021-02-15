@@ -10,7 +10,7 @@ __all__ = ['BlockTimeProperty',
            'NotificationType',
            'NotifyMethod',
            'PlatformProperty',
-           'TriggerMethod',
+           'GetTriggerMethod',
            'TriggerType',
            ]
 
@@ -23,8 +23,8 @@ from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
 from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
 from boa3.model.builtin.interop.runtime.getnotificationsmethod import GetNotificationsMethod
 from boa3.model.builtin.interop.runtime.getplatformmethod import PlatformProperty
+from boa3.model.builtin.interop.runtime.gettriggermethod import GetTriggerMethod
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
-from boa3.model.builtin.interop.runtime.triggermethod import TriggerMethod
 from boa3.model.builtin.interop.runtime.triggertype import TriggerType
