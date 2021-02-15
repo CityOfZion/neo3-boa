@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 
 from boa3.builtin import public
 

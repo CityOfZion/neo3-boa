@@ -17,11 +17,12 @@ def check_witness(hash_or_pubkey: Union[bytes, UInt160]) -> bool:
     pass
 
 
-def notify(state: Any):
+def notify(state: Any, notification_name: str = None):
     """
     Notifies the client from the executing smart contract.
 
     :param state: the notification message
+    :param notification_name: name that'll be linked to the notification
     """
     pass
 

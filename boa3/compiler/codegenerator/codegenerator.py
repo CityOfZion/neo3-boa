@@ -1115,8 +1115,12 @@ class CodeGenerator:
         :param event_id: called event identifier
         :param event: called event
         """
-        self.convert_new_array(len(event.args), Type.list)
-        self.convert_literal(event.name)
+        self.convert_new_array(len(event.args_to_generate), Type.list)
+        if event.generate_name:
+            self.convert_literal(event.name)
+        else:
+            self.swap_reverse_stack_items(2)
+
         from boa3.model.builtin.interop.interop import Interop
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)

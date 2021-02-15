@@ -525,7 +525,7 @@ class TestIf(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 'omin', -4, 4)
         self.assertEqual(-4, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 'omin',16, 0)
+        result = self.run_smart_contract(engine, path, 'main', 'omin', 16, 0)
         self.assertEqual(0, result)
 
         result = self.run_smart_contract(engine, path, 'main', 'omax', 4, 4)
