@@ -1,8 +1,7 @@
 from typing import Any
 
 from boa3.builtin import public
-
-from boa3.builtin.interop.runtime import notify, get_time, check_witness, log, trigger
+from boa3.builtin.interop.runtime import check_witness, get_time, log, notify, trigger
 
 
 @public

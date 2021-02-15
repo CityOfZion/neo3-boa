@@ -38,6 +38,8 @@ class Operator(str, Enum):
 
     # Other operators
     Subscript = '[]'
+    In = 'in'
+    NotIn = 'not in'
 
     @classmethod
     def get_operation(cls, node: ast.operator) -> Optional[Operator]:
@@ -59,6 +61,8 @@ class Operator(str, Enum):
             ast.GtE: Operator.GtE,
             ast.Is: Operator.Is,
             ast.IsNot: Operator.IsNot,
+            ast.In: Operator.In,
+            ast.NotIn: Operator.NotIn,
             ast.And: Operator.And,
             ast.Or: Operator.Or,
             ast.Not: Operator.Not,
@@ -76,5 +80,13 @@ class Operator(str, Enum):
         else:
             return None
 
+    def requires_right_operand_for_validation(self) -> bool:
+        return self in [Operator.In,
+                        Operator.NotIn
+                        ]
+
     def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
         return self.value

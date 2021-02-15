@@ -1,7 +1,7 @@
 from typing import Any
 
 from boa3.builtin import public
-from boa3.builtin.interop.storage import put, delete, get
+from boa3.builtin.interop.storage import delete, get, put
 
 
 @public
