@@ -40,12 +40,14 @@ Build From Source (Alternative)
 -------------------------------
 
 If neo3-boa is not available via pip, you can build it from source.
+
 ::
+   
     git clone https://github.com/CityOfZion/neo3-boa.git
     pip install -e .
 
 1.2 Creating a New Smart Contract
-===============================
+=================================
 
 Project Scaffold
 ----------------
@@ -81,7 +83,9 @@ Configuring the Debugger
 ------------------------
 
 Neo3-boa is compatible with the Neo Debugger. Debugger launch configuration example:
+
 ::
+    
     {
         //Launch configuration example for Neo3-boa.
         //Make sure you compile your smart-contract before you try to debug it.
