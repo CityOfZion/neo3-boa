@@ -18,6 +18,7 @@ from boa3.model.type.itype import IType
 
 class BoaPackage(str, Enum):
     Contract = 'contract'
+    Interop = 'interop'
     Type = 'type'
 
 
@@ -148,5 +149,6 @@ class Builtin:
                               Nep17Transfer,
                               Nep5Transfer,
                               ],
+        BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: [UInt160]
     }

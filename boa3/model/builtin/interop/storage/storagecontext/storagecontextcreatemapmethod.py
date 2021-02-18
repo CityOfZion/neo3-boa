@@ -12,7 +12,7 @@ class StorageContextCreateMapMethod(IBuiltinMethod):
         from boa3.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap
         from boa3.model.type.type import Type
 
-        identifier = 'put'
+        identifier = 'create_map'
         args: Dict[str, Variable] = {'self': Variable(_StorageContext),
                                      'prefix': Variable(Type.union.build([Type.bytes,
                                                                           Type.str
