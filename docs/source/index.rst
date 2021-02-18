@@ -10,18 +10,7 @@ Welcome to neo3-boa's documentation!
    :maxdepth: 3
    :caption: Contents:
 
-   overview
-   project-structure
-   install
-   compiling-your-smart-contract
-   debugger-ready
-   testengine
-   unit-tests
-   examples
-   python-supported-features
-   package-reference
-   contribute
-   license
    getting-started
+   tutorials
+   conceptual-overview
    code-reference
-   

@@ -3,10 +3,8 @@
 
 **Neo3-Boa** is a tool for creating **Neo Smart Contracts using Python**. It compiles ``.py`` files to ``.nef`` and ``.manisfest.json`` formats for usage in the **Neo Virtual Machine** which is used to execute contracts on the **Neo Blockchain**.
 
-Neo-boa is part of the **Neo Python Framework**, aimed to allow the full development of dApps using Python alone.
-
-1.1. Installation
-=================
+1.1 Installation
+================
 
 This version of the compiler requires Python 3.7 or later.
 
@@ -49,10 +47,10 @@ If neo3-boa is not available via pip, you can build it from source.
 1.2 Creating a New Smart Contract
 =================================
 
-Project Scaffold
-----------------
+.. warning::
+    
+    **CONTENT MISSING:** Project Scaffold - GitHub `#307 <https://github.com/CityOfZion/neo3-boa/issues/307>`_ and `#308 <https://github.com/CityOfZion/neo3-boa/issues/308>`_
 
-Pending...
 
 1.3 Compiling your Smart Contract
 =================================
@@ -138,6 +136,9 @@ Go into the neo-devpack-dotnet, pull and recompile.
 Testing
 *******
 
+.. note::
+   If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in the file ``/env.py``
+
 Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function you'll need to call the method run(). Its parameters are the path of the compiled smart contract, the smart contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
 
 Your Python Script should look something like this:
@@ -155,3 +156,8 @@ Your Python Script should look something like this:
         result = engine.run(path, 'Main')
         assert result is VoidType
 
+To run your tests use:
+
+::
+
+    python -m unittest discover boa3_tests

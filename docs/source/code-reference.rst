@@ -1,7 +1,15 @@
-2. Code Reference
+4. Code Reference
 #################
 
-2.1 Supported & Planned Python Features
+4.1 Examples
+============
+
+For an extensive collection of examples:
+
+- `Smart Contract Examples <https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/examples>`_
+- `Feature Tests <https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/test_sc>`_
+
+4.2 Supported & Planned Python Features
 =======================================
 
 Variable Declarations
@@ -304,21 +312,3 @@ Other Features
    * - ✅
      - Import
      - Only  `boa3.builtin` packages are supported right now.
-
-Template Table
----------------------
-
-.. list-table::
-   :widths: 3 47 47
-   :header-rows: 1
-   :align: center
-
-   * - Status
-     - Feature
-     - Sample
-   * - ✅
-     - FEATURE HERE
-     - ::
-
-         code
-            idented code
