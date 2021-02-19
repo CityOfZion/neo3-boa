@@ -11,3 +11,4 @@ neo3_boa.egg-info
 /neo-devpack-dotnet/
 /Neo.TestEngine/
 autopep8
+.vscode

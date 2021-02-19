@@ -165,8 +165,8 @@ Types
          a = 142
          a = 'example'
 
-Statements
-----------
+Control Flow Statements
+-----------------------
 
 .. list-table::
    :widths: 3 47 47
@@ -199,6 +199,24 @@ Statements
 
          for x in (1, 2, 3):
           ...
+   * - ✅
+     - Try except
+     - ::
+
+         try:
+          a = foo(b)
+         except Exception as e:
+          a = foo(b)
+   * - ✅
+     - Try except with finally
+     - ::
+
+         try:
+          a = foo(b)
+         except Exception as e:
+          a = zubs(b)
+         finally:
+          b = zubs(a)
 
 Functions
 ---------
@@ -285,24 +303,6 @@ Other Features
 
          assert x % 2 == 0
          assert x % 3 != 2, 'error message'
-   * - ✅
-     - Try except
-     - ::
-
-         try:
-          a = foo(b)
-         except Exception as e:
-          a = foo(b)
-   * - ✅
-     - Try except with finally
-     - ::
-
-         try:
-          a = foo(b)
-         except Exception as e:
-          a = zubs(b)
-         finally:
-          b = zubs(a)
    * - ✅
      - Continue, break
      - 
