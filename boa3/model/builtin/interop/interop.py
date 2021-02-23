@@ -88,7 +88,7 @@ class Interop:
     ExecutingScriptHash = ExecutingScriptHashProperty()
     GasLeft = GasLeftProperty()
     GetNotifications = GetNotificationsMethod(NotificationType)
-    GetTrigger = TriggerMethod(TriggerType)
+    GetTrigger = GetTriggerMethod(TriggerType)
     InvocationCounter = InvocationCounterProperty()
     Log = LogMethod()
     Notify = NotifyMethod()
