@@ -51,13 +51,14 @@ class TestRuntimeInterop(BoaTest):
         string = String(message).to_bytes()
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
             + Opcode.PUSH1
             + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(event_name)).to_byte_array(min_length=1)
-            + event_name
+            + Opcode.SWAP
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.RET
@@ -79,12 +80,13 @@ class TestRuntimeInterop(BoaTest):
     def test_notify_int(self):
         event_name = String('notify').to_bytes()
         expected_output = (
-            Opcode.PUSH15
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
+            Opcode.PUSHDATA1
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
+            + Opcode.PUSH15
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.SWAP
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.RET
@@ -106,12 +108,13 @@ class TestRuntimeInterop(BoaTest):
     def test_notify_bool(self):
         event_name = String('notify').to_bytes()
         expected_output = (
-            Opcode.PUSH1
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
+            Opcode.PUSHDATA1
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
+            + Opcode.PUSH1
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.SWAP
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.RET
@@ -133,12 +136,13 @@ class TestRuntimeInterop(BoaTest):
     def test_notify_none(self):
         event_name = String('notify').to_bytes()
         expected_output = (
-            Opcode.PUSHNULL
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
+            Opcode.PUSHDATA1
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
+            + Opcode.PUSHNULL
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.SWAP
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.RET
@@ -160,7 +164,10 @@ class TestRuntimeInterop(BoaTest):
     def test_notify_sequence(self):
         event_name = String('notify').to_bytes()
         expected_output = (
-            Opcode.PUSH7
+            Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.PUSH7
             + Opcode.PUSH5
             + Opcode.PUSH3
             + Opcode.PUSH2
@@ -168,9 +175,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.PACK
             + Opcode.PUSH1
             + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(event_name)).to_byte_array(min_length=1)
-            + event_name
+            + Opcode.SWAP
             + Opcode.SYSCALL
             + Interop.Notify.interop_method_hash
             + Opcode.RET
@@ -188,6 +193,33 @@ class TestRuntimeInterop(BoaTest):
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(([2, 3, 5, 7],), event_notifications[0].arguments)
+
+    def test_notify_with_name(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH10
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.SWAP
+            + Opcode.SYSCALL
+            + Interop.Notify.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('NotifyWithName.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', 'unit_test')
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name='unit_test')
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((10,), event_notifications[0].arguments)
 
     def test_log_mismatched_type(self):
         path = self.get_contract_path('LogMismatchedValueInt.py')

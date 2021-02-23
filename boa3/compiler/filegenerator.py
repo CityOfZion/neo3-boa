@@ -161,7 +161,7 @@ class FileGenerator:
                     {
                         "name": arg_id,
                         "type": arg.type.abi_type
-                    } for arg_id, arg in event.args.items()
+                    } for arg_id, arg in event.args_to_generate.items()
                 ],
             } for name, event in self._events.items()
         ]

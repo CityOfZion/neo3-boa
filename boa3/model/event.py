@@ -22,3 +22,11 @@ class Event(Callable, IdentifiedSymbol):
     @property
     def identifier(self) -> str:
         return self.name
+
+    @property
+    def args_to_generate(self) -> Dict[str, Variable]:
+        return self.args.copy()
+
+    @property
+    def generate_name(self) -> bool:
+        return True
