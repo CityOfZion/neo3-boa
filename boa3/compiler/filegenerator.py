@@ -206,6 +206,8 @@ class FileGenerator:
 
     def _get_method_debug_info(self, method_id: str, method: Method) -> Dict[str, Any]:
         from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        from boa3.neo.vm.type.AbiType import AbiType
+        from boa3.model.type.itype import IType
         return {
             "id": str(id(method)),
             "name": ',{0}'.format(method_id),  # TODO: include module name
@@ -215,7 +217,8 @@ class FileGenerator:
             ],
             "return": method.return_type.abi_type,
             "variables": [
-                '{0},{1}'.format(name, var.type.abi_type) for name, var in method.locals.items()
+                '{0},{1}'.format(name, var.type.abi_type if isinstance(var.type, IType) else AbiType.Any)
+                for name, var in method.locals.items()
             ],
             "sequence-points": [
                 '{0}[{1}]{2}:{3}-{4}:{5}'.format(VMCodeMapping.instance().get_start_address(instruction.code),

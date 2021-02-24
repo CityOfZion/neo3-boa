@@ -1,8 +1,9 @@
 import ast
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
+from boa3.analyser.optimizer import UndefinedType
 from boa3.analyser.symbolscope import SymbolScope
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
@@ -94,7 +95,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             return super().get_symbol(symbol_id)
 
-    def new_local_scope(self, symbols: Dict[str, ISymbol]):
+    def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
+        if symbols is None:
+            symbols = self._current_scope.symbols if self._current_scope is not None else {}
+
         self._scope_stack.append(SymbolScope(symbols))
 
     def pop_local_scope(self) -> SymbolScope:
@@ -121,15 +125,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         self.visit(function.args)
         method = self.symbols[function.name]
+
         from boa3.model.event import Event
         if isinstance(method, Method):
             self._current_method = method
+            self.new_local_scope({var_id: var for var_id, var in method.symbols.items()
+                                  if isinstance(var, Variable) and var.type is not UndefinedType})
 
             for stmt in function.body:
                 self.visit(stmt)
 
             self._validate_return(function)
 
+            method_scope = self.pop_local_scope()
             self._current_method = None
         elif (isinstance(method, Event)  # events don't have return
               and function.returns is not None):
@@ -279,6 +287,18 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         value_type: IType = self.get_type(value)
         if isinstance(value, ast.AST):
             value = self.visit(value)
+            if isinstance(value, ast.Name):
+                symbol: ISymbol = self.get_symbol(value.id)
+                if isinstance(symbol, IExpression):
+                    value_type = symbol.type
+                elif isinstance(symbol, IType):
+                    value_type = symbol
+                else:
+                    self._log_error(
+                        CompilerError.UnresolvedReference(
+                            value.lineno, value.col_offset,
+                            symbol_id=value.id
+                        ))
 
         if target is not None:
             target_type = self.get_type(target)
@@ -293,21 +313,38 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         symbol_id=node.id
                     ))
                 return False
-            if var.type is None:
+
+            if var.type is UndefinedType:
+                var = var.copy()
+
+            if var.type in (None, UndefinedType):
                 # it is an declaration with assignment and the value is neither literal nor another variable
                 var.set_type(value_type)
             target_type = var.type
 
         if self._current_scope is not None:
-            if isinstance(node, ast.Name) and node.id not in self._current_scope:
-                if not isinstance(value_type, Collection):
-                    target_type = value_type
-                elif not (isinstance(type(value_type), type(target_type)) and
-                          (value_type.value_type is Type.any or value_type.valid_key is Type.any)):
-                    # if the collection is generic, let the validation for the outer scope
-                    value_type = target_type
+            if isinstance(node, ast.Name):
+                if node.id not in self._current_scope:
+                    if not isinstance(value_type, Collection):
+                        target_type = value_type
+                    elif not (isinstance(type(value_type), type(target_type)) and
+                              (value_type.value_type is Type.any or value_type.valid_key is Type.any)):
+                        # if the collection is generic, let the validation for the outer scope
+                        value_type = target_type
 
-                self._current_scope.include_symbol(node.id, Variable(value_type))
+                    self._current_scope.include_symbol(node.id, Variable(value_type))
+
+                else:
+                    if self._current_method is not None and node.id in self._current_method.symbols:
+                        can_change_target_type = self._current_method.symbols[node.id].type is UndefinedType
+                    else:
+                        can_change_target_type = True
+
+                    if can_change_target_type:
+                        if (not target_type.is_type_of(value_type) and
+                                value != target_type.default_value):
+                            target_type = value_type
+                        self._current_scope.include_symbol(node.id, Variable(value_type))
 
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
             self._log_error(
@@ -512,7 +549,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.visit(stmt)
         is_instance_else = self.pop_local_scope().symbols
 
-        last_scope = self._current_scope if len(self._scope_stack) > 1 else self._current_method
+        last_scope = self._current_scope if len(self._scope_stack) > 0 else self._current_method
         # updates the outer scope for each variable that is changed in both branches
         intersected_ids = is_instance_if.keys() & is_instance_else.keys()
         for changed_symbol in intersected_ids:
@@ -522,15 +559,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             last_scope.include_symbol(changed_symbol, Variable(new_type))
 
         # updates with the variables assigned in a branch that doesn't exist in the outer scope
-        for new_symbol in {key for key in is_instance_if if key not in intersected_ids}:
-            new_value_type = self.get_type(is_instance_if[new_symbol])
-            new_type = Type.union.build([new_value_type, Type.none])
-            last_scope.include_symbol(new_symbol, Variable(new_type))
+        self._include_symbols_to_scope(last_scope, is_instance_if, intersected_ids)
+        self._include_symbols_to_scope(last_scope, is_instance_else, intersected_ids)
 
-        for new_symbol in {key for key in is_instance_else if key not in intersected_ids}:
-            new_value_type = self.get_type(is_instance_else[new_symbol])
-            new_type = Type.union.build([new_value_type, Type.none])
-            last_scope.include_symbol(new_symbol, Variable(new_type))
+    def _include_symbols_to_scope(self, scope: SymbolScope, other_scope: Dict[str, ISymbol], items_filter: Set[str]):
+        for new_symbol in {key for key in other_scope if key not in items_filter}:
+            new_value_type = self.get_type(other_scope[new_symbol])
+            outer_symbol = self.get_symbol(new_symbol)
+            outer_value_type = outer_symbol.type if isinstance(outer_symbol, IExpression) else Type.none
+
+            new_type = Type.union.build([new_value_type, outer_value_type])
+            scope.include_symbol(new_symbol, Variable(new_type))
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """
