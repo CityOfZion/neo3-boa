@@ -4,6 +4,8 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
+from boa3.analyser.optimizer import UndefinedType
+from boa3.analyser.symbolscope import SymbolScope
 from boa3.builtin import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
@@ -44,6 +46,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_method: Method = None
         self._current_event: Event = None
 
+        self._annotated_variables: List[str] = []
+        self._global_assigned_variables: List[str] = []
+        self._scope_stack: List[SymbolScope] = []
+
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
         self.imported_nodes: List[ast.AST] = []
@@ -52,7 +58,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
-    def _current_scope(self):
+    def _current_scope(self) -> Union[Method, Module, None]:
         """
         Returns the scope that is currently being analysed
 
@@ -62,6 +68,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if self._current_method is not None:
             return self._current_method
         return self._current_module
+
+    @property
+    def _current_symbol_scope(self) -> Optional[SymbolScope]:
+        if len(self._scope_stack) > 0:
+            return self._scope_stack[-1]
+        else:
+            return None
 
     @property
     def global_symbols(self) -> Dict[str, ISymbol]:
@@ -98,7 +111,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         for x in range(min(len(variables), len(var_types))):
             var_id, var_type_id = variables[x], var_types[x]
-            if var_id not in self._current_scope.symbols:
+            if var_id not in self._current_symbol_scope.symbols:
                 outer_symbol = self.get_symbol(var_id)
                 if outer_symbol is not None:
                     self._log_warning(
@@ -121,9 +134,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     if isinstance(var_type, SequenceType):
                         var_type = var_type.build_collection(var_enumerate_type)
                     var = Variable(var_type, origin_node=source_node)
-                    self._current_scope.include_variable(var_id, var)
+
+                    self._current_symbol_scope.include_symbol(var_id, var)
+                    if isinstance(source_node, ast.AnnAssign):
+                        self._annotated_variables.append(var_id)
             if hasattr(self._current_scope, 'assign_variable') and assignment:
-                self._current_scope.assign_variable(var_id)
+                self._global_assigned_variables.append(var_id)
 
     def __include_callable(self, callable_id: str, callable: Callable):
         """
@@ -136,6 +152,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._current_module.include_callable(callable_id, callable)
 
     def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+        for scope in reversed(self._scope_stack):
+            if symbol_id in scope.symbols:
+                return scope.symbols[symbol_id]
+
         if symbol_id in self._current_scope.symbols:
             # the symbol exists in the local scope
             return self._current_scope.symbols[symbol_id]
@@ -314,6 +334,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         mod: Module = Module()
         self._current_module = mod
+        self._scope_stack.append(SymbolScope())
 
         global_stmts = []
         function_stmts = []
@@ -346,6 +367,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         # TODO: include the body of the builtin methods to the ast
         # TODO: get module name
         self.modules['main'] = mod
+        module_scope = self._scope_stack.pop()
+        for symbol_id, symbol in module_scope.symbols.items():
+            if symbol_id in self._global_assigned_variables:
+                mod.include_symbol(symbol_id, symbol)
+                mod.assign_variable(symbol_id)
+
+        self._global_assigned_variables.clear()
         self._current_module = None
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
@@ -377,6 +405,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = Method(args=fun_args, defaults=function.args.defaults, return_type=fun_return,
                         origin_node=function, is_public=Builtin.Public in fun_decorators)
         self._current_method = method
+        self._scope_stack.append(SymbolScope())
 
         # don't evaluate constant expression - for example: string for documentation
         from boa3.constants import SYS_VERSION_INFO
@@ -392,6 +421,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.visit(stmt)
 
         self.__include_callable(function.name, method)
+        method_scope = self._scope_stack.pop()
+        global_scope_symbols = self._scope_stack[0].symbols if len(self._scope_stack) > 0 else {}
+
+        for var_id, var in method_scope.symbols.items():
+            if isinstance(var, Variable) and var_id not in self._annotated_variables:
+                method.include_variable(var_id, Variable(UndefinedType, var.origin))
+            else:
+                method.include_symbol(var_id, var)
+
+        self._annotated_variables.clear()
         self._current_method = None
 
     def _get_function_decorators(self, function: ast.FunctionDef) -> List[Method]:

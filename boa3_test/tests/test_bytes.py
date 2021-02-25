@@ -501,6 +501,7 @@ class TestBytes(BoaTest):
 
     def test_boa2_slice_test(self):
         path = self.get_contract_path('SliceBoa2Test.py')
+        self.compile_and_save(path)
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main',
                                          expected_result_type=bytes)

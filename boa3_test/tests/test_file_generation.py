@@ -195,6 +195,7 @@ class TestFileGeneration(BoaTest):
                                  event_param['type'])
 
     def test_generate_nefdbgnfo_file(self):
+        from boa3.model.type.itype import IType
         path = self.get_contract_path('GenerationWithDecorator.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
@@ -239,7 +240,8 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(2, len(var.split(',')))
                 var_id, var_type = var.split(',')
                 self.assertIn(var_id, actual_method.locals)
-                self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
+                local_type = actual_method.locals[var_id].type
+                self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
 
     def test_generate_nefdbgnfo_file_with_event(self):
         path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')

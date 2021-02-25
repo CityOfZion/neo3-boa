@@ -188,8 +188,27 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_mismatched_type(self):
+        string = String('str').to_bytes()
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSHDATA1      # c = 'str'
+            + Integer(len(string)).to_byte_array(min_length=1)
+            + string
+            + Opcode.STLOC0
+            + Opcode.PUSH1      # a = b = c = True
+            + Opcode.DUP            # c = True
+            + Opcode.STLOC0
+            + Opcode.DUP            # b = True
+            + Opcode.STLOC2
+            + Opcode.STLOC1         # a = True
+            + Opcode.RET        # return
+        )
+
         path = self.get_contract_path('MismatchedTypeMultipleAssignments.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_tuple_multiple_assignments(self):
         path = self.get_contract_path('AssignmentWithTuples.py')

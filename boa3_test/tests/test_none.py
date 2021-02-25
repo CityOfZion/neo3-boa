@@ -94,13 +94,48 @@ class TestNone(BoaTest):
         path = self.get_contract_path('MismatchedTypesInOperation.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
-    def test_mismatched_type_assign(self):
-        path = self.get_contract_path('MismatchedTypesAssign.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+    def test_reassign_variable_with_none(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSH2          # a = 2
+            + Opcode.STLOC0
+            + Opcode.PUSH4          # b = a * 2
+            + Opcode.STLOC1
+            + Opcode.PUSHNULL       # a = None
+            + Opcode.STLOC0
+            + Opcode.RET        # return
+        )
 
-    def test_mismatched_type_after_reassign(self):
-        path = self.get_contract_path('MismatchedTypesAfterReassign.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        path = self.get_contract_path('ReassignVariableWithNone.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+
+    def test_reassign_variable_after_none(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHNULL       # a = None
+            + Opcode.STLOC0
+            + Opcode.PUSH2          # a = 2
+            + Opcode.STLOC0
+            + Opcode.PUSH4          # b = a * 2
+            + Opcode.STLOC1
+            + Opcode.RET        # return
+        )
+        path = self.get_contract_path('ReassignVariableAfterNone.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
 
     def test_boa2_none_test(self):
         path = self.get_contract_path('NoneBoa2Test.py')
