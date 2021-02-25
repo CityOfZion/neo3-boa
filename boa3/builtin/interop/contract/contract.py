@@ -8,5 +8,5 @@ class Contract:
         self.id: int = 0
         self.update_counter: int = 0
         self.hash: UInt160 = UInt160()
-        self.script: bytes = bytes()
+        self.nef: bytes = bytes()
         self.manifest: Dict[str, Any] = {}

@@ -25,7 +25,7 @@ class ContractType(ClassType):
             'id': Variable(Type.int),
             'update_counter': Variable(Type.int),
             'hash': Variable(UInt160Type.build()),
-            'script': Variable(Type.bytes),
+            'nef': Variable(Type.bytes),
             'manifest': Variable(Type.dict)
         }
         self._constructor: Method = None
