@@ -567,3 +567,11 @@ class TestVariable(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(None, result)
+
+    def test_anonymous_variable(self):
+        path = self.get_contract_path('AnonymousVariable')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(400, result)
