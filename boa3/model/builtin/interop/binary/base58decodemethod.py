@@ -10,5 +10,5 @@ class Base58DecodeMethod(InteropMethod):
         from boa3.model.type.type import Type
         identifier = 'base58_decode'
         syscall = 'System.Binary.Base58Decode'
-        args: Dict[str, Variable] = {'key': Variable(Type.bytes)}
-        super().__init__(identifier, syscall, args, return_type=Type.str)
+        args: Dict[str, Variable] = {'key': Variable(Type.str)}
+        super().__init__(identifier, syscall, args, return_type=Type.bytes)
