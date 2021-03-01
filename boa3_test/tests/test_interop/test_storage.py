@@ -71,13 +71,13 @@ class TestStorageInterop(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(b'', result)
 
-        storage = {'example': 23}
+        storage = {('example', path): 23}
         result = self.run_smart_contract(engine, path, 'Main', 'example',
                                          fake_storage=storage,
                                          expected_result_type=bytes)
         self.assertEqual(Integer(23).to_byte_array(), result)
 
-        storage = {'test1': 23, 'test2': 42}
+        storage = {('test1', path): 23, ('test2', path): 42}
         result = self.run_smart_contract(engine, path, 'Main', 'test2',
                                          fake_storage=storage,
                                          expected_result_type=bytes)
@@ -109,21 +109,26 @@ class TestStorageInterop(BoaTest):
         stored_value = b'\x01\x02\x03'
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' not in engine.storage)
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
     def test_storage_put_bytes_key_int_value(self):
         value = Integer(123).to_byte_array()
@@ -156,21 +161,26 @@ class TestStorageInterop(BoaTest):
         stored_value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' not in engine.storage)
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
     def test_storage_put_bytes_key_str_value(self):
         value = String('123').to_bytes()
@@ -201,21 +211,26 @@ class TestStorageInterop(BoaTest):
         stored_value = String('123').to_bytes()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' not in engine.storage)
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
     def test_storage_put_str_key_bytes_value(self):
         path = self.get_contract_path('StoragePutStrKeyBytesValue.py')
@@ -225,21 +240,26 @@ class TestStorageInterop(BoaTest):
         stored_value = b'\x01\x02\x03'
         result = self.run_smart_contract(engine, path, 'Main', b'test1')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' not in engine.storage)
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
     def test_storage_put_str_key_int_value(self):
         value = Integer(123).to_byte_array()
@@ -272,21 +292,26 @@ class TestStorageInterop(BoaTest):
         stored_value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' not in engine.storage)
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
     def test_storage_put_str_key_str_value(self):
         value = String('123').to_bytes()
@@ -317,21 +342,26 @@ class TestStorageInterop(BoaTest):
         stored_value = String('123').to_bytes()
         result = self.run_smart_contract(engine, path, 'Main', 'test1')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2')
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test1'])
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
         result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
         self.assertIsVoid(result)
-        self.assertTrue(b'test1' not in engine.storage)
-        self.assertTrue(b'test2' in engine.storage)
-        self.assertEqual(stored_value, engine.storage[b'test2'])
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
 
     def test_storage_put_mismatched_type_key(self):
         path = self.get_contract_path('StoragePutMismatchedTypeKey.py')
@@ -361,13 +391,13 @@ class TestStorageInterop(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', b'example')
         self.assertIsVoid(result)
-        self.assertFalse(b'example' in engine.storage)
+        self.assertIsNone(engine.storage_get(b'example', path))
 
-        storage = {'example': 23}
+        storage = {('example', path): 23}
         result = self.run_smart_contract(engine, path, 'Main', b'example', fake_storage=storage)
         self.assertIsVoid(result)
-        self.assertTrue('example' in storage)
-        self.assertFalse(b'example' in engine.storage)
+        self.assertIsNone(engine.storage_get('example', path))
+        self.assertIsNone(engine.storage_get(b'example', path))
 
     def test_storage_delete_str_key(self):
         expected_output = (
@@ -389,13 +419,13 @@ class TestStorageInterop(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'example')
         self.assertIsVoid(result)
-        self.assertFalse(b'example' in engine.storage)
+        self.assertIsNone(engine.storage_get(b'example', path))
 
-        storage = {'example': 23}
+        storage = {('example', path): 23}
         result = self.run_smart_contract(engine, path, 'Main', 'example', fake_storage=storage)
         self.assertIsVoid(result)
-        self.assertTrue('example' in storage)
-        self.assertFalse(b'example' in engine.storage)
+        self.assertIsNone(engine.storage_get('example', path))
+        self.assertIsNone(engine.storage_get(b'example', path))
 
     def test_storage_delete_mismatched_type(self):
         path = self.get_contract_path('StorageDeleteMismatchedType.py')
@@ -472,3 +502,24 @@ class TestStorageInterop(BoaTest):
         if isinstance(result, str):
             result = String(result).to_bytes()
         self.assertEqual(b'', result)
+
+    def test_storage_between_contracts(self):
+        path1 = self.get_contract_path('StorageGetAndPut1.py')
+        path2 = self.get_contract_path('StorageGetAndPut2.py')
+        self.compile_and_save(path1)
+        self.compile_and_save(path2)
+        key = 'example_key'
+        value = 42
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path1, 'put_value', key, value)
+        self.assertIsVoid(result)
+        storage_value = engine.storage_get(key, path1)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(value, Integer.from_bytes(storage_value))
+
+        result = self.run_smart_contract(engine, path2, 'get_value', key)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path1, 'get_value', key)
+        self.assertEqual(value, result)

@@ -125,14 +125,16 @@ class TestTemplate(BoaTest):
                                          [bytes(40), self.OWNER_SCRIPT_HASH, bytes(12)],
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(1, result)
-        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OWNER_SCRIPT_HASH in engine.storage)
+        storage_value = engine.storage_get(self.KYC_WHITELIST_PREFIX + self.OWNER_SCRIPT_HASH, path)
+        self.assertIsNotNone(storage_value)
 
         # script hashes already registered are returned as well
         result = self.run_smart_contract(engine, path, 'kyc_register',
                                          [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(2, result)
-        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 in engine.storage)
+        storage_value = engine.storage_get(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1, path)
+        self.assertIsNotNone(storage_value)
 
     def test_ico_kyc_remove(self):
         path = self.get_contract_path('ico.py')

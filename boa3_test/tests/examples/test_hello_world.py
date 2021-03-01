@@ -17,5 +17,6 @@ class TestTemplate(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
-        self.assertTrue(b'hello' in engine.storage)
-        self.assertEqual(b'world', engine.storage[b'hello'])
+        storage_value = engine.storage_get(b'hello', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(b'world', storage_value)
