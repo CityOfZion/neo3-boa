@@ -16,16 +16,22 @@ class ContractManagementMethod(InteropMethod):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
+        from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.String import String
 
         method = String(self._sys_call).to_bytes()
-        opcode = [
+        method_opcode = [
             (Opcode.PUSHDATA1, Integer(len(method)).to_byte_array(min_length=1) + method)
         ]
-        return (opcode
+        drop_if_void_opcode = [
+            (Opcode.DROP, b'')
+        ] if self.return_type is Type.none else []
+
+        return (method_opcode
                 + Interop.ManagementContractScriptHash.getter.opcode
                 + Interop.CallContract.opcode
+                + drop_if_void_opcode
                 )
 
     @property

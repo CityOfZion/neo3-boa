@@ -186,12 +186,22 @@ class TestContractInterop(BoaTest):
             + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
+            + Opcode.DROP
             + Opcode.RET
         )
 
         path = self.get_contract_path('UpdateContract.py')
-        output = Boa3.compile(path)
+        output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
+
+        new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
+        self.compile_and_save(new_path)
+        new_nef, new_manifest = self.get_bytes_output(new_path)
+        arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest)
+        self.assertIsVoid(result)
 
     def test_update_contract_too_many_parameters(self):
         path = self.get_contract_path('UpdateContractTooManyArguments.py')
@@ -218,6 +228,7 @@ class TestContractInterop(BoaTest):
             + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
+            + Opcode.DROP
             + Opcode.RET
         )
 
