@@ -81,6 +81,30 @@ jobs:
   build_deploy_prod:
     <<: *build_deploy
 
+  publish-docs:
+      executor: python38-executor
+      working_directory: ~/neo3-boa
+      steps:
+        - checkout
+        - python/load-cache
+
+        - run:
+            name: Install Dependencies
+            command: |
+              sudo pip install -r requirements.txt
+
+        - run:
+            name: install aws cli
+            command: |
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install
+        - run:
+            name: Build and release docs
+            command: |
+              cd docs
+              make publish-docs
+
 workflows:
   version: 2
   build_test_deploy:
@@ -121,3 +145,18 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+
+  update-docs:
+    jobs:
+      - approve-update:
+          type: approval
+          filters:
+            tags:
+              only: /.*/
+      - publish-docs:
+          context: aws
+          requires:
+            - approve-update
+          filters:
+            tags:
+              only: /.*/
