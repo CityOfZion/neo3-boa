@@ -77,7 +77,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbols.update(module.symbols)
         return symbols
 
-    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
         if not isinstance(symbol_id, str):
             return Variable(self.get_type(symbol_id))
 
@@ -93,7 +93,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
         else:
-            return super().get_symbol(symbol_id)
+            return super().get_symbol(symbol_id, is_internal)
 
     def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
@@ -961,7 +961,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         if isinstance(call.func, ast.Name):
             callable_id: str = call.func.id
-            callable_target = self.get_symbol(callable_id)
+            is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
+            callable_target = self.get_symbol(callable_id, is_internal)
         else:
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 

@@ -113,6 +113,21 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         pass
 
+    @property
+    def generation_order(self) -> List[int]:
+        """
+        Gets the indexes order that need to be used during code generation.
+        If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
+
+        :return: Index order for code generation
+        """
+        indexes = list(reversed(range(0, len(self.args))))
+        if self.push_self_first():
+            indexes.remove(0)     # remove the first index from whatever position it is
+            indexes.insert(0, 0)  # and move to the first position
+
+        return indexes
+
     def validate_negative_arguments(self) -> List[int]:
         """
         Returns a list of the arguments that have to be positive values and need validation.

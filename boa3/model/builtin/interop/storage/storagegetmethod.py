@@ -1,3 +1,4 @@
+import ast
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
@@ -12,13 +13,23 @@ class StorageGetMethod(InteropMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
+        from boa3.model.builtin.interop.storage.storagecontexttype import StorageContextType
+
         identifier = 'get'
         syscall = 'System.Storage.Get'
-        # TODO: refactor to accept StorageContext as argument
+        context_type = StorageContextType.build()
         args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
                                                                        Type.str
-                                                                       ]))}
-        super().__init__(identifier, syscall, args, return_type=Type.bytes)
+                                                                       ])),
+                                     'context': Variable(context_type)}
+
+        from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
+        default_id = StorageGetContextMethod(context_type).identifier
+        context_default = ast.parse("{0}()".format(default_id)
+                                    ).body[0].value
+        context_default.is_internal_call = True
+        context_default._fields += ('is_internal_call',)
+        super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.bytes)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -33,11 +44,10 @@ class StorageGetMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.model.builtin.interop.interop import Interop
         from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer
 
-        opcodes = Interop.StorageGetContext.opcode + super().opcode
+        opcodes = super().opcode
         opcodes.extend([
             (Opcode.DUP, b''),
             (Opcode.ISNULL, b''),
@@ -49,9 +59,22 @@ class StorageGetMethod(InteropMethod):
         return opcodes
 
     @property
-    def storage_context_hash(self) -> bytes:
-        # TODO: refactor when default arguments are implemented
-        return self._method_hash(self._storage_context)
+    def generation_order(self) -> List[int]:
+        """
+        Gets the indexes order that need to be used during code generation.
+        If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
+
+        :return: Index order for code generation
+        """
+        indexes = super().generation_order
+        context_index = list(self.args).index('context')
+
+        if indexes[-1] != context_index:
+            # context must be the last generated argument
+            indexes.remove(context_index)
+            indexes.append(context_index)
+
+        return indexes
 
     @property
     def key_arg(self) -> Variable:

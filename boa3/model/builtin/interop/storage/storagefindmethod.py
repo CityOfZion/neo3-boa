@@ -1,3 +1,4 @@
+import ast
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
@@ -12,20 +13,31 @@ class StorageFindMethod(InteropMethod):
 
     def __init__(self, prefix_type: IType = None):
         from boa3.model.type.type import Type
+        from boa3.model.builtin.interop.storage.storagecontexttype import StorageContextType
+
         identifier = 'find'
         syscall = 'System.Storage.Find'
-        # TODO: refactor to accept StorageContext as argument
+        context_type = StorageContextType.build()
 
         if prefix_type is None:
             prefix_type = Type.union.build([Type.bytes,
                                             Type.str
                                             ])
-        args: Dict[str, Variable] = {'prefix': Variable(prefix_type)}
+        args: Dict[str, Variable] = {'prefix': Variable(prefix_type),
+                                     'context': Variable(context_type)}
 
         from boa3.model.builtin.interop.iterator import IteratorType
         return_type = IteratorType.build(Type.dict.build([prefix_type,  # return an Iterator[prefix, bytes]
                                                           Type.bytes]))
-        super().__init__(identifier, syscall, args, return_type=return_type)
+
+        from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
+        default_id = StorageGetContextMethod(context_type).identifier
+        context_default = ast.parse("{0}()".format(default_id)
+                                    ).body[0].value
+        context_default.is_internal_call = True
+        context_default._fields += ('is_internal_call',)
+
+        super().__init__(identifier, syscall, args, defaults=[context_default], return_type=return_type)
 
     @property
     def identifier(self) -> str:
@@ -44,15 +56,13 @@ class StorageFindMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.model.builtin.interop.interop import Interop
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo3.contracts import FindOptions
         find_options = Integer(FindOptions.NONE).to_byte_array(signed=True, min_length=1)
 
         return ([(Opcode.PUSHDATA1, Integer(len(find_options)).to_byte_array(min_length=1) + find_options),
-                 (Opcode.SWAP, b'')
+                 (Opcode.REVERSE3, b'')
                  ]
-                + Interop.StorageGetContext.opcode
                 + super().opcode)
 
     @property
