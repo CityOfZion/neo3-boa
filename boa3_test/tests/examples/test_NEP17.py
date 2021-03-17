@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.constants import NEO_SCRIPT
+from boa3.constants import NEO_SCRIPT, GAS_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
@@ -102,7 +102,7 @@ class TestNEP17Template(BoaTest):
 
         # should fail before running deploy
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "",
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, None,
                                          expected_result_type=bool)
         self.assertEqual(False, result)
 
@@ -113,13 +113,13 @@ class TestNEP17Template(BoaTest):
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "",
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, None,
                                          expected_result_type=bool)
         self.assertEqual(False, result)
 
         # should fail if the sender doesn't have enough balance
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount, "",
+                                         self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
@@ -135,12 +135,12 @@ class TestNEP17Template(BoaTest):
         # should fail when the amount is less than 0
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
-                                    self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10, "")
+                                    self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10, None)
 
         # fire the transfer event when transferring to yourself
         balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transferred_amount, "",
+                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transferred_amount, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -165,7 +165,7 @@ class TestNEP17Template(BoaTest):
         balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "",
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -199,21 +199,112 @@ class TestNEP17Template(BoaTest):
         output, manifest = self.compile_and_save(path)
         nep17_address = hash160(output)
 
-        test_address = bytes(range(20))
-
         result = self.run_smart_contract(engine, path, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-        engine.add_neo(test_address, transferred_amount)
+        engine.add_neo(self.OWNER_SCRIPT_HASH, transferred_amount)
+        engine.add_gas(self.OWNER_SCRIPT_HASH, transferred_amount)
 
-        # fire the Transfer event if sender is NEO when transferring to NEP17 script hash
-        neo_balance_sender_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', test_address)
+        # transferring NEO to the smart contract
+        # saving the balance before the transfer to be able to compare after it
+        neo_balance_sender_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
         neo_balance_nep17_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', nep17_address)
-        nep17_balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', test_address)
+        nep17_balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
 
-        # TODO: Test if the onPayment method is successful when update the TestEngine to make Neo/Gas transfers
+        result = self.run_smart_contract(engine, NEO_SCRIPT, 'transfer',
+                                         self.OWNER_SCRIPT_HASH, nep17_address, transferred_amount, None,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(2, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(3, len(transfer_events[1].arguments))
+
+        # this is the event NEO emitted
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(self.OWNER_SCRIPT_HASH, sender)
+        self.assertEqual(nep17_address, receiver)
+        self.assertEqual(transferred_amount, amount)
+
+        # this is the event NEP17 emitted
+        sender, receiver, amount = transfer_events[1].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(None, sender)
+        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
+        # transferred_amount is multiplied by 10, because this smart contract is minting the NEO received
+        self.assertEqual(transferred_amount * 10, amount)
+
+        # saving the balance after the transfer to compare it with the previous data
+        neo_balance_sender_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        neo_balance_nep17_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', nep17_address)
+        nep17_balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+
+        self.assertEqual(neo_balance_sender_before - transferred_amount, neo_balance_sender_after)
+        self.assertEqual(neo_balance_nep17_before + transferred_amount, neo_balance_nep17_after)
+        # transferred_amount is multiplied by 10, because this smart contract is minting the NEO received
+        self.assertEqual(nep17_balance_sender_before + transferred_amount * 10, nep17_balance_sender_after)
+
+        # transferring GAS to the smart contract
+        # saving the balance before the transfer to be able to compare after it
+        gas_balance_sender_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        gas_balance_nep17_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', nep17_address)
+        nep17_balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+
+        result = self.run_smart_contract(engine, GAS_SCRIPT, 'transfer',
+                                         self.OWNER_SCRIPT_HASH, nep17_address, transferred_amount, None,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(2, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(3, len(transfer_events[1].arguments))
+
+        # this is the event GAS emitted
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(self.OWNER_SCRIPT_HASH, sender)
+        self.assertEqual(nep17_address, receiver)
+        self.assertEqual(transferred_amount, amount)
+
+        # this is the event NEP17 emitted
+        sender, receiver, amount = transfer_events[1].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(None, sender)
+        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
+        # transferred_amount is multiplied by 2, because this smart contract is minting the GAS received
+        self.assertEqual(transferred_amount * 2, amount)
+
+        # saving the balance after the transfer to compare it with the previous data
+        gas_balance_sender_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        gas_balance_nep17_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', nep17_address)
+        nep17_balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+
+        self.assertEqual(gas_balance_sender_before - transferred_amount, gas_balance_sender_after)
+        self.assertEqual(gas_balance_nep17_before + transferred_amount, gas_balance_nep17_after)
+        # transferred_amount is multiplied by 2, because this smart contract is minting the GAS received
+        self.assertEqual(nep17_balance_sender_before + transferred_amount * 2, nep17_balance_sender_after)
+
+        # trying to call onNEP17Transfer() will result in an abort if the one calling it is not NEO or GAS contracts
+        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+            self.run_smart_contract(engine, path, 'onNEP17Transfer',
+                                    self.OWNER_SCRIPT_HASH, transferred_amount, None)
 
     def test_nep17_verify(self):
         path = self.get_contract_path('NEP17.py')
