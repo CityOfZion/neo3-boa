@@ -46,7 +46,7 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
         except BaseException:
             value = decoded
 
-    elif item_type is StackItemType.Array:
+    elif item_type in (StackItemType.Array, StackItemType.Struct):
         if not isinstance(item_value, Sequence) or isinstance(item_value, (str, bytes)):
             raise ValueError
         value = [stack_item_from_json(x) for x in item_value]

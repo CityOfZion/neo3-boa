@@ -13,6 +13,7 @@ from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import CallFlags
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -152,8 +153,8 @@ class TestContractInterop(BoaTest):
 
         self.assertEqual(5, len(result))
         self.assertEqual(nef_file, result[3])
-        # TODO: manifest is None, check why
-        # self.assertEqual(manifest, json.loads(result[4]))
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+        self.assertEqual(manifest_struct, result[4])
 
     def test_create_contract_too_many_parameters(self):
         path = self.get_contract_path('CreateContractTooManyArguments.py')
