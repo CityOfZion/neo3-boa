@@ -196,7 +196,7 @@ class CodeGenerator:
         """
         return self.last_code.opcode is Opcode.PUSHNULL
 
-    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None) -> ISymbol:
+    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> ISymbol:
         """
         Gets a symbol in the symbol table by its id
 
@@ -230,6 +230,13 @@ class CodeGenerator:
                 attr = self.get_symbol(attribute)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                     return attr.symbols[symbol_id]
+
+            if is_internal:
+                from boa3.model.importsymbol import Import
+                imports = [symbol for symbol in self.symbol_table.values() if isinstance(symbol, Import)]
+                for package in imports:
+                    if identifier in package.all_symbols:
+                        return package.all_symbols[identifier]
         return Type.none
 
     def initialize_static_fields(self) -> bool:

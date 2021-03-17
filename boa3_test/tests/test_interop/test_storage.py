@@ -87,20 +87,6 @@ class TestStorageInterop(BoaTest):
         path = self.get_contract_path('StorageGetMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
-    def test_storage_get_context(self):
-        expected_output = (
-            Opcode.SYSCALL
-            + Interop.StorageGetContext.interop_method_hash
-            + Opcode.RET
-        )
-        path = self.get_contract_path('StorageGetContext.py')
-        output, manifest = self.compile_and_save(path)
-        self.assertEqual(expected_output, output)
-
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-
     def test_storage_put_bytes_key_bytes_value(self):
         path = self.get_contract_path('StoragePutBytesKeyBytesValue.py')
         output = Boa3.compile(path)
@@ -452,6 +438,110 @@ class TestStorageInterop(BoaTest):
     def test_storage_find_mismatched_type(self):
         path = self.get_contract_path('StorageFindMismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_storage_get_context(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.StorageGetContext.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('StorageGetContext.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+    def test_storage_get_with_context(self):
+        path = self.get_contract_path('StorageGetWithContext.py')
+        self.compile_and_save(path)
+        
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', 'example',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'', result)
+
+        storage = {('example', path): 23}
+        result = self.run_smart_contract(engine, path, 'Main', 'example',
+                                         fake_storage=storage,
+                                         expected_result_type=bytes)
+        self.assertEqual(Integer(23).to_byte_array(), result)
+
+        storage = {('test1', path): 23, ('test2', path): 42}
+        result = self.run_smart_contract(engine, path, 'Main', 'test2',
+                                         fake_storage=storage,
+                                         expected_result_type=bytes)
+        self.assertEqual(Integer(42).to_byte_array(), result)
+
+    def test_storage_put_with_context(self):
+        path = self.get_contract_path('StoragePutWithContext.py')
+        output = Boa3.compile(path)
+
+        engine = TestEngine()
+        stored_value = b'\x01\x02\x03'
+        result = self.run_smart_contract(engine, path, 'Main', b'test1')
+        self.assertIsVoid(result)
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+
+        result = self.run_smart_contract(engine, path, 'Main', b'test2')
+        self.assertIsVoid(result)
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+
+        result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
+        self.assertIsVoid(result)
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(b'test2', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+
+    def test_storage_delete_with_context(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x01'
+            + Opcode.SYSCALL    # context = get_context()
+            + Interop.StorageGetContext.interop_method_hash
+            + Opcode.STLOC0
+            + Opcode.LDARG0     # delete(key, context)
+            + Opcode.LDLOC0
+            + Opcode.SYSCALL
+            + Interop.StorageDelete.interop_method_hash
+            + Opcode.RET
+        )
+
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        path = self.get_contract_path('StorageDeleteWithContext.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', 'example')
+        self.assertIsVoid(result)
+        self.assertIsNone(engine.storage_get(b'example', path))
+
+        storage = {('example', path): 23}
+        result = self.run_smart_contract(engine, path, 'Main', 'example', fake_storage=storage)
+        self.assertIsVoid(result)
+        self.assertIsNone(engine.storage_get('example', path))
+        self.assertIsNone(engine.storage_get(b'example', path))
+
+    def test_storage_find_with_context(self):
+        path = self.get_contract_path('StorageFindWithContext.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
 
     def test_boa2_storage_test(self):
         path = self.get_contract_path('StorageBoa2Test.py')

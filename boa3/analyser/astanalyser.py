@@ -97,7 +97,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         else:
             return Type.get_type(value)
 
-    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
         """
         Tries to get the symbol by its id name
 
@@ -108,14 +108,21 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         if symbol_id in self.symbols:
             # the symbol exists in the global scope
             return self.symbols[symbol_id]
-        else:
-            # the symbol may be a built in. If not, returns None
-            from boa3.model.builtin.builtin import Builtin
-            found_symbol = Builtin.get_symbol(symbol_id)
 
-            if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
-                found_symbol = Builtin.Exception.return_type
-            return found_symbol
+        if is_internal:
+            from boa3.model.importsymbol import Import
+            imports = [symbol for symbol in self.symbols.values() if isinstance(symbol, Import)]
+            for package in imports:
+                if symbol_id in package.all_symbols:
+                    return package.all_symbols[symbol_id]
+
+        # the symbol may be a built in. If not, returns None
+        from boa3.model.builtin.builtin import Builtin
+        found_symbol = Builtin.get_symbol(symbol_id)
+
+        if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
+            found_symbol = Builtin.Exception.return_type
+        return found_symbol
 
     def is_exception(self, symbol_id: str) -> bool:
         global_symbols = globals()
