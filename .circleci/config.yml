@@ -153,6 +153,10 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              only:
+                - development
+                - master
       - publish-docs:
           context: aws
           requires:
@@ -160,3 +164,7 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              only:
+                - development
+                - master

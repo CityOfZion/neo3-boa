@@ -518,7 +518,6 @@ class TestStorageInterop(BoaTest):
             + Opcode.RET
         )
 
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         path = self.get_contract_path('StorageDeleteWithContext.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)

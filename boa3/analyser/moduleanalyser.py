@@ -751,17 +751,20 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                            col=value.col_offset,
                                                            param=list(Builtin.NewEvent.args)[0])
                         )
-                    elif not (isinstance(value.elts[0], ast.Str)
-                              and (isinstance(value.elts[1], ast.Name)
-                                   and isinstance(self.get_symbol(value.elts[1].id), IType)
-                                   )):
+                    elif not (isinstance(value.elts[0], ast.Str) and
+                              ((isinstance(value.elts[1], ast.Name)  # if is name, get the type of its id
+                                and isinstance(self.get_symbol(value.elts[1].id), IType))
+                               or isinstance(self.visit(value.elts[1]), IType)  # otherwise, if the result is a type
+                              )):
                         CompilerError.MismatchedTypes(line=value.lineno,
                                                       col=value.col_offset,
                                                       expected_type_id=Type.tuple.identifier,
                                                       actual_type_id=self.get_type(value).identifier)
                     else:
                         arg_name = value.elts[0].s
-                        arg_type = self.get_symbol(value.elts[1].id)
+                        arg_type = (self.get_symbol(value.elts[1].id)
+                                    if isinstance(value.elts[1], ast.Name)
+                                    else self.visit(value.elts[1]))
                         event.args[arg_name] = Variable(arg_type)
 
             if len(event_args) > 1:
