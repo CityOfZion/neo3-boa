@@ -32,7 +32,18 @@ def calling_approve(address: UInt160, spender: UInt160, amount: int) -> Any:
     return call_contract(address, 'approve', [spender, amount])
 
 
+@public
+def calling_transfer(address: UInt160, from_address: UInt160, to_address: UInt160, amount: UInt160, data: Any) -> Any:
+    """
+    Transfer NEO to an account
+
+    :return: whether the transfer was successful.
+    :rtype: bool
+    """
+    return call_contract(address, 'transfer', [from_address, to_address, amount, data])
+
+
 # Always accept cryptocurrency
 @public
 def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
-    a = 1
+    pass
