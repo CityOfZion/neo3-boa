@@ -58,14 +58,17 @@ class Interop:
     CallContract = CallMethod()
     CreateContract = CreateMethod(ContractType)
     DestroyContract = DestroyMethod()
+    UpdateContract = UpdateMethod()
+
+    # Native Contracts
     GasScriptHash = GasProperty()
     NeoScriptHash = NeoProperty()
     ManagementContractScriptHash = ManagementContract
-    UpdateContract = UpdateMethod()
+    CryptoLibScriptHash = CryptoLibContract
+    StdLibScriptHash = StdLibContract
 
     # Crypto Interops
-    CheckMultisigWithECDsaSecp256k1 = CheckMultisigWithECDsaSecp256k1Method()
-    CheckMultisigWithECDsaSecp256r1 = CheckMultisigWithECDsaSecp256r1Method()
+    CheckMultisig = CheckMultisigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
     Ripemd160 = Ripemd160Method()
@@ -120,8 +123,7 @@ class Interop:
                                   NeoScriptHash,
                                   UpdateContract
                                   ],
-        InteropPackage.Crypto: [CheckMultisigWithECDsaSecp256k1,
-                                CheckMultisigWithECDsaSecp256r1,
+        InteropPackage.Crypto: [CheckMultisig,
                                 Hash160,
                                 Hash256,
                                 Ripemd160,

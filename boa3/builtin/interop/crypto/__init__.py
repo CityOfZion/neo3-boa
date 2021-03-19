@@ -49,28 +49,10 @@ def hash256(key: Any) -> bytes:
     pass
 
 
-def check_multisig_with_ecdsa_secp256r1(item: Any, pubkeys: List[bytes], signatures: List[bytes]) -> bool:
+def check_multisig(pubkeys: List[bytes], signatures: List[bytes]) -> bool:
     """
-    Using the elliptic curve secp256r1, it checks if the signatures of the item were originally produced by one of the public keys.
+    Checks the signatures for the current script container.
 
-    :param item: the encrypted message
-    :type item: Any
-    :param pubkeys: a list of public keys
-    :type pubkeys: List[bytes]
-    :param signatures: a list of signatures
-    :type signatures: List[bytes]
-    :return: a boolean value that represents whether the signatures were validated
-    :rtype: bool
-    """
-    pass
-
-
-def check_multisig_with_ecdsa_secp256k1(item: Any, pubkeys: List[bytes], signatures: List[bytes]) -> bool:
-    """
-    Using the elliptic curve secp256k1, it checks if the signatures of the item were originally produced by one of the public keys.
-
-    :param item: the encrypted message
-    :type item: Any
     :param pubkeys: a list of public keys
     :type pubkeys: List[bytes]
     :param signatures: a list of signatures

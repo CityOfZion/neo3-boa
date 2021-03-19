@@ -376,10 +376,11 @@ class TestConstant(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_string_script_hash(self):
-        from boa3.neo import cryptography, to_script_hash
+        import base58
+        from boa3.neo import to_script_hash
 
         input = String('123').to_bytes()
-        expected_output = cryptography.hash160(input)
+        expected_output = base58.b58decode(input)[1:]
         output = to_script_hash(input)
 
         self.assertEqual(expected_output, output)

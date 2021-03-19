@@ -1,5 +1,5 @@
-__all__ = ['CheckMultisigWithECDsaSecp256k1Method',
-           'CheckMultisigWithECDsaSecp256r1Method',
+__all__ = ['CheckMultisigMethod',
+           'CryptoLibContract',
            'Hash160Method',
            'Hash256Method',
            'Ripemd160Method',
@@ -8,10 +8,8 @@ __all__ = ['CheckMultisigWithECDsaSecp256k1Method',
            'VerifyWithECDsaSecp256r1Method'
            ]
 
-from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256k1method import (
-    CheckMultisigWithECDsaSecp256k1Method)
-from boa3.model.builtin.interop.crypto.checkmultisigwithecdsasecp256r1method import (
-    CheckMultisigWithECDsaSecp256r1Method)
+from boa3.model.builtin.interop.crypto.checkmultisigmethod import CheckMultisigMethod
+from boa3.model.builtin.interop.crypto.getcryptolibscripthashmethod import CryptoLibContract
 from boa3.model.builtin.interop.crypto.hash160method import Hash160Method
 from boa3.model.builtin.interop.crypto.hash256method import Hash256Method
 from boa3.model.builtin.interop.crypto.ripemd160method import Ripemd160Method

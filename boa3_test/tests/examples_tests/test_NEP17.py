@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.constants import NEO_SCRIPT, GAS_SCRIPT
+from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String

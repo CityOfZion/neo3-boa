@@ -1,6 +1,7 @@
 import unittest
 
 from boa3.boa3 import Boa3
+from boa3.constants import STD_LIB_SCRIPT
 from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
                                           UnexpectedArgument, UnfilledArgument)
 from boa3.model.builtin.interop.interop import Interop
@@ -428,7 +429,8 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
         self.assertEqual(script_hash, result)
 
     def test_script_hash_str_with_builtin(self):
@@ -439,30 +441,24 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         expected_result_type=bytes)
         self.assertEqual(script_hash, result)
 
     def test_script_hash_variable(self):
-        script_hash = Integer(123).to_byte_array()
+        from boa3.neo3.contracts import CallFlags
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         twenty = Integer(20).to_byte_array()
+        base58_identifier = String(Interop.Base58Decode.method_name).to_bytes()
+
         expected_output = (
             Opcode.INITSLOT
-            + b'\x01\x00'
-            + Opcode.PUSHDATA1      # a = 123
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1      # a.to_script_hash()
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.CONVERT
-            + Type.int.stack_item
+            + b'\x00\x01'
+            + Opcode.LDARG0
             + Opcode.DUP
             + Opcode.SIZE
             + Opcode.JMPIFNOT
-            + Integer(36).to_byte_array(min_length=1)
+            + Integer(47).to_byte_array(min_length=1)
             + Opcode.DUP
             + Opcode.ISTYPE
             + Type.str.stack_item
@@ -470,8 +466,19 @@ class TestBuiltinMethod(BoaTest):
             + Integer(4).to_byte_array(min_length=1)
             + Opcode.CONVERT
             + Type.str.stack_item
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(base58_identifier)).to_byte_array(min_length=1) + base58_identifier
+            + Opcode.PUSHDATA1
+            + Integer(len(STD_LIB_SCRIPT)).to_byte_array(min_length=1) + STD_LIB_SCRIPT
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
-            + Interop.Base58Decode.interop_method_hash
+            + Interop.CallContract.interop_method_hash
             + Opcode.DUP
             + Opcode.SIZE
             + Opcode.PUSHDATA1
@@ -503,23 +510,36 @@ class TestBuiltinMethod(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', 123)
+
+        from boa3.neo import to_script_hash
+        from base58 import b58encode
+        value = b58encode(Integer(123).to_byte_array())
+        if isinstance(value, int):
+            value = Integer(value).to_byte_array()
+
+        script_hash = to_script_hash(value)
+
+        result = self.run_smart_contract(engine, path, 'Main', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(script_hash, result)
+
     def test_script_hash_variable_with_builtin(self):
-        script_hash = String('123').to_bytes()
+        from boa3.neo3.contracts import CallFlags
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         twenty = Integer(20).to_byte_array()
+        base58_identifier = String(Interop.Base58Decode.method_name).to_bytes()
+
         expected_output = (
             Opcode.INITSLOT
-            + b'\x01\x00'
-            + Opcode.PUSHDATA1      # a = 123
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1      # a.to_script_hash()
-            + Integer(len(script_hash)).to_byte_array(min_length=1)
-            + script_hash
+            + b'\x00\x01'
+            + Opcode.LDARG0
             + Opcode.DUP
             + Opcode.SIZE
             + Opcode.JMPIFNOT
-            + Integer(36).to_byte_array(min_length=1)
+            + Integer(47).to_byte_array(min_length=1)
             + Opcode.DUP
             + Opcode.ISTYPE
             + Type.str.stack_item
@@ -527,8 +547,19 @@ class TestBuiltinMethod(BoaTest):
             + Integer(4).to_byte_array(min_length=1)
             + Opcode.CONVERT
             + Type.str.stack_item
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(base58_identifier)).to_byte_array(min_length=1) + base58_identifier
+            + Opcode.PUSHDATA1
+            + Integer(len(STD_LIB_SCRIPT)).to_byte_array(min_length=1) + STD_LIB_SCRIPT
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.ROT
+            + Opcode.ROT
             + Opcode.SYSCALL
-            + Interop.Base58Decode.interop_method_hash
+            + Interop.CallContract.interop_method_hash
             + Opcode.DUP
             + Opcode.SIZE
             + Opcode.PUSHDATA1
@@ -559,6 +590,24 @@ class TestBuiltinMethod(BoaTest):
         path = self.get_contract_path('ScriptHashVariableBuiltinCall.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        from boa3.neo import to_script_hash
+        from base58 import b58encode
+        engine = TestEngine()
+
+        script_hash = to_script_hash('123')
+        result = self.run_smart_contract(engine, path, 'Main', '123',
+                                         expected_result_type=bytes)
+        self.assertEqual(script_hash, result)
+
+        value = b58encode('123')
+        if isinstance(value, int):
+            value = Integer(value).to_byte_array()
+
+        script_hash = to_script_hash(value)
+        result = self.run_smart_contract(engine, path, 'Main', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(script_hash, result)
 
     def test_script_hahs_too_many_parameters(self):
         path = self.get_contract_path('ScriptHashTooManyParameters.py')

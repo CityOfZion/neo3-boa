@@ -10,14 +10,20 @@ class Opcode(bytes, Enum):
 
     # region Constants
 
+    # Pushes a 1-byte signed integer onto the stack.
     PUSHINT8 = b'\x00'
+    # Pushes a 2-byte signed integer onto the stack.
     PUSHINT16 = b'\x01'
+    # Pushes a 4-byte signed integer onto the stack.
     PUSHINT32 = b'\x02'
+    # Pushes a 8-byte signed integer onto the stack.
     PUSHINT64 = b'\x03'
+    # Pushes a 16-byte signed integer onto the stack.
     PUSHINT128 = b'\x04'
+    # Pushes a 32-byte signed integer onto the stack.
     PUSHINT256 = b'\x05'
 
-    # Convert the next four bytes to an address, and push the address onto the stack.
+    # Converts the 4-bytes offset to a Pointer, and pushes it onto the stack.
     PUSHA = b'\x0A'
     # The item null is pushed onto the stack.
     PUSHNULL = b'\x0B'
@@ -552,7 +558,9 @@ class Opcode(bytes, Enum):
 
     # region Splice
 
+    # Creates a new Buffer and pushes it onto the stack.
     NEWBUFFER = b'\x88'
+    # Copies a range of bytes from one Buffer to another.
     MEMCPY = b'\x89'
     # Concatenates two strings.
     CAT = b'\x8B'
@@ -605,6 +613,10 @@ class Opcode(bytes, Enum):
     DIV = b'\xA1'
     # Returns the remainder after dividing a by b.
     MOD = b'\xA2'
+    # The result of raising value to the exponent power.
+    POW = b'\xA3'
+    # Returns the square root of a specified number.
+    SQRT = b'\xA4'
     # Shifts a left b bits, preserving sign.
     SHL = b'\xA8'
     # Shifts a right b bits, preserving sign.
@@ -682,16 +694,18 @@ class Opcode(bytes, Enum):
     REMOVE = b'\xD2'
     # Remove all the items from the compound-type.
     CLEARITEMS = b'\xD3'
+    # Remove the last element from an array, and push it onto the stack.
+    POPITEM = b'\xD4'
 
     # endregion
 
     # region Types
 
-    # Returns true if the input is null. Returns false otherwise.
+    # Returns true if the input is null;
     ISNULL = b'\xD8'
-    # Returns true if the top item is of the specified type.
+    # Returns true if the top item of the stack is of the specified type;
     ISTYPE = b'\xD9'
-    # Converts the top item to the specified type.
+    # Returns true if the input is null;
     CONVERT = b'\xDB'
 
     # endregion
