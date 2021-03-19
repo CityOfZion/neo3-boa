@@ -41,6 +41,10 @@ class UnionType(IType):
             return Type.any
 
         if all(isinstance(t, IType) for t in types):
+            for x in types.copy():
+                if isinstance(x, UnionType):
+                    types.remove(x)
+                    types = types.union(x._union_types)
             if len(types) == 1:
                 return list(types)[0]
             return cls(types)

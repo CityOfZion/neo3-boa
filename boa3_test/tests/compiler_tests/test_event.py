@@ -126,6 +126,70 @@ class TestEvent(BoaTest):
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
 
+    def test_event_nep17_transfer(self):
+        event_id = 'Transfer'
+        event_name = String(event_id).to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # Main()
+            + b'\x00\x03'
+            + Opcode.LDARG2         # event(from_addr, to_addr, amount)
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.SYSCALL
+            + Interop.Notify.interop_method_hash
+            + Opcode.RET       # return
+        )
+
+        path = self.get_contract_path('EventNep17Transfer.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
+
+    def test_event_nep17_transfer_built(self):
+        event_id = 'Transfer'
+        event_name = String(event_id).to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # Main()
+            + b'\x00\x03'
+            + Opcode.LDARG2         # event(from_addr, to_addr, amount)
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.SYSCALL
+            + Interop.Notify.interop_method_hash
+            + Opcode.RET       # return
+        )
+
+        path = self.get_contract_path('EventNep17TransferBuilt.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
+
     def test_event_with_return(self):
         path = self.get_contract_path('EventWithoutTypes.py')
         self.assertCompilerLogs(UnfilledArgument, path)
