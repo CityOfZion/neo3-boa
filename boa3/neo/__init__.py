@@ -14,8 +14,6 @@ def to_script_hash(data_bytes: bytes) -> bytes:
         base58_decoded = b58decode(data_bytes)[1:]  # first byte is the address version
 
         from boa3.constants import SIZE_OF_INT160
-        if len(base58_decoded) < SIZE_OF_INT160:
-            raise AttributeError
         return bytes(base58_decoded[:SIZE_OF_INT160])
     except BaseException:
         return cryptography.hash160(data_bytes)

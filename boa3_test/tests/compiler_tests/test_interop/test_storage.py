@@ -456,7 +456,7 @@ class TestStorageInterop(BoaTest):
     def test_storage_get_with_context(self):
         path = self.get_contract_path('StorageGetWithContext.py')
         self.compile_and_save(path)
-        
+
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'example',
                                          expected_result_type=bytes)

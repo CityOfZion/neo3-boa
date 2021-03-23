@@ -45,7 +45,9 @@ class ScriptHashMethod(IBuiltinMethod):
             (Opcode.DUP, b''),      # convert value to string
             (Opcode.ISTYPE, Type.str.stack_item),
             (Opcode.JMPIF, Integer(4).to_byte_array(min_length=1)),
-            (Opcode.CONVERT, Type.str.stack_item)
+            (Opcode.CONVERT, Type.str.stack_item),
+            (Opcode.PUSH1, b''),
+            (Opcode.PACK, b'')
         ]
         opcodes.extend(Base58DecodeMethod().opcode)
         script_len = Integer(SIZE_OF_INT160).to_byte_array(min_length=1)

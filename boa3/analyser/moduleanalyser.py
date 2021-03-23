@@ -755,7 +755,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                               ((isinstance(value.elts[1], ast.Name)  # if is name, get the type of its id
                                 and isinstance(self.get_symbol(value.elts[1].id), IType))
                                or isinstance(self.visit(value.elts[1]), IType)  # otherwise, if the result is a type
-                              )):
+                               )):
                         CompilerError.MismatchedTypes(line=value.lineno,
                                                       col=value.col_offset,
                                                       expected_type_id=Type.tuple.identifier,

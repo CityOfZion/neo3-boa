@@ -22,8 +22,8 @@ def get_native_token_data(token_script: bytes) -> Tuple[Optional[bytes], Optiona
 
 class NativeTokenId(IntEnum):
     ContractManagement = -1
-    NEO = -3
-    GAS = -4
+    NEO = -5
+    GAS = -6
 
     NONE = 0
 

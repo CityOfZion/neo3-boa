@@ -1,7 +1,4 @@
-from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
-from boa3.model.builtin.interop.interop import Interop
-from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
@@ -13,20 +10,8 @@ class TestBinaryInterop(BoaTest):
     default_folder: str = 'test_sc/interop_test/binary'
 
     def test_base64_encode(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.Base64Encode.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('Base64Encode.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         import base64
+        path = self.get_contract_path('Base64Encode.py')
         engine = TestEngine()
         expected_result = base64.b64encode(b'unit test')
         result = self.run_smart_contract(engine, path, 'Main', b'unit test',
@@ -56,20 +41,8 @@ class TestBinaryInterop(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_base64_decode(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.Base64Decode.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('Base64Decode.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         import base64
+        path = self.get_contract_path('Base64Decode.py')
         engine = TestEngine()
         arg = String.from_bytes(base64.b64encode(b'unit test'))
         result = self.run_smart_contract(engine, path, 'Main', arg,
@@ -99,20 +72,8 @@ class TestBinaryInterop(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_base58_encode(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.Base58Encode.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('Base58Encode.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         import base58
+        path = self.get_contract_path('Base58Encode.py')
         engine = TestEngine()
         expected_result = base58.b58encode('unit test')
         result = self.run_smart_contract(engine, path, 'Main', 'unit test',
@@ -142,20 +103,8 @@ class TestBinaryInterop(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_base58_decode(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.Base58Decode.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('Base58Decode.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         import base58
+        path = self.get_contract_path('Base58Decode.py')
         engine = TestEngine()
         arg = base58.b58encode('unit test')
         result = self.run_smart_contract(engine, path, 'Main', arg)

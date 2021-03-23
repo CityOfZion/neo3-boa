@@ -1,6 +1,6 @@
-from typing import Any, Union, List
+from typing import Any, List, Union
 
-from boa3.builtin import NeoMetadata, metadata, public, CreateNewEvent
+from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop.blockchain import get_contract
 from boa3.builtin.interop.contract import call_contract

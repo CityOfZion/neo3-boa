@@ -1,11 +1,11 @@
 from typing import Dict, List, Tuple
 
-from boa3.model.builtin.interop.interopmethod import InteropMethod
+from boa3.model.builtin.interop.crypto.cryptolibmethod import CryptoLibMethod
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class Hash160Method(InteropMethod):
+class Hash160Method(CryptoLibMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
@@ -17,4 +17,8 @@ class Hash160Method(InteropMethod):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
-        return Interop.Sha256.opcode + Interop.Ripemd160.opcode
+        return (Interop.Sha256.opcode
+                + [(Opcode.PUSH1, b''),
+                   (Opcode.PACK, b'')
+                   ]
+                + Interop.Ripemd160.opcode)
