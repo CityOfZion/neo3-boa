@@ -115,6 +115,7 @@ $ git clone https://github.com/CityOfZion/neo3-boa.git
 ```
 ###### Install project dependencies:
 ```shell
+$ pip install wheel
 $ pip install -e .
 ```
 
