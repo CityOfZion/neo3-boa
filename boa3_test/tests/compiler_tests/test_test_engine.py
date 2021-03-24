@@ -357,7 +357,7 @@ class TestTestEngine(BoaTest):
 
     def test_test_engine_not_found_error(self):
         # if the TestEngine is correctly installed a error should not occur
-        import env
+        from boa3 import env
         engine_path = env.TEST_ENGINE_DIRECTORY
         engine = TestEngine(engine_path)
 

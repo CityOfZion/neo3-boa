@@ -222,7 +222,7 @@ For an extensive collection of examples:
 
 Install [`neo3-boa`](#installation) and the [`TestEngine`](#testengine) and run the following command
 
-> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/env.py)
+> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/boa3/env.py)
 
 ```
 python -m unittest discover boa3_test

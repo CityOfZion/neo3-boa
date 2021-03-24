@@ -138,7 +138,7 @@ Testing
 *******
 
 .. note::
-   If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in the file ``/env.py``
+   If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in the file ``boa3/env.py``
 
 Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function you'll need to call the method run(). Its parameters are the path of the compiled smart contract, the smart contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
 

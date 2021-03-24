@@ -17,7 +17,7 @@ from boa3_test.tests.test_classes.transaction import Transaction
 class TestEngine:
     def __init__(self, root_path: Optional[str] = None):
         if root_path is None:
-            import env
+            from boa3 import env
             root_path = env.TEST_ENGINE_DIRECTORY
 
         engine_path = '{0}/Neo.TestEngine.dll'.format(root_path)
