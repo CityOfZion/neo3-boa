@@ -42,6 +42,7 @@ If neo3-boa is not available via pip, you can build it from source.
 ::
    
     git clone https://github.com/CityOfZion/neo3-boa.git
+    pip install wheel
     pip install -e .
 
 1.2 Creating a New Smart Contract
