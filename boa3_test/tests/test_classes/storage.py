@@ -67,28 +67,30 @@ class Storage:
         self._dict[key] = StorageItem(NativeAccountState(balance).serialize())
         return True
 
-    def __contains__(self, item: bytes) -> bool:
-        return StorageKey(item) in self._dict
+    def __contains__(self, item: StorageKey) -> bool:
+        return item in self._dict
 
-    def __getitem__(self, item: bytes) -> Any:
-        storage_key = StorageKey(item)
-        return self._dict[storage_key].value
+    def __getitem__(self, item: StorageKey) -> Any:
+        return self._dict[item].value
 
-    def __setitem__(self, key: bytes, value: Any):
+    def __setitem__(self, key: StorageKey, value: Any):
         from boa3.neo.vm.type import StackItem
-        storage_key = StorageKey(key)
         if isinstance(value, int):
             storage_value = Integer(value).to_byte_array()
         elif isinstance(value, str):
             storage_value = String(value).to_bytes()
         else:
             storage_value = StackItem.serialize(value)
-        self._dict[storage_key] = StorageItem(storage_value)
+        self._dict[key] = StorageItem(storage_value)
+
+    @staticmethod
+    def build_key(key: bytes, index: int) -> StorageKey:
+        return StorageKey(key, index)
 
 
 class StorageKey:
-    def __init__(self, key: bytes):
-        self._ID = 0
+    def __init__(self, key: bytes, _id: int = 0):
+        self._ID: int = _id
         self._key: bytes = key
 
     def to_json(self) -> Dict[str, Any]:
@@ -108,10 +110,10 @@ class StorageKey:
         return key
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, StorageKey) and self._key == other._key
+        return isinstance(other, StorageKey) and self._key == other._key and self._ID == other._ID
 
     def __str__(self) -> str:
-        return self._key.__str__()
+        return '({0}, {1})'.format(self._key, self._ID)
 
     def __hash__(self) -> int:
         return self._key.__hash__()

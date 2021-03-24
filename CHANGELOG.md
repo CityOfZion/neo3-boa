@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.7.1] - 2021-03-24
+### Added
+- Support to [Neo 3 rc1](https://github.com/neo-project/neo/tree/v3.0.0-rc1)
+- Implemented Python `in` operator for collections
+- Support to reassign types to existing variables in a function's scope
+- Included StorageContext to the storage interop functions
+- Included new smart contract example
+  - Automated Market Maker (AMM)
+
+### Changed
+- Included `eventName` argument to `notify` interop
+- Renamed `trigger` method to `get_trigger`
+
+### Fixed
+- Fixed smart contract's storage access in TestEngine
+- Null return in `update_contract` and `destroy_contract` interops
+- `get_contract` and `create_contract` were returning contract's manifest as null
+- Fixed Union type bug when used in CreateNewEvent
+
+
 ## [0.7.0] - 2021-02-11
 ### Added
 - Support to [Neo 3 preview 5](https://github.com/neo-project/neo/tree/v3.0.0-preview5)
@@ -131,7 +151,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/CityOfZion/neo3-boa/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.5.0...v0.6.0

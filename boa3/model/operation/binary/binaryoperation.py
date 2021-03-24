@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from boa3.model.operation.operation import IOperation
 from boa3.model.type.itype import IType
@@ -74,3 +74,14 @@ class BinaryOperation(IOperation, ABC):
         if operation.validate_type(left, right):
             return operation
         return cls(left, left)
+
+    def get_valid_operand_for_validation(self, left_operand: IType,
+                                         right_operand: IType = None) -> Tuple[Optional[IType], Optional[IType]]:
+        """
+        Returns a valid operand type for the given types.
+
+        :param left_operand: reference type
+        :param right_operand: reference type
+        """
+        return next((valid_type for valid_type in self._valid_types if valid_type.is_type_of(left_operand)),
+                    None), self.right_type

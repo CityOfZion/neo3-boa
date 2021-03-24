@@ -3,5 +3,5 @@ from boa3.builtin.interop.contract import update_contract
 
 
 @public
-def Main(script: bytes, manifest: bytes):
+def update(script: bytes, manifest: bytes):
     update_contract(script, manifest)

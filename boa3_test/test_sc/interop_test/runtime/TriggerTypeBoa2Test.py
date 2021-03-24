@@ -1,7 +1,7 @@
 from typing import Any
 
 from boa3.builtin import public
-from boa3.builtin.interop.runtime import TriggerType, trigger
+from boa3.builtin.interop.runtime import TriggerType, get_trigger
 
 
 @public
@@ -15,7 +15,7 @@ def main(arg: int) -> Any:
 
     elif arg == 3:
 
-        if trigger() == TriggerType.APPLICATION:
+        if get_trigger() == TriggerType.APPLICATION:
             return b'\x20'
 
     return -1

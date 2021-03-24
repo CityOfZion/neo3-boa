@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.analyser import Analyser
+from boa3.analyser.symbolscope import SymbolScope
 from boa3.compiler.codegenerator.stackmemento import NeoStack, StackMemento
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.constants import ENCODING
@@ -65,6 +66,9 @@ class CodeGenerator:
 
         self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
         self._can_append_target: bool = True
+
+        self._scope_stack: List[SymbolScope] = []
+        self._global_scope = SymbolScope()
 
         self._current_loop: List[int] = []  # a stack with the converting loops' start addresses
         self._current_for: List[int] = []
@@ -180,6 +184,10 @@ class CodeGenerator:
                         module_globals.append(var_id)
         return module_globals
 
+    @property
+    def _current_scope(self) -> SymbolScope:
+        return self._scope_stack[-1] if len(self._scope_stack) > 0 else self._global_scope
+
     def is_none_inserted(self) -> bool:
         """
         Checks whether the last insertion is null
@@ -188,13 +196,18 @@ class CodeGenerator:
         """
         return self.last_code.opcode is Opcode.PUSHNULL
 
-    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None) -> ISymbol:
+    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> ISymbol:
         """
         Gets a symbol in the symbol table by its id
 
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
+        if len(self._scope_stack) > 0:
+            for symbol_scope in self._scope_stack:
+                if identifier in symbol_scope:
+                    return symbol_scope[identifier]
+
         if scope is not None and hasattr(scope, 'symbols') and isinstance(scope.symbols, dict):
             if identifier in scope.symbols and isinstance(scope.symbols[identifier], ISymbol):
                 return scope.symbols[identifier]
@@ -217,6 +230,13 @@ class CodeGenerator:
                 attr = self.get_symbol(attribute)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                     return attr.symbols[symbol_id]
+
+            if is_internal:
+                from boa3.model.importsymbol import Import
+                imports = [symbol for symbol in self.symbol_table.values() if isinstance(symbol, Import)]
+                for package in imports:
+                    if identifier in package.all_symbols:
+                        return package.all_symbols[identifier]
         return Type.none
 
     def initialize_static_fields(self) -> bool:
@@ -264,6 +284,9 @@ class CodeGenerator:
 
         :param method: method that is being converted
         """
+        new_variable_scope = self._scope_stack[-1].copy() if len(self._scope_stack) > 0 else SymbolScope()
+        self._scope_stack.append(new_variable_scope)
+
         num_args: int = len(method.args)
         num_vars: int = len(method.locals)
 
@@ -288,6 +311,8 @@ class CodeGenerator:
         self._current_method.end_bytecode = self.last_code
         self._current_method = None
         self._stack.clear()
+
+        function_variable_scope = self._scope_stack.pop()
 
     def insert_return(self):
         """
@@ -1012,7 +1037,16 @@ class CodeGenerator:
                     self.__insert1(op_info, Integer(index).to_byte_array())
                 else:
                     self.__insert1(op_info)
-                self._stack_pop()
+                storaged_type = self._stack_pop()
+
+                from boa3.analyser.optimizer import UndefinedType
+                if (var_id in self._current_scope.symbols or
+                        (var_id in self._locals and self._current_method.locals[var_id].type is UndefinedType)):
+                    symbol = self.get_symbol(var_id)
+                    if isinstance(symbol, Variable):
+                        var = symbol.copy()
+                        var.set_type(storaged_type)
+                        self._current_scope.include_symbol(var_id, var)
 
     def _get_variable_info(self, var_id: str) -> Tuple[int, bool, bool]:
         """
@@ -1115,8 +1149,12 @@ class CodeGenerator:
         :param event_id: called event identifier
         :param event: called event
         """
-        self.convert_new_array(len(event.args), Type.list)
-        self.convert_literal(event.name)
+        self.convert_new_array(len(event.args_to_generate), Type.list)
+        if event.generate_name:
+            self.convert_literal(event.name)
+        else:
+            self.swap_reverse_stack_items(2)
+
         from boa3.model.builtin.interop.interop import Interop
         for opcode, data in Interop.Notify.opcode:
             info = OpcodeInfo.get_info(opcode)

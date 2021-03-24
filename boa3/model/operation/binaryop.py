@@ -1,32 +1,10 @@
 from typing import List, Optional
 
-from boa3.model.operation.binary.arithmetic.addition import Addition
-from boa3.model.operation.binary.arithmetic.concat import Concat
-from boa3.model.operation.binary.arithmetic.division import Division
-from boa3.model.operation.binary.arithmetic.floordivision import FloorDivision
-from boa3.model.operation.binary.arithmetic.modulo import Modulo
-from boa3.model.operation.binary.arithmetic.multiplication import Multiplication
-from boa3.model.operation.binary.arithmetic.power import Power
-from boa3.model.operation.binary.arithmetic.strmultiplication import StrMultiplication
-from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
+from boa3.model.operation.binary.additional import *
+from boa3.model.operation.binary.arithmetic import *
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
-from boa3.model.operation.binary.logical.booleanand import BooleanAnd
-from boa3.model.operation.binary.logical.booleanor import BooleanOr
-from boa3.model.operation.binary.logical.leftshift import LeftShift
-from boa3.model.operation.binary.logical.logicand import LogicAnd
-from boa3.model.operation.binary.logical.logicor import LogicOr
-from boa3.model.operation.binary.logical.logicxor import LogicXor
-from boa3.model.operation.binary.logical.rightshift import RightShift
-from boa3.model.operation.binary.relational.LessThan import LessThan
-from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
-from boa3.model.operation.binary.relational.greaterthan import GreaterThan
-from boa3.model.operation.binary.relational.greaterthanorequal import GreaterThanOrEqual
-from boa3.model.operation.binary.relational.identity import Identity
-from boa3.model.operation.binary.relational.notidentity import NotIdentity
-from boa3.model.operation.binary.relational.numericequality import NumericEquality
-from boa3.model.operation.binary.relational.numericinequality import NumericInequality
-from boa3.model.operation.binary.relational.objectequality import ObjectEquality
-from boa3.model.operation.binary.relational.objectinequality import ObjectInequality
+from boa3.model.operation.binary.logical import *
+from boa3.model.operation.binary.relational import *
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.noneidentity import NoneIdentity
@@ -69,6 +47,10 @@ class BinaryOp:
     LShift = LeftShift()
     RShift = RightShift()
 
+    # Other operations
+    In = CollectionMembership()
+    NotIn = CollectionNotMembership()
+
     @classmethod
     def validate_type(cls, operator: Operator, left: IType, right: IType) -> Optional[BinaryOperation]:
         """
@@ -90,12 +72,14 @@ class BinaryOp:
                     return op.build(operand)
 
     @classmethod
-    def get_operation_by_operator(cls, operator: Operator, left_operand: IType) -> Optional[BinaryOperation]:
+    def get_operation_by_operator(cls, operator: Operator, left_operand: IType,
+                                  right_operand: Optional[IType] = None) -> Optional[BinaryOperation]:
         """
         Gets a binary operation given the operator.
 
         :param operator: binary operator
         :param left_operand: left operand of the operator
+        :param right_operand: right operand of the operator
         :return: The operation if exists. If exists more than one operation with the same operator, returns the one with
         the same left operand. If none has the same left operand, returns the first found. None otherwise;
         :rtype: BinaryOperation or None
@@ -103,10 +87,9 @@ class BinaryOp:
         valid_operations: List[BinaryOperation] = []
         for id, op in vars(cls).items():
             if isinstance(op, BinaryOperation) and op.operator is operator:
-                left = next((valid_type for valid_type in op._valid_types if valid_type.is_type_of(left_operand)),
-                            None)
+                left, right = op.get_valid_operand_for_validation(left_operand, right_operand)
                 if left is not None:
-                    return op.build(left_operand, op.right_type)
+                    return op.build(left_operand if right_operand is None else left, right)
                 else:
                     valid_operations.append(op)
 

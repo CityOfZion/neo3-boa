@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 from typing import Optional
 
@@ -15,6 +17,9 @@ class Variable(IExpression):
     def __init__(self, var_type: Optional[IType], origin_node: Optional[ast.AST] = None):
         super().__init__(origin_node)
         self._var_type: Optional[IType] = var_type
+
+    def copy(self) -> Variable:
+        return Variable(self._var_type, self._origin_node)
 
     @property
     def shadowing_name(self) -> str:

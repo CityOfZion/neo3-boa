@@ -566,7 +566,8 @@ class VisitorCodeGenerator(IAstAnalyser):
             else:
                 return Type.none
         else:
-            symbol = self.generator.get_symbol(function_id)
+            is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
+            symbol = self.generator.get_symbol(function_id, is_internal=is_internal)
 
         if isinstance(symbol, ClassType):
             symbol = symbol.constructor_method()
@@ -585,16 +586,17 @@ class VisitorCodeGenerator(IAstAnalyser):
         else:
             args_to_generate = call.args
 
-        if isinstance(symbol, IBuiltinMethod) and symbol.push_self_first():
-            args = args_to_generate[1:]
-            args_addresses.append(
-                VMCodeMapping.instance().bytecode_size
-            )
-            self.visit_to_generate(call.args[0])
-        else:
-            args = args_to_generate
+        if isinstance(symbol, IBuiltinMethod):
+            reordered_args = []
+            for index in symbol.generation_order:
+                if 0 <= index < len(args_to_generate):
+                    reordered_args.append(args_to_generate[index])
 
-        for arg in reversed(args):
+            args = reordered_args
+        else:
+            args = reversed(args_to_generate)
+
+        for arg in args:
             args_addresses.append(
                 VMCodeMapping.instance().bytecode_size
             )

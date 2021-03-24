@@ -21,7 +21,7 @@ What it currently does...
    ``.manisfest.json`` format for use in the `Neo Virtual
    Machine <https://github.com/neo-project/neo-vm>`__
 
--  Works for Python 3.6+
+-  Works for Python 3.7+
 
 -  Logs compiler errors and warnings
 

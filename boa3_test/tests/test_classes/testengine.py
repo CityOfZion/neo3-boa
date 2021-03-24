@@ -1,5 +1,5 @@
 from os import path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3 import constants
 from boa3.neo import to_hex_str
@@ -17,7 +17,7 @@ from boa3_test.tests.test_classes.transaction import Transaction
 class TestEngine:
     def __init__(self, root_path: Optional[str] = None):
         if root_path is None:
-            import env
+            from boa3 import env
             root_path = env.TEST_ENGINE_DIRECTORY
 
         engine_path = '{0}/Neo.TestEngine.dll'.format(root_path)
@@ -70,31 +70,52 @@ class TestEngine:
     def storage(self) -> Storage:
         return self._storage.copy()
 
-    def storage_get(self, key: Union[str, bytes]) -> Any:
+    def storage_get(self, key: Union[str, bytes], contract_path: str) -> Any:
         if isinstance(key, str):
             key = String(key).to_bytes()
 
-        if key in self._storage:
-            return self._storage[key]
+        if contract_path.endswith('.py'):
+            contract_path = contract_path.replace('.py', '.nef')
+        if contract_path not in self._contract_paths:
+            return None
+
+        index = self._contract_paths.index(contract_path)
+        storage_key = Storage.build_key(key, index)
+        if storage_key in self._storage:
+            return self._storage[storage_key]
         else:
             return None
 
-    def storage_put(self, key: Union[str, bytes], value: Any):
+    def storage_put(self, key: Union[str, bytes], value: Any, contract_path: str):
         if isinstance(key, str):
             key = String(key).to_bytes()
 
-        self._storage[key] = value
+        if contract_path.endswith('.py'):
+            contract_path = contract_path.replace('.py', '.nef')
+        if contract_path in self._contract_paths:
+            index = self._contract_paths.index(contract_path)
+            storage_key = Storage.build_key(key, index)
 
-    def set_storage(self, storage: Dict[Union[str, bytes], Any]):
+            self._storage[storage_key] = value
+
+    def set_storage(self, storage: Dict[Tuple[Union[str, bytes], str], Any]):
         self._storage.clear()
-        for key, value in storage.items():
-            self.storage_put(key, value)
+        for (key, contract_path), value in storage.items():
+            self.storage_put(key, value, contract_path)
 
-    def storage_delete(self, key: Union[str, bytes]):
+    def storage_delete(self, key: Union[str, bytes], contract_path: str):
         if isinstance(key, str):
             key = String(key).to_bytes()
 
-        if key in self._storage:
+        if contract_path.endswith('.py'):
+            contract_path = contract_path.replace('.py', '.nef')
+        if contract_path not in self._contract_paths:
+            return None
+
+        index = self._contract_paths.index(contract_path)
+        storage_key = Storage.build_key(key, index)
+
+        if storage_key in self._storage:
             self._storage.pop(key)
 
     def add_neo(self, script_hash: bytes, amount: int) -> bool:
@@ -165,8 +186,12 @@ class TestEngine:
         import json
         import subprocess
 
+        if isinstance(nef_path, str) and nef_path not in self._contract_paths:
+            self._contract_paths.append(nef_path)
+
         test_engine_args = self.to_json(nef_path, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
+
         process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
@@ -184,6 +209,7 @@ class TestEngine:
             result = json.loads(stdout)
 
             self._error_message = result['error'] if 'error' in result else None
+
             if 'vm_state' in result:
                 self._vm_state = VMState.get_vm_state(result['vm_state'])
 

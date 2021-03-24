@@ -1,22 +1,35 @@
-from typing import Any, Dict, Iterable, List, Sized, Tuple
+import ast
+from typing import Any, Dict, Iterable, List, Sized
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class StorageDeleteMethod(InteropMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
+        from boa3.model.builtin.interop.storage.storagecontexttype import StorageContextType
+
         identifier = 'delete'
         syscall = 'System.Storage.Delete'
-        # TODO: refactor to accept StorageContext as argument
-        args: Dict[str, Variable] = {'key': Variable(Type.bytes)}
-        super().__init__(identifier, syscall, args, return_type=Type.none)
+        context_type = StorageContextType.build()
+
+        args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
+                                                                       Type.str
+                                                                       ])),
+                                     'context': Variable(context_type)}
+
+        from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
+        default_id = StorageGetContextMethod(context_type).identifier
+        context_default = ast.parse("{0}()".format(default_id)
+                                    ).body[0].value
+        context_default.is_internal_call = True
+        context_default._fields += ('is_internal_call',)
+        super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -35,9 +48,22 @@ class StorageDeleteMethod(InteropMethod):
         return Type.str.is_type_of(key_type) or Type.bytes.is_type_of(key_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.model.builtin.interop.interop import Interop
-        return Interop.StorageGetContext.opcode + super().opcode
+    def generation_order(self) -> List[int]:
+        """
+        Gets the indexes order that need to be used during code generation.
+        If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
+
+        :return: Index order for code generation
+        """
+        indexes = super().generation_order
+        context_index = list(self.args).index('context')
+
+        if indexes[-1] != context_index:
+            # context must be the last generated argument
+            indexes.remove(context_index)
+            indexes.append(context_index)
+
+        return indexes
 
     @property
     def storage_context_hash(self) -> bytes:
@@ -51,7 +77,7 @@ class StorageDeleteMethod(InteropMethod):
     def build(self, value: Any) -> IBuiltinMethod:
         exp: List[IExpression] = []
         if isinstance(value, Sized):
-            if len(value) > 1 or not isinstance(value, Iterable):
+            if len(value) > 2 or not isinstance(value, Iterable):
                 return self
             exp = [exp if isinstance(exp, IExpression) else Variable(exp)
                    for exp in value if isinstance(exp, (IExpression, IType))]

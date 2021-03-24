@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
-import env
+from boa3 import env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
 from boa3.neo.smart_contract.VoidType import VoidType
@@ -181,7 +181,7 @@ class BoaTest(TestCase):
 
     def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: Union[str, bytes], method: str,
                            *arguments: Any, reset_engine: bool = False,
-                           fake_storage: Dict[str, Any] = None,
+                           fake_storage: Dict[Tuple[str, str], Any] = None,
                            signer_accounts: Iterable[bytes] = (),
                            expected_result_type: Type = None,
                            rollback_on_fault: bool = True) -> Any:

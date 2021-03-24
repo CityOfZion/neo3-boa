@@ -177,7 +177,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
 
 
 @public
-def transferFrom(spender: UInt160, from_address: UInt160, to_address: UInt160, amount: int, data: Any) -> bool:
+def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, amount: int, data: Any) -> bool:
     """
     A spender transfers an amount of zNEO tokens allowed from one account to another.
 
@@ -196,7 +196,7 @@ def transferFrom(spender: UInt160, from_address: UInt160, to_address: UInt160, a
     :type data: Any
 
     :return: whether the transfer was successful
-    :raise AssertionError: raised if `spender`, `from_address` or `to_address` length is not 20 or if `amount` if less
+    :raise AssertionError: raised if `spender`, `from_address` or `to_address` length is not 20 or if `amount` is less
     than zero.
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.

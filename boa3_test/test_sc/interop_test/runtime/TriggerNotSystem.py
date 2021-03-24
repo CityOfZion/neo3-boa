@@ -1,5 +1,5 @@
-from boa3.builtin.interop.runtime import TriggerType, trigger
+from boa3.builtin.interop.runtime import TriggerType, get_trigger
 
 
 def Main() -> bool:
-    return trigger() != TriggerType.SYSTEM
+    return get_trigger() != TriggerType.SYSTEM
