@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
-import env
+from boa3 import env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
 from boa3.neo.smart_contract.VoidType import VoidType
