@@ -7,20 +7,20 @@ from boa3.neo.vm.type.Integer import Integer
 
 def get_native_token_data(token_script: bytes) -> Tuple[Optional[bytes], Optional[int]]:
     prefix: Optional[NativeTokenPrefix] = None
-    token_id: NativeTokenId = NativeTokenId.NONE
+    token_id: NativeContractId = NativeContractId.NONE
 
     if token_script is constants.NEO_SCRIPT:
         prefix = NativeTokenPrefix.NEO
-        token_id = NativeTokenId.NEO
+        token_id = NativeContractId.NEO
     elif token_script is constants.GAS_SCRIPT:
         prefix = NativeTokenPrefix.GAS
-        token_id = NativeTokenId.GAS
+        token_id = NativeContractId.GAS
 
     return (prefix if prefix is None else Integer(prefix).to_byte_array(min_length=1),
             token_id.value)
 
 
-class NativeTokenId(IntEnum):
+class NativeContractId(IntEnum):
     ContractManagement = -1
     NEO = -5
     GAS = -6

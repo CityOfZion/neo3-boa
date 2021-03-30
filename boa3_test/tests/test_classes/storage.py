@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Union
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3_test.tests.test_classes.nativetokenprefix import NativeContractId
 
 
 class Storage:
@@ -66,6 +67,10 @@ class Storage:
         key._ID = token_id
         self._dict[key] = StorageItem(NativeAccountState(balance).serialize())
         return True
+
+    def has_contract(self, script_hash: bytes) -> bool:
+        storage_key = self.build_key(script_hash, NativeContractId.ContractManagement)
+        return storage_key in self
 
     def __contains__(self, item: StorageKey) -> bool:
         return item in self._dict

@@ -11,6 +11,7 @@ from boa3.neo3.core.types import UInt160
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
+from boa3_test.tests.test_classes.testcontract import TestContract
 from boa3_test.tests.test_classes.transaction import Transaction
 
 
@@ -38,7 +39,7 @@ class TestEngine:
         self._blocks: List[Block] = []
 
         self._accounts: List[bytes] = []
-        self._contract_paths: List[str] = []
+        self._contract_paths: List[TestContract] = []
 
         self._error_message: Optional[str] = None
         self._neo_balance_prefix: bytes = b'\x14'
@@ -76,11 +77,11 @@ class TestEngine:
 
         if contract_path.endswith('.py'):
             contract_path = contract_path.replace('.py', '.nef')
-        if contract_path not in self._contract_paths:
+        if contract_path not in self.contracts:
             return None
 
-        index = self._contract_paths.index(contract_path)
-        storage_key = Storage.build_key(key, index)
+        contract_id = self._get_contract_id(contract_path)
+        storage_key = Storage.build_key(key, contract_id)
         if storage_key in self._storage:
             return self._storage[storage_key]
         else:
@@ -92,9 +93,9 @@ class TestEngine:
 
         if contract_path.endswith('.py'):
             contract_path = contract_path.replace('.py', '.nef')
-        if contract_path in self._contract_paths:
-            index = self._contract_paths.index(contract_path)
-            storage_key = Storage.build_key(key, index)
+        if contract_path in self.contracts:
+            contract_id = self._get_contract_id(contract_path)
+            storage_key = Storage.build_key(key, contract_id)
 
             self._storage[storage_key] = value
 
@@ -109,11 +110,11 @@ class TestEngine:
 
         if contract_path.endswith('.py'):
             contract_path = contract_path.replace('.py', '.nef')
-        if contract_path not in self._contract_paths:
+        if contract_path not in self.contracts:
             return None
 
-        index = self._contract_paths.index(contract_path)
-        storage_key = Storage.build_key(key, index)
+        contract_id = self._get_contract_id(contract_path)
+        storage_key = Storage.build_key(key, contract_id)
 
         if storage_key in self._storage:
             self._storage.pop(key)
@@ -130,11 +131,26 @@ class TestEngine:
 
     @property
     def contracts(self) -> List[str]:
-        return self._contract_paths.copy()
+        return [contract.path for contract in self._contract_paths]
 
     def add_contract(self, contract_nef_path: str):
         if contract_nef_path.endswith('.nef') and contract_nef_path not in self._contract_paths:
-            self._contract_paths.append(contract_nef_path)
+            self._contract_paths.append(TestContract(contract_nef_path))
+
+    def remove_contract(self, contract_index_or_path: Union[int, str]):
+        if isinstance(contract_index_or_path, str):
+            index = self._get_contract_id(contract_index_or_path)
+        else:
+            index = contract_index_or_path
+
+        if 0 <= index < len(self._contract_paths):
+            return self._contract_paths.pop(index)
+
+    def _get_contract_id(self, contract_path: str) -> int:
+        contracts = self.contracts
+        if contract_path in contracts:
+            return contracts.index(contract_path)
+        return -1
 
     @property
     def height(self) -> int:
@@ -187,7 +203,7 @@ class TestEngine:
         import subprocess
 
         if isinstance(nef_path, str) and nef_path not in self._contract_paths:
-            self._contract_paths.append(nef_path)
+            self.add_contract(nef_path)
 
         test_engine_args = self.to_json(nef_path, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
@@ -239,6 +255,11 @@ class TestEngine:
                     json_storage = result['storage']
                     self._storage = Storage.from_json(json_storage)
 
+                    index = self._get_contract_id(nef_path)
+                    contract = self._contract_paths[index]
+                    if contract.script_hash is not None and not self._storage.has_contract(contract.script_hash):
+                        self.remove_contract(nef_path)
+
                 if 'blocks' in result:
                     blocks_json = result['blocks']
                     if not isinstance(blocks_json, list):
@@ -280,7 +301,7 @@ class TestEngine:
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),
-            'contracts': [{'nef': contract_path} for contract_path in self._contract_paths],
+            'contracts': [{'nef': contract_path} for contract_path in self.contracts],
             'signerAccounts': [to_hex_str(address) for address in self._accounts],
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
