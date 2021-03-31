@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Union
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
-from boa3_test.tests.test_classes.nativetokenprefix import NativeContractId
+from boa3_test.tests.test_classes.nativecontractprefix import get_native_contract_data
 
 
 class Storage:
@@ -49,8 +49,8 @@ class Storage:
         if len(token_script) != 20 or len(script_hash) != 20 or amount <= 0:
             return False
 
-        from boa3_test.tests.test_classes.nativetokenprefix import get_native_token_data
-        token_prefix, token_id = get_native_token_data(token_script)
+        from boa3_test.tests.test_classes.nativecontractprefix import get_native_contract_data
+        token_prefix, token_id = get_native_contract_data(token_script)
         if token_prefix is None or token_id is None:
             return False
 
@@ -69,7 +69,12 @@ class Storage:
         return True
 
     def has_contract(self, script_hash: bytes) -> bool:
-        storage_key = self.build_key(script_hash, NativeContractId.ContractManagement)
+        from boa3 import constants
+        prefix, native_id = get_native_contract_data(constants.MANAGEMENT_SCRIPT)
+        if prefix is None or native_id is None:
+            return False
+
+        storage_key = self.build_key(prefix + script_hash, native_id)
         return storage_key in self
 
     def __contains__(self, item: StorageKey) -> bool:

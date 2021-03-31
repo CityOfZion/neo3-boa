@@ -208,10 +208,22 @@ class TestEngine:
         test_engine_args = self.to_json(nef_path, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
 
-        process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
-                                   text=True)
+        try:
+            process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT,
+                                       text=True)
+        except:
+            json_path = '{0}/test-engine-test.json'.format(path.curdir)
+            with open(json_path, 'wb+') as json_file:
+                json_file.write(String(param_json).to_bytes())
+                json_file.close()
+
+            process = subprocess.Popen(['dotnet', self._test_engine_path, json_path],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT,
+                                       text=True)
+
         stdout, stderr = process.communicate()
 
         if reset_engine:
