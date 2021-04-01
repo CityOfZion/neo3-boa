@@ -13,7 +13,7 @@ class StorageFindMethod(InteropMethod):
 
     def __init__(self, prefix_type: IType = None):
         from boa3.model.type.type import Type
-        from boa3.model.builtin.interop.storage.storagecontexttype import StorageContextType
+        from boa3.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
 
         identifier = 'find'
         syscall = 'System.Storage.Find'

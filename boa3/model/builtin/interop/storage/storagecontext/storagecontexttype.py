@@ -20,6 +20,7 @@ class StorageContextType(ClassType):
         super().__init__('StorageContext')
 
         self._variables: Dict[str, Variable] = {}
+        self._instance_methods: Dict[str, Method] = {}
         self._constructor: Method = None
 
     @property
@@ -36,7 +37,15 @@ class StorageContextType(ClassType):
 
     @property
     def instance_methods(self) -> Dict[str, Method]:
-        return {}
+        # avoid recursive import
+        if len(self._instance_methods) == 0:
+            from boa3.model.builtin.interop.storage.storagecontext.storagecontextcreatemapmethod import \
+                StorageContextCreateMapMethod
+
+            self._instance_methods = {
+                'create_map': StorageContextCreateMapMethod()
+            }
+        return self._instance_methods
 
     def constructor_method(self) -> Method:
         # was having a problem with recursive import

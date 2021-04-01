@@ -12,7 +12,7 @@ class StoragePutMethod(InteropMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
-        from boa3.model.builtin.interop.storage.storagecontexttype import StorageContextType
+        from boa3.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
 
         identifier = 'put'
         syscall = 'System.Storage.Put'

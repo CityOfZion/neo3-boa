@@ -2,6 +2,7 @@ from typing import Union
 
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.storagecontext import StorageContext
+from boa3.builtin.interop.storage.storagemap import StorageMap
 
 
 def get(key: Union[str, bytes], context: StorageContext = None) -> bytes:

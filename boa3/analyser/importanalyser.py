@@ -118,6 +118,7 @@ class ImportAnalyser(IAstAnalyser):
                 return Builtin.package_symbols(packages[0])
 
             if packages[0] == 'interop':
+                # TODO: refactor for getting inner packages
                 return self._get_interop_symbols(packages[1])
 
         return self._get_boa3_builtin_symbols()
