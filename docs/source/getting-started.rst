@@ -120,7 +120,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 
 ::
     
-    $ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable
+    $ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc1
     $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 
 
