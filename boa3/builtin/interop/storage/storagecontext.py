@@ -10,11 +10,10 @@ class StorageContext:
 
     def create_map(self, prefix: Union[str, bytes]) -> StorageMap:
         """
+        Creates a storage map with the given prefix
 
-
-        :param prefix:
-        :type prefix:
-        :return:
-        :rtype:
+        :param prefix: the identifier of the storage map
+        :type prefix: str or bytes
+        :return: a map with the key-values in the storage that match with the given prefix
         """
         pass
