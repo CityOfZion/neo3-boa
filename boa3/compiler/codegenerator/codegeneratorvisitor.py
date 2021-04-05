@@ -49,7 +49,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         else:
             value = self.visit(node)
 
-        if not hasattr(node, 'test'):
+        if not isinstance(node, (ast.For, ast.While, ast.If)):
             # control flow nodes must map each of their instructions
             self.include_instruction(node, address)
         return value
