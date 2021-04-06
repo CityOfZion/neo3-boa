@@ -83,3 +83,10 @@ class NeoMetadata:
         if isinstance(self.description, str):
             extra['Description'] = self.description
         return extra
+
+
+def sqrt(x: int):
+    """
+    Gets the square root of a number
+    """
+    pass

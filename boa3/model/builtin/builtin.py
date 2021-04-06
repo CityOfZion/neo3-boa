@@ -43,14 +43,15 @@ class Builtin:
                 return method
 
     # builtin method
-    Len = LenMethod()
-    IsInstance = IsInstanceMethod()
-    Print = PrintMethod()
-    ScriptHash = ScriptHashMethod()
-    NewEvent = CreateEventMethod()
     Exit = ExitMethod()
+    IsInstance = IsInstanceMethod()
+    Len = LenMethod()
+    NewEvent = CreateEventMethod()
     Max = MaxMethod()
     Min = MinMethod()
+    Print = PrintMethod()
+    ScriptHash = ScriptHashMethod()
+    Sqrt = SqrtMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -94,7 +95,8 @@ class Builtin:
                                                 SequenceInsert,
                                                 SequencePop,
                                                 SequenceRemove,
-                                                SequenceReverse
+                                                SequenceReverse,
+                                                Sqrt
                                                 ]
 
     @classmethod
