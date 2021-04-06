@@ -40,6 +40,7 @@ class Interop:
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
     StorageContextType = StorageContextType.build()
+    StorageMapType = StorageMapType.build()
     TriggerType = TriggerType()
 
     # Binary Interops
@@ -155,6 +156,7 @@ class Interop:
                                  StorageFind,
                                  StorageGet,
                                  StorageGetContext,
+                                 StorageMapType,
                                  StoragePut
                                  ]
     }
