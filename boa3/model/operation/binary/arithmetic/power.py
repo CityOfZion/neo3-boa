@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Tuple
 
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType, Type
+from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class Power(BinaryOperation):
@@ -37,6 +38,5 @@ class Power(BinaryOperation):
             return Type.none
 
     @property
-    def is_supported(self) -> bool:
-        # TODO: change when power is supported
-        return False
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return [(Opcode.POW, b'')]

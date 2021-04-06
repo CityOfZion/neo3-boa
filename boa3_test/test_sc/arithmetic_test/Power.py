@@ -1,2 +1,6 @@
-def Main(a: int, b: int) -> int:
-    return a ** b  # not supported yet
+from boa3.builtin import public
+
+
+@public
+def pow(a: int, b: int) -> int:
+    return a ** b
