@@ -2,7 +2,7 @@ from typing import Any
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import abort
-from boa3.builtin.interop.contract import call_contract
+from boa3.builtin.interop.contract import call_contract, GAS
 from boa3.builtin.interop.crypto import hash160
 from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash, get_time
 from boa3.builtin.interop.storage import get, put
@@ -28,7 +28,8 @@ def manifest_metadata() -> NeoMetadata:
 # -------------------------------------------
 
 OWNER = UInt160()
-OTHER_PERSON: bytes = b'person b'
+PERSON_A: bytes = b'person a'
+PERSON_B: bytes = b'person b'
 ADDRESS_PREFIX: bytes = b'address'
 AMOUNT_PREFIX: bytes = b'amount'
 TOKEN_PREFIX: bytes = b'token'
@@ -79,44 +80,44 @@ def deploy() -> bool:
 
 
 @public
-def atomic_swap(owner_address: UInt160, owner_token: bytes, owner_amount: int, other_person_address: UInt160,
-                other_person_token: bytes, other_person_amount: int, secret_hash: bytes) -> bool:
+def atomic_swap(person_a_address: UInt160, person_a_token: bytes, person_a_amount: int, person_b_address: UInt160,
+                person_b_token: bytes, person_b_amount: int, secret_hash: bytes) -> bool:
     """
     Initializes the storage when the atomic swap starts.
 
-    :param owner_address: address of owner
-    :type owner_address: UInt160
-    :param owner_token: other_person's desired token
-    :type owner_token: bytes
-    :param owner_amount: other_person's desired amount of tokens
-    :type owner_amount: int
-    :param other_person_address: address of other_person
-    :type other_person_address: bytes
-    :param other_person_token: owner's desired token
-    :type other_person_token: bytes
-    :param other_person_amount: owner's desired amount of tokens
-    :type other_person_amount: int
+    :param person_a_address: address of person_a
+    :type person_a_address: UInt160
+    :param person_a_token: person_b's desired token
+    :type person_a_token: bytes
+    :param person_a_amount: person_b's desired amount of tokens
+    :type person_a_amount: int
+    :param person_b_address: address of person_b
+    :type person_b_address: bytes
+    :param person_b_token: person_a's desired token
+    :type person_b_token: bytes
+    :param person_b_amount: person_a's desired amount of tokens
+    :type person_b_amount: int
     :param secret_hash: the secret hash created by the contract deployer
     :type secret_hash: bytes
 
     :return: whether the deploy was successful or not
     :rtype: bool
 
-    :raise AssertionError: raised if `owner_address` or `other_person_address` length is not 20 or if `amount` is not
+    :raise AssertionError: raised if `person_a_address` or `person_b_address` length is not 20 or if `amount` is not
     greater than zero.
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
-    assert len(owner_address) == 20 and len(other_person_address) == 20
+    assert len(person_a_address) == 20 and len(person_b_address) == 20
     # the parameter amount must be greater than 0. If not, this method should throw an exception.
-    assert owner_amount > 0 and other_person_amount > 0
+    assert person_a_amount > 0 and person_b_amount > 0
 
     if get(NOT_INITIALIZED).to_bool() and verify():
-        put(ADDRESS_PREFIX + OWNER, owner_address)
-        put(TOKEN_PREFIX + OWNER, owner_token)
-        put(AMOUNT_PREFIX + OWNER, owner_amount)
-        put(ADDRESS_PREFIX + OTHER_PERSON, other_person_address)
-        put(TOKEN_PREFIX + OTHER_PERSON, other_person_token)
-        put(AMOUNT_PREFIX + OTHER_PERSON, other_person_amount)
+        put(ADDRESS_PREFIX + PERSON_A, person_a_address)
+        put(TOKEN_PREFIX + PERSON_A, person_a_token)
+        put(AMOUNT_PREFIX + PERSON_A, person_a_amount)
+        put(ADDRESS_PREFIX + PERSON_B, person_b_address)
+        put(TOKEN_PREFIX + PERSON_B, person_b_token)
+        put(AMOUNT_PREFIX + PERSON_B, person_b_amount)
         put(SECRET_HASH, secret_hash)
         put(NOT_INITIALIZED, False)
         put(START_TIME, get_time)
@@ -140,37 +141,42 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     :raise AssertionError: raised if `from_address` length is not 20
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
-    assert len(from_address) == 20
+    if from_address is not None:
+        assert len(from_address) == 20
+
+    # this validation will verify if Neo is trying to mint GAS to this smart contract
+    if from_address is None and calling_script_hash == GAS:
+        return
 
     if not get(NOT_INITIALIZED).to_bool():
-        # Used to check if the one who's transferring to this contract is the OWNER
-        address = get(ADDRESS_PREFIX + OWNER)
-        # Used to check if OWNER already transfer to this smart contract
-        funded_crypto = get(FUNDED_PREFIX + OWNER).to_int()
-        # Used to check if OWNER is transferring the correct amount
-        amount_crypto = get(AMOUNT_PREFIX + OWNER).to_int()
-        # Used to check if OWNER is transferring the correct token
-        token_crypto = get(TOKEN_PREFIX + OWNER)
+        # Used to check if the one who's transferring to this contract is the PERSON_A
+        address = get(ADDRESS_PREFIX + PERSON_A)
+        # Used to check if PERSON_A already transfer to this smart contract
+        funded_crypto = get(FUNDED_PREFIX + PERSON_A).to_int()
+        # Used to check if PERSON_A is transferring the correct amount
+        amount_crypto = get(AMOUNT_PREFIX + PERSON_A).to_int()
+        # Used to check if PERSON_A is transferring the correct token
+        token_crypto = get(TOKEN_PREFIX + PERSON_A)
         if (from_address == address and
                 funded_crypto == 0 and
                 amount == amount_crypto and
                 calling_script_hash == token_crypto):
-            put(FUNDED_PREFIX + OWNER, amount)
+            put(FUNDED_PREFIX + PERSON_A, amount)
             return
         else:
             # Used to check if the one who's transferring to this contract is the OTHER_PERSON
-            address = get(ADDRESS_PREFIX + OTHER_PERSON)
-            # Used to check if OTHER_PERSON already transfer to this smart contract
-            funded_crypto = get(FUNDED_PREFIX + OTHER_PERSON).to_int()
-            # Used to check if OTHER_PERSON is transferring the correct amount
-            amount_crypto = get(AMOUNT_PREFIX + OTHER_PERSON).to_int()
-            # Used to check if OTHER_PERSON is transferring the correct token
-            token_crypto = get(TOKEN_PREFIX + OTHER_PERSON)
+            address = get(ADDRESS_PREFIX + PERSON_B)
+            # Used to check if PERSON_B already transfer to this smart contract
+            funded_crypto = get(FUNDED_PREFIX + PERSON_B).to_int()
+            # Used to check if PERSON_B is transferring the correct amount
+            amount_crypto = get(AMOUNT_PREFIX + PERSON_B).to_int()
+            # Used to check if PERSON_B is transferring the correct token
+            token_crypto = get(TOKEN_PREFIX + PERSON_B)
             if (from_address == address and
                     funded_crypto == 0 and
                     amount == amount_crypto and
                     calling_script_hash == token_crypto):
-                put(FUNDED_PREFIX + OTHER_PERSON, amount)
+                put(FUNDED_PREFIX + PERSON_B, amount)
                 return
     abort()
 
@@ -178,7 +184,7 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
 @public
 def withdraw(secret: str) -> bool:
     """
-    Deposits the contract's cryptocurrency into the owner and other_person addresses as long as they both transferred
+    Deposits the contract's cryptocurrency into the person_a and person_b addresses as long as they both transferred
     to this contract and there is some time remaining
 
     :param secret: the private key that unlocks the transaction
@@ -187,18 +193,18 @@ def withdraw(secret: str) -> bool:
     :return: whether the transfers were successful
     :rtype: bool
     """
-    # Checking if OWNER and OTHER_PERSON transferred to this smart contract
-    funded_owner = get(FUNDED_PREFIX + OWNER).to_int()
-    funded_other_person = get(FUNDED_PREFIX + OTHER_PERSON).to_int()
-    if verify() and not refund() and hash160(secret) == get(SECRET_HASH) and funded_owner != 0 and funded_other_person != 0:
-        put(FUNDED_PREFIX + OWNER, 0)
-        put(FUNDED_PREFIX + OTHER_PERSON, 0)
+    # Checking if PERSON_A and PERSON_B transferred to this smart contract
+    funded_person_a = get(FUNDED_PREFIX + PERSON_A).to_int()
+    funded_person_b = get(FUNDED_PREFIX + PERSON_B).to_int()
+    if verify() and not refund() and hash160(secret) == get(SECRET_HASH) and funded_person_a != 0 and funded_person_b != 0:
+        put(FUNDED_PREFIX + PERSON_A, 0)
+        put(FUNDED_PREFIX + PERSON_B, 0)
         put(NOT_INITIALIZED, True)
         put(START_TIME, 0)
-        call_contract(UInt160(get(TOKEN_PREFIX + OTHER_PERSON)), 'transfer',
-                      [executing_script_hash, get(ADDRESS_PREFIX + OWNER), get(AMOUNT_PREFIX + OTHER_PERSON), ''])
-        call_contract(UInt160(get(TOKEN_PREFIX + OWNER)), 'transfer',
-                      [executing_script_hash, get(ADDRESS_PREFIX + OTHER_PERSON), get(AMOUNT_PREFIX + OWNER), ''])
+        call_contract(UInt160(get(TOKEN_PREFIX + PERSON_B)), 'transfer',
+                      [executing_script_hash, get(ADDRESS_PREFIX + PERSON_A), get(AMOUNT_PREFIX + PERSON_B), None])
+        call_contract(UInt160(get(TOKEN_PREFIX + PERSON_A)), 'transfer',
+                      [executing_script_hash, get(ADDRESS_PREFIX + PERSON_B), get(AMOUNT_PREFIX + PERSON_A), None])
         return True
 
     return False
@@ -213,21 +219,19 @@ def refund() -> bool:
     :rtype: bool
     """
     if get_time > get(START_TIME).to_int() + LOCK_TIME:
-
-        # Checking if OWNER transferred to this smart contract
-        funded_crypto = get(FUNDED_PREFIX + OWNER).to_int()
+        # Checking if PERSON_A transferred to this smart contract
+        funded_crypto = get(FUNDED_PREFIX + PERSON_A).to_int()
         if funded_crypto != 0:
-            call_contract(UInt160(get(TOKEN_PREFIX + OWNER)), 'transfer',
-                          [executing_script_hash, get(ADDRESS_PREFIX + OWNER), get(AMOUNT_PREFIX + OWNER)])
+            call_contract(UInt160(get(TOKEN_PREFIX + PERSON_A)), 'transfer',
+                          [executing_script_hash, UInt160(get(ADDRESS_PREFIX + PERSON_A)), get(AMOUNT_PREFIX + PERSON_A).to_int(), None])
 
-        # Checking if OTHER_PERSON transferred to this smart contract
-        funded_crypto = get(FUNDED_PREFIX + OTHER_PERSON).to_int()
+        # Checking if PERSON_B transferred to this smart contract
+        funded_crypto = get(FUNDED_PREFIX + PERSON_B).to_int()
         if funded_crypto != 0:
-            call_contract(UInt160(get(TOKEN_PREFIX + OTHER_PERSON)), 'transfer',
-                          [executing_script_hash, get(ADDRESS_PREFIX + OTHER_PERSON), get(AMOUNT_PREFIX + OTHER_PERSON)])
-
-        put(FUNDED_PREFIX + OWNER, 0)
-        put(FUNDED_PREFIX + OTHER_PERSON, 0)
+            call_contract(UInt160(get(TOKEN_PREFIX + PERSON_B)), 'transfer',
+                          [executing_script_hash, get(ADDRESS_PREFIX + PERSON_B), get(AMOUNT_PREFIX + PERSON_B).to_int(), None])
+        put(FUNDED_PREFIX + PERSON_A, 0)
+        put(FUNDED_PREFIX + PERSON_B, 0)
         put(NOT_INITIALIZED, True)
         put(START_TIME, 0)
         return True

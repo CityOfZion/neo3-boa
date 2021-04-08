@@ -1,10 +1,14 @@
+from typing import List
+
 from boa3.boa3 import Boa3
-from boa3.builtin.interop.contract import GAS, NEO
+from boa3.constants import NEO_SCRIPT, GAS_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3.neo.smart_contract.notification import Notification
 
 
 class TestHTLCTemplate(BoaTest):
@@ -40,8 +44,8 @@ class TestHTLCTemplate(BoaTest):
         engine = TestEngine()
 
         # can not atomic_swap() without deploying first
-        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO, 10 * 10**8,
-                                         self.OTHER_ACCOUNT_1, GAS, 10000 * 10**8, hash160(String('unit test').to_bytes()),
+        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO_SCRIPT, 10 * 10**8,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, 10000 * 10**8, hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
@@ -53,28 +57,23 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # starting atomic swap by using the atomic_swap method
-        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO, 10 * 10 ** 8,
-                                         self.OTHER_ACCOUNT_1, GAS, 10000 * 10 ** 8, hash160(String('unit test').to_bytes()),
+        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO_SCRIPT, 10 * 10 ** 8,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, 10000 * 10 ** 8, hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-    def test_HTLC_onPayment(self):
+    def test_HTLC_onNEP17Payment(self):
         path = self.get_contract_path('HTLC.py')
         engine = TestEngine()
-        example_contract = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
-
-        output, manifest = self.compile_and_save(example_contract)
-        contract_address1 = bytes(range(20))
-        contract_address2 = hash160(output)
 
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
 
-        engine.add_neo(contract_address1, transferred_amount_neo)
-        engine.add_gas(contract_address2, transferred_amount_gas)
+        engine.add_neo(self.OWNER_SCRIPT_HASH, transferred_amount_neo)
+        engine.add_gas(self.OTHER_ACCOUNT_1, transferred_amount_gas)
 
         # deploying contract
         result = self.run_smart_contract(engine, path, 'deploy',
@@ -83,31 +82,110 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # starting atomic swap
-        result = self.run_smart_contract(engine, path, 'atomic_swap', contract_address1, NEO, transferred_amount_neo,
-                                         contract_address2, GAS, transferred_amount_gas,
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, NEO_SCRIPT, transferred_amount_neo,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-        # TODO: Test if onPayment is successful when update the TestEngine to make Neo/Gas transfers
+        # transfer wil be aborted at onPayment if the transfer is not valid
+        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+            self.run_smart_contract(engine, NEO_SCRIPT, 'transfer', self.OWNER_SCRIPT_HASH, htlc_address,
+                                    transferred_amount_neo - 100, None,
+                                    signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                    expected_result_type=bool)
+
+        # since the transfer was aborted, it was not registered in the events
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(0, len(transfer_events))
+
+        # saving the balance to compare after the transfer
+        balance_neo_sender_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_neo_receiver_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
+
+        # this transfer will be accepted
+        result = self.run_smart_contract(engine, NEO_SCRIPT, 'transfer', self.OWNER_SCRIPT_HASH,
+                                         htlc_address, transferred_amount_neo, None,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # transfer was accepted so it was registered
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(1, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(self.OWNER_SCRIPT_HASH, sender)
+        self.assertEqual(htlc_address, receiver)
+        self.assertEqual(transferred_amount_neo, amount)
+
+        # saving the balance after to compare with the balance before the transfer
+        balance_neo_sender_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_neo_receiver_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
+
+        self.assertEqual(balance_neo_sender_before - transferred_amount_neo, balance_neo_sender_after)
+        self.assertEqual(balance_neo_receiver_before + transferred_amount_neo, balance_neo_receiver_after)
+
+        # transfer won't be accepted, because amount is wrong
+        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+            self.run_smart_contract(engine, GAS_SCRIPT, 'transfer', self.OTHER_ACCOUNT_1,
+                                    htlc_address, transferred_amount_gas - 100, None,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1],
+                                    expected_result_type=bool)
+
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(0, len(transfer_events))
+
+        # saving the balance to compare after the transfer
+        balance_gas_sender_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_gas_receiver_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+
+        # this transfer will be accepted
+        result = self.run_smart_contract(engine, GAS_SCRIPT, 'transfer', self.OTHER_ACCOUNT_1,
+                                         htlc_address, transferred_amount_gas, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # the transfer was accepted so it was registered
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(1, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(self.OTHER_ACCOUNT_1, sender)
+        self.assertEqual(htlc_address, receiver)
+        self.assertEqual(transferred_amount_gas, amount)
+
+        # saving the balance after to compare with the balance before the transfer
+        balance_gas_sender_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_gas_receiver_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+
+        self.assertEqual(balance_gas_sender_before - transferred_amount_gas, balance_gas_sender_after)
+        self.assertEqual(balance_gas_receiver_before + transferred_amount_gas, balance_gas_receiver_after)
 
     def test_HTLC_withdraw(self):
         path = self.get_contract_path('HTLC.py')
         engine = TestEngine()
-        example_contract = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
-
-        output, manifest = self.compile_and_save(example_contract)
-        contract_address1 = bytes(range(20))
-        contract_address2 = hash160(output)
 
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
 
-        engine.add_neo(contract_address1, transferred_amount_neo)
-        engine.add_gas(contract_address2, transferred_amount_gas)
+        engine.add_neo(self.OWNER_SCRIPT_HASH, transferred_amount_neo)
+        engine.add_gas(self.OTHER_ACCOUNT_1, transferred_amount_gas)
 
         # deploying smart contract
         result = self.run_smart_contract(engine, path, 'deploy',
@@ -115,9 +193,18 @@ class TestHTLCTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
+        # saving the balance to compare after the withdraw
+        balance_neo_person_a_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_neo_person_b_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_neo_htlc_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
+        balance_gas_person_a_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_gas_person_b_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_gas_htlc_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+
         # starting atomic swap by using the atomic_swap method
-        result = self.run_smart_contract(engine, path, 'atomic_swap', contract_address1, NEO, transferred_amount_neo,
-                                         contract_address2, GAS, transferred_amount_gas,
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, NEO_SCRIPT, transferred_amount_neo,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
@@ -129,32 +216,88 @@ class TestHTLCTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(False, result)
 
-        # TODO: Test if the withdraw is successful when update the TestEngine to make Neo/Gas transfers
+        result = self.run_smart_contract(engine, NEO_SCRIPT, 'transfer', self.OWNER_SCRIPT_HASH,
+                                         htlc_address, transferred_amount_neo, None,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, GAS_SCRIPT, 'transfer', self.OTHER_ACCOUNT_1,
+                                         htlc_address, transferred_amount_gas, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # the withdraw will fail, because the secret is wrong
+        result = self.run_smart_contract(engine, path, 'withdraw', 'wrong one',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        # the withdraw will occur
+        result = self.run_smart_contract(engine, path, 'withdraw', 'unit test',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # the transfer were accepted so they were registered
+        transfer_events = engine.get_events('Transfer')
+        self.assertEqual(2, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(htlc_address, sender)
+        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
+        self.assertEqual(transferred_amount_gas, amount)
+
+        self.assertEqual(3, len(transfer_events[1].arguments))
+        sender, receiver, amount = transfer_events[1].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(htlc_address, sender)
+        self.assertEqual(self.OTHER_ACCOUNT_1, receiver)
+        self.assertEqual(transferred_amount_neo, amount)
+
+        # saving the balance after to compare with the balance before the transfer
+        balance_neo_person_a_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_neo_person_b_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_neo_htlc_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
+        balance_gas_person_a_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        balance_gas_person_b_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_gas_htlc_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+
+        self.assertEqual(balance_neo_person_a_before - transferred_amount_neo, balance_neo_person_a_after)
+        self.assertEqual(balance_neo_person_b_before + transferred_amount_neo, balance_neo_person_b_after)
+        self.assertEqual(balance_neo_htlc_before, balance_neo_htlc_after)
+        self.assertEqual(balance_gas_person_a_before + transferred_amount_gas, balance_gas_person_a_after)
+        self.assertEqual(balance_gas_person_b_before - transferred_amount_gas, balance_gas_person_b_after)
+        self.assertEqual(balance_gas_htlc_before, balance_gas_htlc_after)
 
     def test_HTLC_refund(self):
         path = self.get_contract_path('HTLC.py')
         engine = TestEngine()
-        example_contract = self.get_contract_path('test_native/example_contract_for_htlc.py')
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
-
-        output, manifest = self.compile_and_save(example_contract)
-        contract_address1 = bytes(range(20))
-        contract_address2 = hash160(output)
 
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
 
-        engine.add_neo(contract_address1, transferred_amount_neo)
-        engine.add_gas(contract_address2, transferred_amount_gas)
+        engine.add_neo(self.OWNER_SCRIPT_HASH, transferred_amount_neo)
+        engine.add_gas(self.OTHER_ACCOUNT_1, transferred_amount_gas)
 
         result = self.run_smart_contract(engine, path, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-        result = self.run_smart_contract(engine, path, 'atomic_swap', contract_address1, NEO, transferred_amount_neo,
-                                         contract_address2, GAS, transferred_amount_gas,
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, NEO_SCRIPT, transferred_amount_neo,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
@@ -175,8 +318,106 @@ class TestHTLCTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
+        transfer_events: List[Notification] = []
         # no one transferred cryptocurrency to the contract, so no one was refunded and no Transfer occurred
-        transfer_events = engine.get_events('Transfer')
+        # removing possible GAS minting from the List
+        for k in engine.get_events('Transfer'):
+            if k.arguments[0] is not None:
+                transfer_events.append(k)
         self.assertEqual(0, len(transfer_events))
 
-        # TODO: Test if the refund is successful when update the TestEngine to make Neo/Gas transfers
+        # starting atomic swap by using the atomic_swap method
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, NEO_SCRIPT, transferred_amount_neo,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, transferred_amount_gas,
+                                         hash160(String('unit test').to_bytes()),
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, NEO_SCRIPT, 'transfer', self.OWNER_SCRIPT_HASH,
+                                         htlc_address, transferred_amount_neo, None,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        engine.increase_block()
+        # will be able to refund, because enough time has passed
+        result = self.run_smart_contract(engine, path, 'refund',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # OWNER transferred cryptocurrency to the contract, so only he will be refunded
+        transfer_events = []
+        # removing possible GAS minting from the List
+        for k in engine.get_events('Transfer'):
+            if k.arguments[0] is not None:
+                transfer_events.append(k)
+        self.assertEqual(1, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+
+        # HTLC returning the tokens
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(htlc_address, sender)
+        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
+        self.assertEqual(transferred_amount_neo, amount)
+
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, NEO_SCRIPT, transferred_amount_neo,
+                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, transferred_amount_gas,
+                                         hash160(String('unit test').to_bytes()),
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, NEO_SCRIPT, 'transfer', self.OWNER_SCRIPT_HASH,
+                                         htlc_address, transferred_amount_neo, None,
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, GAS_SCRIPT, 'transfer', self.OTHER_ACCOUNT_1,
+                                         htlc_address, transferred_amount_gas, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        engine.increase_block()
+        # will be able to refund, because enough time has passed
+        result = self.run_smart_contract(engine, path, 'refund',
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        # OWNER and OTHER_ACCOUNT transferred cryptocurrency to the contract, so they both will be refunded
+        transfer_events = []
+        # removing possible GAS minting from the List
+        for k in engine.get_events('Transfer'):
+            if k.arguments[0] is not None:
+                transfer_events.append(k)
+        self.assertEqual(2, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(3, len(transfer_events[1].arguments))
+
+        sender, receiver, amount = transfer_events[0].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(htlc_address, sender)
+        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
+        self.assertEqual(transferred_amount_neo, amount)
+
+        sender, receiver, amount = transfer_events[1].arguments
+        if isinstance(sender, str):
+            sender = String(sender).to_bytes()
+        if isinstance(receiver, str):
+            receiver = String(receiver).to_bytes()
+        self.assertEqual(htlc_address, sender)
+        self.assertEqual(self.OTHER_ACCOUNT_1, receiver)
+        self.assertEqual(transferred_amount_gas, amount)
