@@ -1,4 +1,5 @@
-__all__ = ['IBuiltinMethod',
+__all__ = ['AbsMethod',
+           'IBuiltinMethod',
            'ByteArrayMethod',
            'CreateEventMethod',
            'EventType',
@@ -14,6 +15,7 @@ __all__ = ['IBuiltinMethod',
            'SqrtMethod'
            ]
 
+from boa3.model.builtin.method.absmethod import AbsMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
