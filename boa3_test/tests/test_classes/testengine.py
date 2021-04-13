@@ -64,8 +64,12 @@ class TestEngine:
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
-    def get_events(self, event_name: str) -> List[Notification]:
-        return [n for n in self._notifications if n.name == event_name]
+    def get_events(self, event_name: str, origin: UInt160 = None) -> List[Notification]:
+        if origin is None:
+            return [n for n in self._notifications if n.name == event_name]
+        else:
+            origin_bytes = origin.to_array() if isinstance(origin, UInt160) else bytes(origin)
+            return [n for n in self._notifications if n.name == event_name and n.origin == origin_bytes]
 
     @property
     def storage(self) -> Storage:

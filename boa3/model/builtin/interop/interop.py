@@ -1,12 +1,14 @@
 from enum import Enum
 from typing import Dict, List
 
+from boa3.model.builtin.interop import *
 from boa3.model.builtin.interop.binary import *
 from boa3.model.builtin.interop.blockchain import *
 from boa3.model.builtin.interop.contract import *
 from boa3.model.builtin.interop.crypto import *
 from boa3.model.builtin.interop.iterator import *
 from boa3.model.builtin.interop.json import *
+from boa3.model.builtin.interop.nativecontract import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.storage import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -39,6 +41,7 @@ class Interop:
     ContractType = ContractType.build()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
+    OracleType = OracleType.build()
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TriggerType = TriggerType()
@@ -66,6 +69,7 @@ class Interop:
     NeoScriptHash = NeoProperty()
     ManagementContractScriptHash = ManagementContract
     CryptoLibScriptHash = CryptoLibContract
+    OracleScriptHash = OracleContract
     StdLibScriptHash = StdLibContract
 
     # Crypto Interops
@@ -160,3 +164,6 @@ class Interop:
                                  StoragePut
                                  ]
     }
+    package_symbols: List[IdentifiedSymbol] = [
+        OracleType
+    ]
