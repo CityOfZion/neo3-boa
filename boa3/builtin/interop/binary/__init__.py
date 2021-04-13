@@ -75,3 +75,19 @@ def deserialize(data: bytes) -> Any:
     :raise Exception: raised when the date doesn't represent a serialized value.
     """
     pass
+
+
+def atoi(value: str, base: int = 10) -> int:
+    """
+    Converts a character string to a specific base value, decimal or hexadecimal. The default is decimal.
+
+    :param value: the int value as a string
+    :type value: str
+    :param base: the value base
+    :type base: int
+    :return: the equivalent value
+    :rtype: int
+
+    :raise Exception: raised when base isn't 10 or 16.
+    """
+    pass
