@@ -44,6 +44,7 @@ class Builtin:
                 return method
 
     # builtin method
+    Abs = AbsMethod()
     Exit = ExitMethod()
     IsInstance = IsInstanceMethod()
     Len = LenMethod()
@@ -76,7 +77,8 @@ class Builtin:
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
 
-    _python_builtins: List[IdentifiedSymbol] = [ByteArray,
+    _python_builtins: List[IdentifiedSymbol] = [Abs,
+                                                ByteArray,
                                                 ConvertToBool,
                                                 ConvertToBytes,
                                                 ConvertToInt,
