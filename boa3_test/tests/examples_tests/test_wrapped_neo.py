@@ -1,3 +1,5 @@
+import unittest
+
 from boa3.boa3 import Boa3
 from boa3.constants import NEO_SCRIPT
 from boa3.neo import to_script_hash
@@ -94,6 +96,7 @@ class TestTemplate(BoaTest):
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_wrapped_neo_total_transfer(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
@@ -208,6 +211,7 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_wrapped_neo_burn(self):
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
@@ -372,6 +376,7 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[aux_contract_address])
         self.assertEqual(allowed_amount, result)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_wrapped_neo_transfer_from(self):
         path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/test_native', 'example_contract_for_wrapped_tokens.py')
@@ -490,6 +495,7 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'transfer_from',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_2, -10, None)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_wrapped_neo_onPayment(self):
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()

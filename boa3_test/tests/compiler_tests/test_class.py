@@ -32,14 +32,17 @@ class TestClass(BoaTest):
         self.assertEqual(len(engine.notifications), 1)
         self.assertEqual(script, result)
 
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'event_name', [1])
         self.assertEqual(len(engine.notifications), 1)
         self.assertEqual('notify', result)
 
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'state', [1])
         self.assertEqual(len(engine.notifications), 1)
         self.assertEqual([1], result)
 
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'state', ['1'])
         self.assertEqual(len(engine.notifications), 1)
         self.assertEqual(['1'], result)

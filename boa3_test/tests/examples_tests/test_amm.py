@@ -1,3 +1,5 @@
+import unittest
+
 from boa3.boa3 import Boa3
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
@@ -130,6 +132,7 @@ class TestTemplate(BoaTest):
         amount_zgas = amount_zneo * reserve_zgas // reserve_zneo
         self.assertEqual(amount_zgas, result)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_amm_onNEP17Payment(self):
         transferred_amount = 10 * 10 ** 8
 
@@ -184,6 +187,7 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_amm_add_liquidity(self):
         transferred_amount_zneo = 10 * 10 ** 8
         transferred_amount_zgas = 110 * 10 ** 8
@@ -428,6 +432,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(reserves_after[0], balance_amm_zneo_after)
         self.assertEqual(reserves_after[1], balance_amm_zgas_after)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_amm_remove_liquidity(self):
         transferred_amount_zneo = 10 * 10 ** 8
         transferred_amount_zgas = 110 * 10 ** 8
@@ -587,6 +592,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(reserves_after[0], balance_amm_zneo_after)
         self.assertEqual(reserves_after[1], balance_amm_zgas_after)
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_amm_swap_zneo_to_zgas(self):
         transferred_amount_zneo = 10 * 10 ** 8
         transferred_amount_zgas = 110 * 10 ** 8
@@ -743,6 +749,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(reserves_before[0] + swapped_zneo, reserves_after[0])
         self.assertEqual(reserves_before[1] - swapped_zgas, reserves_after[1])
 
+    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_amm_swap_zgas_to_zneo(self):
         transferred_amount_zneo = 10 * 10 ** 8
         transferred_amount_zgas = 110 * 10 ** 8
