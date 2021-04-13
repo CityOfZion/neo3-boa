@@ -53,6 +53,7 @@ class Interop:
     Base64Encode = Base64EncodeMethod()
     Base64Decode = Base64DecodeMethod()
     Deserialize = DeserializeMethod()
+    Itoa = ItoaMethod()
     Serialize = SerializeMethod()
 
     # Blockchain Interops
@@ -117,6 +118,7 @@ class Interop:
                                 Base64Encode,
                                 Base64Decode,
                                 Deserialize,
+                                Itoa,
                                 Serialize
                                 ],
         InteropPackage.Blockchain: [CurrentHeight,
