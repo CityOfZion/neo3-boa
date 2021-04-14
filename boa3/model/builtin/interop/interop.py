@@ -47,6 +47,7 @@ class Interop:
     TriggerType = TriggerType()
 
     # Binary Interops
+    Atoi = AtoiMethod()
     Base58Encode = Base58EncodeMethod()
     Base58Decode = Base58DecodeMethod()
     Base64Encode = Base64EncodeMethod()
@@ -110,7 +111,8 @@ class Interop:
     StoragePut = StoragePutMethod()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
-        InteropPackage.Binary: [Base58Encode,
+        InteropPackage.Binary: [Atoi,
+                                Base58Encode,
                                 Base58Decode,
                                 Base64Encode,
                                 Base64Decode,
