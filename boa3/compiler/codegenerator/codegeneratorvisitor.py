@@ -68,7 +68,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                     self.generator.convert_new_exception()
                 else:
                     # TODO: validate function calls
-                    self.generator.convert_load_symbol(result)
+                    is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
+                    self.generator.convert_load_symbol(result, is_internal=is_internal)
             return result
         else:
             return self.generator.convert_literal(node)

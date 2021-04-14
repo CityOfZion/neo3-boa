@@ -5,7 +5,7 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts.callflags import CallFlags
+from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
