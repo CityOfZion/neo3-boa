@@ -1240,7 +1240,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: returns the type of the value, the attribute symbol and its id if the attribute exists.
                  Otherwise, returns None
         """
-        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id) \
+        is_internal = hasattr(attribute, 'is_internal_call') and attribute.is_internal_call
+        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id, is_internal) \
             if isinstance(attribute.value, ast.Name) else self.visit(attribute.value)
 
         if value is None and isinstance(attribute.value, ast.Name):

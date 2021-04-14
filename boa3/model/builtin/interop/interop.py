@@ -38,6 +38,7 @@ class Interop:
         return lst
 
     # Interop Types
+    CallFlagsType = CallFlagsType()
     ContractType = ContractType.build()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
@@ -68,7 +69,7 @@ class Interop:
     # Native Contracts
     GasScriptHash = GasProperty()
     NeoScriptHash = NeoProperty()
-    ManagementContractScriptHash = ManagementContract
+    ContractManagementScriptHash = ContractManagement
     CryptoLibScriptHash = CryptoLibContract
     OracleScriptHash = OracleContract
     StdLibScriptHash = StdLibContract
@@ -123,6 +124,7 @@ class Interop:
                                     GetContract
                                     ],
         InteropPackage.Contract: [CallContract,
+                                  CallFlagsType,
                                   ContractType,
                                   CreateContract,
                                   DestroyContract,

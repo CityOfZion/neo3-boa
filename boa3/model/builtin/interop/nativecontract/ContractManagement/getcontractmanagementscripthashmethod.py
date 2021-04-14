@@ -6,12 +6,8 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
-__all__ = ['GetManagementContractScriptHashMethod',
-           'ManagementContract'
-           ]
 
-
-class GetManagementContractScriptHashMethod(IBuiltinMethod):
+class GetContractManagementScriptHashMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
         identifier = '-get_management_contract'
@@ -36,11 +32,11 @@ class GetManagementContractScriptHashMethod(IBuiltinMethod):
         ]
 
 
-class ManagementContractProperty(IBuiltinProperty):
+class ContractManagementProperty(IBuiltinProperty):
     def __init__(self):
         identifier = 'ManagementContract'
-        getter = GetManagementContractScriptHashMethod()
+        getter = GetContractManagementScriptHashMethod()
         super().__init__(identifier, getter)
 
 
-ManagementContract = ManagementContractProperty()
+ContractManagement = ContractManagementProperty()
