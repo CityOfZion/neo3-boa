@@ -27,5 +27,5 @@ from boa3.model.builtin.method.maxmethod import MaxMethod
 from boa3.model.builtin.method.minmethod import MinMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
-from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod
 from boa3.model.builtin.method.sqrtmethod import SqrtMethod
+from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod

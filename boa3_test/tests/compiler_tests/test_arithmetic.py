@@ -4,8 +4,8 @@ from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestArithmetic(BoaTest):
@@ -261,13 +261,13 @@ class TestArithmetic(BoaTest):
 
     def test_power_operation(self):
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x00'
-                + b'\x02'
-                + Opcode.LDARG0
-                + Opcode.LDARG1
-                + Opcode.POW
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.POW
+            + Opcode.RET
         )
         path = self.get_contract_path('Power.py')
         output = Boa3.compile(path)
@@ -537,14 +537,14 @@ class TestArithmetic(BoaTest):
 
     def test_power_augmented_assignment(self):
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x00'
-                + b'\x02'
-                + Opcode.LDARG0
-                + Opcode.LDARG1
-                + Opcode.POW
-                + Opcode.STARG0
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.POW
+            + Opcode.STARG0
+            + Opcode.RET
         )
         path = self.get_contract_path('PowerAugmentedAssignment.py')
         output = Boa3.compile(path)

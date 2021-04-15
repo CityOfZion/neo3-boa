@@ -8,7 +8,7 @@ class Oracle:
         """
         Requests an information from outside the blockchain.
         This method just requests data from the oracle, it won't return the result.
-        
+
         :param url: external url to retrieve the data
         :type url: str
         :param request_filter: filter to the request.

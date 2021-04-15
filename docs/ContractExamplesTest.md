@@ -411,3 +411,8 @@
 - <a href="/boa3_test/test_sc/list_test/RemoveIntWithBuiltin.py">RemoveIntWithBuiltin.py</a>
 - <a href="/boa3_test/test_sc/list_test/RemoveValue.py">RemoveValue.py</a>
 
+## v0.8
+### Built in function
+
+- <a href="/boa3_test/test_sc/built_in_methods_test/Abs.py">Abs.py</a>
+
