@@ -13,6 +13,7 @@ from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.testcontract import TestContract
 from boa3_test.tests.test_classes.transaction import Transaction
+from boa3_test.tests.test_classes.transactionattribute import oracleresponse
 
 
 class TestEngine:
@@ -38,6 +39,7 @@ class TestEngine:
         self._height: int = 0
         self._blocks: List[Block] = []
 
+        self._current_tx: Optional[Transaction] = None
         self._accounts: List[bytes] = []
         self._contract_paths: List[TestContract] = []
 
@@ -201,6 +203,21 @@ class TestEngine:
         for tx in transaction:
             current_block.add_transaction(tx)
 
+    def run_oracle_response(self, request_id: int, oracle_response: oracleresponse.OracleResponseCode,
+                            result: bytes, reset_engine: bool = False,
+                            rollback_on_fault: bool = True) -> Any:
+        request_ids = [x.arguments[0] if isinstance(x.arguments, (tuple, list)) and len(x.arguments) > 0
+                       else x.arguments
+                       for x in self.get_events('OracleRequest', constants.ORACLE_SCRIPT)]
+
+        assert request_id in request_ids, 'Request ID not found'
+        self._current_tx = Transaction(b'')
+        self._current_tx.add_attribute(oracleresponse.OracleResponse(request_id, oracle_response, result))
+
+        return self.run(UInt160(constants.ORACLE_SCRIPT), 'finish',
+                        reset_engine=reset_engine,
+                        rollback_on_fault=rollback_on_fault)
+
     def run(self, nef_path: Union[str, UInt160], method: str, *arguments: Any, reset_engine: bool = False,
             rollback_on_fault: bool = True) -> Any:
         import json
@@ -265,7 +282,7 @@ class TestEngine:
                         new = Notification.from_json(n)
                         if new is not None:
                             notifications.append(new)
-                    self._notifications = notifications
+                    self._notifications.extend(notifications)
 
                 if 'storage' in result:
                     json_storage = result['storage']
@@ -302,16 +319,17 @@ class TestEngine:
         self._vm_state = VMState.NONE
         self._gas_consumed = 0
         self._result_stack = []
-        self._notifications = []
         self._accounts = []
+        self._current_tx = None
         self._error_message = None
 
     def reset_engine(self):
         self.reset_state()
+        self._notifications.clear()
         self._storage.clear()
 
     def to_json(self, path: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
-        return {
+        json = {
             'path': path if isinstance(path, str) else '',
             'scripthash': str(path) if isinstance(path, UInt160) else None,
             'method': method,
@@ -322,3 +340,6 @@ class TestEngine:
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }
+        if isinstance(self._current_tx, Transaction):
+            json['currentTx'] = self._current_tx.to_json()
+        return json

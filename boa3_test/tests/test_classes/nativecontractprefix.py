@@ -27,6 +27,7 @@ class NativeContractId(IntEnum):
     ContractManagement = -1
     NEO = -5
     GAS = -6
+    Oracle = -9
 
     NONE = 0
 

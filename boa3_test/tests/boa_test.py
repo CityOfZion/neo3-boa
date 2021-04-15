@@ -11,6 +11,7 @@ from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3_test.tests.test_classes.transactionattribute import oracleresponse
 
 
 class BoaTest(TestCase):
@@ -196,15 +197,37 @@ class BoaTest(TestCase):
             from boa3.neo3.core.types import UInt160
             smart_contract_path = UInt160(smart_contract_path)
 
+        self._set_fake_data(test_engine, fake_storage, signer_accounts)
+        result = test_engine.run(smart_contract_path, method, *arguments,
+                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
+
+        return self._filter_result(test_engine, expected_result_type, result)
+
+    def run_oracle_response(self, test_engine: TestEngine, request_id: int,
+                            response_code: oracleresponse.OracleResponseCode,
+                            oracle_result: bytes, reset_engine: bool = False,
+                            fake_storage: Dict[Tuple[str, str], Any] = None,
+                            signer_accounts: Iterable[bytes] = (),
+                            expected_result_type: Type = None,
+                            rollback_on_fault: bool = True) -> Any:
+
+        self._set_fake_data(test_engine, fake_storage, signer_accounts)
+        result = test_engine.run_oracle_response(request_id, response_code, oracle_result,
+                                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
+
+        return self._filter_result(test_engine, expected_result_type, result)
+
+    def _set_fake_data(self, test_engine: TestEngine,
+                       fake_storage: Dict[Tuple[str, str], Any],
+                       signer_accounts: Iterable[bytes]):
+
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)
 
         for account in signer_accounts:
             test_engine.add_signer_account(account)
 
-        result = test_engine.run(smart_contract_path, method, *arguments,
-                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
-
+    def _filter_result(self, test_engine, expected_result_type, result) -> Any:
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
             raise TestExecutionException(test_engine.error)
 
