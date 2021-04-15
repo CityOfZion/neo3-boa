@@ -702,18 +702,32 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
+    <td>✅</td>
+    <td>v0.8</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = abs(-5)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-3">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
     <td>🔜</td>
     <td>backlog</td>
     <td>Built in function</td>
     <td>
       <pre>
         <code>
-  a = abs(-5)
-  b = max(7, 0, 12, 8)
-  c = min(1, 6, 2)
-  d = pow(2, 2)
-  e = sum(list_of_num, 0)
-  f = reversed([1, 2, 3, 4])
+  a = max(7, 0, 12, 8)
+  b = min(1, 6, 2)
+  c = pow(2, 2)
+  d = sum(list_of_num, 0)
+  e = reversed([1, 2, 3, 4])
         </code>
       </pre>
     </td>

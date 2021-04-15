@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.8.0] - 2021-04-15
+### Added
+- Included StorageMap class
+- Implemented `**` operator and `sqrt` function
+- Supports `Oracle` in smart contracts
+- Implemented `abs` builtin
+
+### Fixed
+- Assert statements weren't included in `.nefdbgnfo`
+
+
 ## [0.7.1] - 2021-03-24
 ### Added
 - Support to [Neo 3 rc1](https://github.com/neo-project/neo/tree/v3.0.0-rc1)
@@ -151,16 +162,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.7.1...HEAD
-[0.7.1]: https://github.com/CityOfZion/neo3-boa/compare/v0.7.0...v0.7.1
-[0.7.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.1...v0.7.0
-[0.6.1]: https://github.com/CityOfZion/neo3-boa/compare/v0.6.0...v0.6.1
-[0.6.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.2.2...v0.3.0
-[0.2.2]: https://github.com/CityOfZion/neo3-boa/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/CityOfZion/neo3-boa/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/CityOfZion/neo3-boa/compare/v0.0.3...v0.2.0
-[0.0.3]: https://github.com/CityOfZion/neo3-boa/compare/v0.0.2...v0.0.3
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.0
+[0.7.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.7.1
+[0.7.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.7.0
+[0.6.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.6.1
+[0.6.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.6.0
+[0.5.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.5.0
+[0.4.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.4.0
+[0.3.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.3.0
+[0.2.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.2.2
+[0.2.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.2.1
+[0.2.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.2.0
+[0.0.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.0.3
 [0.0.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.0.2

@@ -244,21 +244,21 @@ Functions
      - ::
 
          a = len('hello')
-         a = range(1, 5, 2)
-         b = isinstance(5, str)
+         b = range(1, 5, 2)
+         c = isinstance(5, str)
          print(42)
-         a = max(7, 12)
-         b = min(1, 6)
+         d = abs(-5)
+         e = max(7, 12)
+         f = min(1, 6)
    * - 🔜
      - Built in functions
      - ::
 
-         a = abs(-5)
-         b = max(7, 0, 12, 8)
-         c = min(1, 6, 2)
-         d = pow(2, 2)
-         e = sum(list_of_num, 0)
-         f = reversed([1, 2, 3, 4])
+         a = max(7, 0, 12, 8)
+         b = min(1, 6, 2)
+         c = pow(2, 2)
+         d = sum(list_of_num, 0)
+         e = reversed([1, 2, 3, 4])
 
 Other Features
 --------------

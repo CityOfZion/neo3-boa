@@ -2,7 +2,7 @@ from typing import Any
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import abort
-from boa3.builtin.interop.contract import call_contract, GAS
+from boa3.builtin.interop.contract import GAS, call_contract
 from boa3.builtin.interop.crypto import hash160
 from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash, get_time
 from boa3.builtin.interop.storage import get, put
