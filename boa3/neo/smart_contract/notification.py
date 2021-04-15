@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Tuple
 
+from boa3.neo import to_hex_str
 from boa3.neo.utils import stack_item_from_json
 
 
@@ -60,4 +61,7 @@ class Notification:
         return cls(name, script, *value)
 
     def __str__(self) -> str:
-        return '{0}({1})'.format(self._event_name, ', '.join(self._value))
+        return '[{0}] {1}'.format(to_hex_str(self.origin), self._event_name)
+
+    def __repr__(self) -> str:
+        return str(self)

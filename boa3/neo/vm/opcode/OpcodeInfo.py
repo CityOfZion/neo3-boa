@@ -379,6 +379,10 @@ class OpcodeInfo:
     DIV = OpcodeInformation(Opcode.DIV)
     # Returns the remainder after dividing a by b.
     MOD = OpcodeInformation(Opcode.MOD)
+    # The result of raising value to the exponent power.
+    POW = OpcodeInformation(Opcode.POW)
+    # Returns the square root of a specified number.
+    SQRT = OpcodeInformation(Opcode.SQRT)
     # Shifts a left b bits, preserving sign.
     SHL = OpcodeInformation(Opcode.SHL)
     # Shifts a right b bits, preserving sign.

@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 
-from boa3.model.builtin.interop.crypto.cryptolibmethod import CryptoLibMethod
+from boa3.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
@@ -10,9 +10,9 @@ class Hash160Method(CryptoLibMethod):
     def __init__(self):
         from boa3.model.type.type import Type
         identifier = 'hash160'
-        syscall = ''
+        native_identifier = ''  # hash160 is not neo native
         args: Dict[str, Variable] = {'key': Variable(Type.any)}
-        super().__init__(identifier, syscall, args, return_type=Type.bytes)
+        super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:

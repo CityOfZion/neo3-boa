@@ -376,6 +376,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._global_assigned_variables.clear()
         self._current_module = None
 
+    def visit_ClassDef(self, node: ast.ClassDef):
+        # TODO: refactor when classes defined by the user are implemented
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='class'
+            )
+        )
+
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
         Visitor of the function node

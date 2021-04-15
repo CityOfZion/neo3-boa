@@ -1,4 +1,5 @@
-__all__ = ['IBuiltinMethod',
+__all__ = ['AbsMethod',
+           'IBuiltinMethod',
            'ByteArrayMethod',
            'CreateEventMethod',
            'EventType',
@@ -10,9 +11,11 @@ __all__ = ['IBuiltinMethod',
            'MinMethod',
            'PrintMethod',
            'RangeMethod',
-           'ScriptHashMethod'
+           'ScriptHashMethod',
+           'SqrtMethod'
            ]
 
+from boa3.model.builtin.method.absmethod import AbsMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
@@ -24,4 +27,5 @@ from boa3.model.builtin.method.maxmethod import MaxMethod
 from boa3.model.builtin.method.minmethod import MinMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
+from boa3.model.builtin.method.sqrtmethod import SqrtMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod

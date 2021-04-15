@@ -9,9 +9,9 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class CryptoLibMethod(InteropMethod):
 
-    def __init__(self, identifier: str, syscall: str, args: Dict[str, Variable] = None,
+    def __init__(self, identifier: str, native_identifier: str, args: Dict[str, Variable] = None,
                  defaults: List[ast.AST] = None, return_type: IType = None):
-        super().__init__(identifier, syscall, args, defaults, return_type)
+        super().__init__(identifier, native_identifier, args, defaults, return_type)
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:

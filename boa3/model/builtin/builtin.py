@@ -18,6 +18,7 @@ from boa3.model.type.itype import IType
 
 class BoaPackage(str, Enum):
     Contract = 'contract'
+    Interop = 'interop'
     Type = 'type'
 
 
@@ -43,14 +44,16 @@ class Builtin:
                 return method
 
     # builtin method
-    Len = LenMethod()
-    IsInstance = IsInstanceMethod()
-    Print = PrintMethod()
-    ScriptHash = ScriptHashMethod()
-    NewEvent = CreateEventMethod()
+    Abs = AbsMethod()
     Exit = ExitMethod()
+    IsInstance = IsInstanceMethod()
+    Len = LenMethod()
+    NewEvent = CreateEventMethod()
     Max = MaxMethod()
     Min = MinMethod()
+    Print = PrintMethod()
+    ScriptHash = ScriptHashMethod()
+    Sqrt = SqrtMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -74,7 +77,8 @@ class Builtin:
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
 
-    _python_builtins: List[IdentifiedSymbol] = [ByteArray,
+    _python_builtins: List[IdentifiedSymbol] = [Abs,
+                                                ByteArray,
                                                 ConvertToBool,
                                                 ConvertToBytes,
                                                 ConvertToInt,
@@ -94,7 +98,8 @@ class Builtin:
                                                 SequenceInsert,
                                                 SequencePop,
                                                 SequenceRemove,
-                                                SequenceReverse
+                                                SequenceReverse,
+                                                Sqrt
                                                 ]
 
     @classmethod
@@ -148,5 +153,6 @@ class Builtin:
                               Nep17Transfer,
                               Nep5Transfer,
                               ],
+        BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: [UInt160]
     }

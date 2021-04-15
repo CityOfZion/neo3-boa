@@ -4,6 +4,7 @@ from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -259,8 +260,30 @@ class TestArithmetic(BoaTest):
         self.assertEqual('unittest', result)
 
     def test_power_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.POW
+            + Opcode.RET
+        )
         path = self.get_contract_path('Power.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'pow', 10, 3)
+        self.assertEqual(1000, result)
+        result = self.run_smart_contract(engine, path, 'pow', 1, 15)
+        self.assertEqual(1, result)
+        result = self.run_smart_contract(engine, path, 'pow', -2, 2)
+        self.assertEqual(4, result)
+        result = self.run_smart_contract(engine, path, 'pow', 0, 20)
+        self.assertEqual(0, result)
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'pow', 1, -2)
 
     def test_str_multiplication_operation(self):
         expected_output = (
@@ -513,8 +536,20 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_power_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + Opcode.POW
+            + Opcode.STARG0
+            + Opcode.RET
+        )
         path = self.get_contract_path('PowerAugmentedAssignment.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        output = Boa3.compile(path)
+
+        self.assertEqual(expected_output, output)
 
     def test_str_multiplication_operation_augmented_assignment(self):
         expected_output = (

@@ -175,7 +175,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 > Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc1
 $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 
@@ -702,18 +702,32 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
+    <td>✅</td>
+    <td>v0.8</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = abs(-5)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-3">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
     <td>🔜</td>
     <td>backlog</td>
     <td>Built in function</td>
     <td>
       <pre>
         <code>
-  a = abs(-5)
-  b = max(7, 0, 12, 8)
-  c = min(1, 6, 2)
-  d = pow(2, 2)
-  e = sum(list_of_num, 0)
-  f = reversed([1, 2, 3, 4])
+  a = max(7, 0, 12, 8)
+  b = min(1, 6, 2)
+  c = pow(2, 2)
+  d = sum(list_of_num, 0)
+  e = reversed([1, 2, 3, 4])
         </code>
       </pre>
     </td>

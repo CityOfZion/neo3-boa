@@ -11,15 +11,16 @@ from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class StorageContextType(ClassType):
+class OracleType(ClassType):
     """
-    A class used to represent Neo StorageContext class
+    A class used to represent Oracle class
     """
 
     def __init__(self):
-        super().__init__('StorageContext')
+        super().__init__('Oracle')
 
         self._variables: Dict[str, Variable] = {}
+        self._class_methods: Dict[str, Method] = {}
         self._constructor: Method = None
 
     @property
@@ -32,7 +33,14 @@ class StorageContextType(ClassType):
 
     @property
     def class_methods(self) -> Dict[str, Method]:
-        return {}
+        # avoid recursive import
+        from boa3.model.builtin.interop.oracle.oraclerequesmethod import OracleRequesMethod
+
+        if len(self._class_methods) == 0:
+            self._class_methods = {
+                'request': OracleRequesMethod()
+            }
+        return self._class_methods
 
     @property
     def instance_methods(self) -> Dict[str, Method]:
@@ -41,26 +49,26 @@ class StorageContextType(ClassType):
     def constructor_method(self) -> Method:
         # was having a problem with recursive import
         if self._constructor is None:
-            self._constructor: Method = StorageContextMethod(self)
+            self._constructor: Method = OracleMethod(self)
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> StorageContextType:
+    def build(cls, value: Any = None) -> OracleType:
         if value is None or cls._is_type_of(value):
-            return _StorageContext
+            return _Oracle
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, StorageContextType)
+        return isinstance(value, OracleType)
 
 
-_StorageContext = StorageContextType()
+_Oracle = OracleType()
 
 
-class StorageContextMethod(IBuiltinMethod):
+class OracleMethod(IBuiltinMethod):
 
-    def __init__(self, return_type: StorageContextType):
-        identifier = '-StorageContext__init__'
+    def __init__(self, return_type: OracleType):
+        identifier = '-Oracle__init__'
         args: Dict[str, Variable] = {}
         super().__init__(identifier, args, return_type=return_type)
 

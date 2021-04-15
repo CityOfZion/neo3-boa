@@ -195,14 +195,20 @@ class TestContractInterop(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'new_method')
+
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
         self.compile_and_save(new_path)
         new_nef, new_manifest = self.get_bytes_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
-        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest)
         self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'new_method')
+        self.assertEqual(42, result)
 
     def test_update_contract_too_many_parameters(self):
         path = self.get_contract_path('UpdateContractTooManyArguments.py')
@@ -236,6 +242,16 @@ class TestContractInterop(BoaTest):
         path = self.get_contract_path('DestroyContract.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+
+        script_hash = hash160(output)
+        call_contract_path = self.get_contract_path('CallScriptHash.py')
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, call_contract_path, 'Main',
+                                    script_hash, 'Main', [])
 
     def test_destroy_contract_too_many_parameters(self):
         path = self.get_contract_path('DestroyContractTooManyArguments.py')

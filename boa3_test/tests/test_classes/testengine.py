@@ -11,7 +11,9 @@ from boa3.neo3.core.types import UInt160
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.storage import Storage
+from boa3_test.tests.test_classes.testcontract import TestContract
 from boa3_test.tests.test_classes.transaction import Transaction
+from boa3_test.tests.test_classes.transactionattribute import oracleresponse
 
 
 class TestEngine:
@@ -37,8 +39,9 @@ class TestEngine:
         self._height: int = 0
         self._blocks: List[Block] = []
 
+        self._current_tx: Optional[Transaction] = None
         self._accounts: List[bytes] = []
-        self._contract_paths: List[str] = []
+        self._contract_paths: List[TestContract] = []
 
         self._error_message: Optional[str] = None
         self._neo_balance_prefix: bytes = b'\x14'
@@ -63,8 +66,12 @@ class TestEngine:
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
-    def get_events(self, event_name: str) -> List[Notification]:
-        return [n for n in self._notifications if n.name == event_name]
+    def get_events(self, event_name: str, origin: UInt160 = None) -> List[Notification]:
+        if origin is None:
+            return [n for n in self._notifications if n.name == event_name]
+        else:
+            origin_bytes = origin.to_array() if isinstance(origin, UInt160) else bytes(origin)
+            return [n for n in self._notifications if n.name == event_name and n.origin == origin_bytes]
 
     @property
     def storage(self) -> Storage:
@@ -76,11 +83,11 @@ class TestEngine:
 
         if contract_path.endswith('.py'):
             contract_path = contract_path.replace('.py', '.nef')
-        if contract_path not in self._contract_paths:
+        if contract_path not in self.contracts:
             return None
 
-        index = self._contract_paths.index(contract_path)
-        storage_key = Storage.build_key(key, index)
+        contract_id = self._get_contract_id(contract_path)
+        storage_key = Storage.build_key(key, contract_id)
         if storage_key in self._storage:
             return self._storage[storage_key]
         else:
@@ -92,9 +99,9 @@ class TestEngine:
 
         if contract_path.endswith('.py'):
             contract_path = contract_path.replace('.py', '.nef')
-        if contract_path in self._contract_paths:
-            index = self._contract_paths.index(contract_path)
-            storage_key = Storage.build_key(key, index)
+        if contract_path in self.contracts:
+            contract_id = self._get_contract_id(contract_path)
+            storage_key = Storage.build_key(key, contract_id)
 
             self._storage[storage_key] = value
 
@@ -109,11 +116,11 @@ class TestEngine:
 
         if contract_path.endswith('.py'):
             contract_path = contract_path.replace('.py', '.nef')
-        if contract_path not in self._contract_paths:
+        if contract_path not in self.contracts:
             return None
 
-        index = self._contract_paths.index(contract_path)
-        storage_key = Storage.build_key(key, index)
+        contract_id = self._get_contract_id(contract_path)
+        storage_key = Storage.build_key(key, contract_id)
 
         if storage_key in self._storage:
             self._storage.pop(key)
@@ -130,11 +137,26 @@ class TestEngine:
 
     @property
     def contracts(self) -> List[str]:
-        return self._contract_paths.copy()
+        return [contract.path for contract in self._contract_paths]
 
     def add_contract(self, contract_nef_path: str):
         if contract_nef_path.endswith('.nef') and contract_nef_path not in self._contract_paths:
-            self._contract_paths.append(contract_nef_path)
+            self._contract_paths.append(TestContract(contract_nef_path))
+
+    def remove_contract(self, contract_index_or_path: Union[int, str]):
+        if isinstance(contract_index_or_path, str):
+            index = self._get_contract_id(contract_index_or_path)
+        else:
+            index = contract_index_or_path
+
+        if 0 <= index < len(self._contract_paths):
+            return self._contract_paths.pop(index)
+
+    def _get_contract_id(self, contract_path: str) -> int:
+        contracts = self.contracts
+        if contract_path in contracts:
+            return contracts.index(contract_path)
+        return -1
 
     @property
     def height(self) -> int:
@@ -181,21 +203,48 @@ class TestEngine:
         for tx in transaction:
             current_block.add_transaction(tx)
 
+    def run_oracle_response(self, request_id: int, oracle_response: oracleresponse.OracleResponseCode,
+                            result: bytes, reset_engine: bool = False,
+                            rollback_on_fault: bool = True) -> Any:
+        request_ids = [x.arguments[0] if isinstance(x.arguments, (tuple, list)) and len(x.arguments) > 0
+                       else x.arguments
+                       for x in self.get_events('OracleRequest', constants.ORACLE_SCRIPT)]
+
+        assert request_id in request_ids, 'Request ID not found'
+        self._current_tx = Transaction(b'')
+        self._current_tx.add_attribute(oracleresponse.OracleResponse(request_id, oracle_response, result))
+
+        return self.run(UInt160(constants.ORACLE_SCRIPT), 'finish',
+                        reset_engine=reset_engine,
+                        rollback_on_fault=rollback_on_fault)
+
     def run(self, nef_path: Union[str, UInt160], method: str, *arguments: Any, reset_engine: bool = False,
             rollback_on_fault: bool = True) -> Any:
         import json
         import subprocess
 
         if isinstance(nef_path, str) and nef_path not in self._contract_paths:
-            self._contract_paths.append(nef_path)
+            self.add_contract(nef_path)
 
         test_engine_args = self.to_json(nef_path, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
 
-        process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
-                                   text=True)
+        try:
+            process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT,
+                                       text=True)
+        except BaseException:
+            json_path = '{0}/test-engine-test.json'.format(path.curdir)
+            with open(json_path, 'wb+') as json_file:
+                json_file.write(String(param_json).to_bytes())
+                json_file.close()
+
+            process = subprocess.Popen(['dotnet', self._test_engine_path, json_path],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT,
+                                       text=True)
+
         stdout, stderr = process.communicate()
 
         if reset_engine:
@@ -233,11 +282,16 @@ class TestEngine:
                         new = Notification.from_json(n)
                         if new is not None:
                             notifications.append(new)
-                    self._notifications = notifications
+                    self._notifications.extend(notifications)
 
                 if 'storage' in result:
                     json_storage = result['storage']
                     self._storage = Storage.from_json(json_storage)
+
+                    index = self._get_contract_id(nef_path)
+                    contract = self._contract_paths[index]
+                    if contract.script_hash is not None and not self._storage.has_contract(contract.script_hash):
+                        self.remove_contract(nef_path)
 
                 if 'blocks' in result:
                     blocks_json = result['blocks']
@@ -265,23 +319,27 @@ class TestEngine:
         self._vm_state = VMState.NONE
         self._gas_consumed = 0
         self._result_stack = []
-        self._notifications = []
         self._accounts = []
+        self._current_tx = None
         self._error_message = None
 
     def reset_engine(self):
         self.reset_state()
+        self._notifications.clear()
         self._storage.clear()
 
     def to_json(self, path: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
-        return {
+        json = {
             'path': path if isinstance(path, str) else '',
             'scripthash': str(path) if isinstance(path, UInt160) else None,
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),
-            'contracts': [{'nef': contract_path} for contract_path in self._contract_paths],
+            'contracts': [{'nef': contract_path} for contract_path in self.contracts],
             'signerAccounts': [to_hex_str(address) for address in self._accounts],
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }
+        if isinstance(self._current_tx, Transaction):
+            json['currentTx'] = self._current_tx.to_json()
+        return json

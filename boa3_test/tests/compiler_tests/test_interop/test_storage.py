@@ -612,3 +612,35 @@ class TestStorageInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path1, 'get_value', key)
         self.assertEqual(value, result)
+
+    def test_create_map(self):
+        path = self.get_contract_path('StorageCreateMap.py')
+        self.compile_and_save(path)
+        map_key = b'example_'
+
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'', result)
+
+        stored_value = b'123'
+        result = self.run_smart_contract(engine, path, 'insert_to_map', 'test1', stored_value)
+        self.assertIsVoid(result)
+
+        storage_value = engine.storage_get(b'test1', path)
+        self.assertIsNone(storage_value)
+        storage_value = engine.storage_get(map_key + b'test1', path)
+        self.assertIsNotNone(storage_value)
+        self.assertEqual(stored_value, storage_value)
+
+        result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',
+                                         expected_result_type=bytes)
+        self.assertEqual(stored_value, result)
+
+        result = self.run_smart_contract(engine, path, 'delete_from_map', 'test1')
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'', result)

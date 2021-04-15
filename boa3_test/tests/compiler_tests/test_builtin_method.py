@@ -976,3 +976,77 @@ class TestBuiltinMethod(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     # endregion
+
+    # region sqrt test
+
+    def test_sqrt_method(self):
+        path = self.get_contract_path('Sqrt.py')
+        engine = TestEngine()
+
+        from math import sqrt
+
+        expected_result = int(sqrt(0))
+        result = self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(expected_result, result)
+        expected_result = int(sqrt(1))
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(expected_result, result)
+        expected_result = int(sqrt(3))
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        self.assertEqual(expected_result, result)
+        expected_result = int(sqrt(4))
+        result = self.run_smart_contract(engine, path, 'main', 4)
+        self.assertEqual(expected_result, result)
+        expected_result = int(sqrt(8))
+        result = self.run_smart_contract(engine, path, 'main', 8)
+        self.assertEqual(expected_result, result)
+        expected_result = int(sqrt(10))
+        result = self.run_smart_contract(engine, path, 'main', 10)
+        self.assertEqual(expected_result, result)
+
+        with self.assertRaises(TestExecutionException):
+            result = self.run_smart_contract(engine, path, 'main', -1)
+
+        val = 25
+        expected_result = int(sqrt(val))
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(expected_result, result)
+
+    # endregion
+
+    # region abs test
+
+    def test_abs(self):
+        path = self.get_contract_path('Abs.py')
+        engine = TestEngine()
+
+        val = 10
+        expected_result = abs(val)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(expected_result, result)
+
+        expected_result = abs(-1)
+        result = self.run_smart_contract(engine, path, 'main', -1)
+        self.assertEqual(expected_result, result)
+
+        expected_result = abs(1)
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(expected_result, result)
+
+    def test_abs_bytes(self):
+        path = self.get_contract_path('AbsMismatchedTypesBytes.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_abs_string(self):
+        path = self.get_contract_path('AbsMismatchedTypesString.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_abs_too_few_parameters(self):
+        path = self.get_contract_path('AbsTooFewParameters.py')
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_abs_too_many_parameters(self):
+        path = self.get_contract_path('AbsTooManyParameters.py')
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    # endregion
