@@ -12,7 +12,8 @@ __all__ = ['AbsMethod',
            'PrintMethod',
            'RangeMethod',
            'ScriptHashMethod',
-           'SqrtMethod'
+           'SqrtMethod',
+           'SumMethod'
            ]
 
 from boa3.model.builtin.method.absmethod import AbsMethod
@@ -28,4 +29,5 @@ from boa3.model.builtin.method.minmethod import MinMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.sqrtmethod import SqrtMethod
+from boa3.model.builtin.method.summethod import SumMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod

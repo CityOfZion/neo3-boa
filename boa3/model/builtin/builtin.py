@@ -54,6 +54,7 @@ class Builtin:
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     Sqrt = SqrtMethod()
+    Sum = SumMethod()
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
@@ -99,7 +100,8 @@ class Builtin:
                                                 SequencePop,
                                                 SequenceRemove,
                                                 SequenceReverse,
-                                                Sqrt
+                                                Sqrt,
+                                                Sum
                                                 ]
 
     @classmethod
