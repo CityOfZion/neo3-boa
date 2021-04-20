@@ -1050,3 +1050,49 @@ class TestBuiltinMethod(BoaTest):
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     # endregion
+
+    # region sum test
+
+    def test_sum(self):
+        path = self.get_contract_path('Sum.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        val = [1, 2, 3, 4]
+        expected_result = sum(val)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(expected_result, result)
+
+        val = list(range(10, 20, 2))
+        expected_result = sum(val)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(expected_result, result)
+
+    def test_sum_with_start(self):
+        path = self.get_contract_path('SumWithStart.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        val = [1, 2, 3, 4]
+        expected_result = sum(val, 10)
+        result = self.run_smart_contract(engine, path, 'main', val, 10)
+        self.assertEqual(expected_result, result)
+
+        val = list(range(10, 20, 2))
+        expected_result = sum(val, 20)
+        result = self.run_smart_contract(engine, path, 'main', val, 20)
+        self.assertEqual(expected_result, result)
+
+    def test_sum_mismatched_type(self):
+        path = self.get_contract_path('SumMismatchedTypes.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_sum_too_few_parameters(self):
+        path = self.get_contract_path('SumTooFewParameters.py')
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_sum_too_many_parameters(self):
+        path = self.get_contract_path('SumTooManyParameters.py')
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    # endregion
