@@ -13,6 +13,7 @@ from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.symbol import ISymbol
 from boa3.model.type.collection.sequence.uint160type import UInt160Type
+from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 
 
@@ -116,6 +117,7 @@ class Builtin:
     # boa builtin type
     Event = EventType
     UInt160 = UInt160Type.build()
+    UInt256 = UInt256Type.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -156,5 +158,7 @@ class Builtin:
                               Nep5Transfer,
                               ],
         BoaPackage.Interop: Interop.package_symbols,
-        BoaPackage.Type: [UInt160]
+        BoaPackage.Type: [UInt160,
+                          UInt256
+                          ]
     }
