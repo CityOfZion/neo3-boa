@@ -914,6 +914,22 @@ class TestBuiltinMethod(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(False, result)
 
+    def test_isinstance_uint256(self):
+        path = self.get_contract_path('IsInstanceUInt256.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', bytes(10),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', bytes(20),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', bytes(30),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', bytes(32),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
     def test_isinstance_class(self):
         path = self.get_contract_path('IsInstanceClass.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
