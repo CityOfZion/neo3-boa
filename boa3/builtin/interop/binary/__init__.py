@@ -91,3 +91,18 @@ def atoi(value: str, base: int = 10) -> int:
     :raise Exception: raised when base isn't 10 or 16.
     """
     pass
+
+
+def itoa(value: int, base: int = 10) -> str:
+    """
+    Converts the specific type of value to a decimal or hexadecimal string. The default is decimal.
+
+    :param value: the int value
+    :type value: int
+    :param base: the value's base
+    :type base: int
+
+    :return: The converted string
+    :rtype: int
+    """
+    pass
