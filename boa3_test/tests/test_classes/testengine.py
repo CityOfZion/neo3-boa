@@ -234,7 +234,7 @@ class TestEngine:
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.STDOUT,
                                        text=True)
-        except:
+        except BaseException:
             json_path = '{0}/test-engine-test.json'.format(path.curdir)
             with open(json_path, 'wb+') as json_file:
                 json_file.write(String(param_json).to_bytes())

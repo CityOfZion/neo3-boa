@@ -1,7 +1,7 @@
 from typing import Any, Sequence
 
-from boa3.builtin.interop.contract.contract import Contract
 from boa3.builtin.interop.contract.callflagstype import CallFlags
+from boa3.builtin.interop.contract.contract import Contract
 from boa3.builtin.type import UInt160
 
 

@@ -38,6 +38,7 @@ class Interop:
         return lst
 
     # Interop Types
+    BlockType = BlockType.build()
     CallFlagsType = CallFlagsType()
     ContractType = ContractType.build()
     Iterator = IteratorType.build()
@@ -60,6 +61,7 @@ class Interop:
     # Blockchain Interops
     CurrentHeight = CurrentHeightProperty()
     GetContract = GetContractMethod(ContractType)
+    GetBlock = GetBlockMethod(BlockType)
 
     # Contract Interops
     CallContract = CallMethod()
@@ -72,6 +74,7 @@ class Interop:
     NeoScriptHash = NeoProperty()
     ContractManagementScriptHash = ContractManagement
     CryptoLibScriptHash = CryptoLibContract
+    LedgerScriptHash = LedgerContract
     OracleScriptHash = OracleContract
     StdLibScriptHash = StdLibContract
 
@@ -122,7 +125,9 @@ class Interop:
                                 Itoa,
                                 Serialize
                                 ],
-        InteropPackage.Blockchain: [CurrentHeight,
+        InteropPackage.Blockchain: [BlockType,
+                                    CurrentHeight,
+                                    GetBlock,
                                     GetContract
                                     ],
         InteropPackage.Contract: [CallContract,
