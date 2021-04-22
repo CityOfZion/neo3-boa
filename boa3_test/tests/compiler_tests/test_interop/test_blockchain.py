@@ -1,10 +1,7 @@
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -40,33 +37,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_get_contract(self):
-        from boa3.neo3.contracts import CallFlags
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(Interop.GetContract.method_name)).to_byte_array(min_length=1)
-            + String(Interop.GetContract.method_name).to_bytes()
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
-            + constants.MANAGEMENT_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.RET
-        )
         path = self.get_contract_path('GetContract.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', bytes(20))
         self.assertIsNone(result)

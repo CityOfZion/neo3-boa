@@ -5,7 +5,7 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts.callflags import CallFlags
+from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -216,14 +216,12 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -255,14 +253,12 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -294,14 +290,12 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -336,14 +330,12 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array(min_length=1)
+            + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -382,14 +374,11 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array() + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -421,14 +410,11 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array() + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -460,14 +446,11 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array() + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -502,14 +485,11 @@ class TestCryptoInterop(BoaTest):
             + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
             + Opcode.APPEND
             + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array() + call_flag
+            + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
             + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP

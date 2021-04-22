@@ -1,6 +1,6 @@
 from typing import Dict
 
-from boa3.model.builtin.interop.contract.contractmanagementmethod import ContractManagementMethod
+from boa3.model.builtin.interop.nativecontract.ContractManagement.contractmanagementmethod import ContractManagementMethod
 from boa3.model.builtin.interop.contract.contracttype import ContractType
 from boa3.model.variable import Variable
 
