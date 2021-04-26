@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 
-from boa3.model.builtin.interop.nativecontract import ContractManagementMethod
 from boa3.model.builtin.interop.contract.contracttype import ContractType
+from boa3.model.builtin.interop.nativecontract import ContractManagementMethod
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 

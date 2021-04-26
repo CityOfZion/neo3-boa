@@ -1,4 +1,5 @@
 from boa3.boa3 import Boa3
+from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -58,3 +59,46 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(nef, result[3])
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
+
+    def test_get_block_by_index(self):
+        path = self.get_contract_path('GetBlockByIndex.py')
+
+        engine = TestEngine()
+        index = 0
+        result = self.run_smart_contract(engine, path, 'Main', index)
+        self.assertIsInstance(result, list)
+        self.assertEqual(9, len(result))
+        self.assertEqual(index, result[5])
+
+        index = 10
+        result = self.run_smart_contract(engine, path, 'Main', index)
+        self.assertIsNone(result)
+
+        engine.increase_block(10)
+        result = self.run_smart_contract(engine, path, 'Main', index)
+        self.assertIsInstance(result, list)
+        self.assertEqual(9, len(result))
+        self.assertEqual(index, result[5])
+
+    def test_get_block_by_hash(self):
+        path = self.get_contract_path('GetBlockByHash.py')
+
+        engine = TestEngine()
+        engine.increase_block(1)
+        block_hash = bytes(32)
+        result = self.run_smart_contract(engine, path, 'Main', block_hash)
+        self.assertIsNone(result)
+
+        from boa3.neo import from_hex_str
+        # TODO: using genesis block hash for testing, change when TestEngine returns blocks hashes
+        block_hash = from_hex_str('0xc3db4ba50ede4f9e749bd97e1499953ae17e65a415c6bf9e38c01cf92b03d156')
+
+        result = self.run_smart_contract(engine, path, 'Main', block_hash)
+        self.assertIsInstance(result, list)
+        self.assertEqual(9, len(result))
+        self.assertEqual(block_hash, result[0])
+        self.assertEqual(0, result[5])  # genesis block's index is zero
+
+    def test_get_block_mismatched_types(self):
+        path = self.get_contract_path('GetBlockMismatchedTypes.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
