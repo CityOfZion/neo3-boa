@@ -987,13 +987,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if builtin_symbol is not None:
                 callable_target = builtin_symbol
 
+        callable_method_id = None
         if isinstance(callable_target, ClassType):
             callable_target = callable_target.constructor_method()
+            callable_method_id = '__init__'
 
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             # if it is None, the error was already logged
             if callable_id is not None:
+                if callable_method_id is not None:
+                    callable_id = '{0}.{1}()'.format(callable_id, callable_method_id)
                 self._log_error(
                     CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
                 )

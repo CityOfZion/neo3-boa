@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.method import Method
 from boa3.model.property import Property
@@ -49,7 +49,10 @@ class ClassType(IType, ABC):
         return {}
 
     @abstractmethod
-    def constructor_method(self) -> Method:
+    def constructor_method(self) -> Optional[Method]:
+        """
+        If the class constructor is None, it mustn't allow instantiation of this class
+        """
         pass
 
     @property
