@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from boa3.model.method import Method
 from boa3.model.property import Property
@@ -63,12 +63,7 @@ class IteratorType(ClassType, ICollectionType):
             }
         return self._methods.copy()
 
-    def constructor_method(self) -> Method:
-        # was having a problem with recursive import
-        if self._constructor is None:
-            from boa3.model.builtin.interop.iterator.iteratorinitmethod import IteratorMethod
-            self._constructor: Method = IteratorMethod(self)
-
+    def constructor_method(self) -> Optional[Method]:
         return self._constructor
 
     @property

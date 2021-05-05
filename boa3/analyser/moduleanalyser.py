@@ -539,7 +539,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             init = target_type.constructor_method()
             if hasattr(init, 'build'):
                 init = init.build(args)
-            target_type = init.return_type
+            target_type = init.return_type if init is not None else target_type
 
         return self.get_type(target_type)
 

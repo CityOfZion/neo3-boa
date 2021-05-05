@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.method import Method
 from boa3.model.property import Property
@@ -50,7 +50,7 @@ class UInt160Type(BytesType, ClassType):
     def instance_methods(self) -> Dict[str, Method]:
         return {}
 
-    def constructor_method(self) -> Method:
+    def constructor_method(self) -> Optional[Method]:
         return self._constructor
 
     @property

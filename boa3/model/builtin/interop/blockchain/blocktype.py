@@ -53,7 +53,7 @@ class BlockType(ClassType):
     def instance_methods(self) -> Dict[str, Method]:
         return {}
 
-    def constructor_method(self) -> Method:
+    def constructor_method(self) -> Optional[Method]:
         # was having a problem with recursive import
         if self._constructor is None:
             self._constructor: Method = BlockMethod(self)
