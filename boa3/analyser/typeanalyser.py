@@ -24,6 +24,7 @@ from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
+from boa3.model.type.typeutils import TypeUtils
 from boa3.model.variable import Variable
 
 
@@ -399,7 +400,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # if it is a type hint, returns the outer type
         if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
-            return value
+            if isinstance(value, Collection):
+                value = value.build_collection(*index)
+            return TypeUtils.type.build(value)
 
         symbol_type: IType = self.get_type(value)
         index_type: IType = self.get_type(index[0])
@@ -1003,7 +1006,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             private_identifier = None  # used for validating internal builtin methods
             if self.validate_callable_arguments(call, callable_target):
-                args = [self.get_type(param) for param in call.args]
+                args = [self.get_type(param, use_metatype=True) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
                     if callable_target.raw_identifier.startswith('-'):
@@ -1015,6 +1018,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                                 callable_target.not_supported_str(callable_id))
                         )
                         return callable_target.return_type
+
+                    if callable_target.is_cast:
+                        # every typing cast raises a warning
+                        cast_types = callable_target.cast_types
+                        if cast_types is None:
+                            origin_type_id = 'unknown'
+                            cast_type_id = callable_target.type.identifier
+                        else:
+                            origin_type_id = cast_types[0].identifier
+                            cast_type_id = cast_types[1].identifier
+
+                        self._log_warning(
+                            CompilerWarning.TypeCasting(call.lineno, call.col_offset,
+                                                        origin_type_id=origin_type_id,
+                                                        cast_type_id=cast_type_id)
+                        )
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
@@ -1102,7 +1121,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         for index, (arg_id, arg_value) in enumerate(callable.args.items()):
             param = call.args[index]
-            param_type = self.get_type(param)
+            param_type = self.get_type(param, use_metatype=True)
             args_types.append(param_type)
             if not arg_value.type.is_type_of(param_type):
                 self._log_error(
