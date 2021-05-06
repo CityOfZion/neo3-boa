@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional
+from typing import Iterable, Optional, Union
 
 
 class CompilerWarning(ABC, BaseException):
@@ -27,7 +27,7 @@ class CompilerWarning(ABC, BaseException):
 
 class NameShadowing(CompilerWarning):
     """
-    An warning raised when a name from an outer scope symbol is used as the name of an inner scope symbol
+    A warning raised when a name from an outer scope symbol is used as the name of an inner scope symbol
     """
     from boa3.model.symbol import ISymbol
 
@@ -44,7 +44,7 @@ class NameShadowing(CompilerWarning):
 
 class RedeclaredSymbol(CompilerWarning):
     """
-    An warning raised when a name from the same scope is used to identify multiple symbols
+    A warning raised when a name from the same scope is used to identify multiple symbols
     """
 
     def __init__(self, line: int, col: int, symbol_id: str):
@@ -57,9 +57,34 @@ class RedeclaredSymbol(CompilerWarning):
             return "Redeclared '{0}' defined above".format(self.symbol_id)
 
 
+class TypeCasting(CompilerWarning):
+    """
+    A warning raised when a type castings is used.
+    """
+
+    def __init__(self, line: int, col: int, origin_type_id: Union[str, Iterable[str]],
+                 cast_type_id: Union[str, Iterable[str]]):
+        if isinstance(origin_type_id, str):
+            origin_type_id = [origin_type_id]
+        if isinstance(cast_type_id, str):
+            cast_type_id = [cast_type_id]
+
+        self.origin_types = origin_type_id
+        self.cast_types = cast_type_id
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        origin_types = join_args(self.origin_types)
+        cast_types = join_args(self.cast_types)
+        return ("Casting {0} to {1}. Be aware that casting types may lead to runtime errors."
+                .format(origin_types, cast_types)
+                )
+
+
 class UnreachableCode(CompilerWarning):
     """
-    An warning raised when a block of code is detected as unreachable
+    A warning raised when a block of code is detected as unreachable
     """
 
     def __init__(self, line: int, col: int):
@@ -72,7 +97,7 @@ class UnreachableCode(CompilerWarning):
 
 class UsingSpecificException(CompilerWarning):
     """
-    An warning raised when a specific exception is used.
+    A warning raised when a specific exception is used.
     """
 
     def __init__(self, line: int, col: int, exception_id: str):
@@ -82,3 +107,7 @@ class UsingSpecificException(CompilerWarning):
     @property
     def _warning_message(self) -> Optional[str]:
         return "{0} will be interpreted as BaseException when running in the blockchain".format(self._exception_id)
+
+
+def join_args(iterable: Iterable[str]) -> str:
+    return str.join("', '", iterable)

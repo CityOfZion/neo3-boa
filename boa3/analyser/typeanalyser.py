@@ -264,7 +264,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         # if value is None, it is a declaration
         if ann_assign.value is not None:
-            self.validate_type_variable_assign(ann_assign.target, ann_assign.value)
+            self.validate_type_variable_assign(ann_assign.target, ann_assign.value, implicit_cast=True)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """
@@ -283,7 +283,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.validate_type_variable_assign(aug_assign.target, operation)
             aug_assign.op = operation
 
-    def validate_type_variable_assign(self, node: ast.AST, value: Any, target: Any = None) -> bool:
+    def validate_type_variable_assign(self, node: ast.AST, value: Any, target: Any = None,
+                                      implicit_cast: bool = False) -> bool:
         value_type: IType = self.get_type(value)
         if isinstance(value, ast.AST):
             value = self.visit(value)
@@ -347,13 +348,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._current_scope.include_symbol(node.id, Variable(value_type))
 
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
-            self._log_error(
-                CompilerError.MismatchedTypes(
-                    node.lineno, node.col_offset,
-                    actual_type_id=value_type.identifier,
-                    expected_type_id=target_type.identifier
-                ))
-            return False
+            if not implicit_cast:
+                self._log_error(
+                    CompilerError.MismatchedTypes(
+                        node.lineno, node.col_offset,
+                        actual_type_id=value_type.identifier,
+                        expected_type_id=target_type.identifier
+                    ))
+                return False
+            else:
+                self._log_warning(
+                    CompilerWarning.TypeCasting(
+                        node.lineno, node.col_offset,
+                        origin_type_id=value_type.identifier,
+                        cast_type_id=target_type.identifier
+                    )
+                )
 
         return True
 
