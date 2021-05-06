@@ -13,8 +13,8 @@ class NeoStruct(list, ABC):
 
     @classmethod
     def _validate_json(cls, json: Dict[str, Any], required_fields: List[str]):
-        keys = set(json.keys())
-        if not keys.issubset(required_fields):
+        required = set(required_fields)
+        if not required.issubset(json.keys()):
             raise ValueError
 
     @classmethod

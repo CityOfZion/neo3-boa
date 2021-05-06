@@ -1,3 +1,5 @@
+import unittest
+
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.core.types.InteropInterface import InteropInterface
@@ -10,6 +12,7 @@ class TestIteratorInterop(BoaTest):
 
     default_folder: str = 'test_sc/interop_test/iterator'
 
+    @unittest.skip("Iterator create was removed, change when it's fixed")
     def test_create_iterator_list(self):
         expected_output = (
             Opcode.INITSLOT
@@ -31,6 +34,7 @@ class TestIteratorInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'list_iterator', [1, 2, 3])
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
+    @unittest.skip("Iterator create was removed, change when it's fixed")
     def test_create_iterator_dict(self):
         expected_output = (
             Opcode.INITSLOT
@@ -56,6 +60,7 @@ class TestIteratorInterop(BoaTest):
         path = self.get_contract_path('IteratorCreateMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
+    @unittest.skip("Iterator create was removed, change when it's fixed")
     def test_iterator_next(self):
         path = self.get_contract_path('IteratorNext.py')
         self.compile_and_save(path)
@@ -73,6 +78,7 @@ class TestIteratorInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'has_next', {})
         self.assertEqual(False, result)
 
+    @unittest.skip("Iterator create was removed, change when it's fixed")
     def test_iterator_value(self):
         path = self.get_contract_path('IteratorValue.py')
         self.compile_and_save(path)
