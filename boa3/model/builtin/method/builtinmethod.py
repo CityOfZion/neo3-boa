@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.method import Method
@@ -23,6 +23,25 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :return: True if it is supported. False otherwise.
         """
         return True
+
+    def not_supported_str(self, callable_id: str) -> str:
+        return '{0}({1})'.format(callable_id,
+                                 ','.join([arg.type.identifier for arg in self.args.values()]))
+
+    @property
+    def is_cast(self) -> bool:
+        """
+        Returns whether this method is for casting types
+        """
+        return False
+
+    @property
+    def cast_types(self) -> Optional[Tuple[IType, IType]]:
+        """
+        If `is_cast` is True, must return the original type and the target type of the cast.
+        Otherwise, must return None
+        """
+        return None
 
     @property
     def args_on_stack(self) -> int:
@@ -174,7 +193,3 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :rtype: IBuiltinMethod
         """
         return self
-
-    def not_supported_str(self, callable_id: str) -> str:
-        return '{0}({1})'.format(callable_id,
-                                 ','.join([arg.type.identifier for arg in self.args.values()]))

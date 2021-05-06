@@ -1,7 +1,7 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation, UnresolvedOperation
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -90,15 +90,15 @@ class TestBytes(BoaTest):
 
     def test_bytes_set_value(self):
         path = self.get_contract_path('BytesSetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_bytes_clear(self):
         path = self.get_contract_path('BytesClear.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_bytes_reverse(self):
         path = self.get_contract_path('BytesReverse.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_bytes_to_int(self):
         path = self.get_contract_path('BytesToInt.py')
@@ -118,11 +118,11 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_int_mismatched_types(self):
         path = self.get_contract_path('BytesToIntWithBuiltinMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_bytes_to_int_with_byte_array_builtin(self):
         path = self.get_contract_path('BytesToIntWithBytearrayBuiltin.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_bytes_to_bool(self):
         path = self.get_contract_path('BytesToBool.py')
@@ -170,7 +170,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_bool_mismatched_types(self):
         path = self.get_contract_path('BytesToBoolWithBuiltinMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_bytes_to_str(self):
         path = self.get_contract_path('BytesToStr.py')
@@ -190,7 +190,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_str_mismatched_types(self):
         path = self.get_contract_path('BytesToStrWithBuiltinMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
@@ -349,8 +349,21 @@ class TestBytes(BoaTest):
         self.assertEqual(b'\x01', result)
 
     def test_byte_array_literal_value(self):
+        data = b'\x01\x02\x03'
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.STLOC0
+            + Opcode.RET        # return
+        )
+
         path = self.get_contract_path('BytearrayLiteral.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_byte_array_from_literal_bytes(self):
         data = b'\x01\x02\x03'
@@ -392,7 +405,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_string(self):
         path = self.get_contract_path('BytearrayFromString.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_byte_array_append(self):
         path = self.get_contract_path('BytearrayAppend.py')
@@ -491,7 +504,7 @@ class TestBytes(BoaTest):
 
     def test_boa2_byte_array_test2(self):
         path = self.get_contract_path('BytearrayBoa2Test2.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_byte_array_test3(self):
         path = self.get_contract_path('BytearrayBoa2Test3.py')

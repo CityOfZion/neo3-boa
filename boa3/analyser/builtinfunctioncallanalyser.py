@@ -31,11 +31,11 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
     def call(self) -> ast.Call:
         return self._tree
 
-    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
-        return self._origin.get_symbol(symbol_id)
+    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+        return self._origin.get_symbol(symbol_id, is_internal)
 
-    def get_type(self, value: Any) -> IType:
-        return self._origin.get_type(value)
+    def get_type(self, value: Any, use_metadata: bool = False) -> IType:
+        return self._origin.get_type(value, use_metadata)
 
     def validate(self) -> bool:
         """
@@ -72,12 +72,15 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
                 self.call.args[-1] = last_arg.elts[-1]
                 return
 
+        from boa3.model.type.annotation.metatype import MetaType
         from boa3.model.type.type import Type
         is_ast_valid = (isinstance(last_arg, ast.Name)
                         or (isinstance(last_arg, ast.NameConstant) and args_types[-1] is Type.none))
+
         is_id_valid = (hasattr(last_arg, 'id')
                        and last_arg.id != args_types[-1].identifier
-                       and last_arg.id != args_types[-1].raw_identifier)
+                       and last_arg.id != args_types[-1].raw_identifier
+                       and isinstance(self.get_type(last_arg, use_metadata=True), MetaType))
 
         if not is_ast_valid or is_id_valid:
             # if the value is not the identifier of a type

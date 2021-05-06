@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -63,7 +63,7 @@ class TestIf(BoaTest):
 
     def test_if_mismatched_type_condition(self):
         path = self.get_contract_path('MismatchedTypeCondition.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_if_no_condition(self):
         path = self.get_contract_path('IfWithoutCondition.py')
@@ -331,8 +331,31 @@ class TestIf(BoaTest):
             output = Boa3.compile(path)
 
     def test_if_expression_mismatched_types(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # a = 2 if condition else None
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSH2      # 2
+            + Opcode.JMP        # else
+            + Integer(3).to_byte_array(min_length=1, signed=True)
+            + Opcode.PUSHNULL   # None
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return a
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedIfExp.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual(2, result)
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual(None, result)
 
     def test_inner_if_else(self):
         path = self.get_contract_path('InnerIfElse.py')

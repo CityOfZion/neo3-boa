@@ -92,6 +92,8 @@ class Type:
 
                 if generic is Type.any:
                     break
+        if generic is Type.any and Type.any not in types:
+            generic = Type.union.build(types)
         return generic
 
     # Builtin Types

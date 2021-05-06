@@ -7,6 +7,7 @@ from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.symbol import ISymbol
 from boa3.model.type.type import Type
+from boa3.model.type.typeutils import TypeUtils
 
 
 class ImportAnalyser(IAstAnalyser):
@@ -103,6 +104,10 @@ class ImportAnalyser(IAstAnalyser):
                 type_id: str = t_id if t_id in Type.all_types() else t_id.lower()
                 if type_id in Type.all_types():
                     type_symbols[t_id] = Type.all_types()[type_id]
+            else:
+                function_id: str = t_id if t_id in TypeUtils.all_functions() else t_id.lower()
+                if function_id in TypeUtils.all_functions():
+                    type_symbols[t_id] = TypeUtils.all_functions()[function_id]
 
         return type_symbols
 

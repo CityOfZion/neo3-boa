@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 from boa3.builtin import public
 from boa3.builtin.interop.binary import deserialize, serialize
@@ -32,7 +32,6 @@ def main(operation: int) -> Any:
 
         to_retrieve = get('serialized')
         deserialized = deserialize(to_retrieve)
-        if isinstance(deserialized, list):
-            return deserialized[2]
+        return cast(list, deserialized)[2]
 
     return False

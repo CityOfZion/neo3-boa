@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -38,7 +38,7 @@ class TestAny(BoaTest):
 
     def test_variable_assignment_with_any(self):
         path = self.get_contract_path('VariableAssignmentWithAny.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_any_list(self):
         ok = String('ok').to_bytes()
@@ -82,7 +82,7 @@ class TestAny(BoaTest):
 
     def test_any_operation(self):
         path = self.get_contract_path('OperationWithAny.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_function_any_param(self):
         ok = String('ok').to_bytes()
@@ -193,12 +193,48 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_int_sequence_any_assignments(self):
+        ok = String('ok').to_bytes()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # any_list = [True, 1, 'ok']
+            + Integer(len(ok)).to_byte_array() + ok
+            + Opcode.PUSH1
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # int_sequence = any_list
+            + Opcode.STLOC1
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('IntSequenceAnyAssignment.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_str_sequence_any_assignments(self):
+        ok = String('ok').to_bytes()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # any_list = [True, 1, 'ok']
+            + Integer(len(ok)).to_byte_array() + ok
+            + Opcode.PUSH1
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # str_sequence = any_list
+            + Opcode.STLOC1
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('StrSequenceAnyAssignment.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_str_sequence_str_assignment(self):
         some_string = String('some_string').to_bytes()
@@ -293,5 +329,39 @@ class TestAny(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_sequence_of_int_sequence_fail(self):
+        ok = String('ok').to_bytes()
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x04'
+            + b'\x00'
+            + Opcode.PUSH3      # int_list = [1, 2, 3]
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1  # any_tuple = (True, 1, 'ok')
+            + Integer(len(ok)).to_byte_array() + ok
+            + Opcode.PUSH1
+            + Opcode.PUSH1
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC1
+            + Opcode.PUSH8      # int_tuple = 10, 9, 8
+            + Opcode.PUSH9
+            + Opcode.PUSH10
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC2
+            + Opcode.LDLOC2     # a = [int_list, any_tuple, int_tuple]
+            + Opcode.LDLOC1
+            + Opcode.LDLOC0
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC3
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('SequenceOfAnyIntSequence.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)

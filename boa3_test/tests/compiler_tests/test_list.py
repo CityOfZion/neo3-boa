@@ -1,7 +1,7 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import InternalError, MismatchedTypes, UnexpectedArgument, UnresolvedOperation
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -106,7 +106,7 @@ class TestList(BoaTest):
 
     def test_non_sequence_get_value(self):
         path = self.get_contract_path('MismatchedTypeGetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_list_get_value(self):
         expected_output = (
@@ -230,11 +230,11 @@ class TestList(BoaTest):
 
     def test_non_sequence_set_value(self):
         path = self.get_contract_path('MismatchedTypeSetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_list_index_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeListIndex.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_array_boa2_test1(self):
         path = self.get_contract_path('ArrayBoa2Test1.py')
@@ -592,11 +592,11 @@ class TestList(BoaTest):
 
     def test_list_slicing_omitted_stride(self):
         path = self.get_contract_path('ListSlicingWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_list_slicing_omitted_with_stride(self):
         path = self.get_contract_path('ListSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     # endregion
 
@@ -682,7 +682,7 @@ class TestList(BoaTest):
 
     def test_list_append_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeAppendValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_list_append_with_builtin(self):
         expected_output = (
@@ -723,7 +723,7 @@ class TestList(BoaTest):
 
     def test_list_append_with_builtin_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeAppendWithBuiltin.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_list_append_test(self):
         path = self.get_contract_path('AppendBoa2Test.py')
@@ -820,11 +820,11 @@ class TestList(BoaTest):
 
     def test_list_extend_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeExtendValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_list_extend_mismatched_iterable_value_type(self):
         path = self.get_contract_path('MismatchedTypeExtendTupleValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_list_extend_with_builtin(self):
         path = self.get_contract_path('ExtendWithBuiltin.py')
@@ -836,7 +836,7 @@ class TestList(BoaTest):
 
     def test_list_extend_with_builtin_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeExtendWithBuiltin.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
@@ -1030,15 +1030,52 @@ class TestList(BoaTest):
 
     def test_list_pop_mismatched_type_argument(self):
         path = self.get_contract_path('PopListMismatchedTypeArgument.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_list_pop_mismatched_type_result(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x02'
+            + b'\x00'
+            + Opcode.PUSH5      # a = [1, 2, 3, 4, 5]
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH5
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # b = a.pop(2)
+            + Opcode.PUSH2
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.OVER
+            + Opcode.OVER
+            + Opcode.PICKITEM
+            + Opcode.REVERSE3
+            + Opcode.SWAP
+            + Opcode.REMOVE
+            + Opcode.STLOC1
+            + Opcode.LDLOC1     # return b
+            + Opcode.RET
+        )
         path = self.get_contract_path('PopListMismatchedTypeResult.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'pop_test')
+        self.assertEqual(3, result)
 
     def test_list_pop_too_many_arguments(self):
         path = self.get_contract_path('PopListTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_boa2_list_remove_test(self):
         path = self.get_contract_path('RemoveBoa2Test.py')

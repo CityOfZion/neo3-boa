@@ -10,8 +10,10 @@ from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
+from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.type import IType, Type
+from boa3.model.type.typeutils import TypeUtils
 
 
 class IAstAnalyser(ABC, ast.NodeVisitor):
@@ -44,7 +46,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
-        if not any(warn == warning for warn in self.errors):
+        if not any(warn == warning for warn in self.warnings):
             # don't include duplicated warnings
             self.warnings.append(warning)
             if self._log:
@@ -65,11 +67,12 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                                   raised_exception=exception)
                 )
 
-    def get_type(self, value: Any) -> IType:
+    def get_type(self, value: Any, use_metatype: bool = False) -> IType:
         """
         Returns the type of the given value.
 
         :param value: value to get the type
+        :param use_metatype: whether it should return `Type.type` if the value is an IType implementation.
         :return: Returns the :class:`IType` of the the type of the value. `Type.none` by default.
         """
         # visits if it is a node
@@ -80,6 +83,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
             if isinstance(fun_rtype_id, str) and not isinstance(value, ast.Str):
                 value = self.get_symbol(fun_rtype_id)
+                if isinstance(value, IType) and not isinstance(value, MetaType):
+                    value = TypeUtils.type.build(value) if use_metatype else value
             else:
                 value = fun_rtype_id
 
@@ -89,13 +94,20 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             value = value.attr_symbol
 
         if isinstance(value, IType):
-            return value
+            final_type = value
         elif isinstance(value, IExpression):
-            return value.type
+            final_type = value.type
         elif isinstance(value, IOperation):
-            return value.result
+            final_type = value.result
         else:
-            return Type.get_type(value)
+            final_type = Type.get_type(value)
+
+        if isinstance(final_type, MetaType):
+            print()
+        if isinstance(final_type, MetaType) and not use_metatype:
+            return final_type.meta_type
+        else:
+            return final_type
 
     def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
         """

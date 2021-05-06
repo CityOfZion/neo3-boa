@@ -2,7 +2,7 @@ from typing import Dict
 
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation, UnresolvedReference
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
@@ -47,7 +47,7 @@ class TestVariable(BoaTest):
 
     def test_declaration_without_type(self):
         path = self.get_contract_path('DeclarationWithoutType.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_assignment_with_type(self):
         input = 'unit_test'
@@ -212,7 +212,7 @@ class TestVariable(BoaTest):
 
     def test_tuple_multiple_assignments(self):
         path = self.get_contract_path('AssignmentWithTuples.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_many_assignments(self):
         expected_output = (
@@ -306,39 +306,115 @@ class TestVariable(BoaTest):
 
     def test_using_undeclared_variable(self):
         path = self.get_contract_path('UsingUndeclaredVariable.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_return_undeclared_variable(self):
         path = self.get_contract_path('ReturnUndeclaredVariable.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_assign_value_mismatched_type(self):
+        string_value = '1'
+        byte_input = String(string_value).to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1    # a = '1'
+            + Integer(len(byte_input)).to_byte_array()
+            + byte_input
+            + Opcode.STLOC0
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeAssignValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_assign_binary_operation_mismatched_type(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH3    # a = 1 + 2
+            + Opcode.STLOC0
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeAssignBinOp.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_assign_unary_operation_mismatched_type(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5    # a = -5
+            + Opcode.NEGATE
+            + Opcode.STLOC0
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeAssignUnOp.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_assign_mixed_operations_mismatched_type(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x03'
+            + Opcode.LDARG1     # b = min <= a - 2 <= max
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.SUB
+            + Opcode.LE
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.SUB
+            + Opcode.LDARG2
+            + Opcode.LE
+            + Opcode.BOOLAND
+            + Opcode.STLOC0
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeAssignMixedOp.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_assign_sequence_get_mismatched_type(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # b = a[0]
+            + Opcode.PUSH0
+            + Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+            + Opcode.PICKITEM
+            + Opcode.STLOC0
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeAssignSequenceGet.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
     def test_assign_sequence_set_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeAssignSequenceSet.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_aug_assign_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeAugAssign.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_global_declaration_with_assignment(self):
         expected_output = (
@@ -360,7 +436,7 @@ class TestVariable(BoaTest):
 
     def test_global_declaration_without_assignment(self):
         path = self.get_contract_path('GlobalDeclarationWithoutAssignment.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_global_assignment_with_type(self):
         expected_output = (
@@ -400,7 +476,7 @@ class TestVariable(BoaTest):
 
     def test_global_tuple_multiple_assignments(self):
         path = self.get_contract_path('GlobalAssignmentWithTuples.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_many_global_assignments(self):
         expected_output = (
