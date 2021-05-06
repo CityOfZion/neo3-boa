@@ -67,6 +67,7 @@ class Interop:
     CallContract = CallMethod()
     CreateContract = CreateMethod(ContractType)
     DestroyContract = DestroyMethod()
+    GetCallFlags = GetCallFlagsMethod(CallFlagsType)
     UpdateContract = UpdateMethod()
 
     # Native Contracts
@@ -136,6 +137,7 @@ class Interop:
                                   CreateContract,
                                   DestroyContract,
                                   GasScriptHash,
+                                  GetCallFlags,
                                   NeoScriptHash,
                                   UpdateContract
                                   ],

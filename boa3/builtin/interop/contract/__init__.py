@@ -65,5 +65,12 @@ def destroy_contract():
     pass
 
 
+def get_call_flags() -> CallFlags:
+    """
+    Gets the CallFlags in the current context
+    """
+    pass
+
+
 NEO: UInt160 = UInt160()  # not real value
 GAS: UInt160 = UInt160()  # not real value
