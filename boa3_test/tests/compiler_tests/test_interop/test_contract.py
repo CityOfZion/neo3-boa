@@ -266,3 +266,36 @@ class TestContractInterop(BoaTest):
         self.assertEqual(0b00000001, result)
         result = self.run_smart_contract(engine, path, 'main', 'NONE')
         self.assertEqual(0, result)
+
+    def test_get_call_flags(self):
+        path = self.get_contract_path('CallScriptHashWithFlags.py')
+        call_contract_path = self.get_contract_path('GetCallFlags.py')
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        call_hash = hash160(contract)
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'main')
+        engine.add_contract(call_contract_path)
+
+        from boa3.neo3.contracts import CallFlags
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALL)
+        self.assertEqual(CallFlags.ALL, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.READ_ONLY)
+        self.assertEqual(CallFlags.READ_ONLY, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.STATES)
+        self.assertEqual(CallFlags.STATES, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.NONE)
+        self.assertEqual(CallFlags.NONE, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.READ_STATES)
+        self.assertEqual(CallFlags.READ_STATES, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.WRITE_STATES)
+        self.assertEqual(CallFlags.WRITE_STATES, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_CALL)
+        self.assertEqual(CallFlags.ALLOW_CALL, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_NOTIFY)
+        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
