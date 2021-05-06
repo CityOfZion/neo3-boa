@@ -3,5 +3,5 @@ from boa3.builtin.interop.iterator import Iterator
 
 
 @public
-def list_iterator(x: int) -> Iterator:
-    return Iterator(x)
+def new_iterator() -> Iterator:
+    return Iterator()  # shouldn't compile
