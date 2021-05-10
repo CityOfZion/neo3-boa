@@ -21,13 +21,16 @@ class IsInstanceMethod(IBuiltinMethod):
         super().__init__(identifier, args, return_type=Type.bool)
 
         from boa3.model.type.collection.sequence.tupletype import TupleType
+        from boa3.model.type.annotation.metatype import MetaType
         from boa3.model.type.annotation.uniontype import UnionType
+
         if not isinstance(target_type, IType):
             instances = [Type.none]
         elif isinstance(target_type, TupleType) and isinstance(target_type.item_type, UnionType):
-            instances = target_type.item_type.union_types
+            instances = [typ.meta_type if isinstance(typ, MetaType) else typ
+                         for typ in target_type.item_type.union_types]
         else:
-            instances = [target_type]
+            instances = [target_type.meta_type if isinstance(target_type, MetaType) else target_type]
 
         self._instances_type: List[IType] = instances
 

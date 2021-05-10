@@ -1,3 +1,5 @@
+from typing import List, cast
+
 from boa3.builtin import public
 
 
@@ -15,17 +17,8 @@ def main() -> int:
         'mcalll': mymethod(1, 4)
     }
 
-    j4 = d['mcalll']
-
-    if isinstance(j4, int):
-        j5 = d['z']
-
-        if isinstance(j5, list):
-            j6 = j5[3]
-
-            if isinstance(j6, int):
-                return j4 + j6
-    return -1
+    j4: int = d['mcalll']
+    return j4 + cast(List[int], d['z'])[3]
 
 
 def mymethod(a: int, b: int) -> int:
