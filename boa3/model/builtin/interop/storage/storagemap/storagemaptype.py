@@ -50,7 +50,7 @@ class StorageMapType(ClassType):
             }
         return self._instance_methods
 
-    def constructor_method(self) -> Method:
+    def constructor_method(self) -> Optional[Method]:
         # was having a problem with recursive import
         if self._constructor is None:
             self._constructor: Method = StorageMapMethod(self)
