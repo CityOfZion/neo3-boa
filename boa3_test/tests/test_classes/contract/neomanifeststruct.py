@@ -14,6 +14,7 @@ class NeoManifestStruct(NeoStruct):
     _abi_field = 'abi'
     _permissions_field = 'permissions'
     _trusts_field = 'trusts'
+    _features_field = 'features'
     _extra_field = 'extra'
 
     @classmethod
@@ -24,6 +25,7 @@ class NeoManifestStruct(NeoStruct):
                            cls._abi_field,
                            cls._permissions_field,
                            cls._trusts_field,
+                           cls._features_field,
                            cls._extra_field
                            ]
         cls._validate_json(json, required_fields)
@@ -31,6 +33,7 @@ class NeoManifestStruct(NeoStruct):
         struct = cls()
         struct.append(json[cls._name_field])
         struct.append(json[cls._groups_field])  # TODO: groups aren't implemented yet
+        struct.append({})   # TODO: features aren't implemented yet
         struct.append(json[cls._supported_standards_field])  # TODO: supported standards aren't implemented
         struct.append(NeoAbiStruct.from_json(json[cls._abi_field]))
         struct.append([NeoPermissionsStruct.from_json(permission) for permission in json[cls._permissions_field]])

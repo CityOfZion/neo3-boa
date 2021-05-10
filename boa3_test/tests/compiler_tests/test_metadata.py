@@ -19,10 +19,6 @@ class TestMetadata(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        # test features fields
-        # removed in neo3-preview4
-        self.assertNotIn('features', manifest)
-
         # test extra field
         self.assertIn('extra', manifest)
         self.assertIsNone(manifest['extra'])
