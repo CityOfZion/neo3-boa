@@ -188,7 +188,7 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
     if not isinstance(to_address, None):    # TODO: change to 'is not None' when `is` semantic is implemented
         contract = get_contract(to_address)
         if not isinstance(contract, None):      # TODO: change to 'is not None' when `is` semantic is implemented
-            call_contract(to_address, 'onPayment', [from_address, amount, data])
+            call_contract(to_address, 'onNEP17Payment', [from_address, amount, data])
 
 
 def mint(account: UInt160, amount: int):

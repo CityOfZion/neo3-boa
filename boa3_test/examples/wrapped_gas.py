@@ -390,7 +390,7 @@ def deploy() -> bool:
 
 
 @public
-def onPayment(from_address: UInt160, amount: int, data: Any):
+def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     """
     If this smart contract receives GAS, it will mint an amount of wrapped GAS
 
