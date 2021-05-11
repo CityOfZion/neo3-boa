@@ -93,7 +93,6 @@ class TestTemplate(BoaTest):
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
-    @unittest.skip('Examples need to be changed to test with the latest Neo version')
     def test_nep5_total_transfer(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
@@ -110,6 +109,9 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
+        # deploying the smart contract will transfer tokens to owner
+        transfer_events = engine.get_events('transfer')
+        self.assertEqual(1, len(transfer_events))
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -145,7 +147,8 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('transfer')
-        self.assertEqual(0, len(transfer_events))
+        # there is one transfer event thanks to the deploy
+        self.assertEqual(1, len(transfer_events))
 
         # transferring to yourself doesn't change the balance
         balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
@@ -160,10 +163,10 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('transfer')
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(2, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[1].arguments))
 
-        sender, receiver, amount = transfer_events[0].arguments
+        sender, receiver, amount = transfer_events[1].arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
