@@ -35,6 +35,13 @@
 - [v0.7](#v07)
   - [Built in function](#built-in-function-2)
   - [List type](#list-type-2)
+- [v0.8](#v08)
+  - [Arithmetic augmented assignment operators](#arithmetic-augmented-assignment-operators-1)
+  - [Arithmetic operations](#arithmetic-operations-1)
+  - [Built in function](#built-in-function-3)
+  - [v0.8.1](#v081)
+    - [Built in function](#built-in-function-4)
+    - [Typing functions](#typing-function)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -412,7 +419,29 @@
 - <a href="/boa3_test/test_sc/list_test/RemoveValue.py">RemoveValue.py</a>
 
 ## v0.8
+### Arithmetic augmented assignment operators
+
+- <a href="/boa3_test/test_sc/arithmetic_test/PowerAugmentedAssignment.py">PowerAugmentedAssignment.py</a>
+
+### Arithmetic operations
+
+- <a href="/boa3_test/test_sc/arithmetic_test/Power.py">Power.py</a>
+
 ### Built in function
 
 - <a href="/boa3_test/test_sc/built_in_methods_test/Abs.py">Abs.py</a>
 
+### v0.8.1
+#### Built in function
+
+- <a href="/boa3_test/test_sc/built_in_methods_test/Sum.py">Sum.py</a>
+- <a href="/boa3_test/test_sc/built_in_methods_test/SumWithStart.py">SumWithStart.py</a>
+
+#### Typing function
+
+- <a href="/boa3_test/test_sc/typing_test/CastToInt.py">CastToInt.py</a>
+- <a href="/boa3_test/test_sc/typing_test/CastToStr.py">CastToStr.py</a>
+- <a href="/boa3_test/test_sc/typing_test/CastToList.py">CastToList.py</a>
+- <a href="/boa3_test/test_sc/typing_test/CastToTypedList.py">CastToTypedList.py</a>
+- <a href="/boa3_test/test_sc/typing_test/CastToDict.py">CastToDict.py</a>
+- <a href="/boa3_test/test_sc/typing_test/CastToTypedDict.py">CastToTypedDict.py</a>

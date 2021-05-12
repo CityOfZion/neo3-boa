@@ -63,17 +63,17 @@ Operations
      - Arithmetic operations
      - ::
 
-         +, -, *, //, %
+         +, -, *, //, %, **
    * - 🔜
      - Arithmetic operations
      - ::
 
-         /, **
+         /
    * - ✅
      - Arithmetic augmented assignment operators
      - ::
 
-         +=, -=, *=, //=, %=
+         +=, -=, *=, //=, %=, **=
    * - 🔜
      - Arithmetic augmented assignment operators
      - ::
@@ -250,6 +250,7 @@ Functions
          d = abs(-5)
          e = max(7, 12)
          f = min(1, 6)
+         g = sum(list_of_num, 0)
    * - 🔜
      - Built in functions
      - ::
@@ -257,8 +258,7 @@ Functions
          a = max(7, 0, 12, 8)
          b = min(1, 6, 2)
          c = pow(2, 2)
-         d = sum(list_of_num, 0)
-         e = reversed([1, 2, 3, 4])
+         d = reversed([1, 2, 3, 4])
 
 Other Features
 --------------
