@@ -1,7 +1,6 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.constants import STD_LIB_SCRIPT
 from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
                                           UnexpectedArgument, UnfilledArgument)
 from boa3.model.builtin.interop.interop import Interop
@@ -446,70 +445,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(script_hash, result)
 
     def test_script_hash_variable(self):
-        from boa3.neo3.contracts import CallFlags
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        twenty = Integer(20).to_byte_array()
-        base58_identifier = String(Interop.Base58Decode.method_name).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.DUP
-            + Opcode.SIZE
-            + Opcode.JMPIFNOT
-            + Integer(47).to_byte_array(min_length=1)
-            + Opcode.DUP
-            + Opcode.ISTYPE
-            + Type.str.stack_item
-            + Opcode.JMPIF
-            + Integer(4).to_byte_array(min_length=1)
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(base58_identifier)).to_byte_array(min_length=1) + base58_identifier
-            + Opcode.PUSHDATA1
-            + Integer(len(STD_LIB_SCRIPT)).to_byte_array(min_length=1) + STD_LIB_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.DUP
-            + Opcode.SIZE
-            + Opcode.PUSHDATA1
-            + Integer(len(twenty)).to_byte_array(min_length=1)
-            + twenty
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.JMPGT
-            + Integer(8).to_byte_array(min_length=1)
-            + Opcode.DUP
-            + Opcode.SIZE
-            + Opcode.DEC
-            + Opcode.RIGHT
-            + Opcode.JMP
-            + Integer(9).to_byte_array(min_length=1)
-            + Opcode.PUSH1
-            + Opcode.PUSHDATA1
-            + Integer(len(twenty)).to_byte_array(min_length=1)
-            + twenty
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('ScriptHashVariable.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'Main', 123)
@@ -527,70 +463,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(script_hash, result)
 
     def test_script_hash_variable_with_builtin(self):
-        from boa3.neo3.contracts import CallFlags
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        twenty = Integer(20).to_byte_array()
-        base58_identifier = String(Interop.Base58Decode.method_name).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.DUP
-            + Opcode.SIZE
-            + Opcode.JMPIFNOT
-            + Integer(47).to_byte_array(min_length=1)
-            + Opcode.DUP
-            + Opcode.ISTYPE
-            + Type.str.stack_item
-            + Opcode.JMPIF
-            + Integer(4).to_byte_array(min_length=1)
-            + Opcode.CONVERT
-            + Type.str.stack_item
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(base58_identifier)).to_byte_array(min_length=1) + base58_identifier
-            + Opcode.PUSHDATA1
-            + Integer(len(STD_LIB_SCRIPT)).to_byte_array(min_length=1) + STD_LIB_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.DUP
-            + Opcode.SIZE
-            + Opcode.PUSHDATA1
-            + Integer(len(twenty)).to_byte_array(min_length=1)
-            + twenty
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.JMPGT
-            + Integer(8).to_byte_array(min_length=1)
-            + Opcode.DUP
-            + Opcode.SIZE
-            + Opcode.DEC
-            + Opcode.RIGHT
-            + Opcode.JMP
-            + Integer(9).to_byte_array(min_length=1)
-            + Opcode.PUSH1
-            + Opcode.PUSHDATA1
-            + Integer(len(twenty)).to_byte_array(min_length=1)
-            + twenty
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.SUBSTR
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('ScriptHashVariableBuiltinCall.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         from boa3.neo import to_script_hash
         from base58 import b58encode
         engine = TestEngine()
@@ -914,6 +787,22 @@ class TestBuiltinMethod(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(False, result)
 
+    def test_isinstance_uint256(self):
+        path = self.get_contract_path('IsInstanceUInt256.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', bytes(10),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', bytes(20),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', bytes(30),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', bytes(32),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
     def test_isinstance_class(self):
         path = self.get_contract_path('IsInstanceClass.py')
         self.assertCompilerLogs(NotSupportedOperation, path)
@@ -1047,6 +936,52 @@ class TestBuiltinMethod(BoaTest):
 
     def test_abs_too_many_parameters(self):
         path = self.get_contract_path('AbsTooManyParameters.py')
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    # endregion
+
+    # region sum test
+
+    def test_sum(self):
+        path = self.get_contract_path('Sum.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        val = [1, 2, 3, 4]
+        expected_result = sum(val)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(expected_result, result)
+
+        val = list(range(10, 20, 2))
+        expected_result = sum(val)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(expected_result, result)
+
+    def test_sum_with_start(self):
+        path = self.get_contract_path('SumWithStart.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        val = [1, 2, 3, 4]
+        expected_result = sum(val, 10)
+        result = self.run_smart_contract(engine, path, 'main', val, 10)
+        self.assertEqual(expected_result, result)
+
+        val = list(range(10, 20, 2))
+        expected_result = sum(val, 20)
+        result = self.run_smart_contract(engine, path, 'main', val, 20)
+        self.assertEqual(expected_result, result)
+
+    def test_sum_mismatched_type(self):
+        path = self.get_contract_path('SumMismatchedTypes.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_sum_too_few_parameters(self):
+        path = self.get_contract_path('SumTooFewParameters.py')
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_sum_too_many_parameters(self):
+        path = self.get_contract_path('SumTooManyParameters.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
 
     # endregion

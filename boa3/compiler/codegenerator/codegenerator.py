@@ -227,7 +227,7 @@ class CodeGenerator:
             split = identifier.split('.')
             if len(split) > 1:
                 attribute, symbol_id = '.'.join(split[:-1]), split[-1]
-                attr = self.get_symbol(attribute)
+                attr = self.get_symbol(attribute, is_internal=is_internal)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                     return attr.symbols[symbol_id]
 
@@ -969,14 +969,14 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.UNPACK)
             self.__insert1(OpcodeInfo.PACK)    # creates a new array with the values
 
-    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None):
+    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False):
         """
         Converts the load of a symbol
 
         :param symbol_id: the symbol identifier
         :param params_addresses: a list with each function arguments' first addresses
         """
-        symbol = self.get_symbol(symbol_id)
+        symbol = self.get_symbol(symbol_id, is_internal=is_internal)
         if symbol is not Type.none:
             if isinstance(symbol, Property):
                 symbol = symbol.getter

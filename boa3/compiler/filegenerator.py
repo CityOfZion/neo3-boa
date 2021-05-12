@@ -105,6 +105,7 @@ class FileGenerator:
                 }
             ],
             "trusts": [],
+            "features": [],
             "supportedstandards": [],
             "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
         }

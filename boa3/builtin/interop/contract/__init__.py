@@ -1,10 +1,11 @@
 from typing import Any, Sequence
 
+from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
 from boa3.builtin.type import UInt160
 
 
-def call_contract(script_hash: UInt160, method: str, args: Sequence = ()) -> Any:
+def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_flags: CallFlags = CallFlags.ALL) -> Any:
     """
     Calls a smart contract given the method and the arguments
 
@@ -14,12 +15,14 @@ def call_contract(script_hash: UInt160, method: str, args: Sequence = ()) -> Any
     :type method: str
     :param args: the specified method's arguments
     :type args: Sequence[Any]
+    :param call_flags: the CallFlags to be used to call the contract
+    :type call_flags: CallFlags
 
     :return: the result of the specified method.
     :rtype: Any
 
-    :raise Exception: raised if the script hash is not a valid smart contract or the method was not found or the
-        arguments aren't valid to the specified method.
+    :raise Exception: raised if there isn't a valid CallFlags, the script hash is not a valid smart contract or the
+    method was not found or the arguments aren't valid to the specified method.
     """
     pass
 
@@ -58,6 +61,13 @@ def update_contract(nef_file: bytes, manifest: bytes):
 def destroy_contract():
     """
     Destroy the executing smart contract
+    """
+    pass
+
+
+def get_call_flags() -> CallFlags:
+    """
+    Gets the CallFlags in the current context
     """
     pass
 

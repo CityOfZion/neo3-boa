@@ -24,6 +24,7 @@ from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
+from boa3.model.type.typeutils import TypeUtils
 from boa3.model.variable import Variable
 
 
@@ -264,7 +265,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         # if value is None, it is a declaration
         if ann_assign.value is not None:
-            self.validate_type_variable_assign(ann_assign.target, ann_assign.value)
+            self.validate_type_variable_assign(ann_assign.target, ann_assign.value, implicit_cast=True)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign):
         """
@@ -283,7 +284,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.validate_type_variable_assign(aug_assign.target, operation)
             aug_assign.op = operation
 
-    def validate_type_variable_assign(self, node: ast.AST, value: Any, target: Any = None) -> bool:
+    def validate_type_variable_assign(self, node: ast.AST, value: Any, target: Any = None,
+                                      implicit_cast: bool = False) -> bool:
         value_type: IType = self.get_type(value)
         if isinstance(value, ast.AST):
             value = self.visit(value)
@@ -347,13 +349,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._current_scope.include_symbol(node.id, Variable(value_type))
 
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
-            self._log_error(
-                CompilerError.MismatchedTypes(
-                    node.lineno, node.col_offset,
-                    actual_type_id=value_type.identifier,
-                    expected_type_id=target_type.identifier
-                ))
-            return False
+            if not implicit_cast:
+                self._log_error(
+                    CompilerError.MismatchedTypes(
+                        node.lineno, node.col_offset,
+                        actual_type_id=value_type.identifier,
+                        expected_type_id=target_type.identifier
+                    ))
+                return False
+            else:
+                self._log_warning(
+                    CompilerWarning.TypeCasting(
+                        node.lineno, node.col_offset,
+                        origin_type_id=value_type.identifier,
+                        cast_type_id=target_type.identifier
+                    )
+                )
 
         return True
 
@@ -389,7 +400,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # if it is a type hint, returns the outer type
         if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
-            return value
+            if isinstance(value, Collection):
+                value = value.build_collection(*index)
+            return TypeUtils.type.build(value)
 
         symbol_type: IType = self.get_type(value)
         index_type: IType = self.get_type(index[0])
@@ -974,13 +987,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if builtin_symbol is not None:
                 callable_target = builtin_symbol
 
+        callable_method_id = None
         if isinstance(callable_target, ClassType):
             callable_target = callable_target.constructor_method()
+            callable_method_id = '__init__'
 
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
             # if it is None, the error was already logged
             if callable_id is not None:
+                if callable_method_id is not None:
+                    callable_id = '{0}.{1}()'.format(callable_id, callable_method_id)
                 self._log_error(
                     CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
                 )
@@ -993,7 +1010,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             private_identifier = None  # used for validating internal builtin methods
             if self.validate_callable_arguments(call, callable_target):
-                args = [self.get_type(param) for param in call.args]
+                args = [self.get_type(param, use_metatype=True) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
                     # if the arguments are not generic, build the specified method
                     if callable_target.raw_identifier.startswith('-'):
@@ -1005,6 +1022,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                                 callable_target.not_supported_str(callable_id))
                         )
                         return callable_target.return_type
+
+                    if callable_target.is_cast:
+                        # every typing cast raises a warning
+                        cast_types = callable_target.cast_types
+                        if cast_types is None:
+                            origin_type_id = 'unknown'
+                            cast_type_id = callable_target.type.identifier
+                        else:
+                            origin_type_id = cast_types[0].identifier
+                            cast_type_id = cast_types[1].identifier
+
+                        self._log_warning(
+                            CompilerWarning.TypeCasting(call.lineno, call.col_offset,
+                                                        origin_type_id=origin_type_id,
+                                                        cast_type_id=cast_type_id)
+                        )
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
@@ -1092,7 +1125,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         for index, (arg_id, arg_value) in enumerate(callable.args.items()):
             param = call.args[index]
-            param_type = self.get_type(param)
+            param_type = self.get_type(param, use_metatype=True)
             args_types.append(param_type)
             if not arg_value.type.is_type_of(param_type):
                 self._log_error(
@@ -1240,7 +1273,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: returns the type of the value, the attribute symbol and its id if the attribute exists.
                  Otherwise, returns None
         """
-        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id) \
+        is_internal = hasattr(attribute, 'is_internal_call') and attribute.is_internal_call
+        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id, is_internal) \
             if isinstance(attribute.value, ast.Name) else self.visit(attribute.value)
 
         if value is None and isinstance(attribute.value, ast.Name):

@@ -38,6 +38,8 @@ class Interop:
         return lst
 
     # Interop Types
+    BlockType = BlockType.build()
+    CallFlagsType = CallFlagsType()
     ContractType = ContractType.build()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
@@ -47,28 +49,33 @@ class Interop:
     TriggerType = TriggerType()
 
     # Binary Interops
+    Atoi = AtoiMethod()
     Base58Encode = Base58EncodeMethod()
     Base58Decode = Base58DecodeMethod()
     Base64Encode = Base64EncodeMethod()
     Base64Decode = Base64DecodeMethod()
     Deserialize = DeserializeMethod()
+    Itoa = ItoaMethod()
     Serialize = SerializeMethod()
 
     # Blockchain Interops
     CurrentHeight = CurrentHeightProperty()
     GetContract = GetContractMethod(ContractType)
+    GetBlock = GetBlockMethod(BlockType)
 
     # Contract Interops
     CallContract = CallMethod()
     CreateContract = CreateMethod(ContractType)
     DestroyContract = DestroyMethod()
+    GetCallFlags = GetCallFlagsMethod(CallFlagsType)
     UpdateContract = UpdateMethod()
 
     # Native Contracts
     GasScriptHash = GasProperty()
     NeoScriptHash = NeoProperty()
-    ManagementContractScriptHash = ManagementContract
+    ContractManagementScriptHash = ContractManagement
     CryptoLibScriptHash = CryptoLibContract
+    LedgerScriptHash = LedgerContract
     OracleScriptHash = OracleContract
     StdLibScriptHash = StdLibContract
 
@@ -110,21 +117,27 @@ class Interop:
     StoragePut = StoragePutMethod()
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
-        InteropPackage.Binary: [Base58Encode,
+        InteropPackage.Binary: [Atoi,
+                                Base58Encode,
                                 Base58Decode,
                                 Base64Encode,
                                 Base64Decode,
                                 Deserialize,
+                                Itoa,
                                 Serialize
                                 ],
-        InteropPackage.Blockchain: [CurrentHeight,
+        InteropPackage.Blockchain: [BlockType,
+                                    CurrentHeight,
+                                    GetBlock,
                                     GetContract
                                     ],
         InteropPackage.Contract: [CallContract,
+                                  CallFlagsType,
                                   ContractType,
                                   CreateContract,
                                   DestroyContract,
                                   GasScriptHash,
+                                  GetCallFlags,
                                   NeoScriptHash,
                                   UpdateContract
                                   ],

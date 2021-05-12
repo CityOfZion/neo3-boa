@@ -1,10 +1,8 @@
-from boa3 import constants
 from boa3.boa3 import Boa3
+from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -40,33 +38,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_get_contract(self):
-        from boa3.neo3.contracts import CallFlags
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(Interop.GetContract.method_name)).to_byte_array(min_length=1)
-            + String(Interop.GetContract.method_name).to_bytes()
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
-            + constants.MANAGEMENT_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.RET
-        )
         path = self.get_contract_path('GetContract.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', bytes(20))
         self.assertIsNone(result)
@@ -87,3 +59,46 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(nef, result[3])
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
+
+    def test_get_block_by_index(self):
+        path = self.get_contract_path('GetBlockByIndex.py')
+
+        engine = TestEngine()
+        index = 0
+        result = self.run_smart_contract(engine, path, 'Main', index)
+        self.assertIsInstance(result, list)
+        self.assertEqual(9, len(result))
+        self.assertEqual(index, result[5])
+
+        index = 10
+        result = self.run_smart_contract(engine, path, 'Main', index)
+        self.assertIsNone(result)
+
+        engine.increase_block(10)
+        result = self.run_smart_contract(engine, path, 'Main', index)
+        self.assertIsInstance(result, list)
+        self.assertEqual(9, len(result))
+        self.assertEqual(index, result[5])
+
+    def test_get_block_by_hash(self):
+        path = self.get_contract_path('GetBlockByHash.py')
+
+        engine = TestEngine()
+        engine.increase_block(1)
+        block_hash = bytes(32)
+        result = self.run_smart_contract(engine, path, 'Main', block_hash)
+        self.assertIsNone(result)
+
+        from boa3.neo import from_hex_str
+        # TODO: using genesis block hash for testing, change when TestEngine returns blocks hashes
+        block_hash = from_hex_str('0xc3db4ba50ede4f9e749bd97e1499953ae17e65a415c6bf9e38c01cf92b03d156')
+
+        result = self.run_smart_contract(engine, path, 'Main', block_hash)
+        self.assertIsInstance(result, list)
+        self.assertEqual(9, len(result))
+        self.assertEqual(block_hash, result[0])
+        self.assertEqual(0, result[5])  # genesis block's index is zero
+
+    def test_get_block_mismatched_types(self):
+        path = self.get_contract_path('GetBlockMismatchedTypes.py')
+        self.assertCompilerLogs(MismatchedTypes, path)

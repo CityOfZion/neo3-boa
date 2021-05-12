@@ -1,16 +1,13 @@
 import json
 
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.exception.CompilerError import UnexpectedArgument, UnfilledArgument
 from boa3.exception.CompilerWarning import NameShadowing
-from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts import CallFlags
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
@@ -22,28 +19,7 @@ class TestContractInterop(BoaTest):
     default_folder: str = 'test_sc/interop_test/contract'
 
     def test_call_contract(self):
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x03'
-            + Opcode.LDARG2
-            + Opcode.LDARG1
-            + Opcode.LDARG0
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('CallScriptHash.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
 
@@ -64,28 +40,7 @@ class TestContractInterop(BoaTest):
         self.assertEqual(-18, result)
 
     def test_call_contract_without_args(self):
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x02'
-            + Opcode.NEWARRAY0
-            + Opcode.LDARG1
-            + Opcode.LDARG0
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('CallScriptHashWithoutArgs.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         call_contract_path = self.get_contract_path('test_sc/list_test', 'IntList.py')
         Boa3.compile_and_save(call_contract_path)
 
@@ -101,6 +56,60 @@ class TestContractInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         self.assertEqual([1, 2, 3], result)
 
+    def test_call_contract_with_flags(self):
+        path = self.get_contract_path('CallScriptHashWithFlags.py')
+        call_contract_path = self.get_contract_path('CallFlagsUsage.py')
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        call_hash = hash160(contract)
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
+        engine.add_contract(call_contract_path)
+
+        from boa3.neo3.contracts import CallFlags
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
+        self.assertEqual(0, result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.READ_ONLY)
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.NONE)
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.STATES)
+        self.assertEqual(None, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
+        self.assertEqual(10, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 99], CallFlags.ALL)
+        self.assertEqual(None, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
+        self.assertEqual(99, result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.READ_ONLY)
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.STATES)
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.ALL)
+        self.assertEqual(None, result)
+        notify = engine.notifications
+        self.assertEqual(1, len(notify))
+        self.assertEqual('Notify was called', notify[0].arguments[0])
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.STATES)
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.NONE)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.ALL)
+        self.assertEqual(0, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract',
+                                         [], CallFlags.READ_ONLY)
+        self.assertEqual(0, result)
+
     def test_call_contract_too_many_parameters(self):
         path = self.get_contract_path('CallScriptHashTooManyArguments.py')
         self.assertCompilerLogs(UnexpectedArgument, path)
@@ -110,38 +119,7 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_create_contract(self):
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG1
-            + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHNULL
-            + Opcode.APPEND
-            + Opcode.PUSHDATA1
-            + Integer(len(Interop.CreateContract.method_name)).to_byte_array(min_length=1)
-            + String(Interop.CreateContract.method_name).to_bytes()
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
-            + constants.MANAGEMENT_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('CreateContract.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
 
@@ -165,36 +143,7 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_update_contract(self):
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\00'
-            + b'\02'
-            + Opcode.LDARG1
-            + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(Interop.UpdateContract.method_name)).to_byte_array(min_length=1)
-            + String(Interop.UpdateContract.method_name).to_bytes()
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
-            + constants.MANAGEMENT_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.DROP
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('UpdateContract.py')
-        output, manifest = self.compile_and_save(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'new_method')
@@ -219,30 +168,8 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(UnfilledArgument, path)
 
     def test_destroy_contract(self):
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        expected_output = (
-            Opcode.NEWARRAY0
-            + Opcode.PUSHDATA1
-            + Integer(len(Interop.DestroyContract.method_name)).to_byte_array(min_length=1)
-            + String(Interop.DestroyContract.method_name).to_bytes()
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.MANAGEMENT_SCRIPT)).to_byte_array(min_length=1)
-            + constants.MANAGEMENT_SCRIPT
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.ROT
-            + Opcode.ROT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
-            + Opcode.DROP
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('DestroyContract.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
@@ -318,3 +245,57 @@ class TestContractInterop(BoaTest):
         path = self.get_contract_path('GasScriptHashCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
+
+    def test_call_flags_type(self):
+        path = self.get_contract_path('CallFlagsType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'ALL')
+        self.assertEqual(0b00001111, result)
+        result = self.run_smart_contract(engine, path, 'main', 'READ_ONLY')
+        self.assertEqual(0b00000101, result)
+        result = self.run_smart_contract(engine, path, 'main', 'STATES')
+        self.assertEqual(0b00000011, result)
+        result = self.run_smart_contract(engine, path, 'main', 'ALLOW_NOTIFY')
+        self.assertEqual(0b00001000, result)
+        result = self.run_smart_contract(engine, path, 'main', 'ALLOW_CALL')
+        self.assertEqual(0b00000100, result)
+        result = self.run_smart_contract(engine, path, 'main', 'WRITE_STATES')
+        self.assertEqual(0b00000010, result)
+        result = self.run_smart_contract(engine, path, 'main', 'READ_STATES')
+        self.assertEqual(0b00000001, result)
+        result = self.run_smart_contract(engine, path, 'main', 'NONE')
+        self.assertEqual(0, result)
+
+    def test_get_call_flags(self):
+        path = self.get_contract_path('CallScriptHashWithFlags.py')
+        call_contract_path = self.get_contract_path('GetCallFlags.py')
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        call_hash = hash160(contract)
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'main')
+        engine.add_contract(call_contract_path)
+
+        from boa3.neo3.contracts import CallFlags
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALL)
+        self.assertEqual(CallFlags.ALL, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.READ_ONLY)
+        self.assertEqual(CallFlags.READ_ONLY, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.STATES)
+        self.assertEqual(CallFlags.STATES, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.NONE)
+        self.assertEqual(CallFlags.NONE, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.READ_STATES)
+        self.assertEqual(CallFlags.READ_STATES, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.WRITE_STATES)
+        self.assertEqual(CallFlags.WRITE_STATES, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_CALL)
+        self.assertEqual(CallFlags.ALLOW_CALL, result)
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_NOTIFY)
+        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)

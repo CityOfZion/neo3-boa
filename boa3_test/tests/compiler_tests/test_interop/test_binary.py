@@ -1,7 +1,8 @@
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
 from boa3.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -258,3 +259,101 @@ class TestBinaryInterop(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 4)
         self.assertEqual(['j', 3, 5], result)
+
+    def test_atoi(self):
+        path = self.get_contract_path('Atoi.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', '10', 10)
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '10', 16)
+        self.assertEqual(16, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '123', 10)
+        self.assertEqual(123, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '123', 16)
+        self.assertEqual(291, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '1f', 16)
+        self.assertEqual(31, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'ff', 16)
+        self.assertEqual(-1, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', 'string', 10)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', 'string', 16)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', 'abc', 10)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', '10', 2)
+
+    def test_atoi_default(self):
+        path = self.get_contract_path('AtoiDefault.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', '10')
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '123')
+        self.assertEqual(123, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', 'string')
+
+    def test_atoi_too_few_parameters(self):
+        path = self.get_contract_path('AtoiTooFewArguments.py')
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_atoi_too_many_parameters(self):
+        path = self.get_contract_path('AtoiTooManyArguments.py')
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_atoi_mismatched_type(self):
+        path = self.get_contract_path('AtoiMismatchedType.py')
+        self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_itoa(self):
+        path = self.get_contract_path('Itoa')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 10, 10)
+        self.assertEqual('10', result)
+        result = self.run_smart_contract(engine, path, 'main', 16, 16)
+        self.assertEqual('10', result)
+        result = self.run_smart_contract(engine, path, 'main', -1, 10)
+        self.assertEqual('-1', result)
+        result = self.run_smart_contract(engine, path, 'main', -1, 16)
+        self.assertEqual('f', result)
+        result = self.run_smart_contract(engine, path, 'main', 15, 16)
+        self.assertEqual('0f', result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'main', 10, 2)
+
+    def test_itoa_default(self):
+        path = self.get_contract_path('ItoaDefault')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 10)
+        self.assertEqual('10', result)
+        result = self.run_smart_contract(engine, path, 'main', -1)
+        self.assertEqual('-1', result)
+
+    def test_itoa_too_few_arguments(self):
+        path = self.get_contract_path('ItoaTooFewArguments')
+        self.assertCompilerLogs(UnfilledArgument, path)
+
+    def test_itoa_too_many_arguments(self):
+        path = self.get_contract_path('ItoaTooManyArguments')
+        self.assertCompilerLogs(UnexpectedArgument, path)
+
+    def test_itoa_mismatched_type(self):
+        path = self.get_contract_path('ItoaMismatchedType')
+        self.assertCompilerLogs(MismatchedTypes, path)

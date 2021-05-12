@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -250,7 +250,7 @@ class TestDict(BoaTest):
 
     def test_dict_get_value_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeGetValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_dict_set_value(self):
         ok = String('ok').to_bytes()
@@ -281,7 +281,7 @@ class TestDict(BoaTest):
 
     def test_dict_set_value_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeSetValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_dict_keys(self):
         one = String('one').to_bytes()
@@ -328,8 +328,48 @@ class TestDict(BoaTest):
         self.assertEqual(['one', 'two', 'three'], result)
 
     def test_dict_keys_mismatched_type(self):
+        one = String('one').to_bytes()
+        two = String('two').to_bytes()
+        three = String('three').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.NEWMAP  # a = {'one': 1, 'two': 2, 'three': 3}
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['one'] = 1
+            + Integer(len(one)).to_byte_array(min_length=1)
+            + one
+            + Opcode.PUSH1
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['two'] = 2
+            + Integer(len(two)).to_byte_array(min_length=1)
+            + two
+            + Opcode.PUSH2
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['three'] = 3
+            + Integer(len(three)).to_byte_array(min_length=1)
+            + three
+            + Opcode.PUSH3
+            + Opcode.SETITEM
+            + Opcode.STLOC0
+            + Opcode.LDLOC0  # b = a.keys()
+            + Opcode.KEYS
+            + Opcode.STLOC1
+            + Opcode.LDLOC1  # return b
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeKeysDict.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(['one', 'two', 'three'], result)
 
     def test_dict_values(self):
         one = String('one').to_bytes()
@@ -376,8 +416,48 @@ class TestDict(BoaTest):
         self.assertEqual([1, 2, 3], result)
 
     def test_dict_values_mismatched_type(self):
+        one = String('one').to_bytes()
+        two = String('two').to_bytes()
+        three = String('three').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x02'
+            + b'\x00'
+            + Opcode.NEWMAP  # a = {'one': 1, 'two': 2, 'three': 3}
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['one'] = 1
+            + Integer(len(one)).to_byte_array(min_length=1)
+            + one
+            + Opcode.PUSH1
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['two'] = 2
+            + Integer(len(two)).to_byte_array(min_length=1)
+            + two
+            + Opcode.PUSH2
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['three'] = 3
+            + Integer(len(three)).to_byte_array(min_length=1)
+            + three
+            + Opcode.PUSH3
+            + Opcode.SETITEM
+            + Opcode.STLOC0
+            + Opcode.LDLOC0  # b = a.values()
+            + Opcode.VALUES
+            + Opcode.STLOC1
+            + Opcode.LDLOC1  # return b
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('MismatchedTypeValuesDict.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([1, 2, 3], result)
 
     def test_dict_boa2_test2(self):
         path = self.get_contract_path('DictBoa2Test2.py')

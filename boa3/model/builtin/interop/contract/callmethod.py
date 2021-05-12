@@ -1,35 +1,49 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class CallMethod(InteropMethod):
 
     def __init__(self):
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
+        from boa3.model.builtin.interop.contract.callflagstype import CallFlagsType
         from boa3.model.type.type import Type
         identifier = 'call_contract'
         syscall = 'System.Contract.Call'
+
+        call_flags = CallFlagsType.build()
         args: Dict[str, Variable] = {
             'script_hash': Variable(UInt160Type.build()),
             'method': Variable(Type.str),
-            'args': Variable(Type.sequence)  # TODO: change when *args is implemented
+            'args': Variable(Type.sequence),  # TODO: change when *args is implemented
+            'call_flags': Variable(call_flags)
         }
         args_default = ast.parse("{0}".format(Type.sequence.default_value)
                                  ).body[0].value
-        super().__init__(identifier, syscall, args, defaults=[args_default], return_type=Type.any)
+        call_flags_default = ast.parse("{0}.{1}".format(call_flags.identifier, call_flags.default_value.name)
+                                       ).body[0].value
+        call_flags_default.is_internal_call = True
+        call_flags_default._fields += ('is_internal_call',)
+
+        super().__init__(identifier, syscall, args, defaults=[args_default, call_flags_default], return_type=Type.any)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.neo.vm.type.Integer import Integer
-        from boa3.neo3.contracts import CallFlags
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+    def generation_order(self) -> List[int]:
+        """
+        Gets the indexes order that need to be used during code generation.
+        If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
 
-        return [
-            (Opcode.PUSHDATA1, Integer(len(call_flags)).to_byte_array() + call_flags),
-            (Opcode.ROT, b''),
-            (Opcode.ROT, b'')
-        ] + super().opcode
+        :return: Index order for code generation
+        """
+        indexes = super().generation_order
+        args_index = list(self.args).index('args')
+
+        if indexes[0] != args_index:
+            # context must be the last generated argument
+            indexes.remove(args_index)
+            indexes.insert(0, args_index)
+
+        return indexes

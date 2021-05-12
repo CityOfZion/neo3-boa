@@ -1,9 +1,7 @@
-from typing import Collection
-
 from boa3.builtin import public
-from boa3.builtin.interop.iterator import Iterator
+from boa3.builtin.interop.storage import find
 
 
 @public
-def has_next(x: Collection) -> bool:
-    return Iterator(x).next()
+def has_next(prefix: str) -> bool:
+    return find(prefix).next()
