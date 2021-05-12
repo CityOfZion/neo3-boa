@@ -108,6 +108,7 @@ class Interop:
     Log = LogMethod()
     Notify = NotifyMethod()
     Platform = PlatformProperty()
+    ScriptContainer = ScriptContainerProperty()
 
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
@@ -166,6 +167,7 @@ class Interop:
                                  NotificationType,
                                  Notify,
                                  Platform,
+                                 ScriptContainer,
                                  TriggerType
                                  ],
         InteropPackage.Storage: [StorageContextType,

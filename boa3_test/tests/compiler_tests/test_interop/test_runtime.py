@@ -563,3 +563,10 @@ class TestRuntimeInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 0)
         self.assertEqual(-1, result)
+
+    def test_get_script_container(self):
+        path = self.get_contract_path('GetScriptContainer.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsNotNone(result)
