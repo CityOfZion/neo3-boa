@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.8.1] - 2021-05-12
+### Added
+- Support to [N3-rc2](https://github.com/neo-project/neo/releases/tag/v3.0.0-rc2)
+- Implemented `itoa`, `atoi` and `get_block` interop methods
+- Included UInt256 type
+- Implemented Python built-in `sum` function
+- Support to type casting
+
+
+### Changed
+- Included an optional `CallFlags` argument in `call_contract` method
+
+
 ## [0.8.0] - 2021-04-15
 ### Added
 - Included StorageMap class
@@ -162,7 +175,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.1
 [0.8.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.0
 [0.7.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.7.1
 [0.7.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.7.0

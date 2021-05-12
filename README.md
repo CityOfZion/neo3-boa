@@ -175,7 +175,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 > Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc1
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc2
 $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 
@@ -310,13 +310,28 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
+    <td>✅</td>
+    <td>v0.8</td>
+    <td>Arithmetic operations</td>
+    <td>
+      <pre>
+        <code>
+  **
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#arithmetic-operations-2">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
     <td>🔜</td>
     <td>backlog</td>
     <td>Arithmetic operations</td>
     <td>
       <pre>
         <code>
-  /, **
+  /
         </code>
       </pre>
     </td>
@@ -336,6 +351,21 @@ python -m unittest discover boa3_test
     </td>
     <td>
       <a href="/docs/ContractExamplesTest.md#arithmetic-augmented-assignment-operators">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.8</td>
+    <td>Arithmetic augmented assignment operators</td>
+    <td>
+      <pre>
+        <code>
+  **=
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#arithmetic-augmented-assignment-operators-2">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -717,6 +747,21 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
+    <td>✅</td>
+    <td>v0.8.1</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = sum(list_of_num, 0)
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-4">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
     <td>🔜</td>
     <td>backlog</td>
     <td>Built in function</td>
@@ -726,8 +771,7 @@ python -m unittest discover boa3_test
   a = max(7, 0, 12, 8)
   b = min(1, 6, 2)
   c = pow(2, 2)
-  d = sum(list_of_num, 0)
-  e = reversed([1, 2, 3, 4])
+  d = reversed([1, 2, 3, 4])
         </code>
       </pre>
     </td>
