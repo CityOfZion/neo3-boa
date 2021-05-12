@@ -67,3 +67,14 @@ def get_notifications(script_hash: UInt160 = UInt160()) -> List[Notification]:
     :rtype: List[Notification]
     """
     pass
+
+
+def burn_gas(gas: int):
+    """
+    Burns GAS to benefit the NEO ecosystem.
+
+    :param gas: the amount of GAS that will be burned
+
+    :raise Exception: raised if gas value is negative.
+    """
+    pass

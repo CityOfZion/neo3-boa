@@ -97,6 +97,7 @@ class Interop:
 
     # Runtime Interops
     BlockTime = BlockTimeProperty()
+    BurnGas = BurnGasMethod()
     CallingScriptHash = CallingScriptHashProperty()
     CheckWitness = CheckWitnessMethod()
     EntryScriptHash = EntryScriptHashProperty()
@@ -154,6 +155,7 @@ class Interop:
                               JsonSerialize
                               ],
         InteropPackage.Runtime: [BlockTime,
+                                 BurnGas,
                                  CallingScriptHash,
                                  CheckWitness,
                                  EntryScriptHash,
