@@ -321,7 +321,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
-      <a href="/docs/ContractExamplesTest.md#arithmetic-operations-2">List of examples</a>
+      <a href="/docs/ContractExamplesTest.md#arithmetic-operations-1">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -365,7 +365,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
-      <a href="/docs/ContractExamplesTest.md#arithmetic-augmented-assignment-operators-2">List of examples</a>
+      <a href="/docs/ContractExamplesTest.md#arithmetic-augmented-assignment-operators-1">List of examples</a>
     </td>
   </tbody>
   <tbody>
