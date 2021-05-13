@@ -102,3 +102,26 @@ class TestBlockchainInterop(BoaTest):
     def test_get_block_mismatched_types(self):
         path = self.get_contract_path('GetBlockMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_transaction(self):
+        path = self.get_contract_path('Transaction.py')
+        engine = TestEngine()
+
+        from boa3.neo3.core.types import UInt256, UInt160
+        from boa3.neo.vm.type.String import String
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(8, len(result))
+        if isinstance(result[0], str):
+            result[0] = String(result[0]).to_bytes()
+        self.assertEqual(UInt256(), UInt256(result[0]))   # hash
+        self.assertEqual(0, result[1])   # version
+        self.assertEqual(0, result[2])   # nonce
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+        self.assertEqual(UInt160(), UInt160(result[3]))   # sender
+        self.assertEqual(0, result[4])   # system_fee
+        self.assertEqual(0, result[5])   # network_fee
+        self.assertEqual(0, result[6])   # valid_until_block
+        if isinstance(result[7], str):
+            result[7] = String(result[7]).to_bytes()
+        self.assertEqual(b'', result[7])   # script

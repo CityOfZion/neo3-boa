@@ -1,6 +1,7 @@
 from typing import Union
 
 from boa3.builtin.interop.blockchain.block import Block
+from boa3.builtin.interop.blockchain.transaction import Transaction
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
 

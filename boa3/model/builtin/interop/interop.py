@@ -46,6 +46,7 @@ class Interop:
     OracleType = OracleType.build()
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
+    TransactionType = TransactionType.build()
     TriggerType = TriggerType()
 
     # Binary Interops
@@ -131,7 +132,8 @@ class Interop:
         InteropPackage.Blockchain: [BlockType,
                                     CurrentHeight,
                                     GetBlock,
-                                    GetContract
+                                    GetContract,
+                                    TransactionType
                                     ],
         InteropPackage.Contract: [CallContract,
                                   CallFlagsType,
