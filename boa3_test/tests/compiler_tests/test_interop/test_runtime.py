@@ -597,3 +597,24 @@ class TestRuntimeInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertIsNotNone(result)
+
+    def test_get_script_container_as_transaction(self):
+        path = self.get_contract_path('ScriptContainerAsTransaction.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(8, len(result))
+        if isinstance(result[0], str):
+            result[0] = String(result[0]).to_bytes()
+        self.assertIsInstance(result[0], bytes)
+        self.assertIsInstance(result[1], int)
+        self.assertIsInstance(result[2], int)
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+        self.assertIsInstance(result[3], bytes)
+        self.assertIsInstance(result[4], int)
+        self.assertIsInstance(result[5], int)
+        self.assertIsInstance(result[6], int)
+        if isinstance(result[6], str):
+            result[6] = String(result[6]).to_bytes()
+        self.assertIsInstance(result[7], bytes)
