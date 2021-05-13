@@ -5,7 +5,7 @@ from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.variable import Variable
 
 
-class GetScriptContainerMethod(InteropMethod):
+class ScriptContainerMethod(InteropMethod):
     def __init__(self):
         from boa3.model.type.type import Type
         identifier = '-get_script_container'
@@ -16,6 +16,6 @@ class GetScriptContainerMethod(InteropMethod):
 
 class ScriptContainerProperty(IBuiltinProperty):
     def __init__(self):
-        identifier = 'get_script_container'
-        getter = GetScriptContainerMethod()
+        identifier = 'script_container'
+        getter = ScriptContainerMethod()
         super().__init__(identifier, getter)
