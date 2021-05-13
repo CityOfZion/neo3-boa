@@ -54,6 +54,7 @@ gas_left: int = 0
 get_platform: str = ''
 invocation_counter: int = 0
 entry_script_hash: UInt160 = UInt160()
+script_container: Any = None
 
 
 def get_notifications(script_hash: UInt160 = UInt160()) -> List[Notification]:
