@@ -1,4 +1,4 @@
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -100,7 +100,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_mismatched_type(self):
         path = self.get_contract_path('UInt160CallMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_uint256_call_bytes(self):
         path = self.get_contract_path('UInt256CallBytes.py')
@@ -193,4 +193,16 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_mismatched_type(self):
         path = self.get_contract_path('UInt256CallMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_transaction_cast_and_get_hash(self):
+        path = self.get_contract_path('CastTransactionGetHash.py')
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+
+    def test_transaction_implicit_cast_and_get_hash(self):
+        path = self.get_contract_path('ImplicitCastTransactionGetHash.py')
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+
+    def test_transaction_cast_and_assign_hash_to_variable(self):
+        path = self.get_contract_path('CastTransactionGetHashToVariable.py')
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)

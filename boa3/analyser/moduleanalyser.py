@@ -528,16 +528,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         if isinstance(target_type, ClassType):
-            args = []
-            for arg in target.args:
-                result = self.visit(arg)
-                if (isinstance(result, str) and not isinstance(arg, (ast.Str, ast.Constant))
-                        and result in self._current_scope.symbols):
-                    result = self.get_type(self._current_scope.symbols[result])
-                args.append(result)
-
             init = target_type.constructor_method()
             if hasattr(init, 'build'):
+                args = []
+                if hasattr(target, 'args'):
+                    for arg in target.args:
+                        result = self.visit(arg)
+                        if (isinstance(result, str) and not isinstance(arg, (ast.Str, ast.Constant))
+                                and result in self._current_scope.symbols):
+                            result = self.get_type(self._current_scope.symbols[result])
+                        args.append(result)
+
                 init = init.build(args)
             target_type = init.return_type if init is not None else target_type
 
@@ -725,6 +726,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 new_event = self.create_new_event(call)
                 self.__include_callable(new_event.identifier, new_event)
                 self._current_event = new_event
+            else:
+                args_types = [self.get_type(arg, use_metatype=True) for arg in call.args]
+                updated_symbol = func_symbol.build(args_types)
+
+                if updated_symbol.identifier != func_id:
+                    self.__include_callable(updated_symbol.identifier, updated_symbol)
+                    return self.get_type(updated_symbol)
 
         return self.get_type(call.func)
 
