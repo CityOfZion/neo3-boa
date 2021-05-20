@@ -31,3 +31,38 @@ def get_block(index_or_hash: Union[int, UInt256]) -> Block:
     :rtype: Block or None
     """
     pass
+
+
+def get_transaction(hash_: UInt256) -> Transaction:
+    """
+    Gets a transaction with the given hash
+
+    :param hash_: hash identifier of the transaction
+    :type hash_: UInt256
+    :return: the Transaction, if exists. None otherwise
+    """
+    pass
+
+
+def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_index: int) -> Transaction:
+    """
+    Gets a transaction from a block
+
+    :param block_hash_or_height: a block identifier
+    :type block_hash_or_height: UInt256 or int
+    :param tx_index: the transaction identifier in the block
+    :type tx_index: int
+    :return: the Transaction, if exists. None otherwise
+    """
+    pass
+
+
+def get_transaction_height(hash_: UInt256) -> int:
+    """
+    Gets the height of a transaction
+
+    :param hash_: hash identifier of the transaction
+    :type hash_: UInt256
+    :return: height of the transaction
+    """
+    pass
