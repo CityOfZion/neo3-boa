@@ -1,8 +1,12 @@
 from boa3.boa3 import Boa3
+from boa3.constants import LEDGER_SCRIPT
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
+from boa3.neo3.contracts import CallFlags
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -125,3 +129,140 @@ class TestBlockchainInterop(BoaTest):
         if isinstance(result[7], str):
             result[7] = String(result[7]).to_bytes()
         self.assertEqual(b'', result[7])   # script
+
+    def test_get_transaction(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransaction').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
+            + LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransaction.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        # TODO: finish this example when transaction gets added to the storage
+
+    def test_get_transaction_from_block_int(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionFromBlock').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
+            + LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionFromBlockInt.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        path_burn_gas = self.get_contract_path('../runtime', 'BurnGas.py')
+        engine = TestEngine()
+
+        engine.increase_block(10)
+
+        self.run_smart_contract(engine, path_burn_gas, 'main', 100)
+
+        block_10 = engine.current_block
+        txs = block_10.get_transactions()
+        hash_ = txs[0]._hash.to_array()
+
+        engine.increase_block()
+
+        result = self.run_smart_contract(engine, path, 'main', 10, 0)
+        self.assertIsNotNone(result)
+        # TODO: finish this example when transaction gets added to the storage
+
+    def test_get_transaction_from_block_uint256(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionFromBlock').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
+            + LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionFromBlockUInt256.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        # TODO: finish this example when transaction gets added to the storage
+
+    def test_get_transaction_height(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionHeight').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
+            + LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionHeight.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        path = self.get_contract_path('GetTransactionHeight.py')
+        engine = TestEngine()
+        # TODO: finish this example when transaction gets added to the storage

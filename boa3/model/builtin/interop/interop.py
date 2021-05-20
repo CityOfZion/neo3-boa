@@ -63,6 +63,9 @@ class Interop:
     CurrentHeight = CurrentHeightProperty()
     GetContract = GetContractMethod(ContractType)
     GetBlock = GetBlockMethod(BlockType)
+    GetTransaction = GetTransactionMethod(TransactionType)
+    GetTransactionFromBlock = GetTransactionFromBlockMethod(TransactionType)
+    GetTransactionHeight = GetTransactionHeightMethod()
 
     # Contract Interops
     CallContract = CallMethod()
@@ -133,6 +136,9 @@ class Interop:
                                     CurrentHeight,
                                     GetBlock,
                                     GetContract,
+                                    GetTransaction,
+                                    GetTransactionFromBlock,
+                                    GetTransactionHeight,
                                     TransactionType
                                     ],
         InteropPackage.Contract: [CallContract,
