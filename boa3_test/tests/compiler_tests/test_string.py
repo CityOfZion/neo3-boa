@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import InternalError, UnresolvedOperation
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -91,6 +92,7 @@ class TestString(BoaTest):
             + Opcode.SIZE
             + Opcode.ADD
             + Opcode.LEFT
+            + Opcode.CONVERT + Type.str.stack_item
             + Opcode.RET        # return
         )
         path = self.get_contract_path('StringSlicingNegativeStart.py')

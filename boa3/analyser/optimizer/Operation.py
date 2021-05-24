@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from enum import Enum, auto
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator

@@ -17,6 +17,7 @@ from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType
+from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
@@ -857,12 +858,12 @@ class CodeGenerator:
 
         self._stack_pop()  # length
         self._stack_pop()  # start
-        self._stack_pop()  # original string
+        original = self._stack_pop()  # original string
 
         self.__insert1(OpcodeInfo.SUBSTR)
         self._update_jump(jmp_address, self.last_code_start_address)
-        self._stack_append(Type.bytes)  # substr returns a buffer instead of a bytestring
-        self.convert_cast(Type.str)
+        self._stack_append(BufferType)  # substr returns a buffer instead of a bytestring
+        self.convert_cast(original)
 
     def convert_get_array_slice(self, array: SequenceType):
         """
@@ -939,7 +940,9 @@ class CodeGenerator:
                                               StackItemType.Buffer):
                 self.__insert1(OpcodeInfo.LEFT)
                 self._stack_pop()  # length
-                self._stack_pop()  # original array
+                original_type = self._stack_pop()  # original array
+                self._stack_append(BufferType)  # left returns a buffer instead of a bytestring
+                self.convert_cast(original_type)
             else:
                 array = self._stack[-2]
                 self.convert_literal(0)
@@ -958,7 +961,9 @@ class CodeGenerator:
                 self.convert_operation(BinaryOp.Sub)
                 self.__insert1(OpcodeInfo.RIGHT)
                 self._stack_pop()  # length
-                self._stack_pop()  # original array
+                original_type = self._stack_pop()  # original array
+                self._stack_append(BufferType)     # right returns a buffer instead of a bytestring
+                self.convert_cast(original_type)
             else:
                 array = self._stack[-3]
                 self.swap_reverse_stack_items(2)
