@@ -66,6 +66,9 @@ class VMCode:
             self_start = code_mapping.get_start_address(self)
             target_start = code_mapping.get_start_address(self.target)
 
+            if self_start == target_start:
+                return self._data
+
             return (Integer(target_start - self_start)
                     .to_byte_array(signed=True, min_length=self._info.data_len))
 

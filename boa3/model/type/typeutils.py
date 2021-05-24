@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Dict
 
 from boa3.model.callable import Callable
 from boa3.model.type.annotation.metatype import metaType

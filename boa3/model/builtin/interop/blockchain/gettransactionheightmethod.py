@@ -1,6 +1,5 @@
 from typing import Dict
 
-from boa3.model.builtin.interop.blockchain.transactiontype import TransactionType
 from boa3.model.builtin.interop.nativecontract import LedgerMethod
 from boa3.model.variable import Variable
 
