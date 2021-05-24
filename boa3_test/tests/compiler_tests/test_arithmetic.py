@@ -265,9 +265,17 @@ class TestArithmetic(BoaTest):
 
         engine = TestEngine()
         engine.increase_block()  # increase to get consistent block_time between execution and engine
-        result = self.run_smart_contract(engine, path, 'concat')
+        result = self.run_smart_contract(engine, path, 'concat1')
         current_time = Integer(engine.current_block.timestamp).to_byte_array()
-        self.assertEqual(b'value1  value2  value3  ' + current_time, result)
+        self.assertEqual(b'value1  value2  value3  ' + current_time + b'some_bytes_after', result)
+
+        result = self.run_smart_contract(engine, path, 'concat2')
+        current_time = Integer(engine.current_block.timestamp).to_byte_array()
+        self.assertEqual(b'value1value2value3' + current_time + b'some_bytes_after', result)
+
+        result = self.run_smart_contract(engine, path, 'concat3')
+        current_time = Integer(engine.current_block.timestamp).to_byte_array()
+        self.assertEqual(b'value1__value2__value3__' + current_time + b'some_bytes_after', result)
 
     def test_concat_string_variables_and_constants(self):
         path = self.get_contract_path('ConcatStringVariablesAndConstants.py')
