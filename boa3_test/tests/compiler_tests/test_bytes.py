@@ -526,3 +526,21 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04', result)
+
+    def test_uint160(self):
+        path = self.get_contract_path('UInt160.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            from boa3.neo.vm.type.String import String
+            result = String(result).to_bytes()
+        self.assertEqual(b'0123456789abcdefghij', result)
+
+    def test_uint256(self):
+        path = self.get_contract_path('UInt256.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            from boa3.neo.vm.type.String import String
+            result = String(result).to_bytes()
+        self.assertEqual(b'0123456789abcdefghijklmnopqrstuv', result)
