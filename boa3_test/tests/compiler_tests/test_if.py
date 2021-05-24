@@ -583,3 +583,23 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 22)
         self.assertEqual(-1, result)
+
+    def test_if_with_inner_while(self):
+        path = self.get_contract_path('IfWithInnerWhile.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual('{[]}', result)
+
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual('{[value1,value2,value3]}', result)
+
+    def test_if_with_inner_for(self):
+        path = self.get_contract_path('IfWithInnerFor.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual('{[]}', result)
+
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual('{[value1,value2,value3]}', result)

@@ -1,5 +1,5 @@
 from boa3.builtin import public
-from boa3.builtin.interop.blockchain import get_transaction_from_block, Transaction
+from boa3.builtin.interop.blockchain import Transaction, get_transaction_from_block
 from boa3.builtin.type import UInt256
 
 
