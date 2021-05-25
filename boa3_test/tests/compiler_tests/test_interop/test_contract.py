@@ -153,11 +153,30 @@ class TestContractInterop(BoaTest):
         new_nef, new_manifest = self.get_bytes_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
-        result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest)
+        result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest, None)
         self.assertIsVoid(result)
 
         result = self.run_smart_contract(engine, path, 'new_method')
         self.assertEqual(42, result)
+
+    def test_update_contract_data_deploy(self):
+        path = self.get_contract_path('UpdateContract.py')
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'new_method')
+
+        new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
+        self.compile_and_save(new_path)
+        new_nef, new_manifest = self.get_bytes_output(new_path)
+        arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
+
+        data = 'this function was deployed'
+        result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest, data)
+        self.assertIsVoid(result)
+        notifies = engine.get_events('notify')
+        self.assertEqual(2, len(notifies))
+        self.assertEqual(True, notifies[0].arguments[0])
+        self.assertEqual(data, notifies[1].arguments[0])
 
     def test_update_contract_too_many_parameters(self):
         path = self.get_contract_path('UpdateContractTooManyArguments.py')

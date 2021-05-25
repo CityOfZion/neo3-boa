@@ -43,7 +43,7 @@ def create_contract(nef_file: bytes, manifest: bytes) -> Contract:
     pass
 
 
-def update_contract(nef_file: bytes, manifest: bytes):
+def update_contract(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the executing smart contract given the script and the manifest
 
@@ -51,6 +51,8 @@ def update_contract(nef_file: bytes, manifest: bytes):
     :type nef_file: bytes
     :param manifest: the new smart contract's manifest
     :type manifest: bytes
+    :param data: the parameters for the _deploy function
+    :type data: Any
 
     :raise Exception: raised if the nef and the manifest are not a valid smart contract or the new contract is the
         same as the old one.
