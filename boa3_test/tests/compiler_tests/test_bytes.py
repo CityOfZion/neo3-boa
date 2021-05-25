@@ -4,6 +4,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -550,7 +551,6 @@ class TestBytes(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         if isinstance(result, str):
-            from boa3.neo.vm.type.String import String
             result = String(result).to_bytes()
         self.assertEqual(b'0123456789abcdefghijklmnopqrstuv', result)
 
@@ -559,6 +559,5 @@ class TestBytes(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         if isinstance(result, str):
-            from boa3.neo.vm.type.String import String
             result = String(result).to_bytes()
         self.assertEqual((256).to_bytes(2, 'little') + bytes(30), result)
