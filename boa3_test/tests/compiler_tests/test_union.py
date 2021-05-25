@@ -69,7 +69,6 @@ class TestUnion(BoaTest):
 
     def test_union_variable_argument(self):
         path = self.get_contract_path('UnionVariableArgument.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 'unittest')
@@ -80,7 +79,6 @@ class TestUnion(BoaTest):
 
     def test_union_isinstance_validation(self):
         path = self.get_contract_path('UnionIsInstanceValidation.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 'unittest')
@@ -91,7 +89,6 @@ class TestUnion(BoaTest):
 
     def test_union_int_none(self):
         path = self.get_contract_path('UnionIntNone.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
