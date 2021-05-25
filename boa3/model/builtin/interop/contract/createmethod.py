@@ -17,7 +17,7 @@ class CreateMethod(ContractManagementMethod):
             'manifest': Variable(Type.bytes),
             'data': Variable(Type.any)
         }
-        data_default = ast.parse("{0}".format(Type.sequence.default_value)
+        data_default = ast.parse("{0}".format(Type.any.default_value)
                                  ).body[0].value
 
         super().__init__(identifier, syscall, args, defaults=[data_default], return_type=contract_type)
