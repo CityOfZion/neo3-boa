@@ -455,6 +455,27 @@ class TestRelational(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
+    def test_compare_string(self):
+        path = self.get_contract_path('CompareString.py')
+        Boa3.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'test1', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'test2', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'test3', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'test4', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
     def test_boa2_equality_test2(self):
         path = self.get_contract_path('Equality2Boa2Test.py')
         engine = TestEngine()
