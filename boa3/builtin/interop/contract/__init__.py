@@ -27,14 +27,16 @@ def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_f
     pass
 
 
-def create_contract(nef_file: bytes, manifest: bytes) -> Contract:
+def create_contract(nef_file: bytes, manifest: bytes, data: Any = None) -> Contract:
     """
     Creates a smart contract given the script and the manifest
 
     :param nef_file: the target smart contract's compiled nef
     :type nef_file: bytes
     :param manifest: the manifest.json that describes how the script should behave
-    type manifest: bytes
+    :type manifest: bytes
+    :param data: the parameters for the _deploy function
+    :type data: Any
     :return: the contract that was created.
     :rtype: Any
 
