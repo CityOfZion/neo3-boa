@@ -23,11 +23,12 @@ class Transaction:
             self._attributes.append(tx_attr)
 
     def to_json(self) -> Dict[str, Any]:
+        from boa3.neo.vm.type.String import String
         return {
             'signers': [signer.to_json() for signer in self._signers],
             'witnesses': [witness.to_json() for witness in self._witnesses],
             'attributes': [attr.to_json() for attr in self._attributes],
-            'script': to_hex_str(self._script)
+            'script': String.from_bytes(base64.b64encode(self._script))
         }
 
     @classmethod

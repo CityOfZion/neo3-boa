@@ -7,7 +7,7 @@ from boa3.neo.utils import stack_item_from_json
 
 
 class Notification:
-    _event_name_key = 'eventName'
+    _event_name_key = 'eventname'
     _script_hash_key = 'scripthash'
     _value_key = 'value'
 

@@ -265,11 +265,11 @@ class TestEngine:
             if 'gasconsumed' in result:
                 self._gas_consumed = result['gasconsumed']
 
-            if 'result_stack' in result:
-                if isinstance(result['result_stack'], list):
-                    self._result_stack = [stack_item_from_json(value) for value in result['result_stack']]
+            if 'resultstack' in result:
+                if isinstance(result['resultstack'], list):
+                    self._result_stack = [stack_item_from_json(value) for value in result['resultstack']]
                 else:
-                    self._result_stack = [stack_item_from_json(result['result_stack'])]
+                    self._result_stack = [stack_item_from_json(result['resultstack'])]
 
             if self._vm_state is VMState.HALT or not rollback_on_fault:
                 if 'notifications' in result:

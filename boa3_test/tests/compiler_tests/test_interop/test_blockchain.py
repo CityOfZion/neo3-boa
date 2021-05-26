@@ -157,7 +157,18 @@ class TestBlockchainInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        path_burn_gas = self.get_contract_path('../runtime', 'BurnGas.py')
         engine = TestEngine()
+
+        engine.increase_block()
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
+
+        txs = engine.get_transactions()
+        self.assertGreater(len(txs), 0)
+        hash_ = txs[0]._hash.to_array()
+
+        result = self.run_smart_contract(engine, path, 'main', hash_)
+        self.assertIsNotNone(result)
         # TODO: finish this example when transaction gets added to the storage
 
     def test_get_transaction_from_block_int(self):
@@ -263,6 +274,17 @@ class TestBlockchainInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        path = self.get_contract_path('GetTransactionHeight.py')
+        path_burn_gas = self.get_contract_path('../runtime', 'BurnGas.py')
         engine = TestEngine()
+
+        expected_block_index = 10
+        engine.increase_block(expected_block_index)
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
+
+        txs = engine.get_transactions()
+        self.assertGreater(len(txs), 0)
+        hash_ = txs[0]._hash.to_array()
+
+        result = self.run_smart_contract(engine, path, 'main', hash_)
+        self.assertEqual(expected_block_index, result)
         # TODO: finish this example when transaction gets added to the storage
