@@ -3,7 +3,7 @@ from typing import Any, Union
 from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract import NEO, call_contract
+from boa3.builtin.interop.contract import GAS, NEO, call_contract
 from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash
 from boa3.builtin.interop.storage import delete, get, put
 from boa3.builtin.type import UInt160
@@ -404,5 +404,8 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     # Use calling_script_hash to identify if the incoming token is NEO
     if calling_script_hash == NEO:
         mint(from_address, amount)
+    elif calling_script_hash == GAS:
+        # GAS is minted when transferring NEO
+        return
     else:
         abort()

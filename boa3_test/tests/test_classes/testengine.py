@@ -66,7 +66,7 @@ class TestEngine:
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
-    def get_events(self, event_name: str, origin: UInt160 = None) -> List[Notification]:
+    def get_events(self, event_name: str, origin: Union[UInt160, bytes] = None) -> List[Notification]:
         if origin is None:
             return [n for n in self._notifications if n.name == event_name]
         else:

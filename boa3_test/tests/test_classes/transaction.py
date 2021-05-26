@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 from typing import Any, Dict, List, Optional
 
-from boa3.neo import from_hex_str, to_hex_str
+from boa3.neo import from_hex_str
 from boa3.neo3.core.types import UInt256
 from boa3_test.tests.test_classes import transactionattribute as tx_attribute
 from boa3_test.tests.test_classes.signer import Signer
@@ -79,4 +79,3 @@ class Transaction:
                 and self._attributes == self._attributes
                 and self._signers == other._signers
                 and self._witnesses == other._witnesses)
-
