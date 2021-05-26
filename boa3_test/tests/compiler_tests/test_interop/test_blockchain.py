@@ -165,7 +165,7 @@ class TestBlockchainInterop(BoaTest):
 
         txs = engine.get_transactions()
         self.assertGreater(len(txs), 0)
-        hash_ = txs[0]._hash.to_array()
+        hash_ = txs[0].hash
 
         result = self.run_smart_contract(engine, path, 'main', hash_)
         self.assertIsNotNone(result)
@@ -208,7 +208,7 @@ class TestBlockchainInterop(BoaTest):
 
         block_10 = engine.current_block
         txs = block_10.get_transactions()
-        hash_ = txs[0]._hash.to_array()
+        hash_ = txs[0].hash
 
         engine.increase_block()
 
@@ -251,9 +251,8 @@ class TestBlockchainInterop(BoaTest):
         self.run_smart_contract(engine, path_burn_gas, 'main', 100)
 
         block_10 = engine.current_block
-        block_hash = block_10._hash
+        block_hash = block_10.hash
         self.assertIsNotNone(block_hash)
-        block_hash = block_hash.to_array()
 
         engine.increase_block()
 
@@ -297,7 +296,7 @@ class TestBlockchainInterop(BoaTest):
 
         txs = engine.get_transactions()
         self.assertGreater(len(txs), 0)
-        hash_ = txs[0]._hash.to_array()
+        hash_ = txs[0].hash
 
         result = self.run_smart_contract(engine, path, 'main', hash_)
         self.assertEqual(expected_block_index, result)

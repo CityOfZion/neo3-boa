@@ -37,6 +37,13 @@ class Block:
         if all(block_tx != tx for block_tx in self._transactions):
             self._transactions.append(tx)
 
+    @property
+    def hash(self) -> Optional[bytes]:
+        if self._hash is None:
+            return None
+        else:
+            return self._hash.to_array()
+
     def to_json(self) -> Dict[str, Any]:
         return {
             'index': self._index,

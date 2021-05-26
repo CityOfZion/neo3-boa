@@ -179,6 +179,9 @@ class TestEngine:
                 new_height = self.height + 1
             self._height = new_height
 
+        if new_height < 1:
+            # don't use height 0 because this is the genesis block index
+            new_height = 1
         new_block = Block(new_height)
         self.add_block(new_block)
         return new_block

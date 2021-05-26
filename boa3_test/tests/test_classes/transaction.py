@@ -22,6 +22,13 @@ class Transaction:
         if tx_attr not in self._attributes:
             self._attributes.append(tx_attr)
 
+    @property
+    def hash(self) -> Optional[bytes]:
+        if self._hash is None:
+            return None
+        else:
+            return self._hash.to_array()
+
     def to_json(self) -> Dict[str, Any]:
         from boa3.neo.vm.type.String import String
         return {
