@@ -207,3 +207,39 @@ class TestTypes(BoaTest):
         sequence_type = Type.sequence.build_collection(Type.str)
         str_type = Type.str
         self.assertFalse(str_type.is_type_of(sequence_type))
+
+    def test_optional_is_type_of_union(self):
+        optional_type = Type.optional.build(Type.str)
+        union_type = Type.union.build({Type.str, Type.none})
+        self.assertTrue(optional_type.is_type_of(union_type))
+        self.assertTrue(union_type.is_type_of(optional_type))
+
+        optional_type = Type.optional.build({Type.str, Type.int, Type.bool, Type.bytes})
+        union_type = Type.union.build({Type.str, Type.int, Type.bool, Type.bytes, Type.none})
+        self.assertTrue(optional_type.is_type_of(union_type))
+        self.assertTrue(union_type.is_type_of(optional_type))
+
+        optional_type = Type.optional.build(Type.str)
+        union_type = Type.union.build({Type.str, Type.int, Type.bool, Type.bytes, Type.none})
+        self.assertFalse(optional_type.is_type_of(union_type))
+        self.assertTrue(union_type.is_type_of(optional_type))
+
+        optional_type = Type.optional.build({Type.str, Type.int, Type.bool, Type.bytes})
+        union_type = Type.union.build({Type.str})
+        self.assertTrue(optional_type.is_type_of(union_type))
+        self.assertFalse(union_type.is_type_of(optional_type))
+
+        optional_type = Type.optional.build({Type.str, Type.int, Type.bool, Type.bytes})
+        union_type = Type.union.build({Type.str, Type.int, Type.bool, Type.bytes})
+        self.assertTrue(optional_type.is_type_of(union_type))
+        self.assertFalse(union_type.is_type_of(optional_type))
+
+        optional_type = Type.optional.build(Type.any)
+        union_type = Type.union.build({Type.str, Type.int, Type.bool, Type.bytes, Type.none})
+        self.assertTrue(optional_type.is_type_of(union_type))
+        self.assertFalse(union_type.is_type_of(optional_type))
+
+        optional_type = Type.optional.build({Type.str, Type.int, Type.bool, Type.bytes, Type.none})
+        union_type = Type.union.build(Type.any)
+        self.assertFalse(optional_type.is_type_of(union_type))
+        self.assertTrue(union_type.is_type_of(optional_type))

@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from boa3.model.type.annotation.optionaltype import OptionalType
 from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.anytype import anyType
 from boa3.model.type.baseexceptiontype import BaseExceptionType
@@ -16,7 +17,7 @@ from boa3.model.type.primitive.booltype import BoolType
 from boa3.model.type.primitive.bytearraytype import ByteArrayType
 from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.inttype import IntType
-from boa3.model.type.primitive.nonetype import NoneType
+from boa3.model.type.primitive.nonetype import noneType
 from boa3.model.type.primitive.strtype import StrType
 
 
@@ -100,7 +101,7 @@ class Type:
     int = IntType()
     bool = BoolType()
     str = StrType()
-    none = NoneType()
+    none = noneType
     bytes = BytesType()
     bytearray = ByteArrayType()
     tuple = TupleType()
@@ -117,4 +118,5 @@ class Type:
 
     # Annotation types
     union = UnionType()
+    optional = OptionalType()
     any = anyType

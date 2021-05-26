@@ -655,7 +655,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if isinstance(index, ast.Tuple):
                     union_types = [self.get_type(value) for value in index.elts]
                 else:
-                    union_types = self.visit(index)
+                    union_types = self.get_type(index)
                 return symbol_type.build(union_types)
 
             if isinstance(symbol_type, Collection):
