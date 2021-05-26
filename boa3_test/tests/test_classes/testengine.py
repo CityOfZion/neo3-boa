@@ -293,13 +293,13 @@ class TestEngine:
                     if contract.script_hash is not None and not self._storage.has_contract(contract.script_hash):
                         self.remove_contract(nef_path)
 
-                if 'blocks' in result:
-                    blocks_json = result['blocks']
-                    if not isinstance(blocks_json, list):
-                        blocks_json = [blocks_json]
+                if 'currentblock' in result:
+                    current_block = Block.from_json(result['currentblock'])
 
-                    self._blocks = sorted([Block.from_json(js) for js in blocks_json],
-                                          key=lambda b: b.index)
+                    existing_block = next((block for block in self._blocks if block.index == current_block.index), None)
+                    if existing_block is not None:
+                        self._blocks.remove(existing_block)
+                    self._blocks.append(current_block)
 
                 if 'transaction' in result and self._vm_state is VMState.HALT:
                     block = self.current_block

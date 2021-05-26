@@ -61,3 +61,15 @@ class Transaction:
         copied = Transaction(self._script, self._signers, self._witnesses)
         copied._hash = self._hash
         return copied
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Transaction):
+            return False
+        if self._hash == other._hash:
+            return True
+
+        return (self._script == other._script
+                and self._attributes == self._attributes
+                and self._signers == other._signers
+                and self._witnesses == other._witnesses)
+

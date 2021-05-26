@@ -107,7 +107,7 @@ class TestBlockchainInterop(BoaTest):
         path = self.get_contract_path('GetBlockMismatchedTypes.py')
         self.assertCompilerLogs(MismatchedTypes, path)
 
-    def test_transaction(self):
+    def test_transaction_init(self):
         path = self.get_contract_path('Transaction.py')
         engine = TestEngine()
 
@@ -244,7 +244,21 @@ class TestBlockchainInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        path_burn_gas = self.get_contract_path('../runtime', 'BurnGas.py')
         engine = TestEngine()
+
+        engine.increase_block(10)
+        self.run_smart_contract(engine, path_burn_gas, 'main', 100)
+
+        block_10 = engine.current_block
+        block_hash = block_10._hash
+        self.assertIsNotNone(block_hash)
+        block_hash = block_hash.to_array()
+
+        engine.increase_block()
+
+        result = self.run_smart_contract(engine, path, 'main', block_hash, 0)
+        self.assertIsNotNone(result)
         # TODO: finish this example when transaction gets added to the storage
 
     def test_get_transaction_height(self):

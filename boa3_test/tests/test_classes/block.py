@@ -34,7 +34,8 @@ class Block:
         return [tx.copy() for tx in self._transactions]
 
     def add_transaction(self, tx: Transaction):
-        self._transactions.append(tx)
+        if all(block_tx != tx for block_tx in self._transactions):
+            self._transactions.append(tx)
 
     def to_json(self) -> Dict[str, Any]:
         return {
