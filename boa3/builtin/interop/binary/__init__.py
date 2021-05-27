@@ -3,11 +3,11 @@ from typing import Any
 
 def base58_encode(key: bytes) -> str:
     """
-    Encodes a bytes value using base58
+    Encodes a bytes value using base58.
 
     :param key: string value to be encoded
     :type key: bytes
-    :return: the encoded string as bytes.
+    :return: the encoded string as bytes
     :rtype: str
     """
     pass
@@ -15,11 +15,11 @@ def base58_encode(key: bytes) -> str:
 
 def base58_decode(key: str) -> bytes:
     """
-    Decodes a string value encoded with base58
+    Decodes a string value encoded with base58.
 
     :param key: bytes value to be decoded
     :type key: str
-    :return: the decoded bytes as string.
+    :return: the decoded bytes as string
     :rtype: bytes
     """
     pass
@@ -27,11 +27,11 @@ def base58_decode(key: str) -> bytes:
 
 def base64_encode(key: bytes) -> str:
     """
-    Encodes a bytes value using base64
+    Encodes a bytes value using base64.
 
     :param key: bytes value to be encoded
     :type key: bytes
-    :return: the encoded bytes as string.
+    :return: the encoded bytes as string
     :rtype: str
     """
     pass
@@ -39,11 +39,11 @@ def base64_encode(key: bytes) -> str:
 
 def base64_decode(key: str) -> bytes:
     """
-    Decodes a string value encoded with base64
+    Decodes a string value encoded with base64.
 
     :param key: string value to be decoded
     :type key: string
-    :return: the decoded string as bytes.
+    :return: the decoded string as bytes
     :rtype: bytes
     """
     pass
@@ -51,7 +51,7 @@ def base64_decode(key: str) -> bytes:
 
 def serialize(item: Any) -> bytes:
     """
-    Serializes the given value into its bytes representation
+    Serializes the given value into its bytes representation.
 
     :param item: value to be serialized
     :type item: Any
@@ -65,7 +65,7 @@ def serialize(item: Any) -> bytes:
 
 def deserialize(data: bytes) -> Any:
     """
-    Deserializes the given bytes value
+    Deserializes the given bytes value.
 
     :param data: serialized value
     :type data: bytes
@@ -101,8 +101,7 @@ def itoa(value: int, base: int = 10) -> str:
     :type value: int
     :param base: the value's base
     :type base: int
-
-    :return: The converted string
+    :return: the converted string
     :rtype: int
     """
     pass

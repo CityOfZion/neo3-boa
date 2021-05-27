@@ -79,9 +79,36 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# The reST default role (used for this markup: `text`) to use for all
+# documents.
+#
+# default_role = None
+
+# If true, '()' will be appended to :func: etc. cross-reference text.
+#
+# add_function_parentheses = True
+
+# If true, the current module name will be prepended to all description
+# unit titles (such as .. function::).
+#
+add_module_names = False
+
+# If true, sectionauthor and moduleauthor directives will be shown in the
+# output. They are ignored by default.
+#
+# show_authors = False
+
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 # todo_include_todos = False
 
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'class-signature': 'separated',
+    'undoc-members': True,
+    'show-inheritance': True,
+    'private-members': True
+}
 
 # -- Options for HTML output ----------------------------------------------
 

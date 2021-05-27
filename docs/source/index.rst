@@ -14,3 +14,4 @@ Welcome to neo3-boa's documentation!
    tutorials
    conceptual-overview
    code-reference
+   builtins/builtins
