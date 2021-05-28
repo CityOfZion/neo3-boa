@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from boa3.model.builtin.interop.interopinterfacetype import InteropInterfaceType
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 
-class IteratorType(ClassType, ICollectionType):
+class IteratorType(InteropInterfaceType, ICollectionType):
     """
     A class used to represent Neo Iterator class
     """

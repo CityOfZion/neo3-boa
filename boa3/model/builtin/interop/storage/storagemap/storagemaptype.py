@@ -28,6 +28,21 @@ class StorageMapType(ClassType):
         return self._variables.copy()
 
     @property
+    def _all_variables(self) -> Dict[str, Variable]:
+        from boa3.model.builtin.interop.storage.storagecontext.storagecontexttype import _StorageContext as StorageContextType
+        from boa3.model.type.type import Type
+
+        private_variables = {
+            '_context': Variable(StorageContextType),
+            '_prefix': Variable(Type.union.build([Type.bytes,
+                                                  Type.str
+                                                  ]))
+        }
+        variables = self.variables.copy()
+        variables.update(private_variables)
+        return variables
+
+    @property
     def properties(self) -> Dict[str, Property]:
         return {}
 

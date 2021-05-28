@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
+from boa3.constants import FOUR_BYTES_MAX_VALUE
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 
 
 class Opcode(bytes, Enum):
@@ -33,6 +35,32 @@ class Opcode(bytes, Enum):
     PUSHDATA2 = b'\x0D'
     # The next four bytes contain the number of bytes to be pushed onto the stack.
     PUSHDATA4 = b'\x0E'
+
+    @staticmethod
+    def get_pushdata_and_data(bytestring: Union[str, bytes]) -> Tuple[Opcode, bytes]:
+        """
+        Gets the push opcode and data to the respective str ot bytes value
+
+        :param bytestring: value that will be pushed
+        :return: the respective opcode and its required data
+        :rtype: Tuple[Opcode, bytes]
+        """
+        if isinstance(bytestring, str):
+            bytestring = String(bytestring).to_bytes()
+
+        bytes_size = Integer(len(bytestring)).to_byte_array(min_length=1)
+        if len(bytes_size) == 1:
+            opcode = Opcode.PUSHDATA1
+        elif len(bytes_size) == 2:
+            opcode = Opcode.PUSHDATA2
+        else:
+            if len(bytes_size) > 4:
+                bytestring = bytestring[:FOUR_BYTES_MAX_VALUE]
+            bytes_size = Integer(len(bytestring)).to_byte_array(min_length=4)
+            opcode = Opcode.PUSHDATA4
+
+        data = bytes_size + bytestring
+        return opcode, data
 
     @staticmethod
     def get_literal_push(integer: int) -> Optional[Opcode]:
@@ -222,6 +250,41 @@ class Opcode(bytes, Enum):
     # Transfers control to a target instruction if the first value is less than or equal to the second value. The 
     # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
     JMPLE_L = b'\x33'
+
+    @property
+    def is_jump(self) -> bool:
+        return self.JMP <= self <= self.JMPLE_L
+
+    @staticmethod
+    def get_jump_and_data(opcode: Opcode, integer: int) -> Tuple[Opcode, bytes]:
+        """
+        Gets the jump opcode and data to the respective integer
+
+        :param opcode: which jump will be used
+        :param integer: number of bytes that'll be jumped
+        :return: the respective opcode and its required data
+        :rtype: Tuple[Opcode, bytes]
+        """
+        if not opcode.is_jump:
+            opcode = Opcode.JMP
+
+        from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
+        opcode_info = OpcodeInfo.get_info(opcode)
+        arg_size = opcode_info.data_len
+        jmp_arg = Integer(arg_size + integer).to_byte_array(min_length=arg_size)
+
+        if len(jmp_arg) > opcode_info.max_data_len and opcode.has_larger_opcode():
+            opcode = opcode.get_larger_opcode()
+            opcode_info = OpcodeInfo.get_info(opcode)
+            arg_size = opcode_info.data_len
+            jmp_arg = Integer(arg_size + integer).to_byte_array(min_length=arg_size)
+            jmp_opcode = opcode
+        else:
+            jmp_opcode = opcode
+
+        jmp_arg = jmp_arg[-arg_size:]
+
+        return jmp_opcode, jmp_arg
 
     # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of 
     # the current instruction. 

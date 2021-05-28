@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Set, List
+from typing import Any, Iterable, List, Set
 
 from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.itype import IType
