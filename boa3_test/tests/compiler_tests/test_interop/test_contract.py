@@ -39,6 +39,23 @@ class TestContractInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, 24])
         self.assertEqual(-18, result)
 
+    def test_call_contract_with_cast(self):
+        path = self.get_contract_path('CallScriptHashWithCast.py')
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        call_hash = hash160(contract)
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine()
+        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+            self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
+        engine.add_contract(call_contract_path)
+
+        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
+        self.assertEqual(True, result)
+
     def test_call_contract_without_args(self):
         path = self.get_contract_path('CallScriptHashWithoutArgs.py')
         call_contract_path = self.get_contract_path('test_sc/list_test', 'IntList.py')

@@ -102,8 +102,6 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         else:
             final_type = Type.get_type(value)
 
-        if isinstance(final_type, MetaType):
-            print()
         if isinstance(final_type, MetaType) and not use_metatype:
             return final_type.meta_type
         else:

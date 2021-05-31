@@ -262,8 +262,8 @@ class TestEngine:
 
             self._error_message = result['error'] if 'error' in result else None
 
-            if 'vm_state' in result:
-                self._vm_state = VMState.get_vm_state(result['vm_state'])
+            if 'vmstate' in result:
+                self._vm_state = VMState.get_vm_state(result['vmstate'])
 
             if 'gasconsumed' in result:
                 self._gas_consumed = result['gasconsumed']
@@ -339,10 +339,10 @@ class TestEngine:
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),
             'contracts': [{'nef': contract_path} for contract_path in self.contracts],
-            'signerAccounts': [to_hex_str(address) for address in self._accounts],
+            'signeraccounts': [to_hex_str(address) for address in self._accounts],
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }
         if isinstance(self._current_tx, Transaction):
-            json['currentTx'] = self._current_tx.to_json()
+            json['currenttx'] = self._current_tx.to_json()
         return json
