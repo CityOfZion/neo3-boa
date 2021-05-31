@@ -65,20 +65,13 @@ class UInt256Type(BytesType, ClassType):
     def _is_type_of(cls, value: Any):
         return isinstance(value, UInt256Type)
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.neo.vm.type.Integer import Integer
+    def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
         push_int_opcode, size_data = Opcode.get_push_and_data(32)
 
         return [
-            (Opcode.DUP, b''),                  # if isinstance(value, bytes):
-            (Opcode.ISTYPE, self.stack_item),
-            (Opcode.JMPIFNOT, Integer(7 + len(size_data)).to_byte_array(min_length=1)),
-            (Opcode.SIZE, b''),                     # return len(value) == 32
+            (Opcode.SIZE, b''),  # return len(value) == 32
             (push_int_opcode, size_data),
-            (Opcode.NUMEQUAL, b''),
-            (Opcode.JMP, Integer(4).to_byte_array(min_length=1)),
-            (Opcode.DROP, b''),
-            (Opcode.PUSH0, b''),                # return False
+            (Opcode.NUMEQUAL, b'')
         ]
 
 

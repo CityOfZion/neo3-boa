@@ -61,6 +61,12 @@ class ContractType(ClassType):
     def _is_type_of(cls, value: Any):
         return isinstance(value, ContractType)
 
+    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+        # TODO: remove this overwrite when the classes related to the manifest are implemented
+        # ContractManifest, ContractAbi, ContractPermission,
+        # ContractMethodDescriptor, ContractEventDescriptor, ContractParameterDefinition
+        return []
+
 
 _Contract = ContractType()
 

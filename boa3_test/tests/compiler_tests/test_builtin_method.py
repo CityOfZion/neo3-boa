@@ -803,10 +803,6 @@ class TestBuiltinMethod(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-    def test_isinstance_class(self):
-        path = self.get_contract_path('IsInstanceClass.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
-
     # endregion
 
     # region exit test

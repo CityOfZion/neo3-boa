@@ -28,18 +28,18 @@ class TestOptional(BoaTest):
 
     def test_optional_variable_reassign(self):
         expected_output = (
-                Opcode.INITSLOT  # function signature
-                + b'\x03'
-                + b'\x00'
-                + Opcode.PUSH2  # a = 2
-                + Opcode.STLOC0
-                + Opcode.PUSH2  # b = a
-                + Opcode.STLOC1
-                + Opcode.PUSHNULL  # c = None
-                + Opcode.STLOC2
-                + Opcode.LDLOC2  # b = c
-                + Opcode.STLOC1
-                + Opcode.RET  # return
+            Opcode.INITSLOT  # function signature
+            + b'\x03'
+            + b'\x00'
+            + Opcode.PUSH2  # a = 2
+            + Opcode.STLOC0
+            + Opcode.PUSH2  # b = a
+            + Opcode.STLOC1
+            + Opcode.PUSHNULL  # c = None
+            + Opcode.STLOC2
+            + Opcode.LDLOC2  # b = c
+            + Opcode.STLOC1
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('OptionalVariableReassign.py')
