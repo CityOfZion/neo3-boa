@@ -21,8 +21,7 @@ class Oracle:
         :type request_filter: str or None
         :param callback: Method name that will be as a callback.
                          This method must be public and implement the following interface:
-
-                         (url: str, user_data: Any, code: int, result: bytes) -> None
+                         `(url: str, user_data: Any, code: int, result: bytes) -> None`
         :type callback: str
         :param user_data: optional data. It'll be returned as the same when the callback is called
         :type user_data: Any

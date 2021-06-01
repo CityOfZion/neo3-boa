@@ -32,7 +32,7 @@ class TriggerType(IntFlag):
 
     ALL = SYSTEM | VERIFICATION | APPLICATION
     """
-    The combination of all triggers
+    The combination of all triggers.
     
     :meta hide-value:
     """

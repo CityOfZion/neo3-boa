@@ -5,23 +5,23 @@ class Block:
     """
     Represents a block.
 
-    :var hash: the hash of the block
+    :ivar hash: a unique identifier based on the unsigned data portion of the object
     :vartype hash: UInt256
-    :var version: the version of the block
+    :ivar version: the data structure version of the block
     :vartype version: int
-    :var previous_hash: the hash of the previous block
+    :ivar previous_hash: the hash of the previous block
     :vartype previous_hash: UInt256
-    :var merkle_root: the merkle root of the transactions
+    :ivar merkle_root: the merkle root of the transactions
     :vartype merkle_root: UInt256
-    :var timestamp: the timestamp of the block
+    :ivar timestamp: UTC timestamp of the block in milliseconds
     :vartype timestamp: int
-    :var index: the index of the block
+    :ivar index: the index of the block
     :vartype index: int
-    :var primary_index: the primary index of the consensus node that generated this block
+    :ivar primary_index: the primary index of the consensus node that generated this block
     :vartype primary_index: int
-    :var next_consensus: the multi-signature address of the consensus nodes that generates the next block
+    :ivar next_consensus: the script hash of the consensus nodes that generates the next block
     :vartype next_consensus: UInt160
-    :var transaction_count: the number of transactions on this block
+    :ivar transaction_count: the number of transactions on this block
     :vartype transaction_count: int
     """
     def __init__(self):

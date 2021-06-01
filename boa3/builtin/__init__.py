@@ -24,7 +24,7 @@ def to_script_hash(data_bytes: Any) -> bytes:
     """
     Converts a data to a script hash.
 
-    :param data_bytes: data to hash.
+    :param data_bytes: data to hash
     :type data_bytes: Any
     :return: the script hash of the data
     :rtype: bytes

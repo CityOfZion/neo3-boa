@@ -42,7 +42,7 @@ def base64_decode(key: str) -> bytes:
     Decodes a string value encoded with base64.
 
     :param key: string value to be decoded
-    :type key: string
+    :type key: str
     :return: the decoded string as bytes
     :rtype: bytes
     """

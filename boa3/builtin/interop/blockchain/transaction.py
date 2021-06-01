@@ -5,21 +5,21 @@ class Transaction:
     """
     Represents a transaction.
 
-    :var hash: the hash of the transaction
+    :ivar hash: a unique identifier based on the unsigned data portion of the object
     :vartype hash: UInt256
-    :var version: the version of the transaction
+    :ivar version: the data structure version of the transaction
     :vartype version: int
-    :var nonce: a random number used once in the cryptography
+    :ivar nonce: a random number used once in the cryptography
     :vartype nonce: int
-    :var sender: the sender is the first signer of the transaction, they will pay the fees of the transaction
+    :ivar sender: the sender is the first signer of the transaction, they will pay the fees of the transaction
     :vartype sender: UInt160
-    :var system_fee: the fee paid for network resource
+    :ivar system_fee: the fee paid for executing the `script`
     :vartype system_fee: int
-    :var network_fee: the fee paid for the validator packaging transactions
+    :ivar network_fee: the fee paid for the validation and inclusion of the transaction in a block by the consensus node
     :vartype network_fee: int
-    :var valid_until_block: indicates that the transaction is only valid before this block height
+    :ivar valid_until_block: indicates that the transaction is only valid before this block height
     :vartype valid_until_block: int
-    :var script: the script of the transaction
+    :ivar script: the array of instructions to be executed on the transaction chain by the virtual machine
     :vartype script: bytes
     """
     def __init__(self):

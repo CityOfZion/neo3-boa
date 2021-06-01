@@ -3,7 +3,7 @@ base58==1.0.3
 bump2version==1.0.0
 coverage==4.5.4
 pycodestyle==2.5.0
-Sphinx==1.6.4
-sphinx-rtd-theme==0.2.4
+Sphinx==4.0.0
+sphinx-rtd-theme==0.5.2
 twine>=1.10.0
 wheel>=0.30.0

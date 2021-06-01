@@ -7,15 +7,16 @@ class Contract:
     """
     Represents a contract that can be invoked.
 
-    :var id: the serial number of the contract
+    :ivar id: the serial number of the contract
     :vartype id: int
-    :var update_counter: the number of times the contract was updated
+    :ivar update_counter: the number of times the contract was updated
     :vartype update_counter: int
-    :var hash: the hash of the contract
+    :ivar hash: the hash of the contract
     :vartype hash: UInt160
-    :var nef: the nef of the contract
+    :ivar nef: the serialized Neo Executable Format (NEF) object holding of the smart contract code and compiler
+        information
     :vartype nef: bytes
-    :var manifest: the manifest of the contract
+    :ivar manifest: the manifest of the contract
     :vartype manifest: Dict[str, Any]
     """
     def __init__(self):
