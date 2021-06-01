@@ -357,3 +357,13 @@ class TestBinaryInterop(BoaTest):
     def test_itoa_mismatched_type(self):
         path = self.get_contract_path('ItoaMismatchedType')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_import_binary(self):
+        path = self.get_contract_path('ImportBinary')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', '10', 10)
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '10', 16)
+        self.assertEqual(16, result)

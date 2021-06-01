@@ -20,6 +20,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.package import Package
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
@@ -1057,7 +1058,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if (callable_target is not None
                 and (len(call.args) < 1 or call.args[0] != arg0)
-                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
+                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import, Package))):
             call.args.insert(0, arg0)
 
         if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
@@ -1288,6 +1289,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(value, ISymbol):
             symbol = value
 
+        if isinstance(symbol, Attribute):
+            symbol = symbol.attr_symbol
         if isinstance(symbol, IExpression):
             symbol = symbol.type
         if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:

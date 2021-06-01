@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.builtin.interop.runtime import TriggerType
+from boa3.neo3.contracts import TriggerType
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
@@ -618,3 +618,10 @@ class TestRuntimeInterop(BoaTest):
         if isinstance(result[6], str):
             result[6] = String(result[6]).to_bytes()
         self.assertIsInstance(result[7], bytes)
+
+    def test_import_runtime(self):
+        path = self.get_contract_path('ImportRuntime.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)
