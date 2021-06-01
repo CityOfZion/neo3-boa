@@ -1,8 +1,10 @@
 from boa3.exception import CompilerError, CompilerWarning
+from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTyping(BoaTest):
@@ -119,19 +121,14 @@ class TestTyping(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_cast_to_uint160(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x01'
-            + Opcode.LDARG0     # x = cast(UInt160, value)
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # return x
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('CastToUInt160.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+
+        engine = TestEngine()
+        value = bytes(range(20))
+        result = self.run_smart_contract(engine, path, 'Main', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
 
     def test_cast_to_transaction(self):
         expected_output = (

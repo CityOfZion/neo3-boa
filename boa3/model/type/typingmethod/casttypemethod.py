@@ -82,6 +82,10 @@ class CastTypeMethod(IBuiltinMethod):
         return 1  # the implementation is the same as x = arg
 
     @property
+    def args_on_stack(self) -> int:
+        return 1  # the implementation is the same as x = arg
+
+    @property
     def generation_order(self) -> List[int]:
         # type should not be converted
         indexes = super().generation_order

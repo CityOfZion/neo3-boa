@@ -37,7 +37,7 @@ jobs:
 
             git clone https://github.com/simplitech/neo-devpack-dotnet.git -b test-engine-executable --single-branch
             cd ./neo-devpack-dotnet
-            git checkout f340a1246f97e8c3705b013208812d06fb8fa1ea
+            git checkout 1aec9f704bcf0ad76de00ac4467ecdbad7ed35bc
             cd ..
             dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
             python -m unittest discover boa3_test
