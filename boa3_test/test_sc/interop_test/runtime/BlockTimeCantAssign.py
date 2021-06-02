@@ -1,7 +1,7 @@
-from boa3.builtin.interop.runtime import get_time
+from boa3.builtin.interop.runtime import time
 
 
 def Main(example: int) -> int:
-    global get_time
-    get_time = example
-    return get_time
+    global time
+    time = example
+    return time

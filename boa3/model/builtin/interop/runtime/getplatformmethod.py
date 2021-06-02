@@ -16,6 +16,6 @@ class GetPlatformMethod(InteropMethod):
 
 class PlatformProperty(IBuiltinProperty):
     def __init__(self):
-        identifier = 'get_platform'
+        identifier = 'platform'
         getter = GetPlatformMethod()
         super().__init__(identifier, getter)
