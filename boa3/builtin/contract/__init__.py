@@ -11,6 +11,12 @@ Nep5TransferEvent = CreateNewEvent(
     ],
     'transfer'
 )
+"""
+The NEP-5 transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
+addresses of the sender, receiver and the amount transferred.
+
+:meta hide-value:
+"""
 
 Nep17TransferEvent = CreateNewEvent(
     [
@@ -20,10 +26,16 @@ Nep17TransferEvent = CreateNewEvent(
     ],
     'Transfer'
 )
+"""
+The NEP-17 Transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
+addresses of the sender, receiver and the amount transferred.
+
+:meta hide-value:
+"""
 
 
 def abort():
     """
-    Abort the execution of a smart contract
+    Aborts the execution of a smart contract.
     """
     pass

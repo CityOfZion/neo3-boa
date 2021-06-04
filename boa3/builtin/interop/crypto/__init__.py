@@ -73,7 +73,7 @@ def verify_with_ecdsa_secp256r1(item: Any, pubkey: bytes, signature: bytes) -> b
     :type pubkey: bytes
     :param signature: the signature of the item
     :type signature: bytes
-    :return:: a boolean value that represents whether the signature is valid
+    :return: a boolean value that represents whether the signature is valid
     :rtype: bool
     """
     pass
@@ -89,7 +89,7 @@ def verify_with_ecdsa_secp256k1(item: Any, pubkey: bytes, signature: bytes) -> b
     :type pubkey: bytes
     :param signature: the signature of the item
     :type signature: bytes
-    :return:: a boolean value that represents whether the signature is valid
+    :return: a boolean value that represents whether the signature is valid
     :rtype: bool
     """
     pass

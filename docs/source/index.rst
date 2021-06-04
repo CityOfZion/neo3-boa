@@ -7,10 +7,10 @@ Welcome to neo3-boa's documentation!
 ====================================
 
 .. toctree::
-   :maxdepth: 3
    :caption: Contents:
 
    getting-started
    tutorials
    conceptual-overview
    code-reference
+   package-reference

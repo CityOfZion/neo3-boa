@@ -10,20 +10,20 @@ current_height: int = 0
 
 def get_contract(hash: UInt160) -> Contract:
     """
-    Gets a contract with a given hash
+    Gets a contract with a given hash.
 
     :param hash: a smart contract hash
     :type hash: UInt160
     :return: a contract
     :rtype: Contract
-    :raise Exception: raised if hash length isn't 20 bytes
+    :raise Exception: raised if hash length isn't 20 bytes.
     """
     pass
 
 
 def get_block(index_or_hash: Union[int, UInt256]) -> Block:
     """
-    Gets the block with the given index or hash
+    Gets the block with the given index or hash.
 
     :param index_or_hash: index or hash identifier of the block
     :type index_or_hash: int or UInt256
@@ -35,7 +35,7 @@ def get_block(index_or_hash: Union[int, UInt256]) -> Block:
 
 def get_transaction(hash_: UInt256) -> Transaction:
     """
-    Gets a transaction with the given hash
+    Gets a transaction with the given hash.
 
     :param hash_: hash identifier of the transaction
     :type hash_: UInt256
@@ -46,7 +46,7 @@ def get_transaction(hash_: UInt256) -> Transaction:
 
 def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_index: int) -> Transaction:
     """
-    Gets a transaction from a block
+    Gets a transaction from a block.
 
     :param block_hash_or_height: a block identifier
     :type block_hash_or_height: UInt256 or int
@@ -59,7 +59,7 @@ def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_ind
 
 def get_transaction_height(hash_: UInt256) -> int:
     """
-    Gets the height of a transaction
+    Gets the height of a transaction.
 
     :param hash_: hash identifier of the transaction
     :type hash_: UInt256

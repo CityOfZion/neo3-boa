@@ -2,6 +2,11 @@ from typing import Any, Union
 
 
 class Oracle:
+    """
+    Neo Oracle Service is an out-of-chain data access service built into Neo N3. It allows users to request the external
+    data sources in smart contracts, and Oracle nodes designated by the committee will access the specified data source
+    then pass the result in the callback function to continue executing the smart contract logic.
+    """
 
     @classmethod
     def request(cls, url: str, request_filter: Union[str, None], callback: str, user_data: Any, gas_for_response: int):
@@ -16,8 +21,7 @@ class Oracle:
         :type request_filter: str or None
         :param callback: Method name that will be as a callback.
                          This method must be public and implement the following interface:
-
-                         (url: str, user_data: Any, code: int, result: bytes) -> None
+                         `(url: str, user_data: Any, code: int, result: bytes) -> None`
         :type callback: str
         :param user_data: optional data. It'll be returned as the same when the callback is called
         :type user_data: Any
