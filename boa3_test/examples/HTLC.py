@@ -4,7 +4,7 @@ from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import abort
 from boa3.builtin.interop.contract import GAS, call_contract
 from boa3.builtin.interop.crypto import hash160
-from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash, get_time
+from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash, time
 from boa3.builtin.interop.storage import get, put
 from boa3.builtin.type import UInt160
 
@@ -120,7 +120,7 @@ def atomic_swap(person_a_address: UInt160, person_a_token: bytes, person_a_amoun
         put(AMOUNT_PREFIX + PERSON_B, person_b_amount)
         put(SECRET_HASH, secret_hash)
         put(NOT_INITIALIZED, False)
-        put(START_TIME, get_time)
+        put(START_TIME, time)
         return True
     return False
 
@@ -218,7 +218,7 @@ def refund() -> bool:
     :return: whether enough time has passed and the cryptocurrencies were refunded
     :rtype: bool
     """
-    if get_time > get(START_TIME).to_int() + LOCK_TIME:
+    if time > get(START_TIME).to_int() + LOCK_TIME:
         # Checking if PERSON_A transferred to this smart contract
         funded_crypto = get(FUNDED_PREFIX + PERSON_A).to_int()
         if funded_crypto != 0:

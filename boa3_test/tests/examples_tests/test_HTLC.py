@@ -349,7 +349,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(False, result)
 
         # this simulates a new block in the blockchain
-        # get_time only changes value when a new block enters the blockchain
+        # time only changes value when a new block enters the blockchain
         engine.increase_block()
         # will be able to refund, because enough time has passed
         result = self.run_smart_contract(engine, path, 'refund',

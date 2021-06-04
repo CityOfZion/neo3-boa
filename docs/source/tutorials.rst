@@ -317,7 +317,7 @@ All of the examples presented here can be found in the `examples folder of the N
     from boa3.builtin.contract import abort
     from boa3.builtin.interop.contract import call_contract
     from boa3.builtin.interop.crypto import hash160
-    from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash, get_time
+    from boa3.builtin.interop.runtime import calling_script_hash, check_witness, executing_script_hash, time
     from boa3.builtin.interop.storage import get, put
     from boa3.builtin.type import UInt160
 
@@ -427,7 +427,7 @@ All of the examples presented here can be found in the `examples folder of the N
             put(AMOUNT_PREFIX + OTHER_PERSON, other_person_amount)
             put(SECRET_HASH, secret_hash)
             put(NOT_INITIALIZED, False)
-            put(START_TIME, get_time)
+            put(START_TIME, time)
             return True
         return False
 
@@ -515,7 +515,7 @@ All of the examples presented here can be found in the `examples folder of the N
         :return: whether enough time has passed and the cryptocurrencies were refunded
         :rtype: bool
         """
-        if get_time > get(START_TIME).to_int() + LOCK_TIME:
+        if time > get(START_TIME).to_int() + LOCK_TIME:
 
             # Checking if OWNER transferred to this smart contract
             funded_crypto = get(FUNDED_PREFIX + OWNER).to_int()

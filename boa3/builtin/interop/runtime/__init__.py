@@ -49,9 +49,9 @@ def get_trigger() -> TriggerType:
 
 executing_script_hash: UInt160 = UInt160()
 calling_script_hash: UInt160 = UInt160()
-get_time: int = 0
+time: int = 0
 gas_left: int = 0
-get_platform: str = ''
+platform: str = ''
 invocation_counter: int = 0
 entry_script_hash: UInt160 = UInt160()
 script_container: Any = None
