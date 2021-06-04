@@ -88,7 +88,7 @@ Gets the script hash of the calling contract.
 :meta hide-value:
 """
 
-get_time: int = 0
+time: int = 0
 """
 Gets the timestamp of the current block.
 
@@ -102,7 +102,7 @@ Gets the remaining GAS that can be spent in order to complete the execution.
 :meta hide-value:
 """
 
-get_platform: str = ''
+platform: str = ''
 """
 Gets the name of the current platform.
 

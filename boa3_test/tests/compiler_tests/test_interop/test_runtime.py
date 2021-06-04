@@ -494,14 +494,14 @@ class TestRuntimeInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
-    def test_get_platform(self):
+    def test_platform(self):
         expected_output = (
             Opcode.SYSCALL
             + Interop.Platform.getter.interop_method_hash
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GetPlatform.py')
+        path = self.get_contract_path('Platform.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -509,7 +509,7 @@ class TestRuntimeInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual('NEO', result)
 
-    def test_get_platform_cant_assign(self):
+    def test_platform_cant_assign(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x01\x01'
@@ -519,7 +519,7 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GetPlatformCantAssign.py')
+        path = self.get_contract_path('PlatformCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
@@ -554,7 +554,7 @@ class TestRuntimeInterop(BoaTest):
         engine = TestEngine()
 
         new_block = engine.increase_block()
-        result = self.run_smart_contract(engine, path, 'main', 'get_time', 1)
+        result = self.run_smart_contract(engine, path, 'main', 'time', 1)
         self.assertEqual(new_block.timestamp, result)
 
         from boa3.builtin.type import UInt160
