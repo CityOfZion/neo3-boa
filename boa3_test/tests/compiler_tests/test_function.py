@@ -1001,3 +1001,30 @@ class TestFunction(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(8, result)
+
+    def test_call_void_function_with_stared_argument(self):
+        path = self.get_contract_path('CallVoidFunctionWithStarredArgument.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(True, result)
+
+    def test_call_return_function_with_stared_argument(self):
+        path = self.get_contract_path('CallReturnFunctionWithStarredArgument.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(sum([1, 2, 3, 4, 5, 6]), result)
+
+    def test_return_starred_argument(self):
+        path = self.get_contract_path('ReturnStarredArgumentCount.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'fun_with_starred', [1, 2, 3, 4, 5])
+        self.assertEqual(5, result)
+
+        result = self.run_smart_contract(engine, path, 'fun_with_starred', [1, 2, 3])
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4, 5])
+        self.assertEqual(5, result)
+
+        result = self.run_smart_contract(engine, path, 'main', [1, 2, 3])
+        self.assertEqual(3, result)

@@ -460,6 +460,8 @@ class OpcodeInfo:
     REMOVE = OpcodeInformation(Opcode.REMOVE)
     # Remove all the items from the compound-type.
     CLEARITEMS = OpcodeInformation(Opcode.CLEARITEMS)
+    # Remove the last element from an array, and push it onto the stack.
+    POPITEM = OpcodeInformation(Opcode.POPITEM)
 
     # endregion
 

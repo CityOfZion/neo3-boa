@@ -1,6 +1,6 @@
 import ast
 from abc import ABC
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -11,8 +11,9 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None,
+                 vararg: Optional[Tuple[str, Variable]] = None,
                  defaults: List[ast.AST] = None, return_type: IType = None):
-        super().__init__(args, defaults, return_type)
+        super().__init__(args, vararg, defaults, return_type)
         self._identifier = identifier
 
     @property
