@@ -7,6 +7,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -670,3 +671,32 @@ class TestStorageInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
         # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
+    def test_as_read_only(self):
+        path = self.get_contract_path('StorageAsReadOnly.py')
+        engine = TestEngine()
+        Boa3.compile(path)
+
+        key = 'key'
+        value_old = 'old value'
+        value_new = 'new value'
+
+        # Putting old value in the storage
+        result = self.run_smart_contract(engine, path, 'put_value_in_storage', key, value_old)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_value_in_storage_read_only', key)
+        self.assertEqual(value_old, result)
+
+        result = self.run_smart_contract(engine, path, 'get_value_in_storage', key)
+        self.assertEqual(value_old, result)
+
+        # Trying to put a new value in the storage using read_only won't work
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'put_value_in_storage_read_only', key, value_new)
+
+        result = self.run_smart_contract(engine, path, 'get_value_in_storage_read_only', key)
+        self.assertEqual(value_old, result)
+
+        result = self.run_smart_contract(engine, path, 'get_value_in_storage', key)
+        self.assertEqual(value_old, result)
