@@ -235,9 +235,10 @@ class VMCodeMapping:
 
         if address in targeted_addresses:
             next_address = self.get_end_address(code) + 1
-            next_code = self._codes[next_address]
-            for source in targeted_addresses[address]:
-                self._codes[source].set_target(next_code)
+            if next_address < self.bytecode_size:
+                next_code = self._codes[next_address]
+                for source in targeted_addresses[address]:
+                    self._codes[source].set_target(next_code)
 
     def move_to_end(self, first_code_address: int, last_code_address: int):
         """

@@ -1,5 +1,4 @@
 from boa3.exception import CompilerError, CompilerWarning
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String

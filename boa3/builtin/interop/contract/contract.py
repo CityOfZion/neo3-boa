@@ -19,6 +19,7 @@ class Contract:
     :ivar manifest: the manifest of the contract
     :vartype manifest: Dict[str, Any]
     """
+
     def __init__(self):
         self.id: int = 0
         self.update_counter: int = 0

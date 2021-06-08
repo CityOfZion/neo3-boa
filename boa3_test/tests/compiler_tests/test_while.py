@@ -1,7 +1,10 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import MismatchedTypes
+from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -429,3 +432,50 @@ class TestWhile(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
+
+    def test_while_interop_condition(self):
+        path = self.get_contract_path('WhileWithInteropCondition.py')
+        output, manifest = self.compile_and_save(path)
+        contract_hash = hash160(output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'deploy')
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'test_end_while_jump')
+        self.assertEqual(True, result)
+
+        # test notifications inserted into the code for validating if the code flow is correct
+        notifications = engine.get_events('notify', origin=contract_hash)
+        self.assertEqual(2, len(notifications))
+
+        self.assertEqual(1, len(notifications[0].arguments))
+        self.assertIsInstance(notifications[0].arguments[0], list)
+        self.assertEqual(4, len(notifications[0].arguments[0]))
+        token, executing_script_hash, fee_receiver, fee_amount = notifications[0].arguments[0]
+        if isinstance(fee_receiver, str):
+            fee_receiver = String(fee_receiver).to_bytes()
+        if isinstance(fee_amount, str):
+            fee_amount = String(fee_amount).to_bytes()
+        if isinstance(fee_amount, bytes):
+            fee_amount = Integer.from_bytes(fee_amount)
+
+        self.assertEqual(constants.GAS_SCRIPT, token)
+        self.assertEqual(contract_hash, executing_script_hash)
+        self.assertEqual(bytes(20), fee_receiver)
+        self.assertEqual(10, fee_amount)
+
+        self.assertEqual(1, len(notifications[1].arguments))
+        self.assertIsInstance(notifications[1].arguments[0], list)
+        self.assertEqual(4, len(notifications[1].arguments[0]))
+        token, executing_script_hash, fee_receiver, fee_amount = notifications[1].arguments[0]
+        if isinstance(fee_receiver, str):
+            fee_receiver = String(fee_receiver).to_bytes()
+        if isinstance(fee_amount, str):
+            fee_amount = String(fee_amount).to_bytes()
+        if isinstance(fee_amount, bytes):
+            fee_amount = Integer.from_bytes(fee_amount)
+
+        self.assertEqual(constants.NEO_SCRIPT, token)
+        self.assertEqual(contract_hash, executing_script_hash)
+        self.assertEqual(bytes(20), fee_receiver)
+        self.assertEqual(20, fee_amount)

@@ -639,7 +639,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         symbol = self.get_symbol(value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, Collection):
+            if isinstance(symbol, Collection) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
+                # for evaluating names like List[str], Dict[int, bool], etc
                 value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
                 values_type: Iterable[IType] = self.get_values_type(value)
                 return symbol.build_collection(*values_type)
@@ -880,6 +881,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the string
         """
         return str.s
+
+    def visit_Bytes(self, btes: ast.Bytes) -> bytes:
+        """
+        Visitor of literal string node
+
+        :param btes:
+        :return: the value of the string
+        """
+        return btes.s
 
     def visit_Tuple(self, tup_node: ast.Tuple) -> Optional[Tuple[Any, ...]]:
         """

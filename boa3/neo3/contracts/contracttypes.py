@@ -12,28 +12,28 @@ class TriggerType(IntFlag):
     SYSTEM = 0x01
     """
     The combination of all system triggers.
-    
+
     :meta hide-value:
     """
 
     VERIFICATION = 0x20
     """
     Indicates that the contract is triggered by the verification of a IVerifiable.
-    
+
     :meta hide-value:
     """
 
     APPLICATION = 0x40
     """
     Indicates that the contract is triggered by the execution of transactions.
-    
+
     :meta hide-value:
     """
 
     ALL = SYSTEM | VERIFICATION | APPLICATION
     """
     The combination of all triggers.
-    
+
     :meta hide-value:
     """
 
@@ -48,7 +48,7 @@ class CallFlags(IntFlag):
     """
     Special behaviors of the invoked contract are not allowed, such as chain calls, sending notifications, modifying 
     state, etc.
-    
+
     :meta hide-value:
     """
 
@@ -90,7 +90,7 @@ class CallFlags(IntFlag):
     READ_ONLY = READ_STATES | ALLOW_CALL
     """
     Indicates that the called contract is allowed to read states or call another contract.
-    
+
     :meta hide-value:
     """
 

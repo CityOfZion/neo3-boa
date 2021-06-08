@@ -24,6 +24,7 @@ class Block:
     :ivar transaction_count: the number of transactions on this block
     :vartype transaction_count: int
     """
+
     def __init__(self):
         self.hash: UInt256 = UInt256()
         self.version: int = 0

@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import cast
 
 from boa3.builtin import public
 from boa3.builtin.interop.contract import call_contract
