@@ -13,6 +13,7 @@ from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.package import Package
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
@@ -238,6 +239,10 @@ class CodeGenerator:
                 for package in imports:
                     if identifier in package.all_symbols:
                         return package.all_symbols[identifier]
+                    else:
+                        for pkg in package.all_symbols.values():
+                            if isinstance(pkg, Package) and identifier in pkg.symbols:
+                                return pkg.symbols[identifier]
         return Type.none
 
     def initialize_static_fields(self) -> bool:

@@ -43,3 +43,12 @@ class TestIteratorInterop(BoaTest):
     def test_iterator_value_dict_mismatched_type(self):
         path = self.get_contract_path('IteratorValueMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_import_iterator(self):
+        path = self.get_contract_path('ImportIterator.py')
+        engine = TestEngine()
+        self.compile_and_save(path)
+
+        result = self.run_smart_contract(engine, path, 'return_iterator')
+        from boa3.neo.core.types.InteropInterface import InteropInterface
+        self.assertEqual(InteropInterface, result)  # returns an interop interface

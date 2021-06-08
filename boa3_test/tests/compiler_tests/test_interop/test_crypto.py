@@ -503,3 +503,11 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
         path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
         self.assertCompilerLogs(MismatchedTypes, path)
+
+    def test_import_crypto(self):
+        import hashlib
+        path = self.get_contract_path('ImportCrypto.py')
+        engine = TestEngine()
+        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
+        result = self.run_smart_contract(engine, path, 'main', 'unit test')
+        self.assertEqual(expected_result, result)
