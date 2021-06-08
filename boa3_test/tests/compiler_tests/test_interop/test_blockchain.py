@@ -7,6 +7,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import CallFlags
+from boa3.neo3.core.types import UInt256, UInt160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -111,8 +112,6 @@ class TestBlockchainInterop(BoaTest):
         path = self.get_contract_path('Transaction.py')
         engine = TestEngine()
 
-        from boa3.neo3.core.types import UInt256, UInt160
-        from boa3.neo.vm.type.String import String
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(8, len(result))
         if isinstance(result[0], str):
@@ -161,15 +160,30 @@ class TestBlockchainInterop(BoaTest):
         engine = TestEngine()
 
         engine.increase_block()
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
+        sender = bytes(range(20))
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000, signer_accounts=[sender])
 
         txs = engine.get_transactions()
         self.assertGreater(len(txs), 0)
         hash_ = txs[0].hash
+        script = txs[0]._script
 
         result = self.run_smart_contract(engine, path, 'main', hash_)
-        self.assertIsNotNone(result)
-        # TODO: finish this example when transaction gets added to the storage
+        self.assertEqual(8, len(result))
+        if isinstance(result[0], str):
+            result[0] = String(result[0]).to_bytes()
+        self.assertEqual(UInt256(hash_), UInt256(result[0]))   # hash
+        self.assertIsInstance(result[1], int)   # version
+        self.assertIsInstance(result[2], int)   # nonce
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+        self.assertEqual(UInt160(sender), UInt160(result[3]))   # sender
+        self.assertIsInstance(result[4], int)   # system_fee
+        self.assertIsInstance(result[5], int)   # network_fee
+        self.assertIsInstance(result[6], int)   # valid_until_block
+        if isinstance(result[7], str):
+            result[7] = String(result[7]).to_bytes()
+        self.assertEqual(script, result[7])   # script
 
     def test_get_transaction_from_block_int(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -203,18 +217,32 @@ class TestBlockchainInterop(BoaTest):
         engine = TestEngine()
 
         engine.increase_block(10)
-
-        self.run_smart_contract(engine, path_burn_gas, 'main', 100)
+        sender = bytes(range(20))
+        self.run_smart_contract(engine, path_burn_gas, 'main', 100, signer_accounts=[sender])
 
         block_10 = engine.current_block
         txs = block_10.get_transactions()
         hash_ = txs[0].hash
+        script = txs[0]._script
 
         engine.increase_block()
 
         result = self.run_smart_contract(engine, path, 'main', 10, 0)
-        self.assertIsNotNone(result)
-        # TODO: finish this example when transaction gets added to the storage
+        self.assertEqual(8, len(result))
+        if isinstance(result[0], str):
+            result[0] = String(result[0]).to_bytes()
+        self.assertEqual(UInt256(hash_), UInt256(result[0]))  # hash
+        self.assertIsInstance(result[1], int)  # version
+        self.assertIsInstance(result[2], int)  # nonce
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+        self.assertEqual(UInt160(sender), UInt160(result[3]))  # sender
+        self.assertIsInstance(result[4], int)  # system_fee
+        self.assertIsInstance(result[5], int)  # network_fee
+        self.assertIsInstance(result[6], int)  # valid_until_block
+        if isinstance(result[7], str):
+            result[7] = String(result[7]).to_bytes()
+        self.assertEqual(script, result[7])  # script
 
     def test_get_transaction_from_block_uint256(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -248,17 +276,34 @@ class TestBlockchainInterop(BoaTest):
         engine = TestEngine()
 
         engine.increase_block(10)
-        self.run_smart_contract(engine, path_burn_gas, 'main', 100)
+        sender = bytes(range(20))
+        self.run_smart_contract(engine, path_burn_gas, 'main', 100, signer_accounts=[sender])
 
         block_10 = engine.current_block
         block_hash = block_10.hash
         self.assertIsNotNone(block_hash)
+        txs = block_10.get_transactions()
+        tx_hash = txs[0].hash
+        tx_script = txs[0]._script
 
         engine.increase_block()
 
         result = self.run_smart_contract(engine, path, 'main', block_hash, 0)
-        self.assertIsNotNone(result)
-        # TODO: finish this example when transaction gets added to the storage
+        self.assertEqual(8, len(result))
+        if isinstance(result[0], str):
+            result[0] = String(result[0]).to_bytes()
+        self.assertEqual(UInt256(tx_hash), UInt256(result[0]))  # hash
+        self.assertIsInstance(result[1], int)  # version
+        self.assertIsInstance(result[2], int)  # nonce
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+        self.assertEqual(UInt160(sender), UInt160(result[3]))  # sender
+        self.assertIsInstance(result[4], int)  # system_fee
+        self.assertIsInstance(result[5], int)  # network_fee
+        self.assertIsInstance(result[6], int)  # valid_until_block
+        if isinstance(result[7], str):
+            result[7] = String(result[7]).to_bytes()
+        self.assertEqual(tx_script, result[7])  # script
 
     def test_get_transaction_height(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -300,4 +345,3 @@ class TestBlockchainInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', hash_)
         self.assertEqual(expected_block_index, result)
-        # TODO: finish this example when transaction gets added to the storage
