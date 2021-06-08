@@ -7,9 +7,21 @@ class TriggerType(IntFlag):
     different usage scenarios.
     """
 
-    # TODO: add ONPERSIST and POSTPERSIST
+    ON_PERSIST = 0x01
+    """
+    Indicate that the contract is triggered by the system to execute the OnPersist method of the native contracts.
 
-    SYSTEM = 0x01
+    :meta hide-value:
+    """
+
+    POST_PERSIST = 0x02
+    """
+    Indicate that the contract is triggered by the system to execute the PostPersist method of the native contracts.
+
+    :meta hide-value:
+    """
+
+    SYSTEM = ON_PERSIST | POST_PERSIST
     """
     The combination of all system triggers.
     
@@ -30,7 +42,7 @@ class TriggerType(IntFlag):
     :meta hide-value:
     """
 
-    ALL = SYSTEM | VERIFICATION | APPLICATION
+    ALL = ON_PERSIST | POST_PERSIST | VERIFICATION | APPLICATION
     """
     The combination of all triggers.
     
