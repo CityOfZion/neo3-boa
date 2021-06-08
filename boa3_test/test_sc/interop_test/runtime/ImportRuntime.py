@@ -4,4 +4,4 @@ from boa3.builtin.interop import runtime
 
 @public
 def main() -> int:
-    return runtime.get_time + runtime.gas_left + runtime.invocation_counter
+    return runtime.time + runtime.gas_left + runtime.invocation_counter
