@@ -60,6 +60,7 @@ class Builtin:
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
     Range = RangeMethod()
+    Reversed = ReversedMethod()
     Exception = ExceptionMethod()
 
     # python class method
