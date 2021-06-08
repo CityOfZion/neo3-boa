@@ -7,21 +7,21 @@ class TriggerType(IntFlag):
     different usage scenarios.
     """
 
-    ONPERSIST = 0x01
+    ON_PERSIST = 0x01
     """
     Indicate that the contract is triggered by the system to execute the OnPersist method of the native contracts.
 
     :meta hide-value:
     """
 
-    POSTPERSIST = 0x02
+    POST_PERSIST = 0x02
     """
     Indicate that the contract is triggered by the system to execute the PostPersist method of the native contracts.
 
     :meta hide-value:
     """
 
-    SYSTEM = ONPERSIST | POSTPERSIST
+    SYSTEM = ON_PERSIST | POST_PERSIST
     """
     The combination of all system triggers.
     
@@ -42,7 +42,7 @@ class TriggerType(IntFlag):
     :meta hide-value:
     """
 
-    ALL = ONPERSIST | POSTPERSIST | VERIFICATION | APPLICATION
+    ALL = ON_PERSIST | POST_PERSIST | VERIFICATION | APPLICATION
     """
     The combination of all triggers.
     
