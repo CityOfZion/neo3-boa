@@ -1283,7 +1283,7 @@ class CodeGenerator:
         vm_code = VMCode(op_info, data)
 
         if op_info.opcode.has_target():
-            data = vm_code.data
+            data = vm_code.raw_data
             relative_address: int = Integer.from_bytes(data, signed=True)
             actual_address = VMCodeMapping.instance().bytecode_size + relative_address
             if (self._can_append_target

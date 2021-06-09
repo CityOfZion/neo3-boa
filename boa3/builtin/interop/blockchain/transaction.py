@@ -22,6 +22,7 @@ class Transaction:
     :ivar script: the array of instructions to be executed on the transaction chain by the virtual machine
     :vartype script: bytes
     """
+
     def __init__(self):
         self.hash: UInt256 = UInt256()
         self.version: int = 0

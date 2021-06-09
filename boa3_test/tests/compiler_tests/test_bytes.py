@@ -227,6 +227,25 @@ class TestBytes(BoaTest):
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'main', bytearray())
 
+    def test_slice_with_cast(self):
+        path = self.get_contract_path('SliceWithCast.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', b'unittest',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'unittest'[1:2], result)
+
+        result = self.run_smart_contract(engine, path, 'main', '123',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'123'[1:2], result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', bytearray())
+
+        result = self.run_smart_contract(engine, path, 'main', 12345,
+                                         expected_result_type=bytes)
+        self.assertEqual(Integer(12345).to_byte_array()[1:2], result)
+
     def test_byte_array_get_value(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
