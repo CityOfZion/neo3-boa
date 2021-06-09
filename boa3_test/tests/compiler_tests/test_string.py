@@ -194,3 +194,16 @@ class TestString(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 'concat', ['', 'neo'])
         self.assertEqual('neo', result)
+
+    def test_string_with_double_quotes(self):
+        path = self.get_contract_path('StringWithDoubleQuotes.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'string_test', 'hello', 'world')
+        self.assertEqual('"hell"test_symbol":world}"', result)
+
+        result = self.run_smart_contract(engine, path, 'string_test', '1', 'neo')
+        self.assertEqual('""test_symbol":neo}"', result)
+
+        result = self.run_smart_contract(engine, path, 'string_test', 'neo', '')
+        self.assertEqual('"ne"test_symbol":}"', result)
