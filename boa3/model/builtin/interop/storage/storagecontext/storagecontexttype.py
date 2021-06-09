@@ -38,9 +38,11 @@ class StorageContextType(InteropInterfaceType):
         if len(self._instance_methods) == 0:
             from boa3.model.builtin.interop.storage.storagecontext.storagecontextcreatemapmethod import \
                 StorageContextCreateMapMethod
+            from boa3.model.builtin.interop.storage.storagecontext.storagecontextasreadonlymethod import StorageContextAsReadOnlyMethod
 
             self._instance_methods = {
-                'create_map': StorageContextCreateMapMethod()
+                'create_map': StorageContextCreateMapMethod(),
+                'as_read_only': StorageContextAsReadOnlyMethod()
             }
         return self._instance_methods
 
