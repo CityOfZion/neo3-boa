@@ -14,7 +14,7 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.event import Event
 from boa3.model.expression import IExpression
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
@@ -300,10 +300,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
         analyser = ImportAnalyser(target)
-        if analyser.can_be_imported:
-            return analyser
-        else:
+
+        if not analyser.can_be_imported:
             self._log_unresolved_import(origin_node, target)
+            return None
+
+        if not analyser.is_builtin_import:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    origin_node.lineno, origin_node.col_offset,
+                    symbol_id='import from user modules'
+                )
+            )
+        return analyser
 
     def visit_Import(self, import_node: ast.Import):
         """

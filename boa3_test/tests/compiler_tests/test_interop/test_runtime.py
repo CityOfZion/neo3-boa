@@ -20,6 +20,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_check_witness(self):
         path = self.get_contract_path('CheckWitness.py')
+        Boa3.compile(path)
         account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
 
         engine = TestEngine()
@@ -621,6 +622,13 @@ class TestRuntimeInterop(BoaTest):
 
     def test_import_runtime(self):
         path = self.get_contract_path('ImportRuntime.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)
+
+    def test_import_interop_runtime(self):
+        path = self.get_contract_path('ImportInteropRuntime.py')
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'main')

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Union
+
 from boa3.builtin.interop.storage.storagemap import StorageMap
 
 

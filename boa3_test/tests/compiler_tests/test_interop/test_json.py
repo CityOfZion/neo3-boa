@@ -85,3 +85,15 @@ class TestJsonInterop(BoaTest):
         value = 'string'
         result = self.run_smart_contract(engine, path, 'main', value)
         self.assertEqual(value, result)
+
+    def test_import_interop_json(self):
+        path = self.get_contract_path('ImportInteropJson.py')
+        engine = TestEngine()
+
+        value = 123
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(value, result)
+
+        value = 'string'
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(value, result)

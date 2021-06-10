@@ -367,3 +367,13 @@ class TestBinaryInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', '10', 16)
         self.assertEqual(16, result)
+
+    def test_import_interop_binary(self):
+        path = self.get_contract_path('ImportInteropBinary')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', '10', 10)
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '10', 16)
+        self.assertEqual(16, result)

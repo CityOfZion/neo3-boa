@@ -511,3 +511,11 @@ class TestCryptoInterop(BoaTest):
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
         result = self.run_smart_contract(engine, path, 'main', 'unit test')
         self.assertEqual(expected_result, result)
+
+    def test_import_interop_crypto(self):
+        import hashlib
+        path = self.get_contract_path('ImportInteropCrypto.py')
+        engine = TestEngine()
+        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
+        result = self.run_smart_contract(engine, path, 'main', 'unit test')
+        self.assertEqual(expected_result, result)

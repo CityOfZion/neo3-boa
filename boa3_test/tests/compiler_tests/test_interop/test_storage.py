@@ -672,6 +672,33 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(InteropInterface, result)  # returns an interop interface
         # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
 
+    def test_import_interop_storage(self):
+        path = self.get_contract_path('ImportInteropStorage.py')
+        Boa3.compile(path)
+        engine = TestEngine()
+
+        key = 'unit_test'
+        value = 1234
+
+        result = self.run_smart_contract(engine, path, 'get_value', key)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'put_value', key, value)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_value', key)
+        self.assertEqual(value, result)
+
+        result = self.run_smart_contract(engine, path, 'delete_value', key)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_value', key)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
     def test_as_read_only(self):
         path = self.get_contract_path('StorageAsReadOnly.py')
         engine = TestEngine()
