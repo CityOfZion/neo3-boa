@@ -79,9 +79,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbols.update(module.symbols)
         return symbols
 
-    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
         if symbol_id is None:
             return None
+        if isinstance(symbol_id, ISymbol) and not isinstance(symbol_id, (IType, IExpression)):
+            return symbol_id
         if not isinstance(symbol_id, str):
             return Variable(self.get_type(symbol_id))
 
@@ -90,14 +94,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if symbol_id in scope:
                     return scope[symbol_id]
 
+                if check_raw_id:
+                    found_symbol = self._search_by_raw_id(symbol_id, list(scope.symbols.values()))
+                    if found_symbol is not None:
+                        return found_symbol
+
         if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
             return self._current_method.symbols[symbol_id]
         elif symbol_id in self.modules:
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
-        else:
-            return super().get_symbol(symbol_id, is_internal)
+
+        if check_raw_id:
+            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_method.symbols.values()))
+            if found_symbol is not None:
+                return found_symbol
+
+        return super().get_symbol(symbol_id, is_internal, check_raw_id)
 
     def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
@@ -1058,9 +1072,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(arg0, Package):
             # visit works only with ast classes
             package = arg0
-            while not self.get_symbol(package.identifier) and package.parent is not None:
+            package_symbol = self.get_symbol(package.identifier, check_raw_id=True)
+
+            while package_symbol is None and package.parent is not None:
                 package = package.parent
-            arg0_identifier = package.identifier
+                package_symbol = self.get_symbol(package.identifier, check_raw_id=True)
+            arg0_identifier = package_symbol if package_symbol else package.identifier
         else:
             arg0_identifier = self.visit(arg0)
 

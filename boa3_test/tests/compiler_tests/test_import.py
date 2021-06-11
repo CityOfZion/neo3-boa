@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestImport(BoaTest):
@@ -93,3 +94,11 @@ class TestImport(BoaTest):
     def test_import_non_existent_package(self):
         path = self.get_contract_path('ImportNonExistantPackage.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_import_interop_with_alias(self):
+        path = self.get_contract_path('ImportInteropWithAlias.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)

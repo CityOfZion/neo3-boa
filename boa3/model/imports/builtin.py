@@ -9,7 +9,6 @@ from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
 from boa3.model.type.typeutils import TypeUtils
 
-
 __all__ = ['get_package',
            'get_internal_symbol'
            ]
