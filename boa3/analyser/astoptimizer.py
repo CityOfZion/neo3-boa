@@ -56,7 +56,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         :return: the parsed node
         :rtype: ast.AST or Sequence[ast.AST]
         """
-        if is_origin_str and not expression.startswith(("'", '"')):
+        if is_origin_str:
             expression = "'{0}'".format(expression)
 
         new_node = self.visit(super().parse_to_node(expression, origin))
