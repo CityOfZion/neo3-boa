@@ -90,7 +90,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_put_bytes_key_bytes_value(self):
         path = self.get_contract_path('StoragePutBytesKeyBytesValue.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         stored_value = b'\x01\x02\x03'
@@ -221,7 +220,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_put_str_key_bytes_value(self):
         path = self.get_contract_path('StoragePutStrKeyBytesValue.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         stored_value = b'\x01\x02\x03'
@@ -420,8 +418,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_bytes_prefix(self):
         path = self.get_contract_path('StorageFindBytesPrefix.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', b'example')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
@@ -429,8 +425,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_str_prefix(self):
         path = self.get_contract_path('StorageFindStrPrefix.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
@@ -456,8 +450,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_get_with_context(self):
         path = self.get_contract_path('StorageGetWithContext.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', 'example',
                                          expected_result_type=bytes)
@@ -477,7 +469,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_put_with_context(self):
         path = self.get_contract_path('StoragePutWithContext.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         stored_value = b'\x01\x02\x03'
@@ -536,8 +527,6 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_with_context(self):
         path = self.get_contract_path('StorageFindWithContext.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
@@ -672,10 +661,35 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(InteropInterface, result)  # returns an interop interface
         # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
 
+    def test_import_interop_storage(self):
+        path = self.get_contract_path('ImportInteropStorage.py')
+        engine = TestEngine()
+
+        key = 'unit_test'
+        value = 1234
+
+        result = self.run_smart_contract(engine, path, 'get_value', key)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'put_value', key, value)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_value', key)
+        self.assertEqual(value, result)
+
+        result = self.run_smart_contract(engine, path, 'delete_value', key)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_value', key)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
     def test_as_read_only(self):
         path = self.get_contract_path('StorageAsReadOnly.py')
         engine = TestEngine()
-        Boa3.compile(path)
 
         key = 'key'
         value_old = 'old value'

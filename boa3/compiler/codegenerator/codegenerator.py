@@ -8,12 +8,11 @@ from boa3.constants import ENCODING
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.event import Event
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unaryop import UnaryOp
-from boa3.model.package import Package
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
@@ -234,15 +233,10 @@ class CodeGenerator:
                     return attr.symbols[symbol_id]
 
             if is_internal:
-                from boa3.model.importsymbol import Import
-                imports = [symbol for symbol in self.symbol_table.values() if isinstance(symbol, Import)]
-                for package in imports:
-                    if identifier in package.all_symbols:
-                        return package.all_symbols[identifier]
-                    else:
-                        for pkg in package.all_symbols.values():
-                            if isinstance(pkg, Package) and identifier in pkg.symbols:
-                                return pkg.symbols[identifier]
+                from boa3.model import imports
+                found_symbol = imports.builtin.get_internal_symbol(identifier)
+                if isinstance(found_symbol, ISymbol):
+                    return found_symbol
         return Type.none
 
     def initialize_static_fields(self) -> bool:

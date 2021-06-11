@@ -1,5 +1,5 @@
 from boa3.builtin import public
-from boa3.builtin.interop.storage import get_context, put, get
+from boa3.builtin.interop.storage import get, get_context, put
 
 
 @public

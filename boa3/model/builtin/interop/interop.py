@@ -12,7 +12,7 @@ from boa3.model.builtin.interop.nativecontract import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.storage import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
-from boa3.model.package import Package
+from boa3.model.imports.package import Package
 
 
 class InteropPackage(str, Enum):
@@ -37,6 +37,8 @@ class Interop:
         for symbols in cls._interop_symbols.values():
             lst.extend(symbols)
         return lst
+
+    # region Interops
 
     # Interop Types
     BlockType = BlockType.build()
@@ -123,8 +125,11 @@ class Interop:
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
 
+    # endregion
+
+    # region Packages
+
     BinaryPackage = Package(identifier=InteropPackage.Binary,
-                            properties=[],
                             methods=[Atoi,
                                      Base58Encode,
                                      Base58Decode,
@@ -136,19 +141,37 @@ class Interop:
                                      ]
                             )
 
+    BlockModule = Package(identifier=BlockType.identifier.lower(),
+                          types=[BlockType]
+                          )
+
+    TransactionModule = Package(identifier=TransactionType.identifier.lower(),
+                                types=[TransactionType]
+                                )
+
     BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
                                 types=[BlockType,
                                        TransactionType
                                        ],
-                                properties=[],
                                 methods=[CurrentHeight,
                                          GetBlock,
                                          GetContract,
                                          GetTransaction,
                                          GetTransactionFromBlock,
                                          GetTransactionHeight
-                                         ]
+                                         ],
+                                packages=[BlockModule,
+                                          TransactionModule
+                                          ]
                                 )
+
+    CallFlagsTypeModule = Package(identifier=f'{CallFlagsType.identifier.lower()}type',
+                                  types=[CallFlagsType]
+                                  )
+
+    ContractModule = Package(identifier=ContractType.identifier.lower(),
+                             types=[ContractType]
+                             )
 
     ContractPackage = Package(identifier=InteropPackage.Contract,
                               types=[CallFlagsType,
@@ -162,11 +185,13 @@ class Interop:
                                        DestroyContract,
                                        GetCallFlags,
                                        UpdateContract
-                                       ]
+                                       ],
+                              packages=[CallFlagsTypeModule,
+                                        ContractModule
+                                        ]
                               )
 
     CryptoPackage = Package(identifier=InteropPackage.Crypto,
-                            properties=[],
                             methods=[CheckMultisig,
                                      Hash160,
                                      Hash256,
@@ -179,17 +204,21 @@ class Interop:
 
     IteratorPackage = Package(identifier=InteropPackage.Iterator,
                               types=[Iterator],
-                              properties=[],
-                              methods=[]
                               )
 
     JsonPackage = Package(identifier=InteropPackage.Json,
-                          types=[],
-                          properties=[],
                           methods=[JsonDeserialize,
                                    JsonSerialize
                                    ]
                           )
+
+    NotificationModule = Package(identifier=NotificationType.identifier.lower(),
+                                 types=[NotificationType]
+                                 )
+
+    TriggerTypeModule = Package(identifier=TriggerType.identifier.lower(),
+                                types=[TriggerType]
+                                )
 
     RuntimePackage = Package(identifier=InteropPackage.Runtime,
                              types=[NotificationType,
@@ -210,21 +239,35 @@ class Interop:
                                       GetTrigger,
                                       Log,
                                       Notify
-                                      ]
+                                      ],
+                             packages=[NotificationModule,
+                                       TriggerTypeModule
+                                       ]
                              )
+
+    StorageContextModule = Package(identifier=StorageContextType.identifier.lower(),
+                                   types=[StorageContextType]
+                                   )
+    StorageMapModule = Package(identifier=StorageMapType.identifier.lower(),
+                               types=[StorageMapType]
+                               )
 
     StoragePackage = Package(identifier=InteropPackage.Storage,
                              types=[StorageContextType,
                                     StorageMapType
                                     ],
-                             properties=[],
                              methods=[StorageDelete,
                                       StorageFind,
                                       StorageGet,
                                       StorageGetContext,
                                       StoragePut
-                                      ]
+                                      ],
+                             packages=[StorageContextModule,
+                                       StorageMapModule
+                                       ]
                              )
+
+    # endregion
 
     package_symbols: List[IdentifiedSymbol] = [
         OracleType,
@@ -239,5 +282,6 @@ class Interop:
     ]
 
     _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
-        package.identifier: list(package.symbols.values()) for package in package_symbols if isinstance(package, Package)
+        package.identifier: list(package.symbols.values()) for package in package_symbols if
+        isinstance(package, Package)
     }

@@ -2,7 +2,9 @@ import ast
 from typing import Optional, Tuple, Union
 
 from boa3.model.expression import IExpression
+from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classtype import ClassType
 from boa3.model.type.itype import IType
 
 
@@ -15,15 +17,17 @@ class Attribute(IExpression):
     :ivar attr_symbol: the found symbol for the attribute
     """
 
-    def __init__(self, value: Union[ast.AST, IExpression], attr_name: str,
+    def __init__(self, value: Union[ast.AST, IExpression, Package], attr_name: str,
                  attr_symbol: Optional[ISymbol] = None, origin: Optional[ast.AST] = None):
         super().__init__(origin)
 
-        self.value: Union[ast.AST, IExpression] = value
+        self.value: Union[ast.AST, IExpression, Package] = value
         self.attr_name: str = attr_name
 
-        if isinstance(value, IExpression) and hasattr(value.type, 'symbols') and attr_name in value.type.symbols:
-            attr_symbol = value.type.symbols[attr_name]
+        obj_with_symbols = value.type if isinstance(value, IExpression) else value
+        if (isinstance(value, (IExpression, ClassType, Package))
+                and hasattr(obj_with_symbols, 'symbols') and attr_name in obj_with_symbols.symbols):
+            attr_symbol = obj_with_symbols.symbols[attr_name]
 
         self.attr_symbol: Optional[ISymbol] = attr_symbol
 

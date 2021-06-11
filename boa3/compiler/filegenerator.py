@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ENCODING
 from boa3.model.event import Event
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable

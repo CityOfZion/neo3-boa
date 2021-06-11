@@ -9,7 +9,6 @@ from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
 from boa3.model.operation.operation import IOperation
-from boa3.model.package import Package
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.classtype import ClassType
@@ -121,15 +120,10 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             return self.symbols[symbol_id]
 
         if is_internal:
-            from boa3.model.importsymbol import Import
-            imports = [symbol for symbol in self.symbols.values() if isinstance(symbol, Import)]
-            for package in imports:
-                if symbol_id in package.all_symbols:
-                    return package.all_symbols[symbol_id]
-                else:
-                    for pkg in package.all_symbols.values():
-                        if isinstance(pkg, Package) and symbol_id in pkg.symbols:
-                            return pkg.symbols[symbol_id]
+            from boa3.model import imports
+            found_symbol = imports.builtin.get_internal_symbol(symbol_id)
+            if isinstance(found_symbol, ISymbol):
+                return found_symbol
 
         # the symbol may be a built in. If not, returns None
         from boa3.model.builtin.builtin import Builtin

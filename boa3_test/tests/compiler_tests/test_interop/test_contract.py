@@ -379,3 +379,23 @@ class TestContractInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'call_flags_all')
         from boa3.neo3.contracts import CallFlags
         self.assertEqual(CallFlags.ALL, result)
+
+    def test_import_interop_contract(self):
+        path = self.get_contract_path('ImportInteropContract.py')
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        Boa3.compile_and_save(path)
+        Boa3.compile_and_save(call_contract_path)
+
+        contract, manifest = self.get_output(call_contract_path)
+        call_hash = hash160(contract)
+        call_contract_path = call_contract_path.replace('.py', '.nef')
+
+        engine = TestEngine()
+        engine.add_contract(call_contract_path)
+
+        result = self.run_smart_contract(engine, path, 'main', call_hash, 'add', [1, 2])
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'call_flags_all')
+        from boa3.neo3.contracts import CallFlags
+        self.assertEqual(CallFlags.ALL, result)

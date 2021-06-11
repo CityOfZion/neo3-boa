@@ -625,3 +625,10 @@ class TestRuntimeInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertIsInstance(result, int)
+
+    def test_import_interop_runtime(self):
+        path = self.get_contract_path('ImportInteropRuntime.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)

@@ -51,7 +51,7 @@ class Module(ISymbol):
             return True
 
         for imported in self.imported_symbols.values():
-            from boa3.model.importsymbol import Import
+            from boa3.model.imports.importsymbol import Import
             if isinstance(imported, Import) and self.variables[var_id] in imported.variables.values():
                 return True
 

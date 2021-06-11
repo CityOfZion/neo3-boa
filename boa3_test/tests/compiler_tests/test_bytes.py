@@ -103,7 +103,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_int(self):
         path = self.get_contract_path('BytesToInt.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
@@ -229,7 +228,6 @@ class TestBytes(BoaTest):
 
     def test_slice_with_cast(self):
         path = self.get_contract_path('SliceWithCast.py')
-        self.compile_and_save(path)
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', b'unittest',
                                          expected_result_type=bytes)
@@ -534,7 +532,6 @@ class TestBytes(BoaTest):
 
     def test_boa2_slice_test(self):
         path = self.get_contract_path('SliceBoa2Test.py')
-        self.compile_and_save(path)
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main',
                                          expected_result_type=bytes)

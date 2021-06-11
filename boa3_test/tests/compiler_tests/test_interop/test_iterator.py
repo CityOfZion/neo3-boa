@@ -13,8 +13,6 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_next(self):
         path = self.get_contract_path('IteratorNext.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
 
         prefix = 'test_iterator_next'
@@ -27,8 +25,6 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_value(self):
         path = self.get_contract_path('IteratorValue.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
 
         prefix = 'test_iterator_value'
@@ -46,6 +42,15 @@ class TestIteratorInterop(BoaTest):
 
     def test_import_iterator(self):
         path = self.get_contract_path('ImportIterator.py')
+        engine = TestEngine()
+        self.compile_and_save(path)
+
+        result = self.run_smart_contract(engine, path, 'return_iterator')
+        from boa3.neo.core.types.InteropInterface import InteropInterface
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
+    def test_import_interop_iterator(self):
+        path = self.get_contract_path('ImportInteropIterator.py')
         engine = TestEngine()
         self.compile_and_save(path)
 

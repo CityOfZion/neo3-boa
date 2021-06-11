@@ -33,8 +33,6 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_call_int(self):
         path = self.get_contract_path('UInt160CallInt.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint160', 0,
                                          expected_result_type=bytes)
@@ -85,8 +83,6 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_concat_with_bytes(self):
         path = self.get_contract_path('UInt160ConcatWithBytes.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         value = bytes(20)
         result = self.run_smart_contract(engine, path, 'uint160_method', value,
@@ -126,8 +122,6 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_call_int(self):
         path = self.get_contract_path('UInt256CallInt.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint256', 0,
                                          expected_result_type=bytes)
@@ -178,8 +172,6 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_concat_with_bytes(self):
         path = self.get_contract_path('UInt256ConcatWithBytes.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         value = bytes(32)
         result = self.run_smart_contract(engine, path, 'uint256_method', value,
@@ -201,8 +193,6 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_block(self):
         path = self.get_contract_path('IsInstanceBlock.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'is_block', bytes(10),
                                          expected_result_type=bool)
@@ -236,8 +226,6 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_transaction(self):
         path = self.get_contract_path('IsInstanceTransaction.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'is_tx', bytes(10),
                                          expected_result_type=bool)
@@ -262,8 +250,6 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_notification(self):
         path = self.get_contract_path('IsInstanceNotification.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'is_notification', bytes(10),
                                          expected_result_type=bool)
@@ -284,8 +270,6 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_storage_context(self):
         path = self.get_contract_path('IsInstanceStorageContext.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'is_context', bytes(10),
                                          expected_result_type=bool)
@@ -306,8 +290,6 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_storage_map(self):
         path = self.get_contract_path('IsInstanceStorageMap.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'is_storage_map', bytes(10),
                                          expected_result_type=bool)
@@ -328,8 +310,6 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_iterator(self):
         path = self.get_contract_path('IsInstanceIterator.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'is_iterator', bytes(10),
                                          expected_result_type=bool)

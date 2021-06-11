@@ -11,7 +11,8 @@ from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
+from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -20,7 +21,6 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
-from boa3.model.package import Package
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
@@ -80,6 +80,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return symbols
 
     def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+        if symbol_id is None:
+            return None
         if not isinstance(symbol_id, str):
             return Variable(self.get_type(symbol_id))
 
@@ -1052,14 +1054,26 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
         attr: Attribute = self.visit(call.func)
         arg0, callable_target, callable_id = attr.values
-        arg0_identifier = self.visit(arg0)
+
+        if isinstance(arg0, Package):
+            # visit works only with ast classes
+            package = arg0
+            while not self.get_symbol(package.identifier) and package.parent is not None:
+                package = package.parent
+            arg0_identifier = package.identifier
+        else:
+            arg0_identifier = self.visit(arg0)
+
         if isinstance(arg0_identifier, ast.Name):
             arg0_identifier = arg0_identifier.id
 
         if (callable_target is not None
-                and (len(call.args) < 1 or call.args[0] != arg0)
-                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import, Package))):
-            call.args.insert(0, arg0)
+                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import, Package))
+                and (len(call.args) < 1 or call.args[0] != arg0)):
+            # move self to the arguments
+            # don't move if it's class method
+            if not (isinstance(arg0, ClassType) and callable_id in arg0.class_methods):
+                call.args.insert(0, arg0)
 
         if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
             self_type: IType = self.get_type(call.args[0])
@@ -1320,7 +1334,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
             attribute.generate_value = True
 
-        return Attribute(attribute.value, attribute.attr, attr_symbol, attribute)
+        if isinstance(symbol, Package) or isinstance(value, Attribute):
+            attr_value = symbol
+        else:
+            attr_value = attribute.value
+
+        return Attribute(attr_value, attribute.attr, attr_symbol, attribute)
 
     def visit_Constant(self, constant: ast.Constant) -> Any:
         """
