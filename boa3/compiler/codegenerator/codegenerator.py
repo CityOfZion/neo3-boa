@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.analyser import Analyser
-from boa3.analyser.symbolscope import SymbolScope
+from boa3.analyser.model.symbolscope import SymbolScope
 from boa3.compiler.codegenerator.stackmemento import NeoStack, StackMemento
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.constants import ENCODING
@@ -760,9 +760,13 @@ class CodeGenerator:
         stack_top_type: IType = self._stack[-1]
         if (not value_type.is_generic
                 and not stack_top_type.is_generic
-                and value_type.stack_item != stack_top_type.stack_item
                 and value_type.stack_item is not Type.any.stack_item):
-            self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
+
+            if value_type.stack_item != stack_top_type.stack_item:
+                # converts only if the stack types are different
+                self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
+
+            # but changes the value internally
             self._stack_pop()
             self._stack_append(value_type)
 
@@ -979,6 +983,17 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.UNPACK)
             self.__insert1(OpcodeInfo.PACK)    # creates a new array with the values
 
+    def convert_starred_variable(self):
+        top_stack_item = self._stack[-1].stack_item
+        if top_stack_item is StackItemType.Array:
+            self.convert_copy()
+        elif top_stack_item is StackItemType.Map:
+            self.convert_builtin_method_call(Builtin.DictKeys)
+        else:
+            return
+
+        self.convert_cast(Type.tuple)
+
     def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False):
         """
         Converts the load of a symbol
@@ -1049,7 +1064,7 @@ class CodeGenerator:
                     self.__insert1(op_info)
                 storaged_type = self._stack_pop()
 
-                from boa3.analyser.optimizer import UndefinedType
+                from boa3.analyser.model.optimizer import UndefinedType
                 if (var_id in self._current_scope.symbols or
                         (var_id in self._locals and self._current_method.locals[var_id].type is UndefinedType)):
                     symbol = self.get_symbol(var_id)

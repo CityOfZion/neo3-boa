@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -8,9 +8,10 @@ from boa3.model.variable import Variable
 
 
 class Event(Callable, IdentifiedSymbol):
-    def __init__(self, event_id: str, args: Dict[str, Variable] = None, defaults: List[ast.AST] = None,
+    def __init__(self, event_id: str, args: Dict[str, Variable] = None,
+                 vararg: Optional[Tuple[str, Variable]] = None, defaults: List[ast.AST] = None,
                  origin_node: Optional[ast.AST] = None):
-        super().__init__(args, defaults, Type.none, True, origin_node)
+        super().__init__(args, vararg, defaults, Type.none, True, origin_node)
 
         self.name: str = event_id
         self._identifier: str = self.name

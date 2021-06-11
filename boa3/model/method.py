@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.callable import Callable
 from boa3.model.debuginstruction import DebugInstruction
@@ -19,9 +19,11 @@ class Method(Callable):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, defaults: List[ast.AST] = None,
+    def __init__(self, args: Dict[str, Variable] = None,
+                 vararg: Optional[Tuple[str, Variable]] = None,
+                 defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False, origin_node: Optional[ast.AST] = None):
-        super().__init__(args, defaults, return_type, is_public, origin_node)
+        super().__init__(args, vararg, defaults, return_type, is_public, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}

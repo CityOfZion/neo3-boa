@@ -4,8 +4,9 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
-from boa3.analyser.optimizer import UndefinedType
-from boa3.analyser.symbolscope import SymbolScope
+from boa3.analyser.model.functionarguments import FunctionArguments
+from boa3.analyser.model.optimizer import UndefinedType
+from boa3.analyser.model.symbolscope import SymbolScope
 from boa3.builtin import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
@@ -103,7 +104,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param var_enumerate_type: variable value type id if var_type_id is a SequenceType
         """
         if not isinstance(var_id, str) and isinstance(var_id, Iterable):
-            variables = [var_name.id for var_name in source_node.targets[0].elts]
+            variables = [var_name.id if isinstance(var_name, ast.Name) else self.visit(var_name).id
+                         for var_name in source_node.targets[0].elts]
             var_types = self.visit(source_node.value)
         else:
             variables = [var_id]
@@ -393,7 +395,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param function:
         """
-        fun_args = self.visit(function.args)
+        fun_args: FunctionArguments = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
 
         if fun_rtype_symbol is None:
@@ -411,7 +413,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._read_metadata_object(function)
             return Builtin.Metadata
 
-        method = Method(args=fun_args, defaults=function.args.defaults, return_type=fun_return,
+        method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
+                        vararg=fun_args.vararg,
                         origin_node=function, is_public=Builtin.Public in fun_decorators)
         self._current_method = method
         self._scope_stack.append(SymbolScope())
@@ -451,19 +454,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return [self.get_symbol(self.visit(decorator)) for decorator in function.decorator_list]
 
-    def visit_arguments(self, arguments: ast.arguments) -> Dict[str, Variable]:
+    def visit_arguments(self, arguments: ast.arguments) -> FunctionArguments:
         """
         Visitor of the function arguments node
 
         :param arguments:
         :return: a dictionary that maps each argument to its identifier
         """
-        args: Dict[str, Variable] = {}
+        fun_args = FunctionArguments()
 
         for arg in arguments.args:
             var_id, var = self.visit_arg(arg)  # Tuple[str, Variable]
-            args[var_id] = var
-        return args
+            fun_args.add_arg(var_id, var)
+
+        if arguments.vararg is not None:
+            var_id, var = self.visit_arg(arguments.vararg)  # Tuple[str, Variable]
+            fun_args.set_vararg(var_id, var)
+
+        return fun_args
 
     def visit_arg(self, arg: ast.arg) -> Tuple[str, Variable]:
         """
@@ -845,6 +853,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the identifier of the name
         """
         return name.id
+
+    def visit_Starred(self, node: ast.Starred):
+        # TODO: refactor when starred variables are implemented
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='* variables'
+            )
+        )
+        return node.value
 
     def visit_Constant(self, constant: ast.Constant) -> Any:
         """

@@ -651,3 +651,7 @@ class TestVariable(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(400, result)
+
+    def test_assign_starred_variable(self):
+        path = self.get_contract_path('AssignStarredVariable.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

@@ -2,8 +2,8 @@ import ast
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.analyser.optimizer import ScopeValue, Undefined
-from boa3.analyser.optimizer.Operation import Operation
+from boa3.analyser.model.optimizer import ScopeValue, Undefined
+from boa3.analyser.model.optimizer.Operation import Operation
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation

@@ -1,5 +1,4 @@
 from boa3.boa3 import Boa3
-from boa3.neo3.contracts import TriggerType
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
@@ -9,6 +8,7 @@ from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.contracts import TriggerType
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
