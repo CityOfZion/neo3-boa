@@ -133,8 +133,6 @@ class TestBinaryInterop(BoaTest):
 
     def test_serialize_int(self):
         path = self.get_contract_path('SerializeInt.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_int',
                                          expected_result_type=bytes)
@@ -143,8 +141,6 @@ class TestBinaryInterop(BoaTest):
 
     def test_serialize_bool(self):
         path = self.get_contract_path('SerializeBool.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_bool',
                                          expected_result_type=bytes)
@@ -153,8 +149,6 @@ class TestBinaryInterop(BoaTest):
 
     def test_serialize_str(self):
         path = self.get_contract_path('SerializeStr.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_str',
                                          expected_result_type=bytes)
@@ -163,8 +157,6 @@ class TestBinaryInterop(BoaTest):
 
     def test_serialize_sequence(self):
         path = self.get_contract_path('SerializeSequence.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_sequence',
                                          expected_result_type=bytes)
@@ -173,8 +165,6 @@ class TestBinaryInterop(BoaTest):
 
     def test_serialize_dict(self):
         path = self.get_contract_path('SerializeDict.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'serialize_dict',
                                          expected_result_type=bytes)
@@ -183,8 +173,6 @@ class TestBinaryInterop(BoaTest):
 
     def test_deserialize(self):
         path = self.get_contract_path('Deserialize.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
 
         expected_result = 42

@@ -66,8 +66,6 @@ class TestClass(BoaTest):
 
     def test_contract_constructor(self):
         path = self.get_contract_path('ContractConstructor.py')
-        output, manifest = self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'new_contract')
         self.assertEqual(5, len(result))

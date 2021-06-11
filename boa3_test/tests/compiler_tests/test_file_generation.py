@@ -502,7 +502,6 @@ class TestFileGeneration(BoaTest):
 
     def test_generation_with_recursive_function(self):
         path = self.get_contract_path('test_sc/function_test', 'RecursiveFunction.py')
-        self.compile_and_save(path)
 
         from boa3_test.tests.test_classes.testengine import TestEngine
         engine = TestEngine()

@@ -10,26 +10,30 @@ from boa3.model.symbol import ISymbol
 from boa3.model.type.typeutils import TypeUtils
 
 
-def get_package(package_full_path: str) -> Optional[Package]:
-    if __CompilerBuiltin._instance is None:
-        __CompilerBuiltin._instance = __CompilerBuiltin()
+__all__ = ['get_package',
+           'get_internal_symbol'
+           ]
 
-    return __CompilerBuiltin.get_package(package_full_path)
+
+def get_package(package_full_path: str) -> Optional[Package]:
+    return CompilerBuiltin.instance().get_package(package_full_path)
 
 
 def get_internal_symbol(symbol_id: str) -> Optional[ISymbol]:
-    if __CompilerBuiltin._instance is None:
-        __CompilerBuiltin._instance = __CompilerBuiltin()
-
-    return __CompilerBuiltin.get_internal_symbol(symbol_id)
+    return CompilerBuiltin.instance().get_internal_symbol(symbol_id)
 
 
-class __CompilerBuiltin:
+class CompilerBuiltin:
 
     _instance = None
 
+    @classmethod
+    def instance(cls) -> CompilerBuiltin:
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
     def __init__(self):
-        self._instance = self
         self.packages: List[Package] = []
 
         self._generate_builtin_package('typing', TypeUtils.get_types_from_typing_lib())
@@ -72,11 +76,10 @@ class __CompilerBuiltin:
             for symbol_id, symbol in symbols.items():
                 cur_package.include_symbol(symbol_id, symbol)
 
-    @classmethod
-    def get_package(cls, package_full_path: str) -> Optional[Package]:
+    def get_package(self, package_full_path: str) -> Optional[Package]:
         package_ids = package_full_path.split('.')
 
-        cur_package: Package = next((root_package for root_package in cls._instance.packages
+        cur_package: Package = next((root_package for root_package in self._instance.packages
                                      if root_package.identifier == package_ids[0]),
                                     None)
         if cur_package is None:
@@ -90,14 +93,15 @@ class __CompilerBuiltin:
 
         return cur_package
 
-    @classmethod
-    def get_internal_symbol(cls, symbol_id: str) -> Optional[ISymbol]:
+    def get_internal_symbol(self, symbol_id: str) -> Optional[ISymbol]:
         packages_stack: List[Tuple[list, int]] = []
-        current_list = cls._instance.packages
+        current_list = self._instance.packages
         current_index = 0
 
         while len(current_list) > current_index or len(packages_stack) > 0:
             if len(current_list) <= current_index:
+                # if didn't find in the current list, go back to the previous list search
+                # if the stack is empty, it doesn't continue the loop because the while condition
                 current_list, current_index = packages_stack.pop()
 
             package = current_list[current_index]
@@ -105,8 +109,11 @@ class __CompilerBuiltin:
                 return package.symbols[symbol_id]
             current_index += 1
 
+            # if the package has internal packages, searches the symbol in these packages before continuing
             internal_packages = [symbol for symbol in package.symbols.values() if isinstance(symbol, Package)]
             if len(internal_packages) > 0:
+                # save the current list and index in the package
+                # made this way to avoid recursive function call
                 packages_stack.append((current_list, current_index))
                 current_list = internal_packages
                 current_index = 0

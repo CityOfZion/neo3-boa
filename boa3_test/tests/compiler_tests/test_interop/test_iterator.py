@@ -13,8 +13,6 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_next(self):
         path = self.get_contract_path('IteratorNext.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
 
         prefix = 'test_iterator_next'
@@ -27,8 +25,6 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_value(self):
         path = self.get_contract_path('IteratorValue.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
 
         prefix = 'test_iterator_value'

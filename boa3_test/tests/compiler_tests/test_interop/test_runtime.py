@@ -20,7 +20,6 @@ class TestRuntimeInterop(BoaTest):
 
     def test_check_witness(self):
         path = self.get_contract_path('CheckWitness.py')
-        Boa3.compile(path)
         account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
 
         engine = TestEngine()

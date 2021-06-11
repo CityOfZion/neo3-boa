@@ -9,9 +9,8 @@ class TestPythonOperation(BoaTest):
 
     def test_in_str(self):
         path = self.get_contract_path('StringIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'main', '123', '1234')
         self.assertEqual('123' in '1234', result)
 
@@ -20,9 +19,8 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_str(self):
         path = self.get_contract_path('StringNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'main', '123', '1234')
         self.assertEqual('123' not in '1234', result)
 
@@ -35,9 +33,8 @@ class TestPythonOperation(BoaTest):
 
     def test_in_bytes(self):
         path = self.get_contract_path('BytesIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'main', b'123', b'1234')
         self.assertEqual(b'123' in b'1234', result)
 
@@ -49,9 +46,8 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_bytes(self):
         path = self.get_contract_path('BytesNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'main', b'123', b'1234')
         self.assertEqual(b'123' not in b'1234', result)
 
@@ -60,8 +56,6 @@ class TestPythonOperation(BoaTest):
 
     def test_int_in_bytes(self):
         path = self.get_contract_path('BytesMembershipWithInt.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, b'1234')
         self.assertEqual(1 in b'1234', result)
@@ -75,8 +69,6 @@ class TestPythonOperation(BoaTest):
 
     def test_in_list(self):
         path = self.get_contract_path('ListIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, '3', '4'])
         self.assertEqual(1 in [1, 2, '3', '4'], result)
@@ -89,8 +81,6 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_list(self):
         path = self.get_contract_path('TypedListIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, 3, 4])
         self.assertEqual(1 in [1, 2, 3, 4], result)
@@ -100,8 +90,6 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_list(self):
         path = self.get_contract_path('ListNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, '3', '4'])
         self.assertEqual(1 not in [1, 2, '3', '4'], result)
@@ -114,8 +102,6 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_list(self):
         path = self.get_contract_path('TypedListNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, 3, 4])
         self.assertEqual(1 not in [1, 2, 3, 4], result)
@@ -129,8 +115,6 @@ class TestPythonOperation(BoaTest):
 
     def test_in_tuple(self):
         path = self.get_contract_path('TupleIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, '3', '4'))
         self.assertEqual(1 in (1, 2, '3', '4'), result)
@@ -143,8 +127,6 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_tuple(self):
         path = self.get_contract_path('TypedTupleIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, 3, 4))
         self.assertEqual(1 in (1, 2, 3, 4), result)
@@ -154,8 +136,6 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_tuple(self):
         path = self.get_contract_path('TupleNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, '3', '4'))
         self.assertEqual(1 not in (1, 2, '3', '4'), result)
@@ -168,8 +148,6 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_tuple(self):
         path = self.get_contract_path('TypedTupleNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, 3, 4))
         self.assertEqual(1 not in (1, 2, 3, 4), result)
@@ -183,8 +161,6 @@ class TestPythonOperation(BoaTest):
 
     def test_in_dict(self):
         path = self.get_contract_path('DictIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', '4': 8})
         self.assertEqual(1 in {1: '2', '4': 8}, result)
@@ -200,8 +176,6 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_dict(self):
         path = self.get_contract_path('TypedDictIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', 4: '8'})
         self.assertEqual(1 in {1: '2', 4: '8'}, result)
@@ -211,8 +185,6 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_dict(self):
         path = self.get_contract_path('DictNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', '4': 8})
         self.assertEqual(1 not in {1: '2', '4': 8}, result)
@@ -228,8 +200,6 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_dict(self):
         path = self.get_contract_path('TypedDictNotIn.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', 4: '8'})
         self.assertEqual(1 not in {1: '2', 4: '8'}, result)
