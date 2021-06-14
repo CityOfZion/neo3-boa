@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.8.2] - 2021-06-14
+### Added
+- Support to [N3-rc3](https://github.com/neo-project/neo/releases/tag/v3.0.0-rc3)
+- Implemented varargs on function definitions
+- Allow importing modules and packages
+  - Only from `boa3.builtin` are accepted by the compiler
+- Implemented Neo interop functions:
+  - Runtime `script_container` and `burn_gas`
+  - StorageContext `as_read_only`
+  - Transaction interops:
+    - `get_transaction`, `get_transaction_from_block` and `get_transaction_height`
+- Implemented `Optional` type annotation
+- Included `ON_PERSIST` and `POST_PERSIST` triggers
+  
+
+### Changed
+- Updated debug info generation to [v1.2 format](https://github.com/ngdenterprise/design-notes/blob/master/NDX-DN11%20-%20NEO%20Debug%20Info%20Specification.md#v12-format-draft)
+- Included `data` argument to `call_contract` and `update_contract`
+- Renamed `get_time` and `get_platform` to `time` and `platform`
+
+
+### Fixed
+- Fixed variables access after casting types
+- Fixed incorrect output when concatenation str and bytes values
+- Fixed issue with control flow statements with many instructions
+- Fixed issue with UInt160 and UInt256 constructors with slicing result
+- Fixed unexpected result when comparing str values
+- Fixed blocks and transactions hashes that TestEngine returns
+- Fixed `isinstance` for boa3 builtin types
+- Fixed issue with incorrect stack sizes during runtime
+
+
 ## [0.8.1] - 2021-05-12
 ### Added
 - Support to [N3-rc2](https://github.com/neo-project/neo/releases/tag/v3.0.0-rc2)
@@ -175,7 +207,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.2...HEAD
+[0.8.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.2
 [0.8.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.1
 [0.8.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.0
 [0.7.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.7.1
