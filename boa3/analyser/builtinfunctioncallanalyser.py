@@ -31,7 +31,9 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
     def call(self) -> ast.Call:
         return self._tree
 
-    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
         return self._origin.get_symbol(symbol_id, is_internal)
 
     def get_type(self, value: Any, use_metadata: bool = False) -> IType:

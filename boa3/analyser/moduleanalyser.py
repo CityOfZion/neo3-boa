@@ -153,10 +153,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if callable_id not in self._current_module.symbols:
             self._current_module.include_callable(callable_id, callable)
 
-    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
         for scope in reversed(self._scope_stack):
             if symbol_id in scope.symbols:
                 return scope.symbols[symbol_id]
+
+            if check_raw_id:
+                found_symbol = self._search_by_raw_id(symbol_id, list(scope.symbols.values()))
+                if found_symbol is not None:
+                    return found_symbol
 
         if symbol_id in self._current_scope.symbols:
             # the symbol exists in the local scope
@@ -164,8 +171,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif symbol_id in self._current_module.symbols:
             # the symbol exists in the module scope
             return self._current_module.symbols[symbol_id]
-        else:
-            return super().get_symbol(symbol_id)
+
+        if check_raw_id:
+            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_scope.symbols.values()))
+            if found_symbol is not None:
+                return found_symbol
+
+            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_module.symbols.values()))
+            if found_symbol is not None:
+                return found_symbol
+
+        return super().get_symbol(symbol_id, is_internal, check_raw_id)
 
     # region Log
 

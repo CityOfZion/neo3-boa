@@ -8,6 +8,7 @@ from boa3.exception.CompilerError import CompilerError, InternalError
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
+from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
@@ -107,7 +108,9 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         else:
             return final_type
 
-    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
         """
         Tries to get the symbol by its id name
 
@@ -118,6 +121,12 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         if symbol_id in self.symbols:
             # the symbol exists in the global scope
             return self.symbols[symbol_id]
+
+        if check_raw_id:
+            found_symbol = self._search_by_raw_id(symbol_id, list(self.symbols.values()))
+            if found_symbol is not None:
+                # the symbol exists in the global scope, but with an alias different from the original name
+                return found_symbol
 
         if is_internal:
             from boa3.model import imports
@@ -132,6 +141,13 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
             found_symbol = Builtin.Exception.return_type
         return found_symbol
+
+    def _search_by_raw_id(self, symbol_id: str, symbols: Sequence[ISymbol]) -> Optional[ISymbol]:
+        for symbol in symbols:
+            if isinstance(symbol, IdentifiedSymbol) and symbol.identifier == symbol_id:
+                return symbol
+
+        return None
 
     def is_exception(self, symbol_id: str) -> bool:
         global_symbols = globals()
