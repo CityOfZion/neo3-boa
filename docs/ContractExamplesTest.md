@@ -494,6 +494,6 @@
 
 #### Optional type
 
-- <a href="//boa3_test/test_sc/optional_test/OptionalReturn.py">OptionalReturn.py</a>,
-- <a href="//boa3_test/test_sc/optional_test/OptionalVariableArgument.py">OptionalVariableArgument.py</a>,
-- <a href="//boa3_test/test_sc/optional_test/OptionalVariableReassign.py">OptionalVariableReassign.py</a>
+- <a href="/boa3_test/test_sc/optional_test/OptionalReturn.py">OptionalReturn.py</a>,
+- <a href="/boa3_test/test_sc/optional_test/OptionalVariableArgument.py">OptionalVariableArgument.py</a>,
+- <a href="/boa3_test/test_sc/optional_test/OptionalVariableReassign.py">OptionalVariableReassign.py</a>

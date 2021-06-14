@@ -1,9 +1,9 @@
 from typing import Union
 
-from boa3.builtin import CreateNewEvent
+from boa3.builtin import CreateNewEvent, Event
 from boa3.builtin.type import UInt160
 
-Nep5TransferEvent = CreateNewEvent(
+Nep5TransferEvent: Event = CreateNewEvent(
     [
         ('from_addr', bytes),
         ('to_addr', bytes),
@@ -18,7 +18,7 @@ addresses of the sender, receiver and the amount transferred.
 :meta hide-value:
 """
 
-Nep17TransferEvent = CreateNewEvent(
+Nep17TransferEvent: Event = CreateNewEvent(
     [
         ('from_addr', Union[UInt160, None]),
         ('to_addr', Union[UInt160, None]),
