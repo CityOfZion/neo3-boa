@@ -1,10 +1,8 @@
 from typing import Any, List, Union
 
-from neo3crypto import ECPoint
-
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import ECPoint, UInt160
 
 
 def check_witness(hash_or_pubkey: Union[UInt160, ECPoint]) -> bool:
