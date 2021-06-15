@@ -1,16 +1,18 @@
 from typing import Any, List, Union
 
+from neo3crypto import ECPoint
+
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
 from boa3.builtin.type import UInt160
 
 
-def check_witness(hash_or_pubkey: Union[bytes, UInt160]) -> bool:
+def check_witness(hash_or_pubkey: Union[UInt160, ECPoint]) -> bool:
     """
     Verifies that the transactions or block of the calling contract has validated the required script hash.
 
     :param hash_or_pubkey: script hash or public key to validate
-    :type hash_or_pubkey: bytes or UInt160
+    :type hash_or_pubkey: UInt160 or ECPoint
     :return: a boolean value that represents whether the script hash was verified
     :rtype: bool
     """

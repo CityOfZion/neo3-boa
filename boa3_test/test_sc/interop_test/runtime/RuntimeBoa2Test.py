@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin import public
+from boa3.builtin import public, type
 from boa3.builtin.interop.runtime import check_witness, get_trigger, log, notify, time
 
 
@@ -10,7 +10,7 @@ def main(operation: str, arg: Any) -> Any:
     if operation == 'get_trigger':
         return get_trigger()
 
-    elif operation == 'check_witness' and isinstance(arg, bytes):
+    elif operation == 'check_witness' and isinstance(arg, (type.UInt160, type.ECPoint)):
         return check_witness(arg)
 
     elif operation == 'time':

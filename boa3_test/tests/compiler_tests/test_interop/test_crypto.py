@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.constants import CRYPTO_SCRIPT
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.model.builtin.interop.interop import Interop
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -14,6 +15,17 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestCryptoInterop(BoaTest):
 
     default_folder: str = 'test_sc/interop_test/crypto'
+    ecpoint_init = (
+        Opcode.CONVERT + Type.bytes.stack_item
+        + Opcode.DUP
+        + Opcode.ISNULL
+        + Opcode.JMPIF + Integer(8).to_byte_array()
+        + Opcode.DUP
+        + Opcode.SIZE
+        + Opcode.PUSHINT8 + Integer(33).to_byte_array(signed=True)
+        + Opcode.JMPEQ + Integer(3).to_byte_array()
+        + Opcode.THROW
+    )
 
     def test_ripemd160_str(self):
         import hashlib
@@ -153,8 +165,8 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_check_multisig(self):
-        byte_input0 = String('123').to_bytes()
-        byte_input1 = String('456').to_bytes()
+        byte_input0 = String('123456789012345678901234567890123').to_bytes()
+        byte_input1 = String('abcdefghijklmnopqrstuvwxyz1234567').to_bytes()
         byte_input2 = String('098').to_bytes()
         byte_input3 = String('765').to_bytes()
 
@@ -165,9 +177,11 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSHDATA1
             + Integer(len(byte_input0)).to_byte_array(min_length=1)
             + byte_input0
+            + self.ecpoint_init
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
@@ -193,7 +207,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
         function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
@@ -206,6 +220,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
@@ -233,7 +248,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -245,6 +260,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSH0
             + Opcode.PUSH3
             + Opcode.PACK
@@ -270,7 +286,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_int(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -282,6 +298,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSH10
             + Opcode.PUSH3
             + Opcode.PACK
@@ -307,7 +324,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
         function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
@@ -320,6 +337,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
@@ -351,7 +369,7 @@ class TestCryptoInterop(BoaTest):
         self.assertCompilerLogs(MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256k1_str(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
         function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
@@ -364,6 +382,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
@@ -390,7 +409,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -402,6 +421,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSH0
             + Opcode.PUSH3
             + Opcode.PACK
@@ -426,7 +446,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_int(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -438,6 +458,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSH10
             + Opcode.PUSH3
             + Opcode.PACK
@@ -462,7 +483,7 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
-        byte_input1 = b'publickey'
+        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
         function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
@@ -475,6 +496,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
+            + self.ecpoint_init
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string

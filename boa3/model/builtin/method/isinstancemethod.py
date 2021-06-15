@@ -130,6 +130,17 @@ class IsInstanceMethod(IBuiltinMethod):
         return 1
 
     @property
+    def generation_order(self) -> List[int]:
+        # type should not be converted
+        indexes = super().generation_order
+        typ_index = list(self.args).index('A_tuple')
+
+        if typ_index in indexes:
+            indexes.remove(typ_index)
+
+        return indexes
+
+    @property
     def _body(self) -> Optional[str]:
         return
 

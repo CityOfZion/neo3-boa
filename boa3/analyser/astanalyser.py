@@ -89,9 +89,10 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             else:
                 value = fun_rtype_id
 
-        if (isinstance(value, Attribute)
-                and isinstance(value.attr_symbol, IExpression)
-                and isinstance(value.attr_symbol.type, ClassType)):
+        if (isinstance(value, Attribute) and
+                ((isinstance(value.attr_symbol, IExpression) and isinstance(value.attr_symbol.type, ClassType))
+                 or (isinstance(value.attr_symbol, IType))
+                )):
             value = value.attr_symbol
 
         if isinstance(value, IType):

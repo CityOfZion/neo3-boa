@@ -19,3 +19,13 @@ class UInt256(bytes):
     def __init__(self, arg: Union[bytes, int] = 0):
         super().__init__()
         pass
+
+
+class ECPoint(bytes):
+    """
+    Represents a coordinate pair for elliptic curve cryptography (ECC) structures.
+    """
+
+    def __init__(self, arg: bytes):
+        super().__init__()
+        pass

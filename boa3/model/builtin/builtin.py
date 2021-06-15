@@ -12,6 +12,7 @@ from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetad
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.symbol import ISymbol
+from boa3.model.type.collection.sequence.ecpointtype import ECPointType
 from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
@@ -119,6 +120,7 @@ class Builtin:
     Event = EventType
     UInt160 = UInt160Type.build()
     UInt256 = UInt256Type.build()
+    ECPoint = ECPointType.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -159,7 +161,8 @@ class Builtin:
                               Nep5Transfer,
                               ],
         BoaPackage.Interop: Interop.package_symbols,
-        BoaPackage.Type: [UInt160,
+        BoaPackage.Type: [ECPoint,
+                          UInt160,
                           UInt256
                           ]
     }
