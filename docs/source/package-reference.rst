@@ -1,5 +1,5 @@
-Package Reference
-=================
+5. Package Reference
+====================
 
 .. toctree::
    :caption: Contents:

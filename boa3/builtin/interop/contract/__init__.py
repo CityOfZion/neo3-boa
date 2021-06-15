@@ -79,7 +79,7 @@ def get_call_flags() -> CallFlags:
 
 NEO: UInt160 = UInt160()
 """
-NEOs token script hash.
+NEO's token script hash.
 
 :meta hide-value:
 """

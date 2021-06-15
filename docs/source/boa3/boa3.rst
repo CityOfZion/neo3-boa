@@ -1,5 +1,5 @@
-neo3-boa package
-================
+boa3 package
+============
 
 .. toctree::
    :caption: Contents:

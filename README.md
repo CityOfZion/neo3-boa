@@ -175,7 +175,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 > Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc2
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc3
 $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 
@@ -577,8 +577,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>next release</td>
+    <td>✅</td>
+    <td>v0.8.2</td>
     <td>Optional type</td>
     <td>
       <pre>
@@ -590,6 +590,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#optional-type">List of examples</a>
     </td>
   </tbody>
   <tbody>

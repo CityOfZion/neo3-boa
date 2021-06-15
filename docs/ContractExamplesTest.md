@@ -42,6 +42,12 @@
   - [v0.8.1](#v081)
     - [Built in function](#built-in-function-4)
     - [Typing functions](#typing-function)
+  - [v0.8.2](#v082)
+    - [Built in function](#built-in-function-5)
+    - [Function call](#function-call-1)
+    - [Import](#import-1)
+    - [Typing functions](#typing-function-1)
+    - [Optional type](#optional-type)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -445,3 +451,49 @@
 - <a href="/boa3_test/test_sc/typing_test/CastToTypedList.py">CastToTypedList.py</a>
 - <a href="/boa3_test/test_sc/typing_test/CastToDict.py">CastToDict.py</a>
 - <a href="/boa3_test/test_sc/typing_test/CastToTypedDict.py">CastToTypedDict.py</a>
+
+### v0.8.2
+#### Built in function
+- <a href="/boa3_test/test_sc/neo_type_test/IsInstanceBlock.py">IsInstanceBlock.py</a>,
+- <a href="/boa3_test/test_sc/neo_type_test/IsInstanceIterator.py">IsInstanceIterator.py</a>,
+- <a href="/boa3_test/test_sc/neo_type_test/IsInstanceNotification.py">IsInstanceNotification.py</a>,
+- <a href="/boa3_test/test_sc/neo_type_test/IsInstanceStorageContext.py">IsInstanceStorageContext.py</a>,
+- <a href="/boa3_test/test_sc/neo_type_test/IsInstanceStorageMap.py">IsInstanceStorageMap.py</a>,
+- <a href="/boa3_test/test_sc/neo_type_test/IsInstanceTransaction.py">IsInstanceTransaction.py</a>
+
+#### Function call
+
+- <a href="/boa3_test/test_sc/function_test/CallReturnFunctionWithStarredArgument.py">CallReturnFunctionWithStarredArgument.py</a>,
+- <a href="/boa3_test/test_sc/function_test/CallVoidFunctionWithStarredArgument.py">CallVoidFunctionWithStarredArgument.py</a>,
+- <a href="/boa3_test/test_sc/function_test/ReturnStarredArgumentCount.py">ReturnStarredArgumentCount.py</a>
+
+### Import
+
+- <a href="/boa3_test/test_sc/interop_test/binary/ImportBinary.py">ImportBinary.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/blockchain/ImportBlockchain.py">ImportBlockchain.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/contract/ImportContract.py">ImportContract.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/crypto/ImportCrypto.py">ImportCrypto.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/iterator/ImportIterator.py">ImportIterator.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/json/ImportJson.py">ImportJson.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/runtime/ImportRuntime.py">ImportRuntime.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/storage/ImportStorage.py">ImportStorage.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/binary/ImportInteropBinary.py">ImportInteropBinary.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/blockchain/ImportInteropBlockchain.py">ImportInteropBlockchain.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/contract/ImportInteropContract.py">ImportInteropContract.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/crypto/ImportInteropCrypto.py">ImportInteropCrypto.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/iterator/ImportInteropIterator.py">ImportInteropIterator.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/json/ImportInteropJson.py">ImportInteropJson.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/native_contracts/ImportInteropOracle.py">ImportInteropOracle.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/runtime/ImportInteropRuntime.py">ImportInteropRuntime.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/storage/ImportInteropStorage.py">ImportInteropStorage.py</a>,
+- <a href="/boa3_test/test_sc/import_test/ImportInteropWithAlias.py">ImportInteropWithAlias.py</a>
+ 
+#### Typing function
+
+- <a href="/boa3_test/test_sc/bytes_test/SliceWithCast.py">SliceWithCast.py</a>
+
+#### Optional type
+
+- <a href="/boa3_test/test_sc/optional_test/OptionalReturn.py">OptionalReturn.py</a>,
+- <a href="/boa3_test/test_sc/optional_test/OptionalVariableArgument.py">OptionalVariableArgument.py</a>,
+- <a href="/boa3_test/test_sc/optional_test/OptionalVariableReassign.py">OptionalVariableReassign.py</a>
