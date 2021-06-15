@@ -3,6 +3,7 @@ from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -258,6 +259,33 @@ class TestArithmetic(BoaTest):
         self.assertEqual('ab', result)
         result = self.run_smart_contract(engine, path, 'concat', 'unit', 'test')
         self.assertEqual('unittest', result)
+
+    def test_concat_bytes_variables_and_constants(self):
+        path = self.get_contract_path('ConcatBytesVariablesAndConstants.py')
+
+        engine = TestEngine()
+        engine.increase_block()  # increase to get consistent block_time between execution and engine
+        result = self.run_smart_contract(engine, path, 'concat1',
+                                         expected_result_type=bytes)
+        current_time = Integer(engine.current_block.timestamp).to_byte_array()
+        self.assertEqual(b'value1  value2  value3  ' + current_time + b'some_bytes_after', result)
+
+        result = self.run_smart_contract(engine, path, 'concat2',
+                                         expected_result_type=bytes)
+        current_time = Integer(engine.current_block.timestamp).to_byte_array()
+        self.assertEqual(b'value1value2value3' + current_time + b'some_bytes_after', result)
+
+        result = self.run_smart_contract(engine, path, 'concat3',
+                                         expected_result_type=bytes)
+        current_time = Integer(engine.current_block.timestamp).to_byte_array()
+        self.assertEqual(b'value1__value2__value3__' + current_time + b'some_bytes_after', result)
+
+    def test_concat_string_variables_and_constants(self):
+        path = self.get_contract_path('ConcatStringVariablesAndConstants.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'concat')
+        self.assertEqual('[1,2]', result)
 
     def test_power_operation(self):
         expected_output = (

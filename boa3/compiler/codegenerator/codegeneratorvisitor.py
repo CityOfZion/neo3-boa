@@ -652,6 +652,11 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         return name.id
 
+    def visit_Starred(self, starred: ast.Starred):
+        self.visit_to_generate(starred.value)
+        self.generator.convert_starred_variable()
+        return starred.value
+
     def visit_Attribute(self, attribute: ast.Attribute) -> str:
         """
         Visitor of a attribute node

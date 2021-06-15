@@ -1,6 +1,6 @@
 import ast
 from abc import ABC
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.expression import IExpression
 from boa3.model.type.type import IType, Type
@@ -17,16 +17,28 @@ class Callable(IExpression, ABC):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None, defaults: List[ast.AST] = None,
+    def __init__(self, args: Dict[str, Variable] = None,
+                 vararg: Optional[Tuple[str, Variable]] = None,
+                 defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  origin_node: Optional[ast.AST] = None):
         if args is None:
             args = {}
-        self.args: Dict[str, Variable] = args
+        self.args: Dict[str, Variable] = args.copy()
 
         if not isinstance(defaults, list):
             defaults = []
         self.defaults: List[ast.AST] = defaults
+
+        self._vararg: Optional[Tuple[str, Variable]] = None
+        if (isinstance(vararg, tuple) and len(vararg) == 2
+                and isinstance(vararg[0], str) and isinstance(vararg[1], Variable)):
+            vararg_id, vararg_var = vararg
+            default_value = ast.parse(f"{Type.tuple.default_value}").body[0].value
+
+            self.args[vararg_id] = Variable(Type.tuple.build_collection([vararg_var.type]))
+            self.defaults.append(default_value)
+            self._vararg = vararg
 
         self.return_type: IType = return_type
         self.is_public: bool = is_public
@@ -59,8 +71,8 @@ class Callable(IExpression, ABC):
         return self.args
 
     @property
-    def allow_starred_argument(self) -> bool:
-        return False
+    def has_starred_argument(self) -> bool:
+        return self._vararg is not None
 
     @property
     def start_address(self) -> Optional[int]:

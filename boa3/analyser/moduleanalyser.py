@@ -4,8 +4,9 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
-from boa3.analyser.optimizer import UndefinedType
-from boa3.analyser.symbolscope import SymbolScope
+from boa3.analyser.model.functionarguments import FunctionArguments
+from boa3.analyser.model.optimizer import UndefinedType
+from boa3.analyser.model.symbolscope import SymbolScope
 from boa3.builtin import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
@@ -13,7 +14,7 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.event import Event
 from boa3.model.expression import IExpression
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
@@ -103,7 +104,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param var_enumerate_type: variable value type id if var_type_id is a SequenceType
         """
         if not isinstance(var_id, str) and isinstance(var_id, Iterable):
-            variables = [var_name.id for var_name in source_node.targets[0].elts]
+            variables = [var_name.id if isinstance(var_name, ast.Name) else self.visit(var_name).id
+                         for var_name in source_node.targets[0].elts]
             var_types = self.visit(source_node.value)
         else:
             variables = [var_id]
@@ -151,10 +153,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if callable_id not in self._current_module.symbols:
             self._current_module.include_callable(callable_id, callable)
 
-    def get_symbol(self, symbol_id: str) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
         for scope in reversed(self._scope_stack):
             if symbol_id in scope.symbols:
                 return scope.symbols[symbol_id]
+
+            if check_raw_id:
+                found_symbol = self._search_by_raw_id(symbol_id, list(scope.symbols.values()))
+                if found_symbol is not None:
+                    return found_symbol
 
         if symbol_id in self._current_scope.symbols:
             # the symbol exists in the local scope
@@ -162,8 +171,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif symbol_id in self._current_module.symbols:
             # the symbol exists in the module scope
             return self._current_module.symbols[symbol_id]
-        else:
-            return super().get_symbol(symbol_id)
+
+        if check_raw_id:
+            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_scope.symbols.values()))
+            if found_symbol is not None:
+                return found_symbol
+
+            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_module.symbols.values()))
+            if found_symbol is not None:
+                return found_symbol
+
+        return super().get_symbol(symbol_id, is_internal, check_raw_id)
 
     # region Log
 
@@ -298,10 +316,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
         analyser = ImportAnalyser(target)
-        if analyser.can_be_imported:
-            return analyser
-        else:
+
+        if not analyser.can_be_imported:
             self._log_unresolved_import(origin_node, target)
+            return None
+
+        if not analyser.is_builtin_import:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    origin_node.lineno, origin_node.col_offset,
+                    symbol_id='import from user modules'
+                )
+            )
+        return analyser
 
     def visit_Import(self, import_node: ast.Import):
         """
@@ -393,7 +420,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param function:
         """
-        fun_args = self.visit(function.args)
+        fun_args: FunctionArguments = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
 
         if fun_rtype_symbol is None:
@@ -411,7 +438,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._read_metadata_object(function)
             return Builtin.Metadata
 
-        method = Method(args=fun_args, defaults=function.args.defaults, return_type=fun_return,
+        method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
+                        vararg=fun_args.vararg,
                         origin_node=function, is_public=Builtin.Public in fun_decorators)
         self._current_method = method
         self._scope_stack.append(SymbolScope())
@@ -451,19 +479,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return [self.get_symbol(self.visit(decorator)) for decorator in function.decorator_list]
 
-    def visit_arguments(self, arguments: ast.arguments) -> Dict[str, Variable]:
+    def visit_arguments(self, arguments: ast.arguments) -> FunctionArguments:
         """
         Visitor of the function arguments node
 
         :param arguments:
         :return: a dictionary that maps each argument to its identifier
         """
-        args: Dict[str, Variable] = {}
+        fun_args = FunctionArguments()
 
         for arg in arguments.args:
             var_id, var = self.visit_arg(arg)  # Tuple[str, Variable]
-            args[var_id] = var
-        return args
+            fun_args.add_arg(var_id, var)
+
+        if arguments.vararg is not None:
+            var_id, var = self.visit_arg(arguments.vararg)  # Tuple[str, Variable]
+            fun_args.set_vararg(var_id, var)
+
+        return fun_args
 
     def visit_arg(self, arg: ast.arg) -> Tuple[str, Variable]:
         """
@@ -528,16 +561,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         if isinstance(target_type, ClassType):
-            args = []
-            for arg in target.args:
-                result = self.visit(arg)
-                if (isinstance(result, str) and not isinstance(arg, (ast.Str, ast.Constant))
-                        and result in self._current_scope.symbols):
-                    result = self.get_type(self._current_scope.symbols[result])
-                args.append(result)
-
             init = target_type.constructor_method()
             if hasattr(init, 'build'):
+                args = []
+                if hasattr(target, 'args'):
+                    for arg in target.args:
+                        result = self.visit(arg)
+                        if (isinstance(result, str) and not isinstance(arg, (ast.Str, ast.Constant))
+                                and result in self._current_scope.symbols):
+                            result = self.get_type(self._current_scope.symbols[result])
+                        args.append(result)
+
                 init = init.build(args)
             target_type = init.return_type if init is not None else target_type
 
@@ -638,7 +672,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         symbol = self.get_symbol(value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, Collection):
+            if isinstance(symbol, Collection) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
+                # for evaluating names like List[str], Dict[int, bool], etc
                 value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
                 values_type: Iterable[IType] = self.get_values_type(value)
                 return symbol.build_collection(*values_type)
@@ -654,7 +689,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if isinstance(index, ast.Tuple):
                     union_types = [self.get_type(value) for value in index.elts]
                 else:
-                    union_types = self.visit(index)
+                    union_types = self.get_type(index)
                 return symbol_type.build(union_types)
 
             if isinstance(symbol_type, Collection):
@@ -725,6 +760,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 new_event = self.create_new_event(call)
                 self.__include_callable(new_event.identifier, new_event)
                 self._current_event = new_event
+            else:
+                args_types = [self.get_type(arg, use_metatype=True) for arg in call.args]
+                updated_symbol = func_symbol.build(args_types)
+
+                if updated_symbol.identifier != func_id:
+                    self.__include_callable(updated_symbol.identifier, updated_symbol)
+                    return self.get_type(updated_symbol)
 
         return self.get_type(call.func)
 
@@ -837,6 +879,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return name.id
 
+    def visit_Starred(self, node: ast.Starred):
+        # TODO: refactor when starred variables are implemented
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='* variables'
+            )
+        )
+        return node.value
+
     def visit_Constant(self, constant: ast.Constant) -> Any:
         """
         Visitor of constant values node
@@ -872,6 +924,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the string
         """
         return str.s
+
+    def visit_Bytes(self, btes: ast.Bytes) -> bytes:
+        """
+        Visitor of literal string node
+
+        :param btes:
+        :return: the value of the string
+        """
+        return btes.s
 
     def visit_Tuple(self, tup_node: ast.Tuple) -> Optional[Tuple[Any, ...]]:
         """

@@ -31,3 +31,6 @@ class NoneType(IType):
 
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.ISNULL, b'')]
+
+
+noneType: IType = NoneType()

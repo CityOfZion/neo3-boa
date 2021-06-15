@@ -16,6 +16,6 @@ class GetBlockTimeMethod(InteropMethod):
 
 class BlockTimeProperty(IBuiltinProperty):
     def __init__(self):
-        identifier = 'get_time'
+        identifier = 'time'
         getter = GetBlockTimeMethod()
         super().__init__(identifier, getter)

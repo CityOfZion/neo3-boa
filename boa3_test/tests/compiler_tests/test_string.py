@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import InternalError, UnresolvedOperation
+from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -52,8 +53,6 @@ class TestString(BoaTest):
 
     def test_string_slicing_start_larger_than_ending(self):
         path = self.get_contract_path('StringSlicingStartLargerThanEnding.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual('', result)
@@ -91,6 +90,7 @@ class TestString(BoaTest):
             + Opcode.SIZE
             + Opcode.ADD
             + Opcode.LEFT
+            + Opcode.CONVERT + Type.str.stack_item
             + Opcode.RET        # return
         )
         path = self.get_contract_path('StringSlicingNegativeStart.py')
@@ -192,3 +192,16 @@ class TestString(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 'concat', ['', 'neo'])
         self.assertEqual('neo', result)
+
+    def test_string_with_double_quotes(self):
+        path = self.get_contract_path('StringWithDoubleQuotes.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'string_test', 'hello', 'world')
+        self.assertEqual('"hell"test_symbol":world}"', result)
+
+        result = self.run_smart_contract(engine, path, 'string_test', '1', 'neo')
+        self.assertEqual('""test_symbol":neo}"', result)
+
+        result = self.run_smart_contract(engine, path, 'string_test', 'neo', '')
+        self.assertEqual('"ne"test_symbol":}"', result)

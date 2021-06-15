@@ -8,6 +8,7 @@ from boa3.constants import BYTEORDER, ENCODING
 from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.model.event import Event
 from boa3.model.method import Method
+from boa3.model.variable import Variable
 from boa3.neo.contracts.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3_test.tests.boa_test import BoaTest
@@ -281,6 +282,32 @@ class TestFileGeneration(BoaTest):
                 self.assertIn(param_id, actual_event.args)
                 self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
+    def test_generate_nefdbgnfo_file_with_static_variables(self):
+        path = self.get_contract_path('GenerationWithStaticVariables.py')
+
+        expected_nef_output = path.replace('.py', '.nefdbgnfo')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        variables: Dict[str, Method] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Variable)
+        }
+
+        self.assertTrue(os.path.exists(expected_nef_output))
+        debug_info = self.get_debug_info(path)
+
+        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('static-variables', debug_info)
+        self.assertGreater(len(debug_info['static-variables']), 0)
+
+        for static_variable in debug_info['static-variables']:
+            # validate parameters
+            self.assertEqual(2, len(static_variable.split(',')))
+            param_id, param_type = static_variable.split(',')
+            self.assertIn(param_id, variables)
+            self.assertEqual(param_type, variables[param_id].type.abi_type)
+
     def test_generate_manifest_file_with_notify_event(self):
         path = self.get_contract_path('test_sc/interop_test/runtime', 'NotifySequence.py')
         expected_manifest_output = path.replace('.py', '.manifest.json')
@@ -475,7 +502,6 @@ class TestFileGeneration(BoaTest):
 
     def test_generation_with_recursive_function(self):
         path = self.get_contract_path('test_sc/function_test', 'RecursiveFunction.py')
-        self.compile_and_save(path)
 
         from boa3_test.tests.test_classes.testengine import TestEngine
         engine = TestEngine()

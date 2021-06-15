@@ -1,5 +1,4 @@
 from boa3.boa3 import Boa3
-from boa3.builtin.interop.runtime import TriggerType
 from boa3.exception.CompilerError import MismatchedTypes
 from boa3.exception.CompilerWarning import NameShadowing
 from boa3.model.builtin.interop.interop import Interop
@@ -9,7 +8,9 @@ from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.contracts import TriggerType
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -493,14 +494,14 @@ class TestRuntimeInterop(BoaTest):
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
 
-    def test_get_platform(self):
+    def test_platform(self):
         expected_output = (
             Opcode.SYSCALL
             + Interop.Platform.getter.interop_method_hash
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GetPlatform.py')
+        path = self.get_contract_path('Platform.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
@@ -508,7 +509,7 @@ class TestRuntimeInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual('NEO', result)
 
-    def test_get_platform_cant_assign(self):
+    def test_platform_cant_assign(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x01\x01'
@@ -518,16 +519,42 @@ class TestRuntimeInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GetPlatformCantAssign.py')
+        path = self.get_contract_path('PlatformCantAssign.py')
         output = self.assertCompilerLogs(NameShadowing, path)
         self.assertEqual(expected_output, output)
+
+    def test_burn_gas(self):
+        path = self.get_contract_path('BurnGas.py')
+        engine = TestEngine()
+
+        burn_gas_cost = 2460    # 2460 * 10^-8 GAS
+
+        # can not burn negative GAS
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', -10**8)
+        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, 0)
+
+        # can not burn no GAS
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, 0)
+
+        burned_gas = 1 * 10**8  # 1 GAS
+        result = self.run_smart_contract(engine, path, 'main', burned_gas)
+        self.assertIsVoid(result)
+        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, burned_gas)
+
+        burned_gas = 123 * 10**5   # 0.123 GAS
+        result = self.run_smart_contract(engine, path, 'main', burned_gas)
+        self.assertIsVoid(result)
+        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, burned_gas)
 
     def test_boa2_runtime_test(self):
         path = self.get_contract_path('RuntimeBoa2Test.py')
         engine = TestEngine()
 
         new_block = engine.increase_block()
-        result = self.run_smart_contract(engine, path, 'main', 'get_time', 1)
+        result = self.run_smart_contract(engine, path, 'main', 'time', 1)
         self.assertEqual(new_block.timestamp, result)
 
         from boa3.builtin.type import UInt160
@@ -563,3 +590,45 @@ class TestRuntimeInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 0)
         self.assertEqual(-1, result)
+
+    def test_get_script_container(self):
+        path = self.get_contract_path('ScriptContainer.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsNotNone(result)
+
+    def test_get_script_container_as_transaction(self):
+        path = self.get_contract_path('ScriptContainerAsTransaction.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(8, len(result))
+        if isinstance(result[0], str):
+            result[0] = String(result[0]).to_bytes()
+        self.assertIsInstance(result[0], bytes)
+        self.assertIsInstance(result[1], int)
+        self.assertIsInstance(result[2], int)
+        if isinstance(result[3], str):
+            result[3] = String(result[3]).to_bytes()
+        self.assertIsInstance(result[3], bytes)
+        self.assertIsInstance(result[4], int)
+        self.assertIsInstance(result[5], int)
+        self.assertIsInstance(result[6], int)
+        if isinstance(result[6], str):
+            result[6] = String(result[6]).to_bytes()
+        self.assertIsInstance(result[7], bytes)
+
+    def test_import_runtime(self):
+        path = self.get_contract_path('ImportRuntime.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)
+
+    def test_import_interop_runtime(self):
+        path = self.get_contract_path('ImportInteropRuntime.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)

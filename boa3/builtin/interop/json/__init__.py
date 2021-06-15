@@ -3,7 +3,7 @@ from typing import Any
 
 def json_serialize(item: Any) -> bytes:
     """
-    Serializes an item into a json
+    Serializes an item into a json.
 
     :param item: The item that will be serialized
     :type item: Any
@@ -18,13 +18,13 @@ def json_serialize(item: Any) -> bytes:
 
 def json_deserialize(json: bytes) -> Any:
     """
-    Deserializes a json into some valid type
+    Deserializes a json into some valid type.
 
     :param json: A json that will be deserialized
     :type json: bytes
     :return: The deserialized json
     :rtype: Any
 
-    :raise Exception: raised if json's deserialization is not valid
+    :raise Exception: raised if json's deserialization is not valid.
     """
     pass

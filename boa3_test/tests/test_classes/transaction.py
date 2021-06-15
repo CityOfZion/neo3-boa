@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 from typing import Any, Dict, List, Optional
 
-from boa3.neo import from_hex_str, to_hex_str
+from boa3.neo import from_hex_str
 from boa3.neo3.core.types import UInt256
 from boa3_test.tests.test_classes import transactionattribute as tx_attribute
 from boa3_test.tests.test_classes.signer import Signer
@@ -22,12 +22,20 @@ class Transaction:
         if tx_attr not in self._attributes:
             self._attributes.append(tx_attr)
 
+    @property
+    def hash(self) -> Optional[bytes]:
+        if self._hash is None:
+            return None
+        else:
+            return self._hash.to_array()
+
     def to_json(self) -> Dict[str, Any]:
+        from boa3.neo.vm.type.String import String
         return {
             'signers': [signer.to_json() for signer in self._signers],
             'witnesses': [witness.to_json() for witness in self._witnesses],
             'attributes': [attr.to_json() for attr in self._attributes],
-            'script': to_hex_str(self._script)
+            'script': String.from_bytes(base64.b64encode(self._script))
         }
 
     @classmethod
@@ -60,3 +68,14 @@ class Transaction:
         copied = Transaction(self._script, self._signers, self._witnesses)
         copied._hash = self._hash
         return copied
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Transaction):
+            return False
+        if self._hash == other._hash:
+            return True
+
+        return (self._script == other._script
+                and self._attributes == self._attributes
+                and self._signers == other._signers
+                and self._witnesses == other._witnesses)

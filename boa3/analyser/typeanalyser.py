@@ -3,15 +3,16 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
-from boa3.analyser.optimizer import UndefinedType
-from boa3.analyser.symbolscope import SymbolScope
+from boa3.analyser.model.optimizer import UndefinedType
+from boa3.analyser.model.symbolscope import SymbolScope
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
+from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -78,7 +79,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbols.update(module.symbols)
         return symbols
 
-    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
+        if symbol_id is None:
+            return None
+        if isinstance(symbol_id, ISymbol) and not isinstance(symbol_id, (IType, IExpression)):
+            return symbol_id
         if not isinstance(symbol_id, str):
             return Variable(self.get_type(symbol_id))
 
@@ -87,14 +94,24 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if symbol_id in scope:
                     return scope[symbol_id]
 
+                if check_raw_id:
+                    found_symbol = self._search_by_raw_id(symbol_id, list(scope.symbols.values()))
+                    if found_symbol is not None:
+                        return found_symbol
+
         if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
             return self._current_method.symbols[symbol_id]
         elif symbol_id in self.modules:
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
-        else:
-            return super().get_symbol(symbol_id, is_internal)
+
+        if check_raw_id:
+            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_method.symbols.values()))
+            if found_symbol is not None:
+                return found_symbol
+
+        return super().get_symbol(symbol_id, is_internal, check_raw_id)
 
     def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
@@ -1051,14 +1068,29 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
         attr: Attribute = self.visit(call.func)
         arg0, callable_target, callable_id = attr.values
-        arg0_identifier = self.visit(arg0)
+
+        if isinstance(arg0, Package):
+            # visit works only with ast classes
+            package = arg0
+            package_symbol = self.get_symbol(package.identifier, check_raw_id=True)
+
+            while package_symbol is None and package.parent is not None:
+                package = package.parent
+                package_symbol = self.get_symbol(package.identifier, check_raw_id=True)
+            arg0_identifier = package_symbol if package_symbol else package.identifier
+        else:
+            arg0_identifier = self.visit(arg0)
+
         if isinstance(arg0_identifier, ast.Name):
             arg0_identifier = arg0_identifier.id
 
         if (callable_target is not None
-                and (len(call.args) < 1 or call.args[0] != arg0)
-                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import))):
-            call.args.insert(0, arg0)
+                and not isinstance(self.get_symbol(arg0_identifier), (IType, Import, Package))
+                and (len(call.args) < 1 or call.args[0] != arg0)):
+            # move self to the arguments
+            # don't move if it's class method
+            if not (isinstance(arg0, ClassType) and callable_id in arg0.class_methods):
+                call.args.insert(0, arg0)
 
         if len(call.args) > 0 and isinstance(callable_target, IBuiltinMethod) and callable_target.has_self_argument:
             self_type: IType = self.get_type(call.args[0])
@@ -1080,12 +1112,18 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return callable_target
 
     def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:
-        if (callable_target.allow_starred_argument
+        if (callable_target.has_starred_argument
                 and not hasattr(call, 'checked_starred_args')
-                and len(call.args) > len(callable_target.args_without_default)):
-            args = self.parse_to_node(str(Type.sequence.default_value), call)
-            args.elts = call.args
-            call.args = [args]
+                and len(call.args) >= len(callable_target.args)):
+
+            if len(call.args) == 0 or not isinstance(call.args[0], ast.Starred):
+                # starred argument is always the last argument
+                len_args_without_starred = len(callable_target.args) - 1
+                args = self.parse_to_node(str(Type.tuple.default_value), call)
+
+                # include the arguments into a tuple to be assigned to the starred argument
+                args.elts = call.args[len_args_without_starred:]
+                call.args[len_args_without_starred:] = [args]
             call.checked_starred_args = True
 
         len_call_args = len(call.args)
@@ -1288,6 +1326,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(value, ISymbol):
             symbol = value
 
+        if isinstance(symbol, Attribute):
+            symbol = symbol.attr_symbol
         if isinstance(symbol, IExpression):
             symbol = symbol.type
         if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
@@ -1311,7 +1351,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
             attribute.generate_value = True
 
-        return Attribute(attribute.value, attribute.attr, attr_symbol, attribute)
+        if isinstance(symbol, Package) or isinstance(value, Attribute):
+            attr_value = symbol
+        else:
+            attr_value = attribute.value
+
+        return Attribute(attr_value, attribute.attr, attr_symbol, attribute)
 
     def visit_Constant(self, constant: ast.Constant) -> Any:
         """
@@ -1412,6 +1457,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the name node information
         """
         return name
+
+    def visit_Starred(self, node: ast.Starred) -> ast.AST:
+        value_type = self.get_type(node.value)
+        if not Type.sequence.is_type_of(value_type):
+            self._log_error(
+                CompilerError.MismatchedTypes(line=node.lineno, col=node.col_offset,
+                                              expected_type_id=Type.sequence.identifier,
+                                              actual_type_id=value_type.identifier)
+            )
+
+        return Type.tuple.build_collection(value_type.value_type)
 
     def visit_Index(self, index: ast.Index) -> Any:
         """

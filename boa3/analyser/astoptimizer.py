@@ -2,8 +2,8 @@ import ast
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
-from boa3.analyser.optimizer import ScopeValue, Undefined
-from boa3.analyser.optimizer.Operation import Operation
+from boa3.analyser.model.optimizer import ScopeValue, Undefined
+from boa3.analyser.model.optimizer.Operation import Operation
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -56,7 +56,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         :return: the parsed node
         :rtype: ast.AST or Sequence[ast.AST]
         """
-        if is_origin_str and not expression.startswith(("'", '"')):
+        if is_origin_str:
             expression = "'{0}'".format(expression)
 
         new_node = self.visit(super().parse_to_node(expression, origin))
@@ -147,19 +147,25 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         except ValueError:
             return bin_op
 
-    def is_symmetric_operation(self, first_op: Union[ast.operator, BinaryOperation],
-                               second_op: Union[ast.operator, BinaryOperation]) -> bool:
-        operator = Operation.get_operation(first_op)
-        second_operator = Operation.get_operation(second_op)
-
-        if operator != second_operator:
+    def is_symmetric_operation(self, first_op: BinaryOperation, second_op: BinaryOperation) -> bool:
+        if not isinstance(first_op, BinaryOperation) or not isinstance(second_op, BinaryOperation):
             return False
 
-        return operator.is_symmetric
+        operation = type(first_op)
+        second_operation = type(second_op)
+
+        if operation != second_operation:
+            return False
+
+        return first_op.is_symmetric
 
     def reorder_operations(self, outer_bin_op: ast.BinOp, inner_bin_op: ast.BinOp) -> Tuple[Any, Any]:
         inner_first_value = self.literal_eval(inner_bin_op.left)
         inner_second_value = self.literal_eval(inner_bin_op.right)
+
+        if (not (isinstance(outer_bin_op.op, BinaryOperation) and outer_bin_op.op.is_symmetric)
+                or not (isinstance(outer_bin_op.op, BinaryOperation) and outer_bin_op.op.is_symmetric)):
+            return inner_first_value, inner_second_value
 
         is_left_operand: bool = inner_bin_op is outer_bin_op.left
         other_value = self.literal_eval(outer_bin_op.right if is_left_operand else outer_bin_op.left)

@@ -1,14 +1,14 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.analyser.analyser import Analyser
-from boa3.analyser.symbolscope import SymbolScope
+from boa3.analyser.model.symbolscope import SymbolScope
 from boa3.compiler.codegenerator.stackmemento import NeoStack, StackMemento
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.constants import ENCODING
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.event import Event
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
@@ -17,6 +17,7 @@ from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType
+from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
@@ -232,11 +233,10 @@ class CodeGenerator:
                     return attr.symbols[symbol_id]
 
             if is_internal:
-                from boa3.model.importsymbol import Import
-                imports = [symbol for symbol in self.symbol_table.values() if isinstance(symbol, Import)]
-                for package in imports:
-                    if identifier in package.all_symbols:
-                        return package.all_symbols[identifier]
+                from boa3.model import imports
+                found_symbol = imports.builtin.get_internal_symbol(identifier)
+                if isinstance(found_symbol, ISymbol):
+                    return found_symbol
         return Type.none
 
     def initialize_static_fields(self) -> bool:
@@ -754,9 +754,13 @@ class CodeGenerator:
         stack_top_type: IType = self._stack[-1]
         if (not value_type.is_generic
                 and not stack_top_type.is_generic
-                and value_type.stack_item != stack_top_type.stack_item
                 and value_type.stack_item is not Type.any.stack_item):
-            self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
+
+            if value_type.stack_item != stack_top_type.stack_item:
+                # converts only if the stack types are different
+                self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
+
+            # but changes the value internally
             self._stack_pop()
             self._stack_append(value_type)
 
@@ -857,12 +861,12 @@ class CodeGenerator:
 
         self._stack_pop()  # length
         self._stack_pop()  # start
-        self._stack_pop()  # original string
+        original = self._stack_pop()  # original string
 
         self.__insert1(OpcodeInfo.SUBSTR)
         self._update_jump(jmp_address, self.last_code_start_address)
-        self._stack_append(Type.bytes)  # substr returns a buffer instead of a bytestring
-        self.convert_cast(Type.str)
+        self._stack_append(BufferType)  # substr returns a buffer instead of a bytestring
+        self.convert_cast(original)
 
     def convert_get_array_slice(self, array: SequenceType):
         """
@@ -939,7 +943,9 @@ class CodeGenerator:
                                               StackItemType.Buffer):
                 self.__insert1(OpcodeInfo.LEFT)
                 self._stack_pop()  # length
-                self._stack_pop()  # original array
+                original_type = self._stack_pop()  # original array
+                self._stack_append(BufferType)  # left returns a buffer instead of a bytestring
+                self.convert_cast(original_type)
             else:
                 array = self._stack[-2]
                 self.convert_literal(0)
@@ -958,7 +964,9 @@ class CodeGenerator:
                 self.convert_operation(BinaryOp.Sub)
                 self.__insert1(OpcodeInfo.RIGHT)
                 self._stack_pop()  # length
-                self._stack_pop()  # original array
+                original_type = self._stack_pop()  # original array
+                self._stack_append(BufferType)     # right returns a buffer instead of a bytestring
+                self.convert_cast(original_type)
             else:
                 array = self._stack[-3]
                 self.swap_reverse_stack_items(2)
@@ -968,6 +976,17 @@ class CodeGenerator:
         if self._stack[-1].stack_item is StackItemType.Array:
             self.__insert1(OpcodeInfo.UNPACK)
             self.__insert1(OpcodeInfo.PACK)    # creates a new array with the values
+
+    def convert_starred_variable(self):
+        top_stack_item = self._stack[-1].stack_item
+        if top_stack_item is StackItemType.Array:
+            self.convert_copy()
+        elif top_stack_item is StackItemType.Map:
+            self.convert_builtin_method_call(Builtin.DictKeys)
+        else:
+            return
+
+        self.convert_cast(Type.tuple)
 
     def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False):
         """
@@ -1039,7 +1058,7 @@ class CodeGenerator:
                     self.__insert1(op_info)
                 storaged_type = self._stack_pop()
 
-                from boa3.analyser.optimizer import UndefinedType
+                from boa3.analyser.model.optimizer import UndefinedType
                 if (var_id in self._current_scope.symbols or
                         (var_id in self._locals and self._current_method.locals[var_id].type is UndefinedType)):
                     symbol = self.get_symbol(var_id)
@@ -1273,7 +1292,7 @@ class CodeGenerator:
         vm_code = VMCode(op_info, data)
 
         if op_info.opcode.has_target():
-            data = vm_code.data
+            data = vm_code.raw_data
             relative_address: int = Integer.from_bytes(data, signed=True)
             actual_address = VMCodeMapping.instance().bytecode_size + relative_address
             if (self._can_append_target

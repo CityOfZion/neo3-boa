@@ -1,3 +1,4 @@
+import ast
 from typing import Dict
 
 from boa3.model.builtin.interop.nativecontract import ContractManagementMethod
@@ -12,6 +13,9 @@ class UpdateMethod(ContractManagementMethod):
         syscall = 'update'
         args: Dict[str, Variable] = {
             'nef_file': Variable(Type.bytes),
-            'manifest': Variable(Type.bytes)
+            'manifest': Variable(Type.bytes),
+            'data': Variable(Type.any)
         }
-        super().__init__(identifier, syscall, args, return_type=Type.none)
+        data_default = ast.parse("{0}".format(Type.any.default_value)
+                                 ).body[0].value
+        super().__init__(identifier, syscall, args, defaults=[data_default], return_type=Type.none)

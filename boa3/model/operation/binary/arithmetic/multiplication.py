@@ -21,6 +21,10 @@ class Multiplication(BinaryOperation):
         self.operator: Operator = Operator.Mult
         super().__init__(left, right)
 
+    @property
+    def is_symmetric(self) -> bool:
+        return True
+
     def validate_type(self, *types: IType) -> bool:
         if len(types) != self.number_of_operands:
             return False

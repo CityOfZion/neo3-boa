@@ -8,6 +8,7 @@ from boa3.exception.CompilerError import CompilerError, InternalError
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
+from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
@@ -102,14 +103,14 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         else:
             final_type = Type.get_type(value)
 
-        if isinstance(final_type, MetaType):
-            print()
         if isinstance(final_type, MetaType) and not use_metatype:
             return final_type.meta_type
         else:
             return final_type
 
-    def get_symbol(self, symbol_id: str, is_internal: bool = False) -> Optional[ISymbol]:
+    def get_symbol(self, symbol_id: str,
+                   is_internal: bool = False,
+                   check_raw_id: bool = False) -> Optional[ISymbol]:
         """
         Tries to get the symbol by its id name
 
@@ -121,12 +122,17 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             # the symbol exists in the global scope
             return self.symbols[symbol_id]
 
+        if check_raw_id:
+            found_symbol = self._search_by_raw_id(symbol_id, list(self.symbols.values()))
+            if found_symbol is not None:
+                # the symbol exists in the global scope, but with an alias different from the original name
+                return found_symbol
+
         if is_internal:
-            from boa3.model.importsymbol import Import
-            imports = [symbol for symbol in self.symbols.values() if isinstance(symbol, Import)]
-            for package in imports:
-                if symbol_id in package.all_symbols:
-                    return package.all_symbols[symbol_id]
+            from boa3.model import imports
+            found_symbol = imports.builtin.get_internal_symbol(symbol_id)
+            if isinstance(found_symbol, ISymbol):
+                return found_symbol
 
         # the symbol may be a built in. If not, returns None
         from boa3.model.builtin.builtin import Builtin
@@ -135,6 +141,13 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
             found_symbol = Builtin.Exception.return_type
         return found_symbol
+
+    def _search_by_raw_id(self, symbol_id: str, symbols: Sequence[ISymbol]) -> Optional[ISymbol]:
+        for symbol in symbols:
+            if isinstance(symbol, IdentifiedSymbol) and symbol.identifier == symbol_id:
+                return symbol
+
+        return None
 
     def is_exception(self, symbol_id: str) -> bool:
         global_symbols = globals()

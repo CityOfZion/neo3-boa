@@ -69,13 +69,13 @@ class TestIf(BoaTest):
         path = self.get_contract_path('IfWithoutCondition.py')
 
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            Boa3.compile(path)
 
     def test_if_no_body(self):
         path = self.get_contract_path('IfWithoutBody.py')
 
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            Boa3.compile(path)
 
     def test_nested_if(self):
         expected_output = (
@@ -151,7 +151,7 @@ class TestIf(BoaTest):
         path = self.get_contract_path('ElseWithoutBody.py')
 
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            Boa3.compile(path)
 
     def test_if_elif(self):
         expected_output = (
@@ -359,9 +359,8 @@ class TestIf(BoaTest):
 
     def test_inner_if_else(self):
         path = self.get_contract_path('InnerIfElse.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'main', 4, 3, 2, 1)
         self.assertEqual(3, result)
 
@@ -382,9 +381,8 @@ class TestIf(BoaTest):
 
     def test_if_is_instance_condition(self):
         path = self.get_contract_path('IfIsInstanceCondition.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'example', 4)
         self.assertEqual(4, result)
 
@@ -399,9 +397,8 @@ class TestIf(BoaTest):
 
     def test_if_else_is_instance_condition(self):
         path = self.get_contract_path('IfElseIsInstanceCondition.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'example', 4)
         self.assertEqual(4, result)
 
@@ -416,9 +413,8 @@ class TestIf(BoaTest):
 
     def test_if_else_is_instance_condition_with_union_variable(self):
         path = self.get_contract_path('IfElseIsInstanceConditionWithUnionVariable.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'example', 4,
                                          expected_result_type=bytes)
         self.assertEqual(b'\x04', result)
@@ -437,9 +433,8 @@ class TestIf(BoaTest):
 
     def test_if_else_multiple_is_instance_condition_with_union_variable(self):
         path = self.get_contract_path('IfElseMultipleIsInstanceConditionWithUnionVariable.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'example', 4)
         self.assertEqual(16, result)
 
@@ -457,8 +452,6 @@ class TestIf(BoaTest):
 
     def test_variable_in_if_scopes(self):
         path = self.get_contract_path('VariablesInIfScopes.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'main', 1, expected_result_type=bool)
@@ -583,3 +576,23 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 22)
         self.assertEqual(-1, result)
+
+    def test_if_with_inner_while(self):
+        path = self.get_contract_path('IfWithInnerWhile.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual('{[]}', result)
+
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual('{[value1,value2,value3]}', result)
+
+    def test_if_with_inner_for(self):
+        path = self.get_contract_path('IfWithInnerFor.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', True)
+        self.assertEqual('{[]}', result)
+
+        result = self.run_smart_contract(engine, path, 'Main', False)
+        self.assertEqual('{[value1,value2,value3]}', result)

@@ -2,20 +2,16 @@ from __future__ import annotations
 
 import ast
 from enum import Enum, auto
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 
 
 class Operation(Enum):
-    def __init__(self, value: Any, symmetric: bool = False):
-        self._value_ = value
-        self._symmetric: bool = symmetric
-
-    Add = auto(), True
+    Add = auto()
     Sub = auto()
-    Mult = auto(), True
+    Mult = auto()
     Div = auto()
     FloorDiv = auto()
     Mod = auto()

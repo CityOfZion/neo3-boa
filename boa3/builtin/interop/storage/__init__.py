@@ -21,7 +21,7 @@ def get(key: Union[str, bytes], context: StorageContext = None) -> bytes:
 
 def get_context() -> StorageContext:
     """
-    Gets current storage context
+    Gets current storage context.
 
     :return: the current storage context
     :rtype: StorageContext
@@ -57,7 +57,7 @@ def delete(key: Union[str, bytes], context: StorageContext = None):
 
 def find(prefix: Union[str, bytes], context: StorageContext = None) -> Iterator:
     """
-    Searches in the storage for keys that start with the given prefix
+    Searches in the storage for keys that start with the given prefix.
 
     :param prefix: prefix to find the storage keys
     :type prefix: str or bytes

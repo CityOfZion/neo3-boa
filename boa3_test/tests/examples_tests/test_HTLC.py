@@ -121,11 +121,12 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # transfer was accepted so it was registered
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', NEO_SCRIPT)
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        neo_transfer_event = transfer_events[0]
+        self.assertEqual(3, len(neo_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[0].arguments
+        sender, receiver, amount = neo_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -148,7 +149,7 @@ class TestHTLCTemplate(BoaTest):
                                     signer_accounts=[aux_address2],
                                     expected_result_type=bool)
 
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
         # the NEO transfer
         self.assertEqual(1, len(transfer_events))
 
@@ -164,11 +165,12 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # the transfer was accepted so it was registered
-        transfer_events = engine.get_events('Transfer')
-        self.assertEqual(2, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
+        transfer_events = engine.get_events('Transfer', origin=GAS_SCRIPT)
+        self.assertGreaterEqual(len(transfer_events), 1)
+        gas_transfer_event = transfer_events[-1]
+        self.assertEqual(3, len(gas_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[1].arguments
+        sender, receiver, amount = gas_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -238,7 +240,7 @@ class TestHTLCTemplate(BoaTest):
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
         self.assertEqual(1, len(transfer_events))
 
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
@@ -246,7 +248,7 @@ class TestHTLCTemplate(BoaTest):
                                          signer_accounts=[aux_address2],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', GAS_SCRIPT)
         self.assertEqual(2, len(transfer_events))
 
         # the withdraw will fail, because the secret is wrong
@@ -262,11 +264,17 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # the transfer were accepted so they were registered
-        transfer_events = engine.get_events('Transfer')
-        self.assertEqual(4, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[2].arguments))
+        transfer_events = engine.get_events('Transfer', origin=GAS_SCRIPT)
+        self.assertGreaterEqual(len(transfer_events), 1)
+        gas_transfer_event = transfer_events[-1]
+        self.assertEqual(3, len(gas_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[2].arguments
+        transfer_events = engine.get_events('Transfer', NEO_SCRIPT)
+        self.assertGreaterEqual(len(transfer_events), 1)
+        neo_transfer_event = transfer_events[-1]
+        self.assertEqual(3, len(neo_transfer_event.arguments))
+
+        sender, receiver, amount = gas_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -275,8 +283,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(aux_address, receiver)
         self.assertEqual(transferred_amount_gas, amount)
 
-        self.assertEqual(3, len(transfer_events[3].arguments))
-        sender, receiver, amount = transfer_events[3].arguments
+        sender, receiver, amount = neo_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -286,6 +293,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(transferred_amount_neo, amount)
 
         # saving the balance after to compare with the balance before the transfer
+        minted_gas_per_neo_transfer = int(transferred_amount_neo * 0.5)
         balance_neo_person_a_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
         balance_neo_person_b_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address2)
         balance_neo_htlc_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
@@ -296,7 +304,8 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_neo_person_a_before - transferred_amount_neo, balance_neo_person_a_after)
         self.assertEqual(balance_neo_person_b_before + transferred_amount_neo, balance_neo_person_b_after)
         self.assertEqual(balance_neo_htlc_before, balance_neo_htlc_after)
-        self.assertEqual(balance_gas_person_a_before + transferred_amount_gas, balance_gas_person_a_after)
+        self.assertEqual(balance_gas_person_a_before + transferred_amount_gas + minted_gas_per_neo_transfer,
+                         balance_gas_person_a_after)
         self.assertEqual(balance_gas_person_b_before - transferred_amount_gas, balance_gas_person_b_after)
         self.assertEqual(balance_gas_htlc_before, balance_gas_htlc_after)
 
@@ -340,7 +349,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(False, result)
 
         # this simulates a new block in the blockchain
-        # get_time only changes value when a new block enters the blockchain
+        # time only changes value when a new block enters the blockchain
         engine.increase_block()
         # will be able to refund, because enough time has passed
         result = self.run_smart_contract(engine, path, 'refund',

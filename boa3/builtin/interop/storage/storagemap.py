@@ -2,6 +2,9 @@ from typing import Union
 
 
 class StorageMap:
+    """
+    The key-value storage for the specific prefix in the given storage context.
+    """
 
     def __init__(self, context, prefix: Union[bytes, str]):
         from boa3.builtin.interop.storage.storagecontext import StorageContext

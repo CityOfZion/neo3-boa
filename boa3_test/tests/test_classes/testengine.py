@@ -66,7 +66,7 @@ class TestEngine:
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
-    def get_events(self, event_name: str, origin: UInt160 = None) -> List[Notification]:
+    def get_events(self, event_name: str, origin: Union[UInt160, bytes] = None) -> List[Notification]:
         if origin is None:
             return [n for n in self._notifications if n.name == event_name]
         else:
@@ -179,6 +179,9 @@ class TestEngine:
                 new_height = self.height + 1
             self._height = new_height
 
+        if new_height < 1:
+            # don't use height 0 because this is the genesis block index
+            new_height = 1
         new_block = Block(new_height)
         self.add_block(new_block)
         return new_block
@@ -259,17 +262,17 @@ class TestEngine:
 
             self._error_message = result['error'] if 'error' in result else None
 
-            if 'vm_state' in result:
-                self._vm_state = VMState.get_vm_state(result['vm_state'])
+            if 'vmstate' in result:
+                self._vm_state = VMState.get_vm_state(result['vmstate'])
 
             if 'gasconsumed' in result:
                 self._gas_consumed = result['gasconsumed']
 
-            if 'result_stack' in result:
-                if isinstance(result['result_stack'], list):
-                    self._result_stack = [stack_item_from_json(value) for value in result['result_stack']]
+            if 'resultstack' in result:
+                if isinstance(result['resultstack'], list):
+                    self._result_stack = [stack_item_from_json(value) for value in result['resultstack']]
                 else:
-                    self._result_stack = [stack_item_from_json(result['result_stack'])]
+                    self._result_stack = [stack_item_from_json(result['resultstack'])]
 
             if self._vm_state is VMState.HALT or not rollback_on_fault:
                 if 'notifications' in result:
@@ -293,13 +296,13 @@ class TestEngine:
                     if contract.script_hash is not None and not self._storage.has_contract(contract.script_hash):
                         self.remove_contract(nef_path)
 
-                if 'blocks' in result:
-                    blocks_json = result['blocks']
-                    if not isinstance(blocks_json, list):
-                        blocks_json = [blocks_json]
+                if 'currentblock' in result:
+                    current_block = Block.from_json(result['currentblock'])
 
-                    self._blocks = sorted([Block.from_json(js) for js in blocks_json],
-                                          key=lambda b: b.index)
+                    existing_block = next((block for block in self._blocks if block.index == current_block.index), None)
+                    if existing_block is not None:
+                        self._blocks.remove(existing_block)
+                    self._blocks.append(current_block)
 
                 if 'transaction' in result and self._vm_state is VMState.HALT:
                     block = self.current_block
@@ -336,10 +339,10 @@ class TestEngine:
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),
             'contracts': [{'nef': contract_path} for contract_path in self.contracts],
-            'signerAccounts': [to_hex_str(address) for address in self._accounts],
+            'signeraccounts': [to_hex_str(address) for address in self._accounts],
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }
         if isinstance(self._current_tx, Transaction):
-            json['currentTx'] = self._current_tx.to_json()
+            json['currenttx'] = self._current_tx.to_json()
         return json

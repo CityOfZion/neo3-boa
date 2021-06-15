@@ -12,8 +12,9 @@ from boa3.model.variable import Variable
 
 class IBuiltinMethod(IBuiltinCallable, Method, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None):
-        super().__init__(identifier, args, defaults, return_type)
+                 defaults: List[ast.AST] = None, return_type: IType = None,
+                 vararg: Optional[Tuple[str, Variable]] = None):
+        super().__init__(identifier, args, vararg, defaults, return_type)
 
     @property
     def is_supported(self) -> bool:

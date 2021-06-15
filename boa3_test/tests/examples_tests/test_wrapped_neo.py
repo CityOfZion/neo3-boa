@@ -98,6 +98,9 @@ class TestTemplate(BoaTest):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
         path = self.get_contract_path('wrapped_neo.py')
+        output, manifest = self.compile_and_save(path)
+        wrapped_neo_address = hash160(output)
+
         engine = TestEngine()
 
         # should fail before running deploy
@@ -111,7 +114,7 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
         self.assertEqual(1, len(transfer_events))
         self.assertEqual(3, len(transfer_events[0].arguments))
 
@@ -157,7 +160,7 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
         self.assertEqual(2, len(transfer_events))
         self.assertEqual(3, len(transfer_events[1].arguments))
 
@@ -237,11 +240,12 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        wrapped_token_transfer_event = transfer_events[0]
+        self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[0].arguments
+        sender, receiver, amount = wrapped_token_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -260,11 +264,12 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertIsVoid(result)
 
-        transfer_events = engine.get_events('Transfer')
-        self.assertEqual(3, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
+        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
+        self.assertGreaterEqual(len(transfer_events), 1)
+        wrapped_token_transfer_event = transfer_events[-1]
+        self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[1].arguments
+        sender, receiver, amount = wrapped_token_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -273,9 +278,12 @@ class TestTemplate(BoaTest):
         self.assertEqual(None, receiver)
         self.assertEqual(burned_amount, amount)
 
-        self.assertEqual(3, len(transfer_events[2].arguments))
+        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
+        self.assertGreaterEqual(len(transfer_events), 1)
+        neo_transfer_event = transfer_events[-1]
+        self.assertEqual(3, len(neo_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[2].arguments
+        sender, receiver, amount = neo_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -561,11 +569,12 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer')
+        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        wrapped_token_transfer_event = transfer_events[0]
+        self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[0].arguments
+        sender, receiver, amount = wrapped_token_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -591,11 +600,12 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-        transfer_events = engine.get_events('Transfer')
-        self.assertEqual(3, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
+        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
+        self.assertEqual(1, len(transfer_events))
+        neo_transfer_event = transfer_events[0]
+        self.assertEqual(3, len(neo_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[1].arguments
+        sender, receiver, amount = neo_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -604,9 +614,12 @@ class TestTemplate(BoaTest):
         self.assertEqual(wrapped_neo_address, receiver)
         self.assertEqual(minted_amount, amount)
 
-        self.assertEqual(3, len(transfer_events[2].arguments))
+        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
+        self.assertEqual(2, len(transfer_events))
+        wrapped_token_transfer_event = transfer_events[1]
+        self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[2].arguments
+        sender, receiver, amount = wrapped_token_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):

@@ -223,9 +223,10 @@ class TestNEP17Template(BoaTest):
         # when deploying, the contract will mint tokens to the owner
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        transfer_event = transfer_events[0]
+        self.assertEqual(3, len(transfer_event.arguments))
 
-        sender, receiver, amount = transfer_events[0].arguments
+        sender, receiver, amount = transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -249,12 +250,14 @@ class TestNEP17Template(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
-        self.assertEqual(3, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
-        self.assertEqual(3, len(transfer_events[2].arguments))
+        self.assertEqual(4, len(transfer_events))
+        neo_transfer_event = transfer_events[2]
+        transfer_event = transfer_events[3]
+        self.assertEqual(3, len(neo_transfer_event.arguments))
+        self.assertEqual(3, len(transfer_event.arguments))
 
         # this is the event NEO emitted
-        sender, receiver, amount = transfer_events[1].arguments
+        sender, receiver, amount = neo_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -264,7 +267,7 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(transferred_amount, amount)
 
         # this is the event NEP17 emitted
-        sender, receiver, amount = transfer_events[2].arguments
+        sender, receiver, amount = transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -296,12 +299,14 @@ class TestNEP17Template(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
-        self.assertEqual(5, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[3].arguments))
-        self.assertEqual(3, len(transfer_events[4].arguments))
+        self.assertEqual(6, len(transfer_events))
+        gas_transfer_event = transfer_events[4]
+        transfer_event = transfer_events[5]
+        self.assertEqual(3, len(gas_transfer_event.arguments))
+        self.assertEqual(3, len(transfer_event.arguments))
 
         # this is the event GAS emitted
-        sender, receiver, amount = transfer_events[3].arguments
+        sender, receiver, amount = gas_transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -311,7 +316,7 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(transferred_amount, amount)
 
         # this is the event NEP17 emitted
-        sender, receiver, amount = transfer_events[4].arguments
+        sender, receiver, amount = transfer_event.arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):

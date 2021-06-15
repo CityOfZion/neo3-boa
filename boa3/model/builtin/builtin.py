@@ -126,13 +126,13 @@ class Builtin:
     # boa smart contract methods
     Abort = AbortMethod()
 
-    _boa_builtins: List[IdentifiedSymbol] = [Public,
-                                             NewEvent,
-                                             Event,
-                                             Metadata,
-                                             NeoMetadataType,
-                                             ScriptHash
-                                             ]
+    boa_builtins: List[IdentifiedSymbol] = [Public,
+                                            NewEvent,
+                                            Event,
+                                            Metadata,
+                                            NeoMetadataType,
+                                            ScriptHash
+                                            ]
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
         'author': (str, type(None)),
@@ -143,7 +143,7 @@ class Builtin:
 
     @classmethod
     def boa_symbols(cls) -> Dict[str, IdentifiedSymbol]:
-        return {symbol.identifier: symbol for symbol in cls._boa_builtins}
+        return {symbol.identifier: symbol for symbol in cls.boa_builtins}
 
     @classmethod
     def package_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:

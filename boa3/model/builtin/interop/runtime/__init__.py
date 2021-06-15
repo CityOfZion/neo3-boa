@@ -1,4 +1,5 @@
 __all__ = ['BlockTimeProperty',
+           'BurnGasMethod',
            'CallingScriptHashProperty',
            'CheckWitnessMethod',
            'EntryScriptHashProperty',
@@ -10,10 +11,12 @@ __all__ = ['BlockTimeProperty',
            'NotificationType',
            'NotifyMethod',
            'PlatformProperty',
+           'ScriptContainerProperty',
            'GetTriggerMethod',
            'TriggerType',
            ]
 
+from boa3.model.builtin.interop.runtime.burngasmethod import BurnGasMethod
 from boa3.model.builtin.interop.runtime.checkwitnessmethod import CheckWitnessMethod
 from boa3.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
@@ -27,4 +30,5 @@ from boa3.model.builtin.interop.runtime.gettriggermethod import GetTriggerMethod
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod
+from boa3.model.builtin.interop.runtime.scriptcontainermethod import ScriptContainerProperty
 from boa3.model.builtin.interop.runtime.triggertype import TriggerType

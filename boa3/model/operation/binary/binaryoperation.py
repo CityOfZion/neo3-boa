@@ -31,6 +31,10 @@ class BinaryOperation(IOperation, ABC):
     def number_of_operands(self) -> int:
         return 2
 
+    @property
+    def is_symmetric(self) -> bool:
+        return False
+
     @abstractmethod
     def _get_result(self, left: IType, right: IType) -> IType:
         """

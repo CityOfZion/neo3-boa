@@ -4,6 +4,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -102,7 +103,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_int(self):
         path = self.get_contract_path('BytesToInt.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
@@ -225,6 +225,24 @@ class TestBytes(BoaTest):
 
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'main', bytearray())
+
+    def test_slice_with_cast(self):
+        path = self.get_contract_path('SliceWithCast.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', b'unittest',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'unittest'[1:2], result)
+
+        result = self.run_smart_contract(engine, path, 'main', '123',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'123'[1:2], result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', bytearray())
+
+        result = self.run_smart_contract(engine, path, 'main', 12345,
+                                         expected_result_type=bytes)
+        self.assertEqual(Integer(12345).to_byte_array()[1:2], result)
 
     def test_byte_array_get_value(self):
         expected_output = (
@@ -514,7 +532,6 @@ class TestBytes(BoaTest):
 
     def test_boa2_slice_test(self):
         path = self.get_contract_path('SliceBoa2Test.py')
-        self.compile_and_save(path)
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main',
                                          expected_result_type=bytes)
@@ -526,3 +543,37 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'main',
                                          expected_result_type=bytes)
         self.assertEqual(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04', result)
+
+    def test_uint160_bytes(self):
+        path = self.get_contract_path('UInt160Bytes.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            from boa3.neo.vm.type.String import String
+            result = String(result).to_bytes()
+        self.assertEqual(b'0123456789abcdefghij', result)
+
+    def test_uint160_int(self):
+        path = self.get_contract_path('UInt160Int.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            from boa3.neo.vm.type.String import String
+            result = String(result).to_bytes()
+        self.assertEqual((160).to_bytes(2, 'little') + bytes(18), result)
+
+    def test_uint256_bytes(self):
+        path = self.get_contract_path('UInt256Bytes.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual(b'0123456789abcdefghijklmnopqrstuv', result)
+
+    def test_uint256_int(self):
+        path = self.get_contract_path('UInt256Int.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        self.assertEqual((256).to_bytes(2, 'little') + bytes(30), result)

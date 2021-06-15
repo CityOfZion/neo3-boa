@@ -12,6 +12,7 @@ from boa3.model.builtin.interop.nativecontract import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.storage import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
+from boa3.model.imports.package import Package
 
 
 class InteropPackage(str, Enum):
@@ -37,6 +38,8 @@ class Interop:
             lst.extend(symbols)
         return lst
 
+    # region Interops
+
     # Interop Types
     BlockType = BlockType.build()
     CallFlagsType = CallFlagsType()
@@ -46,6 +49,7 @@ class Interop:
     OracleType = OracleType.build()
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
+    TransactionType = TransactionType.build()
     TriggerType = TriggerType()
 
     # Binary Interops
@@ -62,6 +66,9 @@ class Interop:
     CurrentHeight = CurrentHeightProperty()
     GetContract = GetContractMethod(ContractType)
     GetBlock = GetBlockMethod(BlockType)
+    GetTransaction = GetTransactionMethod(TransactionType)
+    GetTransactionFromBlock = GetTransactionFromBlockMethod(TransactionType)
+    GetTransactionHeight = GetTransactionHeightMethod()
 
     # Contract Interops
     CallContract = CallMethod()
@@ -97,6 +104,7 @@ class Interop:
 
     # Runtime Interops
     BlockTime = BlockTimeProperty()
+    BurnGas = BurnGasMethod()
     CallingScriptHash = CallingScriptHashProperty()
     CheckWitness = CheckWitnessMethod()
     EntryScriptHash = EntryScriptHashProperty()
@@ -108,6 +116,7 @@ class Interop:
     Log = LogMethod()
     Notify = NotifyMethod()
     Platform = PlatformProperty()
+    ScriptContainer = ScriptContainerProperty()
 
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
@@ -116,67 +125,163 @@ class Interop:
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
 
-    _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
-        InteropPackage.Binary: [Atoi,
-                                Base58Encode,
-                                Base58Decode,
-                                Base64Encode,
-                                Base64Decode,
-                                Deserialize,
-                                Itoa,
-                                Serialize
-                                ],
-        InteropPackage.Blockchain: [BlockType,
-                                    CurrentHeight,
-                                    GetBlock,
-                                    GetContract
+    # endregion
+
+    # region Packages
+
+    BinaryPackage = Package(identifier=InteropPackage.Binary,
+                            methods=[Atoi,
+                                     Base58Encode,
+                                     Base58Decode,
+                                     Base64Encode,
+                                     Base64Decode,
+                                     Deserialize,
+                                     Itoa,
+                                     Serialize
+                                     ]
+                            )
+
+    BlockModule = Package(identifier=BlockType.identifier.lower(),
+                          types=[BlockType]
+                          )
+
+    TransactionModule = Package(identifier=TransactionType.identifier.lower(),
+                                types=[TransactionType]
+                                )
+
+    BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
+                                types=[BlockType,
+                                       TransactionType
+                                       ],
+                                methods=[CurrentHeight,
+                                         GetBlock,
+                                         GetContract,
+                                         GetTransaction,
+                                         GetTransactionFromBlock,
+                                         GetTransactionHeight
+                                         ],
+                                packages=[BlockModule,
+                                          TransactionModule
+                                          ]
+                                )
+
+    CallFlagsTypeModule = Package(identifier=f'{CallFlagsType.identifier.lower()}type',
+                                  types=[CallFlagsType]
+                                  )
+
+    ContractModule = Package(identifier=ContractType.identifier.lower(),
+                             types=[ContractType]
+                             )
+
+    ContractPackage = Package(identifier=InteropPackage.Contract,
+                              types=[CallFlagsType,
+                                     ContractType
+                                     ],
+                              properties=[GasScriptHash,
+                                          NeoScriptHash
+                                          ],
+                              methods=[CallContract,
+                                       CreateContract,
+                                       DestroyContract,
+                                       GetCallFlags,
+                                       UpdateContract
+                                       ],
+                              packages=[CallFlagsTypeModule,
+                                        ContractModule
+                                        ]
+                              )
+
+    CryptoPackage = Package(identifier=InteropPackage.Crypto,
+                            methods=[CheckMultisig,
+                                     Hash160,
+                                     Hash256,
+                                     Ripemd160,
+                                     Sha256,
+                                     VerifyWithECDsaSecp256k1,
+                                     VerifyWithECDsaSecp256r1
+                                     ]
+                            )
+
+    IteratorPackage = Package(identifier=InteropPackage.Iterator,
+                              types=[Iterator],
+                              )
+
+    JsonPackage = Package(identifier=InteropPackage.Json,
+                          methods=[JsonDeserialize,
+                                   JsonSerialize
+                                   ]
+                          )
+
+    NotificationModule = Package(identifier=NotificationType.identifier.lower(),
+                                 types=[NotificationType]
+                                 )
+
+    TriggerTypeModule = Package(identifier=TriggerType.identifier.lower(),
+                                types=[TriggerType]
+                                )
+
+    RuntimePackage = Package(identifier=InteropPackage.Runtime,
+                             types=[NotificationType,
+                                    TriggerType
                                     ],
-        InteropPackage.Contract: [CallContract,
-                                  CallFlagsType,
-                                  ContractType,
-                                  CreateContract,
-                                  DestroyContract,
-                                  GasScriptHash,
-                                  GetCallFlags,
-                                  NeoScriptHash,
-                                  UpdateContract
-                                  ],
-        InteropPackage.Crypto: [CheckMultisig,
-                                Hash160,
-                                Hash256,
-                                Ripemd160,
-                                Sha256,
-                                VerifyWithECDsaSecp256k1,
-                                VerifyWithECDsaSecp256r1
-                                ],
-        InteropPackage.Iterator: [Iterator],
-        InteropPackage.Json: [JsonDeserialize,
-                              JsonSerialize
-                              ],
-        InteropPackage.Runtime: [BlockTime,
-                                 CallingScriptHash,
-                                 CheckWitness,
-                                 EntryScriptHash,
-                                 ExecutingScriptHash,
-                                 GasLeft,
-                                 GetNotifications,
-                                 GetTrigger,
-                                 InvocationCounter,
-                                 Log,
-                                 NotificationType,
-                                 Notify,
-                                 Platform,
-                                 TriggerType
-                                 ],
-        InteropPackage.Storage: [StorageContextType,
-                                 StorageDelete,
-                                 StorageFind,
-                                 StorageGet,
-                                 StorageGetContext,
-                                 StorageMapType,
-                                 StoragePut
-                                 ]
-    }
+                             properties=[BlockTime,
+                                         CallingScriptHash,
+                                         ExecutingScriptHash,
+                                         GasLeft,
+                                         Platform,
+                                         InvocationCounter,
+                                         EntryScriptHash,
+                                         ScriptContainer
+                                         ],
+                             methods=[BurnGas,
+                                      CheckWitness,
+                                      GetNotifications,
+                                      GetTrigger,
+                                      Log,
+                                      Notify
+                                      ],
+                             packages=[NotificationModule,
+                                       TriggerTypeModule
+                                       ]
+                             )
+
+    StorageContextModule = Package(identifier=StorageContextType.identifier.lower(),
+                                   types=[StorageContextType]
+                                   )
+    StorageMapModule = Package(identifier=StorageMapType.identifier.lower(),
+                               types=[StorageMapType]
+                               )
+
+    StoragePackage = Package(identifier=InteropPackage.Storage,
+                             types=[StorageContextType,
+                                    StorageMapType
+                                    ],
+                             methods=[StorageDelete,
+                                      StorageFind,
+                                      StorageGet,
+                                      StorageGetContext,
+                                      StoragePut
+                                      ],
+                             packages=[StorageContextModule,
+                                       StorageMapModule
+                                       ]
+                             )
+
+    # endregion
+
     package_symbols: List[IdentifiedSymbol] = [
-        OracleType
+        OracleType,
+        BinaryPackage,
+        BlockchainPackage,
+        ContractPackage,
+        CryptoPackage,
+        IteratorPackage,
+        JsonPackage,
+        RuntimePackage,
+        StoragePackage
     ]
+
+    _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
+        package.identifier: list(package.symbols.values()) for package in package_symbols if
+        isinstance(package, Package)
+    }

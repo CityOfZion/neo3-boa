@@ -3,7 +3,6 @@ import unittest
 from boa3.boa3 import Boa3
 from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
                                           UnexpectedArgument, UnfilledArgument)
-from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -595,40 +594,16 @@ class TestBuiltinMethod(BoaTest):
     # region print test
 
     def test_print_int(self):
-        value = Integer(42).to_byte_array()
-        expected_output = (
-            Opcode.PUSHDATA1        # print(123)
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.SYSCALL
-            + Interop.Log.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('PrintInt.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
     def test_print_str(self):
-        value = String('str').to_bytes()
-        expected_output = (
-            Opcode.PUSHDATA1        # print('str')
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.SYSCALL
-            + Interop.Log.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('PrintStr.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -640,7 +615,10 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_many_values(self):
         path = self.get_contract_path('PrintManyValues.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
 
     def test_print_missing_outer_function_return(self):
         path = self.get_contract_path('PrintIntMissingFunctionReturn.py')
@@ -802,10 +780,6 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', bytes(32),
                                          expected_result_type=bool)
         self.assertEqual(True, result)
-
-    def test_isinstance_class(self):
-        path = self.get_contract_path('IsInstanceClass.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
 
     # endregion
 

@@ -1,9 +1,9 @@
-from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTyping(BoaTest):
@@ -118,3 +118,28 @@ class TestTyping(BoaTest):
     def test_cast_mismatched_type(self):
         path = self.get_contract_path('CastMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_cast_to_uint160(self):
+        path = self.get_contract_path('CastToUInt160.py')
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+
+        engine = TestEngine()
+        value = bytes(range(20))
+        result = self.run_smart_contract(engine, path, 'Main', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
+
+    def test_cast_to_transaction(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # x = cast(Transaction, value)
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('CastToTransaction.py')
+        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)

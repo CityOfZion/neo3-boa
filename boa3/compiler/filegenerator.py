@@ -5,9 +5,10 @@ from typing import Any, Dict, List
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ENCODING
 from boa3.model.event import Event
-from boa3.model.importsymbol import Import
+from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
+from boa3.model.variable import Variable
 from boa3.neo import to_hex_str
 from boa3.neo.contracts.neffile import NefFile
 
@@ -33,6 +34,16 @@ class FileGenerator:
         :return: a dictionary that maps each public method with its identifier
         """
         return {name: method for name, method in self._methods.items() if method.is_public}
+
+    @property
+    def _static_variables(self) -> Dict[str, Variable]:
+        """
+        Gets a sublist of the symbols containing all global variables
+
+        :return: a dictionary that maps each global variable with its identifier
+        """
+        return {name: variable for name, variable in self._symbols.items()
+                if isinstance(variable, Variable)}
 
     @property
     def _methods(self) -> Dict[str, Method]:
@@ -190,6 +201,7 @@ class FileGenerator:
         return {
             "hash": self._nef_hash,
             "documents": self._files,
+            "static-variables": self._get_debug_static_variables(),
             "methods": self._get_debug_methods(),
             "events": self._get_debug_events()
         }
@@ -260,6 +272,19 @@ class FileGenerator:
                     '{0},{1}'.format(name, var.type.abi_type) for name, var in event.args.items()
                 ]
             } for event_id, event in self._events.items()
+        ]
+
+    def _get_debug_static_variables(self) -> List[str]:
+        """
+        Gets the static variables' debug information in a dictionary format
+
+        :return: a dictionary with the event's debug information
+        """
+        from boa3.model.type.itype import IType
+        from boa3.neo.vm.type.AbiType import AbiType
+        return [
+            '{0},{1}'.format(name, var.type.abi_type if isinstance(var.type, IType) else AbiType.Any)
+            for name, var in self._static_variables.items()
         ]
 
     # endregion

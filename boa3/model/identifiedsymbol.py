@@ -20,7 +20,7 @@ class IdentifiedSymbol(ISymbol, ABC):
 
         :return: the resulting type when the expression is evaluated
         """
-        return self._identifier
+        return str(self._identifier)
 
     @property
     def raw_identifier(self) -> str:

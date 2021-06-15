@@ -439,8 +439,6 @@ class TestRelational(BoaTest):
 
     def test_compare_same_value_hard_coded(self):
         path = self.get_contract_path('CompareSameValueHardCoded.py')
-        Boa3.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'testing_something',
                                          expected_result_type=bool)
@@ -448,10 +446,27 @@ class TestRelational(BoaTest):
 
     def test_compare_same_value_argument(self):
         path = self.get_contract_path('CompareSameValueArgument.py')
-        Boa3.compile_and_save(path)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'testing_something', bytes(20),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+    def test_compare_string(self):
+        path = self.get_contract_path('CompareString.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'test1', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'test2', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'test3', '|',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'test4', '|',
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
