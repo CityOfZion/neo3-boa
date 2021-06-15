@@ -11,6 +11,7 @@ from boa3.model.type.collection.sequence.genericsequencetype import GenericSeque
 from boa3.model.type.collection.sequence.mutable.genericmutablesequencetype import GenericMutableSequenceType
 from boa3.model.type.collection.sequence.mutable.listtype import ListType
 from boa3.model.type.collection.sequence.rangetype import RangeType
+from boa3.model.type.collection.sequence.reversedtype import ReversedType
 from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.booltype import BoolType
@@ -37,6 +38,7 @@ class Type:
             Type.tuple,
             Type.dict,
             Type.range,
+            Type.reversed,
             Type.bytes,
             Type.bytearray,
             Type.none
@@ -108,6 +110,7 @@ class Type:
     list = ListType()
     dict = DictType()
     range = RangeType(int)
+    reversed = ReversedType()
 
     # Generic types
     sequence = GenericSequenceType()
