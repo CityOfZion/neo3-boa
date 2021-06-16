@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Any, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.collection.sequence.sequencetype import SequenceType

@@ -76,9 +76,8 @@ class TestContractInterop(BoaTest):
     def test_call_contract_with_flags(self):
         path = self.get_contract_path('CallScriptHashWithFlags.py')
         call_contract_path = self.get_contract_path('CallFlagsUsage.py')
-        Boa3.compile_and_save(call_contract_path)
 
-        contract, manifest = self.get_output(call_contract_path)
+        contract, manifest = self.compile_and_save(call_contract_path)
         call_hash = hash160(contract)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
@@ -114,7 +113,7 @@ class TestContractInterop(BoaTest):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.ALL)
         self.assertEqual(None, result)
-        notify = engine.notifications
+        notify = engine.get_events(origin=call_hash)
         self.assertEqual(1, len(notify))
         self.assertEqual('Notify was called', notify[0].arguments[0])
 

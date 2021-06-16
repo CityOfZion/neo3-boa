@@ -17,34 +17,41 @@ class TestClass(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'script_hash', [],
                                          expected_result_type=bytes)
-        self.assertEqual(len(engine.notifications), 0)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 0)
         self.assertEqual(bytes(20), result)
 
         result = self.run_smart_contract(engine, path, 'event_name', [])
-        self.assertEqual(len(engine.notifications), 0)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 0)
         self.assertEqual('', result)
 
         result = self.run_smart_contract(engine, path, 'state', [])
-        self.assertEqual(len(engine.notifications), 0)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 0)
         self.assertEqual([], result)
 
         result = self.run_smart_contract(engine, path, 'script_hash', [1])
-        self.assertEqual(len(engine.notifications), 1)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 1)
         self.assertEqual(script, result)
 
         engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'event_name', [1])
-        self.assertEqual(len(engine.notifications), 1)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 1)
         self.assertEqual('notify', result)
 
         engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'state', [1])
-        self.assertEqual(len(engine.notifications), 1)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 1)
         self.assertEqual([1], result)
 
         engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'state', ['1'])
-        self.assertEqual(len(engine.notifications), 1)
+        contract_notifications = engine.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 1)
         self.assertEqual(['1'], result)
 
     def test_notification_set_variables(self):
