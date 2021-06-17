@@ -1,7 +1,7 @@
 from typing import Any, List
 
 from boa3.builtin import public
-from boa3.builtin.interop.runtime import Notification, get_notifications, notify
+from boa3.builtin.interop.runtime import Notification, executing_script_hash, get_notifications, notify
 
 
 @public
@@ -23,7 +23,7 @@ def notification(args: List[Any]) -> Notification:
     for x in args:
         notify(x)
 
-    n = get_notifications()
+    n = get_notifications(executing_script_hash)
 
     if len(n) > 0:
         return n[0]

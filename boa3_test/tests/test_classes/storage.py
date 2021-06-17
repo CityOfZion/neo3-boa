@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Union
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.core.serialization import BinaryReader
 from boa3_test.tests.test_classes.nativecontractprefix import get_native_contract_data
 
 
@@ -17,7 +18,10 @@ class Storage:
         return self._dict.pop(storage_key)
 
     def clear(self):
-        return self._dict.clear()
+        for key in list(self._dict.keys()):
+            if key._ID > 0:
+                # keep native contracts storage
+                self._dict.pop(key)
 
     def copy(self) -> Storage:
         storage = Storage()
@@ -76,6 +80,23 @@ class Storage:
 
         storage_key = self.build_key(prefix + script_hash, native_id)
         return storage_key in self
+
+    def get_contract_id(self, script_hash: bytes) -> int:
+        from boa3 import constants
+        prefix, native_id = get_native_contract_data(constants.MANAGEMENT_SCRIPT)
+        if prefix is None or native_id is None:
+            return False
+
+        storage_key = self.build_key(prefix + script_hash, native_id)
+        if storage_key in self:
+            result = self[storage_key]
+            with BinaryReader(result) as reader:
+                from boa3_test.tests.test_classes.binaryserializer import deserialize_binary
+                result = deserialize_binary(reader)
+
+            return result[0] if isinstance(result[0], int) else -1
+        else:
+            return -1
 
     def __contains__(self, item: StorageKey) -> bool:
         return item in self._dict

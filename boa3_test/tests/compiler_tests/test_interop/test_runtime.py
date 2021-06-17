@@ -532,22 +532,22 @@ class TestRuntimeInterop(BoaTest):
         # can not burn negative GAS
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'main', -10**8)
-        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, 0)
+        self.assertEqual(engine.gas_consumed - burn_gas_cost, 0)
 
         # can not burn no GAS
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'main', 0)
-        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, 0)
+        self.assertEqual(engine.gas_consumed - burn_gas_cost, 0)
 
         burned_gas = 1 * 10**8  # 1 GAS
         result = self.run_smart_contract(engine, path, 'main', burned_gas)
         self.assertIsVoid(result)
-        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, burned_gas)
+        self.assertEqual(engine.gas_consumed - burn_gas_cost, burned_gas)
 
         burned_gas = 123 * 10**5   # 0.123 GAS
         result = self.run_smart_contract(engine, path, 'main', burned_gas)
         self.assertIsVoid(result)
-        self.assertEqual(int(engine.gas_consumed) - burn_gas_cost, burned_gas)
+        self.assertEqual(engine.gas_consumed - burn_gas_cost, burned_gas)
 
     def test_boa2_runtime_test(self):
         path = self.get_contract_path('RuntimeBoa2Test.py')
