@@ -532,6 +532,13 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(InteropInterface, result)  # returns an interop interface
         # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
 
+    def test_storage_find_with_options(self):
+        path = self.get_contract_path('StorageFindWithOptions.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+
     def test_boa2_storage_test(self):
         path = self.get_contract_path('StorageBoa2Test.py')
         engine = TestEngine()

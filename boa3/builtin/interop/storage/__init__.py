@@ -3,6 +3,7 @@ from typing import Union
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.storagecontext import StorageContext
 from boa3.builtin.interop.storage.storagemap import StorageMap
+from boa3.builtin.interop.storage.findoptions import FindOptions
 
 
 def get(key: Union[str, bytes], context: StorageContext = None) -> bytes:
@@ -55,7 +56,9 @@ def delete(key: Union[str, bytes], context: StorageContext = None):
     pass
 
 
-def find(prefix: Union[str, bytes], context: StorageContext = None) -> Iterator:
+def find(prefix: Union[str, bytes],
+         context: StorageContext = None,
+         options: FindOptions = FindOptions.NONE) -> Iterator:
     """
     Searches in the storage for keys that start with the given prefix.
 
@@ -63,6 +66,8 @@ def find(prefix: Union[str, bytes], context: StorageContext = None) -> Iterator:
     :type prefix: str or bytes
     :param context: storage context to be used
     :type context: StorageContext
+    :param options: the options of the search
+    :type options: FindOptions
     :return: an iterator with the search results
     :rtype: Iterator
     """
