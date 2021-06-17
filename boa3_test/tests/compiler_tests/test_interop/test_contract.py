@@ -4,6 +4,7 @@ from boa3.boa3 import Boa3
 from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.exception.CompilerError import UnexpectedArgument, UnfilledArgument
 from boa3.exception.CompilerWarning import NameShadowing
+from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -398,3 +399,30 @@ class TestContractInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'call_flags_all')
         from boa3.neo3.contracts import CallFlags
         self.assertEqual(CallFlags.ALL, result)
+
+    def test_create_standard_account(self):
+        from boa3.neo.vm.type.StackItem import StackItemType
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.CONVERT
+            + StackItemType.ByteString
+            + Opcode.DUP
+            + Opcode.ISNULL
+            + Opcode.JMPIF
+            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.PUSHINT8
+            + Integer(33).to_byte_array(min_length=1)
+            + Opcode.JMPEQ
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.THROW
+            + Opcode.SYSCALL
+            + Interop.CreateStandardAccount.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('CreateStandardAccount.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)

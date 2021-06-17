@@ -2,6 +2,7 @@ __all__ = ['CallFlagsType',
            'CallMethod',
            'ContractType',
            'CreateMethod',
+           'CreateStandardAccountMethod',
            'DestroyMethod',
            'GasProperty',
            'GetCallFlagsMethod',
@@ -13,6 +14,7 @@ from boa3.model.builtin.interop.contract.callflagstype import CallFlagsType
 from boa3.model.builtin.interop.contract.callmethod import CallMethod
 from boa3.model.builtin.interop.contract.contracttype import ContractType
 from boa3.model.builtin.interop.contract.createmethod import CreateMethod
+from boa3.model.builtin.interop.contract.createstandardaccountmethod import CreateStandardAccountMethod
 from boa3.model.builtin.interop.contract.destroymethod import DestroyMethod
 from boa3.model.builtin.interop.contract.getcallflagsmethod import GetCallFlagsMethod
 from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
