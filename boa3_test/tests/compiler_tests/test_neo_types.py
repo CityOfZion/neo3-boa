@@ -9,6 +9,8 @@ class TestNeoTypes(BoaTest):
 
     default_folder: str = 'test_sc/neo_type_test'
 
+    # region UInt160
+
     def test_uint160_call_bytes(self):
         path = self.get_contract_path('UInt160CallBytes.py')
 
@@ -98,6 +100,10 @@ class TestNeoTypes(BoaTest):
         path = self.get_contract_path('UInt160CallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    # endregion
+
+    # region UInt256
+
     def test_uint256_call_bytes(self):
         path = self.get_contract_path('UInt256CallBytes.py')
 
@@ -186,6 +192,80 @@ class TestNeoTypes(BoaTest):
     def test_uint256_mismatched_type(self):
         path = self.get_contract_path('UInt256CallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    # endregion
+
+    # region ECPoint
+
+    def test_ecpoint_call_bytes(self):
+        path = self.get_contract_path('ECPointCallBytes.py')
+        engine = TestEngine()
+
+        value = bytes(33)
+        result = self.run_smart_contract(engine, path, 'ecpoint', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
+
+        value = bytes(range(33))
+        result = self.run_smart_contract(engine, path, 'ecpoint', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'ecpoint', bytes(20),
+                                    expected_result_type=bytes)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'uint160', bytes(30),
+                                    expected_result_type=bytes)
+
+    def test_ecpoint_call_without_args(self):
+        path = self.get_contract_path('ECPointCallWithoutArgs.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_ecpoint_return_bytes(self):
+        path = self.get_contract_path('ECPointReturnBytes.py')
+        engine = TestEngine()
+
+        value = bytes(33)
+        result = self.run_smart_contract(engine, path, 'ecpoint', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
+
+        value = bytes(range(33))
+        result = self.run_smart_contract(engine, path, 'ecpoint', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'ecpoint', bytes(10),
+                                    expected_result_type=bytes)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'ecpoint', bytes(30),
+                                    expected_result_type=bytes)
+
+    def test_ecpoint_concat_with_bytes(self):
+        path = self.get_contract_path('ECPointConcatWithBytes.py')
+        engine = TestEngine()
+
+        value = bytes(33)
+        result = self.run_smart_contract(engine, path, 'ecpoint_method', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value + b'123', result)
+
+        value = bytes(range(33))
+        result = self.run_smart_contract(engine, path, 'ecpoint_method', value,
+                                         expected_result_type=bytes)
+        self.assertEqual(value + b'123', result)
+
+    def test_ecpoint_mismatched_type(self):
+        path = self.get_contract_path('ECPointCallMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    # endregion
+
+    # region IsInstance Neo Types
 
     def test_isinstance_contract(self):
         path = self.get_contract_path('IsInstanceContract.py')
@@ -327,3 +407,22 @@ class TestNeoTypes(BoaTest):
         result = self.run_smart_contract(engine, path, 'storage_find_is_context',
                                          expected_result_type=bool)
         self.assertEqual(True, result)
+
+    def test_isinstance_ecpoint(self):
+        path = self.get_contract_path('IsInstanceECPoint.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(10),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(33),
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(30),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', 42,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+    # endregion

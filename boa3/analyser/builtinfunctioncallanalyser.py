@@ -36,6 +36,17 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
                    check_raw_id: bool = False) -> Optional[ISymbol]:
         return self._origin.get_symbol(symbol_id, is_internal)
 
+    def get_symbol_from_node(self, node: ast.AST) -> Optional[ISymbol]:
+        if isinstance(node, ast.Name):
+            return self.get_symbol(node.id)
+
+        if isinstance(node, ast.Attribute):
+            value = self.get_symbol_from_node(node.value)
+            if hasattr(value, 'symbols') and node.attr in value.symbols:
+                return value.symbols[node.attr]
+
+        return None
+
     def get_type(self, value: Any, use_metadata: bool = False) -> IType:
         return self._origin.get_type(value, use_metadata)
 
@@ -62,14 +73,15 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
         :param args_types: types of the arguments
         """
         last_arg = self.call.args[-1]
-        if isinstance(last_arg, ast.Tuple) and all(isinstance(tpe, ast.Name) for tpe in last_arg.elts):
+        if isinstance(last_arg, ast.Tuple) and all(isinstance(tpe, (ast.Attribute, ast.Name))
+                                                   for tpe in last_arg.elts):
             if len(last_arg.elts) == 1:
                 # if the types tuple has only one type, remove it from inside the tuple
                 last_arg = self.call.args[-1] = last_arg.elts[-1]
                 args_types[-1] = args_types[-1].value_type
             elif len(last_arg.elts) > 1:
                 # if there are more than one type, updates information in the instance of the method
-                types: List[IType] = [self.get_symbol(name.id) for name in last_arg.elts]
+                types: List[IType] = [self.get_symbol_from_node(name) for name in last_arg.elts]
                 method.set_instance_type(types)
                 self.call.args[-1] = last_arg.elts[-1]
                 return

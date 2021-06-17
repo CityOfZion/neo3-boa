@@ -20,6 +20,8 @@ class MetaType(IType):
 
     @classmethod
     def build(cls, value: Any) -> IType:
+        if isinstance(value, MetaType):
+            return value
         if isinstance(value, IType):
             return cls(value)
         else:

@@ -273,14 +273,14 @@ class Opcode(bytes, Enum):
         opcode_info = OpcodeInfo.get_info(opcode)
         arg_size = opcode_info.data_len
         jmp_arg = Integer(arg_size + integer + jump_through).to_byte_array(min_length=arg_size) if integer > 0 \
-            else Integer(integer + jump_through).to_byte_array(min_length=arg_size)
+            else Integer(integer).to_byte_array(min_length=arg_size)
 
         if len(jmp_arg) > opcode_info.max_data_len and opcode.has_larger_opcode():
             opcode = opcode.get_larger_opcode()
             opcode_info = OpcodeInfo.get_info(opcode)
             arg_size = opcode_info.data_len
             jmp_arg = Integer(arg_size + integer + jump_through).to_byte_array(min_length=arg_size) if integer > 0 \
-                else Integer(integer + jump_through).to_byte_array(min_length=arg_size)
+                else Integer(integer).to_byte_array(min_length=arg_size)
             jmp_opcode = opcode
         else:
             jmp_opcode = opcode

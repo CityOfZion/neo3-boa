@@ -145,7 +145,7 @@ def balanceOf(account: bytes) -> int:
 
 
 @public
-def transfer(from_address: bytes, to_address: bytes, amount: int) -> bool:
+def transfer(from_address: UInt160, to_address: UInt160, amount: int) -> bool:
     """
     Transfers a specified amount of NEP5 tokens from one account to another
 
@@ -153,9 +153,9 @@ def transfer(from_address: bytes, to_address: bytes, amount: int) -> bool:
     or from and to are the same address.
 
     :param from_address: the address to transfer from
-    :type from_address: bytes
+    :type from_address: UInt160
     :param to_address: the address to transfer to
-    :type to_address: bytes
+    :type to_address: UInt160
     :param amount: the amount of NEP5 tokens to transfer
     :type amount: int
 
