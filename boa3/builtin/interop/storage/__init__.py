@@ -30,6 +30,16 @@ def get_context() -> StorageContext:
     pass
 
 
+def get_read_only_context() -> StorageContext:
+    """
+    Gets current read only storage context.
+
+    :return: the current read only storage context
+    :rtype: StorageContext
+    """
+    pass
+
+
 def put(key: Union[str, bytes], value: Union[int, str, bytes], context: StorageContext = None):
     """
     Inserts a given value in the key-value format into the persistent storage.
