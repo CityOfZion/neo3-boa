@@ -1,4 +1,5 @@
-__all__ = ['StorageContextType',
+__all__ = ['FindOptionsType',
+           'StorageContextType',
            'StorageDeleteMethod',
            'StorageFindMethod',
            'StorageGetContextMethod',
@@ -7,6 +8,7 @@ __all__ = ['StorageContextType',
            'StoragePutMethod'
            ]
 
+from boa3.model.builtin.interop.storage.findoptionstype import FindOptionsType
 from boa3.model.builtin.interop.storage.storagecontext import StorageContextType
 from boa3.model.builtin.interop.storage.storagedeletemethod import StorageDeleteMethod
 from boa3.model.builtin.interop.storage.storagefindmethod import StorageFindMethod

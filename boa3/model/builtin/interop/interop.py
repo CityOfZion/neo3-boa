@@ -51,6 +51,7 @@ class Interop:
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
     TriggerType = TriggerType()
+    FindOptionsType = FindOptionsType()
 
     # Binary Interops
     Atoi = AtoiMethod()
@@ -120,7 +121,7 @@ class Interop:
 
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
-    StorageFind = StorageFindMethod()
+    StorageFind = StorageFindMethod(FindOptionsType)
     StorageGetContext = StorageGetContextMethod(StorageContextType)
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
@@ -245,6 +246,9 @@ class Interop:
                                        ]
                              )
 
+    FindOptionsModule = Package(identifier=FindOptionsType.identifier.lower(),
+                                types=[FindOptionsType]
+                                )
     StorageContextModule = Package(identifier=StorageContextType.identifier.lower(),
                                    types=[StorageContextType]
                                    )
@@ -253,7 +257,8 @@ class Interop:
                                )
 
     StoragePackage = Package(identifier=InteropPackage.Storage,
-                             types=[StorageContextType,
+                             types=[FindOptionsType,
+                                    StorageContextType,
                                     StorageMapType
                                     ],
                              methods=[StorageDelete,
@@ -262,7 +267,8 @@ class Interop:
                                       StorageGetContext,
                                       StoragePut
                                       ],
-                             packages=[StorageContextModule,
+                             packages=[FindOptionsModule,
+                                       StorageContextModule,
                                        StorageMapModule
                                        ]
                              )
