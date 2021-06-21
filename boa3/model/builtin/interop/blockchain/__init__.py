@@ -1,4 +1,5 @@
 __all__ = ['BlockType',
+           'CurrentHashProperty',
            'CurrentHeightProperty',
            'GetBlockMethod',
            'GetContractMethod',
@@ -9,6 +10,7 @@ __all__ = ['BlockType',
            ]
 
 from boa3.model.builtin.interop.blockchain.blocktype import BlockType
+from boa3.model.builtin.interop.blockchain.currenthashmethod import CurrentHashProperty
 from boa3.model.builtin.interop.blockchain.getblockmethod import GetBlockMethod
 from boa3.model.builtin.interop.blockchain.getcontractmethod import GetContractMethod
 from boa3.model.builtin.interop.blockchain.getcurrentheightmethod import CurrentHeightProperty
