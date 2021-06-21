@@ -395,7 +395,6 @@ class TestBlockchainInterop(BoaTest):
     def test_current_hash(self):
         path = self.get_contract_path('CurrentHash.py')
         engine = TestEngine()
-        self.compile_and_save(path)
 
         engine.increase_block()
 
