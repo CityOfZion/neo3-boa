@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
+from boa3.exception import CompilerError
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -146,7 +146,7 @@ class TestArithmetic(BoaTest):
 
     def test_division_operation(self):
         path = self.get_contract_path('Division.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_integer_division_operation(self):
         expected_output = (
@@ -336,11 +336,11 @@ class TestArithmetic(BoaTest):
 
     def test_mismatched_type_binary_operation(self):
         path = self.get_contract_path('MismatchedOperandBinary.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mismatched_type_unary_operation(self):
         path = self.get_contract_path('MismatchedOperandUnary.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_sequence_addition(self):
         expected_output = (
@@ -508,7 +508,7 @@ class TestArithmetic(BoaTest):
 
     def test_division_augmented_assignment(self):
         path = self.get_contract_path('DivisionAugmentedAssignment.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_integer_division_augmented_assignment(self):
         expected_output = (

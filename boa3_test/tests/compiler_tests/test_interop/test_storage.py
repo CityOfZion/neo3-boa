@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.core.types.InteropInterface import InteropInterface
@@ -86,7 +86,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_get_mismatched_type(self):
         path = self.get_contract_path('StorageGetMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_put_bytes_key_bytes_value(self):
         path = self.get_contract_path('StoragePutBytesKeyBytesValue.py')
@@ -350,11 +350,11 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_put_mismatched_type_key(self):
         path = self.get_contract_path('StoragePutMismatchedTypeKey.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_put_mismatched_type_value(self):
         path = self.get_contract_path('StoragePutMismatchedTypeValue.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_delete_bytes_key(self):
         expected_output = (
@@ -414,7 +414,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_delete_mismatched_type(self):
         path = self.get_contract_path('StorageDeleteMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_find_bytes_prefix(self):
         path = self.get_contract_path('StorageFindBytesPrefix.py')
@@ -432,7 +432,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_mismatched_type(self):
         path = self.get_contract_path('StorageFindMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_get_context(self):
         expected_output = (

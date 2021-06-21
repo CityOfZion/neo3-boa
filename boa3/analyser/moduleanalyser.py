@@ -1,5 +1,6 @@
 import ast
 import logging
+import os
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.analyser.astanalyser import IAstAnalyser
@@ -37,10 +38,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], filename: str = None, log: bool = False):
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], filename: str = None,
+                 analysed_files: Optional[List[str]] = None, log: bool = False):
         super().__init__(analyser.ast_tree, filename, log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
+
+        if isinstance(analysed_files, list):
+            analysed_files = [file_path.replace(os.sep, '/') if isinstance(file_path, str) else file_path
+                              for file_path in analysed_files]
+        self._analysed_files: Optional[List[str]] = analysed_files
 
         self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
@@ -314,22 +321,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_from, name)
 
-    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
-        analyser = ImportAnalyser(target)
-
-        if not analyser.can_be_imported:
-            self._log_unresolved_import(origin_node, target)
-            return None
-
-        if not analyser.is_builtin_import:
-            self._log_error(
-                CompilerError.NotSupportedOperation(
-                    origin_node.lineno, origin_node.col_offset,
-                    symbol_id='import from user modules'
-                )
-            )
-        return analyser
-
     def visit_Import(self, import_node: ast.Import):
         """
         Includes methods and variables from other modules into the current scope
@@ -350,6 +341,40 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 imported_module = Import(analyser.path, analyser.tree, analyser)
                 self._current_scope.include_symbol(alias, imported_module)
+
+    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
+        already_imported = {imported.origin for imported in self._current_module.symbols.values()
+                            if isinstance(imported, Import)
+                            }
+        if self._analysed_files is not None:
+            already_imported = already_imported.union(self._analysed_files)
+
+        analyser = ImportAnalyser(import_target=target,
+                                  importer_file=self.filename,
+                                  already_imported_modules=list(already_imported),
+                                  log=self._log)
+
+        if analyser.recursive_import:
+            self._log_error(
+                CompilerError.CircularImport(line=origin_node.lineno,
+                                             col=origin_node.col_offset,
+                                             target_import=target,
+                                             target_origin=self.filename)
+            )
+
+        elif not analyser.can_be_imported:
+            circular_import_error = next((error for error in analyser.errors
+                                          if isinstance(error, CompilerError.CircularImport)),
+                                         None)
+
+            if circular_import_error is not None:
+                # if the problem was a circular import, the error was already logged
+                self.errors.append(circular_import_error)
+            else:
+                self._log_unresolved_import(origin_node, target)
+
+        else:
+            return analyser
 
     def visit_Module(self, module: ast.Module):
         """

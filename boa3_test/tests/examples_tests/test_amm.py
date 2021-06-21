@@ -1,5 +1,5 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
@@ -174,7 +174,7 @@ class TestTemplate(BoaTest):
 
         # adding the transferred_amount into the aux_address
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         NEO_SCRIPT, aux_address, zneo_address, transferred_amount, None,
+                                         constants.NEO_SCRIPT, aux_address, zneo_address, transferred_amount, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -226,7 +226,7 @@ class TestTemplate(BoaTest):
         engine.add_neo(aux_address, 10_000_000 * 10 ** 8)
         # minting zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         NEO_SCRIPT, aux_address, zneo_address, 10_000_000 * 10 ** 8, None,
+                                         constants.NEO_SCRIPT, aux_address, zneo_address, 10_000_000 * 10 ** 8, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -234,7 +234,7 @@ class TestTemplate(BoaTest):
         engine.add_gas(aux_address, 10_000_000 * 10 ** 8)
         # minting zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         GAS_SCRIPT, aux_address, zgas_address, 10_000_000 * 10 ** 8, None,
+                                         constants.GAS_SCRIPT, aux_address, zgas_address, 10_000_000 * 10 ** 8, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)

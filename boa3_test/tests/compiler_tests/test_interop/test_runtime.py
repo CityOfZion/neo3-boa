@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
-from boa3.exception.CompilerWarning import NameShadowing
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo import to_script_hash
@@ -44,7 +43,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_check_witness_mismatched_type(self):
         path = self.get_contract_path('CheckWitnessMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_notify_str(self):
         event_name = String('notify').to_bytes()
@@ -224,7 +223,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_log_mismatched_type(self):
         path = self.get_contract_path('LogMismatchedValueInt.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_log_str(self):
         string = String('str').to_bytes()
@@ -326,7 +325,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('CallingScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_executing_script_hash(self):
@@ -351,7 +350,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('ExecutingScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_block_time(self):
@@ -381,7 +380,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('BlockTimeCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_gas_left(self):
@@ -406,7 +405,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('GasLeftCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_invocation_counter(self):
@@ -431,7 +430,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('InvocationCounterCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_notifications(self):
@@ -491,7 +490,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('EntryScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_platform(self):
@@ -520,7 +519,7 @@ class TestRuntimeInterop(BoaTest):
         )
 
         path = self.get_contract_path('PlatformCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_burn_gas(self):

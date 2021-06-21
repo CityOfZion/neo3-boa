@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -88,11 +88,11 @@ class TestNone(BoaTest):
 
     def test_none_equality(self):
         path = self.get_contract_path('NoneEquality.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mismatched_type_int_operation(self):
         path = self.get_contract_path('MismatchedTypesInOperation.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_reassign_variable_with_none(self):
         expected_output = (
@@ -139,4 +139,4 @@ class TestNone(BoaTest):
 
     def test_boa2_none_test(self):
         path = self.get_contract_path('NoneBoa2Test.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

@@ -2,7 +2,7 @@ from typing import Any, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
-from boa3.builtin.type import UInt160, ECPoint
+from boa3.builtin.type import ECPoint, UInt160
 
 
 def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_flags: CallFlags = CallFlags.ALL) -> Any:

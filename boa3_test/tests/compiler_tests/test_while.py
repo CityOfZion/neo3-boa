@@ -1,6 +1,6 @@
 from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -91,7 +91,7 @@ class TestWhile(BoaTest):
 
     def test_while_mismatched_type_condition(self):
         path = self.get_contract_path('MismatchedTypeCondition.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_while_no_condition(self):
         path = self.get_contract_path('NoCondition.py')

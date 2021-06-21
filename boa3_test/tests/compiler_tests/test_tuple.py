@@ -1,7 +1,7 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import InternalError, MismatchedTypes, UnresolvedOperation
+from boa3.exception import CompilerError
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -151,19 +151,19 @@ class TestTuple(BoaTest):
 
     def test_non_sequence_get_value(self):
         path = self.get_contract_path('MismatchedTypeGetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_tuple_set_value(self):
         path = self.get_contract_path('SetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_non_sequence_set_value(self):
         path = self.get_contract_path('MismatchedTypeSetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_tuple_index_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeTupleIndex.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     @unittest.skip("get values from inner arrays is not working as expected")
     def test_tuple_of_tuple(self):
@@ -548,8 +548,8 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_omitted_stride(self):
         path = self.get_contract_path('TupleSlicingWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_tuple_slicing_omitted_with_stride(self):
         path = self.get_contract_path('TupleSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)

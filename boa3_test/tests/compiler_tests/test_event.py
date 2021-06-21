@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, UnfilledArgument
+from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -192,11 +192,11 @@ class TestEvent(BoaTest):
 
     def test_event_with_return(self):
         path = self.get_contract_path('EventWithoutTypes.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_event_call_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeCallEvent.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_event_test(self):
         path = self.get_contract_path('EventBoa2Test.py')

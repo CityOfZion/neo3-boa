@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 
 
-class ISymbol(ABC, object):
+class ISymbol(ABC):
+
+    defined_by_entry: bool = False
+
     @property
     @abstractmethod
     def shadowing_name(self) -> str:

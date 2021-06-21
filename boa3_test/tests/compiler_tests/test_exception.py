@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
-from boa3.exception.CompilerWarning import UsingSpecificException
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -189,7 +188,7 @@ class TestException(BoaTest):
 
     def test_raise_mismatched_type(self):
         path = self.get_contract_path('RaiseMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_try_except_without_exception(self):
         expected_output = (
@@ -275,7 +274,7 @@ class TestException(BoaTest):
         )
 
         path = self.get_contract_path('TryExceptSpecificException.py')
-        output = self.assertCompilerLogs(UsingSpecificException, path)
+        output = self.assertCompilerLogs(CompilerWarning.UsingSpecificException, path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
@@ -286,7 +285,7 @@ class TestException(BoaTest):
 
     def test_try_except_with_name(self):
         path = self.get_contract_path('TryExceptWithName.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_try_except_finally(self):
         expected_output = (

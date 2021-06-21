@@ -1,9 +1,8 @@
 import json
 
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
-from boa3.exception.CompilerError import UnexpectedArgument, UnfilledArgument
-from boa3.exception.CompilerWarning import NameShadowing
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -129,11 +128,11 @@ class TestContractInterop(BoaTest):
 
     def test_call_contract_too_many_parameters(self):
         path = self.get_contract_path('CallScriptHashTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_call_contract_too_few_parameters(self):
         path = self.get_contract_path('CallScriptHashTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_create_contract(self):
         path = self.get_contract_path('CreateContract.py')
@@ -177,11 +176,11 @@ class TestContractInterop(BoaTest):
 
     def test_create_contract_too_many_parameters(self):
         path = self.get_contract_path('CreateContractTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_create_contract_too_few_parameters(self):
         path = self.get_contract_path('CreateContractTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_update_contract(self):
         path = self.get_contract_path('UpdateContract.py')
@@ -221,11 +220,11 @@ class TestContractInterop(BoaTest):
 
     def test_update_contract_too_many_parameters(self):
         path = self.get_contract_path('UpdateContractTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_update_contract_too_few_parameters(self):
         path = self.get_contract_path('UpdateContractTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_destroy_contract(self):
         path = self.get_contract_path('DestroyContract.py')
@@ -242,10 +241,10 @@ class TestContractInterop(BoaTest):
 
     def test_destroy_contract_too_many_parameters(self):
         path = self.get_contract_path('DestroyContractTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_get_neo_native_script_hash(self):
-        value = NEO_SCRIPT
+        value = constants.NEO_SCRIPT
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
@@ -272,11 +271,11 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('NeoScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_gas_native_script_hash(self):
-        value = GAS_SCRIPT
+        value = constants.GAS_SCRIPT
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
@@ -303,7 +302,7 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('GasScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_call_flags_type(self):
