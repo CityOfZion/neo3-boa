@@ -391,3 +391,17 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(nef, result[3])
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
+
+    def test_current_hash(self):
+        path = self.get_contract_path('CurrentHash.py')
+        engine = TestEngine()
+
+        engine.increase_block()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+
+        block = engine.current_block
+        
+        self.assertEqual(block.hash, result)

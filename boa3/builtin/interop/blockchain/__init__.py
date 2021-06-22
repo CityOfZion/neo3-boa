@@ -66,3 +66,11 @@ def get_transaction_height(hash_: UInt256) -> int:
     :return: height of the transaction
     """
     pass
+
+
+current_hash: UInt256 = UInt256()
+"""
+Gets the hash of the current block.
+
+:meta hide-value:
+"""

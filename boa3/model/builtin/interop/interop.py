@@ -64,6 +64,7 @@ class Interop:
     Serialize = SerializeMethod()
 
     # Blockchain Interops
+    CurrentHash = CurrentHashProperty()
     CurrentHeight = CurrentHeightProperty()
     GetContract = GetContractMethod(ContractType)
     GetBlock = GetBlockMethod(BlockType)
@@ -155,7 +156,8 @@ class Interop:
                                 types=[BlockType,
                                        TransactionType
                                        ],
-                                methods=[CurrentHeight,
+                                methods=[CurrentHash,
+                                         CurrentHeight,
                                          GetBlock,
                                          GetContract,
                                          GetTransaction,
