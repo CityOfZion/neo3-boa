@@ -80,6 +80,12 @@ def get_call_flags() -> CallFlags:
 def create_standard_account(pub_key: ECPoint) -> UInt160:
     """
     Calculates the script hash from a public key.
+
+    :param pub_key: the given public key
+    :type pub_key: ECPoint
+
+    :return: the corresponding script hash of the public key
+    :rtype: UInt160
     """
     pass
 
