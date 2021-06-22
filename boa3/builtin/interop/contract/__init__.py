@@ -2,7 +2,7 @@ from typing import Any, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, ECPoint
 
 
 def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_flags: CallFlags = CallFlags.ALL) -> Any:
@@ -73,6 +73,19 @@ def destroy_contract():
 def get_call_flags() -> CallFlags:
     """
     Gets the CallFlags in the current context.
+    """
+    pass
+
+
+def create_standard_account(pub_key: ECPoint) -> UInt160:
+    """
+    Calculates the script hash from a public key.
+
+    :param pub_key: the given public key
+    :type pub_key: ECPoint
+
+    :return: the corresponding script hash of the public key
+    :rtype: UInt160
     """
     pass
 
