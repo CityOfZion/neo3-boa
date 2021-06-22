@@ -66,6 +66,7 @@ class Interop:
     # Blockchain Interops
     CurrentHash = CurrentHashProperty()
     CurrentHeight = CurrentHeightProperty()
+    CurrentIndex = CurrentIndexProperty()
     GetContract = GetContractMethod(ContractType)
     GetBlock = GetBlockMethod(BlockType)
     GetTransaction = GetTransactionMethod(TransactionType)
@@ -159,6 +160,7 @@ class Interop:
                                        ],
                                 methods=[CurrentHash,
                                          CurrentHeight,
+                                         CurrentIndex,
                                          GetBlock,
                                          GetContract,
                                          GetTransaction,
