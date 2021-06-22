@@ -123,6 +123,7 @@ class Interop:
     StorageDelete = StorageDeleteMethod()
     StorageFind = StorageFindMethod(FindOptionsType)
     StorageGetContext = StorageGetContextMethod(StorageContextType)
+    StorageGetReadOnlyContext = StorageGetReadOnlyContextMethod(StorageContextType)
     StorageGet = StorageGetMethod()
     StoragePut = StoragePutMethod()
 
@@ -265,6 +266,7 @@ class Interop:
                                       StorageFind,
                                       StorageGet,
                                       StorageGetContext,
+                                      StorageGetReadOnlyContext,
                                       StoragePut
                                       ],
                              packages=[FindOptionsModule,

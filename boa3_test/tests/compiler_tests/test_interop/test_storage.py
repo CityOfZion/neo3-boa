@@ -448,6 +448,20 @@ class TestStorageInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(InteropInterface, result)  # returns an interop interface
 
+    def test_storage_get_read_only_context(self):
+        expected_output = (
+            Opcode.SYSCALL
+            + Interop.StorageGetReadOnlyContext.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('StorageGetReadOnlyContext.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(InteropInterface, result)  # returns an interop interface
+
     def test_storage_get_with_context(self):
         path = self.get_contract_path('StorageGetWithContext.py')
         engine = TestEngine()
