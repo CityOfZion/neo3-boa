@@ -38,4 +38,4 @@ class StrSplitMethod(StdLibMethod):
 
         return indexes
 
-    # TODO: Use maxsplit to verify if the returning array has length less than or equals to maxsplit, and to concatenate if not
+    # TODO: Use maxsplit to verify if the returning array has length less than or equals to maxsplit and to concatenate if not
