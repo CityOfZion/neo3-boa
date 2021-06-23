@@ -29,6 +29,22 @@ class CompilerError(ABC, BaseException):
         return self.message == other.message
 
 
+class CircularImport(CompilerError):
+    """
+    An error raised when circular imports are detected
+    """
+
+    def __init__(self, line: int, col: int, target_import: str, target_origin: str):
+        import os
+        self.target_import = target_import
+        self.target_origin = target_origin.replace(os.sep, '/')
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "Circular import with '%s' ('%s')" % (self.target_import, self.target_origin)
+
+
 class IncorrectNumberOfOperands(CompilerError):
     """
     An error raised when an operation is used with the wrong number of operands

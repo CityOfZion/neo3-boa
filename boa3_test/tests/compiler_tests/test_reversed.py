@@ -1,4 +1,4 @@
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -94,4 +94,4 @@ class TestReversed(BoaTest):
 
     def test_mismatched_type(self):
         path = self.get_contract_path('ReversedParameterMismatchedType')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

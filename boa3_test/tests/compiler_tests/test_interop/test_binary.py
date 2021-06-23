@@ -1,4 +1,4 @@
-from boa3.exception.CompilerError import MismatchedTypes, UnexpectedArgument, UnfilledArgument
+from boa3.exception import CompilerError
 from boa3.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
@@ -39,7 +39,7 @@ class TestBinaryInterop(BoaTest):
 
     def test_base64_encode_mismatched_type(self):
         path = self.get_contract_path('Base64EncodeMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_base64_decode(self):
         import base64
@@ -70,7 +70,7 @@ class TestBinaryInterop(BoaTest):
 
     def test_base64_decode_mismatched_type(self):
         path = self.get_contract_path('Base64DecodeMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_base58_encode(self):
         import base58
@@ -101,7 +101,7 @@ class TestBinaryInterop(BoaTest):
 
     def test_base58_encode_mismatched_type(self):
         path = self.get_contract_path('Base58EncodeMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_base58_decode(self):
         import base58
@@ -129,7 +129,7 @@ class TestBinaryInterop(BoaTest):
 
     def test_base58_decode_mismatched_type(self):
         path = self.get_contract_path('Base58DecodeMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_serialize_int(self):
         path = self.get_contract_path('SerializeInt.py')
@@ -220,7 +220,7 @@ class TestBinaryInterop(BoaTest):
 
     def test_deserialize_mismatched_type(self):
         path = self.get_contract_path('DeserializeMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_serialization_test1(self):
         path = self.get_contract_path('SerializationBoa2Test.py')
@@ -297,15 +297,15 @@ class TestBinaryInterop(BoaTest):
 
     def test_atoi_too_few_parameters(self):
         path = self.get_contract_path('AtoiTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_atoi_too_many_parameters(self):
         path = self.get_contract_path('AtoiTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_atoi_mismatched_type(self):
         path = self.get_contract_path('AtoiMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_itoa(self):
         path = self.get_contract_path('Itoa')
@@ -336,15 +336,15 @@ class TestBinaryInterop(BoaTest):
 
     def test_itoa_too_few_arguments(self):
         path = self.get_contract_path('ItoaTooFewArguments')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_itoa_too_many_arguments(self):
         path = self.get_contract_path('ItoaTooManyArguments')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_itoa_mismatched_type(self):
         path = self.get_contract_path('ItoaMismatchedType')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_binary(self):
         path = self.get_contract_path('ImportBinary')

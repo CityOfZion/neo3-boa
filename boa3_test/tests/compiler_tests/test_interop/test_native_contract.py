@@ -1,5 +1,5 @@
 from boa3 import constants
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.neo.cryptography import hash160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -58,19 +58,19 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request_url_mismatched_type(self):
         path = self.get_contract_path('OracleRequestUrlMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_oracle_request_filter_mismatched_type(self):
         path = self.get_contract_path('OracleRequestFilterMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_oracle_request_callback_mismatched_type(self):
         path = self.get_contract_path('OracleRequestCallCallbackMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_oracle_request_gas_mismatched_type(self):
         path = self.get_contract_path('OracleRequestGasMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_interop_oracle(self):
         path = self.get_contract_path('ImportInteropOracle.py')

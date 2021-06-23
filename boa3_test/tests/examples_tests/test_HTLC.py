@@ -1,7 +1,7 @@
 from typing import List
 
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.smart_contract.notification import Notification
@@ -44,8 +44,8 @@ class TestHTLCTemplate(BoaTest):
         engine = TestEngine()
 
         # can not atomic_swap() without deploying first
-        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO_SCRIPT, 10 * 10**8,
-                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, 10000 * 10**8, hash160(String('unit test').to_bytes()),
+        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10**8,
+                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10**8, hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
@@ -57,8 +57,8 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # starting atomic swap by using the atomic_swap method
-        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, NEO_SCRIPT, 10 * 10 ** 8,
-                                         self.OTHER_ACCOUNT_1, GAS_SCRIPT, 10000 * 10 ** 8, hash160(String('unit test').to_bytes()),
+        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10 ** 8,
+                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10 ** 8, hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -91,8 +91,8 @@ class TestHTLCTemplate(BoaTest):
 
         # starting atomic swap
         result = self.run_smart_contract(engine, path, 'atomic_swap',
-                                         aux_address, NEO_SCRIPT, transferred_amount_neo,
-                                         aux_address2, GAS_SCRIPT, transferred_amount_gas,
+                                         aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
+                                         aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
@@ -100,7 +100,7 @@ class TestHTLCTemplate(BoaTest):
 
         # transfer wil be aborted at onPayment if the transfer is not valid
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
-            self.run_smart_contract(engine, aux_path, 'calling_transfer', NEO_SCRIPT, aux_address, htlc_address,
+            self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.NEO_SCRIPT, aux_address, htlc_address,
                                     transferred_amount_neo - 100, None,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH],
                                     expected_result_type=bool)
@@ -110,18 +110,18 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(0, len(transfer_events))
 
         # saving the balance to compare after the transfer
-        balance_neo_sender_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
-        balance_neo_receiver_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
+        balance_neo_sender_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
+        balance_neo_receiver_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', htlc_address)
 
         # this transfer will be accepted
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
-                                         NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
+                                         constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
         # transfer was accepted so it was registered
-        transfer_events = engine.get_events('Transfer', NEO_SCRIPT)
+        transfer_events = engine.get_events('Transfer', constants.NEO_SCRIPT)
         self.assertEqual(1, len(transfer_events))
         neo_transfer_event = transfer_events[0]
         self.assertEqual(3, len(neo_transfer_event.arguments))
@@ -136,8 +136,8 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(transferred_amount_neo, amount)
 
         # saving the balance after to compare with the balance before the transfer
-        balance_neo_sender_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
-        balance_neo_receiver_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
+        balance_neo_sender_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
+        balance_neo_receiver_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', htlc_address)
 
         self.assertEqual(balance_neo_sender_before - transferred_amount_neo, balance_neo_sender_after)
         self.assertEqual(balance_neo_receiver_before + transferred_amount_neo, balance_neo_receiver_after)
@@ -145,27 +145,27 @@ class TestHTLCTemplate(BoaTest):
         # transfer won't be accepted, because amount is wrong
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, aux_path2, 'calling_transfer',
-                                    GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas - 100, None,
+                                    constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas - 100, None,
                                     signer_accounts=[aux_address2],
                                     expected_result_type=bool)
 
-        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
+        transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)
         # the NEO transfer
         self.assertEqual(1, len(transfer_events))
 
         # saving the balance to compare after the transfer
-        balance_gas_sender_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address2)
-        balance_gas_receiver_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+        balance_gas_sender_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address2)
+        balance_gas_receiver_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', htlc_address)
 
         # this transfer will be accepted
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
-                                         GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
+                                         constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
                                          signer_accounts=[aux_address2],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
         # the transfer was accepted so it was registered
-        transfer_events = engine.get_events('Transfer', origin=GAS_SCRIPT)
+        transfer_events = engine.get_events('Transfer', origin=constants.GAS_SCRIPT)
         self.assertGreaterEqual(len(transfer_events), 1)
         gas_transfer_event = transfer_events[-1]
         self.assertEqual(3, len(gas_transfer_event.arguments))
@@ -180,8 +180,8 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(transferred_amount_gas, amount)
 
         # saving the balance after to compare with the balance before the transfer
-        balance_gas_sender_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address2)
-        balance_gas_receiver_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+        balance_gas_sender_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address2)
+        balance_gas_receiver_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', htlc_address)
 
         self.assertEqual(balance_gas_sender_before - transferred_amount_gas, balance_gas_sender_after)
         self.assertEqual(balance_gas_receiver_before + transferred_amount_gas, balance_gas_receiver_after)
@@ -213,17 +213,17 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # saving the balance to compare after the withdraw
-        balance_neo_person_a_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
-        balance_neo_person_b_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address2)
-        balance_neo_htlc_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
-        balance_gas_person_a_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address)
-        balance_gas_person_b_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address2)
-        balance_gas_htlc_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+        balance_neo_person_a_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
+        balance_neo_person_b_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address2)
+        balance_neo_htlc_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', htlc_address)
+        balance_gas_person_a_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address)
+        balance_gas_person_b_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address2)
+        balance_gas_htlc_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', htlc_address)
 
         # starting atomic swap by using the atomic_swap method
         result = self.run_smart_contract(engine, path, 'atomic_swap',
-                                         aux_address, NEO_SCRIPT, transferred_amount_neo,
-                                         aux_address2, GAS_SCRIPT, transferred_amount_gas,
+                                         aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
+                                         aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
@@ -236,19 +236,19 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
-                                         NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
+                                         constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
-        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
+        transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)
         self.assertEqual(1, len(transfer_events))
 
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
-                                         GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
+                                         constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
                                          signer_accounts=[aux_address2],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
-        transfer_events = engine.get_events('Transfer', GAS_SCRIPT)
+        transfer_events = engine.get_events('Transfer', constants.GAS_SCRIPT)
         self.assertEqual(2, len(transfer_events))
 
         # the withdraw will fail, because the secret is wrong
@@ -264,12 +264,12 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # the transfer were accepted so they were registered
-        transfer_events = engine.get_events('Transfer', origin=GAS_SCRIPT)
+        transfer_events = engine.get_events('Transfer', origin=constants.GAS_SCRIPT)
         self.assertGreaterEqual(len(transfer_events), 1)
         gas_transfer_event = transfer_events[-1]
         self.assertEqual(3, len(gas_transfer_event.arguments))
 
-        transfer_events = engine.get_events('Transfer', NEO_SCRIPT)
+        transfer_events = engine.get_events('Transfer', constants.NEO_SCRIPT)
         self.assertGreaterEqual(len(transfer_events), 1)
         neo_transfer_event = transfer_events[-1]
         self.assertEqual(3, len(neo_transfer_event.arguments))
@@ -294,12 +294,12 @@ class TestHTLCTemplate(BoaTest):
 
         # saving the balance after to compare with the balance before the transfer
         minted_gas_per_neo_transfer = int(transferred_amount_neo * 0.5)
-        balance_neo_person_a_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
-        balance_neo_person_b_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address2)
-        balance_neo_htlc_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', htlc_address)
-        balance_gas_person_a_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address)
-        balance_gas_person_b_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address2)
-        balance_gas_htlc_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', htlc_address)
+        balance_neo_person_a_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
+        balance_neo_person_b_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address2)
+        balance_neo_htlc_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', htlc_address)
+        balance_gas_person_a_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address)
+        balance_gas_person_b_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address2)
+        balance_gas_htlc_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', htlc_address)
 
         self.assertEqual(balance_neo_person_a_before - transferred_amount_neo, balance_neo_person_a_after)
         self.assertEqual(balance_neo_person_b_before + transferred_amount_neo, balance_neo_person_b_after)
@@ -335,8 +335,8 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'atomic_swap',
-                                         aux_address, NEO_SCRIPT, transferred_amount_neo,
-                                         aux_address2, GAS_SCRIPT, transferred_amount_gas,
+                                         aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
+                                         aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
@@ -367,15 +367,15 @@ class TestHTLCTemplate(BoaTest):
 
         # starting atomic swap by using the atomic_swap method
         result = self.run_smart_contract(engine, path, 'atomic_swap',
-                                         aux_address, NEO_SCRIPT, transferred_amount_neo,
-                                         aux_address2, GAS_SCRIPT, transferred_amount_gas,
+                                         aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
+                                         aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
-                                         NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
+                                         constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -412,15 +412,15 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(transferred_amount_neo, amount)
 
         result = self.run_smart_contract(engine, path, 'atomic_swap',
-                                         aux_address, NEO_SCRIPT, transferred_amount_neo,
-                                         aux_address2, GAS_SCRIPT, transferred_amount_gas,
+                                         aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
+                                         aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
-                                         NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
+                                         constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -432,7 +432,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(3, len(transfer_events[2].arguments))
 
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
-                                         GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
+                                         constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
                                          signer_accounts=[aux_address2],
                                          expected_result_type=bool)
         self.assertEqual(True, result)

@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes, NotSupportedOperation
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -153,7 +153,7 @@ class TestRelational(BoaTest):
 
     def test_identity_operation(self):
         path = self.get_contract_path('NumIdentity.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_boolean_equality_operation(self):
         expected_output = (
@@ -408,19 +408,19 @@ class TestRelational(BoaTest):
 
     def test_mixed_less_than_operation(self):
         path = self.get_contract_path('MixedLessThan.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mixed_less_or_equal_than_operation(self):
         path = self.get_contract_path('MixedLessOrEqual.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mixed_greater_than_operation(self):
         path = self.get_contract_path('MixedGreaterThan.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mixed_greater_or_equal_than_operation(self):
         path = self.get_contract_path('MixedGreaterOrEqual.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_list_equality_with_slice(self):
         path = self.get_contract_path('ListEqualityWithSlice.py')

@@ -1,9 +1,9 @@
 from typing import Union
 
 from boa3.builtin.interop.iterator import Iterator
+from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.interop.storage.storagecontext import StorageContext
 from boa3.builtin.interop.storage.storagemap import StorageMap
-from boa3.builtin.interop.storage.findoptions import FindOptions
 
 
 def get(key: Union[str, bytes], context: StorageContext = None) -> bytes:

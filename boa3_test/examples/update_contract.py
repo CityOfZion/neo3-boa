@@ -1,11 +1,10 @@
 from typing import Any, Union
 
-from boa3.builtin import NeoMetadata, metadata, public, CreateNewEvent
+from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
 from boa3.builtin.interop.contract import update_contract
 from boa3.builtin.interop.runtime import check_witness
-from boa3.builtin.interop.storage import put, get
+from boa3.builtin.interop.storage import get, put
 from boa3.builtin.type import UInt160
-
 
 # -------------------------------------------
 # TOKEN SETTINGS

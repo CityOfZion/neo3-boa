@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Iterable, List, Sized, Tuple
+from typing import Any, Dict, Iterable, List, Sized
 
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.interop.storage import FindOptionsType
@@ -7,7 +7,6 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class StorageFindMethod(InteropMethod):

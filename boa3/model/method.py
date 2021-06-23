@@ -27,6 +27,7 @@ class Method(Callable):
 
         self.imported_symbols = {}
         self._symbols = {}
+        self.defined_by_entry = True
         self.locals: Dict[str, Variable] = {}
 
         self._debug_map: List[DebugInstruction] = []

@@ -1,4 +1,4 @@
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -29,7 +29,7 @@ class TestPythonOperation(BoaTest):
 
     def test_str_membership_mismatched_type(self):
         path = self.get_contract_path('StringMembershipMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_bytes(self):
         path = self.get_contract_path('BytesIn.py')
@@ -65,7 +65,7 @@ class TestPythonOperation(BoaTest):
 
     def test_bytes_membership_mismatched_type(self):
         path = self.get_contract_path('BytesMembershipMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_list(self):
         path = self.get_contract_path('ListIn.py')
@@ -111,7 +111,7 @@ class TestPythonOperation(BoaTest):
 
     def test_list_membership_mismatched_type(self):
         path = self.get_contract_path('ListMembershipMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_tuple(self):
         path = self.get_contract_path('TupleIn.py')
@@ -157,7 +157,7 @@ class TestPythonOperation(BoaTest):
 
     def test_tuple_membership_mismatched_type(self):
         path = self.get_contract_path('TupleMembershipMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_dict(self):
         path = self.get_contract_path('DictIn.py')
@@ -209,4 +209,4 @@ class TestPythonOperation(BoaTest):
 
     def test_dict_membership_mismatched_type(self):
         path = self.get_contract_path('DictMembershipMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

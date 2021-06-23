@@ -1,5 +1,5 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
@@ -255,8 +255,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(10_000_000 * 100_000_000, amount)
 
         # burning zNEO will end up giving NEO to the one who burned it
-        neo_wrapped_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
-        neo_owner_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        neo_wrapped_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_owner_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
         zneo_owner_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         # in this case, NEO will be given to the OWNER_SCRIPT_HASH
         result = self.run_smart_contract(engine, path, 'burn', self.OWNER_SCRIPT_HASH, burned_amount,
@@ -278,7 +278,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(None, receiver)
         self.assertEqual(burned_amount, amount)
 
-        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
+        transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)
         self.assertGreaterEqual(len(transfer_events), 1)
         neo_transfer_event = transfer_events[-1]
         self.assertEqual(3, len(neo_transfer_event.arguments))
@@ -293,8 +293,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(burned_amount, amount)
 
         # balance after burning
-        neo_wrapped_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
-        neo_owner_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        neo_wrapped_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_owner_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', self.OWNER_SCRIPT_HASH)
         zneo_owner_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(neo_wrapped_before - burned_amount, neo_wrapped_after)
         self.assertEqual(neo_owner_before + burned_amount, neo_owner_after)
@@ -590,17 +590,17 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'onNEP17Payment', aux_address, minted_amount, None,
                                     signer_accounts=[aux_address])
 
-        neo_wrapped_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
-        neo_aux_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
+        neo_wrapped_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_aux_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
         zneo_aux_before = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
         # transferring NEO to the wrapped_neo_address will mint them
-        result = self.run_smart_contract(engine, aux_path, 'calling_transfer', NEO_SCRIPT,
+        result = self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.NEO_SCRIPT,
                                          aux_address, wrapped_neo_address, minted_amount, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-        transfer_events = engine.get_events('Transfer', origin=NEO_SCRIPT)
+        transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)
         self.assertEqual(1, len(transfer_events))
         neo_transfer_event = transfer_events[0]
         self.assertEqual(3, len(neo_transfer_event.arguments))
@@ -629,8 +629,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(minted_amount, amount)
 
         # balance after burning
-        neo_wrapped_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
-        neo_aux_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
+        neo_wrapped_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
+        neo_aux_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
         zneo_aux_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
         self.assertEqual(neo_wrapped_before + minted_amount, neo_wrapped_after)
         self.assertEqual(neo_aux_before - minted_amount, neo_aux_after)

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from boa3.constants import ENCODING
+from boa3 import constants
 from boa3.neo import to_script_hash
 from boa3.neo.contracts.neffile import NefFile
 
@@ -39,7 +39,7 @@ class TestNefFile(TestCase):
         # the next 64 bytes of the header are from the compiler id + version
         start, end = (4, 68)
         compiler, version = result[start:end].rsplit(b'-', maxsplit=1)
-        self.assertEqual(compiler, nef._nef.compiler.encode(ENCODING))
+        self.assertEqual(compiler, nef._nef.compiler.encode(constants.ENCODING))
         self.assertEqual(version[:32], encoded_test_version)
 
         # the next 2 bytes are reserved for future changes. Have to be zero

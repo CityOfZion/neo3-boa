@@ -16,6 +16,7 @@ class Variable(IExpression):
 
     def __init__(self, var_type: Optional[IType], origin_node: Optional[ast.AST] = None):
         super().__init__(origin_node)
+        self.defined_by_entry = True
         self._var_type: Optional[IType] = var_type
 
     def copy(self) -> Variable:

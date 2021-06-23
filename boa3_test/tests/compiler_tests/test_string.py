@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import InternalError, UnresolvedOperation
+from boa3.exception import CompilerError
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -41,7 +41,7 @@ class TestString(BoaTest):
 
     def test_string_set_value(self):
         path = self.get_contract_path('SetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_string_slicing(self):
         path = self.get_contract_path('StringSlicingLiteralValues.py')
@@ -152,11 +152,11 @@ class TestString(BoaTest):
 
     def test_string_slicing_omitted_stride(self):
         path = self.get_contract_path('StringSlicingWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_string_slicing_omitted_with_stride(self):
         path = self.get_contract_path('StringSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_string_simple_concat(self):
         path = self.get_contract_path('StringSimpleConcat.py')

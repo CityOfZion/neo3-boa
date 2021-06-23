@@ -1,6 +1,6 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import CRYPTO_SCRIPT
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -236,7 +236,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -274,7 +274,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -312,7 +312,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -353,7 +353,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -366,7 +366,7 @@ class TestCryptoInterop(BoaTest):
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
         path = self.get_contract_path('VerifyWithECDsaSecp256r1MismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256k1_str(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -397,7 +397,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -434,7 +434,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -471,7 +471,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -511,7 +511,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(function_id)).to_byte_array() + function_id
             + Opcode.PUSHDATA1
-            + Integer(len(CRYPTO_SCRIPT)).to_byte_array() + CRYPTO_SCRIPT
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.DROP
@@ -524,7 +524,7 @@ class TestCryptoInterop(BoaTest):
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
         path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_crypto(self):
         import hashlib
