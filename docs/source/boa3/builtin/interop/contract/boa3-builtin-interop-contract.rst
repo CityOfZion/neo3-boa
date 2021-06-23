@@ -3,12 +3,11 @@ contract
 
 .. automodule:: boa3.builtin.interop.contract
 
-CallFlags
----------
+Subpackages
+-----------
 
-.. automodule:: boa3.builtin.interop.contract.callflagstype
+.. toctree::
 
-Contract
---------
-
-.. automodule:: boa3.builtin.interop.contract.contract
+    boa3-builtin-interop-contract-callflags
+    boa3-builtin-interop-contract-contract
+    boa3-builtin-interop-contract-contractmanifest

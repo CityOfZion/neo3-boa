@@ -269,7 +269,23 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_contract(self):
         path = self.get_contract_path('IsInstanceContract.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'is_contract', bytes(10),
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'is_contract', [1, 2, 3],
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'is_contract', "test_with_string",
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'is_contract', 42,
+                                         expected_result_type=bool)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'is_get_contract_a_contract',
+                                         expected_result_type=bool)
+        self.assertEqual(True, result)
 
     def test_isinstance_block(self):
         path = self.get_contract_path('IsInstanceBlock.py')

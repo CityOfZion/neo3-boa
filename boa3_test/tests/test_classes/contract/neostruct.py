@@ -28,7 +28,7 @@ class NeoStruct(list, ABC):
         name = json[_name]
         from boa3.neo.vm.type.ContractParameterType import ContractParameterType
         try:
-            param_type = ContractParameterType.get_by_name(json[_type])
+            param_type = ContractParameterType._get_by_name(json[_type])
         except BaseException:
             param_type = None
 
