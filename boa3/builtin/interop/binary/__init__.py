@@ -25,6 +25,22 @@ def base58_decode(key: str) -> bytes:
     pass
 
 
+def base58_check_encode(key: bytes) -> str:
+    """
+    Converts a bytes value to its equivalent str representation that is encoded with base-58 digits. The encoded str
+    contains the checksum of the binary data.
+    """
+    pass
+
+
+def base58_check_decode(key: str) -> bytes:
+    """
+    Converts the specified str, which encodes binary data as base-58 digits, to an equivalent bytes value. The encoded
+    str contains the checksum of the binary data.
+    """
+    pass
+
+
 def base64_encode(key: bytes) -> str:
     """
     Encodes a bytes value using base64.

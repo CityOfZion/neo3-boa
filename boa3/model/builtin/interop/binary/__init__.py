@@ -1,4 +1,6 @@
 __all__ = ['AtoiMethod',
+           'Base58CheckDecodeMethod',
+           'Base58CheckEncodeMethod',
            'Base58DecodeMethod',
            'Base58EncodeMethod',
            'Base64DecodeMethod',
@@ -10,6 +12,8 @@ __all__ = ['AtoiMethod',
            ]
 
 from boa3.model.builtin.interop.binary.atoimethod import AtoiMethod
+from boa3.model.builtin.interop.binary.base58checkdecodemethod import Base58CheckDecodeMethod
+from boa3.model.builtin.interop.binary.base58checkencodemethod import Base58CheckEncodeMethod
 from boa3.model.builtin.interop.binary.base58decodemethod import Base58DecodeMethod
 from boa3.model.builtin.interop.binary.base58encodemethod import Base58EncodeMethod
 from boa3.model.builtin.interop.binary.base64decodemethod import Base64DecodeMethod
