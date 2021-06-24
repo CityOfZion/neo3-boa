@@ -41,3 +41,12 @@ class Oracle:
         :type gas_for_response: int
         """
         pass
+
+    @classmethod
+    def get_price(cls):
+        """
+        Gets the price for an Oracle request.
+
+        :return: the price for an Oracle request
+        """
+        pass
