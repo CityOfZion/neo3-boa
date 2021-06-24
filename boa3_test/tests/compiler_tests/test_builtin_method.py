@@ -958,3 +958,32 @@ class TestBuiltinMethod(BoaTest):
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     # endregion
+
+    # region str split test
+
+    def test_str_split(self):
+        path = self.get_contract_path('StrSplit.py')
+        engine = TestEngine()
+
+        string = '1#2#3#4'
+        separator = '#'
+        expected_result = string.split(separator)
+        result = self.run_smart_contract(engine, path, 'main', string, separator)
+        self.assertEqual(expected_result, result)
+
+        string = 'unit123test123str123split'
+        separator = '123'
+        expected_result = string.split(separator)
+        result = self.run_smart_contract(engine, path, 'main', string, separator)
+        self.assertEqual(expected_result, result)
+
+    def test_str_split_default(self):
+        path = self.get_contract_path('StrSplitSeparatorDefault.py')
+        engine = TestEngine()
+
+        string = '1 2 3 4'
+        expected_result = string.split()
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(expected_result, result)
+
+    # endregion

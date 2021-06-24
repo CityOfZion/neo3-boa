@@ -56,6 +56,7 @@ class Builtin:
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     Sqrt = SqrtMethod()
+    StrSplit = StrSplitMethod()
     Sum = SumMethod()
 
     # python builtin class constructor
@@ -104,6 +105,7 @@ class Builtin:
                                                 SequenceRemove,
                                                 SequenceReverse,
                                                 Sqrt,
+                                                StrSplit,
                                                 Sum
                                                 ]
 
