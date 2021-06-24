@@ -55,6 +55,8 @@ class Interop:
 
     # Binary Interops
     Atoi = AtoiMethod()
+    Base58CheckDecode = Base58CheckDecodeMethod()
+    Base58CheckEncode = Base58CheckEncodeMethod()
     Base58Encode = Base58EncodeMethod()
     Base58Decode = Base58DecodeMethod()
     Base64Encode = Base64EncodeMethod()
@@ -136,6 +138,8 @@ class Interop:
 
     BinaryPackage = Package(identifier=InteropPackage.Binary,
                             methods=[Atoi,
+                                     Base58CheckDecode,
+                                     Base58CheckEncode,
                                      Base58Encode,
                                      Base58Decode,
                                      Base64Encode,

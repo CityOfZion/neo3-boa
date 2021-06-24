@@ -131,6 +131,65 @@ class TestBinaryInterop(BoaTest):
         path = self.get_contract_path('Base58DecodeMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_base58_check_decode(self):
+        import base58
+        path = self.get_contract_path('Base58CheckDecode.py')
+        engine = TestEngine()
+        arg = base58.b58encode_check('unit test'.encode('utf-8'))
+        result = self.run_smart_contract(engine, path, 'main', arg)
+        self.assertEqual('unit test', result)
+
+        arg = base58.b58encode_check(''.encode('utf-8'))
+        result = self.run_smart_contract(engine, path, 'main', arg)
+        self.assertEqual('', result)
+
+        long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
+                       'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                       'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                       'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                       'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                       'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                       'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                       'est enim dictum massa, id aliquet justo magna in purus.')
+        arg = base58.b58encode_check(long_string.encode('utf-8'))
+        result = self.run_smart_contract(engine, path, 'main', arg)
+        self.assertEqual(long_string, result)
+
+    def test_base58_check_decode_mismatched_type(self):
+        path = self.get_contract_path('Base58CheckDecodeMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_base58_check_encode(self):
+        import base58
+        path = self.get_contract_path('Base58CheckEncode.py')
+        engine = TestEngine()
+        expected_result = base58.b58encode_check('unit test'.encode('utf-8'))
+        result = self.run_smart_contract(engine, path, 'main', 'unit test',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        expected_result = base58.b58encode_check(''.encode('utf-8'))
+        result = self.run_smart_contract(engine, path, 'main', '',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
+                       'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
+                       'et, aliquet sed mauris. Curabitur vitae turpis euismod, hendrerit mi a, rhoncus justo. Mauris '
+                       'sollicitudin, nisl sit amet feugiat pharetra, odio ligula congue tellus, vel pellentesque '
+                       'libero leo id dui. Morbi vel risus vehicula, consectetur mauris eget, gravida ligula. '
+                       'Maecenas aliquam velit sit amet nisi ultricies, ac sollicitudin nisi mollis. Lorem ipsum '
+                       'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
+                       'est enim dictum massa, id aliquet justo magna in purus.')
+        expected_result = base58.b58encode_check(long_string.encode('utf-8'))
+        result = self.run_smart_contract(engine, path, 'main', long_string,
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+    def test_base58_check_encode_mismatched_type(self):
+        path = self.get_contract_path('Base58CheckEncodeMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_serialize_int(self):
         path = self.get_contract_path('SerializeInt.py')
         engine = TestEngine()
