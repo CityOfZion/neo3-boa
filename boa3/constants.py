@@ -15,6 +15,8 @@ DEFAULT_UINT32 = 0
 ENCODING = 'utf-8'
 BYTEORDER = 'little'
 
+VARIABLE_NAME_SEPARATOR = ','
+
 INITIALIZE_METHOD_ID = '_initialize'
 DEPLOY_METHOD_ID = '_deploy'
 

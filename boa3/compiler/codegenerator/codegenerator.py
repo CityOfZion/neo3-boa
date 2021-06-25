@@ -15,7 +15,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -52,12 +52,27 @@ class CodeGenerator:
         visitor = VisitorCodeGenerator(generator)
         visitor.visit(analyser.ast_tree)
 
-        analyser.symbol_table.update(generator.symbol_table)
-        generator.initialized_static_fields = True
+        analyser.update_symbol_table(generator.symbol_table)
+        generator.symbol_table.clear()
+        generator.symbol_table.update(analyser.symbol_table.copy())
 
         for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
             generator.symbol_table.update(symbol.all_symbols)
             visitor.visit(symbol.ast)
+
+            analyser.update_symbol_table(symbol.all_symbols)
+            generator.symbol_table.clear()
+            generator.symbol_table.update(analyser.symbol_table.copy())
+
+        generator.can_init_static_fields = True
+        if len(visitor.global_stmts) > 0:
+            import ast
+            global_ast = ast.parse("")
+            global_ast.body = visitor.global_stmts
+            visitor.visit(global_ast)
+            generator.initialized_static_fields = True
+
+        analyser.update_symbol_table(generator.symbol_table)
         return generator.bytecode
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
@@ -81,6 +96,8 @@ class CodeGenerator:
 
         self._opcodes_to_remove: List[int] = []
         self._stack_states: StackMemento = StackMemento()  # simulates neo execution stack
+
+        self.can_init_static_fields: bool = False
         self.initialized_static_fields: bool = False
 
     @property
@@ -177,12 +194,14 @@ class CodeGenerator:
         :return: A list with the variables names
         """
         module_globals = [var_id for var_id, var in self.symbol_table.items() if isinstance(var, Variable)]
-        for imported in self.symbol_table.values():
-            if isinstance(imported, Import):
-                # tried to use set and just update, but we need the varibles to be ordered
-                for var_id, var in imported.variables.items():
-                    if isinstance(var, Variable) and var_id not in module_globals:
-                        module_globals.append(var_id)
+
+        if not self.can_init_static_fields:
+            for imported in self.symbol_table.values():
+                if isinstance(imported, Import):
+                    # tried to use set and just update, but we need the variables to be ordered
+                    for var_id, var in imported.variables.items():
+                        if isinstance(var, Variable) and var_id not in module_globals:
+                            module_globals.append(var_id)
         return module_globals
 
     @property
@@ -245,6 +264,8 @@ class CodeGenerator:
 
         :return: whether there are static fields to be initialized
         """
+        if not self.can_init_static_fields:
+            return False
         if self.initialized_static_fields:
             return False
 
@@ -1056,7 +1077,7 @@ class CodeGenerator:
                     self.__insert1(op_info, Integer(index).to_byte_array())
                 else:
                     self.__insert1(op_info)
-                storaged_type = self._stack_pop()
+                stored_type = self._stack_pop()
 
                 from boa3.analyser.model.optimizer import UndefinedType
                 if (var_id in self._current_scope.symbols or
@@ -1064,7 +1085,7 @@ class CodeGenerator:
                     symbol = self.get_symbol(var_id)
                     if isinstance(symbol, Variable):
                         var = symbol.copy()
-                        var.set_type(storaged_type)
+                        var.set_type(stored_type)
                         self._current_scope.include_symbol(var_id, var)
 
     def _get_variable_info(self, var_id: str) -> Tuple[int, bool, bool]:

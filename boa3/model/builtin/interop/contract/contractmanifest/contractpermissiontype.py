@@ -4,12 +4,11 @@ from typing import Any, Dict, Optional
 
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
-from boa3.neo.vm.type.StackItem import StackItemType
 
 
-class ContractPermissionType(ClassType):
+class ContractPermissionType(ClassArrayType):
     """
     A class used to represent Neo ContractPermission class
     """
@@ -42,10 +41,6 @@ class ContractPermissionType(ClassType):
 
     def constructor_method(self) -> Optional[Method]:
         return self._constructor
-
-    @property
-    def stack_item(self) -> StackItemType:
-        return StackItemType.Array
 
     @classmethod
     def build(cls, value: Any = None) -> ContractPermissionType:

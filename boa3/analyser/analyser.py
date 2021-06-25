@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 from typing import Dict, List, Optional
 
+from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.astoptimizer import AstOptimizer
 from boa3.analyser.constructanalyser import ConstructAnalyser
@@ -122,3 +123,23 @@ class Analyser:
         Tries to optimize the ast after validations
         """
         AstOptimizer(self, log=self._log)
+
+    def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
+        for symbol_id, symbol in symbol_table.items():
+            if (hasattr(symbol, 'origin')
+                    and hasattr(symbol.origin, 'origin')
+                    and isinstance(symbol.origin.origin, ast.AST)
+                    and len(symbol_id.split(',')) <= 1):
+
+                if symbol_id in self.symbol_table:
+                    self.symbol_table.pop(symbol_id)
+
+                origin_hash = symbol.origin.origin.__hash__()
+                unique_id = '{0}{2}{1}'.format(origin_hash, symbol_id, constants.VARIABLE_NAME_SEPARATOR)
+            else:
+                unique_id = symbol_id
+
+            from boa3.model.identifiedsymbol import IdentifiedSymbol
+            if not isinstance(symbol, IdentifiedSymbol):
+                if unique_id not in self.symbol_table:
+                    self.symbol_table[unique_id] = symbol

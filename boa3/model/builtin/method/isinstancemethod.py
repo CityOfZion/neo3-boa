@@ -61,7 +61,7 @@ class IsInstanceMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        from boa3.model.type.classtype import ClassType
+        from boa3.model.type.classes.classtype import ClassType
         return not any(isinstance(param, ClassType) and len(param.is_instance_opcodes()) == 0
                        for param in self._instances_type)
 

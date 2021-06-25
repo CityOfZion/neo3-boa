@@ -1,11 +1,14 @@
 from abc import ABC
 
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class InteropInterfaceType(ClassType, ABC):
+    """
+    An abstract class used to represent a Python class that is implemented internally as a Neo Interop Interface
+    """
 
     @property
     def stack_item(self) -> StackItemType:

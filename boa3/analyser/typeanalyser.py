@@ -22,7 +22,7 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
 from boa3.model.type.typeutils import TypeUtils

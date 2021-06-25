@@ -4,11 +4,11 @@ from typing import Any, Dict, Optional
 
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
 
 
-class OracleType(ClassType):
+class OracleType(ClassArrayType):
     """
     A class used to represent Oracle class
     """

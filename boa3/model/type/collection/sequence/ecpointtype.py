@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.variable import Variable

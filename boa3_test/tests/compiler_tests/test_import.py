@@ -40,14 +40,14 @@ class TestImport(BoaTest):
     def test_import_user_module(self):
         expected_output = (
             Opcode.CALL
-            + Integer(8).to_byte_array(min_length=1, signed=True)
+            + Integer(3).to_byte_array(min_length=1, signed=True)
             + Opcode.RET
+            + Opcode.NEWARRAY0  # imported module's function
+            + Opcode.RET  # return
             + Opcode.INITSSLOT + b'\x01'
             + Opcode.NEWARRAY0  # imported module's variable in the init
             + Opcode.STSFLD0
             + Opcode.RET
-            + Opcode.NEWARRAY0  # imported module's function
-            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('ImportUserModule.py')
@@ -61,14 +61,14 @@ class TestImport(BoaTest):
     def test_import_user_module_with_alias(self):
         expected_output = (
             Opcode.CALL
-            + Integer(8).to_byte_array(min_length=1, signed=True)
+            + Integer(3).to_byte_array(min_length=1, signed=True)
             + Opcode.RET
+            + Opcode.NEWARRAY0  # imported module's function
+            + Opcode.RET  # return
             + Opcode.INITSSLOT + b'\x01'
             + Opcode.NEWARRAY0  # imported module's variable in the init
             + Opcode.STSFLD0
             + Opcode.RET
-            + Opcode.NEWARRAY0  # imported module's function
-            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('ImportUserModuleWithAlias.py')
@@ -83,13 +83,15 @@ class TestImport(BoaTest):
         expected_output = (
             Opcode.LDSFLD0  # b = a
             + Opcode.RET
-            + Opcode.INITSSLOT + b'\x01'
-            + Opcode.CALL  # a = UserModule.EmptyList()
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.STSFLD0
-            + Opcode.RET
             + Opcode.NEWARRAY0  # imported function
             + Opcode.RET  # return
+            + Opcode.INITSSLOT + b'\x02'
+            + Opcode.CALL  # a = UserModule.EmptyList()
+            + Integer(-4).to_byte_array(min_length=1, signed=True)
+            + Opcode.STSFLD0
+            + Opcode.NEWARRAY0     # module variable empty_list from import
+            + Opcode.STSFLD1
+            + Opcode.RET
         )
 
         path = self.get_contract_path('FromImportWithGlobalVariables.py')
@@ -104,12 +106,12 @@ class TestImport(BoaTest):
         expected_output = (
             Opcode.LDSFLD0  # b = a
             + Opcode.RET
+            + Opcode.NEWARRAY0  # imported function
+            + Opcode.RET  # return
             + Opcode.INITSSLOT + b'\x01'
             + Opcode.NEWARRAY0  # imported variable
             + Opcode.STSFLD0
             + Opcode.RET
-            + Opcode.NEWARRAY0  # imported function
-            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('FromImportVariable.py')
@@ -164,6 +166,10 @@ class TestImport(BoaTest):
             + Opcode.RET
             + Opcode.NEWARRAY0  # imported function
             + Opcode.RET  # return
+            + Opcode.INITSSLOT + b'\x01'
+            + Opcode.NEWARRAY0     # module variable empty_list from import
+            + Opcode.STSFLD0
+            + Opcode.RET
         )
 
         path = self.get_contract_path('FromImportUserModule.py')
@@ -186,6 +192,10 @@ class TestImport(BoaTest):
             + Opcode.RET
             + Opcode.NEWARRAY0  # imported function
             + Opcode.RET  # return
+            + Opcode.INITSSLOT + b'\x01'
+            + Opcode.NEWARRAY0     # module variable empty_list from import
+            + Opcode.STSFLD0
+            + Opcode.RET
         )
 
         path = self.get_contract_path('FromImportUserModuleWithAlias.py')
@@ -237,3 +247,30 @@ class TestImport(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', [1, 2, 3], b'\x01' * 20)
         self.assertEqual([], result)
+
+    def test_import_user_module_with_not_imported_variables(self):
+        expected_output = (
+            Opcode.CALL
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.RET
+            + Opcode.LDSFLD1    # module function from import
+            + Opcode.RET  # return
+            + Opcode.LDSFLD2    # imported function
+            + Opcode.RET  # return
+            + Opcode.INITSSLOT + b'\x03'
+            + Opcode.PUSH15     # module variable a
+            + Opcode.STSFLD0
+            + Opcode.PUSH10     # module variable a from import
+            + Opcode.STSFLD1
+            + Opcode.PUSH5      # module variable b from import
+            + Opcode.STSFLD2
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('ImportUserModuleWithNotImportedVariables.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(5, result)

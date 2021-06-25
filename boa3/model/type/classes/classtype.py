@@ -8,6 +8,7 @@ from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
 
@@ -62,8 +63,16 @@ class ClassType(IType, ABC):
         pass
 
     @property
+    @abstractmethod
+    def abi_type(self) -> AbiType:
+        # must be overwritten, classes cannot be mapped to Any
+        return super().abi_type
+
+    @property
+    @abstractmethod
     def stack_item(self) -> StackItemType:
-        return StackItemType.Array
+        # must be overwritten, classes cannot be mapped to Any
+        return super().stack_item
 
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         is_type_opcodes = [
