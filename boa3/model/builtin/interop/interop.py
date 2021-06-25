@@ -5,6 +5,7 @@ from boa3.model.builtin.interop import *
 from boa3.model.builtin.interop.binary import *
 from boa3.model.builtin.interop.blockchain import *
 from boa3.model.builtin.interop.contract import *
+from boa3.model.builtin.interop.contract.contractmanifest import *
 from boa3.model.builtin.interop.crypto import *
 from boa3.model.builtin.interop.iterator import *
 from boa3.model.builtin.interop.json import *
@@ -43,7 +44,9 @@ class Interop:
     # Interop Types
     BlockType = BlockType.build()
     CallFlagsType = CallFlagsType()
+    ContractManifestType = ContractManifestType.build()
     ContractType = ContractType.build()
+    FindOptionsType = FindOptionsType()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
     OracleType = OracleType.build()
@@ -51,7 +54,6 @@ class Interop:
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
     TriggerType = TriggerType()
-    FindOptionsType = FindOptionsType()
 
     # Binary Interops
     Atoi = AtoiMethod()
@@ -184,8 +186,22 @@ class Interop:
                              types=[ContractType]
                              )
 
+    ContractManifestModule = Package(identifier=ContractManifestType.identifier.lower(),
+                                     types=[ContractAbiType.build(),
+                                            ContractEventDescriptorType.build(),
+                                            ContractGroupType.build(),
+                                            ContractManifestType,
+                                            ContractMethodDescriptorType.build(),
+                                            ContractParameterDefinitionType.build(),
+                                            ContractParameterType.build(),
+                                            ContractPermissionDescriptorType.build(),
+                                            ContractPermissionType.build()
+                                            ]
+                                     )
+
     ContractPackage = Package(identifier=InteropPackage.Contract,
                               types=[CallFlagsType,
+                                     ContractManifestType,
                                      ContractType
                                      ],
                               properties=[GasScriptHash,
@@ -199,6 +215,7 @@ class Interop:
                                        UpdateContract
                                        ],
                               packages=[CallFlagsTypeModule,
+                                        ContractManifestModule,
                                         ContractModule
                                         ]
                               )

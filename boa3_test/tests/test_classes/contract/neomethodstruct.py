@@ -27,7 +27,7 @@ class NeoMethodStruct(NeoStruct):
         struct = cls()
         struct.append(json[cls._name_field])
         struct.append([cls._get_param_info(arg) for arg in json[cls._parameters_field]])
-        struct.append(ContractParameterType.get_by_name(json[cls._return_type_field]))
+        struct.append(ContractParameterType._get_by_name(json[cls._return_type_field]))
         struct.append(json[cls._offset_field])
         struct.append(json[cls._is_safe_field])
 

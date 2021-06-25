@@ -1,5 +1,4 @@
-from typing import Any, Dict
-
+from boa3.builtin.interop.contract.contractmanifest import ContractManifest
 from boa3.builtin.type import UInt160
 
 
@@ -17,7 +16,7 @@ class Contract:
         information
     :vartype nef: bytes
     :ivar manifest: the manifest of the contract
-    :vartype manifest: Dict[str, Any]
+    :vartype manifest: ContractManifest
     """
 
     def __init__(self):
@@ -25,4 +24,4 @@ class Contract:
         self.update_counter: int = 0
         self.hash: UInt160 = UInt160()
         self.nef: bytes = bytes()
-        self.manifest: Dict[str, Any] = {}
+        self.manifest: ContractManifest = ContractManifest()
