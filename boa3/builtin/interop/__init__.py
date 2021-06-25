@@ -43,7 +43,7 @@ class Oracle:
         pass
 
     @classmethod
-    def get_price(cls):
+    def get_price(cls) -> int:
         """
         Gets the price for an Oracle request.
 
