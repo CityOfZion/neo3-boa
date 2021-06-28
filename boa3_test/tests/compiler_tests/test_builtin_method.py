@@ -834,6 +834,15 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', val1, val2)
         self.assertEqual(expected_result, result)
 
+    def test_min_int_more_arguments(self):
+        path = self.get_contract_path('MinIntMoreArguments.py')
+        engine = TestEngine()
+
+        numbers = 2, 8, 1, 4, 16
+        expected_result = min(numbers)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
     def test_min_too_few_parameters(self):
         path = self.get_contract_path('MinTooFewParameters.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
