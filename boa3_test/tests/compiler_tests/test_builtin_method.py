@@ -812,6 +812,15 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', value1, value2)
         self.assertEqual(expected_result, result)
 
+    def test_max_int_more_arguments(self):
+        path = self.get_contract_path('MaxIntMoreArguments.py')
+        engine = TestEngine()
+
+        numbers = 4, 1, 16, 8, 2
+        expected_result = max(numbers)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
     def test_max_too_few_parameters(self):
         path = self.get_contract_path('MaxTooFewParameters.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
