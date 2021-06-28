@@ -106,6 +106,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.visit(stmt)
 
             self.generator.end_initialize()
+        else:
+            for stmt in global_stmts:
+                stmt.origin = module
+
+            self.global_stmts.extend(global_stmts)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
