@@ -38,9 +38,13 @@ class Callable(IExpression, ABC):
             from boa3.model.type.typeutils import TypeUtils
 
             vararg_id, vararg_var = vararg
-            default_code = "{0}({1}, {2})".format(TypeUtils.cast.raw_identifier,
-                                                  Type.tuple.build_collection(vararg_var.type),
-                                                  Type.tuple.default_value)
+            if vararg_var.type is not Type.any:
+                default_code = "{0}({1}, {2})".format(TypeUtils.cast.raw_identifier,
+                                                      Type.tuple.build_collection(vararg_var.type),
+                                                      Type.tuple.default_value)
+            else:
+                default_code = "{0}".format(Type.tuple.default_value)
+            
             default_value = set_internal_call(ast.parse(default_code).body[0].value)
 
             self.args[vararg_id] = Variable(Type.tuple.build_collection([vararg_var.type]))
