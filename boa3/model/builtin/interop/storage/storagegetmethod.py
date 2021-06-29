@@ -1,6 +1,7 @@
 import ast
 from typing import Any, Dict, Iterable, List, Sized, Tuple
 
+from boa3.model import set_intenal_call
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -25,10 +26,8 @@ class StorageGetMethod(InteropMethod):
 
         from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
         default_id = StorageGetContextMethod(context_type).identifier
-        context_default = ast.parse("{0}()".format(default_id)
-                                    ).body[0].value
-        context_default.is_internal_call = True
-        context_default._fields += ('is_internal_call',)
+        context_default = set_intenal_call(ast.parse("{0}()".format(default_id)
+                                                     ).body[0].value)
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.bytes)
 
     def validate_parameters(self, *params: IExpression) -> bool:

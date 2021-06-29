@@ -1050,11 +1050,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                             origin_type_id = cast_types[0].identifier
                             cast_type_id = cast_types[1].identifier
 
-                        self._log_warning(
-                            CompilerWarning.TypeCasting(call.lineno, call.col_offset,
-                                                        origin_type_id=origin_type_id,
-                                                        cast_type_id=cast_type_id)
-                        )
+                        if not hasattr(call, 'is_internal_call') or not call.is_internal_call:
+                            self._log_warning(
+                                CompilerWarning.TypeCasting(call.lineno, call.col_offset,
+                                                            origin_type_id=origin_type_id,
+                                                            cast_type_id=cast_type_id)
+                            )
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
