@@ -1,7 +1,7 @@
 import ast
 from typing import Any, Dict, Iterable, List, Sized
 
-from boa3.model import set_intenal_call
+from boa3.model import set_internal_call
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -29,7 +29,7 @@ class StoragePutMethod(InteropMethod):
 
         from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
         default_id = StorageGetContextMethod(context_type).identifier
-        context_default = set_intenal_call(ast.parse("{0}()".format(default_id)
+        context_default = set_internal_call(ast.parse("{0}()".format(default_id)
                                                       ).body[0].value)
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
 

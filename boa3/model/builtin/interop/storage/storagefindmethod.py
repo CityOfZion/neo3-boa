@@ -1,7 +1,7 @@
 import ast
 from typing import Any, Dict, Iterable, List, Sized
 
-from boa3.model import set_intenal_call
+from boa3.model import set_internal_call
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.interop.storage import FindOptionsType
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -34,11 +34,11 @@ class StorageFindMethod(InteropMethod):
 
         from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
         default_id = StorageGetContextMethod(context_type).identifier
-        context_default = set_intenal_call(ast.parse("{0}()".format(default_id)
-                                                     ).body[0].value)
-        options_default = set_intenal_call(ast.parse("{0}.{1}".format(find_options_type.identifier,
-                                                                      find_options_type.default_value.name)
-                                                     ).body[0].value)
+        context_default = set_internal_call(ast.parse("{0}()".format(default_id)
+                                                      ).body[0].value)
+        options_default = set_internal_call(ast.parse("{0}.{1}".format(find_options_type.identifier,
+                                                                       find_options_type.default_value.name)
+                                                      ).body[0].value)
 
         defaults = [context_default, options_default]
 
