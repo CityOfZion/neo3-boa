@@ -433,3 +433,42 @@ class TestLogical(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', '~', -3, 0)
         self.assertEqual(2, result)
+
+    def test_logic_augmented_assignment(self):
+        path = self.get_contract_path('AugmentedAssignmentOperators.py')
+        engine = TestEngine()
+
+        a = 1
+        b = 4
+        result = self.run_smart_contract(engine, path, 'right_shift', a, b)
+        a >>= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 4
+        b = 1
+        result = self.run_smart_contract(engine, path, 'left_shift', a, b)
+        a <<= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 255
+        b = 123
+        result = self.run_smart_contract(engine, path, 'l_and', a, b)
+        a &= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 255
+        b = 123
+        result = self.run_smart_contract(engine, path, 'l_or', a, b)
+        a |= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 255
+        b = 123
+        result = self.run_smart_contract(engine, path, 'xor', a, b)
+        a ^= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
