@@ -2,6 +2,7 @@ import ast
 from abc import ABC
 from typing import Dict, List, Optional, Tuple
 
+from boa3.model import set_internal_call
 from boa3.model.expression import IExpression
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
@@ -33,8 +34,18 @@ class Callable(IExpression, ABC):
         self._vararg: Optional[Tuple[str, Variable]] = None
         if (isinstance(vararg, tuple) and len(vararg) == 2
                 and isinstance(vararg[0], str) and isinstance(vararg[1], Variable)):
+
+            from boa3.model.type.typeutils import TypeUtils
+
             vararg_id, vararg_var = vararg
-            default_value = ast.parse(f"{Type.tuple.default_value}").body[0].value
+            if vararg_var.type is not Type.any:
+                default_code = "{0}({1}, {2})".format(TypeUtils.cast.raw_identifier,
+                                                      Type.tuple.build_collection(vararg_var.type),
+                                                      Type.tuple.default_value)
+            else:
+                default_code = "{0}".format(Type.tuple.default_value)
+            
+            default_value = set_internal_call(ast.parse(default_code).body[0].value)
 
             self.args[vararg_id] = Variable(Type.tuple.build_collection([vararg_var.type]))
             self.defaults.append(default_value)

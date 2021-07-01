@@ -594,17 +594,15 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_int(self):
         path = self.get_contract_path('PrintInt.py')
-        output = Boa3.compile(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
     def test_print_str(self):
         path = self.get_contract_path('PrintStr.py')
-        output = Boa3.compile(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
@@ -614,6 +612,13 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_many_values(self):
         path = self.get_contract_path('PrintManyValues.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+
+    def test_print_no_args(self):
+        path = self.get_contract_path('PrintNoArgs.py')
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'Main')

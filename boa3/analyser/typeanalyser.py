@@ -1046,11 +1046,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                             origin_type_id = cast_types[0].identifier
                             cast_type_id = cast_types[1].identifier
 
-                        self._log_warning(
-                            CompilerWarning.TypeCasting(call.lineno, call.col_offset,
-                                                        origin_type_id=origin_type_id,
-                                                        cast_type_id=cast_type_id)
-                        )
+                        if not hasattr(call, 'is_internal_call') or not call.is_internal_call:
+                            self._log_warning(
+                                CompilerWarning.TypeCasting(call.lineno, call.col_offset,
+                                                            origin_type_id=origin_type_id,
+                                                            cast_type_id=cast_type_id)
+                            )
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 
@@ -1108,11 +1109,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return callable_target
 
     def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:
-        if (callable_target.has_starred_argument
-                and not hasattr(call, 'checked_starred_args')
-                and len(call.args) >= len(callable_target.args)):
+        if callable_target.has_starred_argument and not hasattr(call, 'checked_starred_args'):
 
-            if len(call.args) == 0 or not isinstance(call.args[0], ast.Starred):
+            if (len(call.args) >= len(callable_target.args)
+                    and (len(call.args) == 0 or not isinstance(call.args[0], ast.Starred))):
+
                 # starred argument is always the last argument
                 len_args_without_starred = len(callable_target.args) - 1
                 args = self.parse_to_node(str(Type.tuple.default_value), call)
@@ -1120,6 +1121,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 # include the arguments into a tuple to be assigned to the starred argument
                 args.elts = call.args[len_args_without_starred:]
                 call.args[len_args_without_starred:] = [args]
+
             call.checked_starred_args = True
 
         len_call_args = len(call.args)
