@@ -28,13 +28,13 @@ class BoaPackage(str, Enum):
 class Builtin:
     @classmethod
     def get_symbol(cls, symbol_id: str) -> Optional[Callable]:
-        for name, method in vars(cls).items():
+        for method in cls._python_builtins:
             if isinstance(method, IBuiltinCallable) and method.identifier == symbol_id:
                 return method
 
     @classmethod
     def get_any_symbol(cls, symbol_id: str) -> Optional[ISymbol]:
-        for name, method in vars(cls).items():
+        for method in cls._python_builtins:
             if isinstance(method, IdentifiedSymbol) and method.identifier == symbol_id:
                 return method
 
