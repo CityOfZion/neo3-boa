@@ -302,10 +302,19 @@ class TestFileGeneration(BoaTest):
 
         for static_variable in debug_info['static-variables']:
             # validate parameters
-            self.assertEqual(2, len(static_variable.split(',')))
-            param_id, param_type = static_variable.split(',')
-            self.assertIn(param_id, variables)
-            self.assertEqual(param_type, variables[param_id].type.abi_type)
+            self.assertEqual(3, len(static_variable.split(',')))
+            var_id, var_type, var_slot = static_variable.split(',')
+            if var_id not in variables:
+                self.assertIn(var_id, [var_full_id.split(constants.VARIABLE_NAME_SEPARATOR)[-1]
+                                       for var_full_id in variables])
+                var_inner_id = next((var for var in variables
+                                     if var.split(constants.VARIABLE_NAME_SEPARATOR)[-1] == var_id),
+                                    var_id)
+            else:
+                var_inner_id = var_id
+
+            self.assertIn(var_inner_id, variables)
+            self.assertEqual(var_type, variables[var_inner_id].type.abi_type)
 
     def test_generate_nefdbgnfo_file_with_user_module_import(self):
         from boa3.model.type.itype import IType

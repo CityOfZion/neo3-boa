@@ -1,7 +1,8 @@
 import json
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.constants import ENCODING
 from boa3.model.event import Event
@@ -72,59 +73,10 @@ class FileGenerator:
             elif isinstance(symbol, Import):
                 imported_symbols[symbol.origin] = symbol
 
-        # must map all imports, including inner imports
-        index = 0
-        while index < len(imported_symbols):
-            module_origin, imported = list(imported_symbols.items())[index]
-            for name, imported in imported.all_symbols.items():
-                if isinstance(imported, Import) and imported.origin not in imported_symbols:
-                    imported_symbols[imported.origin] = imported
-            index += 1
-
-        # map the modules that have user modules not imported by the entry file
-        imported_to_map: Dict[str, Import] = {}
-        for name in imported_symbols:
-            if any((isinstance(symbol, Method)
-                    and not isinstance(symbol, IBuiltinCallable)
-                    and symbol not in [x for x in methods.values()])
-                   for name, symbol in imported_symbols[name].all_symbols.items()):
-
-                filtered_name = name.replace('.py', '').replace('/__init__', '')
-                imported_to_map[filtered_name] = imported_symbols[name]
-
-        # change the full path names to unique small names
-        imports_paths = list(imported_to_map)
-        imports_paths.append(self._entry_file_full_path.replace('.py', '').replace('/__init__', ''))
-
-        imports_unique_ids = []
-        imports_duplicated_ids = []
-
-        for index in range(len(imports_paths)):
-            name = imports_paths[index]
-            split_name = name.split('/')
-            index = -1
-            short_name = split_name[index]
-            while short_name in imports_duplicated_ids:
-                index -= 1
-                short_name = '.'.join(split_name[index:])
-
-            if short_name in imports_unique_ids:
-                index_of_duplicated = imports_unique_ids.index(short_name)
-
-                dup_split_name = imports_paths[index_of_duplicated].split('/')
-                dup_new_id = short_name
-                dup_index = -len(imports_unique_ids[index].split('.'))
-
-                while dup_new_id == short_name:
-                    imports_duplicated_ids.append(short_name)
-                    index -= 1
-                    dup_index -= 1
-                    short_name = '.'.join(split_name[index:])
-                    dup_new_id = '.'.join(dup_split_name[dup_index:])
-
-                imports_unique_ids[index_of_duplicated] = dup_new_id
-
-            imports_unique_ids.append(short_name)
+        imported_to_map, imports_unique_ids = self._get_imports_unique_ids(imported_symbols,
+                                                                           True,
+                                                                           list(methods.values())
+                                                                           )
 
         if imports_unique_ids[-1] != self._entry_file:
             # update entry file to be a unique name
@@ -370,9 +322,121 @@ class FileGenerator:
         """
         from boa3.model.type.itype import IType
         from boa3.neo.vm.type.AbiType import AbiType
-        return [
-            '{0},{1}'.format(name, var.type.abi_type if isinstance(var.type, IType) else AbiType.Any)
-            for name, var in self._static_variables.items()
-        ]
+
+        static_variables = []
+
+        for name, var in self._static_variables.items():
+            var_unique_name = self._get_static_var_unique_name(name)
+            var_type = var.type.abi_type if isinstance(var.type, IType) else AbiType.Any
+
+            values = [var_unique_name, var_type.name]
+
+            var_slot_index = self._get_static_var_slot_index(name)
+            if isinstance(var_slot_index, int):
+                values.append(str(var_slot_index))
+
+            static_variables.append(
+                ','.join(values)
+            )
+
+        return static_variables
 
     # endregion
+
+    def _get_static_var_unique_name(self, variable_id) -> str:
+        imported_symbols: Dict[str, Import] = {}
+
+        for name, symbol in self._symbols.items():
+            if isinstance(symbol, Import):
+                imported_symbols[symbol.origin] = symbol
+
+        imported_to_map, imports_unique_ids = self._get_imports_unique_ids(imported_symbols,
+                                                                           False,
+                                                                           list(self._static_variables.values())
+                                                                           )
+        split_name = variable_id.split(constants.VARIABLE_NAME_SEPARATOR)
+        if len(split_name) > 1:
+            variable_original_id = split_name[-1]
+        else:
+            variable_original_id = variable_id
+
+        if len(imported_to_map) <= 1:
+            return variable_original_id
+
+        for index, imported in enumerate(imported_symbols.values()):
+            if isinstance(imported, Import) and variable_original_id in imported.all_symbols:
+                if len(split_name) <= 1 or str(imported.ast.__hash__()) == split_name[0]:
+                    return '{0}.{1}'.format(imports_unique_ids[index], variable_original_id)
+
+        return '{0}.{1}'.format(imports_unique_ids[-1], variable_original_id)
+
+    def _get_static_var_slot_index(self, variable_id) -> Optional[int]:
+        module_globals = list(self._static_variables.keys())
+        if variable_id in module_globals:
+            return module_globals.index(variable_id)
+        return None
+
+    def _get_imports_unique_ids(self, imported_symbols: Dict[str, Import],
+                                importing_methods: bool,
+                                inner_imported_symbols: List[ISymbol] = None) -> Tuple[Dict[str, Import], List[str]]:
+        if not isinstance(imported_symbols, dict):
+            return {}, []
+        if not isinstance(inner_imported_symbols, list):
+            inner_imported_symbols = []
+
+        from boa3.model.builtin.builtincallable import IBuiltinCallable
+
+        # must map all imports, including inner imports
+        index = 0
+        while index < len(imported_symbols):
+            module_origin, imported = list(imported_symbols.items())[index]
+            for name, imported in imported.all_symbols.items():
+                if isinstance(imported, Import) and imported.origin not in imported_symbols:
+                    imported_symbols[imported.origin] = imported
+            index += 1
+
+        # map the modules that have user modules not imported by the entry file
+        imported_to_map: Dict[str, Import] = {}
+        for name in imported_symbols:
+            if any(((not importing_methods  # is importing variables or is a method but not builtin
+                     or (isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable)))
+                    and symbol not in inner_imported_symbols)
+                   for name, symbol in imported_symbols[name].all_symbols.items()):
+                filtered_name = name.replace('.py', '').replace('/__init__', '')
+                imported_to_map[filtered_name] = imported_symbols[name]
+
+        # change the full path names to unique small names
+        imports_paths = list(imported_to_map)
+        imports_paths.append(self._entry_file_full_path.replace('.py', '').replace('/__init__', ''))
+
+        imports_unique_ids = []
+        imports_duplicated_ids = []
+
+        for index in range(len(imports_paths)):
+            name = imports_paths[index]
+            split_name = name.split('/')
+            index = -1
+            short_name = split_name[index]
+            while short_name in imports_duplicated_ids:
+                index -= 1
+                short_name = '.'.join(split_name[index:])
+
+            if short_name in imports_unique_ids:
+                index_of_duplicated = imports_unique_ids.index(short_name)
+
+                dup_split_name = imports_paths[index_of_duplicated].split('/')
+                dup_new_id = short_name
+                dup_index = -len(imports_unique_ids[index].split('.'))
+
+                while dup_new_id == short_name:
+                    imports_duplicated_ids.append(short_name)
+                    index -= 1
+                    dup_index -= 1
+                    short_name = '.'.join(split_name[index:])
+                    dup_new_id = '.'.join(dup_split_name[dup_index:])
+
+                imports_unique_ids[index_of_duplicated] = dup_new_id
+
+            imports_unique_ids.append(short_name)
+
+        return imported_to_map, imports_unique_ids

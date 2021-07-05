@@ -12,7 +12,7 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.type.typeutils import TypeUtils
 

@@ -20,7 +20,7 @@ from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.uniontype import UnionType
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
