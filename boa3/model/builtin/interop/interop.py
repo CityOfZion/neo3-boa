@@ -83,6 +83,7 @@ class Interop:
     CreateStandardAccount = CreateStandardAccountMethod()
     DestroyContract = DestroyMethod()
     GetCallFlags = GetCallFlagsMethod(CallFlagsType)
+    GetMinimumDeploymentFee = GetMinimumDeploymentFeeMethod()
     UpdateContract = UpdateMethod()
 
     # Native Contracts
@@ -212,6 +213,7 @@ class Interop:
                                        CreateStandardAccount,
                                        DestroyContract,
                                        GetCallFlags,
+                                       GetMinimumDeploymentFee,
                                        UpdateContract
                                        ],
                               packages=[CallFlagsTypeModule,
