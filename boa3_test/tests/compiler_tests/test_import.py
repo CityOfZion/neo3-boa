@@ -4,6 +4,7 @@ from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -207,7 +208,7 @@ class TestImport(BoaTest):
         self.assertEqual([], result)
 
     def test_import_non_existent_package(self):
-        path = self.get_contract_path('ImportNonExistantPackage.py')
+        path = self.get_contract_path('ImportNonExistentPackage.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_import_interop_with_alias(self):
@@ -235,7 +236,6 @@ class TestImport(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', [], script)
         self.assertEqual([], result)
 
-        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', [1, 2, 3], script)
         expected_result = []
         for x in [1, 2, 3]:
@@ -244,9 +244,16 @@ class TestImport(BoaTest):
                                     [x]])
         self.assertEqual(expected_result, result)
 
-        engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', [1, 2, 3], b'\x01' * 20)
         self.assertEqual([], result)
+
+        # 'with_param' is a public method, so it should be included in the manifest when imported
+        result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
+        self.assertEqual([], result)
+
+        # 'without_param' is a public method, but it isn't imported, so it shouldn't be included in the manifest
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
 
     def test_import_user_module_with_not_imported_variables(self):
         expected_output = (

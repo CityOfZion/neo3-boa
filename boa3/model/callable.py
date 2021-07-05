@@ -44,7 +44,7 @@ class Callable(IExpression, ABC):
                                                       Type.tuple.default_value)
             else:
                 default_code = "{0}".format(Type.tuple.default_value)
-            
+
             default_value = set_internal_call(ast.parse(default_code).body[0].value)
 
             self.args[vararg_id] = Variable(Type.tuple.build_collection([vararg_var.type]))

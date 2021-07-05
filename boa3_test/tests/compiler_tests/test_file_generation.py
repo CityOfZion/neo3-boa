@@ -556,9 +556,8 @@ class TestFileGeneration(BoaTest):
         abi = manifest['abi']
 
         self.assertNotIn('entryPoint', abi)
-        # shouldn't include the imported functions in the manifest
         self.assertIn('methods', abi)
-        self.assertEqual(1, len(abi['methods']))
+        self.assertEqual(2, len(abi['methods']))
 
         self.assertIn('events', abi)
         self.assertEqual(0, len(abi['events']))

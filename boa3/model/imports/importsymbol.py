@@ -2,6 +2,7 @@ import ast
 from typing import Dict
 
 from boa3.analyser.importanalyser import ImportAnalyser
+from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
@@ -33,6 +34,11 @@ class Import(ISymbol):
 
         self._symbols_not_imported = {alias: symbol for alias, symbol in import_analyser.symbols.items()
                                       if alias not in symbols}
+
+        for method in self.methods.values():
+            if not isinstance(method, IBuiltinCallable) and hasattr(method, 'defined_by_entry'):
+                # methods imported are treated as methods defined in the entry file
+                method.defined_by_entry = True
 
         self.origin: str = origin
         self.ast: ast.AST = syntax_tree
