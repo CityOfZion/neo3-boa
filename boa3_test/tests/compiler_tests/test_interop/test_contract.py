@@ -425,3 +425,15 @@ class TestContractInterop(BoaTest):
         path = self.get_contract_path('CreateStandardAccount.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_get_minimum_deployment_fee(self):
+        path = self.get_contract_path('GetMinimumDeploymentFee.py')
+        engine = TestEngine()
+
+        minimum_cost = 10 * 10**8   # minimum deployment cost is 10 GAS right now
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(minimum_cost, result)
+
+    def test_get_minimum_deployment_fee_too_many_parameters(self):
+        path = self.get_contract_path('GetMinimumDeploymentFeeTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)

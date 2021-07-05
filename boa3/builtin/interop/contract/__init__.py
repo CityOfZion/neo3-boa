@@ -70,6 +70,15 @@ def destroy_contract():
     pass
 
 
+def get_minimum_deployment_fee() -> int:
+    """
+    Gets the minimum fee of contract deployment.
+
+    :return: the minimum fee of contract deployment
+    """
+    pass
+
+
 def get_call_flags() -> CallFlags:
     """
     Gets the CallFlags in the current context.
