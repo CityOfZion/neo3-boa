@@ -120,6 +120,7 @@ class Interop:
     GetExecFeeFactor = GetExecFeeFactorMethod()
     GetFeePerByte = GetFeePerByteMethod()
     GetStoragePrice = GetStoragePriceMethod()
+    IsBlocked = IsBlockedMethod()
 
     # Role Interops
     GetDesignatedByRole = GetDesignatedByRoleMethod()
@@ -267,7 +268,8 @@ class Interop:
     PolicyPackage = Package(identifier=InteropPackage.Policy,
                             methods=[GetExecFeeFactor,
                                      GetFeePerByte,
-                                     GetStoragePrice
+                                     GetStoragePrice,
+                                     IsBlocked
                                      ]
                             )
 

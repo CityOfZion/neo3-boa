@@ -1,3 +1,6 @@
+from boa3.builtin.type import UInt160
+
+
 def get_exec_fee_factor() -> int:
     """
     Gets the execution fee factor. This is a multiplier that can be adjusted by the committee to adjust the system fees
@@ -25,5 +28,18 @@ def get_storage_price() -> int:
 
     :return: the snapshot used to read data
     :rtype: int
+    """
+    pass
+
+
+def is_blocked(account: UInt160) -> bool:
+    """
+    Determines whether the specified account is blocked.
+
+    :param account: the account to be checked
+    :type account: UInt160
+
+    :return: whether the account is blocked or not
+    :rtype: bool
     """
     pass

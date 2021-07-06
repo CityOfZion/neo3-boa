@@ -26,3 +26,10 @@ class TestPolicyInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertIsInstance(result, int)
+
+    def test_is_blocked(self):
+        path = self.get_contract_path('IsBlocked.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', bytes(20))
+        self.assertEqual(False, result)
