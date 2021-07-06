@@ -118,6 +118,7 @@ class Interop:
 
     # Policy Interops
     GetExecFeeFactor = GetExecFeeFactorMethod()
+    GetFeePerByte = GetFeePerByteMethod()
 
     # Role Interops
     GetDesignatedByRole = GetDesignatedByRoleMethod()
@@ -263,7 +264,9 @@ class Interop:
                                 )
 
     PolicyPackage = Package(identifier=InteropPackage.Policy,
-                            methods=[GetExecFeeFactor])
+                            methods=[GetExecFeeFactor,
+                                     GetFeePerByte
+                                     ])
 
     RolePackage = Package(identifier=InteropPackage.Role,
                           types=[RoleType],

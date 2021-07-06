@@ -7,3 +7,13 @@ def get_exec_fee_factor() -> int:
     :rtype: int
     """
     pass
+
+
+def get_fee_per_byte() -> int:
+    """
+    Gets the network fee per transaction byte.
+
+    :return: the network fee per transaction byte
+    :rtype: int
+    """
+    pass
