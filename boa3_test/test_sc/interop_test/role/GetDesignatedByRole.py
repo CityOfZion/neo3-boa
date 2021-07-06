@@ -4,5 +4,5 @@ from boa3.builtin.type import ECPoint
 
 
 @public
-def main() -> ECPoint:
-    return get_designated_by_role(Role.STATE_VALIDATOR, 0)
+def main(role: Role, index: int) -> ECPoint:
+    return get_designated_by_role(role, index)

@@ -18,8 +18,10 @@ class TestRoleInterop(BoaTest):
         method = String('getDesignatedByRole').to_bytes()
 
         expected_output = (
-            Opcode.PUSH0
-            + Opcode.PUSH4
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.PUSHDATA1
