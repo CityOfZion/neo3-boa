@@ -10,6 +10,7 @@ from boa3.model.builtin.interop.crypto import *
 from boa3.model.builtin.interop.iterator import *
 from boa3.model.builtin.interop.json import *
 from boa3.model.builtin.interop.nativecontract import *
+from boa3.model.builtin.interop.policy import *
 from boa3.model.builtin.interop.role import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.storage import *
@@ -24,6 +25,7 @@ class InteropPackage(str, Enum):
     Crypto = 'crypto'
     Iterator = 'iterator'
     Json = 'json'
+    Policy = 'policy'
     Role = 'role'
     Runtime = 'runtime'
     Storage = 'storage'
@@ -113,6 +115,9 @@ class Interop:
     # Json Interops
     JsonDeserialize = JsonDeserializeMethod()
     JsonSerialize = JsonSerializeMethod()
+
+    # Policy Interops
+    GetExecFeeFactor = GetExecFeeFactorMethod()
 
     # Role Interops
     GetDesignatedByRole = GetDesignatedByRoleMethod()
@@ -257,6 +262,9 @@ class Interop:
                                 types=[TriggerType]
                                 )
 
+    PolicyPackage = Package(identifier=InteropPackage.Policy,
+                            methods=[GetExecFeeFactor])
+
     RolePackage = Package(identifier=InteropPackage.Role,
                           types=[RoleType],
                           methods=[GetDesignatedByRole]
@@ -325,6 +333,7 @@ class Interop:
         CryptoPackage,
         IteratorPackage,
         JsonPackage,
+        PolicyPackage,
         RolePackage,
         RuntimePackage,
         StoragePackage
