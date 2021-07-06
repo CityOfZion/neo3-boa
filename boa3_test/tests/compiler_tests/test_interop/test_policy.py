@@ -19,3 +19,10 @@ class TestPolicyInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertIsInstance(result, int)
+
+    def test_get_storage_price(self):
+        path = self.get_contract_path('GetStoragePrice.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)

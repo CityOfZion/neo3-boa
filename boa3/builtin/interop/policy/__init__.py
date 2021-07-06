@@ -17,3 +17,13 @@ def get_fee_per_byte() -> int:
     :rtype: int
     """
     pass
+
+
+def get_storage_price() -> int:
+    """
+    Gets the storage price.
+
+    :return: the snapshot used to read data
+    :rtype: int
+    """
+    pass
