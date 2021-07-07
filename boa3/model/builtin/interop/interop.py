@@ -10,6 +10,7 @@ from boa3.model.builtin.interop.crypto import *
 from boa3.model.builtin.interop.iterator import *
 from boa3.model.builtin.interop.json import *
 from boa3.model.builtin.interop.nativecontract import *
+from boa3.model.builtin.interop.role import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.storage import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -23,6 +24,7 @@ class InteropPackage(str, Enum):
     Crypto = 'crypto'
     Iterator = 'iterator'
     Json = 'json'
+    Role = 'role'
     Runtime = 'runtime'
     Storage = 'storage'
 
@@ -50,6 +52,7 @@ class Interop:
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
     OracleType = OracleType.build()
+    RoleType = RoleType.build()
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
@@ -110,6 +113,9 @@ class Interop:
     # Json Interops
     JsonDeserialize = JsonDeserializeMethod()
     JsonSerialize = JsonSerializeMethod()
+
+    # Role Interops
+    GetDesignatedByRole = GetDesignatedByRoleMethod()
 
     # Runtime Interops
     BlockTime = BlockTimeProperty()
@@ -251,6 +257,11 @@ class Interop:
                                 types=[TriggerType]
                                 )
 
+    RolePackage = Package(identifier=InteropPackage.Role,
+                          types=[RoleType],
+                          methods=[GetDesignatedByRole]
+                          )
+
     RuntimePackage = Package(identifier=InteropPackage.Runtime,
                              types=[NotificationType,
                                     TriggerType
@@ -314,6 +325,7 @@ class Interop:
         CryptoPackage,
         IteratorPackage,
         JsonPackage,
+        RolePackage,
         RuntimePackage,
         StoragePackage
     ]
