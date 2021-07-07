@@ -108,8 +108,8 @@ class InternalIncorrectSignature(CompilerError):
     @property
     def _error_message(self) -> Optional[str]:
         return "The implementation of '{0}' is different " \
-               "from the expected '{1}.".format(self.expected_method.raw_identifier,
-                                                self.expected_method)
+               "from the expected '{1}'.".format(self.expected_method.raw_identifier,
+                                                 self.expected_method)
 
 
 class MetadataImplementationMissing(CompilerError):
