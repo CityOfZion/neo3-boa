@@ -1,5 +1,5 @@
-from boa3.builtin.type import ECPoint
 from boa3.builtin.interop.role.roletype import Role
+from boa3.builtin.type import ECPoint
 
 
 def get_designated_by_role(role: Role, index: int) -> ECPoint:

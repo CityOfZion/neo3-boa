@@ -329,3 +329,88 @@ class TestException(BoaTest):
         self.assertEqual(24, result)
         result = self.run_smart_contract(engine, path, 'test_try_except', -110)
         self.assertEqual(-274, result)
+
+    def test_try_except_else(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.TRY        # try:
+            + Integer(7).to_byte_array(signed=True, min_length=1)  # jmp to exception
+            + Integer(0).to_byte_array(signed=True, min_length=1)  # jmp to finally if exists
+            + Opcode.LDARG0         # x = arg
+            + Opcode.STLOC0
+            + Opcode.JMP        # except BaseException:
+            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0          # x = 0
+            + Opcode.STLOC0
+            + Opcode.JMP        # else:
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDARG0         # x = -arg
+            + Opcode.NEGATE
+            + Opcode.STLOC0
+            + Opcode.ENDTRY
+            + Integer(2).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('TryExceptElse.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
+        self.assertEqual(-10, result)
+        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
+        self.assertEqual(110, result)
+
+    def test_try_except_else_finally(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH4
+            + Opcode.DIV
+            + Opcode.STLOC0
+            + Opcode.TRY        # try:
+            + Integer(9).to_byte_array(signed=True, min_length=1)   # jmp to exception
+            + Integer(21).to_byte_array(signed=True, min_length=1)  # jmp to finally if exists
+            + Opcode.LDLOC0         # x += arg
+            + Opcode.LDARG0
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.JMP        # except ValueError:
+            + Integer(8).to_byte_array(signed=True, min_length=1)
+            + Opcode.DROP
+            + Opcode.LDLOC0         # x = -x
+            + Opcode.NEGATE
+            + Opcode.STLOC0
+            + Opcode.JMP        # else:
+            + Integer(6).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0         # x += arg
+            + Opcode.LDARG0
+            + Opcode.ADD
+            + Opcode.STLOC0
+            + Opcode.ENDTRY
+            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDLOC0     # finally
+            + Opcode.PUSH2          # x *= 2
+            + Opcode.MUL
+            + Opcode.STLOC0
+            + Opcode.ENDFINALLY
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('TryExceptElseFinally.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
+        self.assertEqual(44, result)
+        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
+        self.assertEqual(-494, result)

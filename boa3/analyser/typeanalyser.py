@@ -1213,6 +1213,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         for exception_handler in try_node.handlers:
             self.visit(exception_handler)
 
+        for stmt in try_node.orelse:
+            self.visit(stmt)
+
         for stmt in try_node.finalbody:
             self.visit(stmt)
 

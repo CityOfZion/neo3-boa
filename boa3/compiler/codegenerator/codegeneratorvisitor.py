@@ -618,7 +618,15 @@ class VisitorCodeGenerator(IAstAnalyser):
             for stmt in handler.body:
                 self.visit_to_map(stmt, generate=True)
 
-        except_end = self.generator.convert_end_try(try_address, try_end)
+        else_address = None
+        if len(try_node.orelse) > 0:
+            else_start_address = self.generator.convert_begin_else(try_end)
+            else_address = self.generator.bytecode_size
+            for stmt in try_node.orelse:
+                self.visit_to_map(stmt, generate=True)
+            self.generator.convert_end_if(else_start_address)
+
+        except_end = self.generator.convert_end_try(try_address, try_end, else_address)
         for stmt in try_node.finalbody:
             self.visit_to_map(stmt, generate=True)
         self.generator.convert_end_try_finally(except_end, try_address, len(try_node.finalbody) > 0)
