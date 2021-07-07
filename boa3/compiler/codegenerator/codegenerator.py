@@ -56,6 +56,7 @@ class CodeGenerator:
         deploy_method = (analyser.symbol_table[constants.DEPLOY_METHOD_ID]
                          if constants.DEPLOY_METHOD_ID in analyser.symbol_table
                          else None)
+        deploy_origin_module = analyser.ast_tree
 
         if hasattr(deploy_method, 'origin') and deploy_method.origin in analyser.ast_tree.body:
             analyser.ast_tree.body.remove(deploy_method.origin)
@@ -72,6 +73,7 @@ class CodeGenerator:
 
             if hasattr(deploy_method, 'origin') and deploy_method.origin in symbol.ast.body:
                 symbol.ast.body.remove(deploy_method.origin)
+                deploy_origin_module = symbol.ast
 
             visitor.visit(symbol.ast)
 
@@ -100,6 +102,7 @@ class CodeGenerator:
 
             generator.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
             analyser.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
+            visitor._tree = deploy_origin_module
             visitor.visit(deploy_ast)
 
             generator.symbol_table.clear()

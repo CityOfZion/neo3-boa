@@ -630,7 +630,12 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param name: the python ast name identifier node
         :return: the identifier of the name
         """
-        return name.id
+        name = name.id
+        if name not in self.symbols:
+            hashed_name = '{0}{2}{1}'.format(self._tree.__hash__(), name, constants.VARIABLE_NAME_SEPARATOR)
+            if hashed_name in self.symbols:
+                name = hashed_name
+        return name
 
     def visit_Starred(self, starred: ast.Starred):
         self.visit_to_generate(starred.value)
