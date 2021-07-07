@@ -19,8 +19,14 @@ class Variable(IExpression):
         self.defined_by_entry = True
         self._var_type: Optional[IType] = var_type
 
+        self.is_reassigned = False
+        self._origin_variable: Optional[Variable] = None
+
     def copy(self) -> Variable:
-        return Variable(self._var_type, self._origin_node)
+        var = Variable(self._var_type, self._origin_node)
+        var.is_reassigned = self.is_reassigned
+        var._origin_variable = self._origin_variable if self._origin_variable is not None else self
+        return var
 
     @property
     def shadowing_name(self) -> str:
@@ -43,3 +49,9 @@ class Variable(IExpression):
         :param var_type:
         """
         self._var_type = var_type
+
+    def set_is_reassigned(self):
+        if not self.is_reassigned:
+            self.is_reassigned = True
+        if hasattr(self._origin_variable, 'set_is_reassigned'):
+            self._origin_variable.set_is_reassigned()

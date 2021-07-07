@@ -171,19 +171,19 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.convert_literal(None)
         self.generator.insert_return()
 
-    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST]], value: ast.AST):
+    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST], int], value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
             if len(var_ids) == 1:
                 # it's a simple assignment
-                var_id, index = var_ids[0]
+                var_id, index, address = var_ids[0]
                 if index is None:
                     # if index is None, then it is a variable assignment
                     result_type = self.visit_to_generate(value)
 
                     if result_type is Type.none and not self.generator.is_none_inserted():
                         self.generator.convert_literal(None)
-                    self.generator.convert_store_variable(var_id)
+                    self.generator.convert_store_variable(var_id, address)
                 else:
                     # if not, it is an array assignment
                     self.generator.convert_load_symbol(var_id)
@@ -199,12 +199,12 @@ class VisitorCodeGenerator(IAstAnalyser):
             elif len(var_ids) > 0:
                 # it's a chained assignment
                 self.visit_to_generate(value)
-                for pos, (var_id, index) in enumerate(reversed(var_ids)):
+                for pos, (var_id, index, address) in enumerate(reversed(var_ids)):
                     if index is None:
                         # if index is None, then it is a variable assignment
                         if pos < len(var_ids) - 1:
                             self.generator.duplicate_stack_top_item()
-                        self.generator.convert_store_variable(var_id)
+                        self.generator.convert_store_variable(var_id, address)
                     else:
                         # if not, it is an array assignment
                         if pos < len(var_ids) - 1:
@@ -225,11 +225,12 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param ann_assign: the python ast variable assignment node
         """
+        var_value_address = self.generator.bytecode_size
         var_id = self.visit(ann_assign.target)
         # filter to find the imported variables
         if var_id not in self.symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
             var_id = '{0}{2}{1}'.format(ann_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
-        self.store_variable((var_id, None), value=ann_assign.value)
+        self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
 
     def visit_Assign(self, assign: ast.Assign):
         """
@@ -237,8 +238,9 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param assign: the python ast variable assignment node
         """
-        vars_ids: List[Tuple[str, Optional[ast.AST]]] = []
+        vars_ids: List[Tuple[str, Optional[ast.AST], int]] = []
         for target in assign.targets:
+            var_value_address = self.generator.bytecode_size
             var_index = None
             var_id = self.visit(target)
 
@@ -250,7 +252,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             # filter to find the imported variables
             if var_id not in self.symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
                 var_id = '{0}{2}{1}'.format(assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
-            vars_ids.append((var_id, var_index))
+            vars_ids.append((var_id, var_index, var_value_address))
 
         self.store_variable(*vars_ids, value=assign.value)
 
@@ -266,9 +268,10 @@ class VisitorCodeGenerator(IAstAnalyser):
             var_id = '{0}{2}{1}'.format(aug_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
 
         self.generator.convert_load_symbol(var_id)
+        value_address = self.generator.bytecode_size
         self.visit_to_generate(aug_assign.value)
         self.generator.convert_operation(aug_assign.op)
-        self.generator.convert_store_variable(var_id)
+        self.generator.convert_store_variable(var_id, value_address)
 
     def visit_Subscript(self, subscript: ast.Subscript):
         """

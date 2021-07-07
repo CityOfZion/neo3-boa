@@ -47,7 +47,7 @@ class FileGenerator:
         :return: a dictionary that maps each global variable with its identifier
         """
         return {name: variable for name, variable in self._symbols.items()
-                if isinstance(variable, Variable)}
+                if isinstance(variable, Variable) and not variable.is_reassigned}
 
     @property
     def _methods(self) -> Dict[str, Method]:
@@ -56,9 +56,11 @@ class FileGenerator:
 
         :return: a dictionary that maps each method with its identifier
         """
-        from boa3.model.builtin.decorator.builtindecorator import IBuiltinCallable
+        from boa3.model.builtin.method import IBuiltinMethod
         return {name: method for name, method in self._symbols.items()
-                if method.defined_by_entry and isinstance(method, Method) and not isinstance(method, IBuiltinCallable)}
+                if ((isinstance(method, Method) and method.defined_by_entry)
+                    or (isinstance(method, IBuiltinMethod) and method.is_public)
+                    )}
 
     @property
     def _methods_with_imports(self) -> Dict[Tuple[str, str], Method]:
