@@ -49,6 +49,7 @@ class CodeGenerator:
         :return: the Neo VM bytecode
         """
         VMCodeMapping.reset()
+        import ast
         from boa3.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
         generator = CodeGenerator(analyser.symbol_table)
@@ -79,7 +80,6 @@ class CodeGenerator:
             generator.symbol_table.update(analyser.symbol_table.copy())
 
         if len(generator._globals) > 0:
-            import ast
             from boa3.compiler.codegenerator.initstatementsvisitor import InitStatementsVisitor
             deploy_stmts, static_stmts = InitStatementsVisitor.separate_global_statements(analyser.symbol_table,
                                                                                           visitor.global_stmts)
@@ -92,6 +92,9 @@ class CodeGenerator:
                 if_update_body.test.op = UnaryOp.Not
                 deploy_method.origin.body.insert(0, if_update_body)
 
+            visitor.global_stmts = static_stmts
+
+        if hasattr(deploy_method, 'origin'):
             deploy_ast = ast.parse("")
             deploy_ast.body = [deploy_method.origin]
 
@@ -102,11 +105,8 @@ class CodeGenerator:
             generator.symbol_table.clear()
             generator.symbol_table.update(analyser.symbol_table.copy())
 
-            visitor.global_stmts = static_stmts
-
         generator.can_init_static_fields = True
         if len(visitor.global_stmts) > 0:
-            import ast
             global_ast = ast.parse("")
             global_ast.body = visitor.global_stmts
             visitor.visit(global_ast)
