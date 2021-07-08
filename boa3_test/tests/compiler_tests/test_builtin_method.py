@@ -1125,4 +1125,12 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
+    def test_count_range(self):
+        path = self.get_contract_path('CountRange.py')
+        engine = TestEngine()
+
+        expected_result = range(10).count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
     # endregion
