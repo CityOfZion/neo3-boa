@@ -21,7 +21,7 @@ class TestBuiltinMethod(BoaTest):
     def test_deploy_def(self):
         path = self.get_contract_path('DeployDef.py')
         engine = TestEngine()
-        
+
         result = self.run_smart_contract(engine, path, 'get_var')
         self.assertEqual(10, result)
 

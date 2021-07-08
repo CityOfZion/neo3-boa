@@ -583,12 +583,15 @@ class CodeGenerator:
 
         return last_try_code
 
-    def convert_end_try(self, start_address: int, end_address: Optional[int] = None) -> int:
+    def convert_end_try(self, start_address: int,
+                        end_address: Optional[int] = None,
+                        else_address: Optional[int] = None) -> int:
         """
         Converts the end of the try statement
 
         :param start_address: the address of the try first opcode
         :param end_address: the address of the try last opcode. If it is None, there's no except body.
+        :param else_address: the address of the try else. If it is None, there's no else body.
         :return: the last address of the except body
         """
         self.__insert1(OpcodeInfo.ENDTRY)
@@ -603,7 +606,7 @@ class CodeGenerator:
 
             if isinstance(try_vm_code, TryCode):
                 try_vm_code.set_except_code(except_start_code)
-            self._update_jump(end_address, self.last_code_start_address)
+            self._update_jump(else_address if else_address is not None else end_address, self.last_code_start_address)
 
         return self.last_code_start_address
 

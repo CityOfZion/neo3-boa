@@ -23,6 +23,6 @@ class Role(IntFlag):
     NEO_FS_ALPHABET_NODE = 16
     """
     NeoFS Alphabet nodes.
-    
+
     :meta hide-value:
     """
