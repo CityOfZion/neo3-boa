@@ -1,6 +1,8 @@
 from abc import ABC
 from typing import Iterable, Optional, Union
 
+from boa3.model.builtin.internal.internalmethod import IInternalMethod
+
 
 class CompilerError(ABC, BaseException):
     """
@@ -92,6 +94,22 @@ class InternalError(CompilerError):
         if self.raised_exception is not None:
             message += ". {0}: {1}".format(type(self.raised_exception).__name__, str(self.raised_exception))
         return message
+
+
+class InternalIncorrectSignature(CompilerError):
+    """
+    An error raised when an internal method is defined by the user, but with an incorrect signature
+    """
+
+    def __init__(self, line: int, col: int, expected_method: IInternalMethod):
+        self.expected_method: IInternalMethod = expected_method
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "The implementation of '{0}' is different " \
+               "from the expected '{1}'.".format(self.expected_method.raw_identifier,
+                                                 self.expected_method)
 
 
 class MetadataImplementationMissing(CompilerError):

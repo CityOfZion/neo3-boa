@@ -6,6 +6,7 @@ from boa3.model.builtin.classmethod import *
 from boa3.model.builtin.contract import *
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
+from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method import *
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
@@ -168,3 +169,7 @@ class Builtin:
                           UInt256
                           ]
     }
+
+    _internal_methods = [InnerDeployMethod.instance()
+                         ]
+    internal_methods = {method.raw_identifier: method for method in _internal_methods}

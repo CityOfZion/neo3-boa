@@ -165,3 +165,8 @@ class IType(IdentifiedSymbol):
 
         from boa3.model.type.type import Type
         return Type.none
+
+    def is_equal(self, other: Any) -> bool:
+        if not isinstance(other, IType):
+            return False
+        return self.is_type_of(other) and other.is_type_of(self)

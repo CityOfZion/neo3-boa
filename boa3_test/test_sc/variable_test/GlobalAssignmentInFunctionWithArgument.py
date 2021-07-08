@@ -9,3 +9,8 @@ def Main(a: int) -> int:
 
 
 b: int = 0
+
+
+@public
+def get_b() -> int:
+    return b
