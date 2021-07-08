@@ -1,0 +1,2 @@
+from .getpolicycontractscripthashmethod import PolicyContract
+from .policycontractmethod import PolicyContractMethod
