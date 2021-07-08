@@ -28,3 +28,7 @@ class TestBuiltinMethod(BoaTest):
     def test_deploy_def_incorrect_signature(self):
         path = self.get_contract_path('DeployDefWrongSignature.py')
         self.assertCompilerLogs(CompilerError.InternalIncorrectSignature, path)
+
+    def test_will_not_compile(self):
+        path = self.get_contract_path('WillNotCompile.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
