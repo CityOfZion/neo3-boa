@@ -1,6 +1,7 @@
 import ast
 from typing import Dict, List, Tuple
 
+from boa3.model import set_internal_call
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.model.variable import Variable
@@ -18,8 +19,8 @@ class GetNotificationsMethod(InteropMethod):
         uint160 = UInt160Type.build()
 
         args: Dict[str, Variable] = {'script_hash': Variable(uint160)}
-        args_default = ast.parse("{0}()".format(uint160.raw_identifier)
-                                 ).body[0].value
+        args_default = set_internal_call(ast.parse("{0}()".format(uint160.raw_identifier)
+                                                   ).body[0].value)
 
         super().__init__(identifier, syscall, args, [args_default],
                          return_type=Type.list.build([notification_type]))
