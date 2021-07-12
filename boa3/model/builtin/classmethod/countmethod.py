@@ -42,7 +42,7 @@ class CountMethod(IBuiltinMethod):
         from boa3.model.type.collection.sequence.mutable.listtype import ListType
         from boa3.model.type.collection.sequence.tupletype import TupleType
         from boa3.model.type.collection.sequence.rangetype import RangeType
-        if not (isinstance(sequence_type, ListType) or isinstance(sequence_type, TupleType) or isinstance(sequence_type, RangeType)):
+        if not isinstance(sequence_type, (ListType, TupleType, RangeType)):
             return False
         return True
 

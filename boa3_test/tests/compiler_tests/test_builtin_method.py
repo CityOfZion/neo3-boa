@@ -1056,9 +1056,11 @@ class TestBuiltinMethod(BoaTest):
         list_ = [[b'unit', 'test'], [b'unit', b'unit'], [123, 123], [True, False], [True, False]]
         expected_result = list_.count([b'unit', 'test']), list_.count([123, 123]), list_.count([True, False])
 
-        # TODO: uncomment comments when comparison of non primitive types are implemented in an Opcode
-        # result = self.run_smart_contract(engine, path, 'main')
-        # self.assertEqual(expected_result, tuple(result))
+        # TODO: change test when comparison of non primitive types are implemented in the Opcode
+        result = self.run_smart_contract(engine, path, 'main')
+
+        with self.assertRaises(AssertionError):
+            self.assertEqual(expected_result, tuple(result))
 
     def test_count_list_empty(self):
         path = self.get_contract_path('CountListEmpty.py')
@@ -1112,9 +1114,10 @@ class TestBuiltinMethod(BoaTest):
         tuple_ = ([b'unit', 'test'], [b'unit', b'unit'], [123, 123], [True, False], [True, False])
         expected_result = tuple_.count([b'unit', 'test']), tuple_.count([123, 123]), tuple_.count([True, False])
 
-        # TODO: uncomment comments when comparison of non primitive types are implemented in an Opcode
-        # result = self.run_smart_contract(engine, path, 'main')
-        # self.assertEqual(expected_result, tuple(result))
+        # TODO: change test when comparison of non primitive types are implemented in the Opcode
+        result = self.run_smart_contract(engine, path, 'main')
+        with self.assertRaises(AssertionError):
+            self.assertEqual(expected_result, tuple(result))
 
     def test_count_tuple_empty(self):
         path = self.get_contract_path('CountTupleEmpty.py')
@@ -1132,5 +1135,10 @@ class TestBuiltinMethod(BoaTest):
         expected_result = range(10).count(1)
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
+
+    def test_count_str(self):
+        path = self.get_contract_path('CountStr.py')
+        # TODO: change test when str.count(substring, start, end) is implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     # endregion
