@@ -426,6 +426,14 @@ class TestContractInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_create_standard_account_too_few_parameters(self):
+        path = self.get_contract_path('CreateStandardAccountTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_create_standard_account_too_many_parameters(self):
+        path = self.get_contract_path('CreateStandardAccountTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
     def test_get_minimum_deployment_fee(self):
         path = self.get_contract_path('GetMinimumDeploymentFee.py')
         engine = TestEngine()
@@ -436,4 +444,26 @@ class TestContractInterop(BoaTest):
 
     def test_get_minimum_deployment_fee_too_many_parameters(self):
         path = self.get_contract_path('GetMinimumDeploymentFeeTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_create_multisig_account(self):
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00\x02'
+                + Opcode.LDARG1
+                + Opcode.LDARG0
+                + Opcode.SYSCALL
+                + Interop.CreateMultisigAccount.interop_method_hash
+                + Opcode.RET
+        )
+        path = self.get_contract_path('CreateMultisigAccount.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_create_multisig_account_too_few_parameters(self):
+        path = self.get_contract_path('CreateMultisigAccountTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_create_multisig_account_too_many_parameters(self):
+        path = self.get_contract_path('CreateMultisigAccountTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)

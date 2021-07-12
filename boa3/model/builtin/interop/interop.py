@@ -85,6 +85,7 @@ class Interop:
     # Contract Interops
     CallContract = CallMethod()
     CreateContract = CreateMethod(ContractType)
+    CreateMultisigAccount = CreateMultisigAccountMethod()
     CreateStandardAccount = CreateStandardAccountMethod()
     DestroyContract = DestroyMethod()
     GetCallFlags = GetCallFlagsMethod(CallFlagsType)
@@ -224,6 +225,7 @@ class Interop:
                                           ],
                               methods=[CallContract,
                                        CreateContract,
+                                       CreateMultisigAccount,
                                        CreateStandardAccount,
                                        DestroyContract,
                                        GetCallFlags,
