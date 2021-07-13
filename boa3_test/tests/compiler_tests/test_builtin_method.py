@@ -1051,16 +1051,8 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_different_non_primitive_types(self):
         path = self.get_contract_path('CountListDifferentNonPrimitiveTypes.py')
-        engine = TestEngine()
-
-        list_ = [[b'unit', 'test'], [b'unit', b'unit'], [123, 123], [True, False], [True, False]]
-        expected_result = list_.count([b'unit', 'test']), list_.count([123, 123]), list_.count([True, False])
-
         # TODO: change test when comparison of non primitive types are implemented in the Opcode
-        result = self.run_smart_contract(engine, path, 'main')
-
-        with self.assertRaises(AssertionError):
-            self.assertEqual(expected_result, tuple(result))
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_count_list_empty(self):
         path = self.get_contract_path('CountListEmpty.py')
@@ -1109,15 +1101,8 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_different_non_primitive_types(self):
         path = self.get_contract_path('CountTupleDifferentNonPrimitiveTypes.py')
-        engine = TestEngine()
-
-        tuple_ = ([b'unit', 'test'], [b'unit', b'unit'], [123, 123], [True, False], [True, False])
-        expected_result = tuple_.count([b'unit', 'test']), tuple_.count([123, 123]), tuple_.count([True, False])
-
         # TODO: change test when comparison of non primitive types are implemented in the Opcode
-        result = self.run_smart_contract(engine, path, 'main')
-        with self.assertRaises(AssertionError):
-            self.assertEqual(expected_result, tuple(result))
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_count_tuple_empty(self):
         path = self.get_contract_path('CountTupleEmpty.py')

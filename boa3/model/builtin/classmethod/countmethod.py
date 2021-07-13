@@ -28,6 +28,27 @@ class CountMethod(IBuiltinMethod):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
+    @property
+    def _arg_value(self) -> Variable:
+        return self.args['value']
+
+    @property
+    def is_supported(self) -> bool:
+        sequence_type: IType = self._arg_self.type
+        value_type: IType = self._arg_value.type
+
+        # TODO: change when 'str.count()' is supported
+        from boa3.model.type.primitive.strtype import StrType
+        if isinstance(sequence_type, StrType):
+            return False
+
+        # TODO: change when 'sequence.count(list or tuple)' is supported
+        from boa3.model.type.collection.sequence.mutable.listtype import ListType
+        from boa3.model.type.collection.sequence.tupletype import TupleType
+        if isinstance(value_type, (ListType, TupleType)):
+            return False
+        return True
+
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 2:
             return False
