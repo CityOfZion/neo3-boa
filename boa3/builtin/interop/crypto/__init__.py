@@ -51,12 +51,12 @@ def hash256(key: Any) -> bytes:
     pass
 
 
-def check_sig(pub_key: bytes, signature: bytes) -> bool:
+def check_sig(pub_key: ECPoint, signature: bytes) -> bool:
     """
     Checks the signature for the current script container.
 
     :param pub_key: the public key of the account
-    :type pub_key: bytes
+    :type pub_key: ECPoint
     :param signature: the signature of the current script container
     :type signature: bytes
     :return: whether the signature is valid or not
