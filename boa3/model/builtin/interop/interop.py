@@ -103,6 +103,7 @@ class Interop:
 
     # Crypto Interops
     CheckMultisig = CheckMultisigMethod()
+    CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
     Ripemd160 = Ripemd160Method()
@@ -240,6 +241,7 @@ class Interop:
 
     CryptoPackage = Package(identifier=InteropPackage.Crypto,
                             methods=[CheckMultisig,
+                                     CheckSig,
                                      Hash160,
                                      Hash256,
                                      Ripemd160,
