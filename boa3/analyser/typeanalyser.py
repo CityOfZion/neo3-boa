@@ -996,7 +996,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if not isinstance(callable_target, Callable):
             # if the outer call is a builtin, enable call even without the import
-            builtin_symbol = Builtin.get_any_symbol(callable_id)
+            builtin_symbol = Builtin.get_symbol(callable_id)
             if builtin_symbol is not None:
                 callable_target = builtin_symbol
 
