@@ -35,6 +35,5 @@ class NotIdentity(BinaryOperation):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [
-            (Opcode.EQUAL, b''),
-            (Opcode.NOT, b'')
+            (Opcode.NOTEQUAL, b'')
         ]
