@@ -3,20 +3,20 @@ from boa3.builtin import public
 
 @public
 def without_attribution_true() -> bool:
-    a = 1
-    b = 1
+    a = 'unit'
+    b = 'unit'
     return a is b
 
 
 @public
 def without_attribution_false() -> bool:
-    a = 1
-    b = 2
+    a = 'unit'
+    b = 'test'
     return a is b
 
 
 @public
 def with_attribution() -> bool:
-    c = 1
+    c = 'unit'
     d = c
     return c is d
