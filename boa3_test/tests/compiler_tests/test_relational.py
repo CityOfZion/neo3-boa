@@ -151,9 +151,49 @@ class TestRelational(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 2, 1)
         self.assertEqual(True, result)
 
-    def test_identity_operation(self):
+    def test_number_identity_operation(self):
         path = self.get_contract_path('NumIdentity.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+
+        a = 1
+        b = 1
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution_true')
+        self.assertEqual(expected_result, result)
+
+        a = 1
+        b = 2
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution_false')
+        self.assertEqual(expected_result, result)
+
+        c = 1
+        d = c
+        expected_result = c is d
+        result = self.run_smart_contract(engine, path, 'with_attribution')
+        self.assertEqual(expected_result, result)
+
+    def test_number_not_identity_operation(self):
+        path = self.get_contract_path('NumNotIdentity.py')
+        engine = TestEngine()
+
+        a = 1
+        b = 2
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution_true')
+        self.assertEqual(expected_result, result)
+
+        a = 1
+        b = 1
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution_false')
+        self.assertEqual(expected_result, result)
+
+        c = 1
+        d = c
+        expected_result = c is not d
+        result = self.run_smart_contract(engine, path, 'with_attribution')
+        self.assertEqual(expected_result, result)
 
     def test_boolean_equality_operation(self):
         expected_output = (
@@ -196,6 +236,50 @@ class TestRelational(BoaTest):
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(False, result)
+
+    def test_boolean_identity_operation(self):
+        path = self.get_contract_path('BoolIdentity.py')
+        engine = TestEngine()
+
+        a = True
+        b = True
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution_true')
+        self.assertEqual(expected_result, result)
+
+        a = True
+        b = False
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution_false')
+        self.assertEqual(expected_result, result)
+
+        c = True
+        d = c
+        expected_result = c is d
+        result = self.run_smart_contract(engine, path, 'with_attribution')
+        self.assertEqual(expected_result, result)
+
+    def test_boolean_not_identity_operation(self):
+        path = self.get_contract_path('BoolNotIdentity.py')
+        engine = TestEngine()
+
+        a = True
+        b = False
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution_true')
+        self.assertEqual(expected_result, result)
+
+        a = True
+        b = True
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution_false')
+        self.assertEqual(expected_result, result)
+
+        c = True
+        d = c
+        expected_result = c is not d
+        result = self.run_smart_contract(engine, path, 'with_attribution')
+        self.assertEqual(expected_result, result)
 
     def test_multiple_comparisons(self):
         expected_output = (
@@ -360,6 +444,50 @@ class TestRelational(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 'unit', 'test')
         self.assertEqual(False, result)
 
+    def test_string_identity_operation(self):
+        path = self.get_contract_path('StrIdentity.py')
+        engine = TestEngine()
+
+        a = 'unit'
+        b = 'unit'
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution_true')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit'
+        b = 'test'
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution_false')
+        self.assertEqual(expected_result, result)
+
+        c = 'unit'
+        d = c
+        expected_result = c is d
+        result = self.run_smart_contract(engine, path, 'with_attribution')
+        self.assertEqual(expected_result, result)
+
+    def test_string_not_identity_operation(self):
+        path = self.get_contract_path('StrNotIdentity.py')
+        engine = TestEngine()
+
+        a = 'unit'
+        b = 'test'
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution_true')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit'
+        b = 'unit'
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution_false')
+        self.assertEqual(expected_result, result)
+
+        c = 'unit'
+        d = c
+        expected_result = c is not d
+        result = self.run_smart_contract(engine, path, 'with_attribution')
+        self.assertEqual(expected_result, result)
+
     def test_mixed_equality_operation(self):
         expected_output = (
             Opcode.INITSLOT
@@ -422,6 +550,14 @@ class TestRelational(BoaTest):
         path = self.get_contract_path('MixedGreaterOrEqual.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_mixed_identity(self):
+        path = self.get_contract_path('MixedIdentity.py')
+        engine = TestEngine()
+
+        # a mixed identity should always result in False, but will compile
+        result = self.run_smart_contract(engine, path, 'mixed', expected_result_type=bool)
+        self.assertEqual(False, result)
+
     def test_list_equality_with_slice(self):
         path = self.get_contract_path('ListEqualityWithSlice.py')
 
@@ -436,6 +572,38 @@ class TestRelational(BoaTest):
 
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'main', [], '')
+
+    def test_list_identity(self):
+        path = self.get_contract_path('ListIdentity.py')
+        engine = TestEngine()
+
+        a = [1, 2, 3]
+        b = a
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'with_attribution', expected_result_type=bool)
+        self.assertEqual(expected_result, result)
+
+        a = [1, 2, 3]
+        b = [1, 2, 3]
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'without_attribution', expected_result_type=bool)
+        self.assertEqual(expected_result, result)
+
+    def test_list_not_identity(self):
+        path = self.get_contract_path('ListNotIdentity.py')
+        engine = TestEngine()
+
+        a = [1, 2, 3]
+        b = a
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'with_attribution', expected_result_type=bool)
+        self.assertEqual(expected_result, result)
+
+        a = [1, 2, 3]
+        b = [1, 2, 3]
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'without_attribution', expected_result_type=bool)
+        self.assertEqual(expected_result, result)
 
     def test_compare_same_value_hard_coded(self):
         path = self.get_contract_path('CompareSameValueHardCoded.py')
@@ -494,3 +662,71 @@ class TestRelational(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', 7)
         self.assertEqual(False, result)
+
+    def test_none_identity_operation(self):
+        path = self.get_contract_path('NoneIdentity.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'string')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'bytes')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', None)
+        self.assertEqual(True, result)
+
+    def test_none_not_identity_operation(self):
+        path = self.get_contract_path('NoneNotIdentity.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'string')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'bytes')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', None)
+        self.assertEqual(False, result)
+
+    def test_tuple_identity(self):
+        path = self.get_contract_path('TupleIdentity.py')
+        engine = TestEngine()
+
+        a = (1, 2, 3)
+        b = a
+        expected_result = a is b
+        result = self.run_smart_contract(engine, path, 'with_attribution', expected_result_type=bool)
+        self.assertEqual(expected_result, result)
+
+        # Python will try conserve memory and will make a and b reference the same position, since Tuples are immutable
+        # this will deviate from Neo's expected behaviour
+        result = self.run_smart_contract(engine, path, 'without_attribution', expected_result_type=bool)
+        self.assertEqual(False, result)
+
+    def test_tuple_not_identity(self):
+        path = self.get_contract_path('TupleNotIdentity.py')
+        engine = TestEngine()
+
+        a = (1, 2, 3)
+        b = a
+        expected_result = a is not b
+        result = self.run_smart_contract(engine, path, 'with_attribution', expected_result_type=bool)
+        self.assertEqual(expected_result, result)
+
+        # Python will try conserve memory and will make a and b reference the same position, since Tuples are immutable
+        # this will deviate from Neo's expected behaviour
+        result = self.run_smart_contract(engine, path, 'without_attribution', expected_result_type=bool)
+        self.assertEqual(True, result)

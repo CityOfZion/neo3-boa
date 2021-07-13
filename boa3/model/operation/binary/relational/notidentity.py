@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Tuple
 
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType, Type
+from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class NotIdentity(BinaryOperation):
@@ -23,11 +24,7 @@ class NotIdentity(BinaryOperation):
     def validate_type(self, *types: IType) -> bool:
         if len(types) != self.number_of_operands:
             return False
-        left: IType = types[0]
-        right: IType = types[1]
-
-        # TODO: change the logic of the validation when implement other numeric types
-        return left == right and left in self._valid_types
+        return True
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):
@@ -36,6 +33,8 @@ class NotIdentity(BinaryOperation):
             return Type.none
 
     @property
-    def is_supported(self) -> bool:
-        # TODO: change when 'is not' is supported
-        return False
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return [
+            (Opcode.EQUAL, b''),
+            (Opcode.NOT, b'')
+        ]
