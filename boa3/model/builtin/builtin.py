@@ -62,6 +62,7 @@ class Builtin:
     # python class method
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
+    SequenceCount = CountMethod()
     SequenceExtend = ExtendMethod()
     SequenceInsert = InsertMethod()
     SequencePop = PopMethod()
@@ -96,6 +97,7 @@ class Builtin:
                                                 ScriptHash,
                                                 SequenceAppend,
                                                 SequenceClear,
+                                                SequenceCount,
                                                 SequenceExtend,
                                                 SequenceInsert,
                                                 SequencePop,

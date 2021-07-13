@@ -1010,3 +1010,120 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_result, result)
 
     # endregion
+
+    # region count test
+
+    def test_count_list_int(self):
+        path = self.get_contract_path('CountListInt.py')
+        engine = TestEngine()
+
+        list_ = [1, 2, 3, 4, 1, 1, 0]
+        expected_result = list_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_str(self):
+        path = self.get_contract_path('CountListStr.py')
+        engine = TestEngine()
+
+        list_ = ['unit', 'test', 'unit', 'unit', 'random', 'string']
+        expected_result = list_.count('unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_bytes(self):
+        path = self.get_contract_path('CountListBytes.py')
+        engine = TestEngine()
+
+        list_ = [b'unit', b'test', b'unit', b'unit', b'random', b'string']
+        expected_result = list_.count(b'unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_different_types(self):
+        path = self.get_contract_path('CountListDifferentTypes.py')
+        engine = TestEngine()
+
+        list_ = [b'unit', 'test', b'unit', b'unit', 123, 123, True, False]
+        expected_result = list_.count(b'unit'), list_.count('test'), list_.count(123)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, tuple(result))
+
+    def test_count_list_different_non_primitive_types(self):
+        path = self.get_contract_path('CountListDifferentNonPrimitiveTypes.py')
+        # TODO: change test when comparison of non primitive types are implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_count_list_empty(self):
+        path = self.get_contract_path('CountListEmpty.py')
+        engine = TestEngine()
+
+        list_ = []
+        expected_result = list_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_int(self):
+        path = self.get_contract_path('CountTupleInt.py')
+        engine = TestEngine()
+
+        tuple_ = (1, 2, 3, 4, 1, 1, 0)
+        expected_result = tuple_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_str(self):
+        path = self.get_contract_path('CountTupleStr.py')
+        engine = TestEngine()
+
+        tuple_ = ('unit', 'test', 'unit', 'unit', 'random', 'string')
+        expected_result = tuple_.count('unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_bytes(self):
+        path = self.get_contract_path('CountTupleBytes.py')
+        engine = TestEngine()
+
+        tuple_ = (b'unit', b'test', b'unit', b'unit', b'random', b'string')
+        expected_result = tuple_.count(b'unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_different_types(self):
+        path = self.get_contract_path('CountTupleDifferentTypes.py')
+        engine = TestEngine()
+
+        tuple_ = (b'unit', 'test', b'unit', b'unit', 123, 123, True, False)
+        expected_result = tuple_.count(b'unit'), tuple_.count('test'), tuple_.count(123)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, tuple(result))
+
+    def test_count_tuple_different_non_primitive_types(self):
+        path = self.get_contract_path('CountTupleDifferentNonPrimitiveTypes.py')
+        # TODO: change test when comparison of non primitive types are implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_count_tuple_empty(self):
+        path = self.get_contract_path('CountTupleEmpty.py')
+        engine = TestEngine()
+
+        tuple_ = ()
+        expected_result = tuple_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_range(self):
+        path = self.get_contract_path('CountRange.py')
+        engine = TestEngine()
+
+        expected_result = range(10).count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_str(self):
+        path = self.get_contract_path('CountStr.py')
+        # TODO: change test when str.count(substring, start, end) is implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    # endregion
