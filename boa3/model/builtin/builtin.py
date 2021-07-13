@@ -12,7 +12,6 @@ from boa3.model.builtin.method import *
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
-from boa3.model.symbol import ISymbol
 from boa3.model.type.collection.sequence.ecpointtype import ECPointType
 from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
@@ -30,12 +29,6 @@ class Builtin:
     def get_symbol(cls, symbol_id: str) -> Optional[Callable]:
         for method in cls._python_builtins:
             if isinstance(method, IBuiltinCallable) and method.identifier == symbol_id:
-                return method
-
-    @classmethod
-    def get_any_symbol(cls, symbol_id: str) -> Optional[ISymbol]:
-        for method in cls._python_builtins:
-            if isinstance(method, IdentifiedSymbol) and method.identifier == symbol_id:
                 return method
 
     @classmethod
