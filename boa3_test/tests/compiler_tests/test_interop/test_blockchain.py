@@ -17,6 +17,27 @@ class TestBlockchainInterop(BoaTest):
 
     default_folder: str = 'test_sc/interop_test/blockchain'
 
+    def test_block_constructor(self):
+        path = self.get_contract_path('Block.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, list)
+        self.assertEqual(10, len(result))
+        for k in range(len(result)):
+            if isinstance(result[k], str):
+                result[k] = String(result[k]).to_bytes()
+        self.assertEqual(UInt256(), UInt256(result[0]))   # hash
+        self.assertEqual(0, result[1])   # version
+        self.assertEqual(UInt256(), UInt256(result[2]))   # previous_hash
+        self.assertEqual(UInt256(), UInt256(result[3]))   # merkle_root
+        self.assertEqual(0, result[4])   # timestamp
+        self.assertEqual(0, result[5])   # nonce
+        self.assertEqual(0, result[6])   # index
+        self.assertEqual(0, result[7])   # primary_index
+        self.assertEqual(UInt160(), UInt160(result[8]))   # next_consensus
+        self.assertEqual(0, result[9])   # transaction_count
+
     def test_get_current_height(self):
         expected_output = (
             Opcode.SYSCALL
@@ -72,8 +93,8 @@ class TestBlockchainInterop(BoaTest):
         index = 0
         result = self.run_smart_contract(engine, path, 'Main', index)
         self.assertIsInstance(result, list)
-        self.assertEqual(9, len(result))
-        self.assertEqual(index, result[5])
+        self.assertEqual(10, len(result))
+        self.assertEqual(index, result[6])
 
         index = 10
         result = self.run_smart_contract(engine, path, 'Main', index)
@@ -82,8 +103,8 @@ class TestBlockchainInterop(BoaTest):
         engine.increase_block(10)
         result = self.run_smart_contract(engine, path, 'Main', index)
         self.assertIsInstance(result, list)
-        self.assertEqual(9, len(result))
-        self.assertEqual(index, result[5])
+        self.assertEqual(10, len(result))
+        self.assertEqual(index, result[6])
 
     def test_get_block_by_hash(self):
         path = self.get_contract_path('GetBlockByHash.py')
@@ -96,13 +117,13 @@ class TestBlockchainInterop(BoaTest):
 
         from boa3.neo import from_hex_str
         # TODO: using genesis block hash for testing, change when TestEngine returns blocks hashes
-        block_hash = from_hex_str('0xc3db4ba50ede4f9e749bd97e1499953ae17e65a415c6bf9e38c01cf92b03d156')
+        block_hash = from_hex_str('0x1f4d1defa46faa5e7b9b8d3f79a06bec777d7c26c4aa5f6f5899a291daa87c15')
 
         result = self.run_smart_contract(engine, path, 'Main', block_hash)
         self.assertIsInstance(result, list)
-        self.assertEqual(9, len(result))
+        self.assertEqual(10, len(result))
         self.assertEqual(block_hash, result[0])
-        self.assertEqual(0, result[5])  # genesis block's index is zero
+        self.assertEqual(0, result[6])  # genesis block's index is zero
 
     def test_get_block_mismatched_types(self):
         path = self.get_contract_path('GetBlockMismatchedTypes.py')

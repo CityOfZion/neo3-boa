@@ -15,6 +15,8 @@ class Block:
     :vartype merkle_root: UInt256
     :ivar timestamp: UTC timestamp of the block in milliseconds
     :vartype timestamp: int
+    :ivar nonce: a random number used once in the cryptography
+    :vartype nonce: int
     :ivar index: the index of the block
     :vartype index: int
     :ivar primary_index: the primary index of the consensus node that generated this block
@@ -31,6 +33,7 @@ class Block:
         self.previous_hash: UInt256 = UInt256()
         self.merkle_root: UInt256 = UInt256()
         self.timestamp: int = 0
+        self.nonce: int = 0
         self.index: int = 0
         self.primary_index: int = 0
         self.next_consensus: UInt160 = UInt160()
