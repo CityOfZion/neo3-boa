@@ -30,6 +30,7 @@ class BlockType(ClassArrayType):
             'previous_hash': Variable(uint256),
             'merkle_root': Variable(uint256),
             'timestamp': Variable(Type.int),
+            'nonce': Variable(Type.int),
             'index': Variable(Type.int),
             'primary_index': Variable(Type.int),
             'next_consensus': Variable(UInt160Type.build()),
@@ -94,12 +95,13 @@ class BlockMethod(IBuiltinMethod):
             (Opcode.PUSHDATA1, uint160_default),  # next_consensus
             (Opcode.PUSH0, b''),  # primary_index
             (Opcode.PUSH0, b''),  # index
+            (Opcode.PUSH0, b''),  # nonce
             (Opcode.PUSH0, b''),  # timestamp
             (Opcode.PUSHDATA1, uint256_default),  # merkle_root
             (Opcode.PUSHDATA1, uint256_default),  # previous_hash
             (Opcode.PUSH0, b''),  # version
             (Opcode.PUSHDATA1, uint256_default),  # hash
-            (Opcode.PUSH9, b''),
+            (Opcode.PUSH10, b''),
             (Opcode.PACK, b'')
         ]
 
