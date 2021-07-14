@@ -618,6 +618,17 @@ class TestRuntimeInterop(BoaTest):
             result[6] = String(result[6]).to_bytes()
         self.assertIsInstance(result[7], bytes)
 
+    def test_get_network(self):
+        path = self.get_contract_path('GetNetwork.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(5195086, result)   # Neo3 main net's magic number
+
+    def test_get_network_too_many_parameters(self):
+        path = self.get_contract_path('GetNetworkTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
     def test_import_runtime(self):
         path = self.get_contract_path('ImportRuntime.py')
         engine = TestEngine()
