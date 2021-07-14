@@ -76,9 +76,9 @@ def burn_gas(gas: int):
 
 def get_random() -> int:
     """
-    Gets a random number.
+    Gets the next random number.
 
-    :return: the random number
+    :return: the next random number
     :rtype: int
     """
     pass
