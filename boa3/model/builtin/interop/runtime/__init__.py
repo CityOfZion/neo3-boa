@@ -6,6 +6,7 @@ __all__ = ['BlockTimeProperty',
            'ExecutingScriptHashProperty',
            'GasLeftProperty',
            'GetNotificationsMethod',
+           'GetRandomMethod',
            'InvocationCounterProperty',
            'LogMethod',
            'NotificationType',
@@ -26,6 +27,7 @@ from boa3.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
 from boa3.model.builtin.interop.runtime.getinvocationcountermethod import InvocationCounterProperty
 from boa3.model.builtin.interop.runtime.getnotificationsmethod import GetNotificationsMethod
 from boa3.model.builtin.interop.runtime.getplatformmethod import PlatformProperty
+from boa3.model.builtin.interop.runtime.getrandommethod import GetRandomMethod
 from boa3.model.builtin.interop.runtime.gettriggermethod import GetTriggerMethod
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notificationtype import NotificationType

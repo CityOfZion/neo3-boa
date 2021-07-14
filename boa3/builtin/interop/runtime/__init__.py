@@ -74,6 +74,16 @@ def burn_gas(gas: int):
     pass
 
 
+def get_random() -> int:
+    """
+    Gets a random number.
+
+    :return: the random number
+    :rtype: int
+    """
+    pass
+
+
 executing_script_hash: UInt160 = UInt160()
 """
 Gets the script hash of the current context.
