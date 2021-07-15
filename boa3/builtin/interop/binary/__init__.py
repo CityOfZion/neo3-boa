@@ -128,9 +128,9 @@ def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int =
     Searches for a given value in a given memory.
 
     :param mem: the memory
-    :type mem: bytes
+    :type mem: bytes or str
     :param value: the value
-    :type value: bytes
+    :type value: bytes or str
     :param start: the index the search should start from
     :type start: int
     :param backward: whether it should invert the memory
