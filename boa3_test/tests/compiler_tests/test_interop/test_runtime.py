@@ -631,3 +631,14 @@ class TestRuntimeInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertIsInstance(result, int)
+
+    def test_get_random(self):
+        path = self.get_contract_path('GetRandom.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)
+
+    def test_get_random_too_many_parameters(self):
+        path = self.get_contract_path('GetRandomTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
