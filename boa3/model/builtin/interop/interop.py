@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Dict, List
 
-from boa3.model.builtin.interop.binary import *
 from boa3.model.builtin.interop.blockchain import *
 from boa3.model.builtin.interop.contract import *
 from boa3.model.builtin.interop.contract.contractmanifest import *
@@ -13,13 +12,13 @@ from boa3.model.builtin.interop.oracle import *
 from boa3.model.builtin.interop.policy import *
 from boa3.model.builtin.interop.role import *
 from boa3.model.builtin.interop.runtime import *
+from boa3.model.builtin.interop.stdlib import *
 from boa3.model.builtin.interop.storage import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 
 
 class InteropPackage(str, Enum):
-    Binary = 'binary'
     Blockchain = 'blockchain'
     Contract = 'contract'
     Crypto = 'crypto'
@@ -29,6 +28,7 @@ class InteropPackage(str, Enum):
     Policy = 'policy'
     Role = 'role'
     Runtime = 'runtime'
+    Stdlib = 'stdlib'
     Storage = 'storage'
 
 
@@ -61,20 +61,6 @@ class Interop:
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
     TriggerType = TriggerType()
-
-    # Binary Interops
-    Atoi = AtoiMethod()
-    Base58CheckDecode = Base58CheckDecodeMethod()
-    Base58CheckEncode = Base58CheckEncodeMethod()
-    Base58Encode = Base58EncodeMethod()
-    Base58Decode = Base58DecodeMethod()
-    Base64Encode = Base64EncodeMethod()
-    Base64Decode = Base64DecodeMethod()
-    Deserialize = DeserializeMethod()
-    Itoa = ItoaMethod()
-    MemoryCompare = MemoryCompareMethod()
-    MemorySearch = MemorySearchMethod()
-    Serialize = SerializeMethod()
 
     # Blockchain Interops
     CurrentHash = CurrentHashProperty()
@@ -149,6 +135,20 @@ class Interop:
     Platform = PlatformProperty()
     ScriptContainer = ScriptContainerProperty()
 
+    # Stdlib Interops
+    Atoi = AtoiMethod()
+    Base58CheckDecode = Base58CheckDecodeMethod()
+    Base58CheckEncode = Base58CheckEncodeMethod()
+    Base58Encode = Base58EncodeMethod()
+    Base58Decode = Base58DecodeMethod()
+    Base64Encode = Base64EncodeMethod()
+    Base64Decode = Base64DecodeMethod()
+    Deserialize = DeserializeMethod()
+    Itoa = ItoaMethod()
+    MemoryCompare = MemoryCompareMethod()
+    MemorySearch = MemorySearchMethod()
+    Serialize = SerializeMethod()
+
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
     StorageFind = StorageFindMethod(FindOptionsType)
@@ -160,22 +160,6 @@ class Interop:
     # endregion
 
     # region Packages
-
-    BinaryPackage = Package(identifier=InteropPackage.Binary,
-                            methods=[Atoi,
-                                     Base58CheckDecode,
-                                     Base58CheckEncode,
-                                     Base58Encode,
-                                     Base58Decode,
-                                     Base64Encode,
-                                     Base64Decode,
-                                     Deserialize,
-                                     Itoa,
-                                     MemoryCompare,
-                                     MemorySearch,
-                                     Serialize
-                                     ]
-                            )
 
     BlockModule = Package(identifier=BlockType.identifier.lower(),
                           types=[BlockType]
@@ -337,9 +321,27 @@ class Interop:
     FindOptionsModule = Package(identifier=FindOptionsType.identifier.lower(),
                                 types=[FindOptionsType]
                                 )
+
+    StdlibPackage = Package(identifier=InteropPackage.Stdlib,
+                            methods=[Atoi,
+                                     Base58CheckDecode,
+                                     Base58CheckEncode,
+                                     Base58Encode,
+                                     Base58Decode,
+                                     Base64Encode,
+                                     Base64Decode,
+                                     Deserialize,
+                                     Itoa,
+                                     MemoryCompare,
+                                     MemorySearch,
+                                     Serialize
+                                     ]
+                            )
+
     StorageContextModule = Package(identifier=StorageContextType.identifier.lower(),
                                    types=[StorageContextType]
                                    )
+
     StorageMapModule = Package(identifier=StorageMapType.identifier.lower(),
                                types=[StorageMapType]
                                )
@@ -365,7 +367,7 @@ class Interop:
     # endregion
 
     package_symbols: List[IdentifiedSymbol] = [
-        BinaryPackage,
+        OracleType,
         BlockchainPackage,
         ContractPackage,
         CryptoPackage,
@@ -375,6 +377,7 @@ class Interop:
         PolicyPackage,
         RolePackage,
         RuntimePackage,
+        StdlibPackage,
         StoragePackage
     ]
 
