@@ -13,8 +13,8 @@ class MemorySearchMethod(StdLibMethod):
         identifier = 'memory_search'
         native_identifier = 'memorySearch'
         args: Dict[str, Variable] = {
-            'mem': Type.union.build([Type.str, Type.bytes]),
-            'value': Type.union.build([Type.str, Type.bytes]),
+            'mem': Variable(Type.union.build([Type.str, Type.bytes])),
+            'value': Variable(Type.union.build([Type.str, Type.bytes])),
             'start': Variable(Type.int),
             'backward': Variable(Type.bool),
         }

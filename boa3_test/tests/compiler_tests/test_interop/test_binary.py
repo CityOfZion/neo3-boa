@@ -429,6 +429,9 @@ class TestBinaryInterop(BoaTest):
         path = self.get_contract_path('MemorySearch')
         engine = TestEngine()
 
+        result = self.run_smart_contract(engine, path, 'main', 'abcde', 'a', 0, False)
+        self.assertEqual(0, result)
+
         result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 0, False)
         self.assertEqual(0, result)
 
@@ -462,6 +465,9 @@ class TestBinaryInterop(BoaTest):
     def test_memory_search_backward(self):
         path = self.get_contract_path('MemorySearch')
         engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'abcde', 'a', 5, True)
+        self.assertEqual(0, result)
 
         result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 5, True)
         self.assertEqual(0, result)
@@ -497,6 +503,9 @@ class TestBinaryInterop(BoaTest):
         path = self.get_contract_path('MemorySearchStart')
         engine = TestEngine()
 
+        result = self.run_smart_contract(engine, path, 'main', 'abcde', 'a', 0)
+        self.assertEqual(0, result)
+
         result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 0)
         self.assertEqual(0, result)
 
@@ -521,6 +530,9 @@ class TestBinaryInterop(BoaTest):
     def test_memory_search_default_values(self):
         path = self.get_contract_path('MemorySearchDefault')
         engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'abcde', 'a')
+        self.assertEqual(0, result)
 
         result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a')
         self.assertEqual(0, result)
