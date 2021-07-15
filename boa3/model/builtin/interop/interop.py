@@ -72,6 +72,7 @@ class Interop:
     Base64Decode = Base64DecodeMethod()
     Deserialize = DeserializeMethod()
     Itoa = ItoaMethod()
+    MemorySearch = MemorySearchMethod()
     Serialize = SerializeMethod()
 
     # Blockchain Interops
@@ -169,6 +170,7 @@ class Interop:
                                      Base64Decode,
                                      Deserialize,
                                      Itoa,
+                                     MemorySearch,
                                      Serialize
                                      ]
                             )
