@@ -4,7 +4,7 @@ from boa3.model.builtin.interop.nativecontract import OracleMethod
 from boa3.model.variable import Variable
 
 
-class OracleRequesMethod(OracleMethod):
+class OracleRequestMethod(OracleMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type

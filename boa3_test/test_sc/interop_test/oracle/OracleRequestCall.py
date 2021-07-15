@@ -1,7 +1,7 @@
 from typing import Any, Union
 
 from boa3.builtin import public
-from boa3.builtin.interop import Oracle
+from boa3.builtin.interop.oracle import Oracle, OracleResponseCode
 
 
 @public
@@ -10,5 +10,5 @@ def oracle_call(url: str, request_filter: Union[str, None], callback: str, user_
 
 
 @public
-def test_callback(requested_url: str, user_data: Any, code: int, request_result: bytes):
+def test_callback(requested_url: str, user_data: Any, code: int, request_result: OracleResponseCode):
     return

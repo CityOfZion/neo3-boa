@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Dict, List
 
-from boa3.model.builtin.interop import *
 from boa3.model.builtin.interop.binary import *
 from boa3.model.builtin.interop.blockchain import *
 from boa3.model.builtin.interop.contract import *
@@ -10,6 +9,7 @@ from boa3.model.builtin.interop.crypto import *
 from boa3.model.builtin.interop.iterator import *
 from boa3.model.builtin.interop.json import *
 from boa3.model.builtin.interop.nativecontract import *
+from boa3.model.builtin.interop.oracle import *
 from boa3.model.builtin.interop.policy import *
 from boa3.model.builtin.interop.role import *
 from boa3.model.builtin.interop.runtime import *
@@ -25,6 +25,7 @@ class InteropPackage(str, Enum):
     Crypto = 'crypto'
     Iterator = 'iterator'
     Json = 'json'
+    Oracle = 'oracle'
     Policy = 'policy'
     Role = 'role'
     Runtime = 'runtime'
@@ -53,6 +54,7 @@ class Interop:
     FindOptionsType = FindOptionsType()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
+    OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleType.build()
     RoleType = RoleType.build()
     StorageContextType = StorageContextType.build()
@@ -267,6 +269,23 @@ class Interop:
                                  types=[NotificationType]
                                  )
 
+    OracleResponseCodeModule = Package(identifier=OracleResponseCode.identifier.lower(),
+                                       types=[OracleResponseCode]
+                                       )
+
+    OracleModule = Package(identifier=OracleType.identifier.lower(),
+                           types=[OracleType]
+                           )
+
+    OraclePackage = Package(identifier=InteropPackage.Oracle,
+                            types=[OracleResponseCode,
+                                   OracleType
+                                   ],
+                            packages=[OracleModule,
+                                      OracleResponseCodeModule
+                                      ]
+                            )
+
     TriggerTypeModule = Package(identifier=TriggerType.identifier.lower(),
                                 types=[TriggerType]
                                 )
@@ -342,13 +361,13 @@ class Interop:
     # endregion
 
     package_symbols: List[IdentifiedSymbol] = [
-        OracleType,
         BinaryPackage,
         BlockchainPackage,
         ContractPackage,
         CryptoPackage,
         IteratorPackage,
         JsonPackage,
+        OraclePackage,
         PolicyPackage,
         RolePackage,
         RuntimePackage,
