@@ -135,6 +135,7 @@ class Interop:
     EntryScriptHash = EntryScriptHashProperty()
     ExecutingScriptHash = ExecutingScriptHashProperty()
     GasLeft = GasLeftProperty()
+    GetNetwork = GetNetworkMethod()
     GetNotifications = GetNotificationsMethod(NotificationType)
     GetRandom = GetRandomMethod()
     GetTrigger = GetTriggerMethod(TriggerType)
@@ -298,6 +299,7 @@ class Interop:
                                          ],
                              methods=[BurnGas,
                                       CheckWitness,
+                                      GetNetwork,
                                       GetNotifications,
                                       GetRandom,
                                       GetTrigger,
