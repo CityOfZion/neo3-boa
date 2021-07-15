@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 
 def base58_encode(key: bytes) -> str:
@@ -123,7 +123,7 @@ def itoa(value: int, base: int = 10) -> str:
     pass
 
 
-def memory_search(mem: bytes, value: bytes, start: int = 0, backward: bool = False) -> int:
+def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int = 0, backward: bool = False) -> int:
     """
     Searches for a given value in a given memory.
 
