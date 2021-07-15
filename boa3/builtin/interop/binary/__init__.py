@@ -140,3 +140,18 @@ def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int =
     :rtype: int
     """
     pass
+
+
+def memory_compare(mem1: Union[bytes, str], mem2: Union[bytes, str]) -> int:
+    """
+    Compares a memory with another one.
+
+    :param mem1: a memory to be compared to another one
+    :type mem1: bytes or str
+    :param mem2: a memory that will be compared with another one
+    :type mem2: bytes or str
+
+    :return: -1 if mem1 precedes mem2, 0 if mem1 and mem2 are equal, 1 if mem1 follows mem2
+    :rtype: int
+    """
+    pass

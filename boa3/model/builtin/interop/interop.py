@@ -72,6 +72,7 @@ class Interop:
     Base64Decode = Base64DecodeMethod()
     Deserialize = DeserializeMethod()
     Itoa = ItoaMethod()
+    MemoryCompare = MemoryCompareMethod()
     MemorySearch = MemorySearchMethod()
     Serialize = SerializeMethod()
 
@@ -170,6 +171,7 @@ class Interop:
                                      Base64Decode,
                                      Deserialize,
                                      Itoa,
+                                     MemoryCompare,
                                      MemorySearch,
                                      Serialize
                                      ]

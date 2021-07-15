@@ -566,3 +566,37 @@ class TestBinaryInterop(BoaTest):
     def test_memory_search_too_many_parameters(self):
         path = self.get_contract_path('MemorySearchTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_memory_compare(self):
+        path = self.get_contract_path('MemoryCompare')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 'abc', 'abc')
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'abc', 'ABC')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'ABC', 'abc')
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abc', b'abc')
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abc', b'ABC')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'ABC', b'abc')
+        self.assertEqual(-1, result)
+
+    def test_memory_compare_too_few_parameters(self):
+        path = self.get_contract_path('MemoryCompareTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_memory_compare_too_many_parameters(self):
+        path = self.get_contract_path('MemoryCompareTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_memory_compare_mismatched_type(self):
+        path = self.get_contract_path('MemoryCompareMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
