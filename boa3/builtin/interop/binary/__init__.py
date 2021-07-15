@@ -121,3 +121,22 @@ def itoa(value: int, base: int = 10) -> str:
     :rtype: int
     """
     pass
+
+
+def memory_search(mem: bytes, value: bytes, start: int = 0, backward: bool = False) -> int:
+    """
+    Searches for a given value in a given memory.
+
+    :param mem: the memory
+    :type mem: bytes
+    :param value: the value
+    :type value: bytes
+    :param start: the index the search should start from
+    :type start: int
+    :param backward: whether it should invert the memory
+    :type backward: bool
+
+    :return: the index of the value in the memory. Returns -1 if it's not found
+    :rtype: int
+    """
+    pass

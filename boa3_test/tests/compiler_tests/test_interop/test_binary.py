@@ -424,3 +424,133 @@ class TestBinaryInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', '10', 16)
         self.assertEqual(16, result)
+
+    def test_memory_search(self):
+        path = self.get_contract_path('MemorySearch')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 0, False)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'b', 0, False)
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'c', 0, False)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'd', 0, False)
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'e', 0, False)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 1, False)
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'cd', 0, False)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'abe', 0, False)
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'aaaaa', b'a', 0, False)
+        self.assertEqual(0, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 20, False)
+
+    def test_memory_search_backward(self):
+        path = self.get_contract_path('MemorySearch')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 5, True)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'b', 5, True)
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'c', 5, True)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'd', 5, True)
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'e', 5, True)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 0, True)
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'cd', 5, True)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'abe', 5, True)
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'aaaaa', b'a', 5, True)
+        self.assertEqual(4, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 20, True)
+
+    def test_memory_search_start(self):
+        path = self.get_contract_path('MemorySearchStart')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 0)
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'e', 0)
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 1)
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'cd', 0)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'abe', 0)
+        self.assertEqual(-1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'aaaaa', b'a', 0)
+        self.assertEqual(0, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+            self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 20)
+
+    def test_memory_search_default_values(self):
+        path = self.get_contract_path('MemorySearchDefault')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'a')
+        self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'b')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'c')
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'd')
+        self.assertEqual(3, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'e')
+        self.assertEqual(4, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'cd')
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'abcde', b'aa')
+        self.assertEqual(-1, result)
+
+    def test_memory_search_mismatched_type(self):
+        path = self.get_contract_path('MemorySearchMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_memory_search_too_few_parameters(self):
+        path = self.get_contract_path('MemorySearchTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_memory_search_too_many_parameters(self):
+        path = self.get_contract_path('MemorySearchTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
