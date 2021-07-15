@@ -32,12 +32,12 @@ class OracleType(ClassArrayType):
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
         from boa3.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
-        from boa3.model.builtin.interop.oracle.oraclerequesmethod import OracleRequesMethod
+        from boa3.model.builtin.interop.oracle.oraclerequestmethod import OracleRequestMethod
 
         if len(self._class_methods) == 0:
             self._class_methods = {
                 'get_price': OracleGetPriceMethod(),
-                'request': OracleRequesMethod()
+                'request': OracleRequestMethod()
             }
         return self._class_methods
 

@@ -11,7 +11,7 @@ from boa3_test.tests.test_classes.transactionattribute.oracleresponse import Ora
 
 
 class TestNativeContracts(BoaTest):
-    default_folder: str = 'test_sc/interop_test/native_contracts'
+    default_folder: str = 'test_sc/interop_test/oracle'
 
     def test_oracle_request(self):
         path = self.get_contract_path('OracleRequestCall.py')
