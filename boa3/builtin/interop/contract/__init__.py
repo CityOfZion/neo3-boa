@@ -1,4 +1,4 @@
-from typing import Any, Sequence, List
+from typing import Any, List, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract

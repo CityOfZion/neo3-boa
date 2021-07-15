@@ -1,7 +1,5 @@
 from typing import Any, Union
 
-from boa3.builtin.interop.oracle.oracleresponsecode import OracleResponseCode
-
 
 class Oracle:
     """

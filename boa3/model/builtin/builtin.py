@@ -139,6 +139,7 @@ class Builtin:
                                             ]
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
+        'supported_standards': list,
         'author': (str, type(None)),
         'email': (str, type(None)),
         'description': (str, type(None)),

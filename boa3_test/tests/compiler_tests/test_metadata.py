@@ -157,3 +157,20 @@ class TestMetadata(BoaTest):
         self.assertEqual(True, manifest['extra']['unittest3'])
         self.assertIn('unittest4', manifest['extra'])
         self.assertEqual(['list', 3210], manifest['extra']['unittest4'])
+
+    def test_metadata_info_supported_standards(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandards.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_missing_implementations(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementation.py')
+        self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
+
+    def test_metadata_info_supported_standards_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

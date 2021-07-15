@@ -16,21 +16,21 @@ class OracleResponseCode(IntFlag):
     PROTOCOL_NOT_SUPPORTED = 0x10
     """
     Indicates that the protocol of the request is not supported.
-    
+
     :meta hide-value:
     """
 
     CONSENSUS_UNREACHABLE = 0x12
     """
     Indicates that the oracle nodes cannot reach a consensus on the result of the request.
-    
+
     :meta hide-value:
     """
 
     NOT_FOUND = 0x14
     """
     Indicates that the requested Uri does not exist.
-    
+
     :meta hide-value:
     """
 
@@ -65,7 +65,7 @@ class OracleResponseCode(IntFlag):
     CONTENT_TYPE_NOT_SUPPORTED = 0x1F
     """
     Indicates that the content-type of the request is not supported.
-    
+
     :meta hide-value:
     """
 

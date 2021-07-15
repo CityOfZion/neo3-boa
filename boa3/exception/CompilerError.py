@@ -2,6 +2,8 @@ from abc import ABC
 from typing import Iterable, Optional, Union
 
 from boa3.model.builtin.internal.internalmethod import IInternalMethod
+from boa3.model.event import Event
+from boa3.model.method import Method
 
 
 class CompilerError(ABC, BaseException):
@@ -159,7 +161,8 @@ class MetadataInformationMissing(CompilerError):
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "'{0}' requires '{1}' attribute, which is missing in the metadata".format(self.symbol_id, self.metadata_attr_id)
+        return "'{0}' requires '{1}' attribute, which is missing in the metadata".format(self.symbol_id,
+                                                                                         self.metadata_attr_id)
 
 
 class MismatchedTypes(CompilerError):
@@ -167,7 +170,8 @@ class MismatchedTypes(CompilerError):
     An error raised when the evaluated and expected types are not the same
     """
 
-    def __init__(self, line: int, col: int, expected_type_id: Union[str, Iterable[str]], actual_type_id: Union[str, Iterable[str]]):
+    def __init__(self, line: int, col: int, expected_type_id: Union[str, Iterable[str]],
+                 actual_type_id: Union[str, Iterable[str]]):
         if isinstance(expected_type_id, str):
             expected_type_id = [expected_type_id]
         if isinstance(actual_type_id, str):
@@ -196,6 +200,29 @@ class MissingReturnStatement(CompilerError):
     @property
     def _error_message(self) -> Optional[str]:
         return "'%s': Missing return statement" % self.symbol_id
+
+
+class MissingStandardDefinition(CompilerError):
+    """
+    An error raised when a contract standard is defined in the metadata and are required symbols missing
+    """
+
+    def __init__(self, standard_id: str, symbol_id: str, symbol: Union[Method, Event]):
+        self.standard = standard_id
+        self.symbol_id = symbol_id
+        self.symbol = symbol
+        super().__init__(0, 0)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "'{0}': Missing '{1}' {2} definition '{3}'".format(self.standard,
+                                                                  self.symbol_id,
+                                                                  self.symbol.shadowing_name,
+                                                                  self.symbol)
+
+    @property
+    def message(self) -> str:
+        return self._error_message
 
 
 class NotSupportedOperation(CompilerError):
@@ -270,7 +297,8 @@ class UnresolvedOperation(CompilerError):
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "Unresolved reference: '%s' does not have a definition of '%s' operator" % (self.type_id, self.operation_id)
+        return "Unresolved reference: '{0}' does not have a definition of '{1}' operator".format(self.type_id,
+                                                                                                 self.operation_id)
 
 
 class TooManyReturns(CompilerError):

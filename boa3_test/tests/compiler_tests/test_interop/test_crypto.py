@@ -11,7 +11,6 @@ from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 
 
 class TestCryptoInterop(BoaTest):

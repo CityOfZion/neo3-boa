@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any, List
 
 from boa3.builtin.interop.contract import create_multisig_account
 from boa3.builtin.type import ECPoint, UInt160
