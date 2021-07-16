@@ -448,13 +448,13 @@ class TestContractInterop(BoaTest):
 
     def test_create_multisig_account(self):
         expected_output = (
-                Opcode.INITSLOT
-                + b'\x00\x02'
-                + Opcode.LDARG1
-                + Opcode.LDARG0
-                + Opcode.SYSCALL
-                + Interop.CreateMultisigAccount.interop_method_hash
-                + Opcode.RET
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CreateMultisigAccount.interop_method_hash
+            + Opcode.RET
         )
         path = self.get_contract_path('CreateMultisigAccount.py')
         output = Boa3.compile(path)

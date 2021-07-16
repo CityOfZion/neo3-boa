@@ -1,4 +1,4 @@
-from typing import Tuple, List, Any
+from typing import Any, List, Tuple
 
 from boa3.builtin import public
 

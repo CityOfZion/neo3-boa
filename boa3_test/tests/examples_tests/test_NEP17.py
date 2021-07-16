@@ -18,7 +18,12 @@ class TestNEP17Template(BoaTest):
 
     def test_nep17_compile(self):
         path = self.get_contract_path('NEP17.py')
-        Boa3.compile(path)
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
 
     def test_nep17_deploy(self):
         path = self.get_contract_path('NEP17.py')

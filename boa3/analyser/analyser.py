@@ -8,6 +8,7 @@ from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.astoptimizer import AstOptimizer
 from boa3.analyser.constructanalyser import ConstructAnalyser
 from boa3.analyser.moduleanalyser import ModuleAnalyser
+from boa3.analyser.supportedstandard.standardanalyser import StandardAnalyser
 from boa3.analyser.typeanalyser import TypeAnalyser
 from boa3.builtin import NeoMetadata
 from boa3.exception.CompilerError import CompilerError
@@ -60,6 +61,9 @@ class Analyser:
         # fill symbol table
         if not analyser.__analyse_modules(analysed_files):
             return analyser
+        # check if standards are correctly implemented
+        if not analyser.__check_standards():
+            return analyser
         # check is the types are correct
         if not analyser.__check_types():
             return analyser
@@ -107,6 +111,16 @@ class Analyser:
         self.ast_tree.body.extend(module_analyser.imported_nodes)
         self.__update_logs(module_analyser)
         return not module_analyser.has_errors
+
+    def __check_standards(self) -> bool:
+        """
+        Verify if the standards included in the metadata are fully implemented
+
+        :return: a boolean value that represents if the analysis was successful
+        """
+        standards_analyser = StandardAnalyser(self, self.symbol_table, log=self._log)
+        self.__update_logs(standards_analyser)
+        return not standards_analyser.has_errors
 
     def __update_logs(self, analyser: IAstAnalyser):
         self._errors.extend(analyser.errors)

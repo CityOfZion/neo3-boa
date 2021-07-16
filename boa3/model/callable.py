@@ -115,3 +115,12 @@ class Callable(IExpression, ABC):
         else:
             from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
             return VMCodeMapping.instance().get_end_address(self.end_bytecode)
+
+    def __str__(self) -> str:
+        args_types: List[str] = [str(arg.type) for arg in self.args.values()]
+        if self.return_type is not Type.none:
+            signature = '({0}) -> {1}'.format(', '.join(args_types), self.return_type)
+        else:
+            signature = '({0})'.format(', '.join(args_types))
+        public = 'public ' if self.is_public else ''
+        return '{0}{1}'.format(public, signature)
