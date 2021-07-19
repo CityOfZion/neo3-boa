@@ -41,3 +41,61 @@ class TestRoleInterop(BoaTest):
         path = self.get_contract_path('GetDesignatedByRole.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_import_role(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getDesignatedByRole').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.ROLE_MANAGEMENT)).to_byte_array()
+            + constants.ROLE_MANAGEMENT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('ImportRole.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_import_interop_role(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getDesignatedByRole').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.ROLE_MANAGEMENT)).to_byte_array()
+            + constants.ROLE_MANAGEMENT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('ImportInteropRole.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
