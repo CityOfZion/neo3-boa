@@ -472,7 +472,7 @@
 - <a href="/boa3_test/test_sc/function_test/CallVoidFunctionWithStarredArgument.py">CallVoidFunctionWithStarredArgument.py</a>,
 - <a href="/boa3_test/test_sc/function_test/ReturnStarredArgumentCount.py">ReturnStarredArgumentCount.py</a>
 
-### Import
+#### Import
 
 - <a href="/boa3_test/test_sc/interop_test/binary/ImportBinary.py">ImportBinary.py</a>,
 - <a href="/boa3_test/test_sc/interop_test/blockchain/ImportBlockchain.py">ImportBlockchain.py</a>,
@@ -535,7 +535,7 @@
 - <a href="/boa3_test/test_sc/built_in_methods_test/MinIntMoreArguments.py">MinIntMoreArguments.py</a>,
 - <a href="/boa3_test/test_sc/built_in_methods_test/MaxIntMoreArguments.py">MaxIntMoreArguments.py</a>
 
-### Import
+#### Import
 - <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImports.py">GenerationWithUserModuleImports.py</a>,
 - <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImportsDupNames.py">GenerationWithUserModuleImportsDupNames.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedSymbols.py">ImportUserModuleWithNotImportedSymbols.py</a>,
