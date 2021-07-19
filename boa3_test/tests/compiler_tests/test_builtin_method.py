@@ -990,6 +990,38 @@ class TestBuiltinMethod(BoaTest):
 
         string = '1#2#3#4'
         separator = '#'
+        maxsplit = 2
+        expected_result = string.split(separator, maxsplit)
+        result = self.run_smart_contract(engine, path, 'main', string, separator, maxsplit)
+        self.assertEqual(expected_result, result)
+
+        string = '1#2#3#4'
+        separator = '#'
+        maxsplit = 1
+        expected_result = string.split(separator, maxsplit)
+        result = self.run_smart_contract(engine, path, 'main', string, separator, maxsplit)
+        self.assertEqual(expected_result, result)
+
+        string = '1#2#3#4'
+        separator = '#'
+        maxsplit = 0
+        expected_result = string.split(separator, maxsplit)
+        result = self.run_smart_contract(engine, path, 'main', string, separator, maxsplit)
+        self.assertEqual(expected_result, result)
+
+        string = 'unit123test123str123split'
+        separator = '123'
+        maxsplit = 1
+        expected_result = string.split(separator, maxsplit)
+        result = self.run_smart_contract(engine, path, 'main', string, separator, maxsplit)
+        self.assertEqual(expected_result, result)
+
+    def test_str_split_maxsplit_default(self):
+        path = self.get_contract_path('StrSplitMaxsplitDefault.py')
+        engine = TestEngine()
+
+        string = '1#2#3#4'
+        separator = '#'
         expected_result = string.split(separator)
         result = self.run_smart_contract(engine, path, 'main', string, separator)
         self.assertEqual(expected_result, result)
