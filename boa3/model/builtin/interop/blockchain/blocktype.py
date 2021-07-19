@@ -6,12 +6,12 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class BlockType(ClassType):
+class BlockType(ClassArrayType):
     """
     A class used to represent Neo Block class
     """

@@ -27,6 +27,7 @@ class Method(Callable):
 
         self.imported_symbols = {}
         self._symbols = {}
+        self.defined_by_entry = True
         self.locals: Dict[str, Variable] = {}
 
         self._debug_map: List[DebugInstruction] = []
@@ -48,15 +49,6 @@ class Method(Callable):
                 self._symbols[var_id] = var
             else:
                 self.locals[var_id] = var
-
-    def __str__(self) -> str:
-        args_types: List[str] = [str(arg.type) for arg in self.args.values()]
-        if self.return_type is not Type.none:
-            signature = '({0}) -> {1}'.format(', '.join(args_types), self.return_type)
-        else:
-            signature = '({0})'.format(', '.join(args_types))
-        public = 'public ' if self.is_public else ''
-        return '{0}{1}'.format(public, signature)
 
     @property
     def symbols(self) -> Dict[str, Variable]:

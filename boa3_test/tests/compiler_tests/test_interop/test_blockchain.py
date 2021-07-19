@@ -1,6 +1,6 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import LEDGER_SCRIPT
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -106,7 +106,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_get_block_mismatched_types(self):
         path = self.get_contract_path('GetBlockMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_transaction_init(self):
         path = self.get_contract_path('Transaction.py')
@@ -146,8 +146,8 @@ class TestBlockchainInterop(BoaTest):
             + Integer(len(method)).to_byte_array()
             + method
             + Opcode.PUSHDATA1
-            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
-            + LEDGER_SCRIPT
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -203,8 +203,8 @@ class TestBlockchainInterop(BoaTest):
             + Integer(len(method)).to_byte_array()
             + method
             + Opcode.PUSHDATA1
-            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
-            + LEDGER_SCRIPT
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -262,8 +262,8 @@ class TestBlockchainInterop(BoaTest):
             + Integer(len(method)).to_byte_array()
             + method
             + Opcode.PUSHDATA1
-            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
-            + LEDGER_SCRIPT
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -322,8 +322,8 @@ class TestBlockchainInterop(BoaTest):
             + Integer(len(method)).to_byte_array()
             + method
             + Opcode.PUSHDATA1
-            + Integer(len(LEDGER_SCRIPT)).to_byte_array()
-            + LEDGER_SCRIPT
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
             + Opcode.SYSCALL
             + Interop.CallContract.interop_method_hash
             + Opcode.RET
@@ -391,3 +391,28 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(nef, result[3])
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
+
+    def test_current_hash(self):
+        path = self.get_contract_path('CurrentHash.py')
+        engine = TestEngine()
+
+        engine.increase_block()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+
+        block = engine.current_block
+
+        self.assertEqual(block.hash, result)
+
+    def test_current_index(self):
+        path = self.get_contract_path('CurrentIndex.py')
+        engine = TestEngine()
+
+        engine.increase_block()
+        result = self.run_smart_contract(engine, path, 'main')
+        if isinstance(result, str):
+            result = String(result).to_bytes()
+        block = engine.current_block
+        self.assertEqual(block.index, result)

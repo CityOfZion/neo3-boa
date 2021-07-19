@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -76,7 +76,7 @@ class TestFor(BoaTest):
 
     def test_for_mismatched_type_condition(self):
         path = self.get_contract_path('MismatchedTypeCondition.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_for_no_condition(self):
         path = self.get_contract_path('NoCondition.py')
@@ -452,7 +452,7 @@ class TestFor(BoaTest):
 
     def test_for_iterate_dict(self):
         path = self.get_contract_path('ForIterateDict.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_iteration_test(self):
         path = self.get_contract_path('IterBoa2Test.py')
@@ -474,7 +474,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test4(self):
         path = self.get_contract_path('IterBoa2Test4.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_iteration_test5(self):
         path = self.get_contract_path('IterBoa2Test5.py')

@@ -1,7 +1,6 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import ENCODING
-from boa3.exception.CompilerError import (InternalError, MismatchedTypes, MissingReturnStatement, TooManyReturns,
-                                          TypeHintMissing)
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -36,7 +35,7 @@ class TestFunction(BoaTest):
             # functions without arguments and local variables don't need initslot
             Opcode.PUSHDATA1        # body
             + bytes([len('42')])
-            + bytes('42', ENCODING)
+            + bytes('42', constants.ENCODING)
             + Opcode.RET            # return
         )
 
@@ -65,11 +64,11 @@ class TestFunction(BoaTest):
 
     def test_none_function(self):
         path = self.get_contract_path('NoneFunction.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_arg_without_type_hint(self):
         path = self.get_contract_path('ArgWithoutTypeHintFunction.py')
-        self.assertCompilerLogs(TypeHintMissing, path)
+        self.assertCompilerLogs(CompilerError.TypeHintMissing, path)
 
     def test_no_return_hint_function_with_empty_return_statement(self):
         expected_output = (
@@ -165,19 +164,19 @@ class TestFunction(BoaTest):
 
     def test_return_type_hint_function_with_empty_return(self):
         path = self.get_contract_path('ExpectingReturnFunction.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_multiple_return_function(self):
         path = self.get_contract_path('MultipleReturnFunction.py')
-        self.assertCompilerLogs(TooManyReturns, path)
+        self.assertCompilerLogs(CompilerError.TooManyReturns, path)
 
     def test_tuple_function(self):
         path = self.get_contract_path('TupleFunction.py')
-        self.assertCompilerLogs(TooManyReturns, path)
+        self.assertCompilerLogs(CompilerError.TooManyReturns, path)
 
     def test_default_return(self):
         path = self.get_contract_path('DefaultReturn.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_empty_list_return(self):
         expected_output = (
@@ -195,11 +194,11 @@ class TestFunction(BoaTest):
 
     def test_mismatched_return_type(self):
         path = self.get_contract_path('MismatchedReturnType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mismatched_return_type_with_if(self):
         path = self.get_contract_path('MismatchedReturnTypeWithIf.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
@@ -513,7 +512,7 @@ class TestFunction(BoaTest):
 
     def test_return_void_function_mismatched_type(self):
         path = self.get_contract_path('ReturnVoidFunctionMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_return_inside_if(self):
         expected_output = (
@@ -560,15 +559,15 @@ class TestFunction(BoaTest):
 
     def test_missing_return_inside_if(self):
         path = self.get_contract_path('ReturnIfMissing.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_missing_return_inside_elif(self):
         path = self.get_contract_path('ReturnElifMissing.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_missing_return_inside_else(self):
         path = self.get_contract_path('ReturnElseMissing.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_return_inside_multiple_inner_if(self):
         path = self.get_contract_path('ReturnMultipleInnerIf.py')
@@ -581,7 +580,7 @@ class TestFunction(BoaTest):
 
     def test_missing_return_inside_multiple_inner_if(self):
         path = self.get_contract_path('ReturnMultipleInnerIfMissing.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_return_if_expression(self):
         expected_output = (
@@ -610,7 +609,7 @@ class TestFunction(BoaTest):
 
     def test_return_if_expression_mismatched_type(self):
         path = self.get_contract_path('ReturnIfExpressionMismatched.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_return_inside_for(self):
         expected_output = (
@@ -717,7 +716,7 @@ class TestFunction(BoaTest):
 
     def test_missing_return_inside_for_else(self):
         path = self.get_contract_path('ReturnForElseMissing.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_return_inside_while(self):
         expected_output = (
@@ -795,7 +794,7 @@ class TestFunction(BoaTest):
 
     def test_missing_return_inside_while_without_else(self):
         path = self.get_contract_path('ReturnWhileWithoutElse.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_multiple_function_large_call(self):
         path = self.get_contract_path('MultipleFunctionLargeCall.py')
@@ -923,7 +922,7 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_kwargs(self):
         path = self.get_contract_path('CallFunctionWithKwargs.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_boa2_fibonacci_test(self):
         path = self.get_contract_path('FibonacciBoa2Test.py')

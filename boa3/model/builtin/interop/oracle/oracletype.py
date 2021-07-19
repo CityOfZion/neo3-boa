@@ -4,11 +4,11 @@ from typing import Any, Dict, Optional
 
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
 
 
-class OracleType(ClassType):
+class OracleType(ClassArrayType):
     """
     A class used to represent Oracle class
     """
@@ -31,11 +31,13 @@ class OracleType(ClassType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.oracle.oraclerequesmethod import OracleRequesMethod
+        from boa3.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
+        from boa3.model.builtin.interop.oracle.oraclerequestmethod import OracleRequestMethod
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'request': OracleRequesMethod()
+                'get_price': OracleGetPriceMethod(),
+                'request': OracleRequestMethod()
             }
         return self._class_methods
 

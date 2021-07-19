@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import MismatchedTypes
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -108,11 +108,11 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_binary_operation(self):
         path = self.get_contract_path('MismatchedOperandAnd.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mismatched_type_unary_operation(self):
         path = self.get_contract_path('MismatchedOperandNot.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_mixed_operations(self):
         expected_output = (
@@ -190,7 +190,7 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_logic_and(self):
         path = self.get_contract_path('MismatchedOperandLogicAnd.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_logic_or_with_bool_operand(self):
         expected_output = (
@@ -240,7 +240,7 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_logic_or(self):
         path = self.get_contract_path('MismatchedOperandLogicOr.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_logic_not_with_bool_operand(self):
         expected_output = (
@@ -286,7 +286,7 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_logic_not(self):
         path = self.get_contract_path('MismatchedOperandLogicNot.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_logic_xor_with_bool_operand(self):
         expected_output = (
@@ -336,7 +336,7 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_logic_xor(self):
         path = self.get_contract_path('MismatchedOperandLogicXor.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_logic_left_shift(self):
         expected_output = (
@@ -363,7 +363,7 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_logic_left_shift(self):
         path = self.get_contract_path('MismatchedOperandLogicLeftShift.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_logic_right_shift(self):
         expected_output = (
@@ -390,7 +390,7 @@ class TestLogical(BoaTest):
 
     def test_mismatched_type_logic_right_shift(self):
         path = self.get_contract_path('MismatchedOperandLogicRightShift.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_logic_test(self):
         path = self.get_contract_path('BinOpBoa2Test.py')
@@ -433,3 +433,42 @@ class TestLogical(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', '~', -3, 0)
         self.assertEqual(2, result)
+
+    def test_logic_augmented_assignment(self):
+        path = self.get_contract_path('AugmentedAssignmentOperators.py')
+        engine = TestEngine()
+
+        a = 1
+        b = 4
+        result = self.run_smart_contract(engine, path, 'right_shift', a, b)
+        a >>= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 4
+        b = 1
+        result = self.run_smart_contract(engine, path, 'left_shift', a, b)
+        a <<= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 255
+        b = 123
+        result = self.run_smart_contract(engine, path, 'l_and', a, b)
+        a &= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 255
+        b = 123
+        result = self.run_smart_contract(engine, path, 'l_or', a, b)
+        a |= b
+        expected_result = a
+        self.assertEqual(expected_result, result)
+
+        a = 255
+        b = 123
+        result = self.run_smart_contract(engine, path, 'xor', a, b)
+        a ^= b
+        expected_result = a
+        self.assertEqual(expected_result, result)

@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import (InternalError, MismatchedTypes, UnexpectedArgument, UnfilledArgument,
-                                          UnresolvedOperation)
+from boa3.exception import CompilerError
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -197,7 +196,7 @@ class TestRange(BoaTest):
 
     def test_range_parameter_mismatched_type(self):
         path = self.get_contract_path('RangeParameterMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_range_as_sequence(self):
         expected_output = (
@@ -260,15 +259,15 @@ class TestRange(BoaTest):
 
     def test_range_mismatched_type(self):
         path = self.get_contract_path('RangeMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_range_too_few_parameters(self):
         path = self.get_contract_path('RangeTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_range_too_many_parameters(self):
         path = self.get_contract_path('RangeTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_range_get_value(self):
         expected_output = (
@@ -304,7 +303,7 @@ class TestRange(BoaTest):
 
     def test_range_set_value(self):
         path = self.get_contract_path('SetValue.py')
-        self.assertCompilerLogs(UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_range_slicing(self):
         path = self.get_contract_path('RangeSlicingLiteralValues.py')
@@ -745,11 +744,11 @@ class TestRange(BoaTest):
 
     def test_range_slicing_omitted_stride(self):
         path = self.get_contract_path('RangeSlicingWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_range_slicing_omitted_with_stride(self):
         path = self.get_contract_path('RangeSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(InternalError, path)
+        self.assertCompilerLogs(CompilerError.InternalError, path)
 
     def test_boa2_range_test(self):
         path = self.get_contract_path('RangeBoa2Test.py')

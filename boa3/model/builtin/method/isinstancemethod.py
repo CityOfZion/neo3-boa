@@ -61,7 +61,7 @@ class IsInstanceMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        from boa3.model.type.classtype import ClassType
+        from boa3.model.type.classes.classtype import ClassType
         return not any(isinstance(param, ClassType) and len(param.is_instance_opcodes()) == 0
                        for param in self._instances_type)
 
@@ -128,6 +128,17 @@ class IsInstanceMethod(IBuiltinMethod):
     @property
     def _args_on_stack(self) -> int:
         return 1
+
+    @property
+    def generation_order(self) -> List[int]:
+        # type should not be converted
+        indexes = super().generation_order
+        typ_index = list(self.args).index('A_tuple')
+
+        if typ_index in indexes:
+            indexes.remove(typ_index)
+
+        return indexes
 
     @property
     def _body(self) -> Optional[str]:

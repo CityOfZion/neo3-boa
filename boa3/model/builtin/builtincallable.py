@@ -15,6 +15,7 @@ class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
                  defaults: List[ast.AST] = None, return_type: IType = None):
         super().__init__(args, vararg, defaults, return_type)
         self._identifier = identifier
+        self.defined_by_entry = False  # every builtin symbol must have this variable set as False
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:

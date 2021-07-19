@@ -66,12 +66,13 @@ class TestEngine:
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
-    def get_events(self, event_name: str, origin: Union[UInt160, bytes] = None) -> List[Notification]:
+    def get_events(self, event_name: str = None, origin: Union[UInt160, bytes] = None) -> List[Notification]:
         if origin is None:
-            return [n for n in self._notifications if n.name == event_name]
+            return [n for n in self._notifications if n.name == event_name or event_name is None]
         else:
             origin_bytes = origin.to_array() if isinstance(origin, UInt160) else bytes(origin)
-            return [n for n in self._notifications if n.name == event_name and n.origin == origin_bytes]
+            return [n for n in self._notifications if ((n.name == event_name or event_name is None)
+                                                       and n.origin == origin_bytes)]
 
     @property
     def storage(self) -> Storage:
@@ -145,7 +146,11 @@ class TestEngine:
 
     def remove_contract(self, contract_index_or_path: Union[int, str]):
         if isinstance(contract_index_or_path, str):
-            index = self._get_contract_id(contract_index_or_path)
+            contracts = self.contracts
+            if contract_index_or_path in contracts:
+                index = contracts.index(contract_index_or_path)
+            else:
+                index = -1
         else:
             index = contract_index_or_path
 
@@ -153,6 +158,13 @@ class TestEngine:
             return self._contract_paths.pop(index)
 
     def _get_contract_id(self, contract_path: str) -> int:
+        if path.isfile(contract_path):
+            with open(contract_path, mode='rb') as nef:
+                from boa3.neo.contracts.neffile import NefFile
+                script_hash = NefFile.deserialize(nef.read()).script_hash
+
+            return self._storage.get_contract_id(script_hash)
+
         contracts = self.contracts
         if contract_path in contracts:
             return contracts.index(contract_path)
@@ -226,7 +238,7 @@ class TestEngine:
         import json
         import subprocess
 
-        if isinstance(nef_path, str) and nef_path not in self._contract_paths:
+        if isinstance(nef_path, str) and nef_path not in self.contracts:
             self.add_contract(nef_path)
 
         test_engine_args = self.to_json(nef_path, method, *arguments)
@@ -266,7 +278,7 @@ class TestEngine:
                 self._vm_state = VMState.get_vm_state(result['vmstate'])
 
             if 'gasconsumed' in result:
-                self._gas_consumed = result['gasconsumed']
+                self._gas_consumed = int(result['gasconsumed'])
 
             if 'resultstack' in result:
                 if isinstance(result['resultstack'], list):
@@ -291,10 +303,11 @@ class TestEngine:
                     json_storage = result['storage']
                     self._storage = Storage.from_json(json_storage)
 
-                    index = self._get_contract_id(nef_path)
-                    contract = self._contract_paths[index]
-                    if contract.script_hash is not None and not self._storage.has_contract(contract.script_hash):
-                        self.remove_contract(nef_path)
+                    for contract in self._contract_paths.copy():
+                        if (not isinstance(contract, TestContract)
+                                or contract.script_hash is None
+                                or not self._storage.has_contract(contract.script_hash)):
+                            self.remove_contract(contract.path)
 
                 if 'currentblock' in result:
                     current_block = Block.from_json(result['currentblock'])

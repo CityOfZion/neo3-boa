@@ -9,12 +9,6 @@ class StorageGetContextMethod(InteropMethod):
 
     def __init__(self, storage_context_type: StorageContextType):
         identifier = 'get_context'
-        syscall = 'System.Storage.GetContext'
-        self._storage_context = 'System.Storage.GetContext'  # TODO: refactor when default arguments are implemented
+        native_identifier = 'System.Storage.GetContext'
         args: Dict[str, Variable] = {}
-        super().__init__(identifier, syscall, args, return_type=storage_context_type)
-
-    @property
-    def storage_context_hash(self) -> bytes:
-        # TODO: refactor when default arguments are implemented
-        return self._method_hash(self._storage_context)
+        super().__init__(identifier, native_identifier, args, return_type=storage_context_type)

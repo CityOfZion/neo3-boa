@@ -1,5 +1,5 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
@@ -18,7 +18,12 @@ class TestNEP17Template(BoaTest):
 
     def test_nep17_compile(self):
         path = self.get_contract_path('NEP17.py')
-        Boa3.compile(path)
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
 
     def test_nep17_deploy(self):
         path = self.get_contract_path('NEP17.py')
@@ -240,11 +245,11 @@ class TestNEP17Template(BoaTest):
 
         # transferring NEO to the smart contract
         # saving the balance before the transfer to be able to compare after it
-        neo_balance_sender_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
-        neo_balance_nep17_before = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', nep17_address)
+        neo_balance_sender_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
+        neo_balance_nep17_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', nep17_address)
         nep17_balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
 
-        result = self.run_smart_contract(engine, aux_path, 'calling_transfer', NEO_SCRIPT,
+        result = self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.NEO_SCRIPT,
                                          aux_address, nep17_address, transferred_amount, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
@@ -278,8 +283,8 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(transferred_amount * 10, amount)
 
         # saving the balance after the transfer to compare it with the previous data
-        neo_balance_sender_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', aux_address)
-        neo_balance_nep17_after = self.run_smart_contract(engine, NEO_SCRIPT, 'balanceOf', nep17_address)
+        neo_balance_sender_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
+        neo_balance_nep17_after = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', nep17_address)
         nep17_balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
 
         self.assertEqual(neo_balance_sender_before - transferred_amount, neo_balance_sender_after)
@@ -289,11 +294,11 @@ class TestNEP17Template(BoaTest):
 
         # transferring GAS to the smart contract
         # saving the balance before the transfer to be able to compare after it
-        gas_balance_sender_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address)
-        gas_balance_nep17_before = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', nep17_address)
+        gas_balance_sender_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address)
+        gas_balance_nep17_before = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', nep17_address)
         nep17_balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
 
-        result = self.run_smart_contract(engine, aux_path, 'calling_transfer', GAS_SCRIPT,
+        result = self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.GAS_SCRIPT,
                                          aux_address, nep17_address, transferred_amount, None,
                                          signer_accounts=[aux_address],
                                          expected_result_type=bool)
@@ -327,8 +332,8 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(transferred_amount * 2, amount)
 
         # saving the balance after the transfer to compare it with the previous data
-        gas_balance_sender_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', aux_address)
-        gas_balance_nep17_after = self.run_smart_contract(engine, GAS_SCRIPT, 'balanceOf', nep17_address)
+        gas_balance_sender_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', aux_address)
+        gas_balance_nep17_after = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'balanceOf', nep17_address)
         nep17_balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
 
         self.assertEqual(gas_balance_sender_before - transferred_amount, gas_balance_sender_after)

@@ -1,2 +1,5 @@
-from .oraclerequesmethod import OracleRequesMethod
-from .oracletype import OracleType
+__all__ = ['OracleType',
+           ]
+
+
+from boa3.model.builtin.interop.oracle.oracletype import OracleType

@@ -17,7 +17,7 @@ class ContractParameterType(IntEnum):
     Void = 0xff
 
     @classmethod
-    def get_by_name(cls, name: str) -> int:
+    def _get_by_name(cls, name: str) -> int:
         try:
             value = cls.__getattr__(name)
         except BaseException:

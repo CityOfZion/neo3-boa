@@ -12,7 +12,7 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.operation.operation import IOperation
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.type.typeutils import TypeUtils
 
@@ -89,9 +89,10 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             else:
                 value = fun_rtype_id
 
-        if (isinstance(value, Attribute)
-                and isinstance(value.attr_symbol, IExpression)
-                and isinstance(value.attr_symbol.type, ClassType)):
+        if (isinstance(value, Attribute) and
+                ((isinstance(value.attr_symbol, IExpression) and isinstance(value.attr_symbol.type, ClassType))
+                 or (isinstance(value.attr_symbol, IType))
+                 )):
             value = value.attr_symbol
 
         if isinstance(value, IType):

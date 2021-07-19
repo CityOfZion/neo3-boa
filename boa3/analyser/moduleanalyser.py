@@ -1,7 +1,9 @@
 import ast
 import logging
+import os
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
 from boa3.analyser.model.functionarguments import FunctionArguments
@@ -19,7 +21,7 @@ from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.uniontype import UnionType
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
@@ -37,15 +39,23 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], filename: str = None, log: bool = False):
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], filename: str = None,
+                 analysed_files: Optional[List[str]] = None, log: bool = False):
         super().__init__(analyser.ast_tree, filename, log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
+
+        if isinstance(analysed_files, list):
+            analysed_files = [file_path.replace(os.sep, '/') if isinstance(file_path, str) else file_path
+                              for file_path in analysed_files]
+        self._analysed_files: Optional[List[str]] = analysed_files
 
         self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
         self._current_method: Method = None
         self._current_event: Event = None
+
+        self._deploy_method: Optional[Method] = None
 
         self._annotated_variables: List[str] = []
         self._global_assigned_variables: List[str] = []
@@ -113,12 +123,22 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         for x in range(min(len(variables), len(var_types))):
             var_id, var_type_id = variables[x], var_types[x]
-            if var_id not in self._current_symbol_scope.symbols:
-                outer_symbol = self.get_symbol(var_id)
-                if outer_symbol is not None:
-                    self._log_warning(
-                        CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
-                    )
+
+            outer_symbol = self.get_symbol(var_id)
+            if var_id in self._current_symbol_scope.symbols:
+                if hasattr(outer_symbol, 'set_is_reassigned'):
+                    # don't mark as reassigned if it is outside of a function
+                    is_module_scope = isinstance(self._current_scope, Module)
+                    if not is_module_scope:
+                        outer_symbol.set_is_reassigned()
+                    if is_module_scope or self._current_scope == self._deploy_method:
+                        source_node.origin = self._tree
+            else:
+                if not isinstance(source_node, ast.Global):
+                    if outer_symbol is not None:
+                        self._log_warning(
+                            CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
+                        )
 
                 var_type = None
                 if isinstance(var_type_id, SequenceType):
@@ -133,9 +153,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 if isinstance(var_type, IType) or var_type is None:
                     # if type is None, the variable type depends on the type of a expression
-                    if isinstance(var_type, SequenceType):
-                        var_type = var_type.build_collection(var_enumerate_type)
-                    var = Variable(var_type, origin_node=source_node)
+                    if isinstance(source_node, ast.Global):
+                        var = outer_symbol
+                    else:
+                        if isinstance(var_type, SequenceType):
+                            var_type = var_type.build_collection(var_enumerate_type)
+                        var = Variable(var_type, origin_node=source_node)
 
                     self._current_symbol_scope.include_symbol(var_id, var)
                     if isinstance(source_node, ast.AnnAssign):
@@ -314,22 +337,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_from, name)
 
-    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
-        analyser = ImportAnalyser(target)
-
-        if not analyser.can_be_imported:
-            self._log_unresolved_import(origin_node, target)
-            return None
-
-        if not analyser.is_builtin_import:
-            self._log_error(
-                CompilerError.NotSupportedOperation(
-                    origin_node.lineno, origin_node.col_offset,
-                    symbol_id='import from user modules'
-                )
-            )
-        return analyser
-
     def visit_Import(self, import_node: ast.Import):
         """
         Includes methods and variables from other modules into the current scope
@@ -350,6 +357,40 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 imported_module = Import(analyser.path, analyser.tree, analyser)
                 self._current_scope.include_symbol(alias, imported_module)
+
+    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
+        already_imported = {imported.origin for imported in self._current_module.symbols.values()
+                            if isinstance(imported, Import)
+                            }
+        if self._analysed_files is not None:
+            already_imported = already_imported.union(self._analysed_files)
+
+        analyser = ImportAnalyser(import_target=target,
+                                  importer_file=self.filename,
+                                  already_imported_modules=list(already_imported),
+                                  log=self._log)
+
+        if analyser.recursive_import:
+            self._log_error(
+                CompilerError.CircularImport(line=origin_node.lineno,
+                                             col=origin_node.col_offset,
+                                             target_import=target,
+                                             target_origin=self.filename)
+            )
+
+        elif not analyser.can_be_imported:
+            circular_import_error = next((error for error in analyser.errors
+                                          if isinstance(error, CompilerError.CircularImport)),
+                                         None)
+
+            if circular_import_error is not None:
+                # if the problem was a circular import, the error was already logged
+                self.errors.append(circular_import_error)
+            else:
+                self._log_unresolved_import(origin_node, target)
+
+        else:
+            return analyser
 
     def visit_Module(self, module: ast.Module):
         """
@@ -441,6 +482,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
                         vararg=fun_args.vararg,
                         origin_node=function, is_public=Builtin.Public in fun_decorators)
+
+        if function.name in Builtin.internal_methods:
+            internal_method = Builtin.internal_methods[function.name]
+            if not internal_method.is_valid_deploy_method(method):
+                self._log_error(
+                    CompilerError.InternalIncorrectSignature(line=function.lineno,
+                                                             col=function.col_offset,
+                                                             expected_method=internal_method)
+                )
+        if function.name == constants.DEPLOY_METHOD_ID:
+            self._deploy_method = method
+
         self._current_method = method
         self._scope_stack.append(SymbolScope())
 
@@ -637,8 +690,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         for var_id in global_node.names:
             symbol = self.get_symbol(var_id)
-            if isinstance(symbol, Variable) and self._current_method is not None:
-                self._current_method.include_variable(var_id, symbol, is_global=True)
+            if isinstance(symbol, Variable):
+                if self._current_method is not None:
+                    self._current_method.include_variable(var_id, symbol, is_global=True)
+                self.__include_variable(var_id, symbol.type, source_node=global_node)
 
     def visit_Expr(self, expr: ast.Expr):
         """

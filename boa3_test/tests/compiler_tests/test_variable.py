@@ -478,6 +478,22 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('GlobalAssignmentWithTuples.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
+    def test_global_chained_multiple_assignments(self):
+        path = self.get_contract_path('GlobalMultipleAssignments.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_a')
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'get_c')
+        self.assertEqual(15, result)
+
+        result = self.run_smart_contract(engine, path, 'set_a', 100)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'get_a')
+        self.assertEqual(100, result)
+
     def test_many_global_assignments(self):
         expected_output = (
             Opcode.LDSFLD + b'\x07'
@@ -611,29 +627,22 @@ class TestVariable(BoaTest):
         self.assertEqual(-140, result)
 
     def test_assign_global_in_function_with_global_keyword(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0     # b = a
-            + Opcode.STSFLD0
-            + Opcode.LDSFLD0    # return b
-            + Opcode.RET
-            + Opcode.INITSSLOT  # global variables
-            + b'\x01'           # number of globals
-            + Opcode.PUSH0      # b = 0
-            + Opcode.STSFLD0
-            + Opcode.RET
-        )
         path = self.get_contract_path('GlobalAssignmentInFunctionWithArgument.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_b')
+        self.assertEqual(0, result)
+
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
+        result = self.run_smart_contract(engine, path, 'get_b')
+        self.assertEqual(10, result)
+
         result = self.run_smart_contract(engine, path, 'Main', -140)
+        self.assertEqual(-140, result)
+
+        result = self.run_smart_contract(engine, path, 'get_b')
         self.assertEqual(-140, result)
 
     def test_assign_void_function_call(self):

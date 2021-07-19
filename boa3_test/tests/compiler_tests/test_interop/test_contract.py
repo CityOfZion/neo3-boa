@@ -1,9 +1,9 @@
 import json
 
+from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.constants import GAS_SCRIPT, NEO_SCRIPT
-from boa3.exception.CompilerError import UnexpectedArgument, UnfilledArgument
-from boa3.exception.CompilerWarning import NameShadowing
+from boa3.exception import CompilerError, CompilerWarning
+from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -76,9 +76,8 @@ class TestContractInterop(BoaTest):
     def test_call_contract_with_flags(self):
         path = self.get_contract_path('CallScriptHashWithFlags.py')
         call_contract_path = self.get_contract_path('CallFlagsUsage.py')
-        Boa3.compile_and_save(call_contract_path)
 
-        contract, manifest = self.get_output(call_contract_path)
+        contract, manifest = self.compile_and_save(call_contract_path)
         call_hash = hash160(contract)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
@@ -114,7 +113,7 @@ class TestContractInterop(BoaTest):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.ALL)
         self.assertEqual(None, result)
-        notify = engine.notifications
+        notify = engine.get_events(origin=call_hash)
         self.assertEqual(1, len(notify))
         self.assertEqual('Notify was called', notify[0].arguments[0])
 
@@ -129,11 +128,11 @@ class TestContractInterop(BoaTest):
 
     def test_call_contract_too_many_parameters(self):
         path = self.get_contract_path('CallScriptHashTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_call_contract_too_few_parameters(self):
         path = self.get_contract_path('CallScriptHashTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_create_contract(self):
         path = self.get_contract_path('CreateContract.py')
@@ -177,11 +176,11 @@ class TestContractInterop(BoaTest):
 
     def test_create_contract_too_many_parameters(self):
         path = self.get_contract_path('CreateContractTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_create_contract_too_few_parameters(self):
         path = self.get_contract_path('CreateContractTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_update_contract(self):
         path = self.get_contract_path('UpdateContract.py')
@@ -221,11 +220,11 @@ class TestContractInterop(BoaTest):
 
     def test_update_contract_too_many_parameters(self):
         path = self.get_contract_path('UpdateContractTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_update_contract_too_few_parameters(self):
         path = self.get_contract_path('UpdateContractTooFewArguments.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_destroy_contract(self):
         path = self.get_contract_path('DestroyContract.py')
@@ -242,10 +241,10 @@ class TestContractInterop(BoaTest):
 
     def test_destroy_contract_too_many_parameters(self):
         path = self.get_contract_path('DestroyContractTooManyArguments.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_get_neo_native_script_hash(self):
-        value = NEO_SCRIPT
+        value = constants.NEO_SCRIPT
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
@@ -272,11 +271,11 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('NeoScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_get_gas_native_script_hash(self):
-        value = GAS_SCRIPT
+        value = constants.GAS_SCRIPT
         expected_output = (
             Opcode.PUSHDATA1
             + Integer(len(value)).to_byte_array()
@@ -303,7 +302,7 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('GasScriptHashCantAssign.py')
-        output = self.assertCompilerLogs(NameShadowing, path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
     def test_call_flags_type(self):
@@ -399,3 +398,72 @@ class TestContractInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'call_flags_all')
         from boa3.neo3.contracts import CallFlags
         self.assertEqual(CallFlags.ALL, result)
+
+    def test_create_standard_account(self):
+        from boa3.neo.vm.type.StackItem import StackItemType
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.CONVERT
+            + StackItemType.ByteString
+            + Opcode.DUP
+            + Opcode.ISNULL
+            + Opcode.JMPIF
+            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.DUP
+            + Opcode.SIZE
+            + Opcode.PUSHINT8
+            + Integer(33).to_byte_array(min_length=1)
+            + Opcode.JMPEQ
+            + Integer(3).to_byte_array(min_length=1)
+            + Opcode.THROW
+            + Opcode.SYSCALL
+            + Interop.CreateStandardAccount.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('CreateStandardAccount.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_create_standard_account_too_few_parameters(self):
+        path = self.get_contract_path('CreateStandardAccountTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_create_standard_account_too_many_parameters(self):
+        path = self.get_contract_path('CreateStandardAccountTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_get_minimum_deployment_fee(self):
+        path = self.get_contract_path('GetMinimumDeploymentFee.py')
+        engine = TestEngine()
+
+        minimum_cost = 10 * 10**8   # minimum deployment cost is 10 GAS right now
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(minimum_cost, result)
+
+    def test_get_minimum_deployment_fee_too_many_parameters(self):
+        path = self.get_contract_path('GetMinimumDeploymentFeeTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_create_multisig_account(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.SYSCALL
+            + Interop.CreateMultisigAccount.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('CreateMultisigAccount.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_create_multisig_account_too_few_parameters(self):
+        path = self.get_contract_path('CreateMultisigAccountTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_create_multisig_account_too_many_parameters(self):
+        path = self.get_contract_path('CreateMultisigAccountTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)

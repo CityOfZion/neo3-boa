@@ -5,6 +5,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Included new interops from Neo-rc4
+  - `get_network`
+  - `get_random`
+- Included OracleRequestCode enum for better compatibility with Oracles
+
+
+## [0.8.3] - 2021-07-19
+### Added
+- Included import of user modules
+- Module variables are now linked to the contract's storage to persist their values
+- Support to Python's builtins:
+  - `is` keyword
+  - `reversed`
+  - `str.split`
+  - `list.count` and `tuple.count`
+- Included the remaining Neo interops in the `builtin.interop` package
+- Included ECPoint type
+- Included `find_options` optional argument to `Storage.Find` interop
+- Included new smart contract example
+  - Update Contract
+- Implemented compiler validation of `try else` branch
+  
+
+### Changed
+- Renamed `interop.binary` package to `interop.stdlib`
+- `min` and `max` methods now accept many arguments instead of just two
+
+
+### Fixed
+- Fixed `isinstance` for `Contract` boa3 builtin class
+- Fixed issue with not passing values to a vararg
 
 
 ## [0.8.2] - 2021-06-14
@@ -207,7 +239,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.2...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.3...HEAD
+[0.8.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.3
 [0.8.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.2
 [0.8.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.1
 [0.8.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.0

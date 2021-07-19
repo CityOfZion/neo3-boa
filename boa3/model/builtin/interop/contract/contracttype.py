@@ -6,18 +6,19 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.method import Method
 from boa3.model.property import Property
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class ContractType(ClassType):
+class ContractType(ClassArrayType):
     """
     A class used to represent Neo Contract class
     """
 
     def __init__(self):
         super().__init__('Contract')
+        from boa3.model.builtin.interop.contract.contractmanifest import ContractManifestType
         from boa3.model.type.type import Type
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
 
@@ -26,7 +27,7 @@ class ContractType(ClassType):
             'update_counter': Variable(Type.int),
             'hash': Variable(UInt160Type.build()),
             'nef': Variable(Type.bytes),
-            'manifest': Variable(Type.dict)
+            'manifest': Variable(ContractManifestType.build())
         }
         self._constructor: Method = None
 
@@ -60,12 +61,6 @@ class ContractType(ClassType):
     @classmethod
     def _is_type_of(cls, value: Any):
         return isinstance(value, ContractType)
-
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        # TODO: remove this overwrite when the classes related to the manifest are implemented
-        # ContractManifest, ContractAbi, ContractPermission,
-        # ContractMethodDescriptor, ContractEventDescriptor, ContractParameterDefinition
-        return []
 
 
 _Contract = ContractType()

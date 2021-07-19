@@ -1,7 +1,7 @@
 import ast
 import importlib.util
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.model import imports
@@ -11,10 +11,15 @@ from boa3.model.type.type import Type
 
 class ImportAnalyser(IAstAnalyser):
 
-    def __init__(self, import_target: str):
+    def __init__(self, import_target: str, importer_file: Optional[str] = None,
+                 already_imported_modules: List[str] = None, log: bool = False):
         self.can_be_imported: bool = False
         self.is_builtin_import: bool = False
+        self.recursive_import: bool = False
         self._import_identifier: str = import_target
+        self._imported_files: List[str] = already_imported_modules if already_imported_modules is not None else []
+
+        super().__init__(ast.Module(body=[]), log=log)
 
         try:
             module_origin: str = importlib.util.find_spec(import_target).origin
@@ -22,12 +27,12 @@ class ImportAnalyser(IAstAnalyser):
             return
 
         path: List[str] = module_origin.split(os.sep)
+        self.filename = path[-1]
         self.path: str = module_origin.replace(os.sep, '/')
 
-        super().__init__(ast.Module(body=[]), path[-1])
-        self._find_package(module_origin)
+        self._find_package(module_origin, importer_file)
 
-    def _find_package(self, module_origin: str):
+    def _find_package(self, module_origin: str, origin_file: Optional[str] = None):
         path: List[str] = module_origin.split(os.sep)
 
         package = imports.builtin.get_package(self._import_identifier)
@@ -46,17 +51,28 @@ class ImportAnalyser(IAstAnalyser):
             updated_tree = None
 
             if not (inside_python_folder and 'lib' in path):
+                # check circular imports to avoid recursions inside the compiler
+                if self.path in self._imported_files:
+                    self.recursive_import = True
+                    return
+
                 # TODO: only user modules and typing lib imports are implemented
                 try:
                     from boa3.analyser.analyser import Analyser
-                    analyser = Analyser.analyse(module_origin)
+                    files = self._imported_files
+                    files.append(origin_file)
+                    analyser = Analyser.analyse(module_origin, analysed_files=files, log=self._log)
 
                     # include only imported symbols
                     if analyser.is_analysed:
-                        self.symbols.update(
-                            {symbol_id: symbol for symbol_id, symbol in analyser.symbol_table.items()
-                             if symbol_id not in Type.all_types()
-                             })
+                        for symbol_id, symbol in analyser.symbol_table.items():
+                            if symbol_id not in Type.all_types():
+                                symbol.defined_by_entry = False
+                                self.symbols[symbol_id] = symbol
+
+                    self.errors.extend(analyser.errors)
+                    self.warnings.extend(analyser.warnings)
+
                     updated_tree = analyser.ast_tree
                     self.can_be_imported = analyser.is_analysed
                 except FileNotFoundError:

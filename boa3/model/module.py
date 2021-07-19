@@ -26,6 +26,7 @@ class Module(ISymbol):
         self.methods = methods
         self.callables: Dict[str, Callable] = {}
 
+        self.defined_by_entry = True
         self.imported_symbols = {}
         self.assigned_variables = []
 

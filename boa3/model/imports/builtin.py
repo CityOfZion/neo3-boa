@@ -102,6 +102,9 @@ class CompilerBuiltin:
                 # if didn't find in the current list, go back to the previous list search
                 # if the stack is empty, it doesn't continue the loop because the while condition
                 current_list, current_index = packages_stack.pop()
+                if len(current_list) <= current_index:
+                    # if the previous list has no elements unchecked, just continue the loop
+                    continue
 
             package = current_list[current_index]
             if symbol_id in package.symbols:

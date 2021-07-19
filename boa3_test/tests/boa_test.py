@@ -5,6 +5,7 @@ from unittest import TestCase
 from boa3 import env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.model.method import Method
 from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -38,6 +39,11 @@ class BoaTest(TestCase):
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
+
+    def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
+        from boa3.compiler.filegenerator import FileGenerator
+        generator = FileGenerator(compiler.bytecode, compiler._analyser, compiler._entry_smart_contract)
+        return {','.join(name): value for name, value in generator._methods_with_imports.items()}
 
     def indent_text(self, text: str, no_spaces: int = 4) -> str:
         import re

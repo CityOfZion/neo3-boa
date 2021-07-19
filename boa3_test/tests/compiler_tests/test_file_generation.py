@@ -4,7 +4,6 @@ from typing import Dict
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
-from boa3.constants import BYTEORDER, ENCODING
 from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.model.event import Event
 from boa3.model.method import Method
@@ -46,13 +45,13 @@ class TestFileGeneration(BoaTest):
             nef_output.read(2)  # reserved
 
             script_size = nef_output.read(1)
-            script = nef_output.read(int.from_bytes(script_size, BYTEORDER))
+            script = nef_output.read(int.from_bytes(script_size, constants.BYTEORDER))
             check_sum = nef_output.read(constants.SIZE_OF_INT32)
 
-        self.assertEqual(int.from_bytes(script_size, BYTEORDER), len(script))
+        self.assertEqual(int.from_bytes(script_size, constants.BYTEORDER), len(script))
 
         nef = NefFile(script)._nef
-        self.assertEqual(compiler.decode(ENCODING), nef.compiler)
+        self.assertEqual(compiler.decode(constants.ENCODING), nef.compiler)
         self.assertEqual(check_sum, nef.checksum)
         self.assertEqual(version, nef.version.to_array())
 
@@ -303,10 +302,69 @@ class TestFileGeneration(BoaTest):
 
         for static_variable in debug_info['static-variables']:
             # validate parameters
-            self.assertEqual(2, len(static_variable.split(',')))
-            param_id, param_type = static_variable.split(',')
-            self.assertIn(param_id, variables)
-            self.assertEqual(param_type, variables[param_id].type.abi_type)
+            self.assertEqual(3, len(static_variable.split(',')))
+            var_id, var_type, var_slot = static_variable.split(',')
+            if var_id not in variables:
+                self.assertIn(var_id, [var_full_id.split(constants.VARIABLE_NAME_SEPARATOR)[-1]
+                                       for var_full_id in variables])
+                var_inner_id = next((var for var in variables
+                                     if var.split(constants.VARIABLE_NAME_SEPARATOR)[-1] == var_id),
+                                    var_id)
+            else:
+                var_inner_id = var_id
+
+            self.assertIn(var_inner_id, variables)
+            self.assertEqual(var_type, variables[var_inner_id].type.abi_type)
+
+    def test_generate_nefdbgnfo_file_with_user_module_import(self):
+        from boa3.model.type.itype import IType
+        path = self.get_contract_path('GenerationWithUserModuleImportsDupNames.py')
+
+        expected_nef_output = path.replace('.py', '.nefdbgnfo')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        methods: Dict[str, Method] = {
+            name: method
+            for name, method in self.get_all_imported_methods(compiler).items()
+            if isinstance(method, Method)
+        }
+
+        self.assertTrue(os.path.exists(expected_nef_output))
+        debug_info = self.get_debug_info(path)
+        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('methods', debug_info)
+        self.assertGreater(len(debug_info['methods']), 0)
+
+        for debug_method in debug_info['methods']:
+            self.assertIn('name', debug_method)
+            name_without_parsing = debug_method['name']
+            parsed_name = name_without_parsing.split(',')
+            self.assertEqual(2, len(parsed_name))
+            self.assertIn(name_without_parsing, methods)
+            actual_method = methods[name_without_parsing]
+
+            # validate id
+            self.assertIn('id', debug_method)
+            self.assertEqual(str(id(actual_method)), debug_method['id'])
+
+            # validate parameters
+            self.assertIn('params', debug_method)
+            self.assertEqual(len(actual_method.args), len(debug_method['params']))
+            for var in debug_method['params']:
+                self.assertEqual(2, len(var.split(',')))
+                param_id, param_type = var.split(',')
+                self.assertIn(param_id, actual_method.args)
+                self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
+
+            # validate local variables
+            self.assertIn('variables', debug_method)
+            self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
+            for var in debug_method['variables']:
+                self.assertEqual(2, len(var.split(',')))
+                var_id, var_type = var.split(',')
+                self.assertIn(var_id, actual_method.locals)
+                local_type = actual_method.locals[var_id].type
+                self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
 
     def test_generate_manifest_file_with_notify_event(self):
         path = self.get_contract_path('test_sc/interop_test/runtime', 'NotifySequence.py')
@@ -443,10 +501,10 @@ class TestFileGeneration(BoaTest):
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
             if isinstance(method, Method)
         }
-        from boa3.constants import INITIALIZE_METHOD_ID
+
         self.assertGreater(len(methods), 0)
-        self.assertIn(INITIALIZE_METHOD_ID, methods)
-        init_method = methods[INITIALIZE_METHOD_ID]
+        self.assertIn(constants.INITIALIZE_METHOD_ID, methods)
+        init_method = methods[constants.INITIALIZE_METHOD_ID]
 
         output, manifest = self.get_output(path)
         self.assertIn('abi', manifest)
@@ -456,7 +514,7 @@ class TestFileGeneration(BoaTest):
         self.assertGreater(len(abi['methods']), 0)
 
         abi_init = next(method for method in abi['methods']
-                        if 'name' in method and method['name'] == INITIALIZE_METHOD_ID)
+                        if 'name' in method and method['name'] == constants.INITIALIZE_METHOD_ID)
         self.assertIsNotNone(abi_init)
         self.assertIn('offset', abi_init)
         self.assertEqual(init_method.start_address, abi_init['offset'])
@@ -487,6 +545,22 @@ class TestFileGeneration(BoaTest):
         # validate sequence points
         self.assertIn('sequence-points', debug_method)
         self.assertEqual(0, len(debug_method['sequence-points']))
+
+    def test_generate_with_user_module_import(self):
+        path = self.get_contract_path('GenerationWithUserModuleImports.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertNotIn('entryPoint', abi)
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        self.assertIn('events', abi)
+        self.assertEqual(0, len(abi['events']))
 
     def test_compiler_error(self):
         path = self.get_contract_path('test_sc/built_in_methods_test', 'ClearTooManyParameters.py')

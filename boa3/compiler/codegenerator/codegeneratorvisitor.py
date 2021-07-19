@@ -2,6 +2,7 @@ import ast
 from inspect import isclass
 from typing import Dict, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
@@ -13,7 +14,7 @@ from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -33,6 +34,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.generator = generator
         self.current_method: Optional[Method] = None
         self.symbols = generator.symbol_table
+
+        self.global_stmts: List[ast.AST] = []
 
     def include_instruction(self, node: ast.AST, address: int):
         if self.current_method is not None and address in VMCodeMapping.instance().code_map:
@@ -103,47 +106,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.visit(stmt)
 
             self.generator.end_initialize()
+        else:
+            for stmt in global_stmts:
+                stmt.origin = module
 
-    def visit_ImportFrom(self, import_from: ast.ImportFrom):
-        """
-        Includes methods and variables from other modules into the current scope
-
-        :param import_from:
-        """
-        self._import_static_fields(import_from.names)
-
-    def visit_Import(self, import_node: ast.Import):
-        """
-        Includes methods and variables from other modules into the current scope
-
-        :param import_node:
-        """
-        self._import_static_fields(import_node.names)
-
-    def _import_static_fields(self, names: List[ast.alias]):
-        """
-        Visits the imported nodes that aren't function definitions to initialize static fields
-
-        :param names: list of imported alias
-        """
-        for alias in names:
-            name = alias.asname if alias.asname is not None else alias.name
-            if name in self.symbols:
-                if hasattr(self.symbols[name], 'ast') and self.symbols[name].ast is not None:
-                    ast_root = self.symbols[name].ast
-                elif hasattr(self.symbols[name], 'origin') and self.symbols[name].origin is not None:
-                    ast_root = self.symbols[name].origin
-                else:
-                    continue
-
-                if isinstance(ast_root, ast.Module):
-                    body = ast_root.body
-                else:
-                    body = [ast_root]
-
-                for node in body:
-                    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        self.visit(node)
+            self.global_stmts.extend(global_stmts)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -204,19 +171,19 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.convert_literal(None)
         self.generator.insert_return()
 
-    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST]], value: ast.AST):
+    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST], int], value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
             if len(var_ids) == 1:
                 # it's a simple assignment
-                var_id, index = var_ids[0]
+                var_id, index, address = var_ids[0]
                 if index is None:
                     # if index is None, then it is a variable assignment
                     result_type = self.visit_to_generate(value)
 
                     if result_type is Type.none and not self.generator.is_none_inserted():
                         self.generator.convert_literal(None)
-                    self.generator.convert_store_variable(var_id)
+                    self.generator.convert_store_variable(var_id, address)
                 else:
                     # if not, it is an array assignment
                     self.generator.convert_load_symbol(var_id)
@@ -232,12 +199,12 @@ class VisitorCodeGenerator(IAstAnalyser):
             elif len(var_ids) > 0:
                 # it's a chained assignment
                 self.visit_to_generate(value)
-                for pos, (var_id, index) in enumerate(reversed(var_ids)):
+                for pos, (var_id, index, address) in enumerate(reversed(var_ids)):
                     if index is None:
                         # if index is None, then it is a variable assignment
                         if pos < len(var_ids) - 1:
                             self.generator.duplicate_stack_top_item()
-                        self.generator.convert_store_variable(var_id)
+                        self.generator.convert_store_variable(var_id, address)
                     else:
                         # if not, it is an array assignment
                         if pos < len(var_ids) - 1:
@@ -258,8 +225,12 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param ann_assign: the python ast variable assignment node
         """
+        var_value_address = self.generator.bytecode_size
         var_id = self.visit(ann_assign.target)
-        self.store_variable((var_id, None), value=ann_assign.value)
+        # filter to find the imported variables
+        if var_id not in self.symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
+            var_id = '{0}{2}{1}'.format(ann_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+        self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
 
     def visit_Assign(self, assign: ast.Assign):
         """
@@ -267,8 +238,9 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param assign: the python ast variable assignment node
         """
-        vars_ids: List[Tuple[str, Optional[ast.AST]]] = []
+        vars_ids: List[Tuple[str, Optional[ast.AST], int]] = []
         for target in assign.targets:
+            var_value_address = self.generator.bytecode_size
             var_index = None
             var_id = self.visit(target)
 
@@ -277,7 +249,10 @@ class VisitorCodeGenerator(IAstAnalyser):
                 var_index = var_id[1]
                 var_id: str = var_id[0]
 
-            vars_ids.append((var_id, var_index))
+            # filter to find the imported variables
+            if var_id not in self.symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
+                var_id = '{0}{2}{1}'.format(assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+            vars_ids.append((var_id, var_index, var_value_address))
 
         self.store_variable(*vars_ids, value=assign.value)
 
@@ -288,10 +263,15 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param aug_assign: the python ast augmented assignment node
         """
         var_id = self.visit(aug_assign.target)
+        # filter to find the imported variables
+        if var_id not in self.symbols and hasattr(aug_assign, 'origin') and isinstance(aug_assign.origin, ast.AST):
+            var_id = '{0}{2}{1}'.format(aug_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+
         self.generator.convert_load_symbol(var_id)
+        value_address = self.generator.bytecode_size
         self.visit_to_generate(aug_assign.value)
         self.generator.convert_operation(aug_assign.op)
-        self.generator.convert_store_variable(var_id)
+        self.generator.convert_store_variable(var_id, value_address)
 
     def visit_Subscript(self, subscript: ast.Subscript):
         """
@@ -638,7 +618,15 @@ class VisitorCodeGenerator(IAstAnalyser):
             for stmt in handler.body:
                 self.visit_to_map(stmt, generate=True)
 
-        except_end = self.generator.convert_end_try(try_address, try_end)
+        else_address = None
+        if len(try_node.orelse) > 0:
+            else_start_address = self.generator.convert_begin_else(try_end)
+            else_address = self.generator.bytecode_size
+            for stmt in try_node.orelse:
+                self.visit_to_map(stmt, generate=True)
+            self.generator.convert_end_if(else_start_address)
+
+        except_end = self.generator.convert_end_try(try_address, try_end, else_address)
         for stmt in try_node.finalbody:
             self.visit_to_map(stmt, generate=True)
         self.generator.convert_end_try_finally(except_end, try_address, len(try_node.finalbody) > 0)
@@ -650,7 +638,12 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param name: the python ast name identifier node
         :return: the identifier of the name
         """
-        return name.id
+        name = name.id
+        if name not in self.symbols:
+            hashed_name = '{0}{2}{1}'.format(self._tree.__hash__(), name, constants.VARIABLE_NAME_SEPARATOR)
+            if hashed_name in self.symbols:
+                name = hashed_name
+        return name
 
     def visit_Starred(self, starred: ast.Starred):
         self.visit_to_generate(starred.value)

@@ -1,6 +1,4 @@
-from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, UnexpectedArgument,
-                                          UnresolvedReference)
-from boa3.exception.CompilerWarning import RedeclaredSymbol
+from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
@@ -25,11 +23,11 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_method_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoMethodMismatchedReturn.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_metadata_info_method_no_return(self):
         path = self.get_contract_path('MetadataInfoMethodNoReturn.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     def test_metadata_info_multiple_method(self):
         expected_output = (
@@ -38,7 +36,7 @@ class TestMetadata(BoaTest):
         )
 
         path = self.get_contract_path('MetadataInfoMultipleMethod.py')
-        self.assertCompilerLogs(RedeclaredSymbol, path)
+        self.assertCompilerLogs(CompilerWarning.RedeclaredSymbol, path)
 
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
@@ -50,19 +48,19 @@ class TestMetadata(BoaTest):
 
     def test_metadata_method_with_args(self):
         path = self.get_contract_path('MetadataMethodWithArgs.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_metadata_method_called_by_user_method(self):
         path = self.get_contract_path('MetadataMethodCalledByUserMethod.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_metadata_object_call_user_method(self):
         path = self.get_contract_path('MetadataObjectCallUserMethod.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_metadata_object_type_user_method(self):
         path = self.get_contract_path('MetadataObjectTypeUserMethod.py')
-        self.assertCompilerLogs(UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_metadata_info_author(self):
         expected_output = (
@@ -81,7 +79,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_author_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoAuthorMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_metadata_info_email(self):
         expected_output = (
@@ -100,7 +98,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_email_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoEmailMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_metadata_info_description(self):
         expected_output = (
@@ -119,7 +117,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_description_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_metadata_info_extras(self):
         expected_output = (
@@ -159,3 +157,20 @@ class TestMetadata(BoaTest):
         self.assertEqual(True, manifest['extra']['unittest3'])
         self.assertIn('unittest4', manifest['extra'])
         self.assertEqual(['list', 3210], manifest['extra']['unittest4'])
+
+    def test_metadata_info_supported_standards(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandards.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_missing_implementations(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementation.py')
+        self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
+
+    def test_metadata_info_supported_standards_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

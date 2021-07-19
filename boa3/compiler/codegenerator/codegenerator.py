@@ -1,11 +1,14 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.analyser.model.symbolscope import SymbolScope
+from boa3.compiler import codegenerator
 from boa3.compiler.codegenerator.stackmemento import NeoStack, StackMemento
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
-from boa3.constants import ENCODING
 from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.event import Event
 from boa3.model.imports.importsymbol import Import
@@ -15,7 +18,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -46,18 +49,73 @@ class CodeGenerator:
         :return: the Neo VM bytecode
         """
         VMCodeMapping.reset()
+        import ast
         from boa3.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
         generator = CodeGenerator(analyser.symbol_table)
+        deploy_method = (analyser.symbol_table[constants.DEPLOY_METHOD_ID]
+                         if constants.DEPLOY_METHOD_ID in analyser.symbol_table
+                         else None)
+        deploy_origin_module = analyser.ast_tree
+
+        if hasattr(deploy_method, 'origin') and deploy_method.origin in analyser.ast_tree.body:
+            analyser.ast_tree.body.remove(deploy_method.origin)
+
         visitor = VisitorCodeGenerator(generator)
         visitor.visit(analyser.ast_tree)
 
-        analyser.symbol_table.update(generator.symbol_table)
-        generator.initialized_static_fields = True
+        analyser.update_symbol_table(generator.symbol_table)
+        generator.symbol_table.clear()
+        generator.symbol_table.update(analyser.symbol_table.copy())
 
         for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
             generator.symbol_table.update(symbol.all_symbols)
+
+            if hasattr(deploy_method, 'origin') and deploy_method.origin in symbol.ast.body:
+                symbol.ast.body.remove(deploy_method.origin)
+                deploy_origin_module = symbol.ast
+
             visitor.visit(symbol.ast)
+
+            analyser.update_symbol_table(symbol.all_symbols)
+            generator.symbol_table.clear()
+            generator.symbol_table.update(analyser.symbol_table.copy())
+
+        if len(generator._globals) > 0:
+            from boa3.compiler.codegenerator.initstatementsvisitor import InitStatementsVisitor
+            deploy_stmts, static_stmts = InitStatementsVisitor.separate_global_statements(analyser.symbol_table,
+                                                                                          visitor.global_stmts)
+
+            deploy_method = deploy_method if deploy_method is not None else InnerDeployMethod.instance().copy()
+
+            if len(deploy_stmts) > 0:
+                if_update_body = ast.parse(f"if not {list(deploy_method.args)[1]}: pass").body[0]
+                if_update_body.body = deploy_stmts
+                if_update_body.test.op = UnaryOp.Not
+                deploy_method.origin.body.insert(0, if_update_body)
+
+            visitor.global_stmts = static_stmts
+
+        if hasattr(deploy_method, 'origin'):
+            deploy_ast = ast.parse("")
+            deploy_ast.body = [deploy_method.origin]
+
+            generator.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
+            analyser.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
+            visitor._tree = deploy_origin_module
+            visitor.visit(deploy_ast)
+
+            generator.symbol_table.clear()
+            generator.symbol_table.update(analyser.symbol_table.copy())
+
+        generator.can_init_static_fields = True
+        if len(visitor.global_stmts) > 0:
+            global_ast = ast.parse("")
+            global_ast.body = visitor.global_stmts
+            visitor.visit(global_ast)
+            generator.initialized_static_fields = True
+
+        analyser.update_symbol_table(generator.symbol_table)
         return generator.bytecode
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
@@ -81,6 +139,8 @@ class CodeGenerator:
 
         self._opcodes_to_remove: List[int] = []
         self._stack_states: StackMemento = StackMemento()  # simulates neo execution stack
+
+        self.can_init_static_fields: bool = False
         self.initialized_static_fields: bool = False
 
     @property
@@ -171,18 +231,30 @@ class CodeGenerator:
 
     @property
     def _globals(self) -> List[str]:
+        return self._module_variables(True)
+
+    @property
+    def _statics(self) -> List[str]:
+        return self._module_variables(False)
+
+    def _module_variables(self, modified_variable: bool) -> List[str]:
         """
         Gets a list with the variables name in the global scope
 
         :return: A list with the variables names
         """
-        module_globals = [var_id for var_id, var in self.symbol_table.items() if isinstance(var, Variable)]
-        for imported in self.symbol_table.values():
-            if isinstance(imported, Import):
-                # tried to use set and just update, but we need the varibles to be ordered
-                for var_id, var in imported.variables.items():
-                    if isinstance(var, Variable) and var_id not in module_globals:
-                        module_globals.append(var_id)
+        module_globals = [var_id for var_id, var in self.symbol_table.items()
+                          if isinstance(var, Variable) and var.is_reassigned == modified_variable]
+
+        if not self.can_init_static_fields:
+            for imported in self.symbol_table.values():
+                if isinstance(imported, Import):
+                    # tried to use set and just update, but we need the variables to be ordered
+                    for var_id, var in imported.variables.items():
+                        if (isinstance(var, Variable)
+                                and var.is_reassigned == modified_variable
+                                and var_id not in module_globals):
+                            module_globals.append(var_id)
         return module_globals
 
     @property
@@ -245,24 +317,25 @@ class CodeGenerator:
 
         :return: whether there are static fields to be initialized
         """
+        if not self.can_init_static_fields:
+            return False
         if self.initialized_static_fields:
             return False
 
-        num_static_fields = len(self._globals)
+        num_static_fields = len(self._statics)
         if num_static_fields > 0:
             init_data = bytearray([num_static_fields])
             self.__insert1(OpcodeInfo.INITSSLOT, init_data)
 
-            from boa3.constants import INITIALIZE_METHOD_ID
-            if INITIALIZE_METHOD_ID in self.symbol_table:
+            if constants.INITIALIZE_METHOD_ID in self.symbol_table:
                 from boa3.helpers import get_auxiliary_name
-                method = self.symbol_table.pop(INITIALIZE_METHOD_ID)
-                new_id = get_auxiliary_name(INITIALIZE_METHOD_ID, method)
+                method = self.symbol_table.pop(constants.INITIALIZE_METHOD_ID)
+                new_id = get_auxiliary_name(constants.INITIALIZE_METHOD_ID, method)
                 self.symbol_table[new_id] = method
 
             init_method = Method(is_public=True)
             init_method.init_bytecode = self.last_code
-            self.symbol_table[INITIALIZE_METHOD_ID] = init_method
+            self.symbol_table[constants.INITIALIZE_METHOD_ID] = init_method
 
         return num_static_fields > 0
 
@@ -273,9 +346,8 @@ class CodeGenerator:
         self.__insert1(OpcodeInfo.RET)
         self.initialized_static_fields = True
 
-        from boa3.constants import INITIALIZE_METHOD_ID
-        if INITIALIZE_METHOD_ID in self.symbol_table:
-            init_method = self.symbol_table[INITIALIZE_METHOD_ID]
+        if constants.INITIALIZE_METHOD_ID in self.symbol_table:
+            init_method = self.symbol_table[constants.INITIALIZE_METHOD_ID]
             init_method.end_bytecode = self.last_code
 
     def convert_begin_method(self, method: Method):
@@ -511,12 +583,15 @@ class CodeGenerator:
 
         return last_try_code
 
-    def convert_end_try(self, start_address: int, end_address: Optional[int] = None) -> int:
+    def convert_end_try(self, start_address: int,
+                        end_address: Optional[int] = None,
+                        else_address: Optional[int] = None) -> int:
         """
         Converts the end of the try statement
 
         :param start_address: the address of the try first opcode
         :param end_address: the address of the try last opcode. If it is None, there's no except body.
+        :param else_address: the address of the try else. If it is None, there's no else body.
         :return: the last address of the except body
         """
         self.__insert1(OpcodeInfo.ENDTRY)
@@ -531,7 +606,7 @@ class CodeGenerator:
 
             if isinstance(try_vm_code, TryCode):
                 try_vm_code.set_except_code(except_start_code)
-            self._update_jump(end_address, self.last_code_start_address)
+            self._update_jump(else_address if else_address is not None else end_address, self.last_code_start_address)
 
         return self.last_code_start_address
 
@@ -697,7 +772,7 @@ class CodeGenerator:
 
         :param value: the value to be converted
         """
-        array = bytes(value, ENCODING)
+        array = bytes(value, constants.ENCODING)
         self.insert_push_data(array)
         self.convert_cast(Type.str)
 
@@ -1040,7 +1115,12 @@ class CodeGenerator:
             if value is not None:
                 self.convert_literal(value)
 
-    def convert_store_variable(self, var_id: str):
+        elif var_id in self._globals:
+            var = self.get_symbol(var_id)
+            storage_key = codegenerator.get_storage_key_for_variable(var)
+            self._convert_builtin_storage_get_or_put(True, storage_key)
+
+    def convert_store_variable(self, var_id: str, value_start_address: int = None):
         """
         Converts the assignment of a variable
 
@@ -1056,7 +1136,7 @@ class CodeGenerator:
                     self.__insert1(op_info, Integer(index).to_byte_array())
                 else:
                     self.__insert1(op_info)
-                storaged_type = self._stack_pop()
+                stored_type = self._stack_pop()
 
                 from boa3.analyser.model.optimizer import UndefinedType
                 if (var_id in self._current_scope.symbols or
@@ -1064,8 +1144,31 @@ class CodeGenerator:
                     symbol = self.get_symbol(var_id)
                     if isinstance(symbol, Variable):
                         var = symbol.copy()
-                        var.set_type(storaged_type)
+                        var.set_type(stored_type)
                         self._current_scope.include_symbol(var_id, var)
+
+        elif var_id in self._globals:
+            var = self.get_symbol(var_id)
+            storage_key = codegenerator.get_storage_key_for_variable(var)
+            if value_start_address is None:
+                value_start_address = self.bytecode_size
+            self._convert_builtin_storage_get_or_put(False, storage_key, value_start_address)
+
+    def _convert_builtin_storage_get_or_put(self, is_get: bool, storage_key: bytes, arg_address: int = None):
+        addresses = [arg_address] if arg_address is not None else [self.bytecode_size]
+        if not is_get:
+            # must serialized before storing the value
+            self.convert_builtin_method_call(Interop.Serialize, addresses)
+
+        self.convert_literal(storage_key)
+        self.convert_builtin_method_call(Interop.StorageGetContext)
+
+        builtin_method = Interop.StorageGet if is_get else Interop.StoragePut
+        self.convert_builtin_method_call(builtin_method)
+
+        if is_get:
+            # once the value is retrieved, it must be deserialized
+            self.convert_builtin_method_call(Interop.Deserialize, addresses)
 
     def _get_variable_info(self, var_id: str) -> Tuple[int, bool, bool]:
         """
@@ -1078,6 +1181,10 @@ class CodeGenerator:
             `is_arg` is True only if the variable is a parameter of the function.
         If the variable is not found, returns (-1, False, False)
         """
+        is_arg: bool = False
+        local: bool = False
+        scope = None
+
         if var_id in self._args:
             is_arg: bool = True
             local: bool = True
@@ -1086,12 +1193,14 @@ class CodeGenerator:
             is_arg = False
             local: bool = True
             scope = self._locals
-        else:
-            is_arg: bool = False
-            local: bool = False
-            scope = self._globals
+        elif var_id in self._statics:
+            scope = self._statics
 
-        index: int = scope.index(var_id) if var_id in scope else -1
+        if scope is not None:
+            index: int = scope.index(var_id) if var_id in scope else -1
+        else:
+            index = -1
+
         return index, local, is_arg
 
     def convert_builtin_method_call(self, function: IBuiltinMethod, args_address: List[int] = None):
@@ -1107,7 +1216,7 @@ class CodeGenerator:
         store_data: bytes = b''
 
         if function.pack_arguments:
-            self.convert_new_array(len(function.args))
+            self.convert_new_array(len(args_address))
 
         if function.stores_on_slot and 0 < len(function.args) <= len(args_address):
             address = args_address[-len(function.args)]

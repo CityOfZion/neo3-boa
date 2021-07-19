@@ -1,6 +1,7 @@
 import ast
 from typing import Dict, List
 
+from boa3.model import set_internal_call
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.variable import Variable
 
@@ -23,10 +24,9 @@ class CallMethod(InteropMethod):
         }
         args_default = ast.parse("{0}".format(Type.sequence.default_value)
                                  ).body[0].value
-        call_flags_default = ast.parse("{0}.{1}".format(call_flags.identifier, call_flags.default_value.name)
-                                       ).body[0].value
-        call_flags_default.is_internal_call = True
-        call_flags_default._fields += ('is_internal_call',)
+        call_flags_default = set_internal_call(ast.parse("{0}.{1}".format(call_flags.identifier,
+                                                                          call_flags.default_value.name)
+                                                         ).body[0].value)
 
         super().__init__(identifier, syscall, args, defaults=[args_default, call_flags_default], return_type=Type.any)
 

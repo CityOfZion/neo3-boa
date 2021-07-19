@@ -1,8 +1,7 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.exception.CompilerError import (MismatchedTypes, MissingReturnStatement, NotSupportedOperation,
-                                          UnexpectedArgument, UnfilledArgument)
+from boa3.exception import CompilerError
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -106,15 +105,15 @@ class TestBuiltinMethod(BoaTest):
 
     def test_len_of_no_collection(self):
         path = self.get_contract_path('LenMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_len_too_many_parameters(self):
         path = self.get_contract_path('LenTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_len_too_few_parameters(self):
         path = self.get_contract_path('LenTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
 
@@ -122,11 +121,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_append_tuple(self):
         path = self.get_contract_path('AppendTuple.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_append_sequence(self):
         path = self.get_contract_path('AppendSequence.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_append_mutable_sequence(self):
         expected_output = (
@@ -204,11 +203,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_append_too_many_parameters(self):
         path = self.get_contract_path('AppendTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_append_too_few_parameters(self):
         path = self.get_contract_path('AppendTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
 
@@ -216,7 +215,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_clear_tuple(self):
         path = self.get_contract_path('ClearTuple.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_clear_mutable_sequence(self):
         expected_output = (
@@ -300,11 +299,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_clear_too_many_parameters(self):
         path = self.get_contract_path('ClearTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_clear_too_few_parameters(self):
         path = self.get_contract_path('ClearTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
 
@@ -312,7 +311,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_reverse_tuple(self):
         path = self.get_contract_path('ReverseTuple.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_reverse_mutable_sequence(self):
         expected_output = (
@@ -351,11 +350,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_reverse_too_many_parameters(self):
         path = self.get_contract_path('ReverseTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_reverse_too_few_parameters(self):
         path = self.get_contract_path('ReverseTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
 
@@ -363,11 +362,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_extend_tuple(self):
         path = self.get_contract_path('ExtendTuple.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_extend_sequence(self):
         path = self.get_contract_path('ExtendSequence.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_extend_mutable_sequence(self):
         path = self.get_contract_path('ExtendMutableSequence.py')
@@ -387,11 +386,11 @@ class TestBuiltinMethod(BoaTest):
 
     def test_extend_too_many_parameters(self):
         path = self.get_contract_path('ExtendTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_extend_too_few_parameters(self):
         path = self.get_contract_path('ExtendTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
 
@@ -483,19 +482,19 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hahs_too_many_parameters(self):
         path = self.get_contract_path('ScriptHashTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_script_hash_too_few_parameters(self):
         path = self.get_contract_path('ScriptHashTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_script_hash_mismatched_types(self):
         path = self.get_contract_path('ScriptHashMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_script_hash_builtin_mismatched_types(self):
         path = self.get_contract_path('ScriptHashBuiltinMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
@@ -587,7 +586,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_to_bytes_mismatched_types(self):
         path = self.get_contract_path('ToBytesMismatchedType.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
@@ -595,23 +594,21 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_int(self):
         path = self.get_contract_path('PrintInt.py')
-        output = Boa3.compile(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
     def test_print_str(self):
         path = self.get_contract_path('PrintStr.py')
-        output = Boa3.compile(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
     def test_print_list(self):
         path = self.get_contract_path('PrintList.py')
-        self.assertCompilerLogs(NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_print_many_values(self):
         path = self.get_contract_path('PrintManyValues.py')
@@ -620,9 +617,16 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
+    def test_print_no_args(self):
+        path = self.get_contract_path('PrintNoArgs.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+
     def test_print_missing_outer_function_return(self):
         path = self.get_contract_path('PrintIntMissingFunctionReturn.py')
-        self.assertCompilerLogs(MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
 
     # endregion
 
@@ -808,13 +812,22 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', value1, value2)
         self.assertEqual(expected_result, result)
 
+    def test_max_int_more_arguments(self):
+        path = self.get_contract_path('MaxIntMoreArguments.py')
+        engine = TestEngine()
+
+        numbers = 4, 1, 16, 8, 2
+        expected_result = max(numbers)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
     def test_max_too_few_parameters(self):
         path = self.get_contract_path('MaxTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_max_mismatched_types(self):
         path = self.get_contract_path('MaxMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
@@ -830,13 +843,22 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', val1, val2)
         self.assertEqual(expected_result, result)
 
+    def test_min_int_more_arguments(self):
+        path = self.get_contract_path('MinIntMoreArguments.py')
+        engine = TestEngine()
+
+        numbers = 2, 8, 1, 4, 16
+        expected_result = min(numbers)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
     def test_min_too_few_parameters(self):
         path = self.get_contract_path('MinTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_min_mismatched_types(self):
         path = self.get_contract_path('MinMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
@@ -898,19 +920,19 @@ class TestBuiltinMethod(BoaTest):
 
     def test_abs_bytes(self):
         path = self.get_contract_path('AbsMismatchedTypesBytes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_abs_string(self):
         path = self.get_contract_path('AbsMismatchedTypesString.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_abs_too_few_parameters(self):
         path = self.get_contract_path('AbsTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_abs_too_many_parameters(self):
         path = self.get_contract_path('AbsTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     # endregion
 
@@ -948,14 +970,160 @@ class TestBuiltinMethod(BoaTest):
 
     def test_sum_mismatched_type(self):
         path = self.get_contract_path('SumMismatchedTypes.py')
-        self.assertCompilerLogs(MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_sum_too_few_parameters(self):
         path = self.get_contract_path('SumTooFewParameters.py')
-        self.assertCompilerLogs(UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_sum_too_many_parameters(self):
         path = self.get_contract_path('SumTooManyParameters.py')
-        self.assertCompilerLogs(UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    # endregion
+
+    # region str split test
+
+    def test_str_split(self):
+        path = self.get_contract_path('StrSplit.py')
+        engine = TestEngine()
+
+        string = '1#2#3#4'
+        separator = '#'
+        expected_result = string.split(separator)
+        result = self.run_smart_contract(engine, path, 'main', string, separator)
+        self.assertEqual(expected_result, result)
+
+        string = 'unit123test123str123split'
+        separator = '123'
+        expected_result = string.split(separator)
+        result = self.run_smart_contract(engine, path, 'main', string, separator)
+        self.assertEqual(expected_result, result)
+
+    def test_str_split_default(self):
+        path = self.get_contract_path('StrSplitSeparatorDefault.py')
+        engine = TestEngine()
+
+        string = '1 2 3 4'
+        expected_result = string.split()
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(expected_result, result)
+
+    # endregion
+
+    # region count test
+
+    def test_count_list_int(self):
+        path = self.get_contract_path('CountListInt.py')
+        engine = TestEngine()
+
+        list_ = [1, 2, 3, 4, 1, 1, 0]
+        expected_result = list_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_str(self):
+        path = self.get_contract_path('CountListStr.py')
+        engine = TestEngine()
+
+        list_ = ['unit', 'test', 'unit', 'unit', 'random', 'string']
+        expected_result = list_.count('unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_bytes(self):
+        path = self.get_contract_path('CountListBytes.py')
+        engine = TestEngine()
+
+        list_ = [b'unit', b'test', b'unit', b'unit', b'random', b'string']
+        expected_result = list_.count(b'unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_different_types(self):
+        path = self.get_contract_path('CountListDifferentTypes.py')
+        engine = TestEngine()
+
+        list_ = [b'unit', 'test', b'unit', b'unit', 123, 123, True, False]
+        expected_result = list_.count(b'unit'), list_.count('test'), list_.count(123)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, tuple(result))
+
+    def test_count_list_different_non_primitive_types(self):
+        path = self.get_contract_path('CountListDifferentNonPrimitiveTypes.py')
+        # TODO: change test when comparison of non primitive types are implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_count_list_empty(self):
+        path = self.get_contract_path('CountListEmpty.py')
+        engine = TestEngine()
+
+        list_ = []
+        expected_result = list_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_int(self):
+        path = self.get_contract_path('CountTupleInt.py')
+        engine = TestEngine()
+
+        tuple_ = (1, 2, 3, 4, 1, 1, 0)
+        expected_result = tuple_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_str(self):
+        path = self.get_contract_path('CountTupleStr.py')
+        engine = TestEngine()
+
+        tuple_ = ('unit', 'test', 'unit', 'unit', 'random', 'string')
+        expected_result = tuple_.count('unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_bytes(self):
+        path = self.get_contract_path('CountTupleBytes.py')
+        engine = TestEngine()
+
+        tuple_ = (b'unit', b'test', b'unit', b'unit', b'random', b'string')
+        expected_result = tuple_.count(b'unit')
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_tuple_different_types(self):
+        path = self.get_contract_path('CountTupleDifferentTypes.py')
+        engine = TestEngine()
+
+        tuple_ = (b'unit', 'test', b'unit', b'unit', 123, 123, True, False)
+        expected_result = tuple_.count(b'unit'), tuple_.count('test'), tuple_.count(123)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, tuple(result))
+
+    def test_count_tuple_different_non_primitive_types(self):
+        path = self.get_contract_path('CountTupleDifferentNonPrimitiveTypes.py')
+        # TODO: change test when comparison of non primitive types are implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_count_tuple_empty(self):
+        path = self.get_contract_path('CountTupleEmpty.py')
+        engine = TestEngine()
+
+        tuple_ = ()
+        expected_result = tuple_.count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_range(self):
+        path = self.get_contract_path('CountRange.py')
+        engine = TestEngine()
+
+        expected_result = range(10).count(1)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_str(self):
+        path = self.get_contract_path('CountStr.py')
+        # TODO: change test when str.count(substring, start, end) is implemented in the Opcode
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     # endregion

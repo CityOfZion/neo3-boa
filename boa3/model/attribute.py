@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Union
 from boa3.model.expression import IExpression
 from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
-from boa3.model.type.classtype import ClassType
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.itype import IType
 
 
