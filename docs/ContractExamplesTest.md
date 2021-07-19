@@ -48,6 +48,11 @@
     - [Import](#import-1)
     - [Typing functions](#typing-function-1)
     - [Optional type](#optional-type)
+  - [v0.8.3](#v083)
+    - [Relational operations](#relational-operations-1)
+    - [Bitwise augmented assignment operators](#bitwise-augmented-assignment-operators)
+    - [Built in function](#built-in-function-6)
+    - [Import](#import-2)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -467,7 +472,7 @@
 - <a href="/boa3_test/test_sc/function_test/CallVoidFunctionWithStarredArgument.py">CallVoidFunctionWithStarredArgument.py</a>,
 - <a href="/boa3_test/test_sc/function_test/ReturnStarredArgumentCount.py">ReturnStarredArgumentCount.py</a>
 
-### Import
+#### Import
 
 - <a href="/boa3_test/test_sc/interop_test/binary/ImportBinary.py">ImportBinary.py</a>,
 - <a href="/boa3_test/test_sc/interop_test/blockchain/ImportBlockchain.py">ImportBlockchain.py</a>,
@@ -483,7 +488,7 @@
 - <a href="/boa3_test/test_sc/interop_test/crypto/ImportInteropCrypto.py">ImportInteropCrypto.py</a>,
 - <a href="/boa3_test/test_sc/interop_test/iterator/ImportInteropIterator.py">ImportInteropIterator.py</a>,
 - <a href="/boa3_test/test_sc/interop_test/json/ImportInteropJson.py">ImportInteropJson.py</a>,
-- <a href="/boa3_test/test_sc/interop_test/native_contracts/ImportInteropOracle.py">ImportInteropOracle.py</a>,
+- <a href="/boa3_test/test_sc/interop_test/oracle/ImportInteropOracle.py">ImportInteropOracle.py</a>,
 - <a href="/boa3_test/test_sc/interop_test/runtime/ImportInteropRuntime.py">ImportInteropRuntime.py</a>,
 - <a href="/boa3_test/test_sc/interop_test/storage/ImportInteropStorage.py">ImportInteropStorage.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportInteropWithAlias.py">ImportInteropWithAlias.py</a>
@@ -497,3 +502,41 @@
 - <a href="/boa3_test/test_sc/optional_test/OptionalReturn.py">OptionalReturn.py</a>,
 - <a href="/boa3_test/test_sc/optional_test/OptionalVariableArgument.py">OptionalVariableArgument.py</a>,
 - <a href="/boa3_test/test_sc/optional_test/OptionalVariableReassign.py">OptionalVariableReassign.py</a>
+
+### v0.8.3
+#### Relational operations
+- <a href="/boa3_test/test_sc/relational_test/StrIdentity.py">StrIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/StrNotIdentity.py">StrNotIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/NumIdentity.py">NumIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/NumNotIdentity.py">NumNotIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/BoolIdentity.py">BoolIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/BoolNotIdentity.py">BoolNotIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/ListIdentity.py">ListIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/ListNotIdentity.py">ListNotIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/TupleIdentity.py">TupleIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/TupleNotIdentity.py">TupleNotIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/NoneIdentity.py">NoneIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/NoneNotIdentity.py">NoneNotIdentity.py</a>,
+- <a href="/boa3_test/test_sc/relational_test/MixedIdentity.py">MixedIdentity.py</a>
+
+#### Bitwise augmented assignment operators
+- <a href="/boa3_test/test_sc/logical_test/AugmentedAssignmentOperators.py">AugmentedAssignmentOperators.py</a>
+
+#### Built in function
+- <a href="/boa3_test/test_sc/reversed_test/ReversedBytes.py">ReversedBytes.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedList.py">ReversedList.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedListBool.py">ReversedListBool.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedListBytes.py">ReversedListBytes.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedListInt.py">ReversedListInt.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedListStr.py">ReversedListStr.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedRange.py">ReversedRange.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedString.py">ReversedString.py</a>,
+- <a href="/boa3_test/test_sc/reversed_test/ReversedTuple.py">ReversedTuple.py</a>,
+- <a href="/boa3_test/test_sc/built_in_methods_test/MinIntMoreArguments.py">MinIntMoreArguments.py</a>,
+- <a href="/boa3_test/test_sc/built_in_methods_test/MaxIntMoreArguments.py">MaxIntMoreArguments.py</a>
+
+#### Import
+- <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImports.py">GenerationWithUserModuleImports.py</a>,
+- <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImportsDupNames.py">GenerationWithUserModuleImportsDupNames.py</a>,
+- <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedSymbols.py">ImportUserModuleWithNotImportedSymbols.py</a>,
+- <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedVariables.py">ImportUserModuleWithNotImportedVariables.py</a>
