@@ -64,3 +64,17 @@ class TestPolicyInterop(BoaTest):
     def test_is_blocked_too_few_parameters(self):
         path = self.get_contract_path('IsBlockedTooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_import_policy(self):
+        path = self.get_contract_path('ImportPolicy.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)
+
+    def test_import_interop_policy(self):
+        path = self.get_contract_path('ImportInteropPolicy.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsInstance(result, int)

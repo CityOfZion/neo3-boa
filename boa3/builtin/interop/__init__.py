@@ -6,5 +6,7 @@ import boa3.builtin.interop.crypto
 import boa3.builtin.interop.iterator
 import boa3.builtin.interop.json
 import boa3.builtin.interop.oracle
+import boa3.builtin.interop.policy
+import boa3.builtin.interop.role
 import boa3.builtin.interop.runtime
 import boa3.builtin.interop.storage

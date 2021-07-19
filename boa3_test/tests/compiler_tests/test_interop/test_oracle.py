@@ -76,6 +76,33 @@ class TestNativeContracts(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_interop_oracle(self):
+        path = self.get_contract_path('ImportOracle.py')
+        output, manifest = self.compile_and_save(path)
+        contract_script = hash160(output)
+
+        engine = TestEngine()
+
+        test_url = 'abc'
+        request_filter = 'ABC'
+        callback = '123'
+        gas_for_response = 1_0000000
+        result = self.run_smart_contract(engine, path, 'oracle_call',
+                                         test_url, request_filter, callback, None, gas_for_response)
+        self.assertIsVoid(result)
+
+        oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
+        self.assertEqual(1, len(oracle_requests))
+        self.assertEqual(4, len(oracle_requests[0].arguments))
+        self.assertEqual(contract_script, oracle_requests[0].arguments[1])
+        self.assertEqual(test_url, oracle_requests[0].arguments[2])
+        self.assertEqual(request_filter, oracle_requests[0].arguments[3])
+
+        request_id = oracle_requests[0].arguments[0]
+        with self.assertRaises(TestExecutionException):
+            # callback function doesn't exist
+            self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
+
+    def test_import_interop_oracle(self):
         path = self.get_contract_path('ImportInteropOracle.py')
         output, manifest = self.compile_and_save(path)
         contract_script = hash160(output)
