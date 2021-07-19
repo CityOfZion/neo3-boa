@@ -15,7 +15,7 @@ class TestRoleInterop(BoaTest):
 
     def test_get_designated_by_role(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getDesignatedByRole').to_bytes()
+        method = String(Interop.GetDesignatedByRole.method_name).to_bytes()
 
         expected_output = (
             Opcode.INITSLOT
@@ -44,7 +44,7 @@ class TestRoleInterop(BoaTest):
 
     def test_import_role(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getDesignatedByRole').to_bytes()
+        method = String(Interop.GetDesignatedByRole.method_name).to_bytes()
 
         expected_output = (
             Opcode.INITSLOT
@@ -73,7 +73,7 @@ class TestRoleInterop(BoaTest):
 
     def test_import_interop_role(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getDesignatedByRole').to_bytes()
+        method = String(Interop.GetDesignatedByRole.method_name).to_bytes()
 
         expected_output = (
             Opcode.INITSLOT
