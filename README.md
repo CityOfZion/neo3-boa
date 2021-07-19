@@ -399,8 +399,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.8.3</td>
     <td>Relational operations</td>
     <td>
       <pre>
@@ -410,6 +410,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#relational-operations-1">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -428,8 +429,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.8.3</td>
     <td>Bitwise augmented assignment operators</td>
     <td>
       <pre>
@@ -439,6 +440,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#bitwise-augmented-assignment-operators">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -534,7 +536,7 @@ python -m unittest discover boa3_test
   </tbody>
   <tbody>
     <td>🔜</td>
-    <td>next release</td>
+    <td>backlog</td>
     <td>Set type</td>
     <td>
       <pre>
@@ -763,16 +765,30 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.8.3</td>
     <td>Built in function</td>
     <td>
       <pre>
         <code>
   a = max(7, 0, 12, 8)
   b = min(1, 6, 2)
-  c = pow(2, 2)
-  d = reversed([1, 2, 3, 4])
+  c = reversed([1, 2, 3, 4])
+        </code>
+      </pre>
+    </td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-6">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>backlog</td>
+    <td>Built in function</td>
+    <td>
+      <pre>
+        <code>
+  a = pow(2, 2)
         </code>
       </pre>
     </td>
@@ -919,9 +935,34 @@ python -m unittest discover boa3_test
     <td>✅</td>
     <td>v0.3</td>
     <td>Import</td>
-    <td>Only <code>boa3.builtin</code> packages are supported right now.</td>
+    <td>Support to <code>boa3.builtin</code> packages.</td>
     <td>
       <a href="/docs/ContractExamplesTest.md#import">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>✅</td>
+    <td>v0.8.3</td>
+    <td>Import</td>
+    <td>Support to user created modules.</td>
+    <td>
+      <a href="/docs/ContractExamplesTest.md#import-2">List of examples</a>
+    </td>
+  </tbody>
+  <tbody>
+    <td>🔜</td>
+    <td>next release</td>
+    <td>Class</td>
+    <td>
+      <pre>
+        <code>
+  class Foo:
+    def __init__(self, bar: Any):
+      pass
+        </code>
+      </pre>
+    </td>
+    <td>
     </td>
   </tbody>
 </table>

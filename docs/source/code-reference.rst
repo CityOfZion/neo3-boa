@@ -84,18 +84,14 @@ Operations
      - ::
 
          ==, !=, <, <=, >, >=, 
-         is None, is not None
-   * - 🔜
-     - Relational operations
-     - ::
-
+         is None, is not None,
          is, is not
    * - ✅
      - Bitwise operations
      - ::
 
          &, |, ~, ^, <<, >>
-   * - 🔜
+   * - ✅
      - Bitwise augmented assignment operators
      - ::
 
@@ -249,16 +245,16 @@ Functions
          print(42)
          d = abs(-5)
          e = max(7, 12)
-         f = min(1, 6)
-         g = sum(list_of_num, 0)
+         f = max(7, 0, 12, 8)
+         g = min(1, 6)
+         h = min(1, 6, 2)
+         i = sum(list_of_num, 0)
+         j = reversed([1, 2, 3, 4])
    * - 🔜
      - Built in functions
      - ::
 
-         a = max(7, 0, 12, 8)
-         b = min(1, 6, 2)
-         c = pow(2, 2)
-         d = reversed([1, 2, 3, 4])
+         a = pow(2, 2)
 
 Other Features
 --------------
@@ -311,4 +307,13 @@ Other Features
      - 
    * - ✅
      - Import
-     - Only  `boa3.builtin` packages are supported right now.
+     -
+       - Support to ``boa3.builtin`` packages
+       - Support to user created modules.
+   * - 🔜
+     - Class
+     - ::
+
+         class Foo:
+           def __init__(self, bar: Any):
+             pass
