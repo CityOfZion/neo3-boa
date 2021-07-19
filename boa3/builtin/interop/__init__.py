@@ -1,5 +1,5 @@
 # for package imports in the smart contract
-import boa3.builtin.interop.binary
+import boa3.builtin.interop.stdlib
 import boa3.builtin.interop.blockchain
 import boa3.builtin.interop.contract
 import boa3.builtin.interop.crypto
