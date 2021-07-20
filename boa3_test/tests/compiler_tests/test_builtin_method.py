@@ -940,7 +940,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_sum(self):
         path = self.get_contract_path('Sum.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         val = [1, 2, 3, 4]
@@ -955,7 +954,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_sum_with_start(self):
         path = self.get_contract_path('SumWithStart.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         val = [1, 2, 3, 4]
@@ -1121,9 +1119,144 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
+    def test_count_sequence_too_many_parameters(self):
+        path = self.get_contract_path('CountSequenceTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_count_sequence_too_few_parameters(self):
+        path = self.get_contract_path('CountSequenceTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
     def test_count_str(self):
         path = self.get_contract_path('CountStr.py')
-        # TODO: change test when str.count(substring, start, end) is implemented in the Opcode
+        engine = TestEngine()
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = 0
+        end = 43
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = 0
+        end = 1000
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = 0
+        end = -1000
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = 0
+        end = -4
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = 23
+        end = 43
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = -11
+        end = 43
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = -1000
+        end = 43
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        substr = 'e'
+        start = 1000
+        end = 43
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'a string that will be used in the unit test'
+        substr = 'string'
+        start = 0
+        end = 43
+        expected_result = str_.count(substr, start, end)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start, end)
+        self.assertEqual(expected_result, result)
+
+    def test_count_str_end_default(self):
+        path = self.get_contract_path('CountStrEndDefault.py')
+        engine = TestEngine()
+
+        str_ = 'a string that will be used in the unit test'
+        substr = 'string'
+        start = 0
+        expected_result = str_.count(substr, start)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'a string that will be used in the unit test'
+        substr = 'string'
+        start = 4
+        expected_result = str_.count(substr, start)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeee'
+        substr = 'e'
+        start = 0
+        expected_result = str_.count(substr, start)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeee'
+        substr = 'e'
+        start = 5
+        expected_result = str_.count(substr, start)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr, start)
+        self.assertEqual(expected_result, result)
+
+    def test_count_str_default(self):
+        path = self.get_contract_path('CountStrDefault.py')
+        engine = TestEngine()
+
+        str_ = 'a string that will be used in the unit test'
+        substr = 'string'
+        expected_result = str_.count(substr)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr)
+        self.assertEqual(expected_result, result)
+
+        str_ = 'eeeeeeeeeee'
+        substr = 'e'
+        expected_result = str_.count(substr)
+        result = self.run_smart_contract(engine, path, 'main', str_, substr)
+        self.assertEqual(expected_result, result)
+
+    def test_count_str_too_many_parameters(self):
+        path = self.get_contract_path('CountStrTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_count_str_too_few_parameters(self):
+        path = self.get_contract_path('CountStrTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
