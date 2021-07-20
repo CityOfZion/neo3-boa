@@ -22,6 +22,7 @@ from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
@@ -52,6 +53,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
+        self._current_class: UserClass = None
         self._current_method: Method = None
         self._current_event: Event = None
 
@@ -69,7 +71,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
-    def _current_scope(self) -> Union[Method, Module, None]:
+    def _current_scope(self) -> Union[Method, Module, UserClass, None]:
         """
         Returns the scope that is currently being analysed
 
@@ -78,6 +80,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         if self._current_method is not None:
             return self._current_method
+        if self._current_class is not None:
+            return self._current_class
         return self._current_module
 
     @property
@@ -165,6 +169,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._annotated_variables.append(var_id)
             if hasattr(self._current_scope, 'assign_variable') and assignment:
                 self._global_assigned_variables.append(var_id)
+
+    def __include_callable(self, callable_id: str, callable: Callable):
+        """
+        Includes the method in the symbol table if the id was not used
+
+        :param callable_id: method id
+        :param callable: method to be included
+        """
+        if callable_id not in self._current_module.symbols:
+            self._current_module.include_callable(callable_id, callable)
 
     def __include_callable(self, callable_id: str, callable: Callable):
         """
@@ -444,14 +458,56 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._global_assigned_variables.clear()
         self._current_module = None
 
-    def visit_ClassDef(self, node: ast.ClassDef):
-        # TODO: refactor when classes defined by the user are implemented
-        self._log_error(
-            CompilerError.NotSupportedOperation(
-                node.lineno, node.col_offset,
-                symbol_id='class'
+    def visit_ClassDef(self, class_node: ast.ClassDef):
+        # TODO: change when class inheritance is implemented
+        if len(class_node.bases) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class inheritance'
+                )
             )
-        )
+
+        # TODO: change when base classes with keyword is implemented
+        if len(class_node.keywords) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class keyword'
+                )
+            )
+
+        # TODO: change when class decorators are implemented
+        if len(class_node.decorator_list) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class decorator'
+                )
+            )
+
+        # TODO: change when class variables and methods are implemented
+        if len(class_node.body) > 1 or (len(class_node.body) == 1 and not isinstance(class_node.body[0], ast.Pass)):
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class'
+                )
+            )
+
+        user_class = UserClass(identifier=class_node.name)
+
+        self._current_class = user_class
+        if self._current_symbol_scope is not None:
+            self._current_symbol_scope.include_symbol(class_node.name, user_class)
+        self._scope_stack.append(SymbolScope())
+
+        for stmt in class_node.body:
+            self.visit(stmt)
+
+        class_scope = self._scope_stack.pop()
+        self._current_module.include_class(class_node.name, user_class)
+        self._current_class = None
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """

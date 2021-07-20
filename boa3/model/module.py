@@ -3,6 +3,7 @@ from typing import Dict
 from boa3.model.callable import Callable
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.variable import Variable
 
 
@@ -13,6 +14,7 @@ class Module(ISymbol):
     :ivar variables: a dictionary that maps each variable with its name. Empty by default.
     :ivar methods: a dictionary that maps each method with its name. Empty by default.
     :ivar callables: a dictionary that maps each callable object with its name. Empty by default.
+    :ivar classes: a dictionary that maps each class with its name. Empty by default.
     :ivar imported_symbols: a dictionary that maps each imported symbol with its name. Empty by default.
     """
 
@@ -25,6 +27,7 @@ class Module(ISymbol):
             methods = {}
         self.methods = methods
         self.callables: Dict[str, Callable] = {}
+        self.classes: Dict[str, ClassType] = {}
 
         self.defined_by_entry = True
         self.imported_symbols = {}
@@ -75,6 +78,16 @@ class Module(ISymbol):
             else:
                 self.callables[method_id] = method
 
+    def include_class(self, class_id: str, class_obj: ClassType):
+        """
+        Includes a class into the scope of the module
+
+        :param class_id: class identifier
+        :param class_obj: class object to be included
+        """
+        if class_id not in self.symbols:
+            self.classes[class_id] = class_obj
+
     def include_symbol(self, symbol_id: str, symbol: ISymbol):
         """
         Includes a method into the scope of the module
@@ -87,6 +100,8 @@ class Module(ISymbol):
                 self.include_variable(symbol_id, symbol)
             elif isinstance(symbol, Callable):
                 self.include_callable(symbol_id, symbol)
+            elif isinstance(symbol, ClassType):
+                self.include_class(symbol_id, symbol)
             else:
                 self.imported_symbols[symbol_id] = symbol
 
@@ -102,4 +117,5 @@ class Module(ISymbol):
         symbols.update(self.variables)
         symbols.update(self.methods)
         symbols.update(self.callables)
+        symbols.update(self.classes)
         return symbols

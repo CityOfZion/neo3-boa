@@ -24,8 +24,12 @@ class StorageMapType(ClassArrayType):
         self._instance_methods: Dict[str, Method] = {}
 
     @property
-    def variables(self) -> Dict[str, Variable]:
+    def instance_variables(self) -> Dict[str, Variable]:
         return self._variables.copy()
+
+    @property
+    def class_variables(self) -> Dict[str, Variable]:
+        return {}
 
     @property
     def _all_variables(self) -> Dict[str, Variable]:
@@ -38,12 +42,16 @@ class StorageMapType(ClassArrayType):
                                                   Type.str
                                                   ]))
         }
-        variables = self.variables.copy()
+        variables = super()._all_variables
         variables.update(private_variables)
         return variables
 
     @property
     def properties(self) -> Dict[str, Property]:
+        return {}
+
+    @property
+    def static_methods(self) -> Dict[str, Method]:
         return {}
 
     @property

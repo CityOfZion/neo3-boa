@@ -1,3 +1,5 @@
+from boa3.boa3 import Boa3
+from boa3.exception import CompilerError
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
@@ -87,3 +89,45 @@ class TestClass(BoaTest):
         self.assertEqual(bytes(20), result[2])
         self.assertEqual(bytes(), result[3])
         self.assertEqual({}, result[4])
+
+    def test_user_class_empty(self):
+        path = self.get_contract_path('UserClassEmpty.py')
+        output = Boa3.compile(path)
+
+        self.assertEqual(b'', output)
+
+    def test_user_class_with_static_method(self):
+        path = self.get_contract_path('UserClassWithStaticMethod.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_class_method(self):
+        path = self.get_contract_path('UserClassWithClassMethod.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_class_variable(self):
+        path = self.get_contract_path('UserClassWithClassVariable.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_init(self):
+        path = self.get_contract_path('UserClassWithInit.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_instance_method(self):
+        path = self.get_contract_path('UserClassWithInstanceMethod.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_instance_variable(self):
+        path = self.get_contract_path('UserClassWithInstanceVariable.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_base(self):
+        path = self.get_contract_path('UserClassWithBase.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_keyword_base(self):
+        path = self.get_contract_path('UserClassWithKeywordBase.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_decorator(self):
+        path = self.get_contract_path('UserClassWithDecorator.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
