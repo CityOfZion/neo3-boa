@@ -1019,6 +1019,7 @@ class TestBuiltinMethod(BoaTest):
     def test_str_split_maxsplit_default(self):
         path = self.get_contract_path('StrSplitMaxsplitDefault.py')
         engine = TestEngine()
+        self.compile_and_save(path)
 
         string = '1#2#3#4'
         separator = '#'
