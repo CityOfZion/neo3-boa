@@ -30,11 +30,19 @@ class ECPointType(BytesType, ClassType):
         return AbiType.PublicKey
 
     @property
-    def variables(self) -> Dict[str, Variable]:
+    def instance_variables(self) -> Dict[str, Variable]:
+        return {}
+
+    @property
+    def class_variables(self) -> Dict[str, Variable]:
         return {}
 
     @property
     def properties(self) -> Dict[str, Property]:
+        return {}
+
+    @property
+    def static_methods(self) -> Dict[str, Method]:
         return {}
 
     @property

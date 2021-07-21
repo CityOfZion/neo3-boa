@@ -25,11 +25,19 @@ class ContractParameterDefinitionType(ClassStructType):
         self._constructor: Method = None
 
     @property
-    def variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> Dict[str, Variable]:
+        return {}
+
+    @property
+    def instance_variables(self) -> Dict[str, Variable]:
         return self._variables.copy()
 
     @property
     def properties(self) -> Dict[str, Property]:
+        return {}
+
+    @property
+    def static_methods(self) -> Dict[str, Method]:
         return {}
 
     @property
