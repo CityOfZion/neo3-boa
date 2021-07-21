@@ -101,4 +101,3 @@ class StrSplitMethod(StdLibMethod):
             concatenate_array +
             clean_stack
         )
-

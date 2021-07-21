@@ -129,12 +129,12 @@ class CountSequenceMethod(CountMethod):
         # endregion
 
         return (
-                repack_array +
-                sequence_initialize +
-                sequence_verify_while +
-                sequence_get_element +
-                sequence_equals +
-                sequence_count_inc +
-                list_tuple_count_index_dec +
-                sequence_clean_stack
+            repack_array +
+            sequence_initialize +
+            sequence_verify_while +
+            sequence_get_element +
+            sequence_equals +
+            sequence_count_inc +
+            list_tuple_count_index_dec +
+            sequence_clean_stack
         )

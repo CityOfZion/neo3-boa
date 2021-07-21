@@ -100,9 +100,45 @@ class TestClass(BoaTest):
         path = self.get_contract_path('UserClassWithStaticMethod.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
-    def test_user_class_with_class_method(self):
-        path = self.get_contract_path('UserClassWithClassMethod.py')
+    def test_user_class_with_class_method_called_from_class_name(self):
+        path = self.get_contract_path('UserClassWithClassMethodFromClass.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'call_by_class_name')
+        self.assertEqual(42, result)
+
+    def test_user_class_with_class_method_called_from_object(self):
+        path = self.get_contract_path('UserClassWithClassMethodFromObject.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_class_method_with_args(self):
+        path = self.get_contract_path('UserClassWithClassMethodWithArgs.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', 42)
+        self.assertEqual(42, result)
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', 1)
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', -10)
+        self.assertEqual(-10, result)
+
+    def test_user_class_with_class_method_with_vararg(self):
+        path = self.get_contract_path('UserClassWithClassMethodWithVararg.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', [])
+        self.assertEqual(42, result)
+
+        args = [1, 2, 3]
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
+        self.assertEqual(args[0], result)
+
+        args = [4, 3, 2, 1]
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
+        self.assertEqual(args[0], result)
 
     def test_user_class_with_class_variable(self):
         path = self.get_contract_path('UserClassWithClassVariable.py')

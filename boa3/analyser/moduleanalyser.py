@@ -14,12 +14,14 @@ from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
+from boa3.model.decorator import IDecorator
 from boa3.model.event import Event
 from boa3.model.expression import IExpression
 from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
+from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
@@ -486,8 +488,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: change when class variables and methods are implemented
-        if len(class_node.body) > 1 or (len(class_node.body) == 1 and not isinstance(class_node.body[0], ast.Pass)):
+        # TODO: change when class variables are implemented
+        if len([stmt for stmt in class_node.body if not isinstance(stmt, (ast.FunctionDef, ast.Pass))]) > 1:
             self._log_error(
                 CompilerError.NotSupportedOperation(
                     class_node.lineno, class_node.col_offset,
@@ -517,6 +519,25 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param function:
         """
+        fun_decorators: List[Method] = self._get_function_decorators(function)
+        if Builtin.Metadata in fun_decorators:
+            self._read_metadata_object(function)
+            return Builtin.Metadata
+
+        if any(decorator is None for decorator in fun_decorators):
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    function.lineno, function.col_offset,
+                    symbol_id='decorator'
+                )
+            )
+
+        valid_decorators: List[IDecorator] = []
+        for decorator in fun_decorators:
+            if isinstance(decorator, IDecorator):
+                decorator.update_args(function.args, self._current_scope)
+                valid_decorators.append(decorator)
+
         fun_args: FunctionArguments = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
 
@@ -529,15 +550,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             fun_rtype_symbol = self.get_type(symbol)
 
         fun_return: IType = self.get_type(fun_rtype_symbol)
-        fun_decorators: List[Method] = self._get_function_decorators(function)
-
-        if Builtin.Metadata in fun_decorators:
-            self._read_metadata_object(function)
-            return Builtin.Metadata
 
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
                         vararg=fun_args.vararg,
-                        origin_node=function, is_public=Builtin.Public in fun_decorators)
+                        origin_node=function, is_public=Builtin.Public in fun_decorators,
+                        decorators=valid_decorators)
 
         if function.name in Builtin.internal_methods:
             internal_method = Builtin.internal_methods[function.name]
@@ -779,15 +796,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: if the subscript is not a symbol, returns its type. Otherwise returns the symbol id.
         :rtype: IType or str
         """
+        is_internal = hasattr(subscript, 'is_internal_call') and subscript.is_internal_call
         value = self.visit(subscript.value)
-        symbol = self.get_symbol(value) if isinstance(value, str) else value
+        symbol = self.get_symbol(value, is_internal=is_internal) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, Collection) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
+            if isinstance(symbol, (Collection, MetaType)) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
                 # for evaluating names like List[str], Dict[int, bool], etc
                 value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
                 values_type: Iterable[IType] = self.get_values_type(value)
-                return symbol.build_collection(*values_type)
+                if isinstance(symbol, Collection):
+                    return symbol.build_collection(*values_type)
+                else:
+                    return symbol.build(*values_type)
 
             symbol_type = self.get_type(symbol)
             if isinstance(subscript.slice, ast.Slice):

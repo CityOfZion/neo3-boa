@@ -15,6 +15,7 @@ from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -102,15 +103,25 @@ class VisitorCodeGenerator(IAstAnalyser):
             self.visit(stmt)
 
         if self.generator.initialize_static_fields():
+            # to generate the 'initialize' method for Neo
             for stmt in global_stmts:
                 self.visit(stmt)
 
             self.generator.end_initialize()
-        else:
+        elif len(function_stmts) > 0:
+            # to organize syntax tree nodes from other modules
             for stmt in global_stmts:
                 stmt.origin = module
 
             self.global_stmts.extend(global_stmts)
+        else:
+            # to generate objects when there are no static variables to generate 'initialize'
+            for stmt in global_stmts:
+                self.visit(stmt)
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        for stmt in node.body:
+            self.visit(stmt)
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -554,13 +565,15 @@ class VisitorCodeGenerator(IAstAnalyser):
             symbol = symbol.constructor_method()
         args_addresses: List[int] = []
 
-        if VMCodeMapping.instance().bytecode_size > last_address:
-            # remove opcodes inserted during the evaluation of the symbol
-            VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
-        if last_stack < self.generator.stack_size:
-            # remove any additional values pushed to the stack during the evalution of the symbol
-            for _ in range(self.generator.stack_size - last_stack):
-                self.generator._stack_pop()
+        has_cls_or_self_argument = isinstance(symbol, Method) and symbol.has_cls_or_self
+        if not has_cls_or_self_argument:
+            if VMCodeMapping.instance().bytecode_size > last_address:
+                # remove opcodes inserted during the evaluation of the symbol
+                VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
+            if last_stack < self.generator.stack_size:
+                # remove any additional values pushed to the stack during the evalution of the symbol
+                for _ in range(self.generator.stack_size - last_stack):
+                    self.generator._stack_pop()
 
         if isinstance(symbol, Method):
             args_to_generate = [arg for index, arg in enumerate(call.args) if index in symbol.args_to_be_generated()]
@@ -577,11 +590,14 @@ class VisitorCodeGenerator(IAstAnalyser):
         else:
             args = reversed(args_to_generate)
 
+        args_begin_address = self.generator.last_code_start_address
         for arg in args:
             args_addresses.append(
                 VMCodeMapping.instance().bytecode_size
             )
             self.visit_to_generate(arg)
+        if has_cls_or_self_argument:
+            VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
 
         if self.is_exception_name(function_id):
             self.generator.convert_new_exception(len(call.args))
@@ -657,10 +673,17 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param attribute: the python ast attribute node
         :return: the identifier of the attribute
         """
-        if self.generator.get_symbol(attribute.attr) is not Type.none and not hasattr(attribute, 'generate_value'):
+        attr = self.generator.get_symbol(attribute.attr)
+        value = attribute.value
+        if isinstance(value, ast.Name):
+            value_id = self.visit(value)
+            if (isinstance(self.generator.get_symbol(value_id), UserClass)
+                    and isinstance(attr, Method) and attr.has_cls_or_self):
+                self.generator.convert_load_symbol(value_id)
+
+        if attr is not Type.none and not hasattr(attribute, 'generate_value'):
             return attribute.attr
 
-        value = attribute.value
         if isinstance(value, ast.Attribute):
             value = self.visit(value)
         elif hasattr(attribute, 'generate_value') and attribute.generate_value:

@@ -19,6 +19,7 @@ from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -1089,6 +1090,8 @@ class CodeGenerator:
                 self.convert_event_call(symbol)
             elif isinstance(symbol, Method):
                 self.convert_method_call(symbol, len(params_addresses))
+            elif isinstance(symbol, UserClass):
+                self.convert_class_symbol(symbol, symbol_id)
 
     def convert_load_variable(self, var_id: str, var: Variable):
         """
@@ -1307,6 +1310,8 @@ class CodeGenerator:
             method = symbol.getter if load else symbol.setter
         elif symbol_id in class_type.instance_methods:
             method = class_type.instance_methods[symbol_id]
+        elif isinstance(class_type, UserClass):
+            return self.convert_user_class(class_type, symbol_id)
         else:
             return
 
@@ -1315,6 +1320,18 @@ class CodeGenerator:
         else:
             self.convert_method_call(method, 0)
         return symbol_id
+
+    def convert_user_class(self, class_type: UserClass, symbol_id: str) -> Optional[int]:
+        """
+        Converts an class symbol
+
+        :param class_type:
+        :param symbol_id:
+        """
+        # TODO: change to create an array with the class variables' default values when they are implemented
+        start_address = self.bytecode_size
+        self.convert_new_array(len(class_type.class_variables))
+        return start_address
 
     def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
         """

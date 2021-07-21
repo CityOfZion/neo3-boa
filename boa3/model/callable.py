@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 from abc import ABC
 from typing import Dict, List, Optional, Tuple
@@ -22,7 +24,9 @@ class Callable(IExpression, ABC):
                  vararg: Optional[Tuple[str, Variable]] = None,
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
+                 decorators: List[Callable] = None,
                  origin_node: Optional[ast.AST] = None):
+
         if args is None:
             args = {}
         self.args: Dict[str, Variable] = args.copy()
@@ -54,6 +58,12 @@ class Callable(IExpression, ABC):
         self.return_type: IType = return_type
         self.is_public: bool = is_public
 
+        if decorators is None:
+            decorators = []
+        from boa3.model.decorator import IDecorator
+        self.decorators: List[IDecorator] = [decorator for decorator in decorators
+                                             if isinstance(decorator, IDecorator)]
+
         super().__init__(origin_node)
 
         self.init_address: Optional[int] = None
@@ -80,6 +90,10 @@ class Callable(IExpression, ABC):
         if num_defaults > 0:
             return {key: self.args[key] for key in list(self.args.keys())[:-num_defaults]}
         return self.args
+
+    @property
+    def has_cls_or_self(self) -> bool:
+        return any(decorator.has_cls_or_self for decorator in self.decorators)
 
     @property
     def has_starred_argument(self) -> bool:
