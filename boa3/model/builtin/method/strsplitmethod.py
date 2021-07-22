@@ -19,7 +19,8 @@ class StrSplitMethod(StdLibMethod):
         # whitespace is the default separator
         separator_default = ast.parse("' '").body[0].value
         # maxsplit the default value is -1
-        maxsplit_default = ast.parse("-1").body[0].value
+        maxsplit_default = ast.parse("-1").body[0].value.operand
+        maxsplit_default.n = -1
 
         super().__init__(identifier, syscall, args, defaults=[separator_default, maxsplit_default],
                          return_type=Type.list.build_collection(Type.str))
