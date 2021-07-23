@@ -60,9 +60,10 @@ class Builtin:
     Exception = ExceptionMethod()
 
     # python class method
+    CountSequence = CountSequenceMethod()
+    CountStr = CountStrMethod()
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
-    SequenceCount = CountMethod()
     SequenceExtend = ExtendMethod()
     SequenceInsert = InsertMethod()
     SequencePop = PopMethod()
@@ -83,6 +84,8 @@ class Builtin:
                                                 ConvertToBytes,
                                                 ConvertToInt,
                                                 ConvertToStr,
+                                                CountSequence,
+                                                CountStr,
                                                 DictKeys,
                                                 DictValues,
                                                 Exception,
@@ -97,7 +100,6 @@ class Builtin:
                                                 ScriptHash,
                                                 SequenceAppend,
                                                 SequenceClear,
-                                                SequenceCount,
                                                 SequenceExtend,
                                                 SequenceInsert,
                                                 SequencePop,
