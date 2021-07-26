@@ -107,7 +107,7 @@ class CompilerBuiltin:
                     continue
 
             package = current_list[current_index]
-            if symbol_id in package.symbols:
+            if symbol_id in package.symbols and not isinstance(package.symbols[symbol_id], Package):
                 return package.symbols[symbol_id]
             current_index += 1
 
@@ -120,4 +120,6 @@ class CompilerBuiltin:
                 current_list = internal_packages
                 current_index = 0
 
+        if symbol_id in TypeUtils.symbols_for_internal_validation:
+            return TypeUtils.symbols_for_internal_validation[symbol_id]
         return None

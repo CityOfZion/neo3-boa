@@ -22,7 +22,9 @@ from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.symbol import ISymbol
+from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
 from boa3.model.type.typeutils import TypeUtils
@@ -401,13 +403,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param index_node: the subscript index
         :return: the type of the accessed value if it is valid. Type.none otherwise.
         """
+        is_internal = hasattr(subscript, 'is_internal_call') and subscript.is_internal_call
+
         value = self.visit(subscript.value)
         index = self.visit(index_node)
 
         if isinstance(value, ast.Name):
-            value = self.get_symbol(value.id)
+            value = self.get_symbol(value.id, is_internal=is_internal)
         if isinstance(index, ast.Name):
-            index = self.get_symbol(index.id)
+            index = self.get_symbol(index.id, is_internal=is_internal)
         if not isinstance(index, tuple):
             index = (index,)
 
@@ -415,7 +419,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
             if isinstance(value, Collection):
                 value = value.build_collection(*index)
-            return TypeUtils.type.build(value)
+
+            value_to_be_built = index if isinstance(value, MetaType) else value
+            if not isinstance(value_to_be_built, tuple):
+                value_to_be_built = (value_to_be_built,)
+            return TypeUtils.type.build(*value_to_be_built)
 
         symbol_type: IType = self.get_type(value)
         index_type: IType = self.get_type(index[0])
@@ -1002,6 +1010,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         callable_method_id = None
         if isinstance(callable_target, ClassType):
+            if isinstance(callable_target, UserClass):
+                # TODO: change when class instance is implemented
+                exception = CompilerError.NotSupportedOperation(
+                    call.lineno, call.col_offset,
+                    symbol_id='class instance'
+                )
+                self._log_error(exception)
+                raise exception
+
             callable_target = callable_target.constructor_method()
             callable_method_id = '__init__'
 
@@ -1124,17 +1141,18 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             call.checked_starred_args = True
 
+        ignore_first_argument = int(callable_target.has_cls_or_self)  # 1 if True, 0 otherwise
         len_call_args = len(call.args)
-        callable_required_args = len(callable_target.args_without_default)
+        callable_required_args = len(callable_target.args_without_default) - ignore_first_argument
 
         if len_call_args > len(callable_target.args):
-            unexpected_arg = call.args[len(callable_target.args)]
+            unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
             self._log_error(
                 CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
             )
             return False
         elif len_call_args < callable_required_args:
-            missed_arg = list(callable_target.args)[len(call.args)]
+            missed_arg = list(callable_target.args)[len(call.args) + ignore_first_argument]
             self._log_error(
                 CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
             )
@@ -1159,8 +1177,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self.warnings.extend(builtin_analyser.warnings)
                 return
 
-        for index, (arg_id, arg_value) in enumerate(callable.args.items()):
-            param = call.args[index]
+        ignore_first_argument = int(callable.has_cls_or_self)  # 1 if True, 0 otherwise
+        for index, param in enumerate(call.args):
+            (arg_id, arg_value) = list(callable.args.items())[index + ignore_first_argument]
+
             param_type = self.get_type(param, use_metatype=True)
             args_types.append(param_type)
             if not arg_value.type.is_type_of(param_type):

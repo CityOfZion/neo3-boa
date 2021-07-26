@@ -242,12 +242,12 @@ class CountStrMethod(CountMethod):
         ]
 
         count_logic = (
-                initialize +
-                verify_while +
-                count_substring +
-                count_plusplus +
-                go_back_to_while +
-                clean_stack
+            initialize +
+            verify_while +
+            count_substring +
+            count_plusplus +
+            go_back_to_while +
+            clean_stack
         )
 
         # endregion

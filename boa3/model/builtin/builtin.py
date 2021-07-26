@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.classmethod import *
 from boa3.model.builtin.contract import *
+from boa3.model.builtin.decorator.classmethoddecorator import ClassMethodDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
@@ -78,8 +79,12 @@ class Builtin:
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
 
+    # builtin decorator
+    ClassMethodDecorator = ClassMethodDecorator()
+
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
                                                 ConvertToInt,
@@ -115,7 +120,7 @@ class Builtin:
         return {symbol.raw_identifier if hasattr(symbol, 'raw_identifier') else symbol.identifier: symbol
                 for symbol in Interop.interop_symbols(package)}
 
-    # builtin decorator
+    # boa builtin decorator
     Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
