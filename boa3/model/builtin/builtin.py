@@ -4,9 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.classmethod import *
 from boa3.model.builtin.contract import *
-from boa3.model.builtin.decorator.classmethoddecorator import ClassMethodDecorator
-from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
-from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
+from boa3.model.builtin.decorator import *
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method import *
@@ -81,6 +79,7 @@ class Builtin:
 
     # builtin decorator
     ClassMethodDecorator = ClassMethodDecorator()
+    StaticMethodDecorator = StaticMethodDecorator()
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
@@ -111,6 +110,7 @@ class Builtin:
                                                 SequenceRemove,
                                                 SequenceReverse,
                                                 Sqrt,
+                                                StaticMethodDecorator,
                                                 StrSplit,
                                                 Sum
                                                 ]

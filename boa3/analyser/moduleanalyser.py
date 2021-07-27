@@ -461,6 +461,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_module = None
 
     def visit_ClassDef(self, class_node: ast.ClassDef):
+        """
+        Visitor of the class node
+
+        Includes the class in the scope of its module
+        """
         # TODO: change when class inheritance is implemented
         if len(class_node.bases) > 0:
             self._log_error(
