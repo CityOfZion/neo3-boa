@@ -311,7 +311,7 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_approve(self):
         path = self.get_contract_path('wrapped_neo.py')
-        path_aux_contract = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux_contract = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -364,7 +364,7 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_allowance(self):
         path = self.get_contract_path('wrapped_neo.py')
-        path_aux_contract = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux_contract = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -408,7 +408,7 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_transfer_from(self):
         path = self.get_contract_path('wrapped_neo.py')
-        path_aux_contract = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux_contract = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -554,7 +554,7 @@ class TestTemplate(BoaTest):
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
-        aux_path = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
 
         output, manifest = self.compile_and_save(path)
         wrapped_neo_address = hash160(output)

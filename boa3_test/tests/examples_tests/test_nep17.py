@@ -16,7 +16,7 @@ class TestNEP17Template(BoaTest):
     OTHER_ACCOUNT_2 = bytes(range(20))
 
     def test_nep17_compile(self):
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('supportedstandards', manifest)
@@ -25,7 +25,7 @@ class TestNEP17Template(BoaTest):
         self.assertIn('NEP-17', manifest['supportedstandards'])
 
     def test_nep17_deploy(self):
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
 
         # needs the owner signature
@@ -51,13 +51,13 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(False, result)
 
     def test_nep17_symbol(self):
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'symbol')
         self.assertEqual('NEP17', result)
 
     def test_nep17_decimals(self):
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'decimals')
         self.assertEqual(8, result)
@@ -65,7 +65,7 @@ class TestNEP17Template(BoaTest):
     def test_nep17_total_supply(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(0, result)
@@ -79,7 +79,7 @@ class TestNEP17Template(BoaTest):
     def test_nep17_total_balance_of(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(0, result)
@@ -101,7 +101,7 @@ class TestNEP17Template(BoaTest):
     def test_nep17_total_transfer(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
 
         # should fail before running deploy
@@ -208,7 +208,7 @@ class TestNEP17Template(BoaTest):
     def test_nep17_onPayment(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -216,7 +216,7 @@ class TestNEP17Template(BoaTest):
         output, manifest = self.compile_and_save(path)
         nep17_address = hash160(output)
 
-        aux_path = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         output, manifest = self.compile_and_save(aux_path)
         aux_address = hash160(output)
 
@@ -346,7 +346,7 @@ class TestNEP17Template(BoaTest):
                                     self.OWNER_SCRIPT_HASH, transferred_amount, None)
 
     def test_nep17_verify(self):
-        path = self.get_contract_path('NEP17.py')
+        path = self.get_contract_path('nep17.py')
         engine = TestEngine()
 
         # should fail without signature

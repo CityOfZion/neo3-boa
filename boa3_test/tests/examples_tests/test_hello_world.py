@@ -8,11 +8,11 @@ class TestTemplate(BoaTest):
     default_folder: str = 'examples'
 
     def test_hello_world_compile(self):
-        path = self.get_contract_path('HelloWorld.py')
+        path = self.get_contract_path('hello_world.py')
         Boa3.compile(path)
 
     def test_hello_world_main(self):
-        path = self.get_contract_path('HelloWorld.py')
+        path = self.get_contract_path('hello_world.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)

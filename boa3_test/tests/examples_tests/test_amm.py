@@ -134,7 +134,7 @@ class TestTemplate(BoaTest):
         transferred_amount = 10 * 10 ** 8
 
         path = self.get_contract_path('amm.py')
-        path_aux = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
         engine = TestEngine()
@@ -194,7 +194,7 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -429,7 +429,7 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -589,7 +589,7 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -748,7 +748,7 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         engine.add_contract(path.replace('.py', '.nef'))
