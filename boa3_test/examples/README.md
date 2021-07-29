@@ -1,8 +1,8 @@
 # Examples
 
 This folder has some examples of smart contracts that are used throughout the blockchain. It's also recommended checking
-the tests on boa3_test/tests/examples_tests, since they have comments describing why the methods are being called, and 
-their expected behaviour.
+the [tests](https://github.com/CityOfZion/neo3-boa/tree/development/boa3_test/tests/examples_tests), since they have 
+comments describing why the methods are being called, and their expected behaviour.
 
 ## AMM
 

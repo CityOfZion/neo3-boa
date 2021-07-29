@@ -16,13 +16,13 @@ class TestUpdateContractTemplate(BoaTest):
 
     def test_update_contract_compile(self):
         path = self.get_contract_path('update_contract.py')
-        path_new = self.get_contract_path('auxiliary_contracts/update_contract.py')
+        path_new = self.get_contract_path('examples/auxiliary_contracts', 'update_contract.py')
         Boa3.compile(path)
         Boa3.compile(path_new)
 
     def test_update_contract(self):
         path = self.get_contract_path('update_contract.py')
-        path_new = self.get_contract_path('auxiliary_contracts/update_contract.py')
+        path_new = self.get_contract_path('examples/auxiliary_contracts', 'update_contract.py')
         self.compile_and_save(path_new)
         self.compile_and_save(path)
 
