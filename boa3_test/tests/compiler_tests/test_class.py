@@ -96,9 +96,51 @@ class TestClass(BoaTest):
 
         self.assertEqual(b'', output)
 
-    def test_user_class_with_static_method(self):
-        path = self.get_contract_path('UserClassWithStaticMethod.py')
+    def test_user_class_with_static_method_from_class(self):
+        path = self.get_contract_path('UserClassWithStaticMethodFromClass.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name')
+        self.assertEqual(42, result)
+
+    def test_user_class_with_static_method_from_object(self):
+        path = self.get_contract_path('UserClassWithStaticMethodFromObject.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_static_method_with_args(self):
+        path = self.get_contract_path('UserClassWithStaticMethodWithArgs.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', 10, 10)
+        self.assertEqual(30, result)
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', 30, -30)
+        self.assertEqual(10, result)
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', -5, -10)
+        self.assertEqual(-5, result)
+
+    def test_user_class_with_static_method_with_vararg(self):
+        path = self.get_contract_path('UserClassWithStaticMethodWithVararg.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', [])
+        self.assertEqual(42, result)
+
+        args = [1, 2, 3]
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
+        self.assertEqual(args[0], result)
+
+        args = [4, 3, 2, 1]
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
+        self.assertEqual(args[0], result)
+
+    def test_user_class_with_static_method_not_class_method(self):
+        path = self.get_contract_path('UserClassWithStaticMethodNotClassMethod.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name', 42)
+        self.assertEqual(42, result)
 
     def test_user_class_with_class_method_called_from_class_name(self):
         path = self.get_contract_path('UserClassWithClassMethodFromClass.py')
