@@ -24,13 +24,18 @@ class Method(Callable):
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
+                 is_init: bool = False,
                  origin_node: Optional[ast.AST] = None):
         super().__init__(args, vararg, defaults, return_type, is_public, decorators, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}
         self.defined_by_entry = True
+        self.is_init = is_init
         self.locals: Dict[str, Variable] = {}
+
+        if is_init and self.has_cls_or_self:
+            self.return_type = list(self.args.values())[0].type
 
         self._debug_map: List[DebugInstruction] = []
 

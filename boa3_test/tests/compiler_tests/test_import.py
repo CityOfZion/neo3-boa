@@ -213,7 +213,6 @@ class TestImport(BoaTest):
 
     def test_import_interop_with_alias(self):
         path = self.get_contract_path('ImportInteropWithAlias.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'Main')

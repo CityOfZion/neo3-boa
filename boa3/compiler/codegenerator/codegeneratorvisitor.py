@@ -720,7 +720,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                 result = x.type if isinstance(x, IExpression) else x
             if isinstance(result, ClassType):
                 index = self.generator.convert_class_symbol(result, attribute.attr, isinstance(attribute.ctx, ast.Load))
-                return result, index
+                return ((result, index)
+                        if not isinstance(result, UserClass)
+                        else f'{result.identifier}.{attribute.attr}')
 
         if isinstance(value, (ast.Name, str)):
             value_id = value.id if isinstance(value, ast.Name) else value

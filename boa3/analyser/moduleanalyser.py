@@ -543,6 +543,26 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 decorator.update_args(function.args, self._current_scope)
                 valid_decorators.append(decorator)
 
+        is_instance_method = isinstance(self._current_scope, UserClass)
+        is_class_constructor = is_instance_method and function.name == constants.INIT_METHOD_ID
+
+        if is_instance_method and len(function.args.args) > 0 and function.args.args[0].annotation is None:
+            # set annotation to the self method
+            from boa3.model import set_internal_call
+            self_argument = function.args.args[0]
+            self_annotation = self._current_class.identifier
+
+            self_ast_annotation = ast.parse(self_annotation).body[0].value
+            set_internal_call(self_ast_annotation)
+
+            ast.copy_location(self_ast_annotation, self_argument)
+            self_argument.annotation = self_ast_annotation
+
+        if is_class_constructor:
+            # __init__ method behave like class methods
+            if Builtin.ClassMethodDecorator not in valid_decorators:
+                valid_decorators.append(Builtin.ClassMethodDecorator)
+
         fun_args: FunctionArguments = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
 
@@ -559,7 +579,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
                         vararg=fun_args.vararg,
                         origin_node=function, is_public=Builtin.Public in fun_decorators,
-                        decorators=valid_decorators)
+                        decorators=valid_decorators,
+                        is_init=is_class_constructor)
 
         if function.name in Builtin.internal_methods:
             internal_method = Builtin.internal_methods[function.name]

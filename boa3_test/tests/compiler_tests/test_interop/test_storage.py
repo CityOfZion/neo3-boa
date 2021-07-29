@@ -606,14 +606,14 @@ class TestStorageInterop(BoaTest):
     def test_storage_between_contracts(self):
         path1 = self.get_contract_path('StorageGetAndPut1.py')
         path2 = self.get_contract_path('StorageGetAndPut2.py')
-        self.compile_and_save(path1)
-        self.compile_and_save(path2)
+
         key = 'example_key'
         value = 42
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path1, 'put_value', key, value)
         self.assertIsVoid(result)
+
         storage_value = engine.storage_get(key, path1)
         self.assertIsNotNone(storage_value)
         self.assertEqual(value, Integer.from_bytes(storage_value))
@@ -626,9 +626,8 @@ class TestStorageInterop(BoaTest):
 
     def test_create_map(self):
         path = self.get_contract_path('StorageCreateMap.py')
-        self.compile_and_save(path)
-        map_key = b'example_'
 
+        map_key = b'example_'
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',

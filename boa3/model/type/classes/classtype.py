@@ -70,12 +70,29 @@ class ClassType(IType, ABC):
 
     @property
     def symbols(self) -> Dict[str, ISymbol]:
-        # TODO: Change to return only class symbols or instance symbols
         s = {}
         s.update(self.static_methods)
         s.update(self.class_methods)
         s.update(self.instance_methods)
         s.update(self.variables)
+        s.update(self.properties)
+        return s
+
+    @property
+    def class_symbols(self) -> Dict[str, ISymbol]:
+        s: Dict[str, ISymbol] = {}
+        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_variables)  # from class name or instance object
+        s.update(self.static_methods)
+        return s
+
+    @property
+    def instance_symbols(self) -> Dict[str, ISymbol]:
+        s: Dict[str, ISymbol] = {}
+        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_variables)  # from class name or instance object
+        s.update(self.instance_methods)
+        s.update(self.instance_variables)
         s.update(self.properties)
         return s
 

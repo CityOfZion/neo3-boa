@@ -83,7 +83,6 @@ class TestCryptoInterop(BoaTest):
     def test_hash160_bool(self):
         import hashlib
         path = self.get_contract_path('Hash160Bool.py')
-        self.compile_and_save(path)
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(1).to_byte_array()).digest())).digest()
         result = self.run_smart_contract(engine, path, 'Main')

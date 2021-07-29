@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 
+from boa3 import constants
 from boa3.model.callable import Callable
 from boa3.model.method import Method
 from boa3.model.property import Property
@@ -98,12 +99,21 @@ class UserClass(ClassArrayType):
                 self.imported_symbols[symbol_id] = symbol
 
     def constructor_method(self) -> Optional[Method]:
-        # TODO: change when user class init is implemented
-        return None
+        if constants.INIT_METHOD_ID not in self._class_methods:
+            # TODO: create a generic __init__ for instantiating classes that doesn't have it declared
+            from boa3.model.type.classes.classinitmethoddefault import ClassInitMethod
+            self._class_methods[constants.INIT_METHOD_ID] = ClassInitMethod(self)
+
+        return self._class_methods[constants.INIT_METHOD_ID]
+
+    def is_type_of(self, value: Any) -> bool:
+        # TODO: change when class inheritance is implemented
+        return value is self
 
     @classmethod
     def _is_type_of(cls, value: Any) -> bool:
-        return False
+        # TODO: change when class inheritance is implemented
+        return isinstance(value, UserClass)
 
     @classmethod
     def build(cls, value: Any) -> IType:

@@ -379,6 +379,11 @@ class CodeGenerator:
             self._current_method.init_bytecode = VMCodeMapping.instance().code_map[self._current_method.init_address]
 
         if self.last_code.opcode is not Opcode.RET:
+            if self._current_method.is_init:
+                # return the built object if it's a constructor
+                self_id, self_value = list(self._current_method.args.items())[0]
+                self.convert_load_variable(self_id, self_value)
+
             self.insert_return()
 
         self._current_method.end_bytecode = self.last_code
@@ -1264,6 +1269,17 @@ class CodeGenerator:
 
         :param function: the function to be converted
         """
+        if function.is_init:
+            if num_args == len(function.args):
+                self.remove_stack_top_item()
+                num_args -= 1
+
+            if num_args == len(function.args) - 1:
+                # if this method is a constructor and only the self argument is missing
+                function_result = function.type
+                size = len(function_result.variables) if isinstance(function_result, UserClass) else 0
+                self.convert_new_empty_array(size, function_result)
+
         from boa3.neo.vm.CallCode import CallCode
         self.__insert_code(CallCode(function))
 
