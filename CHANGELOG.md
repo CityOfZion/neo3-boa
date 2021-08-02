@@ -6,10 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Support to user implemented classes
+
+
+## [0.9.0] - 2021-08-02
+### Added
+- Support to [N3-rc4](https://github.com/neo-project/neo/releases/tag/v3.0.0-rc4)
 - Included new interops from Neo-rc4
   - `get_network`
   - `get_random`
 - Included OracleRequestCode enum for better compatibility with Oracles
+- Implemented Python's builtin `str` count
+  
+
+### Changed
+- Changed manifest's `features` from an empty array to an empty object
+- Included `maxsplit` optional argument on `str` split method
 
 
 ## [0.8.3] - 2021-07-19
@@ -239,7 +251,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.8.3...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.9.0
 [0.8.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.3
 [0.8.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.2
 [0.8.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.1
