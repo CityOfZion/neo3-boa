@@ -103,6 +103,14 @@ class TestClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
         self.assertEqual(42, result)
 
+    def test_user_class_with_static_method_from_class_with_same_method_name(self):
+        path = self.get_contract_path('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name')
+        self.assertEqual(42, result)
+
     def test_user_class_with_static_method_from_object(self):
         path = self.get_contract_path('UserClassWithStaticMethodFromObject.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

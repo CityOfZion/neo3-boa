@@ -189,8 +189,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param callable_id: method id
         :param callable: method to be included
         """
-        if callable_id not in self._current_module.symbols:
-            self._current_module.include_callable(callable_id, callable)
+        if callable_id not in self._current_scope.symbols and hasattr(self._current_scope, 'include_callable'):
+            self._current_scope.include_callable(callable_id, callable)
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
@@ -588,9 +588,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in function.body:
             self.visit(stmt)
 
-        self.__include_callable(function.name, method)
         method_scope = self._scope_stack.pop()
         global_scope_symbols = self._scope_stack[0].symbols if len(self._scope_stack) > 0 else {}
+
+        self._current_method = None
+        self.__include_callable(function.name, method)
 
         for var_id, var in method_scope.symbols.items():
             if isinstance(var, Variable) and var_id not in self._annotated_variables:
@@ -599,7 +601,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 method.include_symbol(var_id, var)
 
         self._annotated_variables.clear()
-        self._current_method = None
 
     def _get_function_decorators(self, function: ast.FunctionDef) -> List[Method]:
         """
