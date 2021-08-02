@@ -6,10 +6,15 @@ comments describing why the methods are being called, and their expected behavio
 
 ## AMM
 
-The AMM (Automated Market Maker) is a smart contract with the goal to automatize token trading. Instead of buying from 
-and selling to other users, there is a liquidity pool that stores two tokens and if the user wants to buy tokens from 
-there, they can.
-The example was mainly based on [Uniswap V2](https://uniswap.org/blog/uniswap-v2/)
+The AMM (Automated Market Maker) is a smart contract that automates the process of token trading. This example was 
+mainly based on [Uniswap V2](https://uniswap.org/blog/uniswap-v2/), and showcases one of the simplest implementations 
+of blockchain AMMs.
+It establishes a liquidity pool of two specific tokens, that are kept at a fixed ratio in the pool. Users can provide 
+liquidity to the pool by sending amounts of the accepted tokens, and receiving a liquidity token that represents their 
+participation in the pool. Other users can then swap the tokens directly one for the other. Liquidity providers receive 
+a percentage of the fees as incentive to keep their tokens in the pool. The relative prices of the token pair varies 
+according to the expected fixed ratio, and if they fluctuate away from prices on other markets, it creates an incentive 
+for users to make a profit on this difference, thus returning balance to the pool.
 
 ## Hello World
 
@@ -22,17 +27,19 @@ their agreements in the transaction. The transactions will be undone if one of t
 
 ## ICO
 
-The ICO (Initial Coin Offering) is kind of like a crowdfunding token. The creators make a white paper explaining why 
-their token is worthwhile, and the users can help finance the token, receiving some benefits for doing so.
+The ICO (Initial Coin Offering) is kind of like a crowdfunding token. The creators offer a new token that is minted 
+based on contributions received by the smart-contract. The period of time that tokens can be minted is fixed and early 
+adopters usually pay less for the tokens than others.
 
 ## NEP-5
 
-The [NEP-5](https://github.com/neo-project/proposals/blob/master/obsolete/nep-5.mediawiki) smart contract demonstrates the obsolete token standard for the Neo blockchain. It was substituted by NEP-17.
+The [NEP-5](https://github.com/neo-project/proposals/blob/master/obsolete/nep-5.mediawiki) smart contract demonstrates 
+the obsolete token standard for the Neo blockchain. It was replaced by NEP-17.
 
 ## NEP-17
 
-The [NEP-17](https://github.com/neo-project/proposals/pull/126/files?short_path=e39836e#diff-e39836e1dc236bd36413c0a15a41ea9f968729d1eb888b7f0d36d98bd1d2d357)
-smart contract demonstrates the current token standard for the Neo blockchain.
+The [NEP-17](https://docs.neo.org/docs/en-us/develop/write/nep17.html) smart contract demonstrates the current token 
+standard for the Neo blockchain.
 
 ## Update Contract
 
