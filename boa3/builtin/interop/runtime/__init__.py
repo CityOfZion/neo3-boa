@@ -62,6 +62,16 @@ def get_notifications(script_hash: UInt160 = UInt160()) -> List[Notification]:
     pass
 
 
+def get_network() -> int:
+    """
+    Gets the magic number of the current network.
+
+    :return: the magic number of the current network
+    :rtype: int
+    """
+    pass
+
+
 def burn_gas(gas: int):
     """
     Burns GAS to benefit the NEO ecosystem.
@@ -70,6 +80,16 @@ def burn_gas(gas: int):
     :type gas: int
 
     :raise Exception: raised if gas value is negative.
+    """
+    pass
+
+
+def get_random() -> int:
+    """
+    Gets the next random number.
+
+    :return: the next random number
+    :rtype: int
     """
     pass
 

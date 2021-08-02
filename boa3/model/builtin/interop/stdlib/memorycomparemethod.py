@@ -1,4 +1,3 @@
-import ast
 from typing import Dict
 
 from boa3.model.builtin.interop.nativecontract import StdLibMethod

@@ -54,6 +54,7 @@ class Interop:
     FindOptionsType = FindOptionsType()
     Iterator = IteratorType.build()
     NotificationType = NotificationType.build()
+    OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleType.build()
     RoleType = RoleType.build()
     StorageContextType = StorageContextType.build()
@@ -124,7 +125,9 @@ class Interop:
     EntryScriptHash = EntryScriptHashProperty()
     ExecutingScriptHash = ExecutingScriptHashProperty()
     GasLeft = GasLeftProperty()
+    GetNetwork = GetNetworkMethod()
     GetNotifications = GetNotificationsMethod(NotificationType)
+    GetRandom = GetRandomMethod()
     GetTrigger = GetTriggerMethod(TriggerType)
     InvocationCounter = InvocationCounterProperty()
     Log = LogMethod()
@@ -254,14 +257,20 @@ class Interop:
                                  types=[NotificationType]
                                  )
 
+    OracleResponseCodeModule = Package(identifier=OracleResponseCode.identifier.lower(),
+                                       types=[OracleResponseCode]
+                                       )
+
     OracleModule = Package(identifier=OracleType.identifier.lower(),
                            types=[OracleType]
                            )
 
     OraclePackage = Package(identifier=InteropPackage.Oracle,
-                            types=[OracleType
+                            types=[OracleResponseCode,
+                                   OracleType
                                    ],
-                            packages=[OracleModule
+                            packages=[OracleModule,
+                                      OracleResponseCodeModule
                                       ]
                             )
 
@@ -297,7 +306,9 @@ class Interop:
                                          ],
                              methods=[BurnGas,
                                       CheckWitness,
+                                      GetNetwork,
                                       GetNotifications,
+                                      GetRandom,
                                       GetTrigger,
                                       Log,
                                       Notify
