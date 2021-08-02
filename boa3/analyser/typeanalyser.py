@@ -1386,7 +1386,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
             attribute.generate_value = True
 
-        if isinstance(symbol, (Package, Attribute, ClassType)):
+        if (isinstance(symbol, (Package, Attribute))
+                or (isinstance(symbol, ClassType) and isinstance(value, (Package, Attribute)))):
             attr_value = symbol
         else:
             attr_value = attribute.value
