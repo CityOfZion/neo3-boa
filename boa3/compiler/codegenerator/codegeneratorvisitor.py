@@ -14,6 +14,7 @@ from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
+from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.type import IType, Type
@@ -34,9 +35,19 @@ class VisitorCodeGenerator(IAstAnalyser):
         super().__init__(ast.parse(""), log=True)
         self.generator = generator
         self.current_method: Optional[Method] = None
+        self.current_class: Optional[UserClass] = None
         self.symbols = generator.symbol_table
 
         self.global_stmts: List[ast.AST] = []
+
+    @property
+    def _symbols(self) -> Dict[str, ISymbol]:
+        symbol_table = self.symbols
+
+        if isinstance(self.current_class, UserClass):
+            symbol_table.update(self.current_class.symbols)
+
+        return symbol_table
 
     def include_instruction(self, node: ast.AST, address: int):
         if self.current_method is not None and address in VMCodeMapping.instance().code_map:
@@ -120,8 +131,15 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.visit(stmt)
 
     def visit_ClassDef(self, node: ast.ClassDef):
+        if node.name in self.symbols:
+            class_symbol = self.symbols[node.name]
+            if isinstance(class_symbol, UserClass):
+                self.current_class = class_symbol
+
         for stmt in node.body:
             self.visit(stmt)
+
+        self.current_class = None
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -131,7 +149,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param function: the python ast function definition node
         """
-        method = self.symbols[function.name]
+        method = self._symbols[function.name]
         if isinstance(method, Method):
             self.current_method = method
             self.generator.convert_begin_method(method)
@@ -239,7 +257,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_value_address = self.generator.bytecode_size
         var_id = self.visit(ann_assign.target)
         # filter to find the imported variables
-        if var_id not in self.symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
+        if var_id not in self._symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
             var_id = '{0}{2}{1}'.format(ann_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
         self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
 
@@ -261,7 +279,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 var_id: str = var_id[0]
 
             # filter to find the imported variables
-            if var_id not in self.symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
+            if var_id not in self._symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
                 var_id = '{0}{2}{1}'.format(assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
             vars_ids.append((var_id, var_index, var_value_address))
 
@@ -275,7 +293,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         var_id = self.visit(aug_assign.target)
         # filter to find the imported variables
-        if var_id not in self.symbols and hasattr(aug_assign, 'origin') and isinstance(aug_assign.origin, ast.AST):
+        if var_id not in self._symbols and hasattr(aug_assign, 'origin') and isinstance(aug_assign.origin, ast.AST):
             var_id = '{0}{2}{1}'.format(aug_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
 
         self.generator.convert_load_symbol(var_id)
@@ -655,9 +673,9 @@ class VisitorCodeGenerator(IAstAnalyser):
         :return: the identifier of the name
         """
         name = name.id
-        if name not in self.symbols:
+        if name not in self._symbols:
             hashed_name = '{0}{2}{1}'.format(self._tree.__hash__(), name, constants.VARIABLE_NAME_SEPARATOR)
-            if hashed_name in self.symbols:
+            if hashed_name in self._symbols:
                 name = hashed_name
         return name
 
@@ -675,14 +693,23 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         attr = self.generator.get_symbol(attribute.attr)
         value = attribute.value
+        value_symbol = None
         if isinstance(value, ast.Name):
             value_id = self.visit(value)
-            if (isinstance(self.generator.get_symbol(value_id), UserClass)
-                    and isinstance(attr, Method) and attr.has_cls_or_self):
-                self.generator.convert_load_symbol(value_id)
+            value_symbol = self.generator.get_symbol(value_id)
+
+            if isinstance(value_symbol, UserClass):
+                if attribute.attr in value_symbol.symbols:
+                    attr = value_symbol.symbols[attribute.attr]
+
+                if isinstance(attr, Method) and attr.has_cls_or_self:
+                    self.generator.convert_load_symbol(value_id)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
-            return attribute.attr
+            return (attribute.attr
+                    if not isinstance(value_symbol, UserClass)
+                    else f'{value_symbol.identifier}.{attribute.attr}'
+                    )
 
         if isinstance(value, ast.Attribute):
             value = self.visit(value)

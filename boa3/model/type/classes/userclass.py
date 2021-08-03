@@ -64,7 +64,7 @@ class UserClass(ClassArrayType):
         # TODO: change when user class variables are implemented
         pass
 
-    def include_callable(self, method_id: str, method: Callable, scope: ClassScope):
+    def include_callable(self, method_id: str, method: Callable, scope: ClassScope = ClassScope.INSTANCE):
         """
         Includes a method into the scope of the class
 
@@ -72,8 +72,14 @@ class UserClass(ClassArrayType):
         :param method: method to be included
         :param scope: which class scope this method should be included
         """
-        # TODO: change when user class methods are implemented
-        pass
+        from boa3.model.builtin.builtin import Builtin
+        if isinstance(method, Method):
+            if Builtin.ClassMethodDecorator in method.decorators or scope is ClassScope.CLASS:
+                self._class_methods[method_id] = method
+            elif Builtin.StaticMethodDecorator in method.decorators or scope is ClassScope.STATIC:
+                self._static_methods[method_id] = method
+            else:
+                self._instance_methods[method_id] = method
 
     def include_symbol(self, symbol_id: str, symbol: ISymbol, scope: ClassScope = ClassScope.INSTANCE):
         """

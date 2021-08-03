@@ -11,6 +11,7 @@ from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression
+from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.importsymbol import Import
 from boa3.model.imports.package import Package
 from boa3.model.method import Method
@@ -49,6 +50,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
+        self._current_class: UserClass = None
         self._current_method: Method = None
         self._scope_stack: List[SymbolScope] = []
         self.visit(self._tree)
@@ -135,6 +137,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in module.body:
             self.visit(stmt)
 
+    def visit_ClassDef(self, node: ast.ClassDef) -> Any:
+        if node.name in self.symbols:
+            class_symbol = self.symbols[node.name]
+            if isinstance(class_symbol, UserClass):
+                self._current_class = class_symbol
+
+        self.generic_visit(node)
+        self._current_class = None
+
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
         Visitor of the function node
@@ -144,7 +155,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param function: the python ast function definition node
         """
         self.visit(function.args)
-        method = self.symbols[function.name]
+        symbols = self.symbols if self._current_class is None else self._current_class.symbols
+        method = symbols[function.name]
 
         from boa3.model.event import Event
         if isinstance(method, Method):
@@ -1092,6 +1104,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 package = package.parent
                 package_symbol = self.get_symbol(package.identifier, check_raw_id=True)
             arg0_identifier = package_symbol if package_symbol else package.identifier
+        elif isinstance(arg0, UserClass):
+            arg0_identifier = arg0.identifier
         else:
             arg0_identifier = self.visit(arg0)
 
@@ -1372,7 +1386,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
             attribute.generate_value = True
 
-        if isinstance(symbol, Package) or isinstance(value, Attribute):
+        if (isinstance(symbol, (Package, Attribute))
+                or (isinstance(symbol, ClassType) and isinstance(value, (Package, Attribute)))):
             attr_value = symbol
         else:
             attr_value = attribute.value

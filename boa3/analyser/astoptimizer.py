@@ -10,6 +10,7 @@ from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 
 
@@ -32,6 +33,8 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         self._is_optimizing: bool = False
         self.has_changes: bool = False
         self.current_scope: ScopeValue = ScopeValue()
+
+        self._current_class: UserClass = None
 
         self.visit(self._tree)
 
@@ -68,8 +71,20 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     def reset_state(self):
         self.current_scope.reset()
 
+    def visit_ClassDef(self, node: ast.ClassDef) -> Any:
+        if node.name in self.symbols:
+            class_symbol = self.symbols[node.name]
+            if isinstance(class_symbol, UserClass):
+                self._current_class = class_symbol
+
+        self.generic_visit(node)
+        self._current_class = None
+        return node
+
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
-        method = self.symbols[node.name]
+        symbols = self.symbols if self._current_class is None else self._current_class.symbols
+        method = symbols[node.name]
+
         if isinstance(method, Method):
             self._is_optimizing = True
             self.has_changes = True
