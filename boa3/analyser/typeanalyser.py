@@ -479,18 +479,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         value = self.visit(subscript.value)
         lower, upper, step = (self.get_type(value) for value in self.visit(slice_node))
 
-        if step is not Type.none:
-            # TODO: remove when slices with stride are implemented
-            raise NotImplementedError
-        # is not allowed to store into a slice
-        if isinstance(subscript.ctx, ast.Store):
-            self._log_error(
-                CompilerError.NotSupportedOperation(
-                    subscript.lineno, subscript.col_offset,
-                    symbol_id=Operator.Subscript
-                )
-            )
-
         symbol_type: IType = self.get_type(value)
         # only collection types can be subscribed
         if not isinstance(symbol_type, Collection):
@@ -504,6 +492,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         lower = lower if lower is not Type.none else symbol_type.valid_key
         upper = upper if upper is not Type.none else symbol_type.valid_key
+        step = step if step is not Type.none else symbol_type.valid_key
 
         # TODO: remove when slices of other sequence types are implemented
         if (not symbol_type.is_valid_key(lower)

@@ -244,6 +244,48 @@ class TestBytes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(Integer(12345).to_byte_array()[1:2], result)
 
+    def test_slice_with_stride(self):
+        path = self.get_contract_path('SliceWithStride.py')
+        engine = TestEngine()
+
+        expected_result = b'12345'
+        expected_result = expected_result[0:5:2]
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+    def test_slice_with_negative_stride(self):
+        path = self.get_contract_path('SliceWithNegativeStride.py')
+        engine = TestEngine()
+
+        expected_result = b'12345'
+        expected_result = expected_result[0:5:-1]
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        # TODO: Remove assertRaises when the slicing with negative stride is correctly implemented
+        with self.assertRaises(AssertionError):
+            self.assertEqual(expected_result, result)
+
+    def test_slice_omitted_with_stride(self):
+        path = self.get_contract_path('SliceOmittedWithStride.py')
+        engine = TestEngine()
+
+        expected_result = b'12345'
+        expected_result = expected_result[::2]
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+    def test_slice_omitted_with_negative_stride(self):
+        path = self.get_contract_path('SliceOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        expected_result = b'12345'
+        expected_result = expected_result[::-1]
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
     def test_byte_array_get_value(self):
         expected_output = (
             Opcode.INITSLOT     # function signature

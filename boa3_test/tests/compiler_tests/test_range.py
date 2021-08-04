@@ -742,13 +742,35 @@ class TestRange(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
-    def test_range_slicing_omitted_stride(self):
+    def test_range_slicing_with_stride(self):
         path = self.get_contract_path('RangeSlicingWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(list(range(2, 5, 2)), result)
+
+    def test_range_slicing_with_negative_stride(self):
+        path = self.get_contract_path('RangeSlicingWithNegativeStride.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        # TODO: Remove assertRaises when the slicing with negative stride is correctly implemented
+        with self.assertRaises(AssertionError):
+            self.assertEqual(list(range(0, 5, -2)), result)
 
     def test_range_slicing_omitted_with_stride(self):
         path = self.get_contract_path('RangeSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(list(range(0, 6, 2)), result)
+
+    def test_range_slicing_omitted_with_negative_stride(self):
+        path = self.get_contract_path('RangeSlicingOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(list(range(5,-1, -2)), result)
 
     def test_boa2_range_test(self):
         path = self.get_contract_path('RangeBoa2Test.py')

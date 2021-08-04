@@ -585,18 +585,49 @@ class TestList(BoaTest):
 
     def test_list_slicing_end_omitted(self):
         path = self.get_contract_path('ListSlicingEndOmitted.py')
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
-    def test_list_slicing_omitted_stride(self):
+    def test_list_slicing_with_stride(self):
         path = self.get_contract_path('ListSlicingWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        a = [0, 1, 2, 3, 4, 5]
+        expected_result = a[2:5:2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_list_slicing_with_negative_stride(self):
+        path = self.get_contract_path('ListSlicingWithNegativeStride.py')
+        engine = TestEngine()
+
+        a = [0, 1, 2, 3, 4, 5]
+        expected_result = a[0:5:2]
+        result = self.run_smart_contract(engine, path, 'Main')
+
+        # TODO: Remove assertRaises when the slicing with negative stride is correctly implemented
+        with self.assertRaises(AssertionError):
+            self.assertEqual(expected_result, result)
 
     def test_list_slicing_omitted_with_stride(self):
         path = self.get_contract_path('ListSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        a = [0, 1, 2, 3, 4, 5]
+        expected_result = a[::2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_list_slicing_omitted_with_negative_stride(self):
+        path = self.get_contract_path('ListSlicingOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        a = [0, 1, 2, 3, 4, 5]
+        expected_result = a[::-2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
 
     # endregion
 

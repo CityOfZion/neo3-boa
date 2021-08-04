@@ -546,10 +546,36 @@ class TestTuple(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
-    def test_tuple_slicing_omitted_stride(self):
+    def test_tuple_slicing_with_stride(self):
         path = self.get_contract_path('TupleSlicingWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([2, 4], result)
+
+    def test_tuple_slicing_with_negative_stride(self):
+        path = self.get_contract_path('TupleSlicingWithNegativeStride.py')
+        engine = TestEngine()
+
+        expected_result = (0, 1, 2, 3, 4, 5)
+        expected_result = expected_result[2:5:-2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        # TODO: Remove assertRaises when the slicing with negative stride is correctly implemented
+        with self.assertRaises(AssertionError):
+            self.assertEqual(expected_result, tuple(result))
 
     def test_tuple_slicing_omitted_with_stride(self):
         path = self.get_contract_path('TupleSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual([0, 2, 4], result)
+
+    def test_tuple_slicing_omitted_with_negative_stride(self):
+        path = self.get_contract_path('TupleSlicingOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        expected_result = (0, 1, 2, 3, 4, 5)
+        expected_result = expected_result[::-2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, tuple(result))

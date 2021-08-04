@@ -338,6 +338,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         lower_omitted = subscript.slice.lower is None
         upper_omitted = subscript.slice.upper is None
+        step_omitted = subscript.slice.step is None
 
         self.visit_to_generate(subscript.value)
         # if both are explicit
@@ -365,6 +366,10 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.convert_get_array_ending()
         else:
             self.generator.convert_copy()
+
+        if not step_omitted:
+            self.visit_to_generate(subscript.slice.step)
+            self.generator.convert_get_stride()
 
     def _convert_unary_operation(self, operand, op):
         self.visit_to_generate(operand)
