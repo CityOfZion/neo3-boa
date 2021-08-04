@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
+from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
@@ -105,7 +106,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_static_method_from_class_with_same_method_name(self):
         path = self.get_contract_path('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
@@ -113,7 +113,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_static_method_from_object(self):
         path = self.get_contract_path('UserClassWithStaticMethodFromObject.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_user_class_with_static_method_with_args(self):
         path = self.get_contract_path('UserClassWithStaticMethodWithArgs.py')
@@ -152,15 +152,17 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_called_from_class_name(self):
         path = self.get_contract_path('UserClassWithClassMethodFromClass.py')
-        self.compile_and_save(path)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
         self.assertEqual(42, result)
 
     def test_user_class_with_class_method_called_from_object(self):
         path = self.get_contract_path('UserClassWithClassMethodFromObject.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name')
+        self.assertEqual(42, result)
 
     def test_user_class_with_class_method_with_args(self):
         path = self.get_contract_path('UserClassWithClassMethodWithArgs.py')
@@ -196,15 +198,29 @@ class TestClass(BoaTest):
 
     def test_user_class_with_init(self):
         path = self.get_contract_path('UserClassWithInit.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'build_example_object')
+        self.assertEqual([], result)
+
+    def test_user_class_with_init_with_args(self):
+        path = self.get_contract_path('UserClassWithInitWithArgs.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'build_example_object')
+        self.assertEqual([], result)
 
     def test_user_class_with_instance_method(self):
         path = self.get_contract_path('UserClassWithInstanceMethod.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        # change when instance variables are implemented
+        with self.assertRaises(NotLoadedException):
+            Boa3.compile(path)
 
     def test_user_class_with_instance_variable(self):
         path = self.get_contract_path('UserClassWithInstanceVariable.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        # change when instance variables are implemented
+        with self.assertRaises(NotLoadedException):
+            Boa3.compile(path)
 
     def test_user_class_with_base(self):
         path = self.get_contract_path('UserClassWithBase.py')

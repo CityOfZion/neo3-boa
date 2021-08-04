@@ -17,6 +17,7 @@ BYTEORDER = 'little'
 
 VARIABLE_NAME_SEPARATOR = ','
 
+INIT_METHOD_ID = '__init__'
 INITIALIZE_METHOD_ID = '_initialize'
 DEPLOY_METHOD_ID = '_deploy'
 

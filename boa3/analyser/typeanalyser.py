@@ -1,6 +1,7 @@
 import ast
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
 from boa3.analyser.model.optimizer import UndefinedType
@@ -11,7 +12,6 @@ from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
 from boa3.model.expression import IExpression
-from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.importsymbol import Import
 from boa3.model.imports.package import Package
 from boa3.model.method import Method
@@ -167,7 +167,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             for stmt in function.body:
                 self.visit(stmt)
 
-            self._validate_return(function)
+            if not method.is_init:
+                self._validate_return(function)
 
             method_scope = self.pop_local_scope()
             self._current_method = None
@@ -1022,17 +1023,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         callable_method_id = None
         if isinstance(callable_target, ClassType):
-            if isinstance(callable_target, UserClass):
-                # TODO: change when class instance is implemented
-                exception = CompilerError.NotSupportedOperation(
-                    call.lineno, call.col_offset,
-                    symbol_id='class instance'
-                )
-                self._log_error(exception)
-                raise exception
-
             callable_target = callable_target.constructor_method()
-            callable_method_id = '__init__'
+            callable_method_id = constants.INIT_METHOD_ID
 
         if not isinstance(callable_target, Callable):
             # the symbol doesn't exists or is not a function
@@ -1044,6 +1036,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_id)
                 )
         else:
+            if not self.check_call_scope(call, callable_target, callable_id):
+                # errors are logged and handled by the method itself
+                return self.get_type(callable_target)
+
             if callable_target is Builtin.NewEvent:
                 return callable_target.return_type
             # TODO: change when kwargs is implemented
@@ -1114,6 +1110,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if (callable_target is not None
                 and not isinstance(self.get_symbol(arg0_identifier), (IType, Import, Package))
+                and not isinstance(arg0_identifier, UserClass)
                 and (len(call.args) < 1 or call.args[0] != arg0)):
             # move self to the arguments
             # don't move if it's class method
@@ -1128,6 +1125,39 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_target = callable_target.build(self_type)
 
         return callable_id, callable_target
+
+    def check_call_scope(self, call: ast.Call, callable: Callable, callable_id: str):
+        error_count = len(self.errors)
+        if not isinstance(call.func, ast.Attribute):
+            # if the call doesn't came from an attribute, there's nothing to be validated
+            return True
+
+        attr_node: ast.Attribute = call.func
+        if isinstance(attr_node.value, ast.Name):
+            attribute_symbol = self.get_symbol(attr_node.value.id)
+        else:
+            attribute_symbol = self.get_symbol(attr_node.value)
+        is_from_type_name = isinstance(attribute_symbol, IType)
+
+        attribute_type = self.get_type(attribute_symbol)
+        if not isinstance(attribute_type, UserClass):
+            # TODO: change when class specific scopes are implemented in the built-ins
+            return True
+
+        if is_from_type_name and callable_id not in attribute_type.class_symbols:
+            # the current symbol doesn't exist in the class scope
+            callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
+            self._log_error(
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_complete_id)
+            )
+        elif not is_from_type_name and callable_id not in attribute_type.instance_symbols:
+            # the current symbol doesn't exist in the instance scope
+            callable_complete_id = f'{attribute_type.identifier}().{callable_id}'
+            self._log_error(
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, callable_complete_id)
+            )
+
+        return len(self.errors) == error_count
 
     def validate_builtin_callable(self, callable_id: str, callable_target: ISymbol) -> ISymbol:
         if not isinstance(callable_target, Callable):
