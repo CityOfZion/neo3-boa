@@ -203,6 +203,13 @@ class TestClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'build_example_object')
         self.assertEqual([], result)
 
+    def test_user_class_with_init_with_args(self):
+        path = self.get_contract_path('UserClassWithInitWithArgs.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'build_example_object')
+        self.assertEqual([], result)
+
     def test_user_class_with_instance_method(self):
         path = self.get_contract_path('UserClassWithInstanceMethod.py')
         # change when instance variables are implemented
