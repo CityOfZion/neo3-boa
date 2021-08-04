@@ -20,11 +20,11 @@ class TestHTLCTemplate(BoaTest):
     OTHER_ACCOUNT_2 = bytes(range(20))
 
     def test_HTLC_compile(self):
-        path = self.get_contract_path('HTLC.py')
+        path = self.get_contract_path('htlc.py')
         Boa3.compile(path)
 
     def test_HTLC_deploy(self):
-        path = self.get_contract_path('HTLC.py')
+        path = self.get_contract_path('htlc.py')
         engine = TestEngine()
 
         # deploying the smart contract
@@ -40,7 +40,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(False, result)
 
     def test_HTLC_atomic_swap(self):
-        path = self.get_contract_path('HTLC.py')
+        path = self.get_contract_path('htlc.py')
         engine = TestEngine()
 
         # can not atomic_swap() without deploying first
@@ -64,7 +64,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
     def test_HTLC_onNEP17Payment(self):
-        path = self.get_contract_path('HTLC.py')
+        path = self.get_contract_path('htlc.py')
         engine = TestEngine()
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
@@ -72,11 +72,11 @@ class TestHTLCTemplate(BoaTest):
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
 
-        aux_path = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         output, manifest = self.compile_and_save(aux_path)
         aux_address = hash160(output)
 
-        aux_path2 = self.get_contract_path('examples/test_native', 'auxiliary_contract_2.py')
+        aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
         output, manifest = self.compile_and_save(aux_path2)
         aux_address2 = hash160(output)
 
@@ -187,7 +187,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_gas_receiver_before + transferred_amount_gas, balance_gas_receiver_after)
 
     def test_HTLC_withdraw(self):
-        path = self.get_contract_path('HTLC.py')
+        path = self.get_contract_path('htlc.py')
         engine = TestEngine()
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
@@ -195,11 +195,11 @@ class TestHTLCTemplate(BoaTest):
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
 
-        aux_path = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         output, manifest = self.compile_and_save(aux_path)
         aux_address = hash160(output)
 
-        aux_path2 = self.get_contract_path('examples/test_native', 'auxiliary_contract_2.py')
+        aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
         output, manifest = self.compile_and_save(aux_path2)
         aux_address2 = hash160(output)
 
@@ -310,7 +310,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_gas_htlc_before, balance_gas_htlc_after)
 
     def test_HTLC_refund(self):
-        path = self.get_contract_path('HTLC.py')
+        path = self.get_contract_path('htlc.py')
         engine = TestEngine()
         transferred_amount_neo = 10 * 10**8
         transferred_amount_gas = 10000 * 10**8
@@ -318,11 +318,11 @@ class TestHTLCTemplate(BoaTest):
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
 
-        aux_path = self.get_contract_path('examples/test_native', 'auxiliary_contract.py')
+        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         output, manifest = self.compile_and_save(aux_path)
         aux_address = hash160(output)
 
-        aux_path2 = self.get_contract_path('examples/test_native', 'auxiliary_contract_2.py')
+        aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
         output, manifest = self.compile_and_save(aux_path2)
         aux_address2 = hash160(output)
 
