@@ -79,6 +79,7 @@ class Builtin:
 
     # builtin decorator
     ClassMethodDecorator = ClassMethodDecorator()
+    InstanceMethodDecorator = InstanceMethodDecorator()
     StaticMethodDecorator = StaticMethodDecorator()
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,

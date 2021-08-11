@@ -1030,7 +1030,7 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_same_name_in_different_scopes(self):
         path = self.get_contract_path('CallFunctionsWithSameNameInDifferentScopes.py')
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'result')
         self.assertEqual([10, 20], result)
