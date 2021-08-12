@@ -705,6 +705,10 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if isinstance(attr, Method) and attr.has_cls_or_self:
                     self.generator.convert_load_symbol(value_id)
 
+                if isinstance(attr, Variable):
+                    self.visit_to_generate(attribute.value)
+                    self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
+
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
             return (attribute.attr
                     if not isinstance(value_symbol, UserClass)

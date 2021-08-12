@@ -62,8 +62,8 @@ class UserClass(ClassArrayType):
         :param var: variable to be included
         :param is_instance: whether is a instance variable or a class variable
         """
-        # TODO: change when user class variables are implemented
-        pass
+        if not is_instance:
+            self._class_variables[var_id] = var
 
     def include_callable(self, method_id: str, method: Callable, scope: ClassScope = ClassScope.INSTANCE):
         """

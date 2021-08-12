@@ -193,8 +193,24 @@ class TestClass(BoaTest):
         self.assertEqual(args[0], result)
 
     def test_user_class_with_class_variable(self):
-        path = self.get_contract_path('UserClassWithClassVariable.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        path = self.get_contract_path('UserClassWithClassVariableFromClass.py')
+        self.compile_and_save(path)
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        VMCodeMapping
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_val1')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'get_val2')
+        self.assertEqual(2, result)
+
+    def test_a(self):
+        path = self.get_contract_path('Test.py')
+        self.compile_and_save(path)
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        VMCodeMapping
+        engine = TestEngine()
 
     def test_user_class_with_init(self):
         path = self.get_contract_path('UserClassWithInit.py')

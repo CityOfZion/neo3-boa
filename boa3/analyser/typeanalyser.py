@@ -106,6 +106,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if self._current_method is not None and symbol_id in self._current_method.symbols:
             # the symbol exists in the local scope
             return self._current_method.symbols[symbol_id]
+        elif self._current_class is not None and symbol_id in self._current_class.symbols:
+            # the symbol exists in the class
+            return self._current_class.symbols[symbol_id]
         elif symbol_id in self.modules:
             # the symbol exists in the modules scope
             return self.modules[symbol_id]

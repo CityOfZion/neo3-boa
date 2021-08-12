@@ -125,6 +125,7 @@ class CodeGenerator:
         self._current_method: Method = None
 
         self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
+        self._missing_variables: Dict[str, List[int]] = {}  # maps a class variable when being called
         self._can_append_target: bool = True
 
         self._scope_stack: List[SymbolScope] = []
@@ -1069,7 +1070,8 @@ class CodeGenerator:
 
         self.convert_cast(Type.tuple)
 
-    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False):
+    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False,
+                            class_type: Optional[UserClass] = None):
         """
         Converts the load of a symbol
 
@@ -1077,6 +1079,10 @@ class CodeGenerator:
         :param params_addresses: a list with each function arguments' first addresses
         """
         symbol = self.get_symbol(symbol_id, is_internal=is_internal)
+
+        if symbol is Type.none and class_type is not None and symbol_id in class_type.symbols:
+            symbol = class_type.symbols[symbol_id]
+
         if symbol is not Type.none:
             if isinstance(symbol, Property):
                 symbol = symbol.getter
@@ -1088,7 +1094,7 @@ class CodeGenerator:
                 params_addresses = []
 
             if isinstance(symbol, Variable):
-                self.convert_load_variable(symbol_id, symbol)
+                self.convert_load_variable(symbol_id, symbol, class_type)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol, params_addresses)
             elif isinstance(symbol, Event):
@@ -1098,7 +1104,7 @@ class CodeGenerator:
             elif isinstance(symbol, UserClass):
                 self.convert_class_symbol(symbol, symbol_id)
 
-    def convert_load_variable(self, var_id: str, var: Variable):
+    def convert_load_variable(self, var_id: str, var: Variable, class_type: Optional[UserClass] = None):
         """
         Converts the assignment of a variable
 
@@ -1127,6 +1133,12 @@ class CodeGenerator:
             var = self.get_symbol(var_id)
             storage_key = codegenerator.get_storage_key_for_variable(var)
             self._convert_builtin_storage_get_or_put(True, storage_key)
+
+        elif class_type:
+            if var_id in class_type.variables:
+                index = list(class_type.variables).index(var_id)
+                self.convert_literal(index)
+                self.convert_get_item()
 
     def convert_store_variable(self, var_id: str, value_start_address: int = None):
         """
@@ -1346,7 +1358,7 @@ class CodeGenerator:
         """
         # TODO: change to create an array with the class variables' default values when they are implemented
         start_address = self.bytecode_size
-        self.convert_new_array(len(class_type.class_variables))
+        self.convert_new_empty_array(len(class_type.class_variables), class_type)
         return start_address
 
     def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
