@@ -212,9 +212,11 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method(self):
         path = self.get_contract_path('UserClassWithInstanceMethod.py')
-        # change when instance variables are implemented
-        with self.assertRaises(NotLoadedException):
-            Boa3.compile(path)
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_by_class_name')
+        self.assertEqual(42, result)
 
     def test_user_class_with_instance_variable(self):
         path = self.get_contract_path('UserClassWithInstanceVariable.py')

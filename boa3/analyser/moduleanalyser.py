@@ -543,20 +543,26 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 decorator.update_args(function.args, self._current_scope)
                 valid_decorators.append(decorator)
 
-        is_instance_method = isinstance(self._current_scope, UserClass)
+        is_instance_method = (isinstance(self._current_scope, UserClass)
+                              and Builtin.ClassMethodDecorator not in valid_decorators
+                              and Builtin.StaticMethodDecorator not in valid_decorators)
         is_class_constructor = is_instance_method and function.name == constants.INIT_METHOD_ID
 
-        if is_instance_method and len(function.args.args) > 0 and function.args.args[0].annotation is None:
-            # set annotation to the self method
-            from boa3.model import set_internal_call
-            self_argument = function.args.args[0]
-            self_annotation = self._current_class.identifier
+        if is_instance_method:
+            if Builtin.InstanceMethodDecorator not in valid_decorators:
+                valid_decorators.append(Builtin.InstanceMethodDecorator)
+            
+            if len(function.args.args) > 0 and function.args.args[0].annotation is None:
+                # set annotation to the self method
+                from boa3.model import set_internal_call
+                self_argument = function.args.args[0]
+                self_annotation = self._current_class.identifier
 
-            self_ast_annotation = ast.parse(self_annotation).body[0].value
-            set_internal_call(self_ast_annotation)
+                self_ast_annotation = ast.parse(self_annotation).body[0].value
+                set_internal_call(self_ast_annotation)
 
-            ast.copy_location(self_ast_annotation, self_argument)
-            self_argument.annotation = self_ast_annotation
+                ast.copy_location(self_ast_annotation, self_argument)
+                self_argument.annotation = self_ast_annotation
 
         if is_class_constructor:
             # __init__ method behave like class methods
