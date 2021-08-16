@@ -192,11 +192,8 @@ class TestClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
         self.assertEqual(args[0], result)
 
-    def test_user_class_with_class_variable(self):
+    def test_user_class_with_class_variable_from_class(self):
         path = self.get_contract_path('UserClassWithClassVariableFromClass.py')
-        self.compile_and_save(path)
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
-        VMCodeMapping
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_val1')
@@ -205,12 +202,25 @@ class TestClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'get_val2')
         self.assertEqual(2, result)
 
-    def test_a(self):
-        path = self.get_contract_path('Test.py')
-        self.compile_and_save(path)
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
-        VMCodeMapping
+    def test_user_class_with_class_variable_from_object(self):
+        path = self.get_contract_path('UserClassWithClassVariableFromObject.py')
         engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_val1')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'get_val2')
+        self.assertEqual(2, result)
+
+    def test_user_class_with_class_variable_and_class_method(self):
+        path = self.get_contract_path('UserClassWithClassVariableAndClassMethod.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_val1')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'get_foo')
+        self.assertEqual(42, result)
 
     def test_user_class_with_init(self):
         path = self.get_contract_path('UserClassWithInit.py')
@@ -228,7 +238,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method(self):
         path = self.get_contract_path('UserClassWithInstanceMethod.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_by_class_name')

@@ -552,7 +552,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if is_instance_method:
             if Builtin.InstanceMethodDecorator not in valid_decorators:
                 valid_decorators.append(Builtin.InstanceMethodDecorator)
-            
+
             if len(function.args.args) > 0 and function.args.args[0].annotation is None:
                 # set annotation to the self method
                 from boa3.model import set_internal_call

@@ -3,18 +3,18 @@ from boa3.builtin import public
 
 class Example:
     val1 = 1
-    val2 = 2
+    val2 = 42
 
     @classmethod
     def foo(cls) -> int:
-        return cls.val1
+        return cls.val2
 
 
 @public
 def get_val1() -> int:
-    return Example().val1
+    return Example.val1
 
 
 @public
-def get_val2() -> int:
-    return Example().val2
+def get_foo() -> int:
+    return Example.foo()
