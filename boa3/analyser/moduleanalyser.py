@@ -23,6 +23,7 @@ from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.annotation.uniontype import UnionType
+from boa3.model.type.classes.classscope import ClassScope
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
@@ -179,18 +180,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param callable_id: method id
         :param callable: method to be included
         """
-        if callable_id not in self._current_module.symbols:
-            self._current_module.include_callable(callable_id, callable)
-
-    def __include_callable(self, callable_id: str, callable: Callable):
-        """
-        Includes the method in the symbol table if the id was not used
-
-        :param callable_id: method id
-        :param callable: method to be included
-        """
         if callable_id not in self._current_scope.symbols and hasattr(self._current_scope, 'include_callable'):
             self._current_scope.include_callable(callable_id, callable)
+
+    def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
+        """
+        Includes the class variable in the current class
+
+        :param cl_var_id: variable name
+        :param cl_var: variable to be included
+        """
+        if cl_var_id not in self._current_scope.class_variables:
+            self._current_class.include_symbol(cl_var_id, cl_var, ClassScope.CLASS)
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
@@ -493,14 +494,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: change when class variables are implemented
-        if len([stmt for stmt in class_node.body if not isinstance(stmt, (ast.FunctionDef, ast.Pass))]) > 1:
-            self._log_error(
-                CompilerError.NotSupportedOperation(
-                    class_node.lineno, class_node.col_offset,
-                    symbol_id='class'
-                )
-            )
+        # # TODO: change when class variables are implemented
+        # if len([stmt for stmt in class_node.body if not isinstance(stmt, (ast.FunctionDef, ast.Pass))]) > 1:
+        #     self._log_error(
+        #         CompilerError.NotSupportedOperation(
+        #             class_node.lineno, class_node.col_offset,
+        #             symbol_id='class'
+        #         )
+        #     )
 
         user_class = UserClass(identifier=class_node.name)
 
@@ -551,7 +552,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if is_instance_method:
             if Builtin.InstanceMethodDecorator not in valid_decorators:
                 valid_decorators.append(Builtin.InstanceMethodDecorator)
-            
+
             if len(function.args.args) > 0 and function.args.args[0].annotation is None:
                 # set annotation to the self method
                 from boa3.model import set_internal_call
@@ -785,7 +786,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._current_scope.callables[var_id] = self._current_event
             self._current_event = None
         else:
-            self.__include_variable(var_id, var_type, source_node=source_node, assignment=assignment)
+            if isinstance(self._current_scope, UserClass):
+                var = Variable(var_type, source_node)
+                self.__include_class_variable(var_id, var)
+            else:
+                self.__include_variable(var_id, var_type, source_node=source_node, assignment=assignment)
         return var_type
 
     def visit_Global(self, global_node: ast.Global):

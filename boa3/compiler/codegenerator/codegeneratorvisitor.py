@@ -39,10 +39,11 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.symbols = generator.symbol_table
 
         self.global_stmts: List[ast.AST] = []
+        self._is_generating_initialize = False
 
     @property
     def _symbols(self) -> Dict[str, ISymbol]:
-        symbol_table = self.symbols
+        symbol_table = self.symbols.copy()
 
         if isinstance(self.current_class, UserClass):
             symbol_table.update(self.current_class.symbols)
@@ -84,7 +85,17 @@ class VisitorCodeGenerator(IAstAnalyser):
                 else:
                     # TODO: validate function calls
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
-                    self.generator.convert_load_symbol(result, is_internal=is_internal)
+                    class_type = None
+
+                    if len(result.split(constants.ATTRIBUTE_NAME_SEPARATOR)) > 1:
+                        # if the symbol id has the attribute separator and the top item on the stack is a user class,
+                        # then this value is an attribute from that class
+                        # change the id for correct generation
+                        if self.generator.stack_size > 0 and isinstance(self.generator._stack[-1], UserClass):
+                            result = result.split(constants.ATTRIBUTE_NAME_SEPARATOR)[-1]
+                            class_type = self.generator._stack[-1]
+
+                    self.generator.convert_load_symbol(result, is_internal=is_internal, class_type=class_type)
             return result
         else:
             return self.generator.convert_literal(node)
@@ -114,11 +125,41 @@ class VisitorCodeGenerator(IAstAnalyser):
             self.visit(stmt)
 
         if self.generator.initialize_static_fields():
+            class_non_static_stmts = []
+            for node in global_stmts.copy():
+                if isinstance(node, ast.ClassDef):
+                    class_variables = []
+                    class_functions = []
+                    for stmt in node.body:
+                        if isinstance(stmt, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+                            class_variables.append(stmt)
+                        else:
+                            class_functions.append(stmt)
+
+                    if len(class_functions) > 0:
+                        cls_fun = node
+                        if len(class_variables) > 0:
+                            cls_var = node
+                            cls_fun = self.clone(node)
+                            cls_fun.body = class_functions
+                            cls_var.body = class_variables
+                        else:
+                            global_stmts.remove(cls_fun)
+
+                        class_non_static_stmts.append(cls_fun)
+
             # to generate the 'initialize' method for Neo
+            self._is_generating_initialize = True
             for stmt in global_stmts:
                 self.visit(stmt)
 
+            self._is_generating_initialize = False
             self.generator.end_initialize()
+
+            # generate any symbol inside classes that's not variables AFTER generating 'initialize' method
+            for stmt in class_non_static_stmts:
+                self.visit(stmt)
+
         elif len(function_stmts) > 0:
             # to organize syntax tree nodes from other modules
             for stmt in global_stmts:
@@ -135,6 +176,11 @@ class VisitorCodeGenerator(IAstAnalyser):
             class_symbol = self.symbols[node.name]
             if isinstance(class_symbol, UserClass):
                 self.current_class = class_symbol
+
+            if self._is_generating_initialize:
+                address = self.generator.bytecode_size
+                self.generator.convert_new_empty_array(len(class_symbol.class_variables), class_symbol)
+                self.generator.convert_store_variable(node.name, address)
 
         for stmt in node.body:
             self.visit(stmt)
@@ -212,7 +258,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
                     if result_type is Type.none and not self.generator.is_none_inserted():
                         self.generator.convert_literal(None)
-                    self.generator.convert_store_variable(var_id, address)
+                    self.generator.convert_store_variable(var_id, address, self.current_class)
                 else:
                     # if not, it is an array assignment
                     self.generator.convert_load_symbol(var_id)
@@ -580,6 +626,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             symbol = self.generator.get_symbol(function_id, is_internal=is_internal)
 
         if isinstance(symbol, ClassType):
+            self.generator.convert_init_user_class(symbol)
             symbol = symbol.constructor_method()
         args_addresses: List[int] = []
 
@@ -615,6 +662,10 @@ class VisitorCodeGenerator(IAstAnalyser):
             )
             self.visit_to_generate(arg)
         if has_cls_or_self_argument:
+            num_args = len(args_addresses)
+            if self.generator.stack_size > num_args:
+                value = self.generator._stack_pop(-num_args - 1)
+                self.generator._stack_append(value)
             VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
 
         if self.is_exception_name(function_id):
@@ -705,10 +756,15 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if isinstance(attr, Method) and attr.has_cls_or_self:
                     self.generator.convert_load_symbol(value_id)
 
+                if isinstance(attr, Variable):
+                    self.visit_to_generate(attribute.value)
+                    self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
+                    return attr.type
+
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
             return (attribute.attr
                     if not isinstance(value_symbol, UserClass)
-                    else f'{value_symbol.identifier}.{attribute.attr}'
+                    else f'{value_symbol.identifier}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
                     )
 
         if isinstance(value, ast.Attribute):
@@ -732,7 +788,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if isinstance(value, (ast.Name, str)):
             value_id = value.id if isinstance(value, ast.Name) else value
-            return '{0}.{1}'.format(value_id, attribute.attr)
+            return f'{value_id}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
 
         return attribute.attr
 

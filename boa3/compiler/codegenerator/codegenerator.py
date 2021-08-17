@@ -244,8 +244,10 @@ class CodeGenerator:
 
         :return: A list with the variables names
         """
-        module_globals = [var_id for var_id, var in self.symbol_table.items()
-                          if isinstance(var, Variable) and var.is_reassigned == modified_variable]
+        module_global_variables = [var_id for var_id, var in self.symbol_table.items()
+                                   if isinstance(var, Variable) and var.is_reassigned == modified_variable]
+        class_with_class_variables = [class_id for class_id, class_symbol in self.symbol_table.items()
+                                      if isinstance(class_symbol, UserClass) and len(class_symbol.class_variables) > 0]
 
         if not self.can_init_static_fields:
             for imported in self.symbol_table.values():
@@ -254,9 +256,14 @@ class CodeGenerator:
                     for var_id, var in imported.variables.items():
                         if (isinstance(var, Variable)
                                 and var.is_reassigned == modified_variable
-                                and var_id not in module_globals):
-                            module_globals.append(var_id)
-        return module_globals
+                                and var_id not in module_global_variables):
+                            module_global_variables.append(var_id)
+
+                    # TODO: include user class from imported symbols as well
+
+        return (module_global_variables
+                if modified_variable
+                else module_global_variables + class_with_class_variables)
 
     @property
     def _current_scope(self) -> SymbolScope:
@@ -1069,7 +1076,8 @@ class CodeGenerator:
 
         self.convert_cast(Type.tuple)
 
-    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False):
+    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False,
+                            class_type: Optional[UserClass] = None):
         """
         Converts the load of a symbol
 
@@ -1077,6 +1085,10 @@ class CodeGenerator:
         :param params_addresses: a list with each function arguments' first addresses
         """
         symbol = self.get_symbol(symbol_id, is_internal=is_internal)
+
+        if symbol is Type.none and class_type is not None and symbol_id in class_type.symbols:
+            symbol = class_type.symbols[symbol_id]
+
         if symbol is not Type.none:
             if isinstance(symbol, Property):
                 symbol = symbol.getter
@@ -1088,7 +1100,7 @@ class CodeGenerator:
                 params_addresses = []
 
             if isinstance(symbol, Variable):
-                self.convert_load_variable(symbol_id, symbol)
+                self.convert_load_variable(symbol_id, symbol, class_type)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol, params_addresses)
             elif isinstance(symbol, Event):
@@ -1098,7 +1110,7 @@ class CodeGenerator:
             elif isinstance(symbol, UserClass):
                 self.convert_class_symbol(symbol, symbol_id)
 
-    def convert_load_variable(self, var_id: str, var: Variable):
+    def convert_load_variable(self, var_id: str, var: Variable, class_type: Optional[UserClass] = None):
         """
         Converts the assignment of a variable
 
@@ -1128,13 +1140,36 @@ class CodeGenerator:
             storage_key = codegenerator.get_storage_key_for_variable(var)
             self._convert_builtin_storage_get_or_put(True, storage_key)
 
-    def convert_store_variable(self, var_id: str, value_start_address: int = None):
+        elif class_type:
+            if var_id in class_type.variables:
+                index = list(class_type.variables).index(var_id)
+                self.convert_literal(index)
+                self.convert_get_item()
+                self._stack_pop()             # pop class type
+                self._stack_append(var.type)  # push variable type
+
+    def convert_store_variable(self, var_id: str, value_start_address: int = None, user_class: UserClass = None):
         """
         Converts the assignment of a variable
 
         :param var_id: the value to be converted
         """
-        index, local, is_arg = self._get_variable_info(var_id)
+        inner_index = None
+        if isinstance(user_class, UserClass) and var_id in user_class.variables:
+            index, local, is_arg = self._get_variable_info(user_class.identifier)
+            inner_index = list(user_class.variables).index(var_id)
+        else:
+            index, local, is_arg = self._get_variable_info(var_id)
+
+        if isinstance(inner_index, int):
+            # it's a class variable
+            self.convert_literal(inner_index)
+            index_address = self.bytecode_size
+            self.convert_load_variable(user_class.identifier, Variable(user_class))
+            self.swap_reverse_stack_items(3)
+            self.convert_set_item(index_address)
+            return
+
         if index >= 0:
             opcode = Opcode.get_store(index, local, is_arg)
             if opcode is not None:
@@ -1278,7 +1313,8 @@ class CodeGenerator:
                 # if this method is a constructor and only the self argument is missing
                 function_result = function.type
                 size = len(function_result.variables) if isinstance(function_result, UserClass) else 0
-                self.convert_new_empty_array(size, function_result)
+                if self.stack_size < 1 or not self._stack[-1].is_type_of(function_result):
+                    self.convert_new_empty_array(size, function_result)
 
         from boa3.neo.vm.CallCode import CallCode
         self.__insert_code(CallCode(function))
@@ -1344,9 +1380,14 @@ class CodeGenerator:
         :param class_type:
         :param symbol_id:
         """
-        # TODO: change to create an array with the class variables' default values when they are implemented
         start_address = self.bytecode_size
-        self.convert_new_array(len(class_type.class_variables))
+
+        if symbol_id in self._statics:
+            self.convert_load_variable(symbol_id, Variable(class_type))
+        else:
+            # TODO: change to create an array with the class variables' default values when they are implemented
+            self.convert_new_empty_array(len(class_type.class_variables), class_type)
+
         return start_address
 
     def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
@@ -1614,3 +1655,9 @@ class CodeGenerator:
             self.__insert1(op_info)
             if no_items > 0:
                 self._stack.reverse(-no_items)
+
+    def convert_init_user_class(self, class_type: ClassType):
+        # TODO: refactor when instance variables are implemented
+        if isinstance(class_type, UserClass):
+            self.convert_user_class(class_type, class_type.identifier)
+            self.convert_copy()
