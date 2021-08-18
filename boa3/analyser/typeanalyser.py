@@ -1403,12 +1403,34 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
-        if attr_symbol is None and hasattr(symbol, 'symbols'):
+        origin = value
+        if isinstance(origin, Attribute):
+            while isinstance(origin, Attribute):
+                origin = origin.value
+        else:
+            origin = attribute.value
+
+        is_from_class_name = isinstance(origin, ast.Name) and isinstance(self.get_symbol(origin.id), UserClass)
+        is_instance_variable_from_class = (isinstance(symbol, UserClass)
+                                           and attribute.attr in symbol.instance_variables)
+        is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables
+
+        if ((attr_symbol is None and hasattr(symbol, 'symbols'))
+                or (is_from_class_name and is_instance_variable_from_class)):
             # if it couldn't find the symbol in the attribute symbols, raise unresolved reference
             self._log_error(
                 CompilerError.UnresolvedReference(
                     attribute.lineno, attribute.col_offset,
                     symbol_id='{0}.{1}'.format(symbol.identifier, attribute.attr)
+                ))
+            return Attribute(attribute.value, None, attr_symbol, attribute)
+
+        if not is_from_class_name and is_class_variable_from_class and isinstance(attribute.ctx, ast.Store):
+            # reassign class variables in objects is not supported yet
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    attribute.lineno, attribute.col_offset,
+                    symbol_id='reassign class variables'
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 

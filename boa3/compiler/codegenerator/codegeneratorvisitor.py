@@ -772,14 +772,23 @@ class VisitorCodeGenerator(IAstAnalyser):
         elif hasattr(attribute, 'generate_value') and attribute.generate_value:
             current_bytecode_size = self.generator.bytecode_size
             result = self.visit_to_generate(attribute.value)
+            generation_result = result
             if isinstance(result, str):
                 x = self.generator.get_symbol(result)
-                result = x.type if isinstance(x, IExpression) else x
+                if isinstance(x, IExpression):
+                    result = x.type
+                    generation_result = x
+                else:
+                    result = x
+
             if isinstance(result, ClassType):
                 class_attr_id = f'{result.identifier}.{attribute.attr}'
                 if self.generator.bytecode_size > current_bytecode_size and isinstance(result, UserClass):
                     # it was generated already, don't convert again
-                    return class_attr_id
+                    if not isinstance(generation_result, Variable):
+                        return class_attr_id
+                    else:
+                        return attribute.attr
 
                 index = self.generator.convert_class_symbol(result, attribute.attr, isinstance(attribute.ctx, ast.Load))
                 return ((result, index)

@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
@@ -152,6 +151,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_called_from_class_name(self):
         path = self.get_contract_path('UserClassWithClassMethodFromClass.py')
+        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
@@ -212,8 +212,13 @@ class TestClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'get_val2')
         self.assertEqual(2, result)
 
+    def test_user_class_update_class_variable(self):
+        path = self.get_contract_path('UserClassUpdateClassVariable.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
     def test_user_class_with_class_variable_and_class_method(self):
         path = self.get_contract_path('UserClassWithClassVariableAndClassMethod.py')
+        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_val1')
@@ -238,16 +243,37 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method(self):
         path = self.get_contract_path('UserClassWithInstanceMethod.py')
+        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
         self.assertEqual(42, result)
 
-    def test_user_class_with_instance_variable(self):
-        path = self.get_contract_path('UserClassWithInstanceVariable.py')
-        # change when instance variables are implemented
-        with self.assertRaises(NotLoadedException):
-            Boa3.compile(path)
+    def test_user_class_with_instance_variable_from_class(self):
+        path = self.get_contract_path('UserClassWithInstanceVariableFromClass.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_user_class_with_instance_variable_from_object(self):
+        path = self.get_contract_path('UserClassWithInstanceVariableFromObject.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_val1')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'get_val2')
+        self.assertEqual(2, result)
+
+    def test_user_class_update_instance_variable(self):
+        path = self.get_contract_path('UserClassUpdateInstanceVariable.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_val', 10)
+        self.assertEqual([10, 2], result)
+
+        result = self.run_smart_contract(engine, path, 'get_val', 40)
+        self.assertEqual([40, 2], result)
 
     def test_user_class_with_base(self):
         path = self.get_contract_path('UserClassWithBase.py')
