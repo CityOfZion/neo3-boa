@@ -13,6 +13,7 @@ class NativeContract:
     Ledger = LedgerClass()
     Policy = PolicyClass()
     RoleManagement = RoleManagementClass()
+    StdLib = StdLibClass()
 
     # region Packages
 
@@ -34,6 +35,10 @@ class NativeContract:
                                           Interop.RoleType]
                                    )
 
+    StdLibModule = Package(identifier=StdLib.identifier.lower(),
+                           types=[StdLib]
+                           )
+
     # endregion
 
     package_symbols: List[IdentifiedSymbol] = [
@@ -41,4 +46,5 @@ class NativeContract:
         LedgerModule,
         PolicyModule,
         RoleManagementModule,
+        StdLibModule
     ]
