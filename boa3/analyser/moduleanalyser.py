@@ -494,15 +494,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # # TODO: change when class variables are implemented
-        # if len([stmt for stmt in class_node.body if not isinstance(stmt, (ast.FunctionDef, ast.Pass))]) > 1:
-        #     self._log_error(
-        #         CompilerError.NotSupportedOperation(
-        #             class_node.lineno, class_node.col_offset,
-        #             symbol_id='class'
-        #         )
-        #     )
-
         user_class = UserClass(identifier=class_node.name)
 
         self._current_class = user_class
@@ -619,6 +610,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         method_scope = self._scope_stack.pop()
         global_scope_symbols = self._scope_stack[0].symbols if len(self._scope_stack) > 0 else {}
 
+        self._set_instance_variables(method_scope)
+
         self._current_method = None
         self.__include_callable(function.name, method)
 
@@ -638,6 +631,22 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: a list with all function decorators. Empty if none decorator is found.
         """
         return [self.get_symbol(self.visit(decorator)) for decorator in function.decorator_list]
+
+    def _set_instance_variables(self, scope: SymbolScope):
+        if (isinstance(self._current_class, UserClass)
+                and isinstance(self._current_method, Method)
+                and self._current_method.is_init
+                and len(self._current_method.args) > 0):
+
+            self_id = list(self._current_method.args)[0]
+            for var_id, var in scope.symbols.items():
+                if var_id.startswith(self_id):
+                    split_name = var_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)
+                    if len(split_name) > 0:
+                        instance_var_id = split_name[1]
+                        self._current_class.include_symbol(instance_var_id, var)
+                        scope.remove_symbol(var_id)
+            print()
 
     def visit_arguments(self, arguments: ast.arguments) -> FunctionArguments:
         """
@@ -759,7 +768,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return_type = var_type
         for target in assign.targets:
             var_id = self.visit(target)
-            return_type = self.assign_value(var_id, var_type, source_node=assign)
+            if not isinstance(var_id, ISymbol):
+                return_type = self.assign_value(var_id, var_type, source_node=assign)
 
         return return_type
 

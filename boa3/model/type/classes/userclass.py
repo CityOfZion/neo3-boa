@@ -64,6 +64,8 @@ class UserClass(ClassArrayType):
         """
         if not is_instance:
             self._class_variables[var_id] = var
+        else:
+            self._instance_variables[var_id] = var
 
     def include_callable(self, method_id: str, method: Callable, scope: ClassScope = ClassScope.INSTANCE):
         """

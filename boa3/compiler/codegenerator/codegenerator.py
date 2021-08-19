@@ -872,6 +872,7 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.NEWARRAY0)
         else:
             self.convert_literal(length)
+            self._stack_pop()
             self.__insert1(OpcodeInfo.NEWARRAY)
         self._stack_append(array_type)
 
@@ -1084,6 +1085,9 @@ class CodeGenerator:
         :param symbol_id: the symbol identifier
         :param params_addresses: a list with each function arguments' first addresses
         """
+        if class_type is None and len(self._stack) > 0 and isinstance(self._stack[-1], UserClass):
+            class_type = self._stack[-1]
+
         symbol = self.get_symbol(symbol_id, is_internal=is_internal)
 
         if symbol is Type.none and class_type is not None and symbol_id in class_type.symbols:
@@ -1155,18 +1159,22 @@ class CodeGenerator:
         :param var_id: the value to be converted
         """
         inner_index = None
+        index, local, is_arg = self._get_variable_info(var_id)
+
+        if user_class is None and index < 0 and len(self._stack) > 1 and isinstance(self._stack[-2], UserClass):
+            user_class = self._stack[-2]
+
         if isinstance(user_class, UserClass) and var_id in user_class.variables:
             index, local, is_arg = self._get_variable_info(user_class.identifier)
             inner_index = list(user_class.variables).index(var_id)
-        else:
-            index, local, is_arg = self._get_variable_info(var_id)
 
         if isinstance(inner_index, int):
             # it's a class variable
             self.convert_literal(inner_index)
             index_address = self.bytecode_size
             self.convert_load_variable(user_class.identifier, Variable(user_class))
-            self.swap_reverse_stack_items(3)
+            no_stack_items_to_swap = 3 if var_id in user_class.class_variables else 2
+            self.swap_reverse_stack_items(no_stack_items_to_swap)
             self.convert_set_item(index_address)
             return
 
@@ -1659,5 +1667,22 @@ class CodeGenerator:
     def convert_init_user_class(self, class_type: ClassType):
         # TODO: refactor when instance variables are implemented
         if isinstance(class_type, UserClass):
+            # create an none-filled array with the size of the instance variables
+            no_instance_variables = len(class_type.instance_variables)
+            self.convert_new_empty_array(no_instance_variables, class_type)
+
+            self.__insert1(OpcodeInfo.UNPACK)  # unpack for array concatenation
+            value = self._stack_pop()
+            self._stack_append(Type.int)
+            self.remove_stack_top_item()
+
+            # copy the array that stores the class variables from that class
             self.convert_user_class(class_type, class_type.identifier)
-            self.convert_copy()
+
+            self.__insert1(OpcodeInfo.UNPACK)  # unpack for array concatenation
+            self._stack_append(value)
+            self.convert_literal(no_instance_variables)
+            self.convert_operation(BinaryOp.Add)
+
+            self.__insert1(OpcodeInfo.PACK)  # packs everything together
+            self._stack_pop()
