@@ -3,7 +3,7 @@ from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestPolicyInterop(BoaTest):
+class TestPolicyContract(BoaTest):
 
     default_folder: str = 'test_sc/native_test/policy'
 
