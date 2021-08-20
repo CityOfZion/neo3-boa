@@ -150,13 +150,43 @@ class TestString(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(b'it_test', result)
 
-    def test_string_slicing_omitted_stride(self):
+    def test_string_slicing_with_stride(self):
         path = self.get_contract_path('StringSlicingWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        expected_result = 'unit_test'
+        expected_result = expected_result[2:5:2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_string_slicing_with_negative_stride(self):
+        path = self.get_contract_path('StringSlicingWithNegativeStride.py')
+        engine = TestEngine()
+
+        expected_result = 'unit_test'
+        expected_result = expected_result[2:5:-2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        # TODO: Remove assertRaises when the slicing with negative stride is correctly implemented
+        with self.assertRaises(AssertionError):
+            self.assertEqual(expected_result, result)
 
     def test_string_slicing_omitted_with_stride(self):
         path = self.get_contract_path('StringSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        expected_result = 'unit_test'
+        expected_result = expected_result[::2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
+
+    def test_string_slicing_omitted_with_negative_stride(self):
+        path = self.get_contract_path('StringSlicingOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        expected_result = 'unit_test'
+        expected_result = expected_result[::-2]
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertEqual(expected_result, result)
 
     def test_string_simple_concat(self):
         path = self.get_contract_path('StringSimpleConcat.py')

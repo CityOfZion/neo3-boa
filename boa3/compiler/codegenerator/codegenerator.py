@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.analyser.model.symbolscope import SymbolScope
@@ -22,8 +23,11 @@ from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
+from boa3.model.type.collection.sequence.mutable.listtype import ListType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
+from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
+from boa3.model.type.primitive.strtype import StrType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.TryCode import TryCode
@@ -1066,6 +1070,154 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.UNPACK)
             self.__insert1(OpcodeInfo.PACK)    # creates a new array with the values
 
+    def convert_get_stride(self):
+        if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
+            self.convert_negative_stride()
+            if self._stack[-2].stack_item in (StackItemType.ByteString, StackItemType.Buffer):
+                self.convert_get_substring_stride()
+            else:
+                self.convert_get_array_stride()
+
+    def convert_negative_stride(self):
+        # The logic on this function only do variable[::-z]
+        # TODO: Implement logic of `variable[x:y:-z]`
+
+        # verifies if stride is negative
+        self.duplicate_stack_top_item()
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+        self.convert_operation(BinaryOp.NumEq)
+        is_negative = self.convert_begin_if()       # if stride is negative, then reverse array/bytestring
+
+        self.swap_reverse_stack_items(2)
+
+        original = self._stack[-1]
+        self.convert_builtin_method_call(Builtin.Reversed)
+        self.convert_cast(ListType())
+        if isinstance(original, (StrType, BytesType)):        # if self was a string/bytes, then concat the values in the array
+            self.duplicate_stack_top_item()
+            self.convert_builtin_method_call(Builtin.Len)       # index = len(array) - 1
+            self.convert_literal('')                            # string = ''
+
+            start_jump = self.convert_begin_while()
+            self.duplicate_stack_item(3)
+            self.duplicate_stack_item(3)
+            str_type = self._stack[-3]
+            self.__insert1(OpcodeInfo.PICKITEM)
+            self._stack_pop()
+            self._stack_pop()
+            self._stack_append(str_type)
+            self.swap_reverse_stack_items(2)
+            self.convert_operation(BinaryOp.Concat)             # string = string + array[index]
+
+            condition_address = VMCodeMapping.instance().bytecode_size
+            self.swap_reverse_stack_items(2)
+            self.__insert1(OpcodeInfo.DEC)                      # index--
+            self.swap_reverse_stack_items(2)
+            self.duplicate_stack_item(2)
+            self.convert_literal(0)
+            self.convert_operation(BinaryOp.GtE)                # if index <= 0, stop loop
+            self.convert_end_while(start_jump, condition_address)
+            self.convert_end_loop_else(start_jump, self.last_code_start_address, False)
+
+            # remove auxiliary values
+            self.swap_reverse_stack_items(3)
+            self.remove_stack_top_item()
+            self.remove_stack_top_item()
+
+        self.swap_reverse_stack_items(2)
+        self.convert_builtin_method_call(Builtin.Abs)
+        self.convert_end_if(is_negative)
+
+    def convert_get_substring_stride(self):
+        # initializing auxiliary variables
+        self.duplicate_stack_item(2)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.convert_literal(0)                         # index = 0
+        self.convert_literal('')                        # substr = ''
+
+        # logic verifying if substr[index] should be concatenated or not
+        start_jump = self.convert_begin_while()
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(5)
+        self.convert_operation(BinaryOp.Mod)
+        self.convert_literal(0)
+        self.convert_operation(BinaryOp.NumEq)
+        is_mod_0 = self.convert_begin_if()              # if index % stride == 0, then concatenate it
+
+        # concatenating substr[index] with substr
+        self.duplicate_stack_item(5)
+        self.duplicate_stack_item(3)
+        self.convert_literal(1)
+        self._stack_pop()  # length
+        self._stack_pop()  # start
+        str_type = self._stack_pop()
+        self.__insert1(OpcodeInfo.SUBSTR)
+        self._stack_append(BufferType)                  # SUBSTR returns a buffer instead of a bytestring
+        self.convert_cast(str_type)
+        self.convert_operation(BinaryOp.Concat)         # substr = substr + string[index]
+        self.convert_end_if(is_mod_0)
+
+        # increment the index by 1
+        self.swap_reverse_stack_items(2)
+        self.__insert1(OpcodeInfo.INC)                  # index++
+        self.swap_reverse_stack_items(2)
+
+        # verifying if it should still be in the while
+        condition_address = VMCodeMapping.instance().bytecode_size
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(4)
+        self.convert_operation(BinaryOp.Lt)             # stop the loop when index >= len(str)
+        self.convert_end_while(start_jump, condition_address)
+        self.convert_end_loop_else(start_jump, self.last_code_start_address, False)
+
+        # removing auxiliary values
+        self.swap_reverse_stack_items(5)
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+
+    def convert_get_array_stride(self):
+        # initializing auxiliary variable
+        self.duplicate_stack_item(2)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.__insert1(OpcodeInfo.DEC)                      # index = len(array) - 1
+
+        # logic verifying if array[index] should be removed or not
+        start_jump = self.convert_begin_while()
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(2)
+        self.swap_reverse_stack_items(2)
+        self.convert_operation(BinaryOp.Mod)
+        self.convert_literal(0)
+        self.convert_operation(BinaryOp.NumNotEq)
+        is_not_mod_0 = self.convert_begin_if()              # if index % stride != 0, then remove it
+
+        # removing element from array
+        self.duplicate_stack_item(3)
+        self.duplicate_stack_item(2)
+        self.__insert1(OpcodeInfo.REMOVE)                   # array.pop(index)
+        self._stack_pop()
+        self._stack_pop()
+        self.convert_end_if(is_not_mod_0)
+
+        # decrement 1 from index
+        self.__insert1(OpcodeInfo.DEC)
+
+        # verifying if it should still be in the while
+        condition_address = VMCodeMapping.instance().bytecode_size
+        self.duplicate_stack_top_item()
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+        self.convert_operation(BinaryOp.NumNotEq)       # stop the loop when index < 0
+        self.convert_end_while(start_jump, condition_address)
+        self.convert_end_loop_else(start_jump, self.last_code_start_address, False)
+
+        # removing auxiliary values
+        self.remove_stack_top_item()                    # removed index from stack
+        self.remove_stack_top_item()                    # removed stride from stack
+
     def convert_starred_variable(self):
         top_stack_item = self._stack[-1].stack_item
         if top_stack_item is StackItemType.Array:
@@ -1661,6 +1813,8 @@ class CodeGenerator:
                 self.convert_literal(no_items)
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
+            if opcode is Opcode.REVERSEN and no_items > 0:
+                self._stack_pop()
             if no_items > 0:
                 self._stack.reverse(-no_items)
 
