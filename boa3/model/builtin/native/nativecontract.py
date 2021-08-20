@@ -1,7 +1,6 @@
 from typing import List
 
-from boa3.model.builtin.interop.blockchain import BlockType, TransactionType
-from boa3.model.builtin.interop.role import RoleType
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.native import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
@@ -9,16 +8,11 @@ from boa3.model.imports.package import Package
 
 class NativeContract:
 
-    # Interop Types
-    BlockType = BlockType.build()
-    RoleType = RoleType()
-    TransactionType = TransactionType.build()
-
     # Class Interfaces
     CryptoLib = CryptoLibClass()
     Ledger = LedgerClass()
     Policy = PolicyClass()
-    Role = RoleManagementClass()
+    RoleManagement = RoleManagementClass()
 
     # region Packages
 
@@ -27,18 +21,18 @@ class NativeContract:
 
     LedgerModule = Package(identifier=Ledger.identifier.lower(),
                            types=[Ledger,
-                                  BlockType,
-                                  TransactionType]
+                                  Interop.BlockType,
+                                  Interop.TransactionType]
                            )
 
     PolicyModule = Package(identifier=Policy.identifier.lower(),
                            types=[Policy]
                            )
 
-    RoleModule = Package(identifier=Role.identifier.lower(),
-                         types=[Role,
-                                RoleType]
-                         )
+    RoleManagementModule = Package(identifier=RoleManagement.identifier.lower(),
+                                   types=[RoleManagement,
+                                          Interop.RoleType]
+                                   )
 
     # endregion
 
@@ -46,5 +40,5 @@ class NativeContract:
         CryptoLibModule,
         LedgerModule,
         PolicyModule,
-        RoleModule,
+        RoleManagementModule,
     ]
