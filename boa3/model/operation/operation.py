@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
 from boa3.model.operation.operator import Operator
+from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class IOperation(ABC):
+class IOperation(ISymbol, ABC):
     """
     An interface used to represent operations
 
@@ -28,6 +29,15 @@ class IOperation(ABC):
         :return: the opcode if exists. Empty list otherwise.
         """
         return []
+
+    @property
+    def shadowing_name(self) -> str:
+        """
+        Gets the type of the evaluated expression
+
+        :return: the resulting type when the expression is evaluated
+        """
+        return self.operator.value
 
     @property
     def bytecode(self) -> bytes:

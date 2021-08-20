@@ -770,7 +770,7 @@ class TestRange(BoaTest):
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(list(range(5,-1, -2)), result)
+        self.assertEqual(list(range(5, -1, -2)), result)
 
     def test_boa2_range_test(self):
         path = self.get_contract_path('RangeBoa2Test.py')

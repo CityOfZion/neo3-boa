@@ -40,7 +40,6 @@ class TestGasClass(BoaTest):
         path = self.get_contract_path('TotalSupplyTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-
     def test_balance_of(self):
         path = self.get_contract_path('BalanceOf.py')
         engine = TestEngine()
