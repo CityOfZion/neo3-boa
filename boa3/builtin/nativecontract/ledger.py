@@ -1,0 +1,57 @@
+from typing import Union
+
+from boa3.builtin.interop.blockchain import Block, Transaction
+from boa3.builtin.type import UInt256
+
+
+class Ledger:
+    """
+    A class used to represent the Ledger native contract
+    """
+
+    @classmethod
+    def get_block(cls, index_or_hash: Union[int, UInt256]) -> Block:
+        """
+        Gets the block with the given index or hash.
+
+        :param index_or_hash: index or hash identifier of the block
+        :type index_or_hash: int or UInt256
+        :return: the desired block, if exists. None otherwise
+        :rtype: Block or None
+        """
+        pass
+
+    @classmethod
+    def get_transaction(cls, hash_: UInt256) -> Transaction:
+        """
+        Gets a transaction with the given hash.
+
+        :param hash_: hash identifier of the transaction
+        :type hash_: UInt256
+        :return: the Transaction, if exists. None otherwise
+        """
+        pass
+
+    @classmethod
+    def get_transaction_from_block(cls, block_hash_or_height: Union[UInt256, int], tx_index: int) -> Transaction:
+        """
+        Gets a transaction from a block.
+
+        :param block_hash_or_height: a block identifier
+        :type block_hash_or_height: UInt256 or int
+        :param tx_index: the transaction identifier in the block
+        :type tx_index: int
+        :return: the Transaction, if exists. None otherwise
+        """
+        pass
+
+    @classmethod
+    def get_transaction_height(cls, hash_: UInt256) -> int:
+        """
+        Gets the height of a transaction.
+
+        :param hash_: hash identifier of the transaction
+        :type hash_: UInt256
+        :return: height of the transaction
+        """
+        pass
