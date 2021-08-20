@@ -13,10 +13,14 @@ class NativeContract:
     TransactionType = TransactionType.build()
 
     # Class Interfaces
+    CryptoLib = CryptoLibClass()
     Ledger = LedgerClass()
     Policy = PolicyClass()
 
     # region Packages
+
+    CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
+                              types=[CryptoLib])
 
     LedgerModule = Package(identifier=Ledger.identifier.lower(),
                            types=[Ledger,
@@ -31,6 +35,7 @@ class NativeContract:
     # endregion
 
     package_symbols: List[IdentifiedSymbol] = [
+        CryptoLibModule,
         LedgerModule,
-        PolicyModule
+        PolicyModule,
     ]

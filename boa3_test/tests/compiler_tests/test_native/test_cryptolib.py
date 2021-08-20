@@ -14,9 +14,9 @@ from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestCryptoInterop(BoaTest):
+class TestCryptoLibClass(BoaTest):
 
-    default_folder: str = 'test_sc/interop_test/crypto'
+    default_folder: str = 'test_sc/native_test/cryptolib'
     ecpoint_init = (
         Opcode.CONVERT + Type.bytes.stack_item
         + Opcode.DUP
@@ -69,34 +69,6 @@ class TestCryptoInterop(BoaTest):
         path = self.get_contract_path('Ripemd160TooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
-    def test_hash160_str(self):
-        path = self.get_contract_path('Hash160Str.py')
-        engine = TestEngine()
-        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result, result)
-
-    def test_hash160_int(self):
-        path = self.get_contract_path('Hash160Int.py')
-        engine = TestEngine()
-        expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(10).to_byte_array()).digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
-
-    def test_hash160_bool(self):
-        path = self.get_contract_path('Hash160Bool.py')
-        engine = TestEngine()
-        expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(1).to_byte_array()).digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
-
-    def test_hash160_bytes(self):
-        path = self.get_contract_path('Hash160Bytes.py')
-        engine = TestEngine()
-        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
-
     def test_sha256_str(self):
         path = self.get_contract_path('Sha256Str.py')
         engine = TestEngine()
@@ -136,113 +108,6 @@ class TestCryptoInterop(BoaTest):
     def test_sha256_too_few_parameters(self):
         path = self.get_contract_path('Sha256TooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
-
-    def test_hash256_str(self):
-        path = self.get_contract_path('Hash256Str.py')
-        engine = TestEngine()
-        expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result, result)
-
-    def test_hash256_int(self):
-        path = self.get_contract_path('Hash256Int.py')
-        engine = TestEngine()
-        expected_result = hashlib.sha256(hashlib.sha256(Integer(10).to_byte_array()).digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
-
-    def test_hash256_bool(self):
-        path = self.get_contract_path('Hash256Bool.py')
-        engine = TestEngine()
-        expected_result = hashlib.sha256(hashlib.sha256(Integer(1).to_byte_array()).digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
-
-    def test_hash256_bytes(self):
-        path = self.get_contract_path('Hash256Bytes.py')
-        engine = TestEngine()
-        expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
-
-    def test_check_sig(self):
-        byte_input0 = b'\x03\x5a\x92\x8f\x20\x16\x39\x20\x4e\x06\xb4\x36\x8b\x1a\x93\x36\x54\x62\xa8\xeb\xbf\xf0\xb8\x81\x81\x51\xb7\x4f\xaa\xb3\xa2\xb6\x1a'
-        byte_input1 = b'wrongsignature'
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x02'
-            + b'\x00'
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input0)).to_byte_array(min_length=1)
-            + byte_input0
-            + self.ecpoint_init
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + Opcode.STLOC1
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + Opcode.LDLOC0
-            + Opcode.SYSCALL
-            + Interop.CheckSig.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('CheckSig.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(False, result)
-
-    def test_check_multisig(self):
-        byte_input0 = b'\x03\xcd\xb0g\xd90\xfdZ\xda\xa6\xc6\x85E\x01`D\xaa\xdd\xecd\xba9\xe5H%\x0e\xae\xa5Q\x17.S\\'
-        byte_input1 = b'\x03l\x841\xccx\xb31w\xa6\x0bK\xcc\x02\xba\xf6\r\x05\xfe\xe5\x03\x8es9\xd3\xa6\x88\xe3\x94\xc2\xcb\xd8C'
-        byte_input2 = b'wrongsignature1'
-        byte_input3 = b'wrongsignature2'
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x02'
-            + b'\x00'
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + self.ecpoint_init
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input0)).to_byte_array(min_length=1)
-            + byte_input0
-            + self.ecpoint_init
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input3)).to_byte_array(min_length=1)
-            + byte_input3
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input2)).to_byte_array(min_length=1)
-            + byte_input2
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.STLOC1
-            + Opcode.LDLOC1
-            + Opcode.LDLOC0
-            + Opcode.SYSCALL
-            + Interop.CheckMultisig.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('CheckMultisig.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(False, result)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -563,17 +428,3 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
         path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
-
-    def test_import_crypto(self):
-        path = self.get_contract_path('ImportCrypto.py')
-        engine = TestEngine()
-        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'main', 'unit test')
-        self.assertEqual(expected_result, result)
-
-    def test_import_interop_crypto(self):
-        path = self.get_contract_path('ImportInteropCrypto.py')
-        engine = TestEngine()
-        expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'main', 'unit test')
-        self.assertEqual(expected_result, result)
