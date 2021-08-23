@@ -1,6 +1,6 @@
 from boa3 import constants
-
 from boa3.boa3 import Boa3
+from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -41,6 +41,14 @@ class TestRoleInterop(BoaTest):
         path = self.get_contract_path('GetDesignatedByRole.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_get_designated_by_role_too_many_parameters(self):
+        path = self.get_contract_path('GetDesignatedByRoleTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_get_designated_by_role_too_few_parameters(self):
+        path = self.get_contract_path('GetDesignatedByRoleTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_import_role(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
