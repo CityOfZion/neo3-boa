@@ -40,15 +40,13 @@ class CryptoLibClass(ClassArrayType):
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
         from boa3.model.builtin.interop.crypto import (Sha256Method, Ripemd160Method,
-                                                       VerifyWithECDsaSecp256k1Method,
-                                                       VerifyWithECDsaSecp256r1Method)
+                                                       VerifyWithECDsaMethod)
 
         if len(self._class_methods) == 0:
             self._class_methods = {
                 'sha256': Sha256Method(),
                 'ripemd160': Ripemd160Method(),
-                'verify_with_ecdsa_secp256k1': VerifyWithECDsaSecp256k1Method(),
-                'verify_with_ecdsa_secp256r1': VerifyWithECDsaSecp256r1Method()
+                'verify_with_ecdsa': VerifyWithECDsaMethod(),
             }
         return self._class_methods
 

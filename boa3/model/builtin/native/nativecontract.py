@@ -25,7 +25,8 @@ class NativeContract:
                                               Builtin.UInt160])
 
     CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
-                              types=[CryptoLib])
+                              types=[CryptoLib,
+                                     Interop.NamedCurveType])
 
     LedgerModule = Package(identifier=Ledger.identifier.lower(),
                            types=[Ledger,

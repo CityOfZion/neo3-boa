@@ -53,6 +53,7 @@ class Interop:
     ContractType = ContractType.build()
     FindOptionsType = FindOptionsType()
     Iterator = IteratorType.build()
+    NamedCurveType = NamedCurveType()
     NotificationType = NotificationType.build()
     OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleType.build()
@@ -98,8 +99,7 @@ class Interop:
     Hash256 = Hash256Method()
     Ripemd160 = Ripemd160Method()
     Sha256 = Sha256Method()
-    VerifyWithECDsaSecp256k1 = VerifyWithECDsaSecp256k1Method()
-    VerifyWithECDsaSecp256r1 = VerifyWithECDsaSecp256r1Method()
+    VerifyWithECDsa = VerifyWithECDsaMethod()
 
     # Iterator Interops
     IteratorCreate = IteratorMethod(Iterator)
@@ -232,14 +232,14 @@ class Interop:
                               )
 
     CryptoPackage = Package(identifier=InteropPackage.Crypto,
+                            types=[NamedCurveType],
                             methods=[CheckMultisig,
                                      CheckSig,
                                      Hash160,
                                      Hash256,
                                      Ripemd160,
                                      Sha256,
-                                     VerifyWithECDsaSecp256k1,
-                                     VerifyWithECDsaSecp256r1
+                                     VerifyWithECDsa,
                                      ]
                             )
 
