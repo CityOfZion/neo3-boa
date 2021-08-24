@@ -1,13 +1,13 @@
 import ast
 from typing import Dict
 
-from boa3.model.builtin.interop.nativecontract import GasMethod
+from boa3.model.builtin.interop.nativecontract import Nep17Method
 from boa3.model.variable import Variable
 
 
-class TransferMethod(GasMethod):
+class TransferMethod(Nep17Method):
 
-    def __init__(self):
+    def __init__(self, contract_script_hash: bytes):
         from boa3.model.type.type import Type
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
 
@@ -23,4 +23,5 @@ class TransferMethod(GasMethod):
         data_default = ast.parse("{0}".format(Type.any.default_value)
                                  ).body[0].value
 
-        super().__init__(identifier, native_identifier, args, defaults=[data_default], return_type=Type.int)
+        super().__init__(identifier, native_identifier, args, defaults=[data_default],
+                         return_type=Type.int, script_hash=contract_script_hash)

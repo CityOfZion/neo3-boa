@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from boa3.constants import GAS_SCRIPT
 from boa3.model.method import Method
 from boa3.model.property import Property
 from boa3.model.type.classes.classarraytype import ClassArrayType
@@ -39,16 +40,16 @@ class GasClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.native.gas_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
-                                                           TotalSupplyMethod, TransferMethod)
+        from boa3.model.builtin.native.nep17_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
+                                                             TotalSupplyMethod, TransferMethod)
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'balanceOf': BalanceOfMethod(),
-                'decimals': DecimalsMethod(),
-                'symbol': SymbolMethod(),
-                'totalSupply': TotalSupplyMethod(),
-                'transfer': TransferMethod()
+                'balanceOf': BalanceOfMethod(GAS_SCRIPT),
+                'decimals': DecimalsMethod(GAS_SCRIPT),
+                'symbol': SymbolMethod(GAS_SCRIPT),
+                'totalSupply': TotalSupplyMethod(GAS_SCRIPT),
+                'transfer': TransferMethod(GAS_SCRIPT)
             }
         return self._class_methods
 
