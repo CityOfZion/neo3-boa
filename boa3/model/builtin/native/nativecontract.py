@@ -1,5 +1,6 @@
 from typing import List
 
+from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.native import *
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -9,6 +10,7 @@ from boa3.model.imports.package import Package
 class NativeContract:
 
     # Class Interfaces
+    ContractManagement = ContractManagementClass()
     CryptoLib = CryptoLibClass()
     Ledger = LedgerClass()
     Policy = PolicyClass()
@@ -16,6 +18,11 @@ class NativeContract:
     StdLib = StdLibClass()
 
     # region Packages
+
+    ContractManagementModule = Package(identifier=ContractManagement.identifier.lower(),
+                                       types=[ContractManagement,
+                                              Interop.ContractType,
+                                              Builtin.UInt160])
 
     CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
                               types=[CryptoLib])
@@ -42,6 +49,7 @@ class NativeContract:
     # endregion
 
     package_symbols: List[IdentifiedSymbol] = [
+        ContractManagementModule,
         CryptoLibModule,
         LedgerModule,
         PolicyModule,

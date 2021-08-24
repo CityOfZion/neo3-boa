@@ -754,10 +754,10 @@ class VisitorCodeGenerator(IAstAnalyser):
             value_id = self.visit(value)
             value_symbol = self.generator.get_symbol(value_id)
 
-            if isinstance(value_symbol, UserClass):
-                if attribute.attr in value_symbol.symbols:
-                    attr = value_symbol.symbols[attribute.attr]
+            if isinstance(value_symbol, ClassType) and attribute.attr in value_symbol.symbols:
+                attr = value_symbol.symbols[attribute.attr]
 
+            if isinstance(value_symbol, UserClass):
                 if isinstance(attr, Method) and attr.has_cls_or_self:
                     self.generator.convert_load_symbol(value_id)
 
@@ -768,7 +768,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
             return (attribute.attr
-                    if not isinstance(value_symbol, UserClass)
+                    if not isinstance(value_symbol, ClassType)
                     else f'{value_symbol.identifier}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
                     )
 
