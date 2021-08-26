@@ -24,4 +24,4 @@ class TransferMethod(Nep17Method):
                                  ).body[0].value
 
         super().__init__(identifier, native_identifier, args, defaults=[data_default],
-                         return_type=Type.int, script_hash=contract_script_hash)
+                         return_type=Type.bool, script_hash=contract_script_hash)

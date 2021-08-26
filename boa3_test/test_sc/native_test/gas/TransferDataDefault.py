@@ -4,5 +4,5 @@ from boa3.builtin.type import UInt160
 
 
 @public
-def main(from_address: UInt160, to_address: UInt160, amount: int) -> int:
+def main(from_address: UInt160, to_address: UInt160, amount: int) -> bool:
     return GAS.transfer(from_address, to_address, amount)
