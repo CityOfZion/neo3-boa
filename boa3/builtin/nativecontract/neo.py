@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, List, Tuple
 
-from boa3.builtin.type import UInt160
+from boa3.builtin.contract import NeoAccountState
+from boa3.builtin.type import UInt160, ECPoint
 
 
 class NEO:
@@ -70,5 +71,105 @@ class NEO:
         :return: whether the transfer was successful
         :rtype: bool
         :raise Exception: raised if `from_address` or `to_address` length is not 20 or if `amount` is less than zero.
+        """
+        pass
+
+    @classmethod
+    def get_gas_per_block(cls) -> int:
+        """
+        Gets the amount of GAS generated in each block.
+
+        :return: the amount of GAS generated
+        :rtype: int
+        """
+        pass
+
+    @classmethod
+    def unclaimed_gas(cls, account: UInt160, end: int) -> int:
+        """
+        Gets the amount of unclaimed GAS in the specified account.
+
+        :param account: the account to check
+        :type account: UInt160
+        :param end: the block index used when calculating GAS
+        :type end: int
+        """
+        pass
+
+    @classmethod
+    def register_candidate(cls, pubkey: ECPoint) -> bool:
+        """
+        Registers as a candidate.
+
+        :param pubkey: The public key of the account to be registered
+        :type pubkey: ECPoint
+        :return: whether the registration was a success or not
+        :rtype: bool
+        """
+        pass
+
+    @classmethod
+    def unregister_candidate(cls, pubkey: ECPoint) -> bool:
+        """
+        Unregisters as a candidate.
+
+        :param pubkey: The public key of the account to be unregistered
+        :type pubkey: ECPoint
+        :return: whether the unregistration was a success or not
+        :rtype: bool
+        """
+        pass
+
+    @classmethod
+    def vote(cls, account: UInt160, vote_to: ECPoint) -> bool:
+        """
+        Votes for a candidate.
+
+        :param account: the account that is voting
+        :type account: UInt160
+        :param vote_to: the public key of the one being voted
+        :type vote_to: ECPoint
+        """
+        pass
+
+    @classmethod
+    def get_candidates(cls) -> List[Tuple[ECPoint, int]]:
+        """
+        Gets the list of all registered candidates.
+
+        :return: all registered candidates
+        :rtype: List[Tuple[ECPoint, int]]
+        """
+        pass
+
+    @classmethod
+    def get_committee(cls) -> List[ECPoint]:
+        """
+        Gets all committee members list.
+
+        :return: all committee members
+        :rtype: List[ECPoint]
+        """
+        pass
+
+    @classmethod
+    def get_next_block_validators(cls) -> List[ECPoint]:
+        """
+        Gets validators list of the next block.
+
+        :return: the public keys of the validators
+        :rtype: List[ECPoint]
+        """
+        pass
+
+    @classmethod
+    def get_account_state(cls, account: UInt160) -> NeoAccountState:
+        """
+        Gets the latest votes of the specified account.
+
+        :param account: the specified account
+        :type account: UInt160
+        :return: the state of the account
+        :rtype: NeoAccountState
         """
         pass

@@ -130,6 +130,7 @@ class Builtin:
     UInt160 = UInt160Type.build()
     UInt256 = UInt256Type.build()
     ECPoint = ECPointType.build()
+    NeoAccountState = NeoAccountStateType.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -167,6 +168,7 @@ class Builtin:
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
+                              NeoAccountState,
                               Nep17Transfer,
                               Nep5Transfer,
                               ],
