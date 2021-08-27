@@ -12,6 +12,7 @@ class NativeContract:
     # Class Interfaces
     ContractManagement = ContractManagementClass()
     CryptoLib = CryptoLibClass()
+    GAS = GasClass()
     Ledger = LedgerClass()
     Policy = PolicyClass()
     RoleManagement = RoleManagementClass()
@@ -26,6 +27,10 @@ class NativeContract:
 
     CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
                               types=[CryptoLib])
+
+    GasModule = Package(identifier=GAS.identifier.lower(),
+                        types=[GAS]
+                        )
 
     LedgerModule = Package(identifier=Ledger.identifier.lower(),
                            types=[Ledger,
@@ -51,6 +56,7 @@ class NativeContract:
     package_symbols: List[IdentifiedSymbol] = [
         ContractManagementModule,
         CryptoLibModule,
+        GasModule,
         LedgerModule,
         PolicyModule,
         RoleManagementModule,
