@@ -26,7 +26,8 @@ class NativeContract:
                                               Builtin.UInt160])
 
     CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
-                              types=[CryptoLib])
+                              types=[CryptoLib,
+                                     Interop.NamedCurveType])
 
     GasModule = Package(identifier=GAS.identifier.lower(),
                         types=[GAS]

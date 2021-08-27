@@ -244,15 +244,24 @@ class TestCryptoInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(False, result)
 
+    def test_verify_with_ecdsa(self):
+        path = self.get_contract_path('VerifyWithECDsa.py')
+        Boa3.compile(path)
+
     def test_verify_with_ecdsa_secp256r1_str(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -262,12 +271,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -288,11 +293,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256r1_bool(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -300,12 +310,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH0
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -326,11 +332,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256r1_int(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -338,12 +349,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -365,11 +372,16 @@ class TestCryptoInterop(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -379,12 +391,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -410,11 +418,16 @@ class TestCryptoInterop(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -424,12 +437,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -449,11 +458,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_bool(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -461,12 +475,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH0
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -486,11 +496,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_int(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -498,12 +513,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -524,11 +535,16 @@ class TestCryptoInterop(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -538,12 +554,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
