@@ -1,4 +1,4 @@
-from boa3.builtin.interop.crypto import verify_with_ecdsa, NamedCurve
+from boa3.builtin.interop.crypto import NamedCurve, verify_with_ecdsa
 
 
 def Main():

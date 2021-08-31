@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.analyser.model.symbolscope import SymbolScope
@@ -279,7 +278,8 @@ class CodeGenerator:
 
         :return: whether the last value is null
         """
-        return self.last_code.opcode is Opcode.PUSHNULL
+        return (self.last_code.opcode is Opcode.PUSHNULL or
+                (len(self._stack) > 0 and self._stack[-1] is Type.none))
 
     def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> ISymbol:
         """

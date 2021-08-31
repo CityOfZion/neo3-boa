@@ -6,7 +6,7 @@ from boa3.model.variable import Variable
 
 class DecimalsMethod(Nep17Method):
 
-    def __init__(self,  contract_script_hash: bytes):
+    def __init__(self, contract_script_hash: bytes):
         from boa3.model.type.type import Type
 
         identifier = 'decimals'

@@ -6,7 +6,7 @@ class RoleManagement:
     """
     A class used to represent the RoleManagement native contract
     """
-    
+
     @classmethod
     def get_designated_by_role(cls, role: Role, index: int) -> ECPoint:
         """
