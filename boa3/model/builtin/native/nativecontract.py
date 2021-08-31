@@ -14,6 +14,7 @@ class NativeContract:
     CryptoLib = CryptoLibClass()
     GAS = GasClass()
     Ledger = LedgerClass()
+    NEO = NeoClass()
     Policy = PolicyClass()
     RoleManagement = RoleManagementClass()
     StdLib = StdLibClass()
@@ -39,6 +40,10 @@ class NativeContract:
                                   Interop.TransactionType]
                            )
 
+    NeoModule = Package(identifier=NEO.identifier.lower(),
+                        types=[NEO]
+                        )
+
     PolicyModule = Package(identifier=Policy.identifier.lower(),
                            types=[Policy]
                            )
@@ -59,6 +64,7 @@ class NativeContract:
         CryptoLibModule,
         GasModule,
         LedgerModule,
+        NeoModule,
         PolicyModule,
         RoleManagementModule,
         StdLibModule
