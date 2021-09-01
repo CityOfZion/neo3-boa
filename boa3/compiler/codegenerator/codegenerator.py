@@ -965,6 +965,20 @@ class CodeGenerator:
         """
         Converts the end of get a substring
         """
+        # if lower is still negative, then it should be 0
+        self.duplicate_stack_item(2)
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+        jmp_address = VMCodeMapping.instance().bytecode_size
+        self._insert_jump(OpcodeInfo.JMPNE)         # if lower < 0, then lower = 0
+
+        self.swap_reverse_stack_items(2)
+        self.remove_stack_top_item()
+        self.convert_literal(0)
+        self.swap_reverse_stack_items(2)
+        jmp_target = VMCodeMapping.instance().bytecode_size
+        self._update_jump(jmp_address, jmp_target)
+
         self.convert_new_empty_array(0, array)      # slice = []
         self.duplicate_stack_item(3)                # index = slice_start
 
@@ -996,11 +1010,12 @@ class CodeGenerator:
         self.remove_stack_top_item()
         self.remove_stack_top_item()
 
-    def convert_get_sub_array(self, value_addresses: List[int] = None):
+    def convert_get_sub_array(self, value_addresses: List[int] = None, negative_stride: bool = False):
         """
         Converts the end of get a slice in the beginning of an array
 
         :param value_addresses: the start and end values addresses
+        :param negative_stride: whether stride is negative or not
         """
         # top: length, index, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
@@ -1011,29 +1026,126 @@ class CodeGenerator:
                     self.fix_negative_index(code)
                 self.fix_negative_index()  # fix the last value sign
 
+                if negative_stride:
+                    """
+                    If stride is negative, then the array was reversed, thus, lower and upper should be changed 
+                    accordingly.
+                    array[lower:upper:-1] == reversed_array[len(array)-lower-1:len(array)-upper-1]
+                    """
+                    # calculates corresponding upper
+                    # upper = len(array)-upper-1
+                    self.duplicate_stack_item(3)
+                    self.convert_builtin_method_call(Builtin.Len)
+                    self.swap_reverse_stack_items(2)
+                    self.convert_operation(BinaryOp.Sub)
+                    self.__insert1(OpcodeInfo.DEC)
+
+                    # puts lower at the top of the stack
+                    self.swap_reverse_stack_items(2)
+
+                    # calculates corresponding lower
+                    # lower = len(array)-lower-1
+                    self.duplicate_stack_item(3)
+                    self.convert_builtin_method_call(Builtin.Len)
+                    self.swap_reverse_stack_items(2)
+                    self.convert_operation(BinaryOp.Sub)
+                    self.__insert1(OpcodeInfo.DEC)
+
+                    # reverts lower to its correct place
+                    self.swap_reverse_stack_items(2)
+
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
+
+                # if lower is still negative, then it should be 0
+                self.duplicate_stack_item(2)
+                self.__insert1(OpcodeInfo.SIGN)
+                self.convert_literal(-1)
+                jmp_address = VMCodeMapping.instance().bytecode_size
+                self._insert_jump(OpcodeInfo.JMPNE)     # if lower < 0, then lower = 0
+
+                self.swap_reverse_stack_items(2)
+                self.remove_stack_top_item()
+                self.convert_literal(0)
+                self.swap_reverse_stack_items(2)
+                jmp_target = VMCodeMapping.instance().bytecode_size
+                self._update_jump(jmp_address, jmp_target)
+
+                # lower can not be greater than len(string)
+                self.swap_reverse_stack_items(2)
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+                # reverts lower to its correct place
+                self.swap_reverse_stack_items(2)
+
+                # upper can not be greater than len(string)
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.duplicate_stack_item(2)
                 self.convert_operation(BinaryOp.Sub)
                 self.convert_get_substring()
             else:
                 array = self._stack[-3]
-                self.duplicate_stack_item(3)        # if slice end is greater than the array size, fixes them
+                self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
 
+                # if slice end is greater than the array size, fixes them
                 # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
                 self.__insert1(OpcodeInfo.MIN)
                 self._stack_pop()
                 self.convert_get_array_slice(array)
 
-    def convert_get_array_beginning(self):
+    def convert_get_array_beginning(self, negative_stride: bool = False):
         """
         Converts the end of get a slice in the beginning of an array
+
+        :param negative_stride: whether stride is negative or not
         """
         if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
             self.fix_negative_index()
+
+            if negative_stride:
+                """
+                If stride is negative, then the array was reversed, thus, lower and upper should be changed 
+                accordingly.
+                array[:upper:-1] == reversed_array[:len(array)-upper-1]
+                """
+                # calculates corresponding upper
+                # upper = len(array)-upper-1
+                self.duplicate_stack_item(2)
+                self.convert_builtin_method_call(Builtin.Len)
+                self.swap_reverse_stack_items(2)
+                self.convert_operation(BinaryOp.Sub)
+                self.__insert1(OpcodeInfo.DEC)
+
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
+                # if upper is still negative, then it should be 0
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.SIGN)
+                self.convert_literal(-1)
+                jmp_address = VMCodeMapping.instance().bytecode_size
+                self._insert_jump(OpcodeInfo.JMPNE)     # if upper < 0, then upper = 0
+
+                self.remove_stack_top_item()
+                self.convert_literal(0)
+                jmp_target = VMCodeMapping.instance().bytecode_size
+                self._update_jump(jmp_address, jmp_target)
+
+                # upper can not be greater than len(string)
+                self.duplicate_stack_item(2)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.__insert1(OpcodeInfo.LEFT)
                 self._stack_pop()  # length
                 original_type = self._stack_pop()  # original array
@@ -1041,19 +1153,64 @@ class CodeGenerator:
                 self.convert_cast(original_type)
             else:
                 array = self._stack[-2]
+
+                self.duplicate_stack_item(2)
+                self.convert_builtin_method_call(Builtin.Len)
+
+                # if slice end is greater than the array size, fixes them
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.convert_literal(0)
                 self.swap_reverse_stack_items(2)
                 self.convert_get_array_slice(array)
 
-    def convert_get_array_ending(self):
+    def convert_get_array_ending(self, negative_stride: bool = False):
         """
         Converts the end of get a slice in the ending of an array
+
+        :param negative_stride: whether stride is negative or not
         """
         # top: start_slice, array_length, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
             self.fix_negative_index()
+
+            if negative_stride:
+                """
+                If stride is negative, then the array was reversed, thus, lower and upper should be changed 
+                accordingly.
+                array[lower::-1] == reversed_array[:len(array)-upper-1]
+                """
+                # calculates corresponding lower
+                # lower = len(array)-lower-1
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                self.swap_reverse_stack_items(2)
+                self.convert_operation(BinaryOp.Sub)
+                self.__insert1(OpcodeInfo.DEC)
+
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
+                # if lower is still negative, then it should be 0
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.SIGN)
+                self.convert_literal(-1)
+                jmp_address = VMCodeMapping.instance().bytecode_size
+                self._insert_jump(OpcodeInfo.JMPNE)     # if lower < 0, then lower = 0
+
+                self.remove_stack_top_item()
+                self.convert_literal(0)
+                jmp_target = VMCodeMapping.instance().bytecode_size
+                self._update_jump(jmp_address, jmp_target)
+
+                # lower can not be greater than len(string)
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.convert_operation(BinaryOp.Sub)
                 self.__insert1(OpcodeInfo.RIGHT)
                 self._stack_pop()  # length
@@ -1072,24 +1229,16 @@ class CodeGenerator:
 
     def convert_get_stride(self):
         if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
-            self.convert_negative_stride()
             if self._stack[-2].stack_item in (StackItemType.ByteString, StackItemType.Buffer):
                 self.convert_get_substring_stride()
             else:
                 self.convert_get_array_stride()
 
-    def convert_negative_stride(self):
+    def convert_array_negative_stride(self):
+        """
+        Converts an array to its reverse, to be able to scroll through the reversed list
+        """
         # The logic on this function only do variable[::-z]
-        # TODO: Implement logic of `variable[x:y:-z]`
-
-        # verifies if stride is negative
-        self.duplicate_stack_top_item()
-        self.__insert1(OpcodeInfo.SIGN)
-        self.convert_literal(-1)
-        self.convert_operation(BinaryOp.NumEq)
-        is_negative = self.convert_begin_if()       # if stride is negative, then reverse array/bytestring
-
-        self.swap_reverse_stack_items(2)
 
         original = self._stack[-1]
         self.convert_builtin_method_call(Builtin.Reversed)
@@ -1124,10 +1273,6 @@ class CodeGenerator:
             self.swap_reverse_stack_items(3)
             self.remove_stack_top_item()
             self.remove_stack_top_item()
-
-        self.swap_reverse_stack_items(2)
-        self.convert_builtin_method_call(Builtin.Abs)
-        self.convert_end_if(is_negative)
 
     def convert_get_substring_stride(self):
         # initializing auxiliary variables

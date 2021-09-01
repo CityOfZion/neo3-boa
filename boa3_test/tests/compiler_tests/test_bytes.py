@@ -110,7 +110,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_int_with_builtin(self):
         path = self.get_contract_path('BytesToIntWithBuiltin.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
@@ -126,7 +125,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_bool(self):
         path = self.get_contract_path('BytesToBool.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x00')
@@ -140,7 +138,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_bool_with_builtin(self):
         path = self.get_contract_path('BytesToBoolWithBuiltin.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', b'\x00')
@@ -154,7 +151,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_bool_with_builtin_hard_coded_false(self):
         path = self.get_contract_path('BytesToBoolWithBuiltinHardCodedFalse.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool', expected_result_type=bool)
@@ -162,7 +158,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_bool_with_builtin_hard_coded_true(self):
         path = self.get_contract_path('BytesToBoolWithBuiltinHardCodedTrue.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_bool')
@@ -174,7 +169,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_str(self):
         path = self.get_contract_path('BytesToStr.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_str')
@@ -182,7 +176,6 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_str_with_builtin(self):
         path = self.get_contract_path('BytesToStrWithBuiltin.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_str')
@@ -223,8 +216,9 @@ class TestBytes(BoaTest):
                                          expected_result_type=bytearray)
         self.assertEqual(b'123'[1:2], result)
 
-        with self.assertRaises(TestExecutionException):
-            self.run_smart_contract(engine, path, 'main', bytearray())
+        result = self.run_smart_contract(engine, path, 'main', bytearray(),
+                                         expected_result_type=bytearray)
+        self.assertEqual(bytearray()[1:2], result)
 
     def test_slice_with_cast(self):
         path = self.get_contract_path('SliceWithCast.py')
@@ -237,8 +231,9 @@ class TestBytes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(b'123'[1:2], result)
 
-        with self.assertRaises(TestExecutionException):
-            self.run_smart_contract(engine, path, 'main', bytearray())
+        result = self.run_smart_contract(engine, path, 'main', bytearray(),
+                                         expected_result_type=bytearray)
+        self.assertEqual(bytearray()[1:2], result)
 
         result = self.run_smart_contract(engine, path, 'main', 12345,
                                          expected_result_type=bytes)
@@ -248,9 +243,63 @@ class TestBytes(BoaTest):
         path = self.get_contract_path('SliceWithStride.py')
         engine = TestEngine()
 
-        expected_result = b'12345'
-        expected_result = expected_result[0:5:2]
-        result = self.run_smart_contract(engine, path, 'main',
+        a = b'unit_test'
+        expected_result = a[2:5:2]
+        result = self.run_smart_contract(engine, path, 'literal_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-6:5:2]
+        result = self.run_smart_contract(engine, path, 'negative_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[0:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-6:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-999:5:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[0:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-999:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[999:5:2]
+        result = self.run_smart_contract(engine, path, 'really_high_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[0:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[999:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_values',
                                          expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
@@ -258,21 +307,121 @@ class TestBytes(BoaTest):
         path = self.get_contract_path('SliceWithNegativeStride.py')
         engine = TestEngine()
 
-        expected_result = b'12345'
-        expected_result = expected_result[0:5:-1]
-        result = self.run_smart_contract(engine, path, 'main',
+        a = b'unit_test'
+        expected_result = a[2:5:-1]
+        result = self.run_smart_contract(engine, path, 'literal_values',
                                          expected_result_type=bytes)
-        # TODO: Remove assertRaises when the slicing with negative stride is correctly implemented
-        with self.assertRaises(AssertionError):
-            self.assertEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-6:5:-1]
+        result = self.run_smart_contract(engine, path, 'negative_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[0:-1:-1]
+        result = self.run_smart_contract(engine, path, 'negative_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-6:-1:-1]
+        result = self.run_smart_contract(engine, path, 'negative_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-999:5:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[0:-999:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-999:-999:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[999:5:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[0:999:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[999:999:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
 
     def test_slice_omitted_with_stride(self):
         path = self.get_contract_path('SliceOmittedWithStride.py')
         engine = TestEngine()
 
-        expected_result = b'12345'
-        expected_result = expected_result[::2]
-        result = self.run_smart_contract(engine, path, 'main',
+        a = b'unit_test'
+        expected_result = a[::2]
+        result = self.run_smart_contract(engine, path, 'omitted_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:5:2]
+        result = self.run_smart_contract(engine, path, 'omitted_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[2::2]
+        result = self.run_smart_contract(engine, path, 'omitted_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-6::2]
+        result = self.run_smart_contract(engine, path, 'negative_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-999::2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[999::2]
+        result = self.run_smart_contract(engine, path, 'really_high_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_end',
                                          expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
@@ -280,9 +429,57 @@ class TestBytes(BoaTest):
         path = self.get_contract_path('SliceOmittedWithNegativeStride.py')
         engine = TestEngine()
 
-        expected_result = b'12345'
-        expected_result = expected_result[::-1]
-        result = self.run_smart_contract(engine, path, 'main',
+        a = b'unit_test'
+        expected_result = a[::-2]
+        result = self.run_smart_contract(engine, path, 'omitted_values',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:5:-2]
+        result = self.run_smart_contract(engine, path, 'omitted_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[2::-2]
+        result = self.run_smart_contract(engine, path, 'omitted_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-6::-2]
+        result = self.run_smart_contract(engine, path, 'negative_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:-1:-2]
+        result = self.run_smart_contract(engine, path, 'negative_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[-999::-2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:-999:-2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[999::-2]
+        result = self.run_smart_contract(engine, path, 'really_high_start',
+                                         expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        a = b'unit_test'
+        expected_result = a[:999:-2]
+        result = self.run_smart_contract(engine, path, 'really_high_end',
                                          expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
@@ -469,7 +666,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_append(self):
         path = self.get_contract_path('BytearrayAppend.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -478,7 +674,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_append_with_builtin(self):
         path = self.get_contract_path('BytearrayAppendWithBuiltin.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -487,7 +682,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_append_mutable_sequence_with_builtin(self):
         path = self.get_contract_path('BytearrayAppendWithMutableSequence.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -496,7 +690,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_clear(self):
         path = self.get_contract_path('BytearrayClear.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -533,7 +726,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_to_int(self):
         path = self.get_contract_path('BytearrayToInt.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
@@ -541,7 +733,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_to_int_with_builtin(self):
         path = self.get_contract_path('BytearrayToIntWithBuiltin.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
@@ -549,7 +740,6 @@ class TestBytes(BoaTest):
 
     def test_byte_array_to_int_with_bytes_builtin(self):
         path = self.get_contract_path('BytearrayToIntWithBytesBuiltin.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'bytes_to_int')
