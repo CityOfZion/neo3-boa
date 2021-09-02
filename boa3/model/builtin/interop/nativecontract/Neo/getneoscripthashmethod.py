@@ -24,11 +24,10 @@ class GetNeoScriptHashMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.neo.vm.type.Integer import Integer
 
         value = NEO_SCRIPT
         return [
-            (Opcode.PUSHDATA1, Integer(len(value)).to_byte_array() + value)
+            Opcode.get_pushdata_and_data(value)
         ]
 
 

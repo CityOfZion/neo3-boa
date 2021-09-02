@@ -43,7 +43,7 @@ def abort():
 
 class NeoAccountState:
     """
-    Represents a transaction.
+    Represents the account state of NEO token in the NEO system.
 
     :ivar balance: the current account balance, which equals to the votes cast
     :vartype balance: int

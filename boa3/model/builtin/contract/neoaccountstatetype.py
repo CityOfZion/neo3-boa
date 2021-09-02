@@ -83,10 +83,9 @@ class NeoAccountStateMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.neo.vm.type.Integer import Integer
 
         return [
-            (Opcode.PUSHDATA1, Integer(33).to_byte_array() + bytes(33)),    # vote_to
+            Opcode.get_pushdata_and_data(bytes(33)),    # vote_to
             (Opcode.PUSH0, b''),  # height
             (Opcode.PUSH0, b''),  # balance
             (Opcode.PUSH3, b''),
