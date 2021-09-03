@@ -42,6 +42,12 @@ class NeoClass(ClassArrayType):
         # avoid recursive import
         from boa3.model.builtin.native.nep17_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
                                                              TotalSupplyMethod, TransferMethod)
+        from boa3.model.builtin.native.neo_contract_methods import (GetAccountStateMethod, GetCandidatesMethod,
+                                                                    GetCommitteeMethod, GetGasPerBlockMethod,
+                                                                    GetNextBlockValidatorsMethod,
+                                                                    RegisterCandidateMethod, UnclaimedGasMethod,
+                                                                    UnregisterCandidateMethod, VoteMethod)
+        from boa3.model.builtin.contract import NeoAccountStateType
 
         if len(self._class_methods) == 0:
             self._class_methods = {
@@ -49,7 +55,17 @@ class NeoClass(ClassArrayType):
                 'decimals': DecimalsMethod(NEO_SCRIPT),
                 'symbol': SymbolMethod(NEO_SCRIPT),
                 'totalSupply': TotalSupplyMethod(NEO_SCRIPT),
-                'transfer': TransferMethod(NEO_SCRIPT)
+                'transfer': TransferMethod(NEO_SCRIPT),
+
+                'get_account_state': GetAccountStateMethod(NeoAccountStateType.build()),
+                'get_candidates': GetCandidatesMethod(),
+                'get_committee': GetCommitteeMethod(),
+                'get_gas_per_block': GetGasPerBlockMethod(),
+                'get_next_block_validators': GetNextBlockValidatorsMethod(),
+                'register_candidate': RegisterCandidateMethod(),
+                'unclaimed_gas': UnclaimedGasMethod(),
+                'unregister_candidate': UnregisterCandidateMethod(),
+                'vote': VoteMethod(),
             }
         return self._class_methods
 
