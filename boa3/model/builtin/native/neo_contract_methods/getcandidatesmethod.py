@@ -15,6 +15,6 @@ class GetCandidatesMethod(NeoContractMethod):
         args: Dict[str, Variable] = {}
         super().__init__(identifier, native_identifier, args,
                          return_type=Type.list.build_collection([
-                                        Type.tuple.build_collection([
-                                            ECPointType.build(),
-                                            Type.int])]))
+                             Type.tuple.build_collection([
+                                 ECPointType.build(),
+                                 Type.int])]))

@@ -1005,7 +1005,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
-        callable_target = self.validate_builtin_callable(callable_id, callable_target)
+        callable_target = self.validate_builtin_callable(callable_id, callable_target, call.args)
 
         if not isinstance(callable_target, Callable):
             # if the outer call is a builtin, enable call even without the import
@@ -1151,7 +1151,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return len(self.errors) == error_count
 
-    def validate_builtin_callable(self, callable_id: str, callable_target: ISymbol) -> ISymbol:
+    def validate_builtin_callable(self, callable_id: str, callable_target: ISymbol,
+                                  call_args: List[ast.AST] = None) -> ISymbol:
+        if call_args is None:
+            call_args = []
+
         if not isinstance(callable_target, Callable):
             # verify if it is a builtin method with its name shadowed
             call_target = Builtin.get_symbol(callable_id)
@@ -1159,6 +1163,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 call_target = Builtin.Exception
 
             callable_target = call_target if call_target is not None else callable_target
+        elif isinstance(callable_target, IBuiltinMethod):
+            # verify if it's a variation of the default builtin method
+            args = [self.get_type(param, use_metatype=True) for param in call_args]
+            new_target = callable_target.build(args)
+            if new_target is not None:
+                callable_target = new_target
         return callable_target
 
     def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:

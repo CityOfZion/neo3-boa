@@ -1,4 +1,4 @@
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
 from boa3.builtin import public
 from boa3.builtin.nativecontract.neo import NEO
