@@ -5,5 +5,5 @@ from boa3.builtin.interop.json import json_deserialize
 
 
 @public
-def main(json: bytes) -> Any:
+def main(json: str) -> Any:
     return json_deserialize(json)

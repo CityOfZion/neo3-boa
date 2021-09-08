@@ -3,5 +3,5 @@ from boa3.builtin.interop.json import json_serialize
 
 
 @public
-def main() -> bytes:
+def main() -> str:
     return json_serialize(b'unit test')

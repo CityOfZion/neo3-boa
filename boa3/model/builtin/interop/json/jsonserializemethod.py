@@ -10,4 +10,4 @@ class JsonSerializeMethod(StdLibMethod):
         identifier = 'json_serialize'
         native_identifier = 'jsonSerialize'
         args: Dict[str, Variable] = {'item': Variable(Type.any)}
-        super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
+        super().__init__(identifier, native_identifier, args, return_type=Type.str)

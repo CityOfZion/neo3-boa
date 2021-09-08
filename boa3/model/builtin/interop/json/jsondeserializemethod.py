@@ -9,5 +9,5 @@ class JsonDeserializeMethod(StdLibMethod):
         from boa3.model.type.type import Type
         identifier = 'json_deserialize'
         native_identifier = 'jsonDeserialize'
-        args: Dict[str, Variable] = {'json': Variable(Type.bytes)}
+        args: Dict[str, Variable] = {'json': Variable(Type.str)}
         super().__init__(identifier, native_identifier, args, return_type=Type.any)

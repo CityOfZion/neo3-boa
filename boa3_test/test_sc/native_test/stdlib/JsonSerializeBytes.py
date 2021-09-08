@@ -3,5 +3,5 @@ from boa3.builtin.nativecontract.stdlib import StdLib
 
 
 @public
-def main() -> bytes:
+def main() -> str:
     return StdLib.json_serialize(b'unit test')
