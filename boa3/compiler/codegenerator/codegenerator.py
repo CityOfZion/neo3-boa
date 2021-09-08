@@ -691,6 +691,20 @@ class CodeGenerator:
 
         self._can_append_target = not self._can_append_target
 
+    def fix_index_negative_stride(self):
+        """
+        If stride is negative, then the array was reversed, thus, lower and upper should be changed
+        accordingly.
+        The Opcodes below will only fix 1 index.
+        array[lower:upper:-1] == reversed_array[len(array)-lower-1:len(array)-upper-1]
+        If lower or upper was None, then it's not necessary to change its values.
+        """
+        # top array should be: len(array), index
+        self.convert_builtin_method_call(Builtin.Len)
+        self.swap_reverse_stack_items(2)
+        self.convert_operation(BinaryOp.Sub)
+        self.__insert1(OpcodeInfo.DEC)
+
     def convert_loop_continue(self):
         loop_start = self._current_loop[-1]
         self._insert_jump(OpcodeInfo.JMP)
@@ -1035,10 +1049,7 @@ class CodeGenerator:
                     # calculates corresponding upper
                     # upper = len(array)-upper-1
                     self.duplicate_stack_item(3)
-                    self.convert_builtin_method_call(Builtin.Len)
-                    self.swap_reverse_stack_items(2)
-                    self.convert_operation(BinaryOp.Sub)
-                    self.__insert1(OpcodeInfo.DEC)
+                    self.fix_index_negative_stride()
 
                     # puts lower at the top of the stack
                     self.swap_reverse_stack_items(2)
@@ -1046,10 +1057,7 @@ class CodeGenerator:
                     # calculates corresponding lower
                     # lower = len(array)-lower-1
                     self.duplicate_stack_item(3)
-                    self.convert_builtin_method_call(Builtin.Len)
-                    self.swap_reverse_stack_items(2)
-                    self.convert_operation(BinaryOp.Sub)
-                    self.__insert1(OpcodeInfo.DEC)
+                    self.fix_index_negative_stride()
 
                     # reverts lower to its correct place
                     self.swap_reverse_stack_items(2)
@@ -1112,18 +1120,10 @@ class CodeGenerator:
             self.fix_negative_index()
 
             if negative_stride:
-                """
-                If stride is negative, then the array was reversed, thus, lower and upper should be changed 
-                accordingly.
-                array[:upper:-1] == reversed_array[:len(array)-upper-1]
-                """
                 # calculates corresponding upper
                 # upper = len(array)-upper-1
                 self.duplicate_stack_item(2)
-                self.convert_builtin_method_call(Builtin.Len)
-                self.swap_reverse_stack_items(2)
-                self.convert_operation(BinaryOp.Sub)
-                self.__insert1(OpcodeInfo.DEC)
+                self.fix_index_negative_stride()
 
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
@@ -1177,18 +1177,10 @@ class CodeGenerator:
             self.fix_negative_index()
 
             if negative_stride:
-                """
-                If stride is negative, then the array was reversed, thus, lower and upper should be changed 
-                accordingly.
-                array[lower::-1] == reversed_array[:len(array)-upper-1]
-                """
                 # calculates corresponding lower
                 # lower = len(array)-lower-1
                 self.duplicate_stack_item(3)
-                self.convert_builtin_method_call(Builtin.Len)
-                self.swap_reverse_stack_items(2)
-                self.convert_operation(BinaryOp.Sub)
-                self.__insert1(OpcodeInfo.DEC)
+                self.fix_index_negative_stride()
 
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
