@@ -821,6 +821,72 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
+    def test_max_str(self):
+        path = self.get_contract_path('MaxStr.py')
+        engine = TestEngine()
+
+        value1 = 'foo'
+        value2 = 'bar'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+        result = self.run_smart_contract(engine, path, 'main', value2, value1)
+        self.assertEqual(expected_result, result)
+
+        value1 = 'alg'
+        value2 = 'al'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+        value = 'some string'
+        expected_result = max(value, value)
+        result = self.run_smart_contract(engine, path, 'main', value, value)
+        self.assertEqual(expected_result, result)
+
+    def test_max_str_more_arguments(self):
+        path = self.get_contract_path('MaxStrMoreArguments.py')
+        engine = TestEngine()
+
+        values = 'Lorem', 'ipsum', 'dolor', 'sit', 'amet'
+        expected_result = max(values)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_max_bytes(self):
+        path = self.get_contract_path('MaxBytes.py')
+        engine = TestEngine()
+
+        value1 = b'foo'
+        value2 = b'bar'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        result = self.run_smart_contract(engine, path, 'main', value2, value1, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        value1 = b'alg'
+        value2 = b'al'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        value = b'some string'
+        expected_result = max(value, value)
+        result = self.run_smart_contract(engine, path, 'main', value, value, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+    def test_max_bytes_more_arguments(self):
+        path = self.get_contract_path('MaxBytesMoreArguments.py')
+        engine = TestEngine()
+
+        values = b'Lorem', b'ipsum', b'dolor', b'sit', b'amet'
+        expected_result = max(values)
+        result = self.run_smart_contract(engine, path, 'main', expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
     def test_max_too_few_parameters(self):
         path = self.get_contract_path('MaxTooFewParameters.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)

@@ -44,7 +44,7 @@ class Builtin:
     IsInstance = IsInstanceMethod()
     Len = LenMethod()
     NewEvent = CreateEventMethod()
-    Max = MaxMethod()
+    Max = MaxIntMethod()
     Min = MinMethod()
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
