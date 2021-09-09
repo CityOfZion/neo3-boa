@@ -427,6 +427,12 @@ class VisitorCodeGenerator(IAstAnalyser):
         step_omitted = subscript.slice.step is None
 
         self.visit_to_generate(subscript.value)
+
+        step_negative = True if not step_omitted and subscript.slice.step.n < 0 else False
+        # if step is negative, then consider the value reversed
+        if step_negative:
+            self.generator.convert_array_negative_stride()
+
         # if both are explicit
         if not lower_omitted and not upper_omitted:
             addresses = [VMCodeMapping.instance().bytecode_size]
@@ -436,20 +442,20 @@ class VisitorCodeGenerator(IAstAnalyser):
             addresses.append(VMCodeMapping.instance().bytecode_size)
             self.visit_to_generate(subscript.slice.upper)
 
-            self.generator.convert_get_sub_array(addresses)
+            self.generator.convert_get_sub_array(addresses, step_negative)
         # only one of them is omitted
         elif lower_omitted != upper_omitted:
-            # end position is omitted
+            # start position is omitted
             if lower_omitted:
                 self.visit_to_generate(subscript.slice.upper)
-                self.generator.convert_get_array_beginning()
-            # start position is omitted
+                self.generator.convert_get_array_beginning(step_negative)
+            # end position is omitted
             else:
                 self.generator.duplicate_stack_top_item()
                 # length of slice
                 self.generator.convert_builtin_method_call(Builtin.Len)
                 self.visit_to_generate(subscript.slice.lower)
-                self.generator.convert_get_array_ending()
+                self.generator.convert_get_array_ending(step_negative)
         else:
             self.generator.convert_copy()
 
