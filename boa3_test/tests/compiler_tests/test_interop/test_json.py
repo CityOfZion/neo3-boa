@@ -15,8 +15,7 @@ class TestJsonInterop(BoaTest):
         engine = TestEngine()
         test_input = {"one": 1, "two": 2, "three": 3}
         expected_result = json.dumps(test_input, separators=(',', ':'))
-        result = self.run_smart_contract(engine, path, 'main', test_input,
-                                         expected_result_type=str)
+        result = self.run_smart_contract(engine, path, 'main', test_input)
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_int(self):
@@ -24,8 +23,7 @@ class TestJsonInterop(BoaTest):
 
         engine = TestEngine()
         expected_result = json.dumps(10)
-        result = self.run_smart_contract(engine, path, 'main',
-                                         expected_result_type=str)
+        result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_bool(self):
@@ -33,8 +31,7 @@ class TestJsonInterop(BoaTest):
 
         engine = TestEngine()
         expected_result = json.dumps(1)
-        result = self.run_smart_contract(engine, path, 'main',
-                                         expected_result_type=str)
+        result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_str(self):
@@ -42,8 +39,7 @@ class TestJsonInterop(BoaTest):
 
         engine = TestEngine()
         expected_result = json.dumps('unit test')
-        result = self.run_smart_contract(engine, path, 'main',
-                                         expected_result_type=str)
+        result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
     def test_json_serialize_bytes(self):
@@ -53,8 +49,7 @@ class TestJsonInterop(BoaTest):
         # Python does not accept bytes as parameter for json.dumps() method, since string and bytes ends up being the
         # same on Neo, it's being converted to string, before using dumps
         expected_result = json.dumps(String().from_bytes(b'unit test'))
-        result = self.run_smart_contract(engine, path, 'main',
-                                         expected_result_type=str)
+        result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
     def test_json_deserialize(self):
