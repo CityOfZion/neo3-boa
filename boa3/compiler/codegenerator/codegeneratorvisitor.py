@@ -824,7 +824,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                             if value_data.symbol is not None
                             else self.generator.get_symbol(value_id))
 
-            if isinstance(value_symbol, ClassType) and attribute.attr in value_symbol.symbols:
+            if hasattr(value_symbol, 'symbols') and attribute.attr in value_symbol.symbols:
                 attr = value_symbol.symbols[attribute.attr]
 
             if isinstance(value_symbol, UserClass):
@@ -839,10 +839,8 @@ class VisitorCodeGenerator(IAstAnalyser):
             self._remove_inserted_opcodes_since(last_address, last_stack)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
-            attribute_id = (attribute.attr
-                            if not isinstance(value_symbol, ClassType)
-                            else f'{value_symbol.identifier}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
-                            )
+            value_symbol_id = value_symbol.identifier if isinstance(value_symbol, ClassType) else value_data.symbol_id
+            attribute_id = f'{value_symbol_id}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
             return self.build_data(attribute, symbol_id=attribute_id, symbol=attr)
 
         if isinstance(value, ast.Attribute):
