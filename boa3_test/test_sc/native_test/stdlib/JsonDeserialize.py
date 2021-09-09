@@ -5,5 +5,5 @@ from boa3.builtin.nativecontract.stdlib import StdLib
 
 
 @public
-def main(json: bytes) -> Any:
+def main(json: str) -> Any:
     return StdLib.json_deserialize(json)
