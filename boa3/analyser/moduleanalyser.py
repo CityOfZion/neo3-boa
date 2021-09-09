@@ -343,6 +343,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_from.names}
 
             new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
+
+            # check if the wildcard is used and filter the symbols
+            if constants.IMPORT_WILDCARD in import_alias:
+                import_alias.pop(constants.IMPORT_WILDCARD)
+                for imported_symbol_id in new_symbols:
+                    # add the symbols imported with the wildcard without specific aliases in the dict
+                    if imported_symbol_id not in import_alias:
+                        import_alias[imported_symbol_id] = imported_symbol_id
+
             # includes the module to be able to generate the functions
             imported_module = Import(analyser.path, analyser.tree, analyser, import_alias)
             self._current_scope.include_symbol(import_from.module, imported_module)
