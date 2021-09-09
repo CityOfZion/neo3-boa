@@ -45,7 +45,7 @@ class Builtin:
     Len = LenMethod()
     NewEvent = CreateEventMethod()
     Max = MaxIntMethod()
-    Min = MinMethod()
+    Min = MinIntMethod()
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     Sqrt = SqrtMethod()

@@ -9,7 +9,8 @@ __all__ = ['AbsMethod',
            'LenMethod',
            'MaxIntMethod',
            'MaxByteStringMethod',
-           'MinMethod',
+           'MinByteStringMethod',
+           'MinIntMethod',
            'PrintMethod',
            'RangeMethod',
            'ReversedMethod',
@@ -29,7 +30,8 @@ from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.builtin.method.maxbytestringmethod import MaxByteStringMethod
 from boa3.model.builtin.method.maxintmethod import MaxIntMethod
-from boa3.model.builtin.method.minmethod import MinMethod
+from boa3.model.builtin.method.minbytestringmethod import MinByteStringMethod
+from boa3.model.builtin.method.minintmethod import MinIntMethod
 from boa3.model.builtin.method.printmethod import PrintMethod
 from boa3.model.builtin.method.rangemethod import RangeMethod
 from boa3.model.builtin.method.reversedmethod import ReversedMethod
