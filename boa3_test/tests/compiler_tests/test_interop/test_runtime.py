@@ -623,7 +623,7 @@ class TestRuntimeInterop(BoaTest):
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(5195086, result)   # Neo3 main net's magic number
+        self.assertEqual(0x334F454E, result)   # Neo3 main net's magic number
 
     def test_get_network_too_many_parameters(self):
         path = self.get_contract_path('GetNetworkTooManyArguments.py')
