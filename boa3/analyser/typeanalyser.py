@@ -1091,7 +1091,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             while package_symbol is None and package.parent is not None:
                 package = package.parent
                 package_symbol = self.get_symbol(package.identifier, check_raw_id=True)
-            arg0_identifier = package_symbol if package_symbol else package.identifier
+
+            if package_symbol is None:
+                arg0_identifier = package.identifier
+            elif isinstance(package_symbol, Package):
+                arg0_identifier = package_symbol
+            else:
+                arg0_identifier = package
+
         elif isinstance(arg0, UserClass):
             arg0_identifier = arg0.identifier
         else:
