@@ -233,15 +233,19 @@ class TestEngine:
                         reset_engine=reset_engine,
                         rollback_on_fault=rollback_on_fault)
 
-    def run(self, nef_path: Union[str, UInt160], method: str, *arguments: Any, reset_engine: bool = False,
+    def run(self, contract_id: Union[str, UInt160], method: str, *arguments: Any, reset_engine: bool = False,
             rollback_on_fault: bool = True) -> Any:
         import json
         import subprocess
 
-        if isinstance(nef_path, str) and nef_path not in self.contracts:
-            self.add_contract(nef_path)
+        if isinstance(contract_id, str) and contract_id not in self.contracts:
+            self.add_contract(contract_id)
 
-        test_engine_args = self.to_json(nef_path, method, *arguments)
+        # build an UInt160 value if the contract_id is not a path
+        if isinstance(contract_id, bytes) and not isinstance(contract_id, UInt160):
+            contract_id = UInt160(contract_id)
+
+        test_engine_args = self.to_json(contract_id, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
 
         try:
@@ -344,10 +348,10 @@ class TestEngine:
         self._notifications.clear()
         self._storage.clear()
 
-    def to_json(self, path: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
+    def to_json(self, contract_id: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
         json = {
-            'path': path if isinstance(path, str) else '',
-            'scripthash': str(path) if isinstance(path, UInt160) else None,
+            'path': contract_id if isinstance(contract_id, str) else '',
+            'scripthash': str(contract_id) if isinstance(contract_id, UInt160) else None,
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),

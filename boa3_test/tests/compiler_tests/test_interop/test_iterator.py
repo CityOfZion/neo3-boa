@@ -51,7 +51,6 @@ class TestIteratorInterop(BoaTest):
     def test_import_interop_iterator(self):
         path = self.get_contract_path('ImportInteropIterator.py')
         engine = TestEngine()
-        self.compile_and_save(path)
 
         result = self.run_smart_contract(engine, path, 'return_iterator')
         from boa3.neo.core.types.InteropInterface import InteropInterface

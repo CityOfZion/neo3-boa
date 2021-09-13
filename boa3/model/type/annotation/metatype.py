@@ -35,6 +35,13 @@ class MetaType(IType):
         return isinstance(value, MetaType) and self._internal_type.is_type_of(value._internal_type)
 
     @property
+    def meta_identifier(self) -> str:
+        if self.has_meta_type:
+            return f'{self._identifier}[{self._internal_type}]'
+        else:
+            return self._identifier
+
+    @property
     def has_meta_type(self) -> bool:
         return self._internal_type is not None
 

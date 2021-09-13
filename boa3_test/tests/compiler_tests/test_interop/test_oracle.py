@@ -102,7 +102,7 @@ class TestNativeContracts(BoaTest):
             # callback function doesn't exist
             self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
 
-    def test_import_interop_oracle(self):
+    def test_import_interop_oracle_package(self):
         path = self.get_contract_path('ImportInteropOracle.py')
         output, manifest = self.compile_and_save(path)
         contract_script = hash160(output)

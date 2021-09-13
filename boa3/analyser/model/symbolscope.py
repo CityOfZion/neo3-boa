@@ -20,10 +20,19 @@ class SymbolScope:
         """
         Includes a symbols into the scope
 
-        :param symbol_id: method identifier
-        :param symbol: method to be included
+        :param symbol_id: symbol identifier
+        :param symbol: symbol to be included
         """
         self._symbols[symbol_id] = symbol
+
+    def remove_symbol(self, symbol_id: str):
+        """
+        Removes a symbols from the scope
+
+        :param symbol_id: symbol identifier
+        """
+        if symbol_id in self._symbols:
+            self._symbols.pop(symbol_id)
 
     def __getitem__(self, item: str) -> ISymbol:
         return self._symbols[item]

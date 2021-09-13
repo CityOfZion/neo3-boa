@@ -105,7 +105,7 @@ class TestImport(BoaTest):
 
     def test_import_variable(self):
         expected_output = (
-            Opcode.LDSFLD0  # b = a
+            Opcode.LDSFLD0  # return empty_list
             + Opcode.RET
             + Opcode.NEWARRAY0  # imported function
             + Opcode.RET  # return
@@ -154,6 +154,37 @@ class TestImport(BoaTest):
     def test_from_typing_import_not_supported_type(self):
         path = self.get_contract_path('FromImportTypingNotImplementedType.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_from_import_all(self):
+        expected_output = (
+            Opcode.INITSLOT  # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.CALL
+            + Integer(7).to_byte_array(min_length=1, signed=True)
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.RET
+            + Opcode.LDSFLD0  # return empty_list
+            + Opcode.RET
+            + Opcode.NEWARRAY0  # imported function
+            + Opcode.RET  # return
+            + Opcode.INITSSLOT + b'\x01'
+            + Opcode.NEWARRAY0     # module variable empty_list from import
+            + Opcode.STSFLD0
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('FromImportAll.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'call_imported_method')
+        self.assertEqual([], result)
+
+        result = self.run_smart_contract(engine, path, 'call_imported_variable')
+        self.assertEqual([], result)
 
     def test_from_import_user_module(self):
         expected_output = (
@@ -213,7 +244,6 @@ class TestImport(BoaTest):
 
     def test_import_interop_with_alias(self):
         path = self.get_contract_path('ImportInteropWithAlias.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'Main')

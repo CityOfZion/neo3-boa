@@ -14,17 +14,29 @@ class MaxMethod(IBuiltinMethod):
     def __init__(self, arg_value: Optional[IType] = None):
         from boa3.model.type.type import Type
         identifier = 'max'
-        allowed_types = Type.int
-        if not isinstance(arg_value, IType):
-            arg_value = allowed_types
+
+        self._allowed_types = [Type.int, Type.str, Type.bytes]
+        default_type = Type.int
+        if not self._is_valid_type(arg_value):
+            arg_value = default_type
 
         args: Dict[str, Variable] = {
-            'args1': Variable(Type.int),
-            'args2': Variable(Type.int)
+            'args1': Variable(arg_value),
+            'args2': Variable(arg_value)
         }
         vararg = ('values', Variable(arg_value))
         super().__init__(identifier, args, return_type=arg_value, vararg=vararg)
-        self._allowed_types = allowed_types
+
+    def _is_valid_type(self, arg_type: Optional[IType]) -> bool:
+        return (isinstance(arg_type, IType) and
+                any(allowed_type.is_type_of(arg_type) for allowed_type in self._allowed_types))
+
+    @property
+    def identifier(self) -> str:
+        from boa3.model.type.type import Type
+        if self._arg_values.type is Type.int:
+            return self._identifier
+        return '-{0}_from_{1}'.format(self._identifier, self._arg_values.type._identifier)
 
     @property
     def _arg_values(self) -> Variable:
@@ -91,12 +103,14 @@ class MaxMethod(IBuiltinMethod):
             (Opcode.PUSH2, b''),
             (Opcode.PICK, b''),         # max = max if max > array[index] else array[index]
             (Opcode.PICKITEM, b''),
-            (Opcode.MAX, b''),
+        ]
+        is_int_while.extend(self._compare_values())
+        is_int_while.extend([
             (Opcode.OVER, b''),
             (Opcode.SIGN, b'')
             # if index != 0: go back to index--
             # else go to the end
-        ]
+        ])
 
         jmp_back_to_while_statement = (Opcode.JMPIF, Integer(-get_bytes_count(is_int_while)).to_byte_array(signed=True))
         is_int_while.append(jmp_back_to_while_statement)
@@ -117,6 +131,9 @@ class MaxMethod(IBuiltinMethod):
             clean_stack
         )
 
+    def _compare_values(self) -> List[Tuple[Opcode, bytes]]:
+        return [(Opcode.MAX, b'')]
+
     @property
     def _args_on_stack(self) -> int:
         return len(self.args)
@@ -132,4 +149,12 @@ class MaxMethod(IBuiltinMethod):
             value = value.value_type
         if type(value) == type(self._arg_values.type):
             return self
-        return MaxMethod(value)
+
+        from boa3.model.builtin.method.maxbytestringmethod import MaxByteStringMethod
+        from boa3.model.builtin.method.maxintmethod import MaxIntMethod
+        from boa3.model.type.type import Type
+
+        if Type.str.is_type_of(value) or Type.bytes.is_type_of(value):
+            return MaxByteStringMethod(value)
+
+        return MaxIntMethod(value)

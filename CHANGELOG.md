@@ -5,8 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [0.10.0] - 2021-09-13
 ### Added
 - Support to user implemented classes
+- Interfaces to N3 native contracts
+- Support to wildcard imports
+- Sequence slices with given strides
+- Python's `max` and `min` with `str` and `bytes` arguments
+
+### Changed
+- Unified crypto methods `verify_with_ecdsa_secp256r1` and `verify_with_ecdsa_secp256k1` into `verify_with_ecdsa`
+- Changed `json_serialize` return and `json_deserialize` argument types to `str`
+
+### Fixed
+- Fixed the issue with functions with the same name in different scopes
+- Fixed a bug with naming variables with the same name from interop packages
 
 
 ## [0.9.0] - 2021-08-02
@@ -251,7 +266,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.0
 [0.9.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.9.0
 [0.8.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.3
 [0.8.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.2

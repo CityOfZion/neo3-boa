@@ -14,14 +14,18 @@ from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.callable import Callable
+from boa3.model.decorator import IDecorator
 from boa3.model.event import Event
 from boa3.model.expression import IExpression
 from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.symbol import ISymbol
+from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.annotation.uniontype import UnionType
+from boa3.model.type.classes.classscope import ClassScope
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
@@ -52,6 +56,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
+        self._current_class: UserClass = None
         self._current_method: Method = None
         self._current_event: Event = None
 
@@ -69,7 +74,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
-    def _current_scope(self) -> Union[Method, Module, None]:
+    def _current_scope(self) -> Union[Method, Module, UserClass, None]:
         """
         Returns the scope that is currently being analysed
 
@@ -78,6 +83,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         if self._current_method is not None:
             return self._current_method
+        if self._current_class is not None:
+            return self._current_class
         return self._current_module
 
     @property
@@ -173,8 +180,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param callable_id: method id
         :param callable: method to be included
         """
-        if callable_id not in self._current_module.symbols:
-            self._current_module.include_callable(callable_id, callable)
+        if callable_id not in self._current_scope.symbols and hasattr(self._current_scope, 'include_callable'):
+            self._current_scope.include_callable(callable_id, callable)
+
+    def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
+        """
+        Includes the class variable in the current class
+
+        :param cl_var_id: variable name
+        :param cl_var: variable to be included
+        """
+        if cl_var_id not in self._current_scope.class_variables:
+            self._current_class.include_symbol(cl_var_id, cl_var, ClassScope.CLASS)
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
@@ -326,6 +343,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_from.names}
 
             new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
+
+            # check if the wildcard is used and filter the symbols
+            if constants.IMPORT_WILDCARD in import_alias:
+                import_alias.pop(constants.IMPORT_WILDCARD)
+                for imported_symbol_id in new_symbols:
+                    # add the symbols imported with the wildcard without specific aliases in the dict
+                    if imported_symbol_id not in import_alias:
+                        import_alias[imported_symbol_id] = imported_symbol_id
+
             # includes the module to be able to generate the functions
             imported_module = Import(analyser.path, analyser.tree, analyser, import_alias)
             self._current_scope.include_symbol(import_from.module, imported_module)
@@ -444,14 +470,52 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._global_assigned_variables.clear()
         self._current_module = None
 
-    def visit_ClassDef(self, node: ast.ClassDef):
-        # TODO: refactor when classes defined by the user are implemented
-        self._log_error(
-            CompilerError.NotSupportedOperation(
-                node.lineno, node.col_offset,
-                symbol_id='class'
+    def visit_ClassDef(self, class_node: ast.ClassDef):
+        """
+        Visitor of the class node
+
+        Includes the class in the scope of its module
+        """
+        # TODO: change when class inheritance is implemented
+        if len(class_node.bases) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class inheritance'
+                )
             )
-        )
+
+        # TODO: change when base classes with keyword is implemented
+        if len(class_node.keywords) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class keyword'
+                )
+            )
+
+        # TODO: change when class decorators are implemented
+        if len(class_node.decorator_list) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    class_node.lineno, class_node.col_offset,
+                    symbol_id='class decorator'
+                )
+            )
+
+        user_class = UserClass(identifier=class_node.name)
+
+        self._current_class = user_class
+        if self._current_symbol_scope is not None:
+            self._current_symbol_scope.include_symbol(class_node.name, user_class)
+        self._scope_stack.append(SymbolScope())
+
+        for stmt in class_node.body:
+            self.visit(stmt)
+
+        class_scope = self._scope_stack.pop()
+        self._current_module.include_class(class_node.name, user_class)
+        self._current_class = None
 
     def visit_FunctionDef(self, function: ast.FunctionDef):
         """
@@ -461,6 +525,51 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param function:
         """
+        fun_decorators: List[Method] = self._get_function_decorators(function)
+        if Builtin.Metadata in fun_decorators:
+            self._read_metadata_object(function)
+            return Builtin.Metadata
+
+        if any(decorator is None for decorator in fun_decorators):
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    function.lineno, function.col_offset,
+                    symbol_id='decorator'
+                )
+            )
+
+        valid_decorators: List[IDecorator] = []
+        for decorator in fun_decorators:
+            if isinstance(decorator, IDecorator):
+                decorator.update_args(function.args, self._current_scope)
+                valid_decorators.append(decorator)
+
+        is_instance_method = (isinstance(self._current_scope, UserClass)
+                              and Builtin.ClassMethodDecorator not in valid_decorators
+                              and Builtin.StaticMethodDecorator not in valid_decorators)
+        is_class_constructor = is_instance_method and function.name == constants.INIT_METHOD_ID
+
+        if is_instance_method:
+            if Builtin.InstanceMethodDecorator not in valid_decorators:
+                valid_decorators.append(Builtin.InstanceMethodDecorator)
+
+            if len(function.args.args) > 0 and function.args.args[0].annotation is None:
+                # set annotation to the self method
+                from boa3.model import set_internal_call
+                self_argument = function.args.args[0]
+                self_annotation = self._current_class.identifier
+
+                self_ast_annotation = ast.parse(self_annotation).body[0].value
+                set_internal_call(self_ast_annotation)
+
+                ast.copy_location(self_ast_annotation, self_argument)
+                self_argument.annotation = self_ast_annotation
+
+        if is_class_constructor:
+            # __init__ method behave like class methods
+            if Builtin.ClassMethodDecorator not in valid_decorators:
+                valid_decorators.append(Builtin.ClassMethodDecorator)
+
         fun_args: FunctionArguments = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
 
@@ -473,15 +582,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             fun_rtype_symbol = self.get_type(symbol)
 
         fun_return: IType = self.get_type(fun_rtype_symbol)
-        fun_decorators: List[Method] = self._get_function_decorators(function)
-
-        if Builtin.Metadata in fun_decorators:
-            self._read_metadata_object(function)
-            return Builtin.Metadata
 
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
                         vararg=fun_args.vararg,
-                        origin_node=function, is_public=Builtin.Public in fun_decorators)
+                        origin_node=function, is_public=Builtin.Public in fun_decorators,
+                        decorators=valid_decorators,
+                        is_init=is_class_constructor)
 
         if function.name in Builtin.internal_methods:
             internal_method = Builtin.internal_methods[function.name]
@@ -510,9 +616,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in function.body:
             self.visit(stmt)
 
-        self.__include_callable(function.name, method)
         method_scope = self._scope_stack.pop()
         global_scope_symbols = self._scope_stack[0].symbols if len(self._scope_stack) > 0 else {}
+
+        self._set_instance_variables(method_scope)
+
+        self._current_method = None
+        self.__include_callable(function.name, method)
 
         for var_id, var in method_scope.symbols.items():
             if isinstance(var, Variable) and var_id not in self._annotated_variables:
@@ -521,7 +631,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 method.include_symbol(var_id, var)
 
         self._annotated_variables.clear()
-        self._current_method = None
 
     def _get_function_decorators(self, function: ast.FunctionDef) -> List[Method]:
         """
@@ -531,6 +640,22 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: a list with all function decorators. Empty if none decorator is found.
         """
         return [self.get_symbol(self.visit(decorator)) for decorator in function.decorator_list]
+
+    def _set_instance_variables(self, scope: SymbolScope):
+        if (isinstance(self._current_class, UserClass)
+                and isinstance(self._current_method, Method)
+                and self._current_method.is_init
+                and len(self._current_method.args) > 0):
+
+            self_id = list(self._current_method.args)[0]
+            for var_id, var in scope.symbols.items():
+                if var_id.startswith(self_id):
+                    split_name = var_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)
+                    if len(split_name) > 0:
+                        instance_var_id = split_name[1]
+                        self._current_class.include_symbol(instance_var_id, var)
+                        scope.remove_symbol(var_id)
+            print()
 
     def visit_arguments(self, arguments: ast.arguments) -> FunctionArguments:
         """
@@ -652,7 +777,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return_type = var_type
         for target in assign.targets:
             var_id = self.visit(target)
-            return_type = self.assign_value(var_id, var_type, source_node=assign)
+            if not isinstance(var_id, ISymbol):
+                return_type = self.assign_value(var_id, var_type, source_node=assign)
 
         return return_type
 
@@ -679,7 +805,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._current_scope.callables[var_id] = self._current_event
             self._current_event = None
         else:
-            self.__include_variable(var_id, var_type, source_node=source_node, assignment=assignment)
+            if isinstance(self._current_scope, UserClass):
+                var = Variable(var_type, source_node)
+                self.__include_class_variable(var_id, var)
+            else:
+                self.__include_variable(var_id, var_type, source_node=source_node, assignment=assignment)
         return var_type
 
     def visit_Global(self, global_node: ast.Global):
@@ -723,15 +853,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: if the subscript is not a symbol, returns its type. Otherwise returns the symbol id.
         :rtype: IType or str
         """
+        is_internal = hasattr(subscript, 'is_internal_call') and subscript.is_internal_call
         value = self.visit(subscript.value)
-        symbol = self.get_symbol(value) if isinstance(value, str) else value
+        symbol = self.get_symbol(value, is_internal=is_internal) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, Collection) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
+            if isinstance(symbol, (Collection, MetaType)) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
                 # for evaluating names like List[str], Dict[int, bool], etc
                 value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
                 values_type: Iterable[IType] = self.get_values_type(value)
-                return symbol.build_collection(*values_type)
+                if isinstance(symbol, Collection):
+                    return symbol.build_collection(*values_type)
+                else:
+                    return symbol.build(*values_type)
 
             symbol_type = self.get_type(symbol)
             if isinstance(subscript.slice, ast.Slice):

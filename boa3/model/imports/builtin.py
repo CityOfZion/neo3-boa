@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.interop.interop import Interop
+from boa3.model.builtin.native.nativecontract import NativeContract
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
@@ -39,6 +40,7 @@ class CompilerBuiltin:
         self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)
         self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols('contract'))
         self._generate_builtin_package('boa3.builtin.interop', Interop.package_symbols)
+        self._generate_builtin_package('boa3.builtin.nativecontract', NativeContract.package_symbols)
         self._generate_builtin_package('boa3.builtin.type', Builtin.package_symbols('type'))
 
     def _generate_builtin_package(self, package_full_path: str,
@@ -107,7 +109,7 @@ class CompilerBuiltin:
                     continue
 
             package = current_list[current_index]
-            if symbol_id in package.symbols:
+            if symbol_id in package.symbols and not isinstance(package.symbols[symbol_id], Package):
                 return package.symbols[symbol_id]
             current_index += 1
 
@@ -120,4 +122,6 @@ class CompilerBuiltin:
                 current_list = internal_packages
                 current_index = 0
 
+        if symbol_id in TypeUtils.symbols_for_internal_validation:
+            return TypeUtils.symbols_for_internal_validation[symbol_id]
         return None

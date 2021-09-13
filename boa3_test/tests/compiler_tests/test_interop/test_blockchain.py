@@ -206,6 +206,10 @@ class TestBlockchainInterop(BoaTest):
             result[7] = String(result[7]).to_bytes()
         self.assertEqual(script, result[7])   # script
 
+    def test_get_transaction_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_get_transaction_from_block_int(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         method = String('getTransactionFromBlock').to_bytes()
@@ -326,6 +330,10 @@ class TestBlockchainInterop(BoaTest):
             result[7] = String(result[7]).to_bytes()
         self.assertEqual(tx_script, result[7])  # script
 
+    def test_get_transaction_from_block_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionFromBlockMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_get_transaction_height(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         method = String('getTransactionHeight').to_bytes()
@@ -366,6 +374,10 @@ class TestBlockchainInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', hash_)
         self.assertEqual(expected_block_index, result)
+
+    def test_get_transaction_height_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_blockchain(self):
         path = self.get_contract_path('ImportBlockchain.py')

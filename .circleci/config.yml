@@ -28,14 +28,14 @@ jobs:
       - run:
           name: Test
           command: |
-            sudo apt-get update
+            sudo apt update
             sudo apt-get install -y apt-transport-https
             wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
             sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt-get update && \
+            sudo apt update && \
               sudo apt-get install -y dotnet-sdk-5.0
 
-            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b rc4
+            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.0.2
             dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
             python -m unittest discover boa3_test
 

@@ -2,7 +2,6 @@ import unittest
 
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -262,251 +261,21 @@ class TestTuple(BoaTest):
         self.assertEqual([2], result)
 
     def test_tuple_slicing_negative_start(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH5      # a = [0, 1, 2, 3, 4, 5]
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH0
-            + Opcode.PUSH6
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[-4:]
-            + Opcode.DUP
-            + Opcode.SIZE       # slice end
-            + Opcode.PUSH4
-            + Opcode.NEGATE
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.SWAP       # get slice
-            + Opcode.NEWARRAY0  # slice
-            + Opcode.PUSH2
-            + Opcode.PICK       # index
-            + Opcode.JMP        # while index < end
-            + Integer(32).to_byte_array(min_length=1)
-            + Opcode.DUP            # if index >= slice start
-            + Opcode.PUSH4
-            + Opcode.PICK
-            + Opcode.GE
-            + Opcode.JMPIFNOT
-            + Integer(25).to_byte_array(min_length=1)
-            + Opcode.OVER               # slice.append(array[index])
-            + Opcode.PUSH5
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.OVER
-            + Opcode.ISTYPE
-            + Type.bytearray.stack_item
-            + Opcode.JMPIFNOT
-            + Integer(5).to_byte_array(signed=True, min_length=1)
-            + Opcode.CAT
-            + Opcode.JMP
-            + Integer(5).to_byte_array(min_length=1)
-            + Opcode.APPEND
-            + Opcode.INC            # index += 1
-            + Opcode.DUP
-            + Opcode.PUSH3
-            + Opcode.PICK
-            + Opcode.LT
-            + Opcode.JMPIF          # end while index < slice end
-            + Integer(-34).to_byte_array(min_length=1)
-            + Opcode.DROP
-            + Opcode.REVERSE4
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.RET        # return
-        )
         path = self.get_contract_path('TupleSlicingNegativeStart.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
     def test_tuple_slicing_negative_end(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH5      # a = [0, 1, 2, 3, 4, 5]
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH0
-            + Opcode.PUSH6
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[:-4]
-            + Opcode.PUSH4
-            + Opcode.NEGATE         # slice end
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH0
-            + Opcode.SWAP
-            + Opcode.NEWARRAY0  # slice
-            + Opcode.PUSH2
-            + Opcode.PICK       # index
-            + Opcode.JMP        # while index < end
-            + Integer(32).to_byte_array(min_length=1)
-            + Opcode.DUP            # if index >= slice start
-            + Opcode.PUSH4
-            + Opcode.PICK
-            + Opcode.GE
-            + Opcode.JMPIFNOT
-            + Integer(25).to_byte_array(min_length=1)
-            + Opcode.OVER               # slice.append(array[index])
-            + Opcode.PUSH5
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.OVER
-            + Opcode.ISTYPE
-            + Type.bytearray.stack_item
-            + Opcode.JMPIFNOT
-            + Integer(5).to_byte_array(signed=True, min_length=1)
-            + Opcode.CAT
-            + Opcode.JMP
-            + Integer(5).to_byte_array(min_length=1)
-            + Opcode.APPEND
-            + Opcode.INC            # index += 1
-            + Opcode.DUP
-            + Opcode.PUSH3
-            + Opcode.PICK
-            + Opcode.LT
-            + Opcode.JMPIF          # end while index < slice end
-            + Integer(-34).to_byte_array(min_length=1)
-            + Opcode.DROP
-            + Opcode.REVERSE4
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.RET        # return
-        )
         path = self.get_contract_path('TupleSlicingNegativeEnd.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1], result)
 
     def test_tuple_slicing_start_omitted(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH5      # a = [0, 1, 2, 3, 4, 5]
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH0
-            + Opcode.PUSH6
-            + Opcode.PACK
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # return a[:3]
-            + Opcode.PUSH3          # slice end
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PUSH0
-            + Opcode.SWAP
-            + Opcode.NEWARRAY0  # slice
-            + Opcode.PUSH2
-            + Opcode.PICK       # index
-            + Opcode.JMP        # while index < end
-            + Integer(32).to_byte_array(min_length=1)
-            + Opcode.DUP            # if index >= slice start
-            + Opcode.PUSH4
-            + Opcode.PICK
-            + Opcode.GE
-            + Opcode.JMPIFNOT
-            + Integer(25).to_byte_array(min_length=1)
-            + Opcode.OVER               # slice.append(array[index])
-            + Opcode.PUSH5
-            + Opcode.PICK
-            + Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.OVER
-            + Opcode.ISTYPE
-            + Type.bytearray.stack_item
-            + Opcode.JMPIFNOT
-            + Integer(5).to_byte_array(signed=True, min_length=1)
-            + Opcode.CAT
-            + Opcode.JMP
-            + Integer(5).to_byte_array(min_length=1)
-            + Opcode.APPEND
-            + Opcode.INC            # index += 1
-            + Opcode.DUP
-            + Opcode.PUSH3
-            + Opcode.PICK
-            + Opcode.LT
-            + Opcode.JMPIF          # end while index < slice end
-            + Integer(-34).to_byte_array(min_length=1)
-            + Opcode.DROP
-            + Opcode.REVERSE4
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.DROP
-            + Opcode.RET        # return
-        )
-
         path = self.get_contract_path('TupleSlicingStartOmitted.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -517,7 +286,7 @@ class TestTuple(BoaTest):
             Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH5      # a = [0, 1, 2, 3, 4, 5]
+            + Opcode.PUSH5      # a = (0, 1, 2, 3, 4, 5)
             + Opcode.PUSH4
             + Opcode.PUSH3
             + Opcode.PUSH2
@@ -546,10 +315,208 @@ class TestTuple(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([2, 3, 4, 5], result)
 
-    def test_tuple_slicing_omitted_stride(self):
+    def test_tuple_slicing_with_stride(self):
         path = self.get_contract_path('TupleSlicingWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[2:5:2]
+        result = self.run_smart_contract(engine, path, 'literal_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-6:5:2]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[0:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-6:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-999:5:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[0:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-999:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[999:5:2]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[0:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[999:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_values')
+        self.assertEqual(expected_result, tuple(result))
+
+    def test_tuple_slicing_with_negative_stride(self):
+        path = self.get_contract_path('TupleSlicingWithNegativeStride.py')
+        engine = TestEngine()
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[2:5:-1]
+        result = self.run_smart_contract(engine, path, 'literal_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-6:5:-1]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[0:-1:-1]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-6:-1:-1]
+        result = self.run_smart_contract(engine, path, 'negative_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-999:5:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[0:-999:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-999:-999:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[999:5:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[0:999:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[999:999:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_values')
+        self.assertEqual(expected_result, tuple(result))
 
     def test_tuple_slicing_omitted_with_stride(self):
         path = self.get_contract_path('TupleSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[::2]
+        result = self.run_smart_contract(engine, path, 'omitted_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:5:2]
+        result = self.run_smart_contract(engine, path, 'omitted_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[2::2]
+        result = self.run_smart_contract(engine, path, 'omitted_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-6::2]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-999::2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[999::2]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, tuple(result))
+
+    def test_tuple_slicing_omitted_with_negative_stride(self):
+        path = self.get_contract_path('TupleSlicingOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[::-2]
+        result = self.run_smart_contract(engine, path, 'omitted_values')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:5:-2]
+        result = self.run_smart_contract(engine, path, 'omitted_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[2::-2]
+        result = self.run_smart_contract(engine, path, 'omitted_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-6::-2]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:-1:-2]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[-999::-2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:-999:-2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[999::-2]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, tuple(result))
+
+        a = (0, 1, 2, 3, 4, 5)
+        expected_result = a[:999:-2]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, tuple(result))

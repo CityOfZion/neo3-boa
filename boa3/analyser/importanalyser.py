@@ -3,6 +3,7 @@ import importlib.util
 import os
 from typing import Dict, List, Optional
 
+from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.model import imports
 from boa3.model.symbol import ISymbol
@@ -100,6 +101,9 @@ class ImportAnalyser(IAstAnalyser):
         if isinstance(identifiers, str):
             identifiers = [identifiers]
 
-        symbols = {symbol_id: symbol for symbol_id, symbol in self.symbols.items()
-                   if symbol_id in identifiers and symbol is not None}
+        if constants.IMPORT_WILDCARD in identifiers:
+            symbols = self.symbols.copy()
+        else:
+            symbols = {symbol_id: symbol for symbol_id, symbol in self.symbols.items()
+                       if symbol_id in identifiers and symbol is not None}
         return symbols

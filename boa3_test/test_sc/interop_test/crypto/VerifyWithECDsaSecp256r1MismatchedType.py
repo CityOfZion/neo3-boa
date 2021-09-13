@@ -1,5 +1,5 @@
-from boa3.builtin.interop.crypto import verify_with_ecdsa_secp256r1
+from boa3.builtin.interop.crypto import NamedCurve, verify_with_ecdsa
 
 
 def Main():
-    verify_with_ecdsa_secp256r1('unit test', 10, b'signature')
+    verify_with_ecdsa('unit test', 10, b'signature', NamedCurve.SECP256R1)

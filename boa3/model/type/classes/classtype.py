@@ -23,8 +23,19 @@ class ClassType(IType, ABC):
 
     @property
     @abstractmethod
-    def variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> Dict[str, Variable]:
         return {}
+
+    @property
+    @abstractmethod
+    def instance_variables(self) -> Dict[str, Variable]:
+        return {}
+
+    @property
+    def variables(self) -> Dict[str, Variable]:
+        variables = self.class_variables.copy()
+        variables.update(self.instance_variables)
+        return variables
 
     @property
     def _all_variables(self) -> Dict[str, Variable]:
@@ -37,18 +48,13 @@ class ClassType(IType, ABC):
 
     @property
     @abstractmethod
-    def class_methods(self) -> Dict[str, Method]:
+    def static_methods(self) -> Dict[str, Method]:
         return {}
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
-        # TODO: Change to return only class symbols or instance symbols
-        s = {}
-        s.update(self.class_methods)
-        s.update(self.variables)
-        s.update(self.properties)
-        s.update(self.instance_methods)
-        return s
+    @abstractmethod
+    def class_methods(self) -> Dict[str, Method]:
+        return {}
 
     @property
     @abstractmethod
@@ -61,6 +67,34 @@ class ClassType(IType, ABC):
         If the class constructor is None, it mustn't allow instantiation of this class
         """
         pass
+
+    @property
+    def symbols(self) -> Dict[str, ISymbol]:
+        s = {}
+        s.update(self.static_methods)
+        s.update(self.class_methods)
+        s.update(self.instance_methods)
+        s.update(self.variables)
+        s.update(self.properties)
+        return s
+
+    @property
+    def class_symbols(self) -> Dict[str, ISymbol]:
+        s: Dict[str, ISymbol] = {}
+        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_variables)  # from class name or instance object
+        s.update(self.static_methods)
+        return s
+
+    @property
+    def instance_symbols(self) -> Dict[str, ISymbol]:
+        s: Dict[str, ISymbol] = {}
+        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_variables)  # from class name or instance object
+        s.update(self.instance_methods)
+        s.update(self.instance_variables)
+        s.update(self.properties)
+        return s
 
     @property
     @abstractmethod

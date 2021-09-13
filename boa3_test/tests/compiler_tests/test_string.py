@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -45,7 +44,6 @@ class TestString(BoaTest):
 
     def test_string_slicing(self):
         path = self.get_contract_path('StringSlicingLiteralValues.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -65,37 +63,7 @@ class TestString(BoaTest):
         self.assertEqual('i', result)
 
     def test_string_slicing_negative_start(self):
-        string_value = 'unit_test'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = 'unit_test'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1  # return a[:-4]
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.PUSH4            # size of the substring: len(a) - 4
-            + Opcode.NEGATE
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.LEFT
-            + Opcode.CONVERT + Type.str.stack_item
-            + Opcode.RET        # return
-        )
         path = self.get_contract_path('StringSlicingNegativeStart.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -150,13 +118,211 @@ class TestString(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(b'it_test', result)
 
-    def test_string_slicing_omitted_stride(self):
+    def test_string_slicing_with_stride(self):
         path = self.get_contract_path('StringSlicingWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        a = 'unit_test'
+        expected_result = a[2:5:2]
+        result = self.run_smart_contract(engine, path, 'literal_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-6:5:2]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[0:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-6:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-999:5:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[0:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-999:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[999:5:2]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[0:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[999:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_values')
+        self.assertEqual(expected_result, result)
+
+    def test_string_slicing_with_negative_stride(self):
+        path = self.get_contract_path('StringSlicingWithNegativeStride.py')
+        engine = TestEngine()
+
+        a = 'unit_test'
+        expected_result = a[2:5:-1]
+        result = self.run_smart_contract(engine, path, 'literal_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-6:5:-1]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[0:-1:-1]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-6:-1:-1]
+        result = self.run_smart_contract(engine, path, 'negative_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-999:5:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[0:-999:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-999:-999:-1]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[999:5:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[0:999:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[999:999:-1]
+        result = self.run_smart_contract(engine, path, 'really_high_values')
+        self.assertEqual(expected_result, result)
 
     def test_string_slicing_omitted_with_stride(self):
         path = self.get_contract_path('StringSlicingOmittedWithStride.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        a = 'unit_test'
+        expected_result = a[::2]
+        result = self.run_smart_contract(engine, path, 'omitted_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:5:2]
+        result = self.run_smart_contract(engine, path, 'omitted_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[2::2]
+        result = self.run_smart_contract(engine, path, 'omitted_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-6::2]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:-1:2]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-999::2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:-999:2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[999::2]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:999:2]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, result)
+
+    def test_string_slicing_omitted_with_negative_stride(self):
+        path = self.get_contract_path('StringSlicingOmittedWithNegativeStride.py')
+        engine = TestEngine()
+
+        a = 'unit_test'
+        expected_result = a[::-2]
+        result = self.run_smart_contract(engine, path, 'omitted_values')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:5:-2]
+        result = self.run_smart_contract(engine, path, 'omitted_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[2::-2]
+        result = self.run_smart_contract(engine, path, 'omitted_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-6::-2]
+        result = self.run_smart_contract(engine, path, 'negative_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:-1:-2]
+        result = self.run_smart_contract(engine, path, 'negative_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[-999::-2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:-999:-2]
+        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[999::-2]
+        result = self.run_smart_contract(engine, path, 'really_high_start')
+        self.assertEqual(expected_result, result)
+
+        a = 'unit_test'
+        expected_result = a[:999:-2]
+        result = self.run_smart_contract(engine, path, 'really_high_end')
+        self.assertEqual(expected_result, result)
 
     def test_string_simple_concat(self):
         path = self.get_contract_path('StringSimpleConcat.py')

@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from boa3.model.callable import Callable
+from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import metaType
 from boa3.model.type.type import Type
@@ -39,3 +40,9 @@ class TypeUtils:
 
     # Annotation function utils
     cast = CastTypeMethod()
+
+    _internal_validation_symbols: List[IdentifiedSymbol] = [type
+                                                            ]
+
+    symbols_for_internal_validation = {symbol.identifier: symbol
+                                       for symbol in _internal_validation_symbols}

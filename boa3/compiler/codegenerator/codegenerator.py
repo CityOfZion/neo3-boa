@@ -19,10 +19,14 @@ from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
+from boa3.model.type.collection.sequence.mutable.listtype import ListType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
+from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
+from boa3.model.type.primitive.strtype import StrType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.TryCode import TryCode
@@ -243,8 +247,10 @@ class CodeGenerator:
 
         :return: A list with the variables names
         """
-        module_globals = [var_id for var_id, var in self.symbol_table.items()
-                          if isinstance(var, Variable) and var.is_reassigned == modified_variable]
+        module_global_variables = [var_id for var_id, var in self.symbol_table.items()
+                                   if isinstance(var, Variable) and var.is_reassigned == modified_variable]
+        class_with_class_variables = [class_id for class_id, class_symbol in self.symbol_table.items()
+                                      if isinstance(class_symbol, UserClass) and len(class_symbol.class_variables) > 0]
 
         if not self.can_init_static_fields:
             for imported in self.symbol_table.values():
@@ -253,9 +259,14 @@ class CodeGenerator:
                     for var_id, var in imported.variables.items():
                         if (isinstance(var, Variable)
                                 and var.is_reassigned == modified_variable
-                                and var_id not in module_globals):
-                            module_globals.append(var_id)
-        return module_globals
+                                and var_id not in module_global_variables):
+                            module_global_variables.append(var_id)
+
+                    # TODO: include user class from imported symbols as well
+
+        return (module_global_variables
+                if modified_variable
+                else module_global_variables + class_with_class_variables)
 
     @property
     def _current_scope(self) -> SymbolScope:
@@ -267,7 +278,8 @@ class CodeGenerator:
 
         :return: whether the last value is null
         """
-        return self.last_code.opcode is Opcode.PUSHNULL
+        return (self.last_code.opcode is Opcode.PUSHNULL or
+                (len(self._stack) > 0 and self._stack[-1] is Type.none))
 
     def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> ISymbol:
         """
@@ -378,6 +390,11 @@ class CodeGenerator:
             self._current_method.init_bytecode = VMCodeMapping.instance().code_map[self._current_method.init_address]
 
         if self.last_code.opcode is not Opcode.RET:
+            if self._current_method.is_init:
+                # return the built object if it's a constructor
+                self_id, self_value = list(self._current_method.args.items())[0]
+                self.convert_load_variable(self_id, self_value)
+
             self.insert_return()
 
         self._current_method.end_bytecode = self.last_code
@@ -674,6 +691,20 @@ class CodeGenerator:
 
         self._can_append_target = not self._can_append_target
 
+    def fix_index_negative_stride(self):
+        """
+        If stride is negative, then the array was reversed, thus, lower and upper should be changed
+        accordingly.
+        The Opcodes below will only fix 1 index.
+        array[lower:upper:-1] == reversed_array[len(array)-lower-1:len(array)-upper-1]
+        If lower or upper was None, then it's not necessary to change its values.
+        """
+        # top array should be: len(array), index
+        self.convert_builtin_method_call(Builtin.Len)
+        self.swap_reverse_stack_items(2)
+        self.convert_operation(BinaryOp.Sub)
+        self.__insert1(OpcodeInfo.DEC)
+
     def convert_loop_continue(self):
         loop_start = self._current_loop[-1]
         self._insert_jump(OpcodeInfo.JMP)
@@ -859,6 +890,7 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.NEWARRAY0)
         else:
             self.convert_literal(length)
+            self._stack_pop()
             self.__insert1(OpcodeInfo.NEWARRAY)
         self._stack_append(array_type)
 
@@ -947,6 +979,20 @@ class CodeGenerator:
         """
         Converts the end of get a substring
         """
+        # if lower is still negative, then it should be 0
+        self.duplicate_stack_item(2)
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+        jmp_address = VMCodeMapping.instance().bytecode_size
+        self._insert_jump(OpcodeInfo.JMPNE)         # if lower < 0, then lower = 0
+
+        self.swap_reverse_stack_items(2)
+        self.remove_stack_top_item()
+        self.convert_literal(0)
+        self.swap_reverse_stack_items(2)
+        jmp_target = VMCodeMapping.instance().bytecode_size
+        self._update_jump(jmp_address, jmp_target)
+
         self.convert_new_empty_array(0, array)      # slice = []
         self.duplicate_stack_item(3)                # index = slice_start
 
@@ -978,11 +1024,12 @@ class CodeGenerator:
         self.remove_stack_top_item()
         self.remove_stack_top_item()
 
-    def convert_get_sub_array(self, value_addresses: List[int] = None):
+    def convert_get_sub_array(self, value_addresses: List[int] = None, negative_stride: bool = False):
         """
         Converts the end of get a slice in the beginning of an array
 
         :param value_addresses: the start and end values addresses
+        :param negative_stride: whether stride is negative or not
         """
         # top: length, index, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
@@ -993,29 +1040,112 @@ class CodeGenerator:
                     self.fix_negative_index(code)
                 self.fix_negative_index()  # fix the last value sign
 
+                if negative_stride:
+                    """
+                    If stride is negative, then the array was reversed, thus, lower and upper should be changed 
+                    accordingly.
+                    array[lower:upper:-1] == reversed_array[len(array)-lower-1:len(array)-upper-1]
+                    """
+                    # calculates corresponding upper
+                    # upper = len(array)-upper-1
+                    self.duplicate_stack_item(3)
+                    self.fix_index_negative_stride()
+
+                    # puts lower at the top of the stack
+                    self.swap_reverse_stack_items(2)
+
+                    # calculates corresponding lower
+                    # lower = len(array)-lower-1
+                    self.duplicate_stack_item(3)
+                    self.fix_index_negative_stride()
+
+                    # reverts lower to its correct place
+                    self.swap_reverse_stack_items(2)
+
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
+
+                # if lower is still negative, then it should be 0
+                self.duplicate_stack_item(2)
+                self.__insert1(OpcodeInfo.SIGN)
+                self.convert_literal(-1)
+                jmp_address = VMCodeMapping.instance().bytecode_size
+                self._insert_jump(OpcodeInfo.JMPNE)     # if lower < 0, then lower = 0
+
+                self.swap_reverse_stack_items(2)
+                self.remove_stack_top_item()
+                self.convert_literal(0)
+                self.swap_reverse_stack_items(2)
+                jmp_target = VMCodeMapping.instance().bytecode_size
+                self._update_jump(jmp_address, jmp_target)
+
+                # lower can not be greater than len(string)
+                self.swap_reverse_stack_items(2)
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+                # reverts lower to its correct place
+                self.swap_reverse_stack_items(2)
+
+                # upper can not be greater than len(string)
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.duplicate_stack_item(2)
                 self.convert_operation(BinaryOp.Sub)
                 self.convert_get_substring()
             else:
                 array = self._stack[-3]
-                self.duplicate_stack_item(3)        # if slice end is greater than the array size, fixes them
+                self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
 
+                # if slice end is greater than the array size, fixes them
                 # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
                 self.__insert1(OpcodeInfo.MIN)
                 self._stack_pop()
                 self.convert_get_array_slice(array)
 
-    def convert_get_array_beginning(self):
+    def convert_get_array_beginning(self, negative_stride: bool = False):
         """
         Converts the end of get a slice in the beginning of an array
+
+        :param negative_stride: whether stride is negative or not
         """
         if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
             self.fix_negative_index()
+
+            if negative_stride:
+                # calculates corresponding upper
+                # upper = len(array)-upper-1
+                self.duplicate_stack_item(2)
+                self.fix_index_negative_stride()
+
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
+                # if upper is still negative, then it should be 0
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.SIGN)
+                self.convert_literal(-1)
+                jmp_address = VMCodeMapping.instance().bytecode_size
+                self._insert_jump(OpcodeInfo.JMPNE)     # if upper < 0, then upper = 0
+
+                self.remove_stack_top_item()
+                self.convert_literal(0)
+                jmp_target = VMCodeMapping.instance().bytecode_size
+                self._update_jump(jmp_address, jmp_target)
+
+                # upper can not be greater than len(string)
+                self.duplicate_stack_item(2)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.__insert1(OpcodeInfo.LEFT)
                 self._stack_pop()  # length
                 original_type = self._stack_pop()  # original array
@@ -1023,19 +1153,56 @@ class CodeGenerator:
                 self.convert_cast(original_type)
             else:
                 array = self._stack[-2]
+
+                self.duplicate_stack_item(2)
+                self.convert_builtin_method_call(Builtin.Len)
+
+                # if slice end is greater than the array size, fixes them
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.convert_literal(0)
                 self.swap_reverse_stack_items(2)
                 self.convert_get_array_slice(array)
 
-    def convert_get_array_ending(self):
+    def convert_get_array_ending(self, negative_stride: bool = False):
         """
         Converts the end of get a slice in the ending of an array
+
+        :param negative_stride: whether stride is negative or not
         """
         # top: start_slice, array_length, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
             self.fix_negative_index()
+
+            if negative_stride:
+                # calculates corresponding lower
+                # lower = len(array)-lower-1
+                self.duplicate_stack_item(3)
+                self.fix_index_negative_stride()
+
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
+                # if lower is still negative, then it should be 0
+                self.duplicate_stack_top_item()
+                self.__insert1(OpcodeInfo.SIGN)
+                self.convert_literal(-1)
+                jmp_address = VMCodeMapping.instance().bytecode_size
+                self._insert_jump(OpcodeInfo.JMPNE)     # if lower < 0, then lower = 0
+
+                self.remove_stack_top_item()
+                self.convert_literal(0)
+                jmp_target = VMCodeMapping.instance().bytecode_size
+                self._update_jump(jmp_address, jmp_target)
+
+                # lower can not be greater than len(string)
+                self.duplicate_stack_item(3)
+                self.convert_builtin_method_call(Builtin.Len)
+                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
+                self.__insert1(OpcodeInfo.MIN)
+                self._stack_pop()
+
                 self.convert_operation(BinaryOp.Sub)
                 self.__insert1(OpcodeInfo.RIGHT)
                 self._stack_pop()  # length
@@ -1052,6 +1219,142 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.UNPACK)
             self.__insert1(OpcodeInfo.PACK)    # creates a new array with the values
 
+    def convert_get_stride(self):
+        if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
+            if self._stack[-2].stack_item in (StackItemType.ByteString, StackItemType.Buffer):
+                self.convert_get_substring_stride()
+            else:
+                self.convert_get_array_stride()
+
+    def convert_array_negative_stride(self):
+        """
+        Converts an array to its reverse, to be able to scroll through the reversed list
+        """
+        # The logic on this function only do variable[::-z]
+
+        original = self._stack[-1]
+        self.convert_builtin_method_call(Builtin.Reversed)
+        self.convert_cast(ListType())
+        if isinstance(original, (StrType, BytesType)):        # if self was a string/bytes, then concat the values in the array
+            self.duplicate_stack_top_item()
+            self.convert_builtin_method_call(Builtin.Len)       # index = len(array) - 1
+            self.convert_literal('')                            # string = ''
+
+            start_jump = self.convert_begin_while()
+            self.duplicate_stack_item(3)
+            self.duplicate_stack_item(3)
+            str_type = self._stack[-3]
+            self.__insert1(OpcodeInfo.PICKITEM)
+            self._stack_pop()
+            self._stack_pop()
+            self._stack_append(str_type)
+            self.swap_reverse_stack_items(2)
+            self.convert_operation(BinaryOp.Concat)             # string = string + array[index]
+
+            condition_address = VMCodeMapping.instance().bytecode_size
+            self.swap_reverse_stack_items(2)
+            self.__insert1(OpcodeInfo.DEC)                      # index--
+            self.swap_reverse_stack_items(2)
+            self.duplicate_stack_item(2)
+            self.convert_literal(0)
+            self.convert_operation(BinaryOp.GtE)                # if index <= 0, stop loop
+            self.convert_end_while(start_jump, condition_address)
+            self.convert_end_loop_else(start_jump, self.last_code_start_address, False)
+
+            # remove auxiliary values
+            self.swap_reverse_stack_items(3)
+            self.remove_stack_top_item()
+            self.remove_stack_top_item()
+
+    def convert_get_substring_stride(self):
+        # initializing auxiliary variables
+        self.duplicate_stack_item(2)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.convert_literal(0)                         # index = 0
+        self.convert_literal('')                        # substr = ''
+
+        # logic verifying if substr[index] should be concatenated or not
+        start_jump = self.convert_begin_while()
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(5)
+        self.convert_operation(BinaryOp.Mod)
+        self.convert_literal(0)
+        self.convert_operation(BinaryOp.NumEq)
+        is_mod_0 = self.convert_begin_if()              # if index % stride == 0, then concatenate it
+
+        # concatenating substr[index] with substr
+        self.duplicate_stack_item(5)
+        self.duplicate_stack_item(3)
+        self.convert_literal(1)
+        self._stack_pop()  # length
+        self._stack_pop()  # start
+        str_type = self._stack_pop()
+        self.__insert1(OpcodeInfo.SUBSTR)
+        self._stack_append(BufferType)                  # SUBSTR returns a buffer instead of a bytestring
+        self.convert_cast(str_type)
+        self.convert_operation(BinaryOp.Concat)         # substr = substr + string[index]
+        self.convert_end_if(is_mod_0)
+
+        # increment the index by 1
+        self.swap_reverse_stack_items(2)
+        self.__insert1(OpcodeInfo.INC)                  # index++
+        self.swap_reverse_stack_items(2)
+
+        # verifying if it should still be in the while
+        condition_address = VMCodeMapping.instance().bytecode_size
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(4)
+        self.convert_operation(BinaryOp.Lt)             # stop the loop when index >= len(str)
+        self.convert_end_while(start_jump, condition_address)
+        self.convert_end_loop_else(start_jump, self.last_code_start_address, False)
+
+        # removing auxiliary values
+        self.swap_reverse_stack_items(5)
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+
+    def convert_get_array_stride(self):
+        # initializing auxiliary variable
+        self.duplicate_stack_item(2)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.__insert1(OpcodeInfo.DEC)                      # index = len(array) - 1
+
+        # logic verifying if array[index] should be removed or not
+        start_jump = self.convert_begin_while()
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(2)
+        self.swap_reverse_stack_items(2)
+        self.convert_operation(BinaryOp.Mod)
+        self.convert_literal(0)
+        self.convert_operation(BinaryOp.NumNotEq)
+        is_not_mod_0 = self.convert_begin_if()              # if index % stride != 0, then remove it
+
+        # removing element from array
+        self.duplicate_stack_item(3)
+        self.duplicate_stack_item(2)
+        self.__insert1(OpcodeInfo.REMOVE)                   # array.pop(index)
+        self._stack_pop()
+        self._stack_pop()
+        self.convert_end_if(is_not_mod_0)
+
+        # decrement 1 from index
+        self.__insert1(OpcodeInfo.DEC)
+
+        # verifying if it should still be in the while
+        condition_address = VMCodeMapping.instance().bytecode_size
+        self.duplicate_stack_top_item()
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+        self.convert_operation(BinaryOp.NumNotEq)       # stop the loop when index < 0
+        self.convert_end_while(start_jump, condition_address)
+        self.convert_end_loop_else(start_jump, self.last_code_start_address, False)
+
+        # removing auxiliary values
+        self.remove_stack_top_item()                    # removed index from stack
+        self.remove_stack_top_item()                    # removed stride from stack
+
     def convert_starred_variable(self):
         top_stack_item = self._stack[-1].stack_item
         if top_stack_item is StackItemType.Array:
@@ -1063,14 +1366,22 @@ class CodeGenerator:
 
         self.convert_cast(Type.tuple)
 
-    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False):
+    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False,
+                            class_type: Optional[UserClass] = None):
         """
         Converts the load of a symbol
 
         :param symbol_id: the symbol identifier
         :param params_addresses: a list with each function arguments' first addresses
         """
+        if class_type is None and len(self._stack) > 0 and isinstance(self._stack[-1], UserClass):
+            class_type = self._stack[-1]
+
         symbol = self.get_symbol(symbol_id, is_internal=is_internal)
+
+        if symbol is Type.none and class_type is not None and symbol_id in class_type.symbols:
+            symbol = class_type.symbols[symbol_id]
+
         if symbol is not Type.none:
             if isinstance(symbol, Property):
                 symbol = symbol.getter
@@ -1082,15 +1393,17 @@ class CodeGenerator:
                 params_addresses = []
 
             if isinstance(symbol, Variable):
-                self.convert_load_variable(symbol_id, symbol)
+                self.convert_load_variable(symbol_id, symbol, class_type)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol, params_addresses)
             elif isinstance(symbol, Event):
                 self.convert_event_call(symbol)
             elif isinstance(symbol, Method):
                 self.convert_method_call(symbol, len(params_addresses))
+            elif isinstance(symbol, UserClass):
+                self.convert_class_symbol(symbol, symbol_id)
 
-    def convert_load_variable(self, var_id: str, var: Variable):
+    def convert_load_variable(self, var_id: str, var: Variable, class_type: Optional[UserClass] = None):
         """
         Converts the assignment of a variable
 
@@ -1120,13 +1433,40 @@ class CodeGenerator:
             storage_key = codegenerator.get_storage_key_for_variable(var)
             self._convert_builtin_storage_get_or_put(True, storage_key)
 
-    def convert_store_variable(self, var_id: str, value_start_address: int = None):
+        elif class_type:
+            if var_id in class_type.variables:
+                index = list(class_type.variables).index(var_id)
+                self.convert_literal(index)
+                self.convert_get_item()
+                self._stack_pop()             # pop class type
+                self._stack_append(var.type)  # push variable type
+
+    def convert_store_variable(self, var_id: str, value_start_address: int = None, user_class: UserClass = None):
         """
         Converts the assignment of a variable
 
         :param var_id: the value to be converted
         """
+        inner_index = None
         index, local, is_arg = self._get_variable_info(var_id)
+
+        if user_class is None and index < 0 and len(self._stack) > 1 and isinstance(self._stack[-2], UserClass):
+            user_class = self._stack[-2]
+
+        if isinstance(user_class, UserClass) and var_id in user_class.variables:
+            index, local, is_arg = self._get_variable_info(user_class.identifier)
+            inner_index = list(user_class.variables).index(var_id)
+
+        if isinstance(inner_index, int):
+            # it's a class variable
+            self.convert_literal(inner_index)
+            index_address = self.bytecode_size
+            self.convert_load_variable(user_class.identifier, Variable(user_class))
+            no_stack_items_to_swap = 3 if var_id in user_class.class_variables else 2
+            self.swap_reverse_stack_items(no_stack_items_to_swap)
+            self.convert_set_item(index_address)
+            return
+
         if index >= 0:
             opcode = Opcode.get_store(index, local, is_arg)
             if opcode is not None:
@@ -1261,6 +1601,18 @@ class CodeGenerator:
 
         :param function: the function to be converted
         """
+        if function.is_init:
+            if num_args == len(function.args):
+                self.remove_stack_top_item()
+                num_args -= 1
+
+            if num_args == len(function.args) - 1:
+                # if this method is a constructor and only the self argument is missing
+                function_result = function.type
+                size = len(function_result.variables) if isinstance(function_result, UserClass) else 0
+                if self.stack_size < 1 or not self._stack[-1].is_type_of(function_result):
+                    self.convert_new_empty_array(size, function_result)
+
         from boa3.neo.vm.CallCode import CallCode
         self.__insert_code(CallCode(function))
 
@@ -1307,6 +1659,8 @@ class CodeGenerator:
             method = symbol.getter if load else symbol.setter
         elif symbol_id in class_type.instance_methods:
             method = class_type.instance_methods[symbol_id]
+        elif isinstance(class_type, UserClass):
+            return self.convert_user_class(class_type, symbol_id)
         else:
             return
 
@@ -1315,6 +1669,23 @@ class CodeGenerator:
         else:
             self.convert_method_call(method, 0)
         return symbol_id
+
+    def convert_user_class(self, class_type: UserClass, symbol_id: str) -> Optional[int]:
+        """
+        Converts an class symbol
+
+        :param class_type:
+        :param symbol_id:
+        """
+        start_address = self.bytecode_size
+
+        if symbol_id in self._statics:
+            self.convert_load_variable(symbol_id, Variable(class_type))
+        else:
+            # TODO: change to create an array with the class variables' default values when they are implemented
+            self.convert_new_empty_array(len(class_type.class_variables), class_type)
+
+        return start_address
 
     def convert_class_variable(self, class_type: ClassType, symbol_id: str, load: bool = True):
         """
@@ -1579,5 +1950,30 @@ class CodeGenerator:
                 self.convert_literal(no_items)
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
+            if opcode is Opcode.REVERSEN and no_items > 0:
+                self._stack_pop()
             if no_items > 0:
                 self._stack.reverse(-no_items)
+
+    def convert_init_user_class(self, class_type: ClassType):
+        # TODO: refactor when instance variables are implemented
+        if isinstance(class_type, UserClass):
+            # create an none-filled array with the size of the instance variables
+            no_instance_variables = len(class_type.instance_variables)
+            self.convert_new_empty_array(no_instance_variables, class_type)
+
+            self.__insert1(OpcodeInfo.UNPACK)  # unpack for array concatenation
+            value = self._stack_pop()
+            self._stack_append(Type.int)
+            self.remove_stack_top_item()
+
+            # copy the array that stores the class variables from that class
+            self.convert_user_class(class_type, class_type.identifier)
+
+            self.__insert1(OpcodeInfo.UNPACK)  # unpack for array concatenation
+            self._stack_append(value)
+            self.convert_literal(no_instance_variables)
+            self.convert_operation(BinaryOp.Add)
+
+            self.__insert1(OpcodeInfo.PACK)  # packs everything together
+            self._stack_pop()

@@ -5,9 +5,9 @@ def base58_encode(key: bytes) -> str:
     """
     Encodes a bytes value using base58.
 
-    :param key: string value to be encoded
+    :param key: bytes value to be encoded
     :type key: bytes
-    :return: the encoded string as bytes
+    :return: the encoded string
     :rtype: str
     """
     pass
@@ -17,9 +17,9 @@ def base58_decode(key: str) -> bytes:
     """
     Decodes a string value encoded with base58.
 
-    :param key: bytes value to be decoded
+    :param key: string value to be decoded
     :type key: str
-    :return: the decoded bytes as string
+    :return: the decoded bytes
     :rtype: bytes
     """
     pass
@@ -29,6 +29,11 @@ def base58_check_encode(key: bytes) -> str:
     """
     Converts a bytes value to its equivalent str representation that is encoded with base-58 digits. The encoded str
     contains the checksum of the binary data.
+
+    :param key: bytes value to be encoded
+    :type key: bytes
+    :return: the encoded string
+    :rtype: str
     """
     pass
 
@@ -37,6 +42,11 @@ def base58_check_decode(key: str) -> bytes:
     """
     Converts the specified str, which encodes binary data as base-58 digits, to an equivalent bytes value. The encoded
     str contains the checksum of the binary data.
+
+    :param key: string value to be decoded
+    :type key: str
+    :return: the decoded bytes
+    :rtype: bytes
     """
     pass
 
@@ -47,7 +57,7 @@ def base64_encode(key: bytes) -> str:
 
     :param key: bytes value to be encoded
     :type key: bytes
-    :return: the encoded bytes as string
+    :return: the encoded string
     :rtype: str
     """
     pass
@@ -59,7 +69,7 @@ def base64_decode(key: str) -> bytes:
 
     :param key: string value to be decoded
     :type key: str
-    :return: the decoded string as bytes
+    :return: the decoded bytes
     :rtype: bytes
     """
     pass

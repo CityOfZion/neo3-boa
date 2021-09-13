@@ -36,7 +36,11 @@ class IteratorType(InteropInterfaceType, ICollectionType):
         return '{0}[{1}, {2}]'.format(self._identifier, self.valid_key.identifier, self.item_type.identifier)
 
     @property
-    def variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> Dict[str, Variable]:
+        return {}
+
+    @property
+    def instance_variables(self) -> Dict[str, Variable]:
         return {}
 
     @property
@@ -48,6 +52,10 @@ class IteratorType(InteropInterfaceType, ICollectionType):
             }
 
         return self._properties.copy()
+
+    @property
+    def static_methods(self) -> Dict[str, Method]:
+        return {}
 
     @property
     def class_methods(self) -> Dict[str, Method]:

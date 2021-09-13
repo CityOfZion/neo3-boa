@@ -1,3 +1,4 @@
+import hashlib
 
 from boa3 import constants
 from boa3.boa3 import Boa3
@@ -29,7 +30,6 @@ class TestCryptoInterop(BoaTest):
     )
 
     def test_ripemd160_str(self):
-        import hashlib
         path = self.get_contract_path('Ripemd160Str.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', b'unit test')
@@ -41,7 +41,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_int(self):
-        import hashlib
         path = self.get_contract_path('Ripemd160Int.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
@@ -49,7 +48,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_bool(self):
-        import hashlib
         path = self.get_contract_path('Ripemd160Bool.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
@@ -57,15 +55,21 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_bytes(self):
-        import hashlib
         path = self.get_contract_path('Ripemd160Bytes.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', b'unit test')
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
+    def test_ripemd160_too_many_parameters(self):
+        path = self.get_contract_path('Ripemd160TooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_ripemd160_too_few_parameters(self):
+        path = self.get_contract_path('Ripemd160TooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
     def test_hash160_str(self):
-        import hashlib
         path = self.get_contract_path('Hash160Str.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
@@ -73,7 +77,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_hash160_int(self):
-        import hashlib
         path = self.get_contract_path('Hash160Int.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(10).to_byte_array()).digest())).digest()
@@ -81,16 +84,13 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_hash160_bool(self):
-        import hashlib
         path = self.get_contract_path('Hash160Bool.py')
-        self.compile_and_save(path)
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(1).to_byte_array()).digest())).digest()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result, result)
 
     def test_hash160_bytes(self):
-        import hashlib
         path = self.get_contract_path('Hash160Bytes.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
@@ -98,7 +98,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_sha256_str(self):
-        import hashlib
         path = self.get_contract_path('Sha256Str.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(b'unit test')
@@ -110,7 +109,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_int(self):
-        import hashlib
         path = self.get_contract_path('Sha256Int.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(Integer(10).to_byte_array())
@@ -118,7 +116,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_bool(self):
-        import hashlib
         path = self.get_contract_path('Sha256Bool.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(Integer(1).to_byte_array())
@@ -126,15 +123,21 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_bytes(self):
-        import hashlib
         path = self.get_contract_path('Sha256Bytes.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(b'unit test')
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(expected_result.digest(), result)
 
+    def test_sha256_too_many_parameters(self):
+        path = self.get_contract_path('Sha256TooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_sha256_too_few_parameters(self):
+        path = self.get_contract_path('Sha256TooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
     def test_hash256_str(self):
-        import hashlib
         path = self.get_contract_path('Hash256Str.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
@@ -142,7 +145,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_hash256_int(self):
-        import hashlib
         path = self.get_contract_path('Hash256Int.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(Integer(10).to_byte_array()).digest()).digest()
@@ -150,7 +152,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_hash256_bool(self):
-        import hashlib
         path = self.get_contract_path('Hash256Bool.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(Integer(1).to_byte_array()).digest()).digest()
@@ -158,7 +159,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_hash256_bytes(self):
-        import hashlib
         path = self.get_contract_path('Hash256Bytes.py')
         engine = TestEngine()
         expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
@@ -244,15 +244,24 @@ class TestCryptoInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(False, result)
 
+    def test_verify_with_ecdsa(self):
+        path = self.get_contract_path('VerifyWithECDsa.py')
+        Boa3.compile(path)
+
     def test_verify_with_ecdsa_secp256r1_str(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -262,12 +271,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -288,11 +293,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256r1_bool(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -300,12 +310,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH0
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -326,11 +332,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256r1_int(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -338,12 +349,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -365,11 +372,16 @@ class TestCryptoInterop(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256r1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -379,12 +391,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256R1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array(min_length=1)
             + call_flag
@@ -410,11 +418,16 @@ class TestCryptoInterop(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -424,12 +437,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -449,11 +458,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_bool(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -461,12 +475,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH0
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -486,11 +496,16 @@ class TestCryptoInterop(BoaTest):
     def test_verify_with_ecdsa_secp256k1_int(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -498,12 +513,8 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -524,11 +535,16 @@ class TestCryptoInterop(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        function_id = String(Interop.VerifyWithECDsaSecp256k1._sys_call).to_bytes()
+        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHDATA1
+            + Integer(len(named_curve)).to_byte_array(min_length=1)
+            + named_curve
+            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
             + Opcode.PUSHDATA1
@@ -538,12 +554,8 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH3
+            + Opcode.PUSH4
             + Opcode.PACK
-            + Opcode.DUP
-            + Opcode.PUSHINT8
-            + Integer(NamedCurve.SECP256K1).to_byte_array(min_length=1)
-            + Opcode.APPEND
             + Opcode.PUSHDATA1
             + Integer(len(call_flag)).to_byte_array() + call_flag
             + Opcode.PUSHDATA1
@@ -565,7 +577,6 @@ class TestCryptoInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_crypto(self):
-        import hashlib
         path = self.get_contract_path('ImportCrypto.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
@@ -573,7 +584,6 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_import_interop_crypto(self):
-        import hashlib
         path = self.get_contract_path('ImportInteropCrypto.py')
         engine = TestEngine()
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()

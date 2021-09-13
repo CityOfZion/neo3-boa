@@ -4,8 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.classmethod import *
 from boa3.model.builtin.contract import *
-from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
-from boa3.model.builtin.decorator.publicdecorator import PublicDecorator
+from boa3.model.builtin.decorator import *
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method import *
@@ -45,8 +44,8 @@ class Builtin:
     IsInstance = IsInstanceMethod()
     Len = LenMethod()
     NewEvent = CreateEventMethod()
-    Max = MaxMethod()
-    Min = MinMethod()
+    Max = MaxIntMethod()
+    Min = MinIntMethod()
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
     Sqrt = SqrtMethod()
@@ -78,8 +77,14 @@ class Builtin:
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
 
+    # builtin decorator
+    ClassMethodDecorator = ClassMethodDecorator()
+    InstanceMethodDecorator = InstanceMethodDecorator()
+    StaticMethodDecorator = StaticMethodDecorator()
+
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
                                                 ConvertToInt,
@@ -106,6 +111,7 @@ class Builtin:
                                                 SequenceRemove,
                                                 SequenceReverse,
                                                 Sqrt,
+                                                StaticMethodDecorator,
                                                 StrSplit,
                                                 Sum
                                                 ]
@@ -115,7 +121,7 @@ class Builtin:
         return {symbol.raw_identifier if hasattr(symbol, 'raw_identifier') else symbol.identifier: symbol
                 for symbol in Interop.interop_symbols(package)}
 
-    # builtin decorator
+    # boa builtin decorator
     Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
@@ -124,6 +130,7 @@ class Builtin:
     UInt160 = UInt160Type.build()
     UInt256 = UInt256Type.build()
     ECPoint = ECPointType.build()
+    NeoAccountState = NeoAccountStateType.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -161,6 +168,7 @@ class Builtin:
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
+                              NeoAccountState,
                               Nep17Transfer,
                               Nep5Transfer,
                               ],

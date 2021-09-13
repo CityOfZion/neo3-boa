@@ -97,7 +97,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_len_of_bytes(self):
         path = self.get_contract_path('LenBytes.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -370,7 +369,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_extend_mutable_sequence(self):
         path = self.get_contract_path('ExtendMutableSequence.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -378,7 +376,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_extend_mutable_sequence_with_builtin(self):
         path = self.get_contract_path('ExtendMutableSequenceBuiltinCall.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -401,7 +398,6 @@ class TestBuiltinMethod(BoaTest):
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
         path = self.get_contract_path('ScriptHashInt.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -412,7 +408,6 @@ class TestBuiltinMethod(BoaTest):
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
         path = self.get_contract_path('ScriptHashIntBuiltinCall.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
@@ -423,7 +418,6 @@ class TestBuiltinMethod(BoaTest):
         script_hash = to_script_hash(String('123').to_bytes())
 
         path = self.get_contract_path('ScriptHashStr.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -435,7 +429,6 @@ class TestBuiltinMethod(BoaTest):
         script_hash = to_script_hash(String('123').to_bytes())
 
         path = self.get_contract_path('ScriptHashStrBuiltinCall.py')
-        output = Boa3.compile(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main',
@@ -821,6 +814,72 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
+    def test_max_str(self):
+        path = self.get_contract_path('MaxStr.py')
+        engine = TestEngine()
+
+        value1 = 'foo'
+        value2 = 'bar'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+        result = self.run_smart_contract(engine, path, 'main', value2, value1)
+        self.assertEqual(expected_result, result)
+
+        value1 = 'alg'
+        value2 = 'al'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+        value = 'some string'
+        expected_result = max(value, value)
+        result = self.run_smart_contract(engine, path, 'main', value, value)
+        self.assertEqual(expected_result, result)
+
+    def test_max_str_more_arguments(self):
+        path = self.get_contract_path('MaxStrMoreArguments.py')
+        engine = TestEngine()
+
+        values = 'Lorem', 'ipsum', 'dolor', 'sit', 'amet'
+        expected_result = max(values)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_max_bytes(self):
+        path = self.get_contract_path('MaxBytes.py')
+        engine = TestEngine()
+
+        value1 = b'foo'
+        value2 = b'bar'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        result = self.run_smart_contract(engine, path, 'main', value2, value1, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        value1 = b'alg'
+        value2 = b'al'
+        expected_result = max(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        value = b'some string'
+        expected_result = max(value, value)
+        result = self.run_smart_contract(engine, path, 'main', value, value, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+    def test_max_bytes_more_arguments(self):
+        path = self.get_contract_path('MaxBytesMoreArguments.py')
+        engine = TestEngine()
+
+        values = b'Lorem', b'ipsum', b'dolor', b'sit', b'amet'
+        expected_result = max(values)
+        result = self.run_smart_contract(engine, path, 'main', expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
     def test_max_too_few_parameters(self):
         path = self.get_contract_path('MaxTooFewParameters.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
@@ -850,6 +909,72 @@ class TestBuiltinMethod(BoaTest):
         numbers = 2, 8, 1, 4, 16
         expected_result = min(numbers)
         result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_min_str(self):
+        path = self.get_contract_path('MinStr.py')
+        engine = TestEngine()
+
+        value1 = 'foo'
+        value2 = 'bar'
+        expected_result = min(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+        result = self.run_smart_contract(engine, path, 'main', value2, value1)
+        self.assertEqual(expected_result, result)
+
+        value1 = 'alg'
+        value2 = 'al'
+        expected_result = min(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2)
+        self.assertEqual(expected_result, result)
+
+        value = 'some string'
+        expected_result = min(value, value)
+        result = self.run_smart_contract(engine, path, 'main', value, value)
+        self.assertEqual(expected_result, result)
+
+    def test_min_str_more_arguments(self):
+        path = self.get_contract_path('MinStrMoreArguments.py')
+        engine = TestEngine()
+
+        values = 'Lorem', 'ipsum', 'dolor', 'sit', 'amet'
+        expected_result = min(values)
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_min_bytes(self):
+        path = self.get_contract_path('MinBytes.py')
+        engine = TestEngine()
+
+        value1 = b'foo'
+        value2 = b'bar'
+        expected_result = min(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        result = self.run_smart_contract(engine, path, 'main', value2, value1, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        value1 = b'alg'
+        value2 = b'al'
+        expected_result = min(value1, value2)
+        result = self.run_smart_contract(engine, path, 'main', value1, value2, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        value = b'some string'
+        expected_result = min(value, value)
+        result = self.run_smart_contract(engine, path, 'main', value, value, expected_result_type=bytes)
+        self.assertEqual(expected_result, result)
+
+    def test_min_bytes_more_arguments(self):
+        path = self.get_contract_path('MinBytesMoreArguments.py')
+        engine = TestEngine()
+
+        values = b'Lorem', b'ipsum', b'dolor', b'sit', b'amet'
+        expected_result = min(values)
+        result = self.run_smart_contract(engine, path, 'main', expected_result_type=bytes)
         self.assertEqual(expected_result, result)
 
     def test_min_too_few_parameters(self):
@@ -890,7 +1015,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_result, result)
 
         with self.assertRaises(TestExecutionException):
-            result = self.run_smart_contract(engine, path, 'main', -1)
+            self.run_smart_contract(engine, path, 'main', -1)
 
         val = 25
         expected_result = int(sqrt(val))
@@ -1017,7 +1142,6 @@ class TestBuiltinMethod(BoaTest):
     def test_str_split_maxsplit_default(self):
         path = self.get_contract_path('StrSplitMaxsplitDefault.py')
         engine = TestEngine()
-        self.compile_and_save(path)
 
         string = '1#2#3#4'
         separator = '#'
