@@ -1171,3 +1171,72 @@ class TestList(BoaTest):
         self.assertEqual([10, 20], result)
 
     # endregion
+
+    # region TestCopy
+
+    def test_list_copy(self):
+        path = self.get_contract_path('Copy.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [1, 2, 3, 4], 5)
+        self.assertEqual([1, 2, 3, 4], result[0])
+        self.assertEqual([1, 2, 3, 4, 5], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(['list', 'unit', 'test'], result[0])
+        self.assertEqual(['list', 'unit', 'test', 'copy'], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [True, False], True)
+        self.assertEqual([True, False], result[0])
+        self.assertEqual([True, False, True], result[1])
+
+        result = self.run_smart_contract(engine, path, 'attribution', [1, 2, 3, 4], 5)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'attribution', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'attribution', [True, False], True)
+        self.assertEqual(False, result)
+
+    def test_int_list_copy(self):
+        path = self.get_contract_path('CopyInt.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_int_list', [1, 2, 3, 4], 5)
+        self.assertEqual([1, 2, 3, 4], result[0])
+        self.assertEqual([1, 2, 3, 4, 5], result[1])
+
+    def test_str_list_copy(self):
+        path = self.get_contract_path('CopyStr.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_str_list', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(['list', 'unit', 'test'], result[0])
+        self.assertEqual(['list', 'unit', 'test', 'copy'], result[1])
+
+    def test_bool_list_copy(self):
+        path = self.get_contract_path('CopyBool.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_bool_list', [True, False], True)
+        self.assertEqual([True, False], result[0])
+        self.assertEqual([True, False, True], result[1])
+
+    def test_list_copy_builtin_call(self):
+        path = self.get_contract_path('CopyBuiltinCall.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [1, 2, 3, 4], 5)
+        self.assertEqual([1, 2, 3, 4], result[0])
+        self.assertEqual([1, 2, 3, 4, 5], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(['list', 'unit', 'test'], result[0])
+        self.assertEqual(['list', 'unit', 'test', 'copy'], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [True, False], True)
+        self.assertEqual([True, False], result[0])
+        self.assertEqual([True, False, True], result[1])
+
+    # endregion

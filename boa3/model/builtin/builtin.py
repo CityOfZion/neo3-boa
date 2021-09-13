@@ -61,6 +61,7 @@ class Builtin:
     # python class method
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
+    ListCopy = CopyMethod()
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
@@ -97,6 +98,7 @@ class Builtin:
                                                 Exit,
                                                 IsInstance,
                                                 Len,
+                                                ListCopy,
                                                 Max,
                                                 Min,
                                                 Print,
