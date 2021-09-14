@@ -1458,11 +1458,17 @@ class CodeGenerator:
             inner_index = list(user_class.variables).index(var_id)
 
         if isinstance(inner_index, int):
-            # it's a class variable
+            # it's a variable from a class
             self.convert_literal(inner_index)
             index_address = self.bytecode_size
-            self.convert_load_variable(user_class.identifier, Variable(user_class))
-            no_stack_items_to_swap = 3 if var_id in user_class.class_variables else 2
+
+            if var_id in user_class.class_variables:
+                # it's a class variable
+                self.convert_load_variable(user_class.identifier, Variable(user_class))
+                no_stack_items_to_swap = 3
+            else:
+                no_stack_items_to_swap = 2
+
             self.swap_reverse_stack_items(no_stack_items_to_swap)
             self.convert_set_item(index_address)
             return

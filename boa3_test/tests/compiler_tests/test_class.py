@@ -270,10 +270,10 @@ class TestClass(BoaTest):
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_val', 10)
-        self.assertEqual([10, 2], result)
+        self.assertEqual([10, 10, 2], result)
 
         result = self.run_smart_contract(engine, path, 'get_val', 40)
-        self.assertEqual([40, 2], result)
+        self.assertEqual([10, 40, 2], result)
 
     def test_user_class_with_base(self):
         path = self.get_contract_path('UserClassWithBase.py')
