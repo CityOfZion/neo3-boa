@@ -6,7 +6,7 @@ class Example:
 
     def __init__(self):
         self.val1 = 1
-        self.val2 = 2
+        self.val2 = self.val1 + 1
 
 
 @public

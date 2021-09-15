@@ -335,25 +335,25 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if target is not None:
             target_type = self.get_type(target)
-        elif not isinstance(node, ast.Name):
-            target_type = self.get_type(node)
         else:
-            var: ISymbol = self.get_symbol(node.id)
-            if not isinstance(var, Variable):
+            target_type = None
+            var: ISymbol = self.get_symbol(node.id if hasattr(node, 'id') else node)
+            if isinstance(var, Variable):
+                if var.type is UndefinedType:
+                    var = var.copy()
+
+                if var.type in (None, UndefinedType):
+                    # it is an declaration with assignment and the value is neither literal nor another variable
+                    var.set_type(value_type)
+                target_type = var.type
+
+            elif isinstance(node, ast.Name):
                 self._log_error(
                     CompilerError.UnresolvedReference(
                         node.lineno, node.col_offset,
                         symbol_id=node.id
                     ))
                 return False
-
-            if var.type is UndefinedType:
-                var = var.copy()
-
-            if var.type in (None, UndefinedType):
-                # it is an declaration with assignment and the value is neither literal nor another variable
-                var.set_type(value_type)
-            target_type = var.type
 
         if self._current_scope is not None:
             if isinstance(node, ast.Name):
