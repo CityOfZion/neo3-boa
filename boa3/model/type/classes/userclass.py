@@ -67,6 +67,15 @@ class UserClass(ClassArrayType):
         else:
             self._instance_variables[var_id] = var
 
+    def include_property(self, prop_id: str, prop: Property):
+        """
+        Includes a property into the list of properties
+
+        :param prop_id: property identifier
+        :param prop: property to be included
+        """
+        self._properties[prop_id] = prop
+
     def include_callable(self, method_id: str, method: Callable, scope: ClassScope = ClassScope.INSTANCE):
         """
         Includes a method into the scope of the class
@@ -95,6 +104,8 @@ class UserClass(ClassArrayType):
         if symbol_id not in self.symbols:
             if isinstance(symbol, Variable):
                 self.include_variable(symbol_id, symbol, scope == ClassScope.INSTANCE)
+            elif isinstance(symbol, Property):
+                self.include_property(symbol_id, symbol)
             elif isinstance(symbol, Callable):
                 self.include_callable(symbol_id, symbol, scope)
             else:
