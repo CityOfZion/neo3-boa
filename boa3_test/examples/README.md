@@ -49,3 +49,52 @@ It's an example showing how to update a smart contract on the blockchain.
 
 The wrapped tokens are tokens linked to the value of another token. In this case, the wrapped NEO is linked to NEO and 
 wrapped GAS is linked to GAS. Both smart contracts are virtually the same, so there is only a test for the wrapped GAS.
+
+# Building
+
+To build one of the smart contracts above it is necessary to utilize the neo3-boa package and have the smart contract
+on your device. After installing neo3-boa with pip, it's possible to compile the smart contract using the command:
+
+```shell
+> neo3-boa path/to/your/file.py
+```
+
+It's also possible to automate compilation by importing `Boa3` and using the `compile_and_save()` method on a script:
+
+```python
+from boa3.boa3 import Boa3
+
+def main():
+    Boa3.compile_and_save('path/to/smart/contract.py')
+
+if __name__ == "main":
+    main()
+
+```
+
+> For more detailed information on how to compile, read neo3-boas [documentation](https://dojo.coz.io/neo3/boa/getting-started.html#getting-started).
+
+# Testing
+
+There is more than one way to test your smart contract, e.g., deploying your contract at Neo's TestNet, but I'd argue 
+that the quickest way to test would be using the TestEngine. Currently, it's necessary to compile the TestEngine from
+[this](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch.
+
+```python
+from boa3_test.tests.test_classes.testengine import TestEngine
+
+
+def main():
+    path_engine = '{path-to-test-engine-folder}'
+    path = 'path/to/nep-17/smart/contract.nef'
+    engine = TestEngine(path_engine)
+    
+    result = engine.run(path, 'balanceOf', bytes(range(20)))
+    assert result == 0
+    
+if __name__ == 'main':
+    main()
+
+```
+
+> For more information on the TestEngine, read neo3-boas [documentation](https://dojo.coz.io/neo3/boa/getting-started.html#test-engine).
