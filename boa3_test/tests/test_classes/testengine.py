@@ -2,7 +2,6 @@ from os import path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3 import constants
-from boa3.neo import to_hex_str
 from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
@@ -10,10 +9,12 @@ from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
 from boa3.neo3.vm import VMState
 from boa3_test.tests.test_classes.block import Block
+from boa3_test.tests.test_classes.signer import Signer
 from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.testcontract import TestContract
 from boa3_test.tests.test_classes.transaction import Transaction
 from boa3_test.tests.test_classes.transactionattribute import oracleresponse
+from boa3_test.tests.test_classes.witnessscope import WitnessScope
 
 
 class TestEngine:
@@ -40,7 +41,7 @@ class TestEngine:
         self._blocks: List[Block] = []
 
         self._current_tx: Optional[Transaction] = None
-        self._accounts: List[bytes] = []
+        self._accounts: List[Signer] = []
         self._contract_paths: List[TestContract] = []
 
         self._error_message: Optional[str] = None
@@ -132,7 +133,8 @@ class TestEngine:
     def add_gas(self, script_hash: bytes, amount: int) -> bool:
         return self._storage.add_token(constants.GAS_SCRIPT, script_hash, amount)
 
-    def add_signer_account(self, account: bytes):
+    def add_signer_account(self, account_address: bytes, account_scope: WitnessScope = WitnessScope.CalledByEntry):
+        account = Signer(UInt160(account_address), account_scope)
         if account not in self._accounts:
             self._accounts.append(account)
 
@@ -351,12 +353,12 @@ class TestEngine:
     def to_json(self, contract_id: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
         json = {
             'path': contract_id if isinstance(contract_id, str) else '',
-            'scripthash': str(contract_id) if isinstance(contract_id, UInt160) else None,
+            'scripthash': str(contract_id) if not isinstance(contract_id, str) else None,
             'method': method,
             'arguments': [contract_parameter_to_json(x) for x in args],
             'storage': self._storage.to_json(),
             'contracts': [{'nef': contract_path} for contract_path in self.contracts],
-            'signeraccounts': [to_hex_str(address) for address in self._accounts],
+            'signeraccounts': [address.to_json() for address in self._accounts],
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }
