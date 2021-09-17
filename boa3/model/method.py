@@ -21,12 +21,13 @@ class Method(Callable):
 
     def __init__(self, args: Dict[str, Variable] = None,
                  vararg: Optional[Tuple[str, Variable]] = None,
+                 kwargs: Optional[Dict[str, Variable]] = None,
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
                  is_init: bool = False,
                  origin_node: Optional[ast.AST] = None):
-        super().__init__(args, vararg, defaults, return_type, is_public, decorators, origin_node)
+        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}
