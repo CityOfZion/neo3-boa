@@ -824,3 +824,19 @@ class TestBytes(BoaTest):
         bytes_value = b'!@#$%123*-/'
         result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
         self.assertEqual(bytes_value.upper(), result)
+
+    def test_lower_method(self):
+        path = self.get_contract_path('LowerMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+        bytes_value = b'A1B123Y3Z'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+        bytes_value = b'!@#$%123*-/'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)

@@ -60,6 +60,7 @@ class Builtin:
 
     # python class method
     BytesStringUpper = UpperMethod()
+    BytesStringLower = LowerMethod()
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
     SequenceAppend = AppendMethod()
@@ -86,6 +87,7 @@ class Builtin:
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
                                                 BytesStringUpper,
+                                                BytesStringLower,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
