@@ -59,6 +59,7 @@ class Builtin:
     Exception = ExceptionMethod()
 
     # python class method
+    BytesStringUpper = UpperMethod()
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
     SequenceAppend = AppendMethod()
@@ -84,6 +85,7 @@ class Builtin:
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                BytesStringUpper,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
