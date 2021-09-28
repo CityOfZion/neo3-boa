@@ -417,3 +417,144 @@ class TestString(BoaTest):
         with self.assertRaises(AssertionError):
             # TODO: upper was implemented for ASCII characters only
             self.assertEqual(string.lower(), result)
+
+    def test_string_startswith_method(self):
+        path = self.get_contract_path('StartswithStringMethod.py')
+        engine = TestEngine()
+
+        string = 'unit_test'
+        substring = 'unit'
+        start = 0
+        end = len(string)
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = 'unit'
+        start = 2
+        end = 6
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = 'it'
+        start = 2
+        end = 6
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = 'it'
+        start = 2
+        end = 3
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = 'unit_tes'
+        start = -99
+        end = -1
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = ''
+        start = 0
+        end = 0
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = 'unit_test'
+        start = 0
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+        string = 'unit_test'
+        substring = 'unit_test'
+        start = 100
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
+        self.assertEqual(string.startswith(substring, start, end), result)
+
+    def test_string_startswith_method_default_end(self):
+        path = self.get_contract_path('StartswithStringMethodDefaultEnd.py')
+        engine = TestEngine()
+
+        string = 'unit_test'
+        substring = 'unit'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = 'unit'
+        start = 2
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = 'it'
+        start = 2
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = 'it'
+        start = 3
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = 'unit_tes'
+        start = -99
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = ''
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = ''
+        start = 99
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+        string = 'unit_test'
+        substring = 'unit_test'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
+        self.assertEqual(string.startswith(substring, start), result)
+
+    def test_string_startswith_method_defaults(self):
+        path = self.get_contract_path('StartswithStringMethodDefaults.py')
+        engine = TestEngine()
+
+        string = 'unit_test'
+        substring = 'unit'
+        result = self.run_smart_contract(engine, path, 'main', string, substring)
+        self.assertEqual(string.startswith(substring), result)
+
+        string = 'unit_test'
+        substring = 'unit_test'
+        result = self.run_smart_contract(engine, path, 'main', string, substring)
+        self.assertEqual(string.startswith(substring), result)
+
+        string = 'unit_test'
+        substring = ''
+        result = self.run_smart_contract(engine, path, 'main', string, substring)
+        self.assertEqual(string.startswith(substring), result)
+
+        string = 'unit_test'
+        substring = '12345'
+        result = self.run_smart_contract(engine, path, 'main', string, substring)
+        self.assertEqual(string.startswith(substring), result)
+
+        string = 'unit_test'
+        substring = 'bigger substring'
+        result = self.run_smart_contract(engine, path, 'main', string, substring)
+        self.assertEqual(string.startswith(substring), result)

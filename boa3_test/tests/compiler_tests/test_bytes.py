@@ -840,3 +840,137 @@ class TestBytes(BoaTest):
         bytes_value = b'!@#$%123*-/'
         result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
         self.assertEqual(bytes_value.lower(), result)
+
+    def test_bytes_startswith_method(self):
+        path = self.get_contract_path('StartswithBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 0
+        end = len(bytes_value)
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 2
+        end = 6
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 2
+        end = 6
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 2
+        end = 3
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_tes'
+        start = -99
+        end = -1
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        start = 0
+        end = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_test'
+        start = 0
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+    def test_bytes_startswith_method_default_end(self):
+        path = self.get_contract_path('StartswithBytesMethodDefaultEnd.py')
+        engine = TestEngine()
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 2
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 2
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 3
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_tes'
+        start = -99
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        start = 99
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_test'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+    def test_bytes_startswith_method_defaults(self):
+        path = self.get_contract_path('StartswithBytesMethodDefaults.py')
+        engine = TestEngine()
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_test'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'12345'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'bigger subbytes_value'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
