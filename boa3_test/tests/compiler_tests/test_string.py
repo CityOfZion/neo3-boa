@@ -558,3 +558,30 @@ class TestString(BoaTest):
         substring = 'bigger substring'
         result = self.run_smart_contract(engine, path, 'main', string, substring)
         self.assertEqual(string.startswith(substring), result)
+
+    def test_isdigit_method(self):
+        path = self.get_contract_path('IsdigitMethod.py')
+        engine = TestEngine()
+        self.compile_and_save(path)
+
+        string = '0123456789'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.isdigit(), result)
+
+        string = '23mixed01'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.isdigit(), result)
+
+        string = 'no digits here'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.isdigit(), result)
+
+        string = ''
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.isdigit(), result)
+
+        string = '¹²³'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        with self.assertRaises(AssertionError):
+            # neo3-boas isdigit implementation does not verify values that are not from the ASCII
+            self.assertEqual(string.isdigit(), result)

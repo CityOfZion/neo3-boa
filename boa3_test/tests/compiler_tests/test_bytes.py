@@ -974,3 +974,23 @@ class TestBytes(BoaTest):
         subbytes_value = b'bigger subbytes_value'
         result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
         self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+    def test_isdigit_method(self):
+        path = self.get_contract_path('IsdigitMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'0123456789'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+        bytes_value = b'23mixed01'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+        bytes_value = b'no digits here'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+        bytes_value = b''
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
