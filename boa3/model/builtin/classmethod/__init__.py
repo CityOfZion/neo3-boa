@@ -9,6 +9,7 @@ __all__ = ['AppendMethod',
            'PopMethod',
            'RemoveMethod',
            'ReverseMethod',
+           'UpperMethod',
            'ToBoolMethod',
            'ToBytesMethod',
            'ToIntMethod',
@@ -29,3 +30,4 @@ from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
 from boa3.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
+from boa3.model.builtin.classmethod.uppermethod import UpperMethod

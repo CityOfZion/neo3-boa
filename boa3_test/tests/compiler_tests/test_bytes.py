@@ -808,3 +808,19 @@ class TestBytes(BoaTest):
         if isinstance(result, str):
             result = String(result).to_bytes()
         self.assertEqual((256).to_bytes(2, 'little') + bytes(30), result)
+
+    def test_upper_method(self):
+        path = self.get_contract_path('UpperMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
+
+        bytes_value = b'a1b123y3z'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
+
+        bytes_value = b'!@#$%123*-/'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)

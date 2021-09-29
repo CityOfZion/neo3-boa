@@ -371,3 +371,26 @@ class TestString(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'string_test', 'neo', '')
         self.assertEqual('"ne"test_symbol":}"', result)
+
+    def test_upper_method(self):
+        path = self.get_contract_path('UpperMethod.py')
+        engine = TestEngine()
+
+        string = 'abcdefghijklmnopqrstuvwxyz'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.upper(), result)
+
+        string = 'a1b123y3z'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.upper(), result)
+
+        string = '!@#$%123*-/'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.upper(), result)
+
+        string = 'áõèñ'
+        result = self.run_smart_contract(engine, path, 'main', string)
+
+        with self.assertRaises(AssertionError):
+            # TODO: upper was implemented for ASCII characters only
+            self.assertEqual(string.upper(), result)
