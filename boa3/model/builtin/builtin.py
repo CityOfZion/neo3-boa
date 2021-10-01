@@ -60,6 +60,7 @@ class Builtin:
 
     # python class method
     BytesStringIsdigit = IsDigitMethod()
+    BytesStringJoin = JoinMethod()
     BytesStringLower = LowerMethod()
     BytesStringStartswith = StartsWithMethod()
     BytesStringUpper = UpperMethod()
@@ -93,6 +94,7 @@ class Builtin:
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
                                                 BytesStringIsdigit,
+                                                BytesStringJoin,
                                                 BytesStringLower,
                                                 BytesStringStartswith,
                                                 BytesStringUpper,
