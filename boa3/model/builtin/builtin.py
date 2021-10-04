@@ -66,6 +66,7 @@ class Builtin:
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
+    SequenceIndex = IndexSequenceMethod()
     SequenceInsert = InsertMethod()
     SequencePop = PopSequenceMethod()
     SequenceRemove = RemoveMethod()
@@ -111,6 +112,7 @@ class Builtin:
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
+                                                SequenceIndex,
                                                 SequenceInsert,
                                                 SequencePop,
                                                 SequenceRemove,
