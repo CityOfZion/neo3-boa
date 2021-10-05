@@ -3,24 +3,38 @@ from typing import Any, Dict, List, Optional, Tuple
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.collection.sequence.mutable.listtype import ListType
+from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class CopyMethod(IBuiltinMethod):
-    def __init__(self, self_type: ListType = None):
+    def __init__(self, arg_value: Optional[IType] = None):
         from boa3.model.type.type import Type
-        if not isinstance(self_type, ListType):
-            self_type = Type.list
-
         identifier = 'copy'
 
-        args: Dict[str, Variable] = {'self': Variable(self_type)}
-        super().__init__(identifier, args, return_type=self_type)
+        self._allowed_types = [Type.dict, Type.list]
+        default_type = Type.list
+        if not self._is_valid_type(arg_value):
+            arg_value = default_type
+
+        args: Dict[str, Variable] = {'self': Variable(arg_value)}
+        super().__init__(identifier, args, return_type=arg_value)
+
+    def _is_valid_type(self, arg_type: Optional[IType]) -> bool:
+        return (isinstance(arg_type, IType) and
+                any(allowed_type.is_type_of(arg_type) for allowed_type in self._allowed_types))
 
     @property
     def _arg_self(self) -> Variable:
         return self.args['self']
+
+    @property
+    def identifier(self) -> str:
+        from boa3.model.type.type import Type
+        if self._arg_self.type is Type.list:
+            return self._identifier
+        return '-{0}_from_{1}'.format(self._identifier, self._arg_self.type._identifier)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 1:
@@ -46,8 +60,16 @@ class CopyMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if value == self.args['self'].type:
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
+        if value == self.args['self']:
             return self
-        if isinstance(value, ListType):
-            return CopyMethod(value)
-        return super().build(value)
+
+        from boa3.model.builtin.classmethod.copydictmethod import CopyDictMethod
+        from boa3.model.builtin.classmethod.copylistmethod import CopyListMethod
+        from boa3.model.type.type import Type
+
+        if Type.dict.is_type_of(value):
+            return CopyDictMethod(value)
+
+        return CopyListMethod(value)

@@ -1,6 +1,7 @@
 __all__ = ['AppendMethod',
            'ClearMethod',
-           'CopyMethod',
+           'CopyDictMethod',
+           'CopyListMethod',
            'CountSequenceMethod',
            'CountStrMethod',
            'ExtendMethod',
@@ -21,7 +22,8 @@ __all__ = ['AppendMethod',
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.clearmethod import ClearMethod
-from boa3.model.builtin.classmethod.copymethod import CopyMethod
+from boa3.model.builtin.classmethod.copydictmethod import CopyDictMethod
+from boa3.model.builtin.classmethod.copylistmethod import CopyListMethod
 from boa3.model.builtin.classmethod.countsequencemethod import CountSequenceMethod
 from boa3.model.builtin.classmethod.countstrmethod import CountStrMethod
 from boa3.model.builtin.classmethod.extendmethod import ExtendMethod

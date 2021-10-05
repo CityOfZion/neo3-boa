@@ -63,7 +63,7 @@ class Builtin:
     BytesStringLower = LowerMethod()
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
-    ListCopy = CopyMethod()
+    Copy = CopyListMethod()
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
@@ -97,6 +97,7 @@ class Builtin:
                                                 ConvertToBytes,
                                                 ConvertToInt,
                                                 ConvertToStr,
+                                                Copy,
                                                 CountSequence,
                                                 CountStr,
                                                 DictKeys,
@@ -105,7 +106,6 @@ class Builtin:
                                                 Exit,
                                                 IsInstance,
                                                 Len,
-                                                ListCopy,
                                                 Max,
                                                 Min,
                                                 Print,

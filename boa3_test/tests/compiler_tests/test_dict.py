@@ -539,3 +539,29 @@ class TestDict(BoaTest):
         key = 'key not inside'
         with self.assertRaises(TestExecutionException, msg=self.MAP_KEY_NOT_FOUND_ERROR_MSG):
             self.run_smart_contract(engine, path, 'main', dict_, key)
+
+    def test_dict_copy(self):
+        path = self.get_contract_path('DictCopy.py')
+        engine = TestEngine()
+
+        _dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}
+        result = self.run_smart_contract(engine, path, 'copy_dict', _dict)
+        self.assertEqual(2, len(result))
+        self.assertEqual({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}, result[0])
+        self.assertEqual({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'unit': 'test'}, result[1])
+
+    def test_dict_copy_builtin_call(self):
+        path = self.get_contract_path('CopyDictBuiltinCall.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_dict', {0: 10, 1: 11, 2: 12}, 3, 13)
+        self.assertEqual({0: 10, 1: 11, 2: 12}, result[0])
+        self.assertEqual({0: 10, 1: 11, 2: 12, 3: 13}, result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_dict', {'dict': 1, 'unit': 2, 'test': 3}, 'copy', 4)
+        self.assertEqual({'dict': 1, 'unit': 2, 'test': 3}, result[0])
+        self.assertEqual({'dict': 1, 'unit': 2, 'test': 3, 'copy': 4}, result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_dict', {True: 1, False: 0}, True, 99)
+        self.assertEqual({True: 1, False: 0}, result[0])
+        self.assertEqual({True: 99, False: 0}, result[1])
