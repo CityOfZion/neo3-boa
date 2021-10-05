@@ -518,3 +518,24 @@ class TestDict(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(55, result)
+
+    def test_dict_pop(self):
+        path = self.get_contract_path('DictPop.py')
+        engine = TestEngine()
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'a'
+        result = self.run_smart_contract(engine, path, 'main', dict_, key)
+        value = dict_.pop(key)
+        self.assertEqual((dict_, value), tuple(result))
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'd'
+        result = self.run_smart_contract(engine, path, 'main', dict_, key)
+        value = dict_.pop(key)
+        self.assertEqual((dict_, value), tuple(result))
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'key not inside'
+        with self.assertRaises(TestExecutionException, msg=self.MAP_KEY_NOT_FOUND_ERROR_MSG):
+            self.run_smart_contract(engine, path, 'main', dict_, key)
