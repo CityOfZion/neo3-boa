@@ -1120,10 +1120,28 @@ class TestList(BoaTest):
 
     def test_list_insert_any_value(self):
         path = self.get_contract_path('InsertAnyValue.py')
-
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([1, '4', 2, 3], result)
+
+        list_ = [1, 2, 3]
+        pos = 0
+        value = '0'
+        result = self.run_smart_contract(engine, path, 'Main', list_, pos, value)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
+
+        list_ = [1, 2, 3]
+        pos = 1
+        value = '1'
+        result = self.run_smart_contract(engine, path, 'Main', list_, pos, value)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
+
+        list_ = [1, 2, 3]
+        pos = 3
+        value = '4'
+        result = self.run_smart_contract(engine, path, 'Main', list_, pos, value)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
 
     def test_list_insert_int_negative_index(self):
         path = self.get_contract_path('InsertIntNegativeIndex.py')
