@@ -67,10 +67,11 @@ class Builtin:
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
     SequenceInsert = InsertMethod()
-    SequencePop = PopMethod()
+    SequencePop = PopSequenceMethod()
     SequenceRemove = RemoveMethod()
     SequenceReverse = ReverseMethod()
     DictKeys = MapKeysMethod()
+    DictPop = PopDictMethod()
     DictValues = MapValuesMethod()
 
     # custom class methods

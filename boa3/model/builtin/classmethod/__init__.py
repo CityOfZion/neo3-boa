@@ -7,7 +7,8 @@ __all__ = ['AppendMethod',
            'InsertMethod',
            'MapKeysMethod',
            'MapValuesMethod',
-           'PopMethod',
+           'PopDictMethod',
+           'PopSequenceMethod',
            'RemoveMethod',
            'ReverseMethod',
            'UpperMethod',
@@ -25,7 +26,8 @@ from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.insertmethod import InsertMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
-from boa3.model.builtin.classmethod.popmethod import PopMethod
+from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod
+from boa3.model.builtin.classmethod.popsequencemethod import PopSequenceMethod
 from boa3.model.builtin.classmethod.removemethod import RemoveMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
