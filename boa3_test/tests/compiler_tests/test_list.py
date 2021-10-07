@@ -1242,7 +1242,7 @@ class TestList(BoaTest):
         self.assertEqual([True, False, True], result[1])
 
     def test_list_copy_builtin_call(self):
-        path = self.get_contract_path('CopyBuiltinCall.py')
+        path = self.get_contract_path('CopyListBuiltinCall.py')
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'copy_list', [1, 2, 3, 4], 5)
