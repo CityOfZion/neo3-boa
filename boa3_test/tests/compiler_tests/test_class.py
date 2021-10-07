@@ -151,7 +151,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_called_from_class_name(self):
         path = self.get_contract_path('UserClassWithClassMethodFromClass.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
@@ -218,7 +217,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_variable_and_class_method(self):
         path = self.get_contract_path('UserClassWithClassVariableAndClassMethod.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_val1')
@@ -243,7 +241,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method(self):
         path = self.get_contract_path('UserClassWithInstanceMethod.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_by_class_name')
@@ -255,7 +252,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_variable_from_object(self):
         path = self.get_contract_path('UserClassWithInstanceVariableFromObject.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_val1')
@@ -266,7 +262,6 @@ class TestClass(BoaTest):
 
     def test_user_class_update_instance_variable(self):
         path = self.get_contract_path('UserClassUpdateInstanceVariable.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'get_val', 10)
@@ -286,3 +281,47 @@ class TestClass(BoaTest):
     def test_user_class_with_decorator(self):
         path = self.get_contract_path('UserClassWithDecorator.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_property_from_object(self):
+        path = self.get_contract_path('UserClassWithPropertyFromObject.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_property')
+        self.assertEqual(1, result)
+
+    def test_user_class_with_property_using_instance_variables_from_object(self):
+        path = self.get_contract_path('UserClassWithPropertyUsingInstanceVariablesFromObject.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_property')
+        self.assertEqual(10, result)
+
+    def test_user_class_with_property_using_class_variables_from_object(self):
+        path = self.get_contract_path('UserClassWithPropertyUsingClassVariablesFromObject.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_property')
+        self.assertEqual(10, result)
+
+    def test_user_class_with_property_using_variables_from_object(self):
+        path = self.get_contract_path('UserClassWithPropertyUsingVariablesFromObject.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_property')
+        self.assertEqual(47, result)
+
+    def test_user_class_with_property_from_class(self):
+        path = self.get_contract_path('UserClassWithPropertyFromClass.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_user_class_with_property_using_arguments(self):
+        path = self.get_contract_path('UserClassWithPropertyUsingArguments.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_user_class_with_property_mismatched_type(self):
+        path = self.get_contract_path('UserClassWithPropertyMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_user_class_with_property_without_self(self):
+        path = self.get_contract_path('UserClassWithPropertyWithoutSelf.py')
+        self.assertCompilerLogs(CompilerError.SelfArgumentError, path)

@@ -329,5 +329,18 @@ class TypeHintMissing(CompilerError):
             return "Type hint is missing for the symbol '%s'" % self.symbol_id
 
 
+class SelfArgumentError(CompilerError):
+    """
+    An error raised when the self argument is wrong
+    """
+
+    def __init__(self, line: int, col: int):
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "The self argument was not found or the annotation is incorrect"
+
+
 def join_args(iterable: Iterable[str]) -> str:
     return str.join("', '", iterable)

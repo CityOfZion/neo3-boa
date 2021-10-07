@@ -22,6 +22,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.classes.classtype import ClassType
@@ -162,6 +163,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = symbols[function.name]
 
         from boa3.model.event import Event
+        if isinstance(method, Property):
+            method = method.getter
+
         if isinstance(method, Method):
             self._current_method = method
             self.new_local_scope({var_id: var for var_id, var in method.symbols.items()
@@ -1420,9 +1424,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_instance_variable_from_class = (isinstance(symbol, UserClass)
                                            and attribute.attr in symbol.instance_variables)
         is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables
+        is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties
 
         if ((attr_symbol is None and hasattr(symbol, 'symbols'))
-                or (is_from_class_name and is_instance_variable_from_class)):
+                or (is_from_class_name and is_instance_variable_from_class)
+                or (is_from_class_name and is_property_from_class)):
             # if it couldn't find the symbol in the attribute symbols, raise unresolved reference
             self._log_error(
                 CompilerError.UnresolvedReference(
@@ -1437,6 +1443,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.NotSupportedOperation(
                     attribute.lineno, attribute.col_offset,
                     symbol_id='reassign class variables'
+                ))
+            return Attribute(attribute.value, None, attr_symbol, attribute)
+
+        if not is_from_class_name and is_property_from_class and isinstance(attribute.ctx, ast.Store):
+            # setting values for properties in objects is not supported yet
+            # @property.setter is not implemented
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    attribute.lineno, attribute.col_offset,
+                    symbol_id='setting values for properties'
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 

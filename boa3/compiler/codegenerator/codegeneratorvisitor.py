@@ -15,6 +15,7 @@ from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
@@ -246,6 +247,10 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param function: the python ast function definition node
         """
         method = self._symbols[function.name]
+
+        if isinstance(method, Property):
+            method = method.getter
+
         if isinstance(method, Method):
             self.current_method = method
             self.generator.convert_begin_method(method)

@@ -83,6 +83,7 @@ class Builtin:
     # builtin decorator
     ClassMethodDecorator = ClassMethodDecorator()
     InstanceMethodDecorator = InstanceMethodDecorator()
+    PropertyDecorator = PropertyDecorator()
     StaticMethodDecorator = StaticMethodDecorator()
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
@@ -105,6 +106,7 @@ class Builtin:
                                                 Max,
                                                 Min,
                                                 Print,
+                                                PropertyDecorator,
                                                 Range,
                                                 Reversed,
                                                 ScriptHash,

@@ -9,6 +9,7 @@ from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.primitive.primitivetype import PrimitiveType
@@ -84,6 +85,9 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
         symbols = self.symbols if self._current_class is None else self._current_class.symbols
         method = symbols[node.name]
+
+        if isinstance(method, Property):
+            method = method.getter
 
         if isinstance(method, Method):
             self._is_optimizing = True

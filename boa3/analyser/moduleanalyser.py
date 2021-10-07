@@ -20,6 +20,7 @@ from boa3.model.expression import IExpression
 from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
 from boa3.model.module import Module
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.annotation.uniontype import UnionType
@@ -620,6 +621,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         global_scope_symbols = self._scope_stack[0].symbols if len(self._scope_stack) > 0 else {}
 
         self._set_instance_variables(method_scope)
+        self._set_properties(function)
 
         self._current_method = None
         self.__include_callable(function.name, method)
@@ -655,7 +657,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         instance_var_id = split_name[1]
                         self._current_class.include_symbol(instance_var_id, var)
                         scope.remove_symbol(var_id)
-            print()
+
+    def _set_properties(self, function: ast.FunctionDef):
+        from boa3.model.builtin.decorator import PropertyDecorator
+        if (isinstance(self._current_class, UserClass)
+                and isinstance(self._current_method, Method)
+                and any(isinstance(decorator, PropertyDecorator) for decorator in self._current_method.decorators)):
+            if len(self._current_method.args) < 1 or not any('self' == arg for arg in self._current_method.args):
+                self._log_error(
+                    CompilerError.SelfArgumentError(function.lineno, function.col_offset)
+                )
+            self._current_class.include_symbol(self._current_method.origin.name, Property(self._current_method))
 
     def visit_arguments(self, arguments: ast.arguments) -> FunctionArguments:
         """

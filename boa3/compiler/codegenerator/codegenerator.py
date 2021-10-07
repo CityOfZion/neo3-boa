@@ -126,6 +126,7 @@ class CodeGenerator:
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
 
         self._current_method: Method = None
+        self._current_class: Method = None
 
         self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
         self._can_append_target: bool = True
@@ -1597,7 +1598,7 @@ class CodeGenerator:
 
     def convert_method_call(self, function: Method, num_args: int):
         """
-        Converts a builtin method function call
+        Converts a method function call
 
         :param function: the function to be converted
         """
