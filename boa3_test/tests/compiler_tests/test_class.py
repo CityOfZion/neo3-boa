@@ -313,3 +313,15 @@ class TestClass(BoaTest):
     def test_user_class_with_property_from_class(self):
         path = self.get_contract_path('UserClassWithPropertyFromClass.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_user_class_with_property_using_arguments(self):
+        path = self.get_contract_path('UserClassWithPropertyUsingArguments.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_user_class_with_property_mismatched_type(self):
+        path = self.get_contract_path('UserClassWithPropertyMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_user_class_with_property_without_self(self):
+        path = self.get_contract_path('UserClassWithPropertyWithoutSelf.py')
+        self.assertCompilerLogs(CompilerError.SelfArgumentError, path)

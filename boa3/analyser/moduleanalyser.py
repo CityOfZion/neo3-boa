@@ -621,7 +621,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         global_scope_symbols = self._scope_stack[0].symbols if len(self._scope_stack) > 0 else {}
 
         self._set_instance_variables(method_scope)
-        self._set_properties()
+        self._set_properties(function)
 
         self._current_method = None
         self.__include_callable(function.name, method)
@@ -658,12 +658,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._current_class.include_symbol(instance_var_id, var)
                         scope.remove_symbol(var_id)
 
-    def _set_properties(self):
+    def _set_properties(self, function: ast.FunctionDef):
         from boa3.model.builtin.decorator import PropertyDecorator
         if (isinstance(self._current_class, UserClass)
                 and isinstance(self._current_method, Method)
-                and any(isinstance(decorator, PropertyDecorator) for decorator in self._current_method.decorators)
-                and len(self._current_method.args) == 1):
+                and any(isinstance(decorator, PropertyDecorator) for decorator in self._current_method.decorators)):
+            if len(self._current_method.args) < 1 or not any('self' == arg for arg in self._current_method.args):
+                self._log_error(
+                    CompilerError.SelfArgumentError(function.lineno, function.col_offset)
+                )
             self._current_class.include_symbol(self._current_method.origin.name, Property(self._current_method))
 
     def visit_arguments(self, arguments: ast.arguments) -> FunctionArguments:
