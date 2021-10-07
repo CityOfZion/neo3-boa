@@ -520,3 +520,80 @@ class TestTuple(BoaTest):
         expected_result = a[:999:-2]
         result = self.run_smart_contract(engine, path, 'really_high_end')
         self.assertEqual(expected_result, tuple(result))
+
+    def test_tuple_index(self):
+        path = self.get_contract_path('IndexTuple.py')
+        engine = TestEngine()
+
+        tuple_ = (1, 2, 3, 4)
+        value = 3
+        start = 0
+        end = 4
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
+        self.assertEqual(tuple_.index(value, start, end), result)
+
+        tuple_ = (1, 2, 3, 4)
+        value = 3
+        start = 2
+        end = 4
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
+        self.assertEqual(tuple_.index(value, start, end), result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 3, 4)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 4, -1)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 0, -99)
+
+        tuple_ = (1, 2, 3, 4)
+        value = 3
+        start = 0
+        end = -1
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
+        self.assertEqual(tuple_.index(value, start, end), result)
+
+        tuple_ = (1, 2, 3, 4)
+        value = 2
+        start = 0
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
+        self.assertEqual(tuple_.index(value, start, end), result)
+
+    def test_tuple_index_end_default(self):
+        path = self.get_contract_path('IndexTupleEndDefault.py')
+        engine = TestEngine()
+
+        tuple_ = (1, 2, 3, 4)
+        value = 3
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start)
+        self.assertEqual(tuple_.index(value, start), result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 2, 99)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 4, -1)
+
+        tuple_ = (1, 2, 3, 4)
+        value = 2
+        start = -10
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start)
+        self.assertEqual(tuple_.index(value, start), result)
+
+    def test_tuple_index_defaults(self):
+        path = self.get_contract_path('IndexTupleDefaults.py')
+        engine = TestEngine()
+
+        tuple_ = (1, 2, 3, 4)
+        value = 3
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value)
+        self.assertEqual(tuple_.index(value), result)
+
+        tuple_ = (1, 2, 3, 4)
+        value = 1
+        result = self.run_smart_contract(engine, path, 'main', tuple_, value)
+        self.assertEqual(tuple_.index(value), result)
