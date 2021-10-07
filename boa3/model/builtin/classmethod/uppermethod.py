@@ -29,8 +29,8 @@ class UpperMethod(IBuiltinMethod):
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.neo.vm.type.Integer import Integer
 
-        lower_a = Integer(97).to_byte_array()
-        lower_z = Integer(122).to_byte_array()
+        lower_a = Integer(ord('a')).to_byte_array()
+        lower_z = Integer(ord('z')).to_byte_array()
         jmp_place_holder = (Opcode.JMP, b'\x01')
 
         initializing = [                    # initialize auxiliary values
