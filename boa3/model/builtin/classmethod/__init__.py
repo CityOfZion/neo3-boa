@@ -5,6 +5,7 @@ __all__ = ['AppendMethod',
            'CountStrMethod',
            'ExtendMethod',
            'InsertMethod',
+           'LowerMethod',
            'MapKeysMethod',
            'MapValuesMethod',
            'PopDictMethod',
@@ -24,6 +25,7 @@ from boa3.model.builtin.classmethod.countsequencemethod import CountSequenceMeth
 from boa3.model.builtin.classmethod.countstrmethod import CountStrMethod
 from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.insertmethod import InsertMethod
+from boa3.model.builtin.classmethod.lowermethod import LowerMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
 from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod

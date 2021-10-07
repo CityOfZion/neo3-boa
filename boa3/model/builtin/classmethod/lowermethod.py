@@ -7,14 +7,14 @@ from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class UpperMethod(IBuiltinMethod):
+class LowerMethod(IBuiltinMethod):
     def __init__(self, self_type: Union[StrType, BytesType] = None):
         from boa3.model.type.type import Type
 
         if not isinstance(self_type, (StrType, BytesType)):
             self_type = Type.str
 
-        identifier = 'upper'
+        identifier = 'lower'
         args: Dict[str, Variable] = {'self': Variable(self_type)}
 
         super().__init__(identifier, args, return_type=self_type)
@@ -29,8 +29,8 @@ class UpperMethod(IBuiltinMethod):
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.neo.vm.type.Integer import Integer
 
-        lower_a = Integer(ord('a')).to_byte_array()
-        lower_z = Integer(ord('z')).to_byte_array()
+        upper_a = Integer(ord('A')).to_byte_array()
+        upper_z = Integer(ord('Z')).to_byte_array()
         jmp_place_holder = (Opcode.JMP, b'\x01')
 
         initializing = [                    # initialize auxiliary values
@@ -65,31 +65,31 @@ class UpperMethod(IBuiltinMethod):
             (Opcode.SUBSTR, b''),           # substr_middle = string[index:index+modifier]
             (Opcode.CONVERT, StackItemType.ByteString),
             (Opcode.DUP, b''),
-            (Opcode.PUSHDATA1, Integer(len(lower_a)).to_byte_array() + lower_a),
-            jmp_place_holder,               # jump to get the substring to the right if substr_middle value is lower than 'a'
+            (Opcode.PUSHDATA1, Integer(len(upper_a)).to_byte_array() + upper_a),
+            jmp_place_holder,               # jump to get the substring to the right if substr_middle value is lower than 'A'
         ]
 
-        verify_greater_than_z = [           # verifies if substr_middle is between 'a' and 'z'
+        verify_greater_than_z = [           # verifies if substr_middle is between 'A' and 'Z'
             (Opcode.DUP, b''),
-            (Opcode.PUSHDATA1, Integer(len(lower_z)).to_byte_array() + lower_z),
-            jmp_place_holder,               # jump to get the substring to the right if substr_middle value is greater than 'z'
+            (Opcode.PUSHDATA1, Integer(len(upper_z)).to_byte_array() + upper_z),
+            jmp_place_holder,               # jump to get the substring to the right if substr_middle value is greater than 'Z'
         ]
 
-        swap_lower_to_upper_case = [        # change middle_substr to uppercase equivalent
+        swap_upper_to_lower_case = [        # change middle_substr to lowercase equivalent
             (Opcode.PUSHINT8, Integer(32).to_byte_array(signed=True)),
-            (Opcode.SUB, b''),
+            (Opcode.ADD, b''),
             (Opcode.CONVERT, StackItemType.ByteString),
         ]
 
         jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
-                                                                                       swap_lower_to_upper_case), True)
+                                                                                       swap_upper_to_lower_case), True)
         get_substring_middle[-1] = jmp_to_join_substring
 
-        jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_lower_to_upper_case), True)
+        jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_upper_to_lower_case), True)
         verify_greater_than_z[-1] = jmp_to_join_substring
 
         get_substring_middle.extend(verify_greater_than_z)
-        get_substring_middle.extend(swap_lower_to_upper_case)
+        get_substring_middle.extend(swap_upper_to_lower_case)
 
         get_substring_right = [             # gets the substring to the right of the index
             (Opcode.ROT, b''),
@@ -154,5 +154,5 @@ class UpperMethod(IBuiltinMethod):
 
     def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, (StrType, BytesType)):
-            return UpperMethod(value)
+            return LowerMethod(value)
         return super().build(value)

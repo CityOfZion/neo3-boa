@@ -809,8 +809,8 @@ class TestBytes(BoaTest):
             result = String(result).to_bytes()
         self.assertEqual((256).to_bytes(2, 'little') + bytes(30), result)
 
-    def test_upper_method(self):
-        path = self.get_contract_path('UpperMethod.py')
+    def test_bytes_upper(self):
+        path = self.get_contract_path('UpperBytesMethod.py')
         engine = TestEngine()
 
         bytes_value = b'abcdefghijklmnopqrstuvwxyz'
@@ -824,3 +824,19 @@ class TestBytes(BoaTest):
         bytes_value = b'!@#$%123*-/'
         result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
         self.assertEqual(bytes_value.upper(), result)
+
+    def test_bytes_lower(self):
+        path = self.get_contract_path('LowerBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+        bytes_value = b'A1B123Y3Z'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+        bytes_value = b'!@#$%123*-/'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
