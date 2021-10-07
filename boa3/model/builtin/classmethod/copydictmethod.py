@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 from boa3.model.builtin.classmethod.copymethod import CopyMethod
 from boa3.model.type.itype import IType
