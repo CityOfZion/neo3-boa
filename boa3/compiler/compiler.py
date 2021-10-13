@@ -1,6 +1,7 @@
 import logging
 import os
 
+from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.filegenerator import FileGenerator
@@ -30,7 +31,8 @@ class Compiler:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
-        logging.info('Started compiling\t{0}'.format(filename))
+        logging.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
+        logging.info(f'Started compiling\t{filename}')
         self._entry_smart_contract = os.path.splitext(filename)[0]
         self._analyse(fullpath, log)
         return self._compile()
