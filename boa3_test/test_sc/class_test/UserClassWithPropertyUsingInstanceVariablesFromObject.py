@@ -9,6 +9,7 @@ class Example:
     def some_property(self) -> int:
         return self._ivar
 
+
 @public
 def get_property() -> int:
     return Example().some_property

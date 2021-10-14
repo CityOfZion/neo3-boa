@@ -1,8 +1,12 @@
+import platform
 import sys
 
+from boa3 import __version__ as boa_version
 from boa3.neo import from_hex_str
 
 SYS_VERSION_INFO = sys.version_info
+SYS_VERSION = platform.python_version()
+BOA_VERSION = boa_version
 
 ONE_BYTE_MAX_VALUE = 255
 TWO_BYTES_MAX_VALUE = 256 ** 2 - 1

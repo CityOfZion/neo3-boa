@@ -413,7 +413,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             # set item
             var_data = self.visit(subscript.value)
 
-            index = subscript.slice.value
+            index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
             symbol_id = var_data.symbol_id
             value_type = var_data.type
 
