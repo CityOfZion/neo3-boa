@@ -59,6 +59,7 @@ class Builtin:
     Exception = ExceptionMethod()
 
     # python class method
+    BytesStringStartswith = StartsWithMethod()
     BytesStringUpper = UpperMethod()
     BytesStringLower = LowerMethod()
     CountSequence = CountSequenceMethod()
@@ -90,6 +91,7 @@ class Builtin:
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                BytesStringStartswith,
                                                 BytesStringUpper,
                                                 BytesStringLower,
                                                 ClassMethodDecorator,

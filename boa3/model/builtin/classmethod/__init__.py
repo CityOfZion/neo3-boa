@@ -14,11 +14,13 @@ __all__ = ['AppendMethod',
            'PopSequenceMethod',
            'RemoveMethod',
            'ReverseMethod',
-           'UpperMethod',
+           'StartsWithMethod',
            'ToBoolMethod',
            'ToBytesMethod',
            'ToIntMethod',
-           'ToStrMethod']
+           'ToStrMethod',
+           'UpperMethod',
+           ]
 
 from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.clearmethod import ClearMethod
@@ -36,6 +38,7 @@ from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod
 from boa3.model.builtin.classmethod.popsequencemethod import PopSequenceMethod
 from boa3.model.builtin.classmethod.removemethod import RemoveMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
+from boa3.model.builtin.classmethod.startswithmethod import StartsWithMethod
 from boa3.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
 from boa3.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
 from boa3.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
