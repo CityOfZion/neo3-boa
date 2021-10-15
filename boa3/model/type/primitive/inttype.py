@@ -27,6 +27,17 @@ class IntType(PrimitiveType):
     def stack_item(self) -> StackItemType:
         return StackItemType.Integer
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.ConvertToBytes
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
     @classmethod
     def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):

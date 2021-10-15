@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, List, Optional, Tuple
 
 from boa3.model.builtin.interop.interopinterfacetype import InteropInterfaceType
 from boa3.model.method import Method
-from boa3.model.property import Property
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.itype import IType
-from boa3.model.variable import Variable
+from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class IteratorType(InteropInterfaceType, ICollectionType):
@@ -35,42 +34,6 @@ class IteratorType(InteropInterfaceType, ICollectionType):
     def identifier(self) -> str:
         return '{0}[{1}, {2}]'.format(self._identifier, self.valid_key.identifier, self.item_type.identifier)
 
-    @property
-    def class_variables(self) -> Dict[str, Variable]:
-        return {}
-
-    @property
-    def instance_variables(self) -> Dict[str, Variable]:
-        return {}
-
-    @property
-    def properties(self) -> Dict[str, Property]:
-        if self._properties is None:
-            from boa3.model.builtin.interop.iterator.getiteratorvalue import IteratorValueProperty
-            self._properties = {
-                'value': IteratorValueProperty(self)
-            }
-
-        return self._properties.copy()
-
-    @property
-    def static_methods(self) -> Dict[str, Method]:
-        return {}
-
-    @property
-    def class_methods(self) -> Dict[str, Method]:
-        return {}
-
-    @property
-    def instance_methods(self) -> Dict[str, Method]:
-        if self._methods is None:
-            from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
-
-            self._methods = {
-                'next': IteratorNextMethod()
-            }
-        return self._methods.copy()
-
     def constructor_method(self) -> Optional[Method]:
         return self._constructor
 
@@ -95,6 +58,20 @@ class IteratorType(InteropInterfaceType, ICollectionType):
     @classmethod
     def _is_type_of(cls, value: Any):
         return isinstance(value, IteratorType)
+
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.interop.iterator.iteratornextmethod import IteratorNextMethod
+        from boa3.model.builtin.interop.iterator.getiteratorvalue import IteratorValueProperty
+
+        self._instance_methods['next'] = IteratorNextMethod()
+
+        self._properties['value'] = IteratorValueProperty(self)
+
+    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+        from boa3.model.type.classes.pythonclass import PythonClass
+        return super(PythonClass, self).is_instance_opcodes()
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, IteratorType):

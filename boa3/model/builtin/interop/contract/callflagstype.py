@@ -39,7 +39,10 @@ class CallFlagsType(IntType):
         from boa3.builtin.interop.contract import CallFlags
         from boa3.model.variable import Variable
 
-        return {name: Variable(self) for name in CallFlags.__members__.keys()}
+        _symbols = super().symbols
+        _symbols.update({name: Variable(self) for name in CallFlags.__members__.keys()})
+
+        return _symbols
 
     def get_value(self, symbol_id) -> Any:
         """
@@ -47,8 +50,9 @@ class CallFlagsType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        if symbol_id in self.symbols:
-            from boa3.builtin.interop.contract import CallFlags
+        from boa3.builtin.interop.contract import CallFlags
+
+        if symbol_id in self.symbols and symbol_id in CallFlags.__members__:
             return CallFlags.__members__[symbol_id]
 
         return None

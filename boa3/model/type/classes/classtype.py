@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from boa3.compiler.codegenerator import get_bytes_count
-from boa3.model.method import Method
-from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
-from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.Integer import Integer
@@ -23,48 +20,74 @@ class ClassType(IType, ABC):
 
     @property
     @abstractmethod
-    def class_variables(self) -> Dict[str, Variable]:
+    def class_variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         return {}
 
     @property
     @abstractmethod
-    def instance_variables(self) -> Dict[str, Variable]:
+    def instance_variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         return {}
 
     @property
-    def variables(self) -> Dict[str, Variable]:
+    def variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         variables = self.class_variables.copy()
         variables.update(self.instance_variables)
         return variables
 
     @property
-    def _all_variables(self) -> Dict[str, Variable]:
+    def _all_variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         return self.variables
 
     @property
     @abstractmethod
-    def properties(self) -> Dict[str, Property]:
+    def properties(self):
+        """
+        :rtype: Dict[str, boa3.model.property.Property]
+        """
         return {}
 
     @property
     @abstractmethod
-    def static_methods(self) -> Dict[str, Method]:
+    def static_methods(self):
+        """
+        :rtype: Dict[str, boa3.model.method.Method]
+        """
         return {}
 
     @property
     @abstractmethod
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self):
+        """
+        :rtype: Dict[str, boa3.model.method.Method]
+        """
         return {}
 
     @property
     @abstractmethod
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self):
+        """
+        :rtype: Dict[str, boa3.model.method.Method]
+        """
         return {}
 
     @abstractmethod
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self):
         """
         If the class constructor is None, it mustn't allow instantiation of this class
+
+        :rtype: boa3.model.method.Method or None
         """
         pass
 

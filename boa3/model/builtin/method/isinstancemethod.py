@@ -96,7 +96,8 @@ class IsInstanceMethod(IBuiltinMethod):
             jmps = []
             for check_instance in types[:-1]:
                 opcodes.append((Opcode.DUP, b''))
-                opcodes.extend(check_instance.is_instance_opcodes())
+                is_instance_opcodes = check_instance.is_instance_opcodes()
+                opcodes.extend(is_instance_opcodes)
 
                 jmps.append(len(opcodes))
                 opcodes.append((Opcode.JMPIF, b''))

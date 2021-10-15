@@ -161,6 +161,15 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 return True
         return False
 
+    def is_implemented_class_type(self, symbol) -> bool:
+        if not isinstance(symbol, ClassType):
+            return False
+
+        from boa3.model.type.classes.pythonclass import PythonClass
+        from boa3.model.builtin.interop.interopinterfacetype import InteropInterfaceType
+
+        return not isinstance(symbol, PythonClass) or isinstance(symbol, InteropInterfaceType)
+
     def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
         """
         Parses an expression to an ast.

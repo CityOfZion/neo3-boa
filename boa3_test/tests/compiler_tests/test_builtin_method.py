@@ -563,8 +563,6 @@ class TestBuiltinMethod(BoaTest):
             Opcode.PUSHDATA1        # str.to_bytes('123')
             + Integer(len(value)).to_byte_array(min_length=1)
             + value
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 

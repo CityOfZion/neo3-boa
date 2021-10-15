@@ -34,7 +34,10 @@ class NamedCurveType(IntType):
         from boa3.builtin.interop.crypto import NamedCurve
         from boa3.model.variable import Variable
 
-        return {name: Variable(self) for name in NamedCurve.__members__.keys()}
+        _symbols = super().symbols
+        _symbols.update({name: Variable(self) for name in NamedCurve.__members__.keys()})
+
+        return _symbols
 
     def get_value(self, symbol_id) -> Any:
         """
@@ -42,8 +45,9 @@ class NamedCurveType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        if symbol_id in self.symbols:
-            from boa3.builtin.interop.crypto import NamedCurve
+        from boa3.builtin.interop.crypto import NamedCurve
+
+        if symbol_id in self.symbols and symbol_id in NamedCurve.__members__:
             return NamedCurve.__members__[symbol_id]
 
         return None
