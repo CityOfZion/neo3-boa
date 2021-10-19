@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from typing import Any, Iterable, Set, Union
 
 from boa3.model.type.annotation.uniontype import UnionType
+from boa3.model.type.classes.pythonclass import PythonClass
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 
 
-class ICollectionType(IType, ABC):
+class ICollectionType(PythonClass, ABC):
     """
     An interface used to represent Python mapping type
     """

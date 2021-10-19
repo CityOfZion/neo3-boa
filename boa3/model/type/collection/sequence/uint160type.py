@@ -1,17 +1,13 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from boa3.model.method import Method
-from boa3.model.property import Property
-from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
-from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItem import StackItemType
 
 
-class UInt160Type(BytesType, ClassType):
+class UInt160Type(BytesType):
     """
     A class used to represent Neo's UInt160 type
     """
@@ -30,34 +26,6 @@ class UInt160Type(BytesType, ClassType):
     def abi_type(self) -> AbiType:
         return AbiType.Hash160
 
-    @property
-    def stack_item(self) -> StackItemType:
-        return StackItemType.ByteString
-
-    @property
-    def instance_variables(self) -> Dict[str, Variable]:
-        return {}
-
-    @property
-    def class_variables(self) -> Dict[str, Variable]:
-        return {}
-
-    @property
-    def properties(self) -> Dict[str, Property]:
-        return {}
-
-    @property
-    def static_methods(self) -> Dict[str, Method]:
-        return {}
-
-    @property
-    def class_methods(self) -> Dict[str, Method]:
-        return {}
-
-    @property
-    def instance_methods(self) -> Dict[str, Method]:
-        return {}
-
     def constructor_method(self) -> Optional[Method]:
         return self._constructor
 
@@ -72,6 +40,10 @@ class UInt160Type(BytesType, ClassType):
     @classmethod
     def _is_type_of(cls, value: Any):
         return isinstance(value, UInt160Type)
+
+    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+        from boa3.model.type.classes.pythonclass import PythonClass
+        return super(PythonClass, self).is_instance_opcodes()
 
     def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
         push_int_opcode, size_data = Opcode.get_push_and_data(20)

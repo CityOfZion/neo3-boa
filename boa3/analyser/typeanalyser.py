@@ -1458,7 +1458,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         attr_type = value.type if isinstance(value, IExpression) else value
         # for checking during the code generation
-        if (isinstance(attr_type, ClassType) and
+        if (self.is_implemented_class_type(attr_type) and
                 not (isinstance(attribute.value, ast.Name) and attribute.value.id == attr_type.identifier) and
                 (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
             attribute.generate_value = True

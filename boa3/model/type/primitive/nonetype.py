@@ -1,11 +1,12 @@
 from typing import Any, List, Tuple
 
+from boa3.model.type.classes.pythonclass import PythonClass
 from boa3.model.type.itype import IType
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
 
 
-class NoneType(IType):
+class NoneType(PythonClass):
     """
     A class used to represent Python None value
     """

@@ -1,13 +1,11 @@
 from typing import Any
 
-from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
-from boa3.model.type.primitive.primitivetype import PrimitiveType
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.StackItem import StackItemType
 
 
-class StrType(SequenceType, PrimitiveType):
+class StrType(ByteStringType):
     """
     A class used to represent Python str type
     """
@@ -17,10 +15,6 @@ class StrType(SequenceType, PrimitiveType):
         super().__init__(identifier, [self])
 
     @property
-    def identifier(self) -> str:
-        return self._identifier
-
-    @property
     def default_value(self) -> Any:
         return str()
 
@@ -28,9 +22,17 @@ class StrType(SequenceType, PrimitiveType):
     def abi_type(self) -> AbiType:
         return AbiType.String
 
-    @property
-    def stack_item(self) -> StackItemType:
-        return StackItemType.ByteString
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.StrSplit,
+                            Builtin.ConvertToBytes
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
 
     @classmethod
     def build(cls, value: Any) -> IType:
@@ -49,15 +51,3 @@ class StrType(SequenceType, PrimitiveType):
 
     def is_type_of(self, value: Any) -> bool:
         return self._is_type_of(value)
-
-    def is_valid_key(self, key_type: IType) -> bool:
-        return key_type == self.valid_key
-
-    @property
-    def valid_key(self) -> IType:
-        from boa3.model.type.type import Type
-        return Type.int
-
-    @property
-    def can_reassign_values(self) -> bool:
-        return False

@@ -13,6 +13,22 @@ class MutableSequenceType(SequenceType, ABC):
     def __init__(self, identifier: str, values_type: Set[IType]):
         super().__init__(identifier, values_type)
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.SequenceAppend,
+                            Builtin.SequenceClear,
+                            Builtin.SequenceInsert,
+                            Builtin.SequenceExtend,
+                            Builtin.SequenceReverse,
+                            Builtin.SequenceRemove,
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
     def is_type_of(self, value: Any) -> bool:
         if self._is_type_of(value):
             if isinstance(value, MutableSequenceType):

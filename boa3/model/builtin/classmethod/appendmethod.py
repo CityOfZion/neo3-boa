@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sized, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -68,7 +68,9 @@ class AppendMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if type(value) == type(self.args['self'].type):
+        if isinstance(value, Sized) and len(value) > 0:
+            value = value[0]
+        if value == self.args['self'].type:
             return self
         if isinstance(value, MutableSequenceType):
             return AppendMethod(value)

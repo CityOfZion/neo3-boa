@@ -23,5 +23,18 @@ class DictType(MutableMappingType):
     def _is_type_of(cls, value: Any):
         return type(value) in [dict, DictType]
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.DictKeys,
+                            Builtin.DictValues,
+                            Builtin.DictPop,
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
     def __hash__(self):
         return hash(self.identifier)

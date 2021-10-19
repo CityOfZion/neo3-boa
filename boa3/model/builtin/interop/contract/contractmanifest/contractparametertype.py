@@ -39,7 +39,10 @@ class ContractParameterType(IntType):
         from boa3.neo.vm.type.ContractParameterType import ContractParameterType as ContractParameter
         from boa3.model.variable import Variable
 
-        return {name: Variable(self) for name in ContractParameter.__members__.keys()}
+        _symbols = super().symbols
+        _symbols.update({name: Variable(self) for name in ContractParameter.__members__.keys()})
+
+        return _symbols
 
     def get_value(self, symbol_id) -> Any:
         """
@@ -47,8 +50,9 @@ class ContractParameterType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        if symbol_id in self.symbols:
-            from boa3.neo.vm.type.ContractParameterType import ContractParameterType as ContractParameter
+        from boa3.neo.vm.type.ContractParameterType import ContractParameterType as ContractParameter
+
+        if symbol_id in self.symbols and symbol_id in ContractParameter.__members__:
             return ContractParameter.__members__[symbol_id]
 
         return None

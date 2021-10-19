@@ -40,7 +40,10 @@ class TriggerType(IntType):
         from boa3.builtin.interop.runtime import TriggerType as Trigger
         from boa3.model.variable import Variable
 
-        return {name: Variable(self) for name in Trigger.__members__.keys()}
+        _symbols = super().symbols
+        _symbols.update({name: Variable(self) for name in Trigger.__members__.keys()})
+
+        return _symbols
 
     def get_value(self, symbol_id) -> Any:
         """

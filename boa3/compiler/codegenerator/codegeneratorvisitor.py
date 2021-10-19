@@ -122,7 +122,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
                     class_type = result.type
 
-                    if (isinstance(result.type, ClassType)
+                    if (self.is_implemented_class_type(result.type)
                             and len(result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)) > 1):
                         # if the symbol id has the attribute separator and the top item on the stack is a user class,
                         # then this value is an attribute from that class
@@ -696,7 +696,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
             symbol = self.generator.get_symbol(function_id, is_internal=is_internal)
 
-        if isinstance(symbol, ClassType):
+        if self.is_implemented_class_type(symbol):
             self.generator.convert_init_user_class(symbol)
             symbol = symbol.constructor_method()
         args_addresses: List[int] = []
@@ -822,29 +822,35 @@ class VisitorCodeGenerator(IAstAnalyser):
         value = attribute.value
         value_symbol = None
         value_data = self.visit(value)
+        need_to_visit_again = True
 
         if value_data.symbol_id is not None and not value_data.already_generated:
             value_id = value_data.symbol_id
             value_symbol = (value_data.symbol
                             if value_data.symbol is not None
                             else self.generator.get_symbol(value_id))
+            value_type = value_symbol.type if hasattr(value_symbol, 'type') else value_symbol
 
-            if hasattr(value_symbol, 'symbols') and attribute.attr in value_symbol.symbols:
-                attr = value_symbol.symbols[attribute.attr]
+            if hasattr(value_type, 'symbols') and attribute.attr in value_type.symbols:
+                attr = value_type.symbols[attribute.attr]
 
             if isinstance(value_symbol, UserClass):
                 if isinstance(attr, Method) and attr.has_cls_or_self:
                     self.generator.convert_load_symbol(value_id)
+                    need_to_visit_again = False
 
                 if isinstance(attr, Variable):
                     self.visit_to_generate(attribute.value)
                     self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
                     return self.build_data(attribute, symbol=attr)
         else:
+            need_to_visit_again = value_data.already_generated
             self._remove_inserted_opcodes_since(last_address, last_stack)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
-            value_symbol_id = value_symbol.identifier if isinstance(value_symbol, ClassType) else value_data.symbol_id
+            value_symbol_id = (value_symbol.identifier
+                               if self.is_implemented_class_type(value_symbol)
+                               else value_data.symbol_id)
             attribute_id = f'{value_symbol_id}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
             return self.build_data(attribute, symbol_id=attribute_id, symbol=attr)
 
@@ -852,7 +858,8 @@ class VisitorCodeGenerator(IAstAnalyser):
             value_data = self.visit(value)
         elif hasattr(attribute, 'generate_value') and attribute.generate_value:
             current_bytecode_size = self.generator.bytecode_size
-            value_data = self.visit_to_generate(attribute.value)
+            if need_to_visit_again:
+                value_data = self.visit_to_generate(attribute.value)
 
             result = value_data.type
             generation_result = value_data.symbol
@@ -862,7 +869,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     generation_result = result
                     result = result.type
 
-            if isinstance(result, ClassType):
+            if self.is_implemented_class_type(result):
                 class_attr_id = f'{result.identifier}.{attribute.attr}'
                 symbol_id = class_attr_id
                 symbol = None
