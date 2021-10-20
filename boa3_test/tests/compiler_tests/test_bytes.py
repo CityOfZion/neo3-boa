@@ -994,3 +994,47 @@ class TestBytes(BoaTest):
         bytes_value = b''
         result = self.run_smart_contract(engine, path, 'main', bytes_value)
         self.assertEqual(bytes_value.isdigit(), result)
+
+    def test_bytes_join_with_sequence(self):
+        path = self.get_contract_path('JoinBytesMethodWithSequence.py')
+        engine = TestEngine()
+
+        bytes_value = b' '
+        sequence = [b"Unit", b"Test", b"Neo3-boa"]
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sequence,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
+
+        bytes_value = b' '
+        sequence = []
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sequence,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
+
+        bytes_value = b' '
+        sequence = [b"UnitTest"]
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sequence,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
+
+    def test_bytes_join_with_dictionary(self):
+        path = self.get_contract_path('JoinBytesMethodWithDictionary.py')
+        engine = TestEngine()
+
+        bytes_value = b' '
+        dictionary = {b"Unit": 1, b"Test": 2, b"Neo3-boa": 3}
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
+
+        bytes_value = b' '
+        dictionary = {}
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
+
+        bytes_value = b' '
+        dictionary = {b"UnitTest": 1}
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)

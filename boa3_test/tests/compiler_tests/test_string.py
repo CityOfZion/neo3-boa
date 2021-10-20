@@ -585,3 +585,41 @@ class TestString(BoaTest):
         with self.assertRaises(AssertionError):
             # neo3-boas isdigit implementation does not verify values that are not from the ASCII
             self.assertEqual(string.isdigit(), result)
+
+    def test_string_join_with_sequence(self):
+        path = self.get_contract_path('JoinStringMethodWithSequence.py')
+        engine = TestEngine()
+
+        string = ' '
+        sequence = ["Unit", "Test", "Neo3-boa"]
+        result = self.run_smart_contract(engine, path, 'main', string, sequence)
+        self.assertEqual(string.join(sequence), result)
+
+        string = ' '
+        sequence = []
+        result = self.run_smart_contract(engine, path, 'main', string, sequence)
+        self.assertEqual(string.join(sequence), result)
+
+        string = ' '
+        sequence = ["UnitTest"]
+        result = self.run_smart_contract(engine, path, 'main', string, sequence)
+        self.assertEqual(string.join(sequence), result)
+
+    def test_string_join_with_dictionary(self):
+        path = self.get_contract_path('JoinStringMethodWithDictionary.py')
+        engine = TestEngine()
+
+        string = ' '
+        dictionary = {"Unit": 1, "Test": 2, "Neo3-boa": 3}
+        result = self.run_smart_contract(engine, path, 'main', string, dictionary)
+        self.assertEqual(string.join(dictionary), result)
+
+        string = ' '
+        dictionary = {}
+        result = self.run_smart_contract(engine, path, 'main', string, dictionary)
+        self.assertEqual(string.join(dictionary), result)
+
+        string = ' '
+        dictionary = {"UnitTest": 1}
+        result = self.run_smart_contract(engine, path, 'main', string, dictionary)
+        self.assertEqual(string.join(dictionary), result)
