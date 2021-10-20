@@ -28,7 +28,7 @@ class FindOptionsType(IntType):
     @classmethod
     def _is_type_of(cls, value: Any):
         from boa3.builtin.interop.storage import FindOptions
-        return isinstance(value, (FindOptions, FindOptionsType))
+        return isinstance(value, (FindOptions, FindOptionsType, type(int)))
 
     @property
     def symbols(self) -> Dict[str, ISymbol]:
@@ -40,10 +40,7 @@ class FindOptionsType(IntType):
         from boa3.builtin.interop.storage import FindOptions
         from boa3.model.variable import Variable
 
-        _symbols = super().symbols
-        _symbols.update({name: Variable(self) for name in FindOptions.__members__.keys()})
-
-        return _symbols
+        return {name: Variable(self) for name in FindOptions.__members__.keys()}
 
     def get_value(self, symbol_id) -> Any:
         """
@@ -51,9 +48,8 @@ class FindOptionsType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        from boa3.builtin.interop.storage import FindOptions
-
-        if symbol_id in self.symbols and symbol_id in FindOptions.__members__:
+        if symbol_id in self.symbols:
+            from boa3.builtin.interop.storage import FindOptions
             return FindOptions.__members__[symbol_id]
 
         return None
