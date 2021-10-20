@@ -59,9 +59,10 @@ class Builtin:
     Exception = ExceptionMethod()
 
     # python class method
+    BytesStringIsdigit = IsDigitMethod()
+    BytesStringLower = LowerMethod()
     BytesStringStartswith = StartsWithMethod()
     BytesStringUpper = UpperMethod()
-    BytesStringLower = LowerMethod()
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
     Copy = CopyListMethod()
@@ -91,9 +92,10 @@ class Builtin:
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                BytesStringIsdigit,
+                                                BytesStringLower,
                                                 BytesStringStartswith,
                                                 BytesStringUpper,
-                                                BytesStringLower,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
