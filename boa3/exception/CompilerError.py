@@ -64,6 +64,23 @@ class IncorrectNumberOfOperands(CompilerError):
         return "Incorrect number of operands: expected '%s', got '%s' instead" % (self.expected, self.actual)
 
 
+class InvalidUsage(CompilerError):
+    """
+    An error raised when a built-in function or decorator is incorrectly defined
+    """
+
+    def __init__(self, line: int, col: int, custom_error_message: str = None):
+        self.custom_error_message = custom_error_message
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        message = "Invalid usage"
+        if self.custom_error_message is not None:
+            message += f": {self.custom_error_message}"
+        return message
+
+
 class InvalidType(CompilerError):
     """
     An error raised when a type that is not supported by Neo VM is used

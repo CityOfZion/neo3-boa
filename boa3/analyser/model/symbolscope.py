@@ -39,3 +39,6 @@ class SymbolScope:
 
     def __contains__(self, item: str) -> bool:
         return item in self._symbols
+
+    def __repr__(self) -> str:
+        return self._symbols.__repr__()

@@ -15,8 +15,18 @@ class ClassType(IType, ABC):
     An abstract class used to represent Python class
     """
 
-    def __init__(self, identifier: str):
+    def __init__(self, identifier: str, decorators: list = None):
         super().__init__(identifier)
+
+        if decorators is None:
+            decorators = []
+        else:
+            # avoid circular import
+            from boa3.model.decorator import IDecorator
+            decorators = [decorator for decorator in decorators
+                          if isinstance(decorator, IDecorator)]
+
+        self.decorators = decorators
 
     @property
     @abstractmethod
@@ -104,7 +114,7 @@ class ClassType(IType, ABC):
     @property
     def class_symbols(self) -> Dict[str, ISymbol]:
         s: Dict[str, ISymbol] = {}
-        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_methods)  # class methods and variables can be accessed both
         s.update(self.class_variables)  # from class name or instance object
         s.update(self.static_methods)
         return s
@@ -112,7 +122,7 @@ class ClassType(IType, ABC):
     @property
     def instance_symbols(self) -> Dict[str, ISymbol]:
         s: Dict[str, ISymbol] = {}
-        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_methods)  # class methods and variables can be accessed both
         s.update(self.class_variables)  # from class name or instance object
         s.update(self.instance_methods)
         s.update(self.instance_variables)
@@ -130,6 +140,12 @@ class ClassType(IType, ABC):
     def stack_item(self) -> StackItemType:
         # must be overwritten, classes cannot be mapped to Any
         return super().stack_item
+
+    @property
+    def is_interface(self) -> bool:
+        # TODO: change when other interfaces identifiers are implemented
+        from boa3.model.builtin.decorator import ContractDecorator
+        return any(isinstance(decorator, ContractDecorator) for decorator in self.decorators)
 
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         is_type_opcodes = [

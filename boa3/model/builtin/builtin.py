@@ -143,6 +143,7 @@ class Builtin:
                 for symbol in Interop.interop_symbols(package)}
 
     # boa builtin decorator
+    ContractInterface = ContractDecorator()
     Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
@@ -160,11 +161,12 @@ class Builtin:
     # boa smart contract methods
     Abort = AbortMethod()
 
-    boa_builtins: List[IdentifiedSymbol] = [Public,
-                                            NewEvent,
+    boa_builtins: List[IdentifiedSymbol] = [ContractInterface,
                                             Event,
                                             Metadata,
                                             NeoMetadataType,
+                                            NewEvent,
+                                            Public,
                                             ScriptHash
                                             ]
 

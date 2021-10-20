@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from boa3 import constants
 from boa3.model.callable import Callable
@@ -12,8 +12,8 @@ from boa3.model.variable import Variable
 
 
 class UserClass(ClassArrayType):
-    def __init__(self, identifier: str):
-        super(ClassArrayType, self).__init__(identifier)
+    def __init__(self, identifier: str, decorators: List[Callable] = None):
+        super(ClassArrayType, self).__init__(identifier, decorators)
 
         self._static_methods: Dict[str, Method] = {}
 

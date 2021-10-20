@@ -38,7 +38,13 @@ class ImportAnalyser(IAstAnalyser):
 
         package = imports.builtin.get_package(self._import_identifier)
         if hasattr(package, 'symbols'):
-            self.symbols = package.symbols
+            if hasattr(package, 'inner_packages'):
+                # when have symbol and packages with the same id, prioritize symbol
+                self.symbols: Dict[str, ISymbol] = package.inner_packages
+                self.symbols.update(package.symbols)
+            else:
+                self.symbols = package.symbols
+
             self.can_be_imported = True
             self.is_builtin_import = True
             return
