@@ -27,6 +27,10 @@ class LogicOr(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
+        if left.is_type_of(int):
+            left = Type.int
+            right = Type.int
+
         return left == right and left in self._valid_types
 
     def _get_result(self, left: IType, right: IType) -> IType:
