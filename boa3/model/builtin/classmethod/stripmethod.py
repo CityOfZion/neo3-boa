@@ -1,18 +1,17 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
-from boa3.model.type.primitive.bytestype import BytesType
-from boa3.model.type.primitive.strtype import StrType
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class StripMethod(IBuiltinMethod):
-    def __init__(self, self_type: Union[StrType, BytesType] = None):
+    def __init__(self, self_type: ByteStringType = None):
         from boa3.model.type.type import Type
 
-        if not isinstance(self_type, (StrType, BytesType)):
+        if not isinstance(self_type, ByteStringType):
             self_type = Type.str
 
         identifier = 'strip'
@@ -28,7 +27,7 @@ class StripMethod(IBuiltinMethod):
         # decode() will convert it back to str
         whitespace_chars = [char.encode('unicode-escape').decode() for char in whitespace]
 
-        if isinstance(self_type, StrType):
+        if Type.str.is_type_of(self_type):
             chars_default = ast.parse("'{0}'".format(''.join(whitespace_chars))).body[0].value
         else:
             chars_default = ast.parse("b'{0}'".format(''.join(whitespace_chars))).body[0].value
@@ -231,6 +230,6 @@ class StripMethod(IBuiltinMethod):
     def build(self, value: Any) -> IBuiltinMethod:
         if type(value) == type(self.args['self'].type):
             return self
-        if isinstance(value, (StrType, BytesType)):
+        if isinstance(value, ByteStringType):
             return StripMethod(value)
         return super().build(value)

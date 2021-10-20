@@ -28,7 +28,6 @@ from boa3.model.type.classes.classscope import ClassScope
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
-from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
