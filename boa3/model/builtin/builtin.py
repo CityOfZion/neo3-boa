@@ -63,6 +63,7 @@ class Builtin:
     BytesStringJoin = JoinMethod()
     BytesStringLower = LowerMethod()
     BytesStringStartswith = StartsWithMethod()
+    BytesStringStrip = StripMethod()
     BytesStringUpper = UpperMethod()
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
@@ -97,6 +98,7 @@ class Builtin:
                                                 BytesStringJoin,
                                                 BytesStringLower,
                                                 BytesStringStartswith,
+                                                BytesStringStrip,
                                                 BytesStringUpper,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,

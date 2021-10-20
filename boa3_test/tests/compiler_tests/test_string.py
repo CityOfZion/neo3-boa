@@ -559,6 +559,45 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', string, substring)
         self.assertEqual(string.startswith(substring), result)
 
+    def test_string_strip(self):
+        path = self.get_contract_path('StripStringMethod.py')
+        engine = TestEngine()
+
+        string = 'abcdefghijklmnopqrstuvwxyz'
+        chars = 'abcxyz'
+        result = self.run_smart_contract(engine, path, 'main', string, chars)
+        self.assertEqual(string.strip(chars), result)
+
+        string = 'abcdefghijklmnopqrsvwxyz unit test abcdefghijklmnopqrsvwxyz'
+        chars = 'abcdefghijklmnopqrsvwxyz '
+        result = self.run_smart_contract(engine, path, 'main', string, chars)
+        self.assertEqual(string.strip(chars), result)
+
+        string = '0123456789hello world987654310'
+        chars = '0987654321'
+        result = self.run_smart_contract(engine, path, 'main', string, chars)
+        self.assertEqual(string.strip(chars), result)
+
+    def test_string_strip_default(self):
+        path = self.get_contract_path('StripStringMethodDefault.py')
+        engine = TestEngine()
+
+        string = '     unit test    '
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.strip(), result)
+
+        string = 'unit test    '
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.strip(), result)
+
+        string = '    unit test'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.strip(), result)
+
+        string = ' \t\n\r\f\vunit test \t\n\r\f\v'
+        result = self.run_smart_contract(engine, path, 'main', string)
+        self.assertEqual(string.strip(), result)
+
     def test_isdigit_method(self):
         path = self.get_contract_path('IsdigitMethod.py')
         engine = TestEngine()

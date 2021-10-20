@@ -975,6 +975,52 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
         self.assertEqual(bytes_value.startswith(subbytes_value), result)
 
+    def test_bytes_strip(self):
+        path = self.get_contract_path('StripBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        sub_bytes = b'abcxyz'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sub_bytes,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
+
+        bytes_value = b'abcdefghijklmnopqrsvwxyz unit test abcdefghijklmnopqrsvwxyz'
+        sub_bytes = b'abcdefghijklmnopqrsvwxyz '
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sub_bytes,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
+
+        bytes_value = b'0123456789hello world987654310'
+        sub_bytes = b'0987654321'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sub_bytes,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
+
+    def test_bytes_strip_default(self):
+        path = self.get_contract_path('StripBytesMethodDefault.py')
+        engine = TestEngine()
+
+        bytes_value = b'     unit test    '
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+        bytes_value = b'unit test    '
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+        bytes_value = b'    unit test'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+        bytes_value = b' \t\n\r\f\vunit test \t\n\r\f\v'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
     def test_isdigit_method(self):
         path = self.get_contract_path('IsdigitMethod.py')
         engine = TestEngine()
