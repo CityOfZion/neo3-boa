@@ -64,7 +64,7 @@ class IndexMethod(IBuiltinMethod):
 
         from boa3.model.type.type import Type
         if len(value) > 0 and Type.str.is_type_of(value[0]):
-            from boa3.model.builtin.builtin import Builtin
-            return Builtin.CountStr
+            from boa3.model.builtin.classmethod.indexstrmethod import IndexStrMethod
+            return IndexStrMethod(value[0])
 
         return super().build(value)
