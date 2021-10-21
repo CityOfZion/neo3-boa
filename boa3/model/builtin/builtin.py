@@ -76,6 +76,7 @@ class Builtin:
     SequencePop = PopSequenceMethod()
     SequenceRemove = RemoveMethod()
     SequenceReverse = ReverseMethod()
+    StrIndex = IndexStrMethod()
     DictKeys = MapKeysMethod()
     DictPop = PopDictMethod()
     DictValues = MapValuesMethod()
@@ -131,6 +132,7 @@ class Builtin:
                                                 SequenceReverse,
                                                 Sqrt,
                                                 StaticMethodDecorator,
+                                                StrIndex,
                                                 StrSplit,
                                                 Sum
                                                 ]
