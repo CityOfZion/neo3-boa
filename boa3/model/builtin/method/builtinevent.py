@@ -10,9 +10,10 @@ from boa3.model.variable import Variable
 class IBuiltinEvent(IBuiltinCallable, Event, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None,
                  defaults: List[ast.AST] = None,
-                 vararg: Optional[Tuple[str, Variable]] = None):
+                 vararg: Optional[Tuple[str, Variable]] = None,
+                 kwargs: Optional[Dict[str, Variable]] = None):
         from boa3.model.type.type import Type
-        super().__init__(identifier, args, vararg, defaults, Type.none)
+        super().__init__(identifier, args, vararg, kwargs, defaults, Type.none)
 
         # constructor of IBuiltinCallable and Event classes are conflicting
         self._identifier = identifier

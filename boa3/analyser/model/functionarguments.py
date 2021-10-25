@@ -8,6 +8,7 @@ class FunctionArguments:
     def __init__(self):
         self._args: Dict[str, Variable] = {}
         self._vararg: Optional[Tuple[str, Variable]] = None
+        self._kwargs: Optional[Dict[str, Variable]] = None
 
     @property
     def args(self) -> Dict[str, Variable]:
@@ -27,4 +28,14 @@ class FunctionArguments:
         if not isinstance(arg, Variable):
             return False
         self._vararg = (arg_id, arg)
+        return True
+
+    @property
+    def kwargs(self) -> Dict[str, Variable]:
+        return self._kwargs.copy()
+
+    def add_kwarg(self, arg_id: str, arg: Variable) -> bool:
+        if not isinstance(arg, Variable):
+            return False
+        self._kwargs[arg_id] = arg
         return True

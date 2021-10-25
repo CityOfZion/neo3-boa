@@ -707,6 +707,17 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if isinstance(symbol, Method):
             args_to_generate = [arg for index, arg in enumerate(call.args) if index in symbol.args_to_be_generated()]
+            keywords_dict = {keyword.arg: keyword.value for keyword in call.keywords}
+            keywords_with_index = {index: keywords_dict[arg_name] for index, arg_name in enumerate(symbol.args) if arg_name in keywords_dict}
+
+            for index in keywords_with_index:
+                if index < len(args_to_generate):
+                    # override default values
+                    args_to_generate[index] = keywords_with_index[index]
+                else:
+                    # put keywords
+                    args_to_generate.append(keywords_with_index[index])
+
         else:
             args_to_generate = call.args
 

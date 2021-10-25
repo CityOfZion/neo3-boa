@@ -28,6 +28,7 @@ from boa3.model.type.classes.classscope import ClassScope
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
+from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
@@ -574,6 +575,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         fun_args: FunctionArguments = self.visit(function.args)
         fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
 
+        # TODO: remove when dictionary unpacking operator is implemented
+        if function.args.kwarg is not None:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    function.lineno, function.col_offset,
+                    symbol_id='** variables'
+                )
+            )
+
+        # TODO: remove when keyword-only arguments are implemented
+        if len(function.args.kwonlyargs) > 0:
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    function.lineno, function.col_offset,
+                    symbol_id='keyword-only arguments'
+                )
+            )
+
         if fun_rtype_symbol is None:
             # it is a function with None return: Main(a: int) -> None:
             raise NotImplementedError
@@ -685,6 +704,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if arguments.vararg is not None:
             var_id, var = self.visit_arg(arguments.vararg)  # Tuple[str, Variable]
             fun_args.set_vararg(var_id, var)
+
+        if arguments.kwarg is not None:
+            var_id, var = self.visit_arg(arguments.kwarg)   # Tuple[str, Variable]
+            fun_args.add_kwarg(var_id, var)
 
         return fun_args
 
@@ -940,7 +963,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return None
 
         if not isinstance(func_symbol, Callable):
-            # verifiy if it is a builtin method with its name shadowed
+            # verify if it is a builtin method with its name shadowed
             func = Builtin.get_symbol(func_id)
             func_symbol = func if func is not None else func_symbol
 

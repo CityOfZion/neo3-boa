@@ -22,6 +22,7 @@ class Callable(IExpression, ABC):
 
     def __init__(self, args: Dict[str, Variable] = None,
                  vararg: Optional[Tuple[str, Variable]] = None,
+                 kwargs: Optional[Dict[str, Variable]] = None,
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
@@ -54,6 +55,10 @@ class Callable(IExpression, ABC):
             self.args[vararg_id] = Variable(Type.tuple.build_collection([vararg_var.type]))
             self.defaults.append(default_value)
             self._vararg = vararg
+
+        if kwargs is None:
+            kwargs = {}
+        self._kwargs: Dict[str, Variable] = kwargs.copy()
 
         self.return_type: IType = return_type
         self.is_public: bool = is_public
