@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo3.contracts import FindOptions
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -12,6 +13,13 @@ class TestRelational(BoaTest):
     default_folder: str = 'test_sc/relational_test'
 
     # region GreaterThan
+
+    def test_builtin_type_greater_than_operation(self):
+        path = self.get_contract_path('BuiltinTypeGreaterThan.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(FindOptions.VALUES_ONLY > FindOptions.DESERIALIZE_VALUES, result)
 
     def test_mixed_greater_than_operation(self):
         path = self.get_contract_path('MixedGreaterThan.py')
@@ -66,6 +74,13 @@ class TestRelational(BoaTest):
     # endregion
 
     # region GreaterThanOrEqual
+
+    def test_builtin_type_greater_than_or_equal_operation(self):
+        path = self.get_contract_path('BuiltinTypeGreaterThanOrEqual.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.VALUES_ONLY >= FindOptions.VALUES_ONLY, result)
 
     def test_mixed_greater_or_equal_than_operation(self):
         path = self.get_contract_path('MixedGreaterOrEqual.py')
@@ -249,6 +264,13 @@ class TestRelational(BoaTest):
 
     # region LessThan
 
+    def test_builtin_type_less_than_operation(self):
+        path = self.get_contract_path('BuiltinTypeLessThan.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.VALUES_ONLY < FindOptions.VALUES_ONLY, result)
+
     def test_mixed_less_than_operation(self):
         path = self.get_contract_path('MixedLessThan.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
@@ -302,6 +324,13 @@ class TestRelational(BoaTest):
     # endregion
 
     # region LessThanOrEqual
+
+    def test_builtin_type_less_than_or_equal_operation(self):
+        path = self.get_contract_path('BuiltinTypeLessThanOrEqual.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.VALUES_ONLY <= FindOptions.VALUES_ONLY, result)
 
     def test_mixed_less_or_equal_than_operation(self):
         path = self.get_contract_path('MixedLessOrEqual.py')
@@ -577,6 +606,13 @@ class TestRelational(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(True, result)
 
+    def test_builtin_equality_operation(self):
+        path = self.get_contract_path('BuiltinTypeEquality.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.VALUES_ONLY == FindOptions.VALUES_ONLY, result)
+
     def test_multiple_comparisons(self):
         expected_output = (
             Opcode.INITSLOT
@@ -651,6 +687,13 @@ class TestRelational(BoaTest):
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'Main', True, True)
         self.assertEqual(False, result)
+
+    def test_builtin_inequality_operation(self):
+        path = self.get_contract_path('BuiltinTypeInequality.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.VALUES_ONLY != FindOptions.VALUES_ONLY, result)
 
     def test_number_inequality_operation(self):
         expected_output = (

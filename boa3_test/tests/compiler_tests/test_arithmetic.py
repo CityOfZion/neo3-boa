@@ -4,6 +4,7 @@ from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo3.contracts import FindOptions
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -105,6 +106,13 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_addition_builtin_type(self):
+        path = self.get_contract_path('AdditionBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(FindOptions.VALUES_ONLY + FindOptions.DESERIALIZE_VALUES, result)
 
     def test_addition_literal_operation(self):
         expected_output = (
@@ -312,6 +320,13 @@ class TestArithmetic(BoaTest):
         path = self.get_contract_path('DivisionAugmentedAssignment.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
+    def test_division_builtin_type(self):
+        path = self.get_contract_path('DivisionBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES // FindOptions.VALUES_ONLY, result)
+
     def test_integer_division_operation(self):
         expected_output = (
             Opcode.INITSLOT
@@ -464,6 +479,13 @@ class TestArithmetic(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    def test_modulo_builtin_type(self):
+        path = self.get_contract_path('ModuloBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES % FindOptions.VALUES_ONLY, result)
+
     # endregion
 
     # region Multiplication
@@ -509,6 +531,13 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_multiplication_builtin_type(self):
+        path = self.get_contract_path('MultiplicationBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES * FindOptions.VALUES_ONLY, result)
 
     # endregion
 
@@ -556,6 +585,13 @@ class TestArithmetic(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    def test_power_builtin_type(self):
+        path = self.get_contract_path('PowerBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES ** FindOptions.VALUES_ONLY, result)
+
     # endregion
 
     # region Sign
@@ -582,6 +618,13 @@ class TestArithmetic(BoaTest):
         result = self.run_smart_contract(engine, path, 'minus', 0)
         self.assertEqual(0, result)
 
+    def test_negative_builtin_type(self):
+        path = self.get_contract_path('NegativeBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'minus', FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(-FindOptions.DESERIALIZE_VALUES, result)
+
     def test_positive_operation(self):
         expected_output = (
             Opcode.INITSLOT
@@ -602,6 +645,13 @@ class TestArithmetic(BoaTest):
         self.assertEqual(-1, result)
         result = self.run_smart_contract(engine, path, 'plus', 0)
         self.assertEqual(0, result)
+
+    def test_positive_builtin_type(self):
+        path = self.get_contract_path('PositiveBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'plus', FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(+FindOptions.DESERIALIZE_VALUES, result)
 
     # endregion
 
@@ -644,6 +694,13 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_str_multiplication_builtin_type(self):
+        path = self.get_contract_path('StringMultiplicationBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'str_mult', 'unit test', FindOptions.VALUES_ONLY)
+        self.assertEqual('unit test' * FindOptions.VALUES_ONLY, result)
 
     # endregion
 
@@ -688,5 +745,12 @@ class TestArithmetic(BoaTest):
         output = Boa3.compile(path)
 
         self.assertEqual(expected_output, output)
+
+    def test_subtraction_builtin_type(self):
+        path = self.get_contract_path('SubtractionBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES - FindOptions.VALUES_ONLY, result)
 
     # endregion

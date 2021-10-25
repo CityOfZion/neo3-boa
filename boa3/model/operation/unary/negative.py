@@ -25,7 +25,7 @@ class Negative(UnaryOperation):
             return False
         operand: IType = types[0]
 
-        return operand in self._valid_types
+        return any(_type.is_type_of(operand) for _type in self._valid_types)
 
     def _get_result(self, operand: IType) -> IType:
         if self.validate_type(operand):

@@ -269,7 +269,7 @@ class TestRuntimeInterop(BoaTest):
             + application
             + Opcode.CONVERT
             + Type.int.stack_item
-            + Opcode.EQUAL
+            + Opcode.NUMEQUAL
             + Opcode.RET
         )
 
@@ -291,7 +291,7 @@ class TestRuntimeInterop(BoaTest):
             + verification
             + Opcode.CONVERT
             + Type.int.stack_item
-            + Opcode.EQUAL
+            + Opcode.NUMEQUAL
             + Opcode.RET
         )
 

@@ -10,8 +10,8 @@ __all__ = ['LessThan',
            'ObjectInequality'
            ]
 
-from boa3.model.operation.binary.relational.LessThan import LessThan
-from boa3.model.operation.binary.relational.Lessthanorequal import LessThanOrEqual
+from boa3.model.operation.binary.relational.lessthan import LessThan
+from boa3.model.operation.binary.relational.lessthanorequal import LessThanOrEqual
 from boa3.model.operation.binary.relational.greaterthan import GreaterThan
 from boa3.model.operation.binary.relational.greaterthanorequal import GreaterThanOrEqual
 from boa3.model.operation.binary.relational.identity import Identity

@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo3.contracts import FindOptions
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -151,6 +152,13 @@ class TestLogical(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', int('101010', 2), 4)
         self.assertEqual(int('1010100000', 2), result)
 
+    def test_logic_left_shift_builtin_type(self):
+        path = self.get_contract_path('LogicLeftShiftBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(FindOptions.NONE << FindOptions.DESERIALIZE_VALUES, result)
+
     def test_mismatched_type_logic_left_shift(self):
         path = self.get_contract_path('MismatchedOperandLogicLeftShift.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
@@ -205,6 +213,13 @@ class TestLogical(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', -4, 32)
         self.assertEqual(-4 & 32, result)
 
+    def test_logic_and_builtin_type(self):
+        path = self.get_contract_path('LogicAndBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(FindOptions.NONE & FindOptions.DESERIALIZE_VALUES, result)
+
     def test_mismatched_type_logic_and(self):
         path = self.get_contract_path('MismatchedOperandLogicAnd.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
@@ -232,6 +247,13 @@ class TestLogical(BoaTest):
         self.assertEqual(-2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(-1, result)
+
+    def test_logic_not_builtin_type(self):
+        path = self.get_contract_path('LogicNotBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.VALUES_ONLY)
+        self.assertEqual(~FindOptions.VALUES_ONLY, result)
 
     def test_logic_not_with_int_operand(self):
         expected_output = (
@@ -309,6 +331,32 @@ class TestLogical(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', -4, 32)
         self.assertEqual(-4 | 32, result)
 
+    def test_logic_or_builtin_type(self):
+        path = self.get_contract_path('LogicOrBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.REMOVE_PREFIX, FindOptions.KEYS_ONLY,
+                                         expected_result_type=int)
+        int_value_to_check = int(FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY)
+        self.assertEqual(int_value_to_check, result)
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.REMOVE_PREFIX, FindOptions.KEYS_ONLY,
+                                         expected_result_type=FindOptions)
+        self.assertEqual(FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 2, 4,
+                                         expected_result_type=int)
+        int_value_to_check = int(2 | 4)
+        self.assertEqual(int_value_to_check, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0, 123456789,
+                                         expected_result_type=int)
+        self.assertEqual(123456789, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 123456789, 0,
+                                         expected_result_type=int)
+        self.assertEqual(123456789, result)
+
     def test_mismatched_type_logic_or(self):
         path = self.get_contract_path('MismatchedOperandLogicOr.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
@@ -362,6 +410,13 @@ class TestLogical(BoaTest):
         self.assertEqual(40 ^ 6, result)
         result = self.run_smart_contract(engine, path, 'Main', -4, 32)
         self.assertEqual(-4 ^ 32, result)
+
+    def test_logic_xor_builtin_type(self):
+        path = self.get_contract_path('LogicXorBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(FindOptions.NONE ^ FindOptions.DESERIALIZE_VALUES, result)
 
     def test_mismatched_type_logic_xor(self):
         path = self.get_contract_path('MismatchedOperandLogicXor.py')
@@ -506,6 +561,13 @@ class TestLogical(BoaTest):
         self.assertEqual(int('11', 2), result)
         result = self.run_smart_contract(engine, path, 'Main', int('1010100000', 2), 4)
         self.assertEqual(int('101010', 2), result)
+
+    def test_logic_right_shift_builtin_type(self):
+        path = self.get_contract_path('LogicRightShiftBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES)
+        self.assertEqual(FindOptions.NONE >> FindOptions.DESERIALIZE_VALUES, result)
 
     def test_mismatched_type_logic_right_shift(self):
         path = self.get_contract_path('MismatchedOperandLogicRightShift.py')
