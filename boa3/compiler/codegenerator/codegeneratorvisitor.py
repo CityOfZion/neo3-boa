@@ -10,6 +10,7 @@ from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
+from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
@@ -253,12 +254,14 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if isinstance(method, Method):
             self.current_method = method
-            self.generator.convert_begin_method(method)
+            if not isinstance(self.current_class, ClassType) or not self.current_class.is_interface:
+                self.generator.convert_begin_method(method)
 
-            for stmt in function.body:
-                self.visit_to_map(stmt)
+                for stmt in function.body:
+                    self.visit_to_map(stmt)
 
-            self.generator.convert_end_method(function.name)
+                self.generator.convert_end_method(function.name)
+
             self.current_method = None
 
         return self.build_data(function, symbol=method, symbol_id=function.name)
@@ -844,6 +847,8 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             if hasattr(value_type, 'symbols') and attribute.attr in value_type.symbols:
                 attr = value_type.symbols[attribute.attr]
+            elif isinstance(value_type, Package) and attribute.attr in value_type.inner_packages:
+                attr = value_type.inner_packages[attribute.attr]
 
             if isinstance(value_symbol, UserClass):
                 if isinstance(attr, Method) and attr.has_cls_or_self:

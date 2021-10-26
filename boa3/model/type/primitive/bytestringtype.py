@@ -28,12 +28,15 @@ class ByteStringType(SequenceType, PrimitiveType, abc.ABC):
 
         from boa3.model.builtin.builtin import Builtin
 
-        bytestring_instance_methods = [Builtin.BytesStringLower,
-                                       Builtin.BytesStringUpper,
-                                       Builtin.BytesStringStartswith,
-                                       ]
+        instance_methods = [Builtin.BytesStringIsDigit,
+                            Builtin.BytesStringJoin,
+                            Builtin.BytesStringLower,
+                            Builtin.BytesStringUpper,
+                            Builtin.BytesStringStartswith,
+                            Builtin.BytesStringStrip,
+                            ]
 
-        for instance_method in bytestring_instance_methods:
+        for instance_method in instance_methods:
             self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
 
     def is_valid_key(self, key_type: IType) -> bool:

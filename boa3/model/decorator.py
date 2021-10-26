@@ -32,3 +32,11 @@ class IDecorator(Method):
     @property
     def has_cls_or_self(self) -> bool:
         return False
+
+    @property
+    def is_function_decorator(self) -> bool:
+        return True
+
+    @property
+    def is_class_decorator(self) -> bool:
+        return False

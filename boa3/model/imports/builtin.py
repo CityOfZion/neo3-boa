@@ -57,8 +57,8 @@ class CompilerBuiltin:
             package = None
 
             if isinstance(cur_package, Package):
-                if package_id in cur_package.symbols:
-                    package = cur_package.symbols[package_id]
+                if package_id in cur_package.inner_packages:
+                    package = cur_package.inner_packages[package_id]
             else:
                 package = next((root_package for root_package in self.packages
                                 if root_package.identifier == package_id),
@@ -87,10 +87,10 @@ class CompilerBuiltin:
             return None
 
         for package_id in package_ids[1:]:
-            if package_id not in cur_package.symbols:
+            if package_id not in cur_package.inner_packages:
                 return None
 
-            cur_package = cur_package.symbols[package_id]
+            cur_package = cur_package.inner_packages[package_id]
 
         return cur_package
 
@@ -114,7 +114,7 @@ class CompilerBuiltin:
             current_index += 1
 
             # if the package has internal packages, searches the symbol in these packages before continuing
-            internal_packages = [symbol for symbol in package.symbols.values() if isinstance(symbol, Package)]
+            internal_packages = [symbol for symbol in package.inner_packages.values()]
             if len(internal_packages) > 0:
                 # save the current list and index in the package
                 # made this way to avoid recursive function call

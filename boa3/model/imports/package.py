@@ -42,8 +42,8 @@ class Package(IdentifiedSymbol):
 
         if packages is None:
             packages = []
+        self._packages = packages
         for package in packages:
-            self._all_symbols.append(package)
             package._parent = self
 
         self._aliases: Dict[str, str] = {}
@@ -66,6 +66,10 @@ class Package(IdentifiedSymbol):
                 for symbol in self._all_symbols}
 
     @property
+    def inner_packages(self) -> Dict[str, Package]:
+        return {symbol.raw_identifier: symbol for symbol in self._packages}
+
+    @property
     def parent(self) -> Optional[Package]:
         """
         Get the parent package of this one. None if it's the root package.
@@ -74,15 +78,19 @@ class Package(IdentifiedSymbol):
 
     def include_symbol(self, symbol_id, symbol: IdentifiedSymbol):
         identifier = symbol.raw_identifier if isinstance(symbol, IdentifiedSymbol) else symbol_id
-        if all(package_symbol.raw_identifier != identifier for package_symbol in self._all_symbols):
+        check_list = self._packages if isinstance(symbol, Package) else self._all_symbols
+
+        if all(package_symbol.raw_identifier != identifier for package_symbol in check_list):
             if isinstance(symbol, IdentifiedSymbol) and symbol.raw_identifier != symbol_id:
                 self._aliases[symbol.raw_identifier] = symbol_id
 
             if isinstance(symbol, Package):
+                self._packages.append(symbol)
                 if symbol._parent is not None:
                     return
                 symbol._parent = self
-            self._all_symbols.append(symbol)
+            else:
+                self._all_symbols.append(symbol)
 
     def __repr__(self) -> str:
         return self.identifier

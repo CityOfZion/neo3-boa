@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple
 from boa3.model.callable import Callable
 from boa3.model.debuginstruction import DebugInstruction
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -39,6 +40,7 @@ class Method(Callable):
             self.return_type = list(self.args.values())[0].type
 
         self._debug_map: List[DebugInstruction] = []
+        self.origin_class: Optional[ClassType] = None
 
     @property
     def shadowing_name(self) -> str:

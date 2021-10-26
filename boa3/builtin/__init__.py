@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 
 def public(*args):
@@ -18,6 +18,13 @@ def metadata(*args):
     def metadata_wrapper():
         pass
     return metadata_wrapper
+
+
+def contract(script_hash: Union[str, bytes]):
+    """
+    This decorator identifies a class that should be interpreted as an interface to an existing contract.
+    """
+    pass
 
 
 def to_script_hash(data_bytes: Any) -> bytes:

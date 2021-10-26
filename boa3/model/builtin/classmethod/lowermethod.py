@@ -1,17 +1,16 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
-from boa3.model.type.primitive.bytestype import BytesType
-from boa3.model.type.primitive.strtype import StrType
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class LowerMethod(IBuiltinMethod):
-    def __init__(self, self_type: Union[StrType, BytesType] = None):
+    def __init__(self, self_type: ByteStringType = None):
         from boa3.model.type.type import Type
 
-        if not isinstance(self_type, (StrType, BytesType)):
+        if not isinstance(self_type, ByteStringType):
             self_type = Type.str
 
         identifier = 'lower'
@@ -153,6 +152,6 @@ class LowerMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, (StrType, BytesType)):
+        if isinstance(value, ByteStringType):
             return LowerMethod(value)
         return super().build(value)

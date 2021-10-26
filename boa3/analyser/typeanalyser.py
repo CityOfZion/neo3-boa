@@ -171,8 +171,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.new_local_scope({var_id: var for var_id, var in method.symbols.items()
                                   if isinstance(var, Variable) and var.type is not UndefinedType})
 
-            for stmt in function.body:
-                self.visit(stmt)
+            if self._current_class is not None and self._current_class.is_interface and len(function.body) > 0:
+                first_instruction = function.body[0]
+                if not isinstance(first_instruction, ast.Pass):
+                    self._log_warning(CompilerWarning.UnreachableCode(first_instruction.lineno,
+                                                                      first_instruction.col_offset))
+            else:
+                for stmt in function.body:
+                    self.visit(stmt)
 
             if not method.is_init:
                 self._validate_return(function)
@@ -1468,6 +1474,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = symbol.type
         if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
             attr_symbol = symbol.symbols[attribute.attr]
+        elif isinstance(symbol, Package) and attribute.attr in symbol.inner_packages:
+            attr_symbol = symbol.inner_packages[attribute.attr]
         else:
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 

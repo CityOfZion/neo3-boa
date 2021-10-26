@@ -3,17 +3,17 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
-from boa3.model.type.primitive.bytestype import BytesType
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 from boa3.model.type.primitive.strtype import StrType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class JoinMethod(IBuiltinMethod):
-    def __init__(self, self_type: Union[StrType, BytesType] = None, iterable_type: Union[SequenceType, DictType] = None):
+    def __init__(self, self_type: ByteStringType = None, iterable_type: Union[SequenceType, DictType] = None):
         from boa3.model.type.type import Type
 
-        if not isinstance(self_type, (StrType, BytesType)):
+        if not isinstance(self_type, ByteStringType):
             self_type = Type.str
 
         if not isinstance(iterable_type, (SequenceType, DictType)):

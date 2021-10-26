@@ -1,4 +1,5 @@
 __all__ = ['ClassMethodDecorator',
+           'ContractDecorator',
            'InstanceMethodDecorator',
            'MetadataDecorator',
            'PropertyDecorator',
@@ -7,6 +8,7 @@ __all__ = ['ClassMethodDecorator',
            ]
 
 from boa3.model.builtin.decorator.classmethoddecorator import ClassMethodDecorator
+from boa3.model.builtin.decorator.contractdecorator import ContractDecorator
 from boa3.model.builtin.decorator.instancemethoddecorator import InstanceMethodDecorator
 from boa3.model.builtin.decorator.metadatadecorator import MetadataDecorator
 from boa3.model.builtin.decorator.propertydecorator import PropertyDecorator
