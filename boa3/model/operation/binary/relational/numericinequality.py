@@ -27,8 +27,7 @@ class NumericInequality(BinaryOperation):
         left: IType = types[0]
         right: IType = types[1]
 
-        # TODO: change the logic of the validation when implement other numeric types
-        return left == right and left in self._valid_types
+        return left == right and any(_type.is_type_of(left) for _type in self._valid_types)
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):

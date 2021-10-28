@@ -26,8 +26,7 @@ class LeftShift(BinaryOperation):
             return False
         left: IType = types[0]
         right: IType = types[1]
-
-        return left in self._valid_types and right is Type.int
+        return any(_type.is_type_of(left) for _type in self._valid_types) and Type.int.is_type_of(right)
 
     def _get_result(self, left: IType, right: IType) -> IType:
         if self.validate_type(left, right):

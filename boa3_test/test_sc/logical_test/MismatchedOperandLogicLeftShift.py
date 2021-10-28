@@ -1,2 +1,2 @@
-def Main(a: int, b: bool) -> int:
+def Main(a: str, b: int) -> int:
     return a << b
