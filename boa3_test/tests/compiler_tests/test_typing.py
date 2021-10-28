@@ -143,3 +143,10 @@ class TestTyping(BoaTest):
         path = self.get_contract_path('CastToTransaction.py')
         output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
+
+    def test_cast_inside_if(self):
+        path = self.get_contract_path('CastInsideIf.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual('body', result)

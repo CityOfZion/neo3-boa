@@ -368,7 +368,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if self._current_scope is not None:
             if isinstance(node, ast.Name):
                 if node.id not in self._current_scope:
-                    if not isinstance(value_type, Collection):
+                    if implicit_cast:
+                        value_type = target_type
+                    elif not isinstance(value_type, Collection):
                         target_type = value_type
                     elif not (isinstance(type(value_type), type(target_type)) and
                               (value_type.value_type is Type.any or value_type.valid_key is Type.any)):
