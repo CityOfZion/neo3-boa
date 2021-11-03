@@ -482,12 +482,29 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         Includes the class in the scope of its module
         """
-        # TODO: change when class inheritance is implemented
-        if len(class_node.bases) > 0:
+        bases = []
+        for base in class_node.bases:
+            base_type_id: Any = ast.NodeVisitor.visit(self, base)
+            if isinstance(base_type_id, ast.Name):
+                base_type_id = base_type_id.id
+
+            base_symbol = self.get_symbol(base_type_id)
+            # TODO: change when class inheritance with builtin types is implemented
+            if not isinstance(base_symbol, UserClass):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(
+                        class_node.lineno, class_node.col_offset,
+                        symbol_id='class inheritance with builtins'
+                    )
+                )
+            bases.append(base_symbol)
+
+        # TODO: change when class inheritance with multiple bases is implemented
+        if len(bases) > 1:
             self._log_error(
                 CompilerError.NotSupportedOperation(
                     class_node.lineno, class_node.col_offset,
-                    symbol_id='class inheritance'
+                    symbol_id='class inheritance with multiple bases'
                 )
             )
 
@@ -521,9 +538,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             contract_hash = self._evaluate_contract_interface(contract_interface_decorator.origin)
             user_class = ContractInterfaceClass(contract_hash=contract_hash,
                                                 identifier=class_node.name,
-                                                decorators=class_decorators)
+                                                decorators=class_decorators,
+                                                bases=bases)
         else:
-            user_class = UserClass(identifier=class_node.name, decorators=class_decorators)
+            user_class = UserClass(identifier=class_node.name,
+                                   decorators=class_decorators,
+                                   bases=bases)
 
         self._current_class = user_class
         if self._current_symbol_scope is not None:

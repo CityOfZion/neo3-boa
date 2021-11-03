@@ -17,7 +17,8 @@ __all__ = ['AbsMethod',
            'ScriptHashMethod',
            'SqrtMethod',
            'StrSplitMethod',
-           'SumMethod'
+           'SumMethod',
+           'SuperMethod',
            ]
 
 from boa3.model.builtin.method.absmethod import AbsMethod
@@ -38,4 +39,5 @@ from boa3.model.builtin.method.reversedmethod import ReversedMethod
 from boa3.model.builtin.method.sqrtmethod import SqrtMethod
 from boa3.model.builtin.method.strsplitmethod import StrSplitMethod
 from boa3.model.builtin.method.summethod import SumMethod
+from boa3.model.builtin.method.supermethod import SuperMethod
 from boa3.model.builtin.method.toscripthashmethod import ScriptHashMethod

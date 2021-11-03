@@ -1593,7 +1593,13 @@ class CodeGenerator:
 
         for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)
-            self.__insert1(op_info, data)
+            if opcode is Opcode.CALL and isinstance(data, Method):
+                # avoid losing current stack state
+                for _ in data.args:
+                    self._stack_append(Type.any)
+                self.convert_method_call(data, len(data.args) - 1)
+            else:
+                self.__insert1(op_info, data)
 
         if store_opcode is not None:
             self._insert_jump(OpcodeInfo.JMP)
