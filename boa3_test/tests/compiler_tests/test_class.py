@@ -288,7 +288,72 @@ class TestClass(BoaTest):
         self.assertEqual(4, result)
 
     def test_user_class_with_base(self):
-        path = self.get_contract_path('UserClassWithBase.py')
+        path = self.get_contract_path('UserClassWithBuiltinBase.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_created_base(self):
+        path = self.get_contract_path('UserClassWithCreatedBase.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'implemented_method')
+        self.assertEqual(42, result)
+
+        result = self.run_smart_contract(engine, path, 'inherited_method')
+        self.assertEqual(42, result)
+
+    def test_user_class_with_created_base_with_variable(self):
+        path = self.get_contract_path('UserClassWithCreatedBaseWithVariables.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'implemented_variable')
+        self.assertEqual(42, result)
+
+        result = self.run_smart_contract(engine, path, 'inherited_variable')
+        self.assertEqual(42, result)
+
+        new_value = 10
+        result = self.run_smart_contract(engine, path, 'update_variable', new_value)
+        self.assertEqual(new_value, result)
+
+        new_value = -10
+        result = self.run_smart_contract(engine, path, 'update_variable', new_value)
+        self.assertEqual(new_value, result)
+
+        new_value = 10_000_000
+        result = self.run_smart_contract(engine, path, 'update_variable', new_value)
+        self.assertEqual(new_value, result)
+
+    def test_user_class_with_created_base_with_args(self):
+        path = self.get_contract_path('UserClassWithCreatedBaseWithArgs.py')
+        engine = TestEngine()
+
+        init_value = 42
+        result = self.run_smart_contract(engine, path, 'implemented_var', init_value)
+        self.assertEqual(init_value, result)
+
+        result = self.run_smart_contract(engine, path, 'inherited_var', init_value)
+        self.assertEqual(init_value, result)
+
+        init_value = -42
+        result = self.run_smart_contract(engine, path, 'implemented_var', init_value)
+        self.assertEqual(init_value, result)
+
+        result = self.run_smart_contract(engine, path, 'inherited_var', init_value)
+        self.assertEqual(init_value, result)
+
+        init_value = 10_000_000
+        result = self.run_smart_contract(engine, path, 'implemented_var', init_value)
+        self.assertEqual(init_value, result)
+
+        result = self.run_smart_contract(engine, path, 'inherited_var', init_value)
+        self.assertEqual(init_value, result)
+
+    def test_user_class_with_created_base_with_init(self):
+        path = self.get_contract_path('UserClassWithCreatedBaseWithInit.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_user_class_with_multiple_bases(self):
+        path = self.get_contract_path('UserClassWithMultipleBases.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_user_class_with_keyword_base(self):

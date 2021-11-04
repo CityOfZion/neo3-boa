@@ -54,9 +54,10 @@ class Builtin:
 
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
+    Exception = ExceptionMethod()
     Range = RangeMethod()
     Reversed = ReversedMethod()
-    Exception = ExceptionMethod()
+    Super = SuperMethod()
 
     # python class method
     BytesStringIsDigit = IsDigitMethod()
@@ -134,7 +135,8 @@ class Builtin:
                                                 StaticMethodDecorator,
                                                 StrIndex,
                                                 StrSplit,
-                                                Sum
+                                                Sum,
+                                                Super,
                                                 ]
 
     @classmethod
