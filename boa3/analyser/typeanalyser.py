@@ -86,7 +86,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
-                   check_raw_id: bool = False) -> Optional[ISymbol]:
+                   check_raw_id: bool = False,
+                   origin_node: ast.AST = None) -> Optional[ISymbol]:
         if symbol_id is None:
             return None
         if isinstance(symbol_id, ISymbol) and not isinstance(symbol_id, (IType, IExpression)):
@@ -119,7 +120,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if found_symbol is not None:
                 return found_symbol
 
-        return super().get_symbol(symbol_id, is_internal, check_raw_id)
+        return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
 
     def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
@@ -290,17 +291,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param assign: the python ast variable assignment node
         """
-        # multiple assignments
-        if isinstance(assign.targets[0], ast.Tuple):
-            self._log_error(
-                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
-            )
-        else:
-            for target in assign.targets:
-                self.validate_type_variable_assign(target, assign.value)
-
-        # continue to walk through the tree
-        self.generic_visit(assign)
+        for target in assign.targets:
+            self.validate_type_variable_assign(target, assign.value)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """

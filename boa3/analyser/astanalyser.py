@@ -4,7 +4,7 @@ from abc import ABC
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from boa3.exception.CompilerError import CompilerError, InternalError
+from boa3.exception.CompilerError import CompilerError, InternalError, UnresolvedReference
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
@@ -83,7 +83,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 fun_rtype_id = fun_rtype_id.id
 
             if isinstance(fun_rtype_id, str) and not isinstance(value, ast.Str):
-                value = self.get_symbol(fun_rtype_id)
+                value = self.get_symbol(fun_rtype_id, origin_node=value)
                 if isinstance(value, IType) and not isinstance(value, MetaType):
                     value = TypeUtils.type.build(value) if use_metatype else value
             else:
@@ -112,7 +112,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
-                   check_raw_id: bool = False) -> Optional[ISymbol]:
+                   check_raw_id: bool = False,
+                   origin_node: ast.AST = None) -> Optional[ISymbol]:
         """
         Tries to get the symbol by its id name
 
@@ -142,6 +143,16 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
         if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
             found_symbol = Builtin.Exception.return_type
+
+        if origin_node is not None and found_symbol is None:
+            self._log_error(
+                UnresolvedReference(
+                    line=origin_node.lineno,
+                    col=origin_node.col_offset,
+                    symbol_id=symbol_id
+                )
+            )
+
         return found_symbol
 
     def _search_by_raw_id(self, symbol_id: str, symbols: Sequence[ISymbol]) -> Optional[ISymbol]:

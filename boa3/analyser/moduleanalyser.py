@@ -201,7 +201,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
-                   check_raw_id: bool = False) -> Optional[ISymbol]:
+                   check_raw_id: bool = False,
+                   origin_node: ast.AST = None) -> Optional[ISymbol]:
         for scope in reversed(self._scope_stack):
             if symbol_id in scope.symbols:
                 return scope.symbols[symbol_id]
@@ -227,7 +228,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if found_symbol is not None:
                 return found_symbol
 
-        return super().get_symbol(symbol_id, is_internal, check_raw_id)
+        return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
 
     # region Log
 
@@ -644,8 +645,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             raise NotImplementedError
 
         if isinstance(fun_rtype_symbol, str):
-            symbol = self.get_symbol(function.returns.id)
+            symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
             fun_rtype_symbol = self.get_type(symbol)
+
 
         fun_return: IType = self.get_type(fun_rtype_symbol)
 
@@ -722,7 +724,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if decorator_visit is None and hasattr(decorator, 'func'):
                     decorator_visit = self.visit(decorator.func)
 
-                symbol = self.get_symbol(decorator_visit)
+                symbol = self.get_symbol(decorator_visit, origin_node=decorator)
                 if hasattr(symbol, 'build'):
                     symbol = symbol.build(decorator)
                 decorators.append(symbol)
@@ -810,7 +812,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_type: IType = self.get_type(arg.annotation)
 
         if var_type is Type.none and isinstance(arg.annotation, ast.Name):
-            var_symbol: ISymbol = self.get_symbol(arg.annotation.id)
+            var_symbol: ISymbol = self.get_symbol(arg.annotation.id, origin_node=arg)
             var_type = self.get_type(var_symbol)
 
         return var_id, Variable(var_type)
@@ -889,21 +891,28 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param assign:
         """
-        var_type = self.visit_type(assign.value)
+        # multiple assignments
+        if isinstance(assign.targets[0], ast.Tuple):
+            self._log_error(
+                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
+            )
 
-        if var_type is Type.none and isinstance(assign.value, ast.Name):
-            symbol = self.get_symbol(assign.value.id)
-            if isinstance(symbol, Event):
-                var_type = Builtin.Event
-                self._current_event = symbol
+        else:
+            var_type = self.visit_type(assign.value)
 
-        return_type = var_type
-        for target in assign.targets:
-            var_id = self.visit(target)
-            if not isinstance(var_id, ISymbol):
-                return_type = self.assign_value(var_id, var_type, source_node=assign)
+            if var_type is Type.none and isinstance(assign.value, ast.Name):
+                symbol = self.get_symbol(assign.value.id)
+                if isinstance(symbol, Event):
+                    var_type = Builtin.Event
+                    self._current_event = symbol
 
-        return return_type
+            return_type = var_type
+            for target in assign.targets:
+                var_id = self.visit(target)
+                if not isinstance(var_id, ISymbol):
+                    return_type = self.assign_value(var_id, var_type, source_node=assign)
+
+            return return_type
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -978,7 +987,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         is_internal = hasattr(subscript, 'is_internal_call') and subscript.is_internal_call
         value = self.visit(subscript.value)
-        symbol = self.get_symbol(value, is_internal=is_internal) if isinstance(value, str) else value
+        symbol = self.get_symbol(value, is_internal=is_internal, origin_node=subscript.value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
             if isinstance(symbol, (Collection, MetaType)) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
@@ -1029,9 +1038,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if not isinstance(tpe, IType):
                 # type hint not using identifiers or using identifiers that are not types
                 index = self.visit(value)
-                self._log_error(
-                    CompilerError.UnresolvedReference(value.lineno, value.col_offset, index)
-                )
+                if isinstance(index, str):
+                    self._log_error(
+                        CompilerError.UnresolvedReference(value.lineno, value.col_offset, index)
+                    )
 
         return types
 
