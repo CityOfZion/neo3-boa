@@ -232,6 +232,10 @@ class VisitorCodeGenerator(IAstAnalyser):
                 address = self.generator.bytecode_size
                 self.generator.convert_new_empty_array(len(class_symbol.class_variables), class_symbol)
                 self.generator.convert_store_variable(node.name, address)
+            else:
+                init_method = class_symbol.constructor_method()
+                if isinstance(init_method, Method) and init_method.start_address is None:
+                    self.generator.generate_implicit_init_user_class(init_method)
 
         for stmt in node.body:
             self.visit(stmt)

@@ -360,7 +360,7 @@ class CodeGenerator:
         """
         Converts the signature of the method
         """
-        self.__insert1(OpcodeInfo.RET)
+        self.insert_return()
         self.initialized_static_fields = True
 
         if constants.INITIALIZE_METHOD_ID in self.symbol_table:
@@ -1649,6 +1649,8 @@ class CodeGenerator:
 
         for arg in range(num_args):
             self._stack_pop()
+        if function.is_init:
+            self._stack_pop()  # pop duplicated result if it's init
 
         if function.return_type is not Type.none:
             self._stack_append(function.return_type)
@@ -2008,3 +2010,19 @@ class CodeGenerator:
 
             self.__insert1(OpcodeInfo.PACK)  # packs everything together
             self._stack_pop()
+
+    def generate_implicit_init_user_class(self, init_method: Method):
+        self.convert_begin_method(init_method)
+        class_type = init_method.return_type
+        for base in class_type.bases:
+            base_constructor = base.constructor_method()
+            num_args = len(base_constructor.args)
+
+            for arg_id, arg_var in reversed(list(init_method.args.items())):
+                self.convert_load_variable(arg_id, arg_var)
+
+            args_to_call = num_args - 1 if num_args > 0 else num_args
+            self.convert_method_call(base_constructor, args_to_call)
+            self.remove_stack_top_item()
+
+        self.convert_end_method()

@@ -143,3 +143,7 @@ class Callable(IExpression, ABC):
             signature = '({0})'.format(', '.join(args_types))
         public = 'public ' if self.is_public else ''
         return '{0}{1}'.format(public, signature)
+
+    def __repr__(self) -> str:
+        name = self.identifier if hasattr(self, 'identifier') else self.__class__.__name__
+        return f'{name}{str(self)}'
