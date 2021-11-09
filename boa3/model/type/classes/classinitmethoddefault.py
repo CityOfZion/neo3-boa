@@ -1,13 +1,13 @@
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from boa3 import constants
-from boa3.model.builtin.method import IBuiltinMethod
+from boa3.model.identifiedsymbol import IdentifiedSymbol
+from boa3.model.method import Method
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class ClassInitMethod(IBuiltinMethod):
+class ClassInitMethod(IdentifiedSymbol, Method):
     def __init__(self, user_class: UserClass):
         self_var = Variable(user_class)
         args = {
@@ -20,9 +20,10 @@ class ClassInitMethod(IBuiltinMethod):
             # but change the self type
             args['self'] = self_var
 
-        super().__init__(identifier=constants.INIT_METHOD_ID,
-                         args=args,
-                         return_type=user_class)
+        Method.__init__(self, args=args, return_type=user_class)
+        IdentifiedSymbol.__init__(self, identifier=constants.INIT_METHOD_ID)
+
+        self.defined_by_entry = False
         self.is_init = True
         self.origin_class = user_class
         # __init__ method behave like class methods
@@ -36,35 +37,3 @@ class ClassInitMethod(IBuiltinMethod):
     @property
     def _body(self) -> Optional[str]:
         return None
-
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        if self.origin_class is None or len(self.origin_class.bases) == 0:
-            return super().opcode
-
-        opcodes = []
-
-        for base in self.origin_class.bases:
-            base_constructor = base.constructor_method()
-            call_base_init = []
-            num_args = len(base_constructor.args)
-
-            opcode = Opcode.get_dup(num_args)
-            if opcode is Opcode.PICK:
-                load_arg = [
-                    Opcode.get_push_and_data(num_args - 1),
-                    (opcode, b'')
-                ]
-            else:
-                load_arg = [(opcode, b'')]
-
-            call_base_init.extend(load_arg * num_args)
-            call_base_init.append((Opcode.CALL, base_constructor))
-            call_base_init.append((Opcode.DROP, b''))
-
-            opcodes.extend(call_base_init)
-
-        additional_args = len(self.args) - 1  # num of arguments, not counting self
-        if additional_args > 0:
-            opcodes.extend([(Opcode.NIP, b'')] * additional_args)
-        return opcodes
