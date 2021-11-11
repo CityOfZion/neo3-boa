@@ -713,7 +713,11 @@ class VisitorCodeGenerator(IAstAnalyser):
             self._remove_inserted_opcodes_since(last_address, last_stack)
 
         if isinstance(symbol, Method):
-            args_to_generate = [arg for index, arg in enumerate(call.args) if index in symbol.args_to_be_generated()]
+            # self or cls is already generated
+            call_args = (call.args[1:]
+                         if has_cls_or_self_argument and len(call.args) == len(symbol.args)
+                         else call.args)
+            args_to_generate = [arg for index, arg in enumerate(call_args) if index in symbol.args_to_be_generated()]
             keywords_dict = {keyword.arg: keyword.value for keyword in call.keywords}
             keywords_with_index = {index: keywords_dict[arg_name] for index, arg_name in enumerate(symbol.args) if arg_name in keywords_dict}
 
