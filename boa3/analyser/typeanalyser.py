@@ -1284,35 +1284,42 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self.warnings.extend(builtin_analyser.warnings)
                 return
 
+        param_types = []
         ignore_first_argument = int(callable.has_cls_or_self)  # 1 if True, 0 otherwise
+        is_first_arg_cls_of_self = ignore_first_argument and len(call.args) == len(callable.args)
 
         # validate positional parameters
-        for index, param in enumerate(call.args):
-            (arg_id, arg_value) = list(callable.args.items())[index + ignore_first_argument]
+        if is_first_arg_cls_of_self:
+            (self_id, self_value) = list(callable.args.items())[0]
+            param_type = self._validate_argument_type(call.args[0], self_value.type, use_metatype=True)
+            param_types.append(param_type)
 
-            param_type = self.get_type(param, use_metatype=True)
-            args_types.append(param_type)
-            if not arg_value.type.is_type_of(param_type):
-                self._log_error(
-                    CompilerError.MismatchedTypes(
-                        param.lineno, param.col_offset,
-                        arg_value.type.identifier,
-                        param_type.identifier
-                    ))
+        for index, param in enumerate(call.args[is_first_arg_cls_of_self:]):
+            (arg_id, arg_value) = list(callable.args.items())[ignore_first_argument + index]
+
+            param_type = self._validate_argument_type(param, arg_value.type, use_metatype=True)
+            param_types.append(param_type)
 
         # validate keyword arguments
         for param in call.keywords:
             arg_value = callable.args[param.arg]
             param = param.value
-            param_type = self.get_type(param)
-            args_types.append(param_type)
-            if not arg_value.type.is_type_of(param_type):
-                self._log_error(
-                    CompilerError.MismatchedTypes(
-                        param.lineno, param.col_offset,
-                        arg_value.type.identifier,
-                        param_type.identifier
-                    ))
+            param_type = self._validate_argument_type(param, arg_value.type)
+            param_types.append(param_type)
+
+    def _validate_argument_type(self, param: ast.AST, arg_type: IType, use_metatype: bool = False) -> Optional[IType]:
+        param_type = self.get_type(param, use_metatype=use_metatype)
+        if arg_type.is_type_of(param_type):
+            return param_type
+        else:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    param.lineno, param.col_offset,
+                    arg_type.identifier,
+                    param_type.identifier
+                ))
+
+        return None
 
     def update_callable_after_validation(self, call: ast.Call, callable_id: str, callable_target: Callable):
         # if the arguments are not generic, include the specified method in the symbol table
