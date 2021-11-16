@@ -1,5 +1,6 @@
 import ast
 import logging
+import os
 from abc import ABC
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Sequence, Union
@@ -25,11 +26,16 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     :ivar warnings: a list that contains all the warnings found by the compiler. Empty by default.
     """
 
-    def __init__(self, ast_tree: ast.AST, filename: str = None, log: bool = False):
+    def __init__(self, ast_tree: ast.AST, filename: str = None, root_folder: str = None, log: bool = False):
         self.errors: List[CompilerError] = []
         self.warnings: List[CompilerWarning] = []
 
         self.filename: Optional[str] = filename
+        if not isinstance(root_folder, str) or not os.path.isdir(root_folder):
+            root_folder = (os.path.dirname(os.path.abspath(filename))
+                           if isinstance(filename, str) and os.path.isfile(filename)
+                           else os.path.abspath(os.path.curdir))
+        self.root_folder: str = root_folder
         self._log: bool = log
 
         self._tree: ast.AST = ast_tree
@@ -40,6 +46,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         return len(self.errors) > 0
 
     def _log_error(self, error: CompilerError):
+        if error.filepath is None:
+            error.filepath = self.filename
         if not any(err == error for err in self.errors):
             # don't include duplicated errors
             self.errors.append(error)
@@ -47,6 +55,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
+        if warning.filepath is None:
+            warning.filepath = self.filename
         if not any(warn == warning for warn in self.warnings):
             # don't include duplicated warnings
             self.warnings.append(warning)

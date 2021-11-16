@@ -46,7 +46,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     """
 
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
-        super().__init__(analyser.ast_tree, log=log)
+        super().__init__(analyser.ast_tree, analyser.filename, log=log)
         self.type_errors: List[Exception] = []
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
