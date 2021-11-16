@@ -32,10 +32,12 @@ class FunctionArguments:
 
     @property
     def kwargs(self) -> Dict[str, Variable]:
-        return self._kwargs.copy()
+        return self._kwargs
 
     def add_kwarg(self, arg_id: str, arg: Variable) -> bool:
         if not isinstance(arg, Variable):
             return False
+        if self._kwargs is None:
+            self._kwargs: Dict[str, Variable] = {}
         self._kwargs[arg_id] = arg
         return True
