@@ -274,7 +274,6 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method_from_variable(self):
         path = self.get_contract_path('UserClassWithInstanceMethodFromVariable.py')
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         self.compile_and_save(path)
         engine = TestEngine()
 
