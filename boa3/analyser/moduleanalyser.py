@@ -648,7 +648,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
             fun_rtype_symbol = self.get_type(symbol)
 
-
         fun_return: IType = self.get_type(fun_rtype_symbol)
 
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
