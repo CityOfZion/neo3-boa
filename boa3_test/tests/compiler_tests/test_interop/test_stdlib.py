@@ -307,6 +307,26 @@ class TestStdlibInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 4)
         self.assertEqual(['j', 3, 5], result)
 
+    def test_user_class_serialization(self):
+        path = self.get_contract_path('SerializationUserClass.py')
+        engine = TestEngine()
+
+        expected_class = [2, 4]
+        serialized = self.run_smart_contract(engine, path, 'serialize_user_class',
+                                             expected_result_type=bytes)
+        expected_result = serialize(expected_class)
+        self.assertEqual(expected_result, serialized)
+
+        result = self.run_smart_contract(engine, path, 'deserialize_user_class', serialized,
+                                         expected_result_type=list)
+        self.assertEqual(expected_class, result)
+
+        result = self.run_smart_contract(engine, path, 'get_variable_from_deserialized', serialized)
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'call_method_from_deserialized', serialized)
+        self.assertEqual(42, result)
+
     def test_atoi(self):
         path = self.get_contract_path('Atoi.py')
         engine = TestEngine()
