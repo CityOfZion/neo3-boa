@@ -39,9 +39,12 @@ class Analyser:
         import os
         self.path: str = path
         self.filename: str = path if path is None else os.path.realpath(path)
-        if os.path.isfile(project_root):
+
+        if project_root is not None and os.path.isfile(project_root):
             project_root = os.path.dirname(os.path.abspath(project_root))
-        self.root: str = os.path.realpath(project_root) if os.path.isdir(project_root) else path
+        self.root: str = (os.path.realpath(project_root)
+                          if project_root is not None and os.path.isdir(project_root)
+                          else path)
 
     @staticmethod
     def analyse(path: str, log: bool = False, analysed_files: Optional[List[str]] = None, root: str = None) -> Analyser:
