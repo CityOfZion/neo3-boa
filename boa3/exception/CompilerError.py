@@ -14,10 +14,13 @@ class CompilerError(ABC, BaseException):
     def __init__(self, line: int, col: int):
         self.line: int = line
         self.col: int = col
+        self.filepath: Optional[str] = None
 
     @property
     def message(self) -> str:
         message = '' if self._error_message is None else ' - ' + self._error_message
+        if isinstance(self.filepath, str):
+            message += f'\t <{self.filepath}>'
         return '{0}:{1}{2}'.format(self.line, self.col, message)
 
     @property
@@ -236,10 +239,6 @@ class MissingStandardDefinition(CompilerError):
                                                                   self.symbol_id,
                                                                   self.symbol.shadowing_name,
                                                                   self.symbol)
-
-    @property
-    def message(self) -> str:
-        return self._error_message
 
 
 class NotSupportedOperation(CompilerError):

@@ -49,9 +49,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], filename: str = None,
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol],
+                 filename: str = None, root_folder: str = None,
                  analysed_files: Optional[List[str]] = None, log: bool = False):
-        super().__init__(analyser.ast_tree, filename, log)
+        super().__init__(analyser.ast_tree, filename, root_folder, log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
@@ -234,7 +235,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _log_import(self, import_from: str):
         if self._log:
-            logging.info("Importing '{0}'".format(import_from))
+            logging.info("Importing '{0}'\t <{1}>".format(import_from, self.filename))
 
     def _log_unresolved_import(self, origin_node: ast.AST, import_id: str):
         if self._log:
@@ -399,6 +400,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             already_imported = already_imported.union(self._analysed_files)
 
         analyser = ImportAnalyser(import_target=target,
+                                  root_folder=self.root_folder,
                                   importer_file=self.filename,
                                   already_imported_modules=list(already_imported),
                                   log=self._log)
@@ -647,7 +649,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(fun_rtype_symbol, str):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
             fun_rtype_symbol = self.get_type(symbol)
-
 
         fun_return: IType = self.get_type(fun_rtype_symbol)
 

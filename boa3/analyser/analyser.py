@@ -24,7 +24,7 @@ class Analyser:
     :ivar symbol_table: a dictionary used to store the identifiers
     """
 
-    def __init__(self, ast_tree: ast.AST, path: str = None, log: bool = False):
+    def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None, log: bool = False):
         self.symbol_table: Dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
@@ -40,8 +40,14 @@ class Analyser:
         self.path: str = path
         self.filename: str = path if path is None else os.path.realpath(path)
 
+        if project_root is not None and os.path.isfile(project_root):
+            project_root = os.path.dirname(os.path.abspath(project_root))
+        self.root: str = (os.path.realpath(project_root)
+                          if project_root is not None and os.path.isdir(project_root)
+                          else path)
+
     @staticmethod
-    def analyse(path: str, log: bool = False, analysed_files: Optional[List[str]] = None) -> Analyser:
+    def analyse(path: str, log: bool = False, analysed_files: Optional[List[str]] = None, root: str = None) -> Analyser:
         """
         Analyses the syntax of the Python code
 
@@ -55,7 +61,7 @@ class Analyser:
         with open(path, 'rb') as source:
             ast_tree = ast.parse(source.read())
 
-        analyser = Analyser(ast_tree, path, log)
+        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, log)
         analyser.__pre_execute()
 
         # fill symbol table
@@ -106,6 +112,7 @@ class Analyser:
         module_analyser = ModuleAnalyser(self, self.symbol_table,
                                          log=self._log,
                                          filename=self.filename,
+                                         root_folder=self.root,
                                          analysed_files=analysed_files)
         self.symbol_table.update(module_analyser.global_symbols)
         self.ast_tree.body.extend(module_analyser.imported_nodes)
