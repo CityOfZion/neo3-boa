@@ -536,6 +536,17 @@ class TestVariable(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7], result)
 
+    def test_list_global_assignment(self):
+        path = self.get_contract_path('ListGlobalAssignment.py')
+        engine = TestEngine()
+
+        expected_value = [1, 2, 3, 4]
+        result = self.run_smart_contract(engine, path, 'get_from_global')
+        self.assertEqual(expected_value, result)
+
+        result = self.run_smart_contract(engine, path, 'get_from_class')
+        self.assertEqual(expected_value, result)
+
     def test_global_assignment_between_functions(self):
         expected_output = (
             Opcode.LDSFLD0
