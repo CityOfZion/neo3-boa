@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
+from boa3.model.operation.binary.arithmetic import StrBytesMultiplication
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -655,7 +656,60 @@ class TestArithmetic(BoaTest):
 
     # endregion
 
-    # region StrMultiplication
+    # region StrBytesMultiplication
+
+    def test_bytes_multiplication_operation(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + StrBytesMultiplication(Type.bytes).bytecode
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('BytesMultiplication.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'bytes_mult', b'a', 4,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'aaaa', result)
+        result = self.run_smart_contract(engine, path, 'bytes_mult', b'unit', 50,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'unit' * 50, result)
+
+    def test_bytes_multiplication_operation_augmented_assignment(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.LDARG1
+            + StrBytesMultiplication(Type.bytes).bytecode
+            + Opcode.STARG0
+            + Opcode.LDARG0
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('BytesMultiplicationAugmentedAssignment.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', b'unit', 50,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'unit' * 50, result)
+
+    def test_bytes_multiplication_builtin_type(self):
+        path = self.get_contract_path('BytesMultiplicationBuiltinType.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'bytes_mult', b'unit test', FindOptions.VALUES_ONLY,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'unit test' * FindOptions.VALUES_ONLY, result)
 
     def test_str_multiplication_operation(self):
         expected_output = (
@@ -664,7 +718,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrMul.bytecode
+            + BinaryOp.StrBytesMul.bytecode
             + Opcode.RET
         )
 
@@ -685,15 +739,19 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrMul.bytecode
+            + BinaryOp.StrBytesMul.bytecode
             + Opcode.STARG0
+            + Opcode.LDARG0
             + Opcode.RET
         )
 
         path = self.get_contract_path('StringMultiplicationAugmentedAssignment.py')
         output = Boa3.compile(path)
-
         self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', 'unit', 50)
+        self.assertEqual('unit' * 50, result)
 
     def test_str_multiplication_builtin_type(self):
         path = self.get_contract_path('StringMultiplicationBuiltinType.py')

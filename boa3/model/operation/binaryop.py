@@ -22,7 +22,7 @@ class BinaryOp:
     Mod = Modulo()
     Pow = Power()
     Concat = Concat()
-    StrMul = StrMultiplication()
+    StrBytesMul = StrBytesMultiplication()
 
     # Relational operations
     NumEq = NumericEquality()

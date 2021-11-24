@@ -5,7 +5,7 @@ __all__ = ['Addition',
            'Modulo',
            'Multiplication',
            'Power',
-           'StrMultiplication',
+           'StrBytesMultiplication',
            'Subtraction'
            ]
 
@@ -16,5 +16,5 @@ from boa3.model.operation.binary.arithmetic.floordivision import FloorDivision
 from boa3.model.operation.binary.arithmetic.modulo import Modulo
 from boa3.model.operation.binary.arithmetic.multiplication import Multiplication
 from boa3.model.operation.binary.arithmetic.power import Power
-from boa3.model.operation.binary.arithmetic.strmultiplication import StrMultiplication
+from boa3.model.operation.binary.arithmetic.strbytesmultiplication import StrBytesMultiplication
 from boa3.model.operation.binary.arithmetic.subtraction import Subtraction
