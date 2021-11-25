@@ -285,3 +285,10 @@ class TestLedgerContract(BoaTest):
     def test_get_transaction_height_mismatched_type(self):
         path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_get_current_index(self):
+        path = self.get_contract_path('GetCurrentIndex.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(engine.height, result)
