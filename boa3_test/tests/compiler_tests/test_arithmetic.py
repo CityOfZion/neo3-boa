@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.model.operation.binary.arithmetic import StrBytesMultiplication
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -665,7 +664,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + StrBytesMultiplication(Type.bytes).bytecode
+            + BinaryOp.StrBytesMul.build(Type.bytes).bytecode
             + Opcode.RET
         )
 
@@ -688,7 +687,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + StrBytesMultiplication(Type.bytes).bytecode
+            + BinaryOp.StrBytesMul.build(Type.bytes).bytecode
             + Opcode.STARG0
             + Opcode.LDARG0
             + Opcode.RET
