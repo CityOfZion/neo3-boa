@@ -5,8 +5,6 @@ from boa3.builtin.interop.blockchain.transaction import Transaction
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
 
-current_height: int = 0
-
 
 def get_contract(hash: UInt160) -> Contract:
     """
