@@ -418,11 +418,17 @@ class OpcodeInfo:
 
     # region Compound-type
 
+    # A value n is taken from top of main stack. The next n*2 items on main stack are removed, put inside n-sized map
+    # and this map is put on top of the main stack.
+    PACKMAP = OpcodeInformation(Opcode.PACKMAP)
+    # A value n is taken from top of main stack. The next n items on main stack are removed, put inside n-sized
+    # struct and this struct is put on top of the main stack.
+    PACKSTRUCT = OpcodeInformation(Opcode.PACKSTRUCT)
     # A value n is taken from top of main stack. The next n items on main stack are removed, put inside n-sized array
     # and this array is put on top of the main stack.
     PACK = OpcodeInformation(Opcode.PACK)
-    # An array is removed from top of the main stack. Its elements are put on top of the main stack (in reverse
-    # order) and the array size is also put on main stack.
+    # A collection is removed from top of the main stack. Its elements are put on top of the main stack (in reverse
+    # order) and the collection size is also put on main stack.
     UNPACK = OpcodeInformation(Opcode.UNPACK)
     # An empty array (with size 0) is put on top of the main stack.
     NEWARRAY0 = OpcodeInformation(Opcode.NEWARRAY0)

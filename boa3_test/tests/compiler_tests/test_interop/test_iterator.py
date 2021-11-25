@@ -45,13 +45,11 @@ class TestIteratorInterop(BoaTest):
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'return_iterator')
-        from boa3.neo.core.types.InteropInterface import InteropInterface
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        self.assertEqual([], result)
 
     def test_import_interop_iterator(self):
         path = self.get_contract_path('ImportInteropIterator.py')
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'return_iterator')
-        from boa3.neo.core.types.InteropInterface import InteropInterface
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        self.assertEqual([], result)
