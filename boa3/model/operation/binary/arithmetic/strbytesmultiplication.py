@@ -6,16 +6,16 @@ from boa3.model.type.type import IType, Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class StrMultiplication(BinaryOperation):
+class StrBytesMultiplication(BinaryOperation):
     """
-    A class used to represent a string concatenation operation
+    A class used to represent a string or bytes concatenation operation
 
     :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
     :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str]
+    _valid_types: List[IType] = [Type.str, Type.bytes]
 
     def __init__(self, left: IType = Type.str, right: IType = Type.int):
         self.operator: Operator = Operator.Mult
