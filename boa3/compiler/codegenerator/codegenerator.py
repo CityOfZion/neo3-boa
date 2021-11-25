@@ -118,7 +118,6 @@ class CodeGenerator:
         if len(visitor.global_stmts) > 0:
             global_ast = ast.parse("")
             global_ast.body = visitor.global_stmts
-            visitor._tree = analyser.ast_tree
             visitor.visit(global_ast)
             generator.initialized_static_fields = True
 

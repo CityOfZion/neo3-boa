@@ -145,8 +145,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     is_module_scope = isinstance(self._current_scope, Module)
                     if not is_module_scope:
                         outer_symbol.set_is_reassigned()
-                    if is_module_scope or self._current_scope == self._deploy_method:
-                        source_node.origin = self._tree
+                    self.__set_source_origin(source_node, is_module_scope)
             else:
                 if not isinstance(source_node, ast.Global):
                     if outer_symbol is not None:
@@ -199,6 +198,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         if cl_var_id not in self._current_scope.class_variables:
             self._current_class.include_symbol(cl_var_id, cl_var, ClassScope.CLASS)
+
+    def __set_source_origin(self, source_node: ast.AST, scope_is_correct: bool = True):
+        if scope_is_correct or self._current_scope == self._deploy_method:
+            source_node.origin = self._tree
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
@@ -834,6 +837,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._log_error(
                     CompilerError.UnresolvedReference(ret.value.lineno, ret.value.col_offset, symbol_id)
                 )
+
+        if ret.value is not None:
+            self.__set_source_origin(ret.value)
 
     def visit_type(self, target: ast.AST) -> Optional[IType]:
         """
