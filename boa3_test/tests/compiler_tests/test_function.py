@@ -61,9 +61,33 @@ class TestFunction(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
-    def test_none_function(self):
-        path = self.get_contract_path('NoneFunction.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+    def test_none_function_pass(self):
+        path = self.get_contract_path('NoneFunctionPass.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertIsVoid(result)
+
+    def test_none_function_return_none(self):
+        path = self.get_contract_path('NoneFunctionReturnNone.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsVoid(result)
+
+    def test_none_function_changing_values_with_return(self):
+        path = self.get_contract_path('NoneFunctionChangingValuesWithReturn.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([2, 4, 6, 8, 10], result)
+
+    def test_none_function_changing_values_without_return(self):
+        path = self.get_contract_path('NoneFunctionChangingValuesWithoutReturn.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([2, 4, 6, 8, 10], result)
 
     def test_arg_without_type_hint(self):
         path = self.get_contract_path('ArgWithoutTypeHintFunction.py')

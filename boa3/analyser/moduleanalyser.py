@@ -642,10 +642,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        if fun_rtype_symbol is None:
-            # it is a function with None return: Main(a: int) -> None:
-            raise NotImplementedError
-
         if isinstance(fun_rtype_symbol, str):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
             fun_rtype_symbol = self.get_type(symbol)
