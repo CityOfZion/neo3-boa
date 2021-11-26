@@ -159,6 +159,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             for _ in range(self.generator.stack_size - last_stack_size):
                 self.generator._stack_pop()
 
+    def _get_unique_name(self, name_id: str, node: ast.AST) -> str:
+        return '{0}{2}{1}'.format(node.__hash__(), name_id, constants.VARIABLE_NAME_SEPARATOR)
+
     def visit_Module(self, module: ast.Module) -> GeneratorData:
         """
         Visitor of the module node
@@ -212,7 +215,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         elif len(function_stmts) > 0:
             # to organize syntax tree nodes from other modules
             for stmt in global_stmts:
-                stmt.origin = module
+                if not hasattr(stmt, 'origin'):
+                    stmt.origin = module
 
             self.global_stmts.extend(global_stmts)
         else:
@@ -344,7 +348,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_id = var_data.symbol_id
         # filter to find the imported variables
         if var_id not in self._symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
-            var_id = '{0}{2}{1}'.format(ann_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+            var_id = self._get_unique_name(var_id, ann_assign.origin)
         self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
         return self.build_data(ann_assign)
 
@@ -364,7 +368,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             # filter to find the imported variables
             if var_id not in self._symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
-                var_id = '{0}{2}{1}'.format(assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+                var_id = self._get_unique_name(var_id, assign.origin)
             vars_ids.append((var_id, var_index, var_value_address))
 
         self.store_variable(*vars_ids, value=assign.value)
@@ -380,7 +384,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_id = var_data.symbol_id
         # filter to find the imported variables
         if var_id not in self._symbols and hasattr(aug_assign, 'origin') and isinstance(aug_assign.origin, ast.AST):
-            var_id = '{0}{2}{1}'.format(aug_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+            var_id = self._get_unique_name(var_id, aug_assign.origin)
 
         self.generator.convert_load_symbol(var_id)
         value_address = self.generator.bytecode_size
@@ -817,7 +821,10 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         name = name_node.id
         if name not in self._symbols:
-            hashed_name = '{0}{2}{1}'.format(self._tree.__hash__(), name, constants.VARIABLE_NAME_SEPARATOR)
+            hashed_name = self._get_unique_name(name, self._tree)
+            if hashed_name not in self._symbols and hasattr(name_node, 'origin'):
+                hashed_name = self._get_unique_name(name, name_node.origin)
+
             if hashed_name in self._symbols:
                 name = hashed_name
         return self.build_data(name_node, name)
