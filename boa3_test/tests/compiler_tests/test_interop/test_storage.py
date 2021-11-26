@@ -420,15 +420,29 @@ class TestStorageInterop(BoaTest):
         path = self.get_contract_path('StorageFindBytesPrefix.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', b'example')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+        self.assertEqual([], result)
+
+        storage = {('example_0', path): '0',
+                   ('example_1', path): '1',
+                   ('example_2', path): '3'}
+        expected_result = [[key, value] for (key, sc), value in storage.items()]
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example', fake_storage=storage)
+        self.assertEqual(expected_result, result)
 
     def test_storage_find_str_prefix(self):
         path = self.get_contract_path('StorageFindStrPrefix.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+        self.assertEqual([], result)
+
+        storage = {('example_0', path): '0',
+                   ('example_1', path): '1',
+                   ('example_2', path): '3'}
+        expected_result = [[key, value] for (key, sc), value in storage.items()]
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example', fake_storage=storage)
+        self.assertEqual(expected_result, result)
 
     def test_storage_find_mismatched_type(self):
         path = self.get_contract_path('StorageFindMismatchedType.py')
@@ -542,16 +556,34 @@ class TestStorageInterop(BoaTest):
     def test_storage_find_with_context(self):
         path = self.get_contract_path('StorageFindWithContext.py')
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+        self.assertEqual([], result)
+
+        storage = {('example_0', path): '0',
+                   ('example_1', path): '1',
+                   ('example_2', path): '3'}
+        expected_result = [[key, value] for (key, sc), value in storage.items()]
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example', fake_storage=storage)
+        self.assertEqual(expected_result, result)
 
     def test_storage_find_with_options(self):
         path = self.get_contract_path('StorageFindWithOptions.py')
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+        self.assertEqual([], result)
+
+        prefix = 'example'
+        expected_result = [['_0', '0'],
+                           ['_1', '1'],
+                           ['_2', '2']
+                           ]
+        storage = {(prefix + key, path): value for (key, value) in expected_result}
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix, fake_storage=storage)
+        self.assertEqual(expected_result, result)
 
     def test_boa2_storage_test(self):
         path = self.get_contract_path('StorageBoa2Test.py')
@@ -659,17 +691,24 @@ class TestStorageInterop(BoaTest):
         path = self.get_contract_path('ImportStorage.py')
         engine = TestEngine()
 
-        key = 'unit_test'
+        prefix = 'unit'
+        key = f'{prefix}_test'
         value = 1234
 
         result = self.run_smart_contract(engine, path, 'get_value', key)
         self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
+        self.assertEqual([], result)
 
         result = self.run_smart_contract(engine, path, 'put_value', key, value)
         self.assertIsVoid(result)
 
         result = self.run_smart_contract(engine, path, 'get_value', key)
         self.assertEqual(value, result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
+        self.assertEqual([[key, Integer(value).to_byte_array()]], result)
 
         result = self.run_smart_contract(engine, path, 'delete_value', key)
         self.assertIsVoid(result)
@@ -678,24 +717,33 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(0, result)
 
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+        self.assertEqual([], result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
+        self.assertEqual([], result)
 
     def test_import_interop_storage(self):
         path = self.get_contract_path('ImportInteropStorage.py')
         engine = TestEngine()
 
-        key = 'unit_test'
+        prefix = 'unit'
+        key = f'{prefix}_test'
         value = 1234
 
         result = self.run_smart_contract(engine, path, 'get_value', key)
         self.assertEqual(0, result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
+        self.assertEqual([], result)
 
         result = self.run_smart_contract(engine, path, 'put_value', key, value)
         self.assertIsVoid(result)
 
         result = self.run_smart_contract(engine, path, 'get_value', key)
         self.assertEqual(value, result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
+        self.assertEqual([[key, Integer(value).to_byte_array()]], result)
 
         result = self.run_smart_contract(engine, path, 'delete_value', key)
         self.assertIsVoid(result)
@@ -704,8 +752,10 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(0, result)
 
         result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
-        # TODO: validate actual result when Enumerator.next() and Enumerator.value() are implemented
+        self.assertEqual([], result)
+
+        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
+        self.assertEqual([], result)
 
     def test_as_read_only(self):
         path = self.get_contract_path('StorageAsReadOnly.py')

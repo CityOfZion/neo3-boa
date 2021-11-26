@@ -232,23 +232,23 @@ class Opcode(bytes, Enum):
     # Transfers control to a target instruction if the first value is greater than the second value. The target
     # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
     JMPGT_L = b'\x2D'
-    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The 
-    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction. 
+    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The
+    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
     JMPGE = b'\x2E'
-    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The 
-    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
+    # Transfers control to a target instruction if the first value is greater than or equal to the second value. The
+    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
     JMPGE_L = b'\x2F'
-    # Transfers control to a target instruction if the first value is less than the second value. The target 
-    # instruction is represented as a 1-byte signed offset from the beginning of the current instruction. 
+    # Transfers control to a target instruction if the first value is less than the second value. The target
+    # instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
     JMPLT = b'\x30'
-    # Transfers control to a target instruction if the first value is less than the second value. The target 
-    # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
+    # Transfers control to a target instruction if the first value is less than the second value. The target
+    # instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
     JMPLT_L = b'\x31'
-    # Transfers control to a target instruction if the first value is less than or equal to the second value. The 
-    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction. 
+    # Transfers control to a target instruction if the first value is less than or equal to the second value. The
+    # target instruction is represented as a 1-byte signed offset from the beginning of the current instruction.
     JMPLE = b'\x32'
-    # Transfers control to a target instruction if the first value is less than or equal to the second value. The 
-    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction. 
+    # Transfers control to a target instruction if the first value is less than or equal to the second value. The
+    # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
     JMPLE_L = b'\x33'
 
     @property
@@ -289,11 +289,11 @@ class Opcode(bytes, Enum):
 
         return jmp_opcode, jmp_arg
 
-    # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of 
-    # the current instruction. 
+    # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of
+    # the current instruction.
     CALL = b'\x34'
-    # Calls the function at the target address which is represented as a 4-bytes signed offset from the beginning of 
-    # the current instruction. 
+    # Calls the function at the target address which is represented as a 4-bytes signed offset from the beginning of
+    # the current instruction.
     CALL_L = b'\x35'
     # Pop the address of a function from the stack, and call the function.
     CALLA = b'\x36'
@@ -531,8 +531,8 @@ class Opcode(bytes, Enum):
     LDSFLD5 = b'\x5D'
     # Loads the static field at index 6 onto the evaluation stack.
     LDSFLD6 = b'\x5E'
-    # Loads the static field at a specified index onto the evaluation stack. The index is represented as a 1-byte 
-    # unsigned integer. 
+    # Loads the static field at a specified index onto the evaluation stack. The index is represented as a 1-byte
+    # unsigned integer.
     LDSFLD = b'\x5F'
     # Stores the value on top of the evaluation stack in the static field list at index 0.
     STSFLD0 = b'\x60'
@@ -548,8 +548,8 @@ class Opcode(bytes, Enum):
     STSFLD5 = b'\x65'
     # Stores the value on top of the evaluation stack in the static field list at index 6.
     STSFLD6 = b'\x66'
-    # Stores the value on top of the evaluation stack in the static field list at a specified index. The index is 
-    # represented as a 1-byte unsigned integer. 
+    # Stores the value on top of the evaluation stack in the static field list at a specified index. The index is
+    # represented as a 1-byte unsigned integer.
     STSFLD = b'\x67'
     # Loads the local variable at index 0 onto the evaluation stack.
     LDLOC0 = b'\x68'
@@ -565,8 +565,8 @@ class Opcode(bytes, Enum):
     LDLOC5 = b'\x6D'
     # Loads the local variable at index 6 onto the evaluation stack.
     LDLOC6 = b'\x6E'
-    # Loads the local variable at a specified index onto the evaluation stack. The index is represented as a 1-byte 
-    # unsigned integer. 
+    # Loads the local variable at a specified index onto the evaluation stack. The index is represented as a 1-byte
+    # unsigned integer.
     LDLOC = b'\x6F'
     # Stores the value on top of the evaluation stack in the local variable list at index 0.
     STLOC0 = b'\x70'
@@ -582,8 +582,8 @@ class Opcode(bytes, Enum):
     STLOC5 = b'\x75'
     # Stores the value on top of the evaluation stack in the local variable list at index 6.
     STLOC6 = b'\x76'
-    # Stores the value on top of the evaluation stack in the local variable list at a specified index. The index is 
-    # represented as a 1-byte unsigned integer. 
+    # Stores the value on top of the evaluation stack in the local variable list at a specified index. The index is
+    # represented as a 1-byte unsigned integer.
     STLOC = b'\x77'
     # Loads the argument at index 0 onto the evaluation stack.
     LDARG0 = b'\x78'
@@ -599,8 +599,8 @@ class Opcode(bytes, Enum):
     LDARG5 = b'\x7D'
     # Loads the argument at index 6 onto the evaluation stack.
     LDARG6 = b'\x7E'
-    # Loads the argument at a specified index onto the evaluation stack. The index is represented as a 1-byte 
-    # unsigned integer. 
+    # Loads the argument at a specified index onto the evaluation stack. The index is represented as a 1-byte
+    # unsigned integer.
     LDARG = b'\x7F'
     # Stores the value on top of the evaluation stack in the argument slot at index 0.
     STARG0 = b'\x80'
@@ -616,8 +616,8 @@ class Opcode(bytes, Enum):
     STARG5 = b'\x85'
     # Stores the value on top of the evaluation stack in the argument slot at index 6.
     STARG6 = b'\x86'
-    # Stores the value on top of the evaluation stack in the argument slot at a specified index. The index is 
-    # represented as a 1-byte unsigned integer. 
+    # Stores the value on top of the evaluation stack in the argument slot at a specified index. The index is
+    # represented as a 1-byte unsigned integer.
     STARG = b'\x87'
 
     # endregion
@@ -658,8 +658,8 @@ class Opcode(bytes, Enum):
 
     # region Arithmetic
 
-    # Puts the sign of top stack item on top of the main stack. If value is negative, put -1; if positive, 
-    # put 1; if value is zero, put 0. 
+    # Puts the sign of top stack item on top of the main stack. If value is negative, put -1; if positive,
+    # put 1; if value is zero, put 0.
     SIGN = b'\x99'
     # The input is made positive.
     ABS = b'\x9A'
@@ -718,11 +718,16 @@ class Opcode(bytes, Enum):
 
     # region Compound-type
 
+    # A value n is taken from top of main stack. The next n*2 items on main stack are removed, put inside n-sized map
+    # and this map is put on top of the main stack.
+    PACKMAP = b'\xBE'
+    # A value n is taken from top of main stack. The next n items on main stack are removed, put inside n-sized
+    # struct and this struct is put on top of the main stack.
+    PACKSTRUCT = b'\xBF'
     # A value n is taken from top of main stack. The next n items on main stack are removed, put inside n-sized array
-    # and this array is put on top of the main stack. 
+    # and this array is put on top of the main stack.
     PACK = b'\xC0'
-    # An array is removed from top of the main stack. Its elements are put on top of the main stack (in reverse 
-    # order) and the array size is also put on main stack. 
+    # A collection is removed from top of the main stack. Its elements are put on top of the main stack (in reverse order) and the collection size is also put on main stack.
     UNPACK = b'\xC1'
     # An empty array (with size 0) is put on top of the main stack.
     NEWARRAY0 = b'\xC2'
@@ -739,14 +744,14 @@ class Opcode(bytes, Enum):
     # An array is removed from top of the main stack. Its size is put on top of the main stack.
     SIZE = b'\xCA'
     # An input index n (or key) and an array (or map) are removed from the top of the main stack. Puts True on top of
-    # main stack if array[n] (or map[n]) exist, and False otherwise. 
+    # main stack if array[n] (or map[n]) exist, and False otherwise.
     HASKEY = b'\xCB'
     # A map is taken from top of the main stack. The keys of this map are put on top of the main stack.
     KEYS = b'\xCC'
     # A map is taken from top of the main stack. The values of this map are put on top of the main stack.
     VALUES = b'\xCD'
-    # An input index n (or key) and an array (or map) are taken from main stack. Element array[n] (or map[n]) is put 
-    # on top of the main stack. 
+    # An input index n (or key) and an array (or map) are taken from main stack. Element array[n] (or map[n]) is put
+    # on top of the main stack.
     PICKITEM = b'\xCE'
     # The item on top of main stack is removed and appended to the second item on top of the main stack.
     APPEND = b'\xCF'
