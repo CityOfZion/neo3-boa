@@ -5,7 +5,7 @@ If there's an issue opened, please, link it here.
 A clear and concise description of what you made in this change.
 
 **How to Reproduce**
-Steps to reproduce the behaviour:
+Steps to reproduce the behavior:
 1. Open the project, run '...'
 2. Type '...' or do '...'
 3. ...

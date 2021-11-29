@@ -845,8 +845,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.10.0</td>
     <td>Sequence slicing</td>
     <td>
       <pre>
@@ -857,6 +857,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#sequence-slicing-1">List of examples</a>
     </td>
   </tbody>
   <tbody>
@@ -950,8 +951,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>next release</td>
+    <td>✅</td>
+    <td>v0.10.0</td>
     <td>Class</td>
     <td>
       <pre>
@@ -963,6 +964,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#user-created-classes">List of examples</a>
     </td>
   </tbody>
 </table>

@@ -256,7 +256,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_result, result)
 
         # Python will try conserve memory and will make a and b reference the same position, since Tuples are immutable
-        # this will deviate from Neo's expected behaviour
+        # this will deviate from Neo's expected behavior
         result = self.run_smart_contract(engine, path, 'without_attribution', expected_result_type=bool)
         self.assertEqual(False, result)
 
@@ -577,7 +577,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_result, result)
 
         # Python will try conserve memory and will make a and b reference the same position, since Tuples are immutable
-        # this will deviate from Neo's expected behaviour
+        # this will deviate from Neo's expected behavior
         result = self.run_smart_contract(engine, path, 'without_attribution', expected_result_type=bool)
         self.assertEqual(True, result)
 
