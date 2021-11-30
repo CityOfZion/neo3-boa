@@ -14,6 +14,7 @@ def get_contract(hash: UInt160) -> Contract:
     :type hash: UInt160
     :return: a contract
     :rtype: Contract
+
     :raise Exception: raised if hash length isn't 20 bytes.
     """
     pass

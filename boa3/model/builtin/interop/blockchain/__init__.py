@@ -12,8 +12,7 @@ __all__ = ['BlockType',
 
 from boa3.model.builtin.interop.blockchain.blocktype import BlockType
 from boa3.model.builtin.interop.blockchain.currenthashmethod import CurrentHashProperty
-from boa3.model.builtin.interop.blockchain.currentindexmethod import CurrentIndexProperty
-from boa3.model.builtin.interop.blockchain.currentindexmethod import GetCurrentIndexMethod
+from boa3.model.builtin.interop.blockchain.currentindexmethod import CurrentIndexProperty, GetCurrentIndexMethod
 from boa3.model.builtin.interop.blockchain.getblockmethod import GetBlockMethod
 from boa3.model.builtin.interop.blockchain.getcontractmethod import GetContractMethod
 from boa3.model.builtin.interop.blockchain.gettransactionfromblockmethod import GetTransactionFromBlockMethod
