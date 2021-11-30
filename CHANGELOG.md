@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.10.1] - 2021-11-30
 ### Added
 - Support to [Neo 3.1.0](https://github.com/neo-project/neo/tree/v3.1.0)
-- Implemented to class properties on user-created classes
+- Implemented class properties on user-created classes
 - Support to Python 3.9
 - Support to `WitnessScope`s in the TestEngine
 - Implemented keyword args on function definitions
