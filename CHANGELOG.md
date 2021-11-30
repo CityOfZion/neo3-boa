@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom contract interfaces
 - Support to Python's builtins:
   - `str` methods: `join`, `startswith`, `upper`, `lower`, `index`, `isdigit` and `strip`
-  - `list` `copy` method and `dict` method `pop` and `copy` methods
+  - `list` `copy` method and `dict` `pop` and `copy` methods
 
 ### Changed
 - Changed operations implementation to work with custom types

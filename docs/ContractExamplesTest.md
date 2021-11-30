@@ -544,7 +544,7 @@
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedSymbols.py">ImportUserModuleWithNotImportedSymbols.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedVariables.py">ImportUserModuleWithNotImportedVariables.py</a>
 
-## v0.10.0
+## v0.10
 ### User-created classes
 - <a href="/boa3_test/test_sc/class_test/UserClassEmpty.py">UserClassEmpty.py</a>,
 - <a href="/boa3_test/test_sc/class_test/UserClassUpdateInstanceVariable.py">UserClassUpdateInstanceVariable.py</a>,
