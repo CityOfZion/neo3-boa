@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from boa3.compiler.codegenerator import get_bytes_count
-from boa3.model.method import Method
-from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
-from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.Integer import Integer
@@ -18,53 +15,89 @@ class ClassType(IType, ABC):
     An abstract class used to represent Python class
     """
 
-    def __init__(self, identifier: str):
+    def __init__(self, identifier: str, decorators: list = None):
         super().__init__(identifier)
 
+        if decorators is None:
+            decorators = []
+        else:
+            # avoid circular import
+            from boa3.model.decorator import IDecorator
+            decorators = [decorator for decorator in decorators
+                          if isinstance(decorator, IDecorator)]
+
+        self.decorators = decorators
+
     @property
     @abstractmethod
-    def class_variables(self) -> Dict[str, Variable]:
+    def class_variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         return {}
 
     @property
     @abstractmethod
-    def instance_variables(self) -> Dict[str, Variable]:
+    def instance_variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         return {}
 
     @property
-    def variables(self) -> Dict[str, Variable]:
+    def variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         variables = self.class_variables.copy()
         variables.update(self.instance_variables)
         return variables
 
     @property
-    def _all_variables(self) -> Dict[str, Variable]:
+    def _all_variables(self):
+        """
+        :rtype: Dict[str, boa3.model.variable.Variable]
+        """
         return self.variables
 
     @property
     @abstractmethod
-    def properties(self) -> Dict[str, Property]:
+    def properties(self):
+        """
+        :rtype: Dict[str, boa3.model.property.Property]
+        """
         return {}
 
     @property
     @abstractmethod
-    def static_methods(self) -> Dict[str, Method]:
+    def static_methods(self):
+        """
+        :rtype: Dict[str, boa3.model.method.Method]
+        """
         return {}
 
     @property
     @abstractmethod
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self):
+        """
+        :rtype: Dict[str, boa3.model.method.Method]
+        """
         return {}
 
     @property
     @abstractmethod
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self):
+        """
+        :rtype: Dict[str, boa3.model.method.Method]
+        """
         return {}
 
     @abstractmethod
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self):
         """
         If the class constructor is None, it mustn't allow instantiation of this class
+
+        :rtype: boa3.model.method.Method or None
         """
         pass
 
@@ -81,7 +114,7 @@ class ClassType(IType, ABC):
     @property
     def class_symbols(self) -> Dict[str, ISymbol]:
         s: Dict[str, ISymbol] = {}
-        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_methods)  # class methods and variables can be accessed both
         s.update(self.class_variables)  # from class name or instance object
         s.update(self.static_methods)
         return s
@@ -89,7 +122,7 @@ class ClassType(IType, ABC):
     @property
     def instance_symbols(self) -> Dict[str, ISymbol]:
         s: Dict[str, ISymbol] = {}
-        s.update(self.class_methods)    # class methods and variables can be accessed both
+        s.update(self.class_methods)  # class methods and variables can be accessed both
         s.update(self.class_variables)  # from class name or instance object
         s.update(self.instance_methods)
         s.update(self.instance_variables)
@@ -107,6 +140,12 @@ class ClassType(IType, ABC):
     def stack_item(self) -> StackItemType:
         # must be overwritten, classes cannot be mapped to Any
         return super().stack_item
+
+    @property
+    def is_interface(self) -> bool:
+        # TODO: change when other interfaces identifiers are implemented
+        from boa3.model.builtin.decorator import ContractDecorator
+        return any(isinstance(decorator, ContractDecorator) for decorator in self.decorators)
 
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         is_type_opcodes = [

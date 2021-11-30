@@ -12,6 +12,7 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.event import Event
 from boa3.model.imports.importsymbol import Import
+from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
@@ -19,6 +20,7 @@ from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.contractinterfaceclass import ContractInterfaceClass
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType
 from boa3.model.type.collection.sequence.buffertype import Buffer as BufferType
@@ -126,6 +128,7 @@ class CodeGenerator:
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
 
         self._current_method: Method = None
+        self._current_class: Method = None
 
         self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
         self._can_append_target: bool = True
@@ -315,6 +318,8 @@ class CodeGenerator:
                 attr = self.get_symbol(attribute, is_internal=is_internal)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                     return attr.symbols[symbol_id]
+                elif isinstance(attr, Package) and symbol_id in attr.inner_packages:
+                    return attr.inner_packages[symbol_id]
 
             if is_internal:
                 from boa3.model import imports
@@ -1458,11 +1463,17 @@ class CodeGenerator:
             inner_index = list(user_class.variables).index(var_id)
 
         if isinstance(inner_index, int):
-            # it's a class variable
+            # it's a variable from a class
             self.convert_literal(inner_index)
             index_address = self.bytecode_size
-            self.convert_load_variable(user_class.identifier, Variable(user_class))
-            no_stack_items_to_swap = 3 if var_id in user_class.class_variables else 2
+
+            if var_id in user_class.class_variables:
+                # it's a class variable
+                self.convert_load_variable(user_class.identifier, Variable(user_class))
+                no_stack_items_to_swap = 3
+            else:
+                no_stack_items_to_swap = 2
+
             self.swap_reverse_stack_items(no_stack_items_to_swap)
             self.convert_set_item(index_address)
             return
@@ -1597,7 +1608,7 @@ class CodeGenerator:
 
     def convert_method_call(self, function: Method, num_args: int):
         """
-        Converts a builtin method function call
+        Converts a method function call
 
         :param function: the function to be converted
         """
@@ -1613,8 +1624,22 @@ class CodeGenerator:
                 if self.stack_size < 1 or not self._stack[-1].is_type_of(function_result):
                     self.convert_new_empty_array(size, function_result)
 
-        from boa3.neo.vm.CallCode import CallCode
-        self.__insert_code(CallCode(function))
+        if isinstance(function.origin_class, ContractInterfaceClass):
+            function_id = next((symbol_id
+                                for symbol_id, symbol in function.origin_class.symbols.items()
+                                if symbol is function),
+                               None)
+
+            if isinstance(function_id, str):
+                self.convert_new_array(len(function.args))
+                self.convert_literal(Interop.CallFlagsType.default_value)
+                self.convert_literal(function_id)
+                self.convert_literal(function.origin_class.contract_hash.to_array())
+                self.convert_builtin_method_call(Interop.CallContract)
+                self._stack_pop()  # remove call contract 'any' result from the stack
+        else:
+            from boa3.neo.vm.CallCode import CallCode
+            self.__insert_code(CallCode(function))
 
         for arg in range(num_args):
             self._stack_pop()

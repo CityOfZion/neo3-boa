@@ -19,7 +19,7 @@ class StandardAnalyser(IAstAnalyser):
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
         from boa3.builtin import NeoMetadata
 
-        super().__init__(analyser.ast_tree, log=log)
+        super().__init__(analyser.ast_tree, analyser.filename, log=log)
 
         self.symbols: Dict[str, ISymbol] = symbol_table
 

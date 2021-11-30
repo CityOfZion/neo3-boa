@@ -39,13 +39,14 @@ class LedgerClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.blockchain import (BlockType, GetBlockMethod, GetTransactionMethod,
-                                                           GetTransactionFromBlockMethod, GetTransactionHeightMethod,
-                                                           TransactionType)
+        from boa3.model.builtin.interop.blockchain import (BlockType, GetBlockMethod, GetCurrentIndexMethod,
+                                                           GetTransactionMethod, GetTransactionFromBlockMethod,
+                                                           GetTransactionHeightMethod, TransactionType)
 
         if len(self._class_methods) == 0:
             self._class_methods = {
                 'get_block': GetBlockMethod(BlockType()),
+                'get_current_index': GetCurrentIndexMethod(),
                 'get_transaction': GetTransactionMethod(TransactionType()),
                 'get_transaction_from_block': GetTransactionFromBlockMethod(TransactionType()),
                 'get_transaction_height': GetTransactionHeightMethod()

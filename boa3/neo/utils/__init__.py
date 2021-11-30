@@ -13,7 +13,10 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
 
     item_type: StackItemType = StackItemType.get_stack_item_type(item['type'])
     if item_type is StackItemType.InteropInterface:
-        return InteropInterface
+        if 'iterator' in item:
+            return [stack_item_from_json(value) for value in item['iterator']]
+        else:
+            return InteropInterface
     if item_type is StackItemType.Any or 'value' not in item:
         return None
 

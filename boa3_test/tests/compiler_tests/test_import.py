@@ -311,3 +311,20 @@ class TestImport(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(5, result)
+
+    def test_not_imported_builtin_public(self):
+        path = self.get_contract_path('NotImportedBuiltinPublic.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_not_imported_builtin_from_typing(self):
+        path = self.get_contract_path('NotImportedBuiltinFromTypingInReturn.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+        path = self.get_contract_path('NotImportedBuiltinFromTypingInArgs.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+        path = self.get_contract_path('NotImportedBuiltinFromTypingInSubscript.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+        path = self.get_contract_path('NotImportedBuiltinFromTypingInVariable.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)

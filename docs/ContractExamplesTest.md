@@ -53,6 +53,9 @@
     - [Bitwise augmented assignment operators](#bitwise-augmented-assignment-operators)
     - [Built in function](#built-in-function-6)
     - [Import](#import-2)
+- [v0.10](#v010)
+  - [User-created classes](#user-created-classes)
+  - [Sequence slicing](#sequence-slicing-1)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -540,3 +543,46 @@
 - <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImportsDupNames.py">GenerationWithUserModuleImportsDupNames.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedSymbols.py">ImportUserModuleWithNotImportedSymbols.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedVariables.py">ImportUserModuleWithNotImportedVariables.py</a>
+
+## v0.10
+### User-created classes
+- <a href="/boa3_test/test_sc/class_test/UserClassEmpty.py">UserClassEmpty.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassUpdateInstanceVariable.py">UserClassUpdateInstanceVariable.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassMethodFromClass.py">UserClassWithClassMethodFromClass.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassMethodFromObject.py">UserClassWithClassMethodFromObject.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassMethodWithArgs.py">UserClassWithClassMethodWithArgs.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassMethodWithVararg.py">UserClassWithClassMethodWithVararg.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassVariableAndClassMethod.py">UserClassWithClassVariableAndClassMethod.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassVariableFromClass.py">UserClassWithClassVariableFromClass.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithClassVariableFromObject.py">UserClassWithClassVariableFromObject.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithInit.py">UserClassWithInit.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithInitWithArgs.py">UserClassWithInitWithArgs.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithInstanceMethod.py">UserClassWithInstanceMethod.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithInstanceVariableFromObject.py">UserClassWithInstanceVariableFromObject.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithStaticMethodFromClass.py">UserClassWithStaticMethodFromClass.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithStaticMethodFromClassWithSameNameMethod.py">UserClassWithStaticMethodFromClassWithSameNameMethod.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithStaticMethodNotClassMethod.py">UserClassWithStaticMethodNotClassMethod.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithStaticMethodWithArgs.py">UserClassWithStaticMethodWithArgs.py</a>,
+- <a href="/boa3_test/test_sc/class_test/UserClassWithStaticMethodWithVararg.py">UserClassWithStaticMethodWithVararg.py</a>
+
+### Sequence slicing
+- <a href="/boa3_test/test_sc/bytes_test/SliceWithStride.py">SliceWithStride.py</a>,
+- <a href="/boa3_test/test_sc/bytes_test/SliceWithNegativeStride.py">SliceWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/bytes_test/SliceOmittedWithStride.py">SliceOmittedWithStride.py</a>,
+- <a href="/boa3_test/test_sc/bytes_test/SliceOmittedWithNegativeStride.py">SliceOmittedWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/list_test/ListSlicingWithStride.py">ListSlicingWithStride.py</a>,
+- <a href="/boa3_test/test_sc/list_test/ListSlicingWithNegativeStride.py">ListSlicingWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/list_test/ListSlicingOmittedWithStride.py">ListSlicingOmittedWithStride.py</a>,
+- <a href="/boa3_test/test_sc/list_test/ListSlicingOmittedWithNegativeStride.py">ListSlicingOmittedWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingWithStride.py">RangeSlicingWithStride.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingWithNegativeStride.py">RangeSlicingWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingOmittedWithStride.py">RangeSlicingOmittedWithStride.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeSlicingOmittedWithNegativeStride.py">RangeSlicingOmittedWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/string_test/StringSlicingWithStride.py">StringSlicingWithStride.py</a>,
+- <a href="/boa3_test/test_sc/string_test/StringSlicingWithNegativeStride.py">StringSlicingWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/string_test/StringSlicingOmittedWithStride.py">StringSlicingOmittedWithStride.py</a>,
+- <a href="/boa3_test/test_sc/string_test/StringSlicingOmittedWithNegativeStride.py">StringSlicingOmittedWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/tuple_test/TupleSlicingWithStride.py">TupleSlicingWithStride.py</a>,
+- <a href="/boa3_test/test_sc/tuple_test/TupleSlicingWithNegativeStride.py">TupleSlicingWithNegativeStride.py</a>,
+- <a href="/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithStride.py">TupleSlicingOmittedWithStride.py</a>,
+- <a href="/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithNegativeStride.py">TupleSlicingOmittedWithNegativeStride.py</a>

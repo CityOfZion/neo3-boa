@@ -12,8 +12,9 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None,
                  vararg: Optional[Tuple[str, Variable]] = None,
+                 kwargs: Optional[Dict[str, Variable]] = None,
                  defaults: List[ast.AST] = None, return_type: IType = None):
-        super().__init__(args, vararg, defaults, return_type)
+        super().__init__(args, vararg, kwargs, defaults, return_type)
         self._identifier = identifier
         self.defined_by_entry = False  # every builtin symbol must have this variable set as False
 

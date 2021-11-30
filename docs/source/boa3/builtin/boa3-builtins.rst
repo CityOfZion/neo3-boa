@@ -8,4 +8,5 @@ boa3.builtin package
 
    contract/boa3-builtin-contract
    interop/boa3-builtin-interop
+   nativecontract/boa3-builtin-nativecontract
    type/boa3-builtin-type

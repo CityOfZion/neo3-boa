@@ -5,6 +5,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Initial support to inheritance on user-created classes
+
+
+## [0.10.1] - 2021-11-30
+### Added
+- Support to [Neo 3.1.0](https://github.com/neo-project/neo/tree/v3.1.0)
+- Implemented class properties on user-created classes
+- Support to Python 3.9
+- Support to `WitnessScope`s in the TestEngine
+- Implemented keyword args on function definitions
+- Custom contract interfaces
+- Support to Python's builtins:
+  - `str` methods: `join`, `startswith`, `upper`, `lower`, `index`, `isdigit` and `strip`
+  - `list` `copy` method and `dict` `pop` and `copy` methods
+
+### Changed
+- Changed operations implementation to work with custom types
+- Moved `boa3.builtin.interop.blockchain.current_height` to `boa3.builtin.nativecontract.Ledger.get_current_index()` 
+
+### Fixed
+- Fixed importing from different user packages
+- Fixed issue with `insert` in the first position on lists
+- Fixed the runtime error raised when using instance variables
+- Fixed incorrect implicit cast behavior
+- Fixed incorrect code generation when calling class methods from objects
 
 
 ## [0.10.0] - 2021-09-13
@@ -266,7 +292,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...HEAD
+[0.10.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.1
 [0.10.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.0
 [0.9.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.9.0
 [0.8.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.8.3

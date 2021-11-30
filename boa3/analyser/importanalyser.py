@@ -1,6 +1,7 @@
 import ast
 import importlib.util
 import os
+import sys
 from typing import Dict, List, Optional
 
 from boa3 import constants
@@ -12,7 +13,7 @@ from boa3.model.type.type import Type
 
 class ImportAnalyser(IAstAnalyser):
 
-    def __init__(self, import_target: str, importer_file: Optional[str] = None,
+    def __init__(self, import_target: str, root_folder: str, importer_file: Optional[str] = None,
                  already_imported_modules: List[str] = None, log: bool = False):
         self.can_be_imported: bool = False
         self.is_builtin_import: bool = False
@@ -20,12 +21,25 @@ class ImportAnalyser(IAstAnalyser):
         self._import_identifier: str = import_target
         self._imported_files: List[str] = already_imported_modules if already_imported_modules is not None else []
 
-        super().__init__(ast.Module(body=[]), log=log)
+        if isinstance(root_folder, str):
+            if os.path.isfile(root_folder):
+                root = os.path.dirname(root_folder)
+            elif os.path.isdir(root_folder):
+                root = root_folder
+            else:
+                root = os.path.dirname(importer_file)
+        else:
+            root = os.path.dirname(importer_file)
 
+        super().__init__(ast.Module(body=[]), root_folder=root, log=log)
+
+        sys.path.append(self.root_folder)
         try:
             module_origin: str = importlib.util.find_spec(import_target).origin
         except BaseException:
             return
+        finally:
+            sys.path.remove(self.root_folder)
 
         path: List[str] = module_origin.split(os.sep)
         self.filename = path[-1]
@@ -38,7 +52,13 @@ class ImportAnalyser(IAstAnalyser):
 
         package = imports.builtin.get_package(self._import_identifier)
         if hasattr(package, 'symbols'):
-            self.symbols = package.symbols
+            if hasattr(package, 'inner_packages'):
+                # when have symbol and packages with the same id, prioritize symbol
+                self.symbols: Dict[str, ISymbol] = package.inner_packages
+                self.symbols.update(package.symbols)
+            else:
+                self.symbols = package.symbols
+
             self.can_be_imported = True
             self.is_builtin_import = True
             return
@@ -62,7 +82,8 @@ class ImportAnalyser(IAstAnalyser):
                     from boa3.analyser.analyser import Analyser
                     files = self._imported_files
                     files.append(origin_file)
-                    analyser = Analyser.analyse(module_origin, analysed_files=files, log=self._log)
+                    analyser = Analyser.analyse(module_origin, root=self.root_folder,
+                                                analysed_files=files, log=self._log)
 
                     # include only imported symbols
                     if analyser.is_analysed:

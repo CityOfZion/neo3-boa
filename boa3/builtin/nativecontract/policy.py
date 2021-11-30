@@ -2,6 +2,10 @@ from boa3.builtin.type import UInt160
 
 
 class Policy:
+    """
+    A class used to represent the Policy native contract
+    """
+
     @classmethod
     def get_fee_per_byte(cls) -> int:
         """

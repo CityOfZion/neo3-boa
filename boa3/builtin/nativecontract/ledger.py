@@ -22,6 +22,16 @@ class Ledger:
         pass
 
     @classmethod
+    def get_current_index(cls) -> int:
+        """
+        Gets the index of the current block.
+
+        :return: the index of the current block
+        :rtype: int
+        """
+        pass
+
+    @classmethod
     def get_transaction(cls, hash_: UInt256) -> Transaction:
         """
         Gets a transaction with the given hash.

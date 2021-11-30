@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 
 def public(*args):
@@ -18,6 +18,13 @@ def metadata(*args):
     def metadata_wrapper():
         pass
     return metadata_wrapper
+
+
+def contract(script_hash: Union[str, bytes]):
+    """
+    This decorator identifies a class that should be interpreted as an interface to an existing contract.
+    """
+    pass
 
 
 def to_script_hash(data_bytes: Any) -> bytes:
@@ -71,12 +78,16 @@ class NeoMetadata:
     """
     This class stores the smart contract manifest information.
 
+    :ivar supported_standards: Neo standards supported by this smart contract. Empty by default;
+    :vartype supported_standards: List[str]
     :ivar author: the smart contract author. None by default;
     :vartype author: str or None
     :ivar email: the smart contract author email. None by default;
     :vartype email: str or None
     :ivar description: the smart contract description. None by default;
     :vartype description: str or None
+    :ivar extras: A json object with additional information. Empty by default;
+    :vartype extras: Dict[str, Any]
     """
 
     def __init__(self):

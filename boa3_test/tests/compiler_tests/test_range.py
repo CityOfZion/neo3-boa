@@ -576,3 +576,10 @@ class TestRange(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(list(range(100, 120)), result)
+
+    def test_range_index(self):
+        path = self.get_contract_path('IndexRange.py')
+        engine = TestEngine()
+
+        # TODO: change when index() with only one argument is implemented for range
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

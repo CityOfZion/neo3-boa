@@ -5,9 +5,9 @@ from boa3.model.builtin.interop.nativecontract import LedgerMethod
 from boa3.model.variable import Variable
 
 
-class CurrentIndexMethod(LedgerMethod):
+class GetCurrentIndexMethod(LedgerMethod):
     def __init__(self):
-        identifier = '-get_current_index'
+        identifier = 'get_current_index'
         syscall = 'currentIndex'
         args: Dict[str, Variable] = {}
         from boa3.model.type.type import Type
@@ -17,5 +17,5 @@ class CurrentIndexMethod(LedgerMethod):
 class CurrentIndexProperty(IBuiltinProperty):
     def __init__(self):
         identifier = 'current_index'
-        getter = CurrentIndexMethod()
+        getter = GetCurrentIndexMethod()
         super().__init__(identifier, getter)

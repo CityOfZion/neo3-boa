@@ -808,3 +808,279 @@ class TestBytes(BoaTest):
         if isinstance(result, str):
             result = String(result).to_bytes()
         self.assertEqual((256).to_bytes(2, 'little') + bytes(30), result)
+
+    def test_bytes_upper(self):
+        path = self.get_contract_path('UpperBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
+
+        bytes_value = b'a1b123y3z'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
+
+        bytes_value = b'!@#$%123*-/'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
+
+    def test_bytes_lower(self):
+        path = self.get_contract_path('LowerBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+        bytes_value = b'A1B123Y3Z'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+        bytes_value = b'!@#$%123*-/'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, expected_result_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
+
+    def test_bytes_startswith_method(self):
+        path = self.get_contract_path('StartswithBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 0
+        end = len(bytes_value)
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 2
+        end = 6
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 2
+        end = 6
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 2
+        end = 3
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_tes'
+        start = -99
+        end = -1
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        start = 0
+        end = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_test'
+        start = 0
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start, end)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
+
+    def test_bytes_startswith_method_default_end(self):
+        path = self.get_contract_path('StartswithBytesMethodDefaultEnd.py')
+        engine = TestEngine()
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        start = 2
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 2
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'it'
+        start = 3
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_tes'
+        start = -99
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        start = 99
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_test'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value, start)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
+
+    def test_bytes_startswith_method_defaults(self):
+        path = self.get_contract_path('StartswithBytesMethodDefaults.py')
+        engine = TestEngine()
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'unit_test'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b''
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'12345'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+        bytes_value = b'unit_test'
+        subbytes_value = b'bigger subbytes_value'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, subbytes_value)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
+
+    def test_bytes_strip(self):
+        path = self.get_contract_path('StripBytesMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        sub_bytes = b'abcxyz'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sub_bytes,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
+
+        bytes_value = b'abcdefghijklmnopqrsvwxyz unit test abcdefghijklmnopqrsvwxyz'
+        sub_bytes = b'abcdefghijklmnopqrsvwxyz '
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sub_bytes,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
+
+        bytes_value = b'0123456789hello world987654310'
+        sub_bytes = b'0987654321'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sub_bytes,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
+
+    def test_bytes_strip_default(self):
+        path = self.get_contract_path('StripBytesMethodDefault.py')
+        engine = TestEngine()
+
+        bytes_value = b'     unit test    '
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+        bytes_value = b'unit test    '
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+        bytes_value = b'    unit test'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+        bytes_value = b' \t\n\r\f\vunit test \t\n\r\f\v'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
+
+    def test_isdigit_method(self):
+        path = self.get_contract_path('IsdigitMethod.py')
+        engine = TestEngine()
+
+        bytes_value = b'0123456789'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+        bytes_value = b'23mixed01'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+        bytes_value = b'no digits here'
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+        bytes_value = b''
+        result = self.run_smart_contract(engine, path, 'main', bytes_value)
+        self.assertEqual(bytes_value.isdigit(), result)
+
+    def test_bytes_join_with_sequence(self):
+        path = self.get_contract_path('JoinBytesMethodWithSequence.py')
+        engine = TestEngine()
+
+        bytes_value = b' '
+        sequence = [b"Unit", b"Test", b"Neo3-boa"]
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sequence,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
+
+        bytes_value = b' '
+        sequence = []
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sequence,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
+
+        bytes_value = b' '
+        sequence = [b"UnitTest"]
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, sequence,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
+
+    def test_bytes_join_with_dictionary(self):
+        path = self.get_contract_path('JoinBytesMethodWithDictionary.py')
+        engine = TestEngine()
+
+        bytes_value = b' '
+        dictionary = {b"Unit": 1, b"Test": 2, b"Neo3-boa": 3}
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
+
+        bytes_value = b' '
+        dictionary = {}
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
+
+        bytes_value = b' '
+        dictionary = {b"UnitTest": 1}
+        result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
+                                         expected_result_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)

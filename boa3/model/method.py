@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple
 from boa3.model.callable import Callable
 from boa3.model.debuginstruction import DebugInstruction
 from boa3.model.symbol import ISymbol
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 
@@ -21,12 +22,13 @@ class Method(Callable):
 
     def __init__(self, args: Dict[str, Variable] = None,
                  vararg: Optional[Tuple[str, Variable]] = None,
+                 kwargs: Optional[Dict[str, Variable]] = None,
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
                  is_init: bool = False,
                  origin_node: Optional[ast.AST] = None):
-        super().__init__(args, vararg, defaults, return_type, is_public, decorators, origin_node)
+        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}
@@ -38,6 +40,7 @@ class Method(Callable):
             self.return_type = list(self.args.values())[0].type
 
         self._debug_map: List[DebugInstruction] = []
+        self.origin_class: Optional[ClassType] = None
 
     @property
     def shadowing_name(self) -> str:

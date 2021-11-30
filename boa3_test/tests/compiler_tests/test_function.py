@@ -8,16 +8,15 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestFunction(BoaTest):
-
     default_folder: str = 'test_sc/function_test'
 
     def test_integer_function(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'           # num local variables
-            + b'\x01'           # num arguments
-            + Opcode.PUSH10     # body
-            + Opcode.RET        # return
+            Opcode.INITSLOT  # function signature
+            + b'\x00'  # num local variables
+            + b'\x01'  # num arguments
+            + Opcode.PUSH10  # body
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('IntegerFunction.py')
@@ -33,10 +32,10 @@ class TestFunction(BoaTest):
     def test_string_function(self):
         expected_output = (
             # functions without arguments and local variables don't need initslot
-            Opcode.PUSHDATA1        # body
+            Opcode.PUSHDATA1  # body
             + bytes([len('42')])
             + bytes('42', constants.ENCODING)
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('StringFunction.py')
@@ -50,8 +49,8 @@ class TestFunction(BoaTest):
     def test_bool_function(self):
         expected_output = (
             # functions without arguments and local variables don't need initslot
-            Opcode.PUSH1      # body
-            + Opcode.RET        # return
+            Opcode.PUSH1  # body
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('BoolFunction.py')
@@ -62,9 +61,33 @@ class TestFunction(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(1, result)
 
-    def test_none_function(self):
-        path = self.get_contract_path('NoneFunction.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+    def test_none_function_pass(self):
+        path = self.get_contract_path('NoneFunctionPass.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertIsVoid(result)
+
+    def test_none_function_return_none(self):
+        path = self.get_contract_path('NoneFunctionReturnNone.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsVoid(result)
+
+    def test_none_function_changing_values_with_return(self):
+        path = self.get_contract_path('NoneFunctionChangingValuesWithReturn.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([2, 4, 6, 8, 10], result)
+
+    def test_none_function_changing_values_without_return(self):
+        path = self.get_contract_path('NoneFunctionChangingValuesWithoutReturn.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([2, 4, 6, 8, 10], result)
 
     def test_arg_without_type_hint(self):
         path = self.get_contract_path('ArgWithoutTypeHintFunction.py')
@@ -72,10 +95,10 @@ class TestFunction(BoaTest):
 
     def test_no_return_hint_function_with_empty_return_statement(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'           # num local variables
-            + b'\x01'           # num arguments
-            + Opcode.RET        # return
+            Opcode.INITSLOT  # function signature
+            + b'\x00'  # num local variables
+            + b'\x01'  # num arguments
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('EmptyReturnFunction.py')
@@ -88,20 +111,20 @@ class TestFunction(BoaTest):
 
     def test_no_return_hint_function_with_condition_empty_return_statement(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
+            Opcode.INITSLOT  # function signature
             + b'\x01'
             + b'\x01'
-            + Opcode.LDARG0     # if a > 10
+            + Opcode.LDARG0  # if a > 10
             + Opcode.PUSH10
             + Opcode.GT
             + Opcode.JMPIFNOT
             + Integer(3).to_byte_array()
-            + Opcode.RET            # return
+            + Opcode.RET  # return
             + Opcode.LDARG0
             + Opcode.PUSH10
             + Opcode.MOD
             + Opcode.STLOC0
-            + Opcode.RET        # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('ConditionEmptyReturnFunction.py')
@@ -117,19 +140,19 @@ class TestFunction(BoaTest):
 
     def test_empty_return_with_optional_return_type(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
+            Opcode.INITSLOT  # function signature
             + b'\x00'
             + b'\x01'
-            + Opcode.LDARG0     # if a % 2 == 1
+            + Opcode.LDARG0  # if a % 2 == 1
             + Opcode.PUSH2
             + Opcode.MOD
             + Opcode.PUSH1
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + Integer(4).to_byte_array()
-            + Opcode.PUSHNULL       # return
+            + Opcode.PUSHNULL  # return
             + Opcode.RET
-            + Opcode.LDARG0     # return a // 2
+            + Opcode.LDARG0  # return a // 2
             + Opcode.PUSH2
             + Opcode.DIV
             + Opcode.RET
@@ -148,10 +171,10 @@ class TestFunction(BoaTest):
 
     def test_no_return_hint_function_without_return_statement(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'           # num local variables
-            + b'\x01'           # num arguments
-            + Opcode.RET        # return
+            Opcode.INITSLOT  # function signature
+            + b'\x00'  # num local variables
+            + b'\x01'  # num arguments
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('NoReturnFunction.py')
@@ -204,16 +227,16 @@ class TestFunction(BoaTest):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.CALL             # TestFunction()
+            Opcode.CALL  # TestFunction()
             + called_function_address
-            + Opcode.PUSH1          # return True
+            + Opcode.PUSH1  # return True
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH1          # a = 1
+            + Opcode.PUSH1  # a = 1
             + Opcode.STLOC0
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('CallVoidFunctionWithoutArgs.py')
@@ -228,16 +251,16 @@ class TestFunction(BoaTest):
         called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x01'
             + b'\x00'
-            + Opcode.CALL           # a = TestFunction()
+            + Opcode.CALL  # a = TestFunction()
             + called_function_address
             + Opcode.STLOC0
-            + Opcode.LDLOC0         # return a
+            + Opcode.LDLOC0  # return a
             + Opcode.RET
-            + Opcode.PUSH1      # TestFunction
-            + Opcode.RET            # return 1
+            + Opcode.PUSH1  # TestFunction
+            + Opcode.RET  # return 1
         )
 
         path = self.get_contract_path('CallReturnFunctionWithoutArgs.py')
@@ -252,20 +275,20 @@ class TestFunction(BoaTest):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.PUSH2            # TestAdd(1, 2)
+            Opcode.PUSH2  # TestAdd(1, 2)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
-            + Opcode.PUSH1          # return True
+            + Opcode.PUSH1  # return True
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x01'
             + b'\x02'
-            + Opcode.LDARG0         # c = a + b
+            + Opcode.LDARG0  # c = a + b
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STLOC0
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('CallVoidFunctionWithLiteralArgs.py')
@@ -280,23 +303,23 @@ class TestFunction(BoaTest):
         called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH2          # a = TestAdd(1, 2)
+            + Opcode.PUSH2  # a = TestAdd(1, 2)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
             + Opcode.STLOC0
-            + Opcode.LDLOC0         # return a
+            + Opcode.LDLOC0  # return a
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x00'
             + b'\x02'
-            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG0  # return a + b
             + Opcode.LDARG1
             + Opcode.ADD
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('CallReturnFunctionWithLiteralArgs.py')
@@ -311,27 +334,27 @@ class TestFunction(BoaTest):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x02'
             + b'\x00'
-            + Opcode.PUSH1          # a = 1
+            + Opcode.PUSH1  # a = 1
             + Opcode.STLOC0
-            + Opcode.PUSH2          # b = 2
+            + Opcode.PUSH2  # b = 2
             + Opcode.STLOC1
-            + Opcode.PUSH2          # TestAdd(a, b)
+            + Opcode.PUSH2  # TestAdd(a, b)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
-            + Opcode.PUSH1          # return True
+            + Opcode.PUSH1  # return True
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x01'
             + b'\x02'
-            + Opcode.LDARG0         # c = a + b
+            + Opcode.LDARG0  # c = a + b
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.STLOC0
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('CallVoidFunctionWithVariableArgs.py')
@@ -346,27 +369,27 @@ class TestFunction(BoaTest):
         called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x03'
             + b'\x02'
-            + Opcode.PUSH1          # a = 1
+            + Opcode.PUSH1  # a = 1
             + Opcode.STLOC0
-            + Opcode.PUSH2          # b = 2
+            + Opcode.PUSH2  # b = 2
             + Opcode.STLOC1
-            + Opcode.PUSH2          # c = TestAdd(a, b)
+            + Opcode.PUSH2  # c = TestAdd(a, b)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
             + Opcode.STLOC2
-            + Opcode.LDLOC2         # return c
+            + Opcode.LDLOC2  # return c
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x00'
             + b'\x02'
-            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG0  # return a + b
             + Opcode.LDARG1
             + Opcode.ADD
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('CallReturnFunctionWithVariableArgs.py')
@@ -382,25 +405,25 @@ class TestFunction(BoaTest):
         called_function_address = Integer(3).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x02'
             + b'\x00'
-            + Opcode.PUSH1          # a = 1
+            + Opcode.PUSH1  # a = 1
             + Opcode.STLOC0
-            + Opcode.PUSH2          # b = 2
+            + Opcode.PUSH2  # b = 2
             + Opcode.STLOC1
-            + Opcode.PUSH2          # return TestAdd(a, b)
+            + Opcode.PUSH2  # return TestAdd(a, b)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x00'
             + b'\x02'
-            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG0  # return a + b
             + Opcode.LDARG1
             + Opcode.ADD
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('CallReturnFunctionOnReturn.py')
@@ -418,31 +441,31 @@ class TestFunction(BoaTest):
         end_if = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.PUSH1        # One
-            + Opcode.RET            # return 1
-            + Opcode.INITSLOT   # Main
+            Opcode.PUSH1  # One
+            + Opcode.RET  # return 1
+            + Opcode.INITSLOT  # Main
             + b'\x00'
             + b'\x01'
-            + Opcode.LDARG0         # if arg0 == 1
+            + Opcode.LDARG0  # if arg0 == 1
             + Opcode.PUSH1
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + end_if
-            + Opcode.CALL           # return One()
+            + Opcode.CALL  # return One()
             + main_to_one_address
             + Opcode.RET
-            + Opcode.LDARG0         # elif arg0 == 2
+            + Opcode.LDARG0  # elif arg0 == 2
             + Opcode.PUSH2
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + end_if
-            + Opcode.CALL           # return Two()
+            + Opcode.CALL  # return Two()
             + main_to_two_address
             + Opcode.RET
-            + Opcode.PUSH0          # default return
+            + Opcode.PUSH0  # default return
             + Opcode.RET
-            + Opcode.PUSH1     # Two
-            + Opcode.CALL           # return 1 + One()
+            + Opcode.PUSH1  # Two
+            + Opcode.CALL  # return 1 + One()
             + two_to_one_address
             + Opcode.ADD
             + Opcode.RET
@@ -464,14 +487,14 @@ class TestFunction(BoaTest):
         call_address = Integer(-9).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.INITSLOT     # TestFunction
+            Opcode.INITSLOT  # TestFunction
             + b'\x00'
             + b'\x02'
-            + Opcode.LDARG0         # return a + b
+            + Opcode.LDARG0  # return a + b
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.RET
-            + Opcode.PUSH2          # return TestAdd(a, b)
+            + Opcode.PUSH2  # return TestAdd(a, b)
             + Opcode.PUSH1
             + Opcode.CALL
             + call_address
@@ -490,16 +513,16 @@ class TestFunction(BoaTest):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
-            Opcode.CALL         # Main
+            Opcode.CALL  # Main
             + called_function_address  # return TestFunction()
             + Opcode.PUSHNULL
             + Opcode.RET
-            + Opcode.INITSLOT   # TestFunction
+            + Opcode.INITSLOT  # TestFunction
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH1          # a = 1
+            + Opcode.PUSH1  # a = 1
             + Opcode.STLOC0
-            + Opcode.RET            # return
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('ReturnVoidFunction.py')
@@ -516,33 +539,33 @@ class TestFunction(BoaTest):
 
     def test_return_inside_if(self):
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x00'
             + b'\x01'
-            + Opcode.LDARG0     # if arg0 % 3 == 1
+            + Opcode.LDARG0  # if arg0 % 3 == 1
             + Opcode.PUSH3
             + Opcode.MOD
             + Opcode.PUSH1
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + Integer(6).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDARG0     # return arg0 - 1
+            + Opcode.LDARG0  # return arg0 - 1
             + Opcode.PUSH1
             + Opcode.SUB
             + Opcode.RET
-            + Opcode.LDARG0     # elif arg0 % 3 == 2
+            + Opcode.LDARG0  # elif arg0 % 3 == 2
             + Opcode.PUSH3
             + Opcode.MOD
             + Opcode.PUSH2
             + Opcode.NUMEQUAL
             + Opcode.JMPIFNOT
             + Integer(6).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDARG0     # return arg0 + 1
+            + Opcode.LDARG0  # return arg0 + 1
             + Opcode.PUSH1
             + Opcode.ADD
             + Opcode.RET
-            + Opcode.LDARG0     # else
-            + Opcode.RET            # return arg0
+            + Opcode.LDARG0  # else
+            + Opcode.RET  # return arg0
         )
 
         path = self.get_contract_path('ReturnIf.py')
@@ -584,17 +607,17 @@ class TestFunction(BoaTest):
 
     def test_return_if_expression(self):
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x00'
             + b'\x01'
-            + Opcode.LDARG0     # return 5 if condition else 10
+            + Opcode.LDARG0  # return 5 if condition else 10
             + Opcode.JMPIFNOT
             + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH5      # 5
-            + Opcode.JMP        # else
+            + Opcode.PUSH5  # 5
+            + Opcode.JMP  # else
             + Integer(3).to_byte_array(min_length=1, signed=True)
-            + Opcode.PUSH10     # 10
-            + Opcode.RET        # return
+            + Opcode.PUSH10  # 10
+            + Opcode.RET  # return
         )
 
         path = self.get_contract_path('ReturnIfExpression.py')
@@ -613,14 +636,14 @@ class TestFunction(BoaTest):
 
     def test_return_inside_for(self):
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x01'
             + b'\x01'
-            + Opcode.LDARG0     # for_sequence = arg0
-            + Opcode.PUSH0      # for_index = 0
-            + Opcode.JMP        # begin for
+            + Opcode.LDARG0  # for_sequence = arg0
+            + Opcode.PUSH0  # for_index = 0
+            + Opcode.JMP  # begin for
             + Integer(18).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER     # value = for_sequence[for_index]
+            + Opcode.OVER  # value = for_sequence[for_index]
             + Opcode.OVER
             + Opcode.DUP
             + Opcode.SIGN
@@ -633,10 +656,10 @@ class TestFunction(BoaTest):
             + Opcode.PICKITEM
             + Opcode.STLOC0
             + Opcode.CLEAR
-            + Opcode.LDLOC0     # return value
+            + Opcode.LDLOC0  # return value
             + Opcode.RET
-            + Opcode.INC     # for_index = for_index + 1
-            + Opcode.DUP        # if for_index < len(for_sequence)
+            + Opcode.INC  # for_index = for_index + 1
+            + Opcode.DUP  # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
             + Opcode.SIZE
@@ -645,8 +668,8 @@ class TestFunction(BoaTest):
             + Integer(-21).to_byte_array(min_length=1, signed=True)
             + Opcode.DROP
             + Opcode.DROP
-            + Opcode.PUSH5      # else
-            + Opcode.RET          # return 5
+            + Opcode.PUSH5  # else
+            + Opcode.RET  # return 5
         )
 
         path = self.get_contract_path('ReturnFor.py')
@@ -663,16 +686,16 @@ class TestFunction(BoaTest):
 
     def test_missing_return_inside_for(self):
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x02'
             + b'\x01'
-            + Opcode.PUSH0      # x = 0
+            + Opcode.PUSH0  # x = 0
             + Opcode.STLOC0
-            + Opcode.LDARG0     # for_sequence = arg0
-            + Opcode.PUSH0      # for_index = 0
-            + Opcode.JMP        # begin for
+            + Opcode.LDARG0  # for_sequence = arg0
+            + Opcode.PUSH0  # for_index = 0
+            + Opcode.JMP  # begin for
             + Integer(19).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER       # value = for_sequence[for_index]
+            + Opcode.OVER  # value = for_sequence[for_index]
             + Opcode.OVER
             + Opcode.DUP
             + Opcode.SIGN
@@ -684,12 +707,12 @@ class TestFunction(BoaTest):
             + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.STLOC1
-            + Opcode.LDLOC0     # x += value
+            + Opcode.LDLOC0  # x += value
             + Opcode.LDLOC1
             + Opcode.ADD
             + Opcode.STLOC0
-            + Opcode.INC        # for_index = for_index + 1
-            + Opcode.DUP        # if for_index < len(for_sequence)
+            + Opcode.INC  # for_index = for_index + 1
+            + Opcode.DUP  # if for_index < len(for_sequence)
             + Opcode.PUSH2
             + Opcode.PICK
             + Opcode.SIZE
@@ -698,8 +721,8 @@ class TestFunction(BoaTest):
             + Integer(-22).to_byte_array(min_length=1, signed=True)
             + Opcode.DROP
             + Opcode.DROP
-            + Opcode.LDLOC0     # else
-            + Opcode.RET          # return x
+            + Opcode.LDLOC0  # else
+            + Opcode.RET  # return x
         )
 
         path = self.get_contract_path('ReturnForOnlyOnElse.py')
@@ -720,26 +743,26 @@ class TestFunction(BoaTest):
 
     def test_return_inside_while(self):
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x01'
             + b'\x01'
-            + Opcode.LDARG0     # x = arg0
+            + Opcode.LDARG0  # x = arg0
             + Opcode.STLOC0
-            + Opcode.JMP        # begin while
+            + Opcode.JMP  # begin while
             + Integer(8).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC0     # x += 1
+            + Opcode.LDLOC0  # x += 1
             + Opcode.PUSH1
             + Opcode.ADD
             + Opcode.STLOC0
-            + Opcode.LDLOC0     # return x
+            + Opcode.LDLOC0  # return x
             + Opcode.RET
             + Opcode.LDLOC0
             + Opcode.PUSH10
             + Opcode.LT
-            + Opcode.JMPIF      # end while x < 10
+            + Opcode.JMPIF  # end while x < 10
             + Integer(-9).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC0     # else
-            + Opcode.RET            # return x
+            + Opcode.LDLOC0  # else
+            + Opcode.RET  # return x
         )
 
         path = self.get_contract_path('ReturnWhile.py')
@@ -758,24 +781,24 @@ class TestFunction(BoaTest):
 
     def test_missing_return_inside_while(self):
         expected_output = (
-            Opcode.INITSLOT     # Main
+            Opcode.INITSLOT  # Main
             + b'\x01'
             + b'\x01'
-            + Opcode.LDARG0     # x = arg0
+            + Opcode.LDARG0  # x = arg0
             + Opcode.STLOC0
-            + Opcode.JMP        # begin while
+            + Opcode.JMP  # begin while
             + Integer(6).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC0     # x += 1
+            + Opcode.LDLOC0  # x += 1
             + Opcode.PUSH1
             + Opcode.ADD
             + Opcode.STLOC0
             + Opcode.LDLOC0
             + Opcode.PUSH10
             + Opcode.LT
-            + Opcode.JMPIF      # end while x < 10
+            + Opcode.JMPIF  # end while x < 10
             + Integer(-7).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC0     # else
-            + Opcode.RET            # return x
+            + Opcode.LDLOC0  # else
+            + Opcode.RET  # return x
         )
 
         path = self.get_contract_path('ReturnWhileOnlyOnElse.py')
@@ -853,9 +876,9 @@ class TestFunction(BoaTest):
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.RET
-            + Opcode.INITSLOT   # def add(a: int, b: int, c: int = 0)
+            + Opcode.INITSLOT  # def add(a: int, b: int, c: int = 0)
             + b'\x00\x03'
-            + Opcode.LDARG0     # return a + b + c
+            + Opcode.LDARG0  # return a + b + c
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.LDARG2
@@ -873,22 +896,22 @@ class TestFunction(BoaTest):
 
     def test_function_with_only_default_arguments(self):
         expected_output = (
-            Opcode.PUSH0        # defaults
+            Opcode.PUSH0  # defaults
             + Opcode.PUSH0
             + Opcode.PUSH0
-            + Opcode.CALL   # add()
+            + Opcode.CALL  # add()
             + Integer(20).to_byte_array(signed=True, min_length=1)
-            + Opcode.PUSH0      # defaults
-            + Opcode.PUSH6      # add(5, 6)
+            + Opcode.PUSH0  # defaults
+            + Opcode.PUSH6  # add(5, 6)
             + Opcode.PUSH5
             + Opcode.CALL
             + Integer(15).to_byte_array(signed=True, min_length=1)
-            + Opcode.PUSH0      # defaults
+            + Opcode.PUSH0  # defaults
             + Opcode.PUSH0
-            + Opcode.PUSH9      # add(9)
+            + Opcode.PUSH9  # add(9)
             + Opcode.CALL
             + Integer(10).to_byte_array(signed=True, min_length=1)
-            + Opcode.PUSH3      # add(1, 2, 3)
+            + Opcode.PUSH3  # add(1, 2, 3)
             + Opcode.PUSH2
             + Opcode.PUSH1
             + Opcode.CALL
@@ -896,9 +919,9 @@ class TestFunction(BoaTest):
             + Opcode.PUSH4
             + Opcode.PACK
             + Opcode.RET
-            + Opcode.INITSLOT   # def add(a: int, b: int, c: int)
+            + Opcode.INITSLOT  # def add(a: int, b: int, c: int)
             + b'\x00\x03'
-            + Opcode.LDARG0     # return a + b + c
+            + Opcode.LDARG0  # return a + b + c
             + Opcode.LDARG1
             + Opcode.ADD
             + Opcode.LDARG2
@@ -918,11 +941,80 @@ class TestFunction(BoaTest):
         path = self.get_contract_path('FunctionWithDefaultArgumentBetweenArgs.py')
 
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            Boa3.compile(path)
+
+    def test_call_function_with_kwarg(self):
+        path = self.get_contract_path('CallFunctionWithKwarg.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(-10, result)
 
     def test_call_function_with_kwargs(self):
         path = self.get_contract_path('CallFunctionWithKwargs.py')
-        self.assertCompilerLogs(CompilerError.InternalError, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'positional_order')
+        self.assertEqual(1234, result)
+
+        result = self.run_smart_contract(engine, path, 'out_of_order')
+        self.assertEqual(2413, result)
+
+        result = self.run_smart_contract(engine, path, 'mixed_in_order')
+        self.assertEqual(5612, result)
+
+        result = self.run_smart_contract(engine, path, 'mixed_out_of_order')
+        self.assertEqual(5621, result)
+
+    def test_call_function_with_kwargs_with_default_values(self):
+        path = self.get_contract_path('CallFunctionWithKwargsWithDefaultValues.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'positional_order')
+        self.assertEqual(1234, result)
+
+        result = self.run_smart_contract(engine, path, 'out_of_order')
+        self.assertEqual(2413, result)
+
+        result = self.run_smart_contract(engine, path, 'mixed_in_order')
+        self.assertEqual(5612, result)
+
+        result = self.run_smart_contract(engine, path, 'mixed_out_of_order')
+        self.assertEqual(5621, result)
+
+        result = self.run_smart_contract(engine, path, 'default_values')
+        self.assertEqual(1034, result)
+
+        result = self.run_smart_contract(engine, path, 'only_default_values_and_kwargs')
+        self.assertEqual(204, result)
+
+    def test_call_function_with_kwargs_only(self):
+        path = self.get_contract_path('CallFunctionWithKwargsOnly.py')
+
+        # TODO: change the test when creating a function that only accepts keywords is implemented
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_call_function_with_kwargs_self(self):
+        path = self.get_contract_path('CallFunctionWithKwargsSelf.py')
+
+        # TODO: change the test when calling a function using the class is implemented
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_call_function_with_kwargs_wrong_type(self):
+        path = self.get_contract_path('CallFunctionWithKwargsWrongType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_call_function_with_kwargs_too_few_parameters(self):
+        path = self.get_contract_path('CallFunctionWithKwargsTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_call_function_with_kwargs_too_many_parameters(self):
+        path = self.get_contract_path('CallFunctionWithKwargsTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_call_function_with_kwargs_too_many_kw_parameters(self):
+        path = self.get_contract_path('CallFunctionWithKwargsTooManyKwArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_boa2_fibonacci_test(self):
         path = self.get_contract_path('FibonacciBoa2Test.py')
@@ -1034,3 +1126,7 @@ class TestFunction(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'result')
         self.assertEqual([10, 20], result)
+
+    def test_function_with_dictionary_unpacking_operator(self):
+        path = self.get_contract_path('FunctionWithDictionaryUnpackingOperator.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

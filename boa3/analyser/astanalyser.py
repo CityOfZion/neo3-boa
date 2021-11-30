@@ -1,10 +1,11 @@
 import ast
 import logging
+import os
 from abc import ABC
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from boa3.exception.CompilerError import CompilerError, InternalError
+from boa3.exception.CompilerError import CompilerError, InternalError, UnresolvedReference
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.attribute import Attribute
 from boa3.model.expression import IExpression
@@ -25,11 +26,16 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     :ivar warnings: a list that contains all the warnings found by the compiler. Empty by default.
     """
 
-    def __init__(self, ast_tree: ast.AST, filename: str = None, log: bool = False):
+    def __init__(self, ast_tree: ast.AST, filename: str = None, root_folder: str = None, log: bool = False):
         self.errors: List[CompilerError] = []
         self.warnings: List[CompilerWarning] = []
 
         self.filename: Optional[str] = filename
+        if not isinstance(root_folder, str) or not os.path.isdir(root_folder):
+            root_folder = (os.path.dirname(os.path.abspath(filename))
+                           if isinstance(filename, str) and os.path.isfile(filename)
+                           else os.path.abspath(os.path.curdir))
+        self.root_folder: str = root_folder
         self._log: bool = log
 
         self._tree: ast.AST = ast_tree
@@ -40,6 +46,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         return len(self.errors) > 0
 
     def _log_error(self, error: CompilerError):
+        if error.filepath is None:
+            error.filepath = self.filename
         if not any(err == error for err in self.errors):
             # don't include duplicated errors
             self.errors.append(error)
@@ -47,6 +55,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 logging.error(error)
 
     def _log_warning(self, warning: CompilerWarning):
+        if warning.filepath is None:
+            warning.filepath = self.filename
         if not any(warn == warning for warn in self.warnings):
             # don't include duplicated warnings
             self.warnings.append(warning)
@@ -83,17 +93,18 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 fun_rtype_id = fun_rtype_id.id
 
             if isinstance(fun_rtype_id, str) and not isinstance(value, ast.Str):
-                value = self.get_symbol(fun_rtype_id)
+                value = self.get_symbol(fun_rtype_id, origin_node=value)
                 if isinstance(value, IType) and not isinstance(value, MetaType):
                     value = TypeUtils.type.build(value) if use_metatype else value
             else:
                 value = fun_rtype_id
 
-        if (isinstance(value, Attribute) and
-                ((isinstance(value.attr_symbol, IExpression) and isinstance(value.attr_symbol.type, ClassType))
-                 or (isinstance(value.attr_symbol, IType))
-                 )):
-            value = value.attr_symbol
+        if isinstance(value, Attribute):
+            if ((isinstance(value.attr_symbol, IExpression) and isinstance(value.attr_symbol.type, ClassType))
+                    or (isinstance(value.attr_symbol, IType))):
+                value = value.attr_symbol
+            elif isinstance(value.type, IType):
+                value = value.type
 
         if isinstance(value, IType):
             final_type = value
@@ -111,7 +122,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
-                   check_raw_id: bool = False) -> Optional[ISymbol]:
+                   check_raw_id: bool = False,
+                   origin_node: ast.AST = None) -> Optional[ISymbol]:
         """
         Tries to get the symbol by its id name
 
@@ -141,6 +153,16 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
         if found_symbol is None and isinstance(symbol_id, str) and self.is_exception(symbol_id):
             found_symbol = Builtin.Exception.return_type
+
+        if origin_node is not None and found_symbol is None:
+            self._log_error(
+                UnresolvedReference(
+                    line=origin_node.lineno,
+                    col=origin_node.col_offset,
+                    symbol_id=symbol_id
+                )
+            )
+
         return found_symbol
 
     def _search_by_raw_id(self, symbol_id: str, symbols: Sequence[ISymbol]) -> Optional[ISymbol]:
@@ -159,6 +181,15 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             if isclass(symbol) and issubclass(symbol, BaseException):
                 return True
         return False
+
+    def is_implemented_class_type(self, symbol) -> bool:
+        if not isinstance(symbol, ClassType):
+            return False
+
+        from boa3.model.type.classes.pythonclass import PythonClass
+        from boa3.model.builtin.interop.interopinterfacetype import InteropInterfaceType
+
+        return not isinstance(symbol, PythonClass) or isinstance(symbol, InteropInterfaceType)
 
     def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
         """

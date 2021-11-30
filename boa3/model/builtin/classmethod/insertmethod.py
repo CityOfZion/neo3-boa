@@ -81,7 +81,7 @@ class InsertMethod(IBuiltinMethod):
             (Opcode.DUP, b''),          # value = aux
             (Opcode.PUSH4, b''),
             (Opcode.PICK, b''),
-            (Opcode.GE, b''),
+            (Opcode.GT, b''),
             (Opcode.JMPIF, Integer(-18).to_byte_array(signed=True, min_length=1)),
             (Opcode.DROP, b''),
             (Opcode.DROP, b''),

@@ -59,16 +59,26 @@ class Builtin:
     Exception = ExceptionMethod()
 
     # python class method
+    BytesStringIsDigit = IsDigitMethod()
+    BytesStringJoin = JoinMethod()
+    BytesStringLower = LowerMethod()
+    BytesStringStartswith = StartsWithMethod()
+    BytesStringStrip = StripMethod()
+    BytesStringUpper = UpperMethod()
     CountSequence = CountSequenceMethod()
     CountStr = CountStrMethod()
+    Copy = CopyListMethod()
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
+    SequenceIndex = IndexSequenceMethod()
     SequenceInsert = InsertMethod()
-    SequencePop = PopMethod()
+    SequencePop = PopSequenceMethod()
     SequenceRemove = RemoveMethod()
     SequenceReverse = ReverseMethod()
+    StrIndex = IndexStrMethod()
     DictKeys = MapKeysMethod()
+    DictPop = PopDictMethod()
     DictValues = MapValuesMethod()
 
     # custom class methods
@@ -80,15 +90,23 @@ class Builtin:
     # builtin decorator
     ClassMethodDecorator = ClassMethodDecorator()
     InstanceMethodDecorator = InstanceMethodDecorator()
+    PropertyDecorator = PropertyDecorator()
     StaticMethodDecorator = StaticMethodDecorator()
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                BytesStringIsDigit,
+                                                BytesStringJoin,
+                                                BytesStringLower,
+                                                BytesStringStartswith,
+                                                BytesStringStrip,
+                                                BytesStringUpper,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
                                                 ConvertToInt,
                                                 ConvertToStr,
+                                                Copy,
                                                 CountSequence,
                                                 CountStr,
                                                 DictKeys,
@@ -100,18 +118,21 @@ class Builtin:
                                                 Max,
                                                 Min,
                                                 Print,
+                                                PropertyDecorator,
                                                 Range,
                                                 Reversed,
                                                 ScriptHash,
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
+                                                SequenceIndex,
                                                 SequenceInsert,
                                                 SequencePop,
                                                 SequenceRemove,
                                                 SequenceReverse,
                                                 Sqrt,
                                                 StaticMethodDecorator,
+                                                StrIndex,
                                                 StrSplit,
                                                 Sum
                                                 ]
@@ -122,6 +143,7 @@ class Builtin:
                 for symbol in Interop.interop_symbols(package)}
 
     # boa builtin decorator
+    ContractInterface = ContractDecorator()
     Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
@@ -139,11 +161,12 @@ class Builtin:
     # boa smart contract methods
     Abort = AbortMethod()
 
-    boa_builtins: List[IdentifiedSymbol] = [Public,
-                                            NewEvent,
+    boa_builtins: List[IdentifiedSymbol] = [ContractInterface,
                                             Event,
                                             Metadata,
                                             NeoMetadataType,
+                                            NewEvent,
+                                            Public,
                                             ScriptHash
                                             ]
 

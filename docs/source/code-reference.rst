@@ -287,10 +287,6 @@ Other Features
          x = (1, 2, 3)[:]
          x = 'example'[-4:-2]
          x = 'example'[:-4]
-   * - 🔜
-     - Sequence slicing
-     - ::
-
          x = 'example'[2:4:2]
          x = 'example'[::2]
    * - ✅
@@ -310,7 +306,7 @@ Other Features
      -
        - Support to ``boa3.builtin`` packages
        - Support to user created modules.
-   * - 🔜
+   * - ✅
      - Class
      - ::
 

@@ -38,31 +38,6 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(UInt160(), UInt160(result[8]))   # next_consensus
         self.assertEqual(0, result[9])   # transaction_count
 
-    def test_get_current_height(self):
-        expected_output = (
-            Opcode.SYSCALL
-            + Interop.CurrentHeight.getter.interop_method_hash
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('CurrentHeight.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
-    def test_current_height_cant_assign(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01\x01'
-            + Opcode.LDARG0
-            + Opcode.STLOC0
-            + Opcode.LDLOC0
-            + Opcode.RET
-        )
-
-        path = self.get_contract_path('CurrentHeightCantAssign.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
     def test_get_contract(self):
         path = self.get_contract_path('GetContract.py')
         engine = TestEngine()

@@ -14,10 +14,13 @@ class CompilerError(ABC, BaseException):
     def __init__(self, line: int, col: int):
         self.line: int = line
         self.col: int = col
+        self.filepath: Optional[str] = None
 
     @property
     def message(self) -> str:
         message = '' if self._error_message is None else ' - ' + self._error_message
+        if isinstance(self.filepath, str):
+            message += f'\t <{self.filepath}>'
         return '{0}:{1}{2}'.format(self.line, self.col, message)
 
     @property
@@ -62,6 +65,23 @@ class IncorrectNumberOfOperands(CompilerError):
     @property
     def _error_message(self) -> Optional[str]:
         return "Incorrect number of operands: expected '%s', got '%s' instead" % (self.expected, self.actual)
+
+
+class InvalidUsage(CompilerError):
+    """
+    An error raised when a built-in function or decorator is incorrectly defined
+    """
+
+    def __init__(self, line: int, col: int, custom_error_message: str = None):
+        self.custom_error_message = custom_error_message
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        message = "Invalid usage"
+        if self.custom_error_message is not None:
+            message += f": {self.custom_error_message}"
+        return message
 
 
 class InvalidType(CompilerError):
@@ -220,10 +240,6 @@ class MissingStandardDefinition(CompilerError):
                                                                   self.symbol.shadowing_name,
                                                                   self.symbol)
 
-    @property
-    def message(self) -> str:
-        return self._error_message
-
 
 class NotSupportedOperation(CompilerError):
     """
@@ -327,6 +343,19 @@ class TypeHintMissing(CompilerError):
     def _error_message(self) -> Optional[str]:
         if self.symbol_id is not None:
             return "Type hint is missing for the symbol '%s'" % self.symbol_id
+
+
+class SelfArgumentError(CompilerError):
+    """
+    An error raised when the self argument is wrong
+    """
+
+    def __init__(self, line: int, col: int):
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "The self argument was not found or the annotation is incorrect"
 
 
 def join_args(iterable: Iterable[str]) -> str:

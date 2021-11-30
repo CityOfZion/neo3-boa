@@ -1,12 +1,10 @@
 from abc import ABC
 
-from boa3.model.type.itype import IType
+from boa3.model.type.classes.pythonclass import PythonClass
 
 
-class PrimitiveType(IType, ABC):
+class PrimitiveType(PythonClass, ABC):
     """
     An interface for primitive types
     """
-
-    def __init__(self, identifier: str):
-        super().__init__(identifier)
+    pass

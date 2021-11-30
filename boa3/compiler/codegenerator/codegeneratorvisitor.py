@@ -10,11 +10,13 @@ from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
+from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.binaryop import BinaryOp
 from boa3.model.operation.operation import IOperation
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.userclass import UserClass
@@ -121,7 +123,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
                     class_type = result.type
 
-                    if (isinstance(result.type, ClassType)
+                    if (self.is_implemented_class_type(result.type)
                             and len(result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)) > 1):
                         # if the symbol id has the attribute separator and the top item on the stack is a user class,
                         # then this value is an attribute from that class
@@ -156,6 +158,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             # remove any additional values pushed to the stack during the evalution of the symbol
             for _ in range(self.generator.stack_size - last_stack_size):
                 self.generator._stack_pop()
+
+    def _get_unique_name(self, name_id: str, node: ast.AST) -> str:
+        return '{0}{2}{1}'.format(node.__hash__(), name_id, constants.VARIABLE_NAME_SEPARATOR)
 
     def visit_Module(self, module: ast.Module) -> GeneratorData:
         """
@@ -210,7 +215,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         elif len(function_stmts) > 0:
             # to organize syntax tree nodes from other modules
             for stmt in global_stmts:
-                stmt.origin = module
+                if not hasattr(stmt, 'origin'):
+                    stmt.origin = module
 
             self.global_stmts.extend(global_stmts)
         else:
@@ -246,14 +252,20 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param function: the python ast function definition node
         """
         method = self._symbols[function.name]
+
+        if isinstance(method, Property):
+            method = method.getter
+
         if isinstance(method, Method):
             self.current_method = method
-            self.generator.convert_begin_method(method)
+            if not isinstance(self.current_class, ClassType) or not self.current_class.is_interface:
+                self.generator.convert_begin_method(method)
 
-            for stmt in function.body:
-                self.visit_to_map(stmt)
+                for stmt in function.body:
+                    self.visit_to_map(stmt)
 
-            self.generator.convert_end_method(function.name)
+                self.generator.convert_end_method(function.name)
+
             self.current_method = None
 
         return self.build_data(function, symbol=method, symbol_id=function.name)
@@ -332,7 +344,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_id = var_data.symbol_id
         # filter to find the imported variables
         if var_id not in self._symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
-            var_id = '{0}{2}{1}'.format(ann_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+            var_id = self._get_unique_name(var_id, ann_assign.origin)
         self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
         return self.build_data(ann_assign)
 
@@ -352,7 +364,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             # filter to find the imported variables
             if var_id not in self._symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
-                var_id = '{0}{2}{1}'.format(assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+                var_id = self._get_unique_name(var_id, assign.origin)
             vars_ids.append((var_id, var_index, var_value_address))
 
         self.store_variable(*vars_ids, value=assign.value)
@@ -368,7 +380,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_id = var_data.symbol_id
         # filter to find the imported variables
         if var_id not in self._symbols and hasattr(aug_assign, 'origin') and isinstance(aug_assign.origin, ast.AST):
-            var_id = '{0}{2}{1}'.format(aug_assign.origin.__hash__(), var_id, constants.VARIABLE_NAME_SEPARATOR)
+            var_id = self._get_unique_name(var_id, aug_assign.origin)
 
         self.generator.convert_load_symbol(var_id)
         value_address = self.generator.bytecode_size
@@ -408,7 +420,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             # set item
             var_data = self.visit(subscript.value)
 
-            index = subscript.slice.value
+            index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
             symbol_id = var_data.symbol_id
             value_type = var_data.type
 
@@ -691,7 +703,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
             symbol = self.generator.get_symbol(function_id, is_internal=is_internal)
 
-        if isinstance(symbol, ClassType):
+        if self.is_implemented_class_type(symbol):
             self.generator.convert_init_user_class(symbol)
             symbol = symbol.constructor_method()
         args_addresses: List[int] = []
@@ -701,7 +713,22 @@ class VisitorCodeGenerator(IAstAnalyser):
             self._remove_inserted_opcodes_since(last_address, last_stack)
 
         if isinstance(symbol, Method):
-            args_to_generate = [arg for index, arg in enumerate(call.args) if index in symbol.args_to_be_generated()]
+            # self or cls is already generated
+            call_args = (call.args[1:]
+                         if has_cls_or_self_argument and len(call.args) == len(symbol.args)
+                         else call.args)
+            args_to_generate = [arg for index, arg in enumerate(call_args) if index in symbol.args_to_be_generated()]
+            keywords_dict = {keyword.arg: keyword.value for keyword in call.keywords}
+            keywords_with_index = {index: keywords_dict[arg_name] for index, arg_name in enumerate(symbol.args) if arg_name in keywords_dict}
+
+            for index in keywords_with_index:
+                if index < len(args_to_generate):
+                    # override default values
+                    args_to_generate[index] = keywords_with_index[index]
+                else:
+                    # put keywords
+                    args_to_generate.append(keywords_with_index[index])
+
         else:
             args_to_generate = call.args
 
@@ -790,7 +817,10 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         name = name_node.id
         if name not in self._symbols:
-            hashed_name = '{0}{2}{1}'.format(self._tree.__hash__(), name, constants.VARIABLE_NAME_SEPARATOR)
+            hashed_name = self._get_unique_name(name, self._tree)
+            if hashed_name not in self._symbols and hasattr(name_node, 'origin'):
+                hashed_name = self._get_unique_name(name, name_node.origin)
+
             if hashed_name in self._symbols:
                 name = hashed_name
         return self.build_data(name_node, name)
@@ -817,29 +847,37 @@ class VisitorCodeGenerator(IAstAnalyser):
         value = attribute.value
         value_symbol = None
         value_data = self.visit(value)
+        need_to_visit_again = True
 
         if value_data.symbol_id is not None and not value_data.already_generated:
             value_id = value_data.symbol_id
             value_symbol = (value_data.symbol
                             if value_data.symbol is not None
                             else self.generator.get_symbol(value_id))
+            value_type = value_symbol.type if hasattr(value_symbol, 'type') else value_symbol
 
-            if hasattr(value_symbol, 'symbols') and attribute.attr in value_symbol.symbols:
-                attr = value_symbol.symbols[attribute.attr]
+            if hasattr(value_type, 'symbols') and attribute.attr in value_type.symbols:
+                attr = value_type.symbols[attribute.attr]
+            elif isinstance(value_type, Package) and attribute.attr in value_type.inner_packages:
+                attr = value_type.inner_packages[attribute.attr]
 
             if isinstance(value_symbol, UserClass):
                 if isinstance(attr, Method) and attr.has_cls_or_self:
                     self.generator.convert_load_symbol(value_id)
+                    need_to_visit_again = False
 
                 if isinstance(attr, Variable):
                     self.visit_to_generate(attribute.value)
                     self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
                     return self.build_data(attribute, symbol=attr)
         else:
+            need_to_visit_again = value_data.already_generated
             self._remove_inserted_opcodes_since(last_address, last_stack)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
-            value_symbol_id = value_symbol.identifier if isinstance(value_symbol, ClassType) else value_data.symbol_id
+            value_symbol_id = (value_symbol.identifier
+                               if self.is_implemented_class_type(value_symbol)
+                               else value_data.symbol_id)
             attribute_id = f'{value_symbol_id}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
             return self.build_data(attribute, symbol_id=attribute_id, symbol=attr)
 
@@ -847,7 +885,8 @@ class VisitorCodeGenerator(IAstAnalyser):
             value_data = self.visit(value)
         elif hasattr(attribute, 'generate_value') and attribute.generate_value:
             current_bytecode_size = self.generator.bytecode_size
-            value_data = self.visit_to_generate(attribute.value)
+            if need_to_visit_again:
+                value_data = self.visit_to_generate(attribute.value)
 
             result = value_data.type
             generation_result = value_data.symbol
@@ -857,7 +896,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     generation_result = result
                     result = result.type
 
-            if isinstance(result, ClassType):
+            if self.is_implemented_class_type(result):
                 class_attr_id = f'{result.identifier}.{attribute.attr}'
                 symbol_id = class_attr_id
                 symbol = None

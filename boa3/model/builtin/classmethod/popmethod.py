@@ -1,8 +1,9 @@
 import ast
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
+from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
@@ -10,30 +11,26 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class PopMethod(IBuiltinMethod):
-    def __init__(self, sequence_type: MutableSequenceType = None):
-        if not isinstance(sequence_type, MutableSequenceType):
-            from boa3.model.type.type import Type
-            sequence_type = Type.mutableSequence
-
+    def __init__(self, args: Dict[str, Variable] = None,
+                 defaults: List[ast.AST] = None, return_type: IType = None):
         identifier = 'pop'
-        args: Dict[str, Variable] = {'self': Variable(sequence_type),
-                                     'index': Variable(sequence_type.valid_key)
-                                     }
-        # TODO: change when dict.pop is implemented
-        index_default = ast.parse("-1").body[0].value.operand
-        index_default.n = -1
-        super().__init__(identifier, args, defaults=[index_default], return_type=sequence_type.value_type)
+
+        super().__init__(identifier, args, defaults=defaults, return_type=return_type)
 
     @property
-    def is_supported(self) -> bool:
-        """
-        Verifies if the builtin method is supported by the compiler
-
-        :return: True if it is supported. False otherwise.
-        """
-        # TODO: remove when bytearray.pop() is implemented
+    def identifier(self) -> str:
         from boa3.model.type.type import Type
-        return not Type.bytearray.is_type_of(self._arg_self.type)
+
+        if self._arg_self.type is Type.mutableSequence:
+            return self._identifier
+
+        if self._arg_self.type is Type.dict:
+            return '-{0}_{1}'.format(self._identifier, Type.dict.identifier)
+
+        if Type.mutableSequence.is_type_of(self._arg_self.type):
+            return '-{0}_{1}'.format(self._identifier, Type.mutableSequence.identifier)
+
+        return self._identifier
 
     @property
     def _arg_self(self) -> Variable:
@@ -46,13 +43,13 @@ class PopMethod(IBuiltinMethod):
         if any(not isinstance(param, (IExpression, IType)) for param in params):
             return False
 
-        sequence = params[0].type if isinstance(params[0], IExpression) else params[0]
-        if not isinstance(sequence, MutableSequenceType):
+        sequence_or_map = params[0].type if isinstance(params[0], IExpression) else params[0]
+        if not isinstance(sequence_or_map, MutableSequenceType) or not isinstance(sequence_or_map, DictType):
             return False
 
         if len(params) > 1:
             value = params[1].type if isinstance(params[1], IExpression) else params[1]
-            return sequence.valid_key.is_type_of(value)
+            return sequence_or_map.valid_key.is_type_of(value)
         return True
 
     @property
@@ -86,14 +83,15 @@ class PopMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, Iterable) and len(value) > 0:
-            if len(value) == 1:
+        if isinstance(value, list) and len(value) > 0:
+            if len(value) == 2:
                 value = value[0]
-            elif self.validate_parameters(*value):
-                return PopMethod(value[0])
 
-        if type(value) == type(self.args['self'].type):
-            return self
-        if isinstance(value, MutableSequenceType):
-            return PopMethod(value)
-        return super().build(value)
+        from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod
+        from boa3.model.builtin.classmethod.popsequencemethod import PopSequenceMethod
+        from boa3.model.type.type import Type
+
+        if Type.dict.is_type_of(value):
+            return PopDictMethod(value)
+
+        return PopSequenceMethod(value)

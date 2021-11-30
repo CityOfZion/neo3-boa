@@ -22,6 +22,7 @@ from boa3.model.operation.operation import IOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.model.operation.unaryop import UnaryOp
+from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.classes.classtype import ClassType
@@ -45,7 +46,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     """
 
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
-        super().__init__(analyser.ast_tree, log=log)
+        super().__init__(analyser.ast_tree, analyser.filename, log=log)
         self.type_errors: List[Exception] = []
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
@@ -85,7 +86,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
-                   check_raw_id: bool = False) -> Optional[ISymbol]:
+                   check_raw_id: bool = False,
+                   origin_node: ast.AST = None) -> Optional[ISymbol]:
         if symbol_id is None:
             return None
         if isinstance(symbol_id, ISymbol) and not isinstance(symbol_id, (IType, IExpression)):
@@ -118,7 +120,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if found_symbol is not None:
                 return found_symbol
 
-        return super().get_symbol(symbol_id, is_internal, check_raw_id)
+        return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
 
     def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
         if symbols is None:
@@ -162,13 +164,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         method = symbols[function.name]
 
         from boa3.model.event import Event
+        if isinstance(method, Property):
+            method = method.getter
+
         if isinstance(method, Method):
             self._current_method = method
             self.new_local_scope({var_id: var for var_id, var in method.symbols.items()
                                   if isinstance(var, Variable) and var.type is not UndefinedType})
 
-            for stmt in function.body:
-                self.visit(stmt)
+            if self._current_class is not None and self._current_class.is_interface and len(function.body) > 0:
+                first_instruction = function.body[0]
+                if not isinstance(first_instruction, ast.Pass):
+                    self._log_warning(CompilerWarning.UnreachableCode(first_instruction.lineno,
+                                                                      first_instruction.col_offset))
+            else:
+                for stmt in function.body:
+                    self.visit(stmt)
 
             if not method.is_init:
                 self._validate_return(function)
@@ -280,17 +291,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param assign: the python ast variable assignment node
         """
-        # multiple assignments
-        if isinstance(assign.targets[0], ast.Tuple):
-            self._log_error(
-                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
-            )
-        else:
-            for target in assign.targets:
-                self.validate_type_variable_assign(target, assign.value)
-
-        # continue to walk through the tree
-        self.generic_visit(assign)
+        for target in assign.targets:
+            self.validate_type_variable_assign(target, assign.value)
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -335,11 +337,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if target is not None:
             target_type = self.get_type(target)
-        elif not isinstance(node, ast.Name):
-            target_type = self.get_type(node)
         else:
-            var: ISymbol = self.get_symbol(node.id)
-            if not isinstance(var, Variable):
+            target_type = None
+            var: ISymbol = self.get_symbol(node.id if hasattr(node, 'id') else node)
+            if isinstance(var, Variable):
+                if var.type is UndefinedType:
+                    var = var.copy()
+
+                if var.type in (None, UndefinedType):
+                    # it is an declaration with assignment and the value is neither literal nor another variable
+                    var.set_type(value_type)
+                target_type = var.type
+
+            elif isinstance(node, ast.Name):
                 self._log_error(
                     CompilerError.UnresolvedReference(
                         node.lineno, node.col_offset,
@@ -347,18 +357,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     ))
                 return False
 
-            if var.type is UndefinedType:
-                var = var.copy()
-
-            if var.type in (None, UndefinedType):
-                # it is an declaration with assignment and the value is neither literal nor another variable
-                var.set_type(value_type)
-            target_type = var.type
-
         if self._current_scope is not None:
             if isinstance(node, ast.Name):
                 if node.id not in self._current_scope:
-                    if not isinstance(value_type, Collection):
+                    if implicit_cast:
+                        value_type = target_type
+                    elif not isinstance(value_type, Collection):
                         target_type = value_type
                     elif not (isinstance(type(value_type), type(target_type)) and
                               (value_type.value_type is Type.any or value_type.valid_key is Type.any)):
@@ -1034,9 +1038,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             if callable_target is Builtin.NewEvent:
                 return callable_target.return_type
-            # TODO: change when kwargs is implemented
-            if len(call.keywords) > 0:
-                raise NotImplementedError
 
             private_identifier = None  # used for validating internal builtin methods
             if self.validate_callable_arguments(call, callable_target):
@@ -1143,7 +1144,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # TODO: change when class specific scopes are implemented in the built-ins
             return True
 
-        if is_from_type_name and callable_id not in attribute_type.class_symbols:
+        # TODO: remove this verification when calling an instance function from a class is implemented
+        if is_from_type_name and isinstance(callable, Method) and hasattr(attribute_symbol, 'instance_methods') \
+                and callable_id in attribute_symbol.instance_methods:
+            callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
+            self._log_error(
+                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, callable_complete_id)
+            )
+        elif is_from_type_name and callable_id not in attribute_type.class_symbols:
             # the current symbol doesn't exist in the class scope
             callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
             self._log_error(
@@ -1196,15 +1204,53 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         ignore_first_argument = int(callable_target.has_cls_or_self)  # 1 if True, 0 otherwise
         len_call_args = len(call.args)
+        len_call_keywords = len(call.keywords)
         callable_required_args = len(callable_target.args_without_default) - ignore_first_argument
 
-        if len_call_args > len(callable_target.args):
-            unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
+        # verifies if a non-default arg is being called as a keyword
+        necessary_kwargs = list(callable_target.args_without_default.keys())[len_call_args:callable_required_args]
+        keywords_names_used = []
+        all_required_arg_have_values = True
+        for keyword in call.keywords:
+            keywords_names_used.append(keyword.arg)
+        index = 0
+        while index < len(necessary_kwargs) and all_required_arg_have_values:
+            if necessary_kwargs[index] not in keywords_names_used:
+                all_required_arg_have_values = False
+            index += 1
+
+        # verifies if a kwarg is being used but is not an argument for the function
+        index = 0
+        unexpected_kwarg = None
+        while unexpected_kwarg is None and index < len(call.keywords):
+            if call.keywords[index].arg not in list(callable_target.args.keys()):
+                unexpected_kwarg = call.keywords[index].value
+            index += 1
+
+        # verifies if a kwarg that was already used as a positional argument is being used again
+        implicit_args = list(callable_target.args_without_default.keys())[:len_call_args]
+        index = 0
+        already_called_arg = None
+        kwargs_used_names = []
+        for keyword in call.keywords:
+            kwargs_used_names.append(keyword.arg)
+        while already_called_arg is None and index < len(implicit_args):
+            if implicit_args[index] in kwargs_used_names:
+                already_called_arg = call.keywords[index].value
+            index += 1
+
+        if len_call_args > len(callable_target.args) or unexpected_kwarg is not None or already_called_arg is not None:
+            if unexpected_kwarg is not None:
+                unexpected_arg = unexpected_kwarg
+            elif already_called_arg is not None:
+                unexpected_arg = already_called_arg
+            else:
+                unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
             self._log_error(
                 CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
             )
             return False
-        elif len_call_args < callable_required_args:
+        elif len_call_args + len_call_keywords < callable_required_args or not all_required_arg_have_values:
             missed_arg = list(callable_target.args)[len(call.args) + ignore_first_argument]
             self._log_error(
                 CompilerError.UnfilledArgument(call.lineno, call.col_offset, missed_arg)
@@ -1230,19 +1276,42 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self.warnings.extend(builtin_analyser.warnings)
                 return
 
+        param_types = []
         ignore_first_argument = int(callable.has_cls_or_self)  # 1 if True, 0 otherwise
-        for index, param in enumerate(call.args):
-            (arg_id, arg_value) = list(callable.args.items())[index + ignore_first_argument]
+        is_first_arg_cls_of_self = ignore_first_argument and len(call.args) == len(callable.args)
 
-            param_type = self.get_type(param, use_metatype=True)
-            args_types.append(param_type)
-            if not arg_value.type.is_type_of(param_type):
-                self._log_error(
-                    CompilerError.MismatchedTypes(
-                        param.lineno, param.col_offset,
-                        arg_value.type.identifier,
-                        param_type.identifier
-                    ))
+        # validate positional parameters
+        if is_first_arg_cls_of_self:
+            (self_id, self_value) = list(callable.args.items())[0]
+            param_type = self._validate_argument_type(call.args[0], self_value.type, use_metatype=True)
+            param_types.append(param_type)
+
+        for index, param in enumerate(call.args[is_first_arg_cls_of_self:]):
+            (arg_id, arg_value) = list(callable.args.items())[ignore_first_argument + index]
+
+            param_type = self._validate_argument_type(param, arg_value.type, use_metatype=True)
+            param_types.append(param_type)
+
+        # validate keyword arguments
+        for param in call.keywords:
+            arg_value = callable.args[param.arg]
+            param = param.value
+            param_type = self._validate_argument_type(param, arg_value.type)
+            param_types.append(param_type)
+
+    def _validate_argument_type(self, param: ast.AST, arg_type: IType, use_metatype: bool = False) -> Optional[IType]:
+        param_type = self.get_type(param, use_metatype=use_metatype)
+        if arg_type.is_type_of(param_type):
+            return param_type
+        else:
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    param.lineno, param.col_offset,
+                    arg_type.identifier,
+                    param_type.identifier
+                ))
+
+        return None
 
     def update_callable_after_validation(self, call: ast.Call, callable_id: str, callable_target: Callable):
         # if the arguments are not generic, include the specified method in the symbol table
@@ -1406,6 +1475,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = symbol.type
         if hasattr(symbol, 'symbols') and attribute.attr in symbol.symbols:
             attr_symbol = symbol.symbols[attribute.attr]
+        elif isinstance(symbol, Package) and attribute.attr in symbol.inner_packages:
+            attr_symbol = symbol.inner_packages[attribute.attr]
         else:
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
@@ -1420,9 +1491,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_instance_variable_from_class = (isinstance(symbol, UserClass)
                                            and attribute.attr in symbol.instance_variables)
         is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables
+        is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties
 
         if ((attr_symbol is None and hasattr(symbol, 'symbols'))
-                or (is_from_class_name and is_instance_variable_from_class)):
+                or (is_from_class_name and is_instance_variable_from_class)
+                or (is_from_class_name and is_property_from_class)):
             # if it couldn't find the symbol in the attribute symbols, raise unresolved reference
             self._log_error(
                 CompilerError.UnresolvedReference(
@@ -1440,9 +1513,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 
+        if not is_from_class_name and is_property_from_class and isinstance(attribute.ctx, ast.Store):
+            # setting values for properties in objects is not supported yet
+            # @property.setter is not implemented
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    attribute.lineno, attribute.col_offset,
+                    symbol_id='setting values for properties'
+                ))
+            return Attribute(attribute.value, None, attr_symbol, attribute)
+
         attr_type = value.type if isinstance(value, IExpression) else value
         # for checking during the code generation
-        if (isinstance(attr_type, ClassType) and
+        if (self.is_implemented_class_type(attr_type) and
                 not (isinstance(attribute.value, ast.Name) and attribute.value.id == attr_type.identifier) and
                 (not hasattr(attribute, 'generate_value') or not attribute.generate_value)):
             attribute.generate_value = True

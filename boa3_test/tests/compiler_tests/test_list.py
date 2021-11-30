@@ -1120,10 +1120,28 @@ class TestList(BoaTest):
 
     def test_list_insert_any_value(self):
         path = self.get_contract_path('InsertAnyValue.py')
-
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([1, '4', 2, 3], result)
+
+        list_ = [1, 2, 3]
+        pos = 0
+        value = '0'
+        result = self.run_smart_contract(engine, path, 'Main', list_, pos, value)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
+
+        list_ = [1, 2, 3]
+        pos = 1
+        value = '1'
+        result = self.run_smart_contract(engine, path, 'Main', list_, pos, value)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
+
+        list_ = [1, 2, 3]
+        pos = 3
+        value = '4'
+        result = self.run_smart_contract(engine, path, 'Main', list_, pos, value)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
 
     def test_list_insert_int_negative_index(self):
         path = self.get_contract_path('InsertIntNegativeIndex.py')
@@ -1169,5 +1187,182 @@ class TestList(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([10, 20], result)
+
+    # endregion
+
+    # region TestCopy
+
+    def test_list_copy(self):
+        path = self.get_contract_path('Copy.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [1, 2, 3, 4], 5)
+        self.assertEqual([1, 2, 3, 4], result[0])
+        self.assertEqual([1, 2, 3, 4, 5], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(['list', 'unit', 'test'], result[0])
+        self.assertEqual(['list', 'unit', 'test', 'copy'], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [True, False], True)
+        self.assertEqual([True, False], result[0])
+        self.assertEqual([True, False, True], result[1])
+
+        result = self.run_smart_contract(engine, path, 'attribution', [1, 2, 3, 4], 5)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'attribution', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'attribution', [True, False], True)
+        self.assertEqual(False, result)
+
+    def test_int_list_copy(self):
+        path = self.get_contract_path('CopyInt.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_int_list', [1, 2, 3, 4], 5)
+        self.assertEqual([1, 2, 3, 4], result[0])
+        self.assertEqual([1, 2, 3, 4, 5], result[1])
+
+    def test_str_list_copy(self):
+        path = self.get_contract_path('CopyStr.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_str_list', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(['list', 'unit', 'test'], result[0])
+        self.assertEqual(['list', 'unit', 'test', 'copy'], result[1])
+
+    def test_bool_list_copy(self):
+        path = self.get_contract_path('CopyBool.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_bool_list', [True, False], True)
+        self.assertEqual([True, False], result[0])
+        self.assertEqual([True, False, True], result[1])
+
+    def test_list_copy_builtin_call(self):
+        path = self.get_contract_path('CopyListBuiltinCall.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [1, 2, 3, 4], 5)
+        self.assertEqual([1, 2, 3, 4], result[0])
+        self.assertEqual([1, 2, 3, 4, 5], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', ['list', 'unit', 'test'], 'copy')
+        self.assertEqual(['list', 'unit', 'test'], result[0])
+        self.assertEqual(['list', 'unit', 'test', 'copy'], result[1])
+
+        result = self.run_smart_contract(engine, path, 'copy_list', [True, False], True)
+        self.assertEqual([True, False], result[0])
+        self.assertEqual([True, False, True], result[1])
+
+    # endregion
+
+    # region TestIndex
+
+    def test_list_index(self):
+        path = self.get_contract_path('IndexList.py')
+        engine = TestEngine()
+
+        list_ = [1, 2, 3, 4]
+        value = 3
+        start = 0
+        end = 4
+        result = self.run_smart_contract(engine, path, 'main', list_, value, start, end)
+        self.assertEqual(list_.index(value, start, end), result)
+
+        list_ = [1, 2, 3, 4]
+        value = 3
+        start = 2
+        end = 4
+        result = self.run_smart_contract(engine, path, 'main', list_, value, start, end)
+        self.assertEqual(list_.index(value, start, end), result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 3, 3, 4)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 3, 4, -1)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 3, 0, -99)
+
+        list_ = [1, 2, 3, 4]
+        value = 3
+        start = 0
+        end = -1
+        result = self.run_smart_contract(engine, path, 'main', list_, value, start, end)
+        self.assertEqual(list_.index(value, start, end), result)
+
+        list_ = [1, 2, 3, 4]
+        value = 2
+        start = 0
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', list_, value, start, end)
+        self.assertEqual(list_.index(value, start, end), result)
+
+    def test_list_index_end_default(self):
+        path = self.get_contract_path('IndexListEndDefault.py')
+        engine = TestEngine()
+
+        list_ = [1, 2, 3, 4]
+        value = 3
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', list_, value, start)
+        self.assertEqual(list_.index(value, start), result)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 2, 99)
+
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 4, -1)
+
+        list_ = [1, 2, 3, 4]
+        value = 2
+        start = -10
+        result = self.run_smart_contract(engine, path, 'main', list_, value, start)
+        self.assertEqual(list_.index(value, start), result)
+
+    def test_list_index_defaults(self):
+        path = self.get_contract_path('IndexListDefaults.py')
+        engine = TestEngine()
+
+        list_ = [1, 2, 3, 4]
+        value = 3
+        result = self.run_smart_contract(engine, path, 'main', list_, value)
+        self.assertEqual(list_.index(value), result)
+
+        list_ = [1, 2, 3, 4]
+        value = 1
+        result = self.run_smart_contract(engine, path, 'main', list_, value)
+        self.assertEqual(list_.index(value), result)
+
+    def test_list_index_int(self):
+        path = self.get_contract_path('IndexListInt.py')
+        engine = TestEngine()
+
+        list_ = [1, 2, 3, 4]
+        value = 3
+        result = self.run_smart_contract(engine, path, 'main', list_, value)
+        self.assertEqual(list_.index(value), result)
+
+    def test_list_index_str(self):
+        path = self.get_contract_path('IndexListStr.py')
+        engine = TestEngine()
+
+        list_ = ['unit', 'test', 'neo3-boa']
+        value = 'test'
+        result = self.run_smart_contract(engine, path, 'main', list_, value)
+        self.assertEqual(list_.index(value), result)
+
+    def test_list_index_bool(self):
+        path = self.get_contract_path('IndexListBool.py')
+        engine = TestEngine()
+
+        list_ = [True, True, False]
+        value = False
+        result = self.run_smart_contract(engine, path, 'main', list_, value)
+        self.assertEqual(list_.index(value), result)
 
     # endregion
