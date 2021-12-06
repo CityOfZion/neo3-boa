@@ -9,9 +9,10 @@ class Foo:
 class Example(Foo):
     def __init__(self):
         super().__init__()
+        self.var_1 = 10
+        self.var_2 = 20
 
 
 @public
-def inherited_var() -> int:
-    foo = Example()
-    return foo.bar
+def get_full_object() -> Example:
+    return Example()

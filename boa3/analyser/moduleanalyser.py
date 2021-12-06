@@ -186,7 +186,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param callable_id: method id
         :param callable: method to be included
         """
-        if callable_id not in self._current_scope.symbols and hasattr(self._current_scope, 'include_callable'):
+        if ((self._current_scope is self._current_class or callable_id not in self._current_scope.symbols)
+                and hasattr(self._current_scope, 'include_callable')):
             self._current_scope.include_callable(callable_id, callable)
 
     def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
@@ -796,7 +797,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             fun_args.set_vararg(var_id, var)
 
         if arguments.kwarg is not None:
-            var_id, var = self.visit_arg(arguments.kwarg)   # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arguments.kwarg)  # Tuple[str, Variable]
             fun_args.add_kwarg(var_id, var)
 
         return fun_args

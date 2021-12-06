@@ -403,7 +403,31 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base_with_init(self):
         path = self.get_contract_path('UserClassWithCreatedBaseWithInit.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+
+        expected_result = 42
+        result = self.run_smart_contract(engine, path, 'inherited_var')
+        self.assertEqual(expected_result, result)
+
+    def test_user_class_with_created_base_with_init_with_args(self):
+        path = self.get_contract_path('UserClassWithCreatedBaseWithInitWithArgs.py')
+        engine = TestEngine()
+
+        expected_result = -10
+        result = self.run_smart_contract(engine, path, 'inherited_var')
+        self.assertEqual(expected_result, result)
+
+    def test_user_class_with_created_base_with_more_variables(self):
+        path = self.get_contract_path('UserClassWithCreatedBaseWithMoreVariables.py')
+        engine = TestEngine()
+
+        expected_result = [42, 10, 20]
+        result = self.run_smart_contract(engine, path, 'get_full_object')
+        self.assertEqual(expected_result, result)
+
+    def test_user_class_with_created_base_with_more_variables_without_super_init(self):
+        path = self.get_contract_path('UserClassWithCreatedBaseWithMoreVariablesWithoutSuperInit.py')
+        self.assertCompilerLogs(CompilerError.MissingInitCall, path)
 
     def test_user_class_with_multiple_bases(self):
         path = self.get_contract_path('UserClassWithMultipleBases.py')

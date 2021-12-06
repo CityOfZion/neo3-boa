@@ -54,6 +54,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._current_class: UserClass = None
         self._current_method: Method = None
         self._scope_stack: List[SymbolScope] = []
+
+        self._super_calls: List[IBuiltinMethod] = []
         self.visit(self._tree)
 
     @property
@@ -181,7 +183,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 for stmt in function.body:
                     self.visit(stmt)
 
-            if not method.is_init:
+            if method.is_init:
+                self._check_base_init_call(function)
+            else:
                 self._validate_return(function)
 
             method_scope = self.pop_local_scope()
@@ -284,6 +288,21 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
                 return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
         return body_has_inner_return
+
+    def _check_base_init_call(self, node: ast.AST):
+        if not self._current_method.is_init or not isinstance(self._current_class, ClassType):
+            # if the method is not an user class __init__, don't check
+            return
+
+        if len(self._current_class.bases) == 0:
+            # nothing to check if class has no bases
+            return
+
+        if len(self._super_calls) == 0:
+            self._log_error(CompilerError.MissingInitCall(line=node.lineno,
+                                                          col=node.col_offset))
+        else:
+            self._super_calls.clear()
 
     def visit_Assign(self, assign: ast.Assign):
         """
@@ -1181,9 +1200,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif isinstance(callable_target, IBuiltinMethod):
             # verify if it's a variation of the default builtin method
             args = [self.get_type(param, use_metatype=True) for param in call_args]
+
+            from boa3.model.builtin.method import SuperMethod
+            # TODO: change when implementing super() with args
+            if (isinstance(callable_target, SuperMethod)
+                    and isinstance(self._current_method, Method) and self._current_method.has_cls_or_self):
+                args.insert(0, self._current_class)
+
             new_target = callable_target.build(args)
             if new_target is not None:
                 callable_target = new_target
+
+            if isinstance(callable_target, SuperMethod) and callable_target not in self._super_calls:
+                self._super_calls.append(callable_target)
         return callable_target
 
     def validate_callable_arguments(self, call: ast.Call, callable_target: Callable) -> bool:

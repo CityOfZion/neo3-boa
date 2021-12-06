@@ -208,6 +208,19 @@ class MismatchedTypes(CompilerError):
         return "Expected type '%s', got '%s' instead" % (expected_types, actual_types)
 
 
+class MissingInitCall(CompilerError):
+    """
+    An error raised when a custom class is created with inheritance and it's missing the base __init__ call
+    """
+
+    def __init__(self, line: int, col: int):
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return "Call to __init__ of super class is missed"
+
+
 class MissingReturnStatement(CompilerError):
     """
     An error raised when a function with a return value is missing a return statement

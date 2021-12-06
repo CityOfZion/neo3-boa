@@ -1415,3 +1415,29 @@ class TestBuiltinMethod(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     # endregion
+
+    # region super test
+
+    def test_super_with_args(self):
+        # TODO: Change when super with args is implemented
+        path = self.get_contract_path('SuperWithArgs.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_super_call_method(self):
+        path = self.get_contract_path('SuperCallMethod.py')
+        engine = TestEngine()
+
+        super_method_expected_result = -20
+        arg = 20
+        result = self.run_smart_contract(engine, path, 'example_method', arg)
+        self.assertEqual(arg, result)
+
+        arg = 30
+        result = self.run_smart_contract(engine, path, 'example_method', arg)
+        self.assertEqual(arg, result)
+
+        arg = 40
+        result = self.run_smart_contract(engine, path, 'example_method', arg)
+        self.assertEqual(super_method_expected_result, result)
+
+    # endregion

@@ -2,13 +2,13 @@ from boa3.builtin import public
 
 
 class Foo:
-    def __init__(self):
-        self.bar = 42
+    def __init__(self, init_value: int):
+        self.bar = init_value
 
 
 class Example(Foo):
     def __init__(self):
-        super().__init__()
+        super().__init__(-10)
 
 
 @public
