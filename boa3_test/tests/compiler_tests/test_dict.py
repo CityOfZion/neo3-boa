@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestDict(BoaTest):
-
     default_folder: str = 'test_sc/dict_test'
 
     def test_dict_int_keys(self):

@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestRange(BoaTest):
-
     default_folder: str = 'test_sc/range_test'
 
     RANGE_ERROR_MESSAGE = String('range() arg 3 must not be zero').to_bytes()

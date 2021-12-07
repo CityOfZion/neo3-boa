@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestEvent(BoaTest):
-
     default_folder: str = 'test_sc/event_test'
 
     def test_event_without_arguments(self):

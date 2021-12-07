@@ -1220,7 +1220,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             if (len(call.args) >= len(callable_target.args)
                     and (len(call.args) == 0 or not isinstance(call.args[0], ast.Starred))):
-
                 # starred argument is always the last argument
                 len_args_without_starred = len(callable_target.args) - 1
                 args = self.parse_to_node(str(Type.tuple.default_value), call)

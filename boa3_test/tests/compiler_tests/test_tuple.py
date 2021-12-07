@@ -11,7 +11,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTuple(BoaTest):
-
     default_folder: str = 'test_sc/tuple_test'
 
     def test_tuple_int_values(self):

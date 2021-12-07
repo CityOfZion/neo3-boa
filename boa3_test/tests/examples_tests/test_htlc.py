@@ -12,7 +12,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestHTLCTemplate(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -44,8 +43,10 @@ class TestHTLCTemplate(BoaTest):
         engine = TestEngine()
 
         # can not atomic_swap() without deploying first
-        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10**8,
-                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10**8, hash160(String('unit test').to_bytes()),
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10 ** 8,
+                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10 ** 8,
+                                         hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
@@ -57,8 +58,10 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # starting atomic swap by using the atomic_swap method
-        result = self.run_smart_contract(engine, path, 'atomic_swap', self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10 ** 8,
-                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10 ** 8, hash160(String('unit test').to_bytes()),
+        result = self.run_smart_contract(engine, path, 'atomic_swap',
+                                         self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10 ** 8,
+                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10 ** 8,
+                                         hash160(String('unit test').to_bytes()),
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -66,8 +69,8 @@ class TestHTLCTemplate(BoaTest):
     def test_HTLC_onNEP17Payment(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
-        transferred_amount_neo = 10 * 10**8
-        transferred_amount_gas = 10000 * 10**8
+        transferred_amount_neo = 10 * 10 ** 8
+        transferred_amount_gas = 10000 * 10 ** 8
 
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
@@ -100,7 +103,8 @@ class TestHTLCTemplate(BoaTest):
 
         # transfer wil be aborted at onPayment if the transfer is not valid
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
-            self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.NEO_SCRIPT, aux_address, htlc_address,
+            self.run_smart_contract(engine, aux_path, 'calling_transfer',
+                                    constants.NEO_SCRIPT, aux_address, htlc_address,
                                     transferred_amount_neo - 100, None,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH],
                                     expected_result_type=bool)
@@ -145,7 +149,8 @@ class TestHTLCTemplate(BoaTest):
         # transfer won't be accepted, because amount is wrong
         with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, aux_path2, 'calling_transfer',
-                                    constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas - 100, None,
+                                    constants.GAS_SCRIPT, aux_address2, htlc_address,
+                                    transferred_amount_gas - 100, None,
                                     signer_accounts=[aux_address2],
                                     expected_result_type=bool)
 
@@ -189,8 +194,8 @@ class TestHTLCTemplate(BoaTest):
     def test_HTLC_withdraw(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
-        transferred_amount_neo = 10 * 10**8
-        transferred_amount_gas = 10000 * 10**8
+        transferred_amount_neo = 10 * 10 ** 8
+        transferred_amount_gas = 10000 * 10 ** 8
 
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)
@@ -312,8 +317,8 @@ class TestHTLCTemplate(BoaTest):
     def test_HTLC_refund(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
-        transferred_amount_neo = 10 * 10**8
-        transferred_amount_gas = 10000 * 10**8
+        transferred_amount_neo = 10 * 10 ** 8
+        transferred_amount_gas = 10000 * 10 ** 8
 
         output, manifest = self.compile_and_save(path)
         htlc_address = hash160(output)

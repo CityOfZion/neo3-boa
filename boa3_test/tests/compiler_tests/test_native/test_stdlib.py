@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestStdlibClass(BoaTest):
-
     default_folder: str = 'test_sc/native_test/stdlib'
 
     def test_base64_encode(self):

@@ -10,7 +10,6 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestRoleInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/role'
 
     def test_get_designated_by_role(self):

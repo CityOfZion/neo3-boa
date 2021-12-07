@@ -62,7 +62,7 @@ class MappingType(ICollectionType, ABC):
 
         if len(values_type) > 1 and all(isinstance(x, MappingType) for x in values_type):
             first_item: MappingType = list(values_type)[0]
-            mapping_type = type(first_item)          # first mapping type
+            mapping_type = type(first_item)  # first mapping type
 
             k_types = set(value.key_type for value in values_type)
             v_types = set(value.value_type for value in values_type)

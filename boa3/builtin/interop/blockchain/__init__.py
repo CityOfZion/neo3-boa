@@ -74,7 +74,6 @@ Gets the hash of the current block.
 :meta hide-value:
 """
 
-
 current_index: int = 0
 """
 Gets the index of the current block.

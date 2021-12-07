@@ -111,7 +111,7 @@ class Method(Callable):
         """
         if not any((info.start_line == instr_info.start_line and info.start_col == instr_info.start_col
                     for info in self._debug_map)):
-            existing_instr_info: Optional[DebugInstruction] =\
+            existing_instr_info: Optional[DebugInstruction] = \
                 next((info for info in self._debug_map if info.code == instr_info.code), None)
             if existing_instr_info is not None:
                 self._debug_map.remove(existing_instr_info)

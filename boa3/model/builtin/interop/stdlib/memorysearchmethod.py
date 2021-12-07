@@ -24,4 +24,6 @@ class MemorySearchMethod(StdLibMethod):
         backward_default = set_internal_call(ast.parse("{0}".format(Type.bool.default_value)
                                                        ).body[0].value)
 
-        super().__init__(identifier, native_identifier, args, defaults=[start_default, backward_default], return_type=Type.int)
+        super().__init__(identifier, native_identifier, args,
+                         defaults=[start_default, backward_default],
+                         return_type=Type.int)

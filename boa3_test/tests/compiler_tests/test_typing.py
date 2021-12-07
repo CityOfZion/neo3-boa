@@ -7,7 +7,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTyping(BoaTest):
-
     default_folder: str = 'test_sc/typing_test'
 
     def test_cast_to_int(self):

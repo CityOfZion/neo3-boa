@@ -8,7 +8,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestNEP17Template(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)

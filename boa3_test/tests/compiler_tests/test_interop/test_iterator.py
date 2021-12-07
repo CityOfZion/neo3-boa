@@ -4,7 +4,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestIteratorInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/iterator'
 
     def test_iterator_create(self):

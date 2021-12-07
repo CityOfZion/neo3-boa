@@ -4,7 +4,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestPolicyContract(BoaTest):
-
     default_folder: str = 'test_sc/native_test/policy'
 
     def test_get_exec_fee_factor(self):

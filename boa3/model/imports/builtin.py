@@ -8,8 +8,8 @@ from boa3.model.builtin.native.nativecontract import NativeContract
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
-from boa3.model.type.typeutils import TypeUtils
 from boa3.model.type.math import Math
+from boa3.model.type.typeutils import TypeUtils
 
 __all__ = ['get_package',
            'get_internal_symbol'
@@ -25,7 +25,6 @@ def get_internal_symbol(symbol_id: str) -> Optional[ISymbol]:
 
 
 class CompilerBuiltin:
-
     _instance = None
 
     @classmethod

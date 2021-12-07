@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestAssert(BoaTest):
-
     default_folder: str = 'test_sc/assert_test'
 
     def test_assert_unary_boolean_operation(self):

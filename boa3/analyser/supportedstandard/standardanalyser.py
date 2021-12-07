@@ -57,8 +57,8 @@ class StandardAnalyser(IAstAnalyser):
 
                 # validade standard's methods
                 for method_id, standard_method in current_standard.methods.items():
-                    if (method_id not in self.symbols or 
-                            not isinstance(self.symbols[method_id], Method) or 
+                    if (method_id not in self.symbols or
+                            not isinstance(self.symbols[method_id], Method) or
                             not current_standard.match_definition(method_id, self.symbols[method_id])):
                         self._log_error(
                             CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
@@ -72,7 +72,6 @@ class StandardAnalyser(IAstAnalyser):
                             all(not current_standard.match_definition(event.name, event)
                                 for event in events_with_same_name
                                 )):
-
                         self._log_error(
                             CompilerError.MissingStandardDefinition(standard,
                                                                     standard_event.name,

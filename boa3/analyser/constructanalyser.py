@@ -48,8 +48,8 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
                     value = ast.literal_eval(call.func.value)
                     if not isinstance(value, tuple(types.values())):
                         return call
-                elif (isinstance(call.func.value, ast.Name)     # checks if is the name of a type
-                      and call.func.value.id in types        # and if the arguments is from the same type
+                elif (isinstance(call.func.value, ast.Name)  # checks if is the name of a type
+                      and call.func.value.id in types  # and if the arguments is from the same type
                       and len(call.args) == 1
                       and isinstance(call.args[0], literal)):
                     value = ast.literal_eval(call.args[0])

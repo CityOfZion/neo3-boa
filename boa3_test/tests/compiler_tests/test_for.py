@@ -7,7 +7,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestFor(BoaTest):
-
     default_folder: str = 'test_sc/for_test'
 
     def test_for_tuple_condition(self):

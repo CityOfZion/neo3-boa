@@ -8,7 +8,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestUnion(BoaTest):
-
     default_folder: str = 'test_sc/union_test'
 
     def test_union_return(self):

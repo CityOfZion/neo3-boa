@@ -12,7 +12,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestList(BoaTest):
-
     default_folder: str = 'test_sc/list_test'
 
     def test_list_int_values(self):

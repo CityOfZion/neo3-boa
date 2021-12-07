@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestRelational(BoaTest):
-
     default_folder: str = 'test_sc/relational_test'
 
     # region GreaterThan

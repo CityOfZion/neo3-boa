@@ -5,7 +5,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestOptional(BoaTest):
-
     default_folder: str = 'test_sc/optional_test'
 
     def test_optional_return(self):

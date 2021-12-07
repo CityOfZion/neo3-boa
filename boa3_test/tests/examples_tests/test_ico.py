@@ -6,7 +6,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTemplate(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -361,7 +360,7 @@ class TestTemplate(BoaTest):
 
         # should fail if amount is a negative number
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'mint', -10 * 10**8)
+            self.run_smart_contract(engine, path, 'mint', -10 * 10 ** 8)
 
         minted_amount = 10_000 * 10 ** 8
         # should fail if not signed by the administrator

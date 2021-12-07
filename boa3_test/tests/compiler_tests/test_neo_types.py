@@ -6,7 +6,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestNeoTypes(BoaTest):
-
     default_folder: str = 'test_sc/neo_type_test'
 
     # region UInt160

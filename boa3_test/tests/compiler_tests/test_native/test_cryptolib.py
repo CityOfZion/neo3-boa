@@ -15,7 +15,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestCryptoLibClass(BoaTest):
-
     default_folder: str = 'test_sc/native_test/cryptolib'
     ecpoint_init = (
         Opcode.CONVERT + Type.bytes.stack_item
