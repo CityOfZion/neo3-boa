@@ -101,6 +101,13 @@ class Callable(IExpression, ABC):
         return any(decorator.has_cls_or_self for decorator in self.decorators)
 
     @property
+    def cls_or_self_type(self) -> Optional[IType]:
+        if not self.has_cls_or_self or len(self.args) == 0:
+            return None
+
+        return list(self.args.values())[0].type
+
+    @property
     def has_starred_argument(self) -> bool:
         return self._vararg is not None
 

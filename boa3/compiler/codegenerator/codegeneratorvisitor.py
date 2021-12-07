@@ -761,6 +761,9 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if self.is_exception_name(function_id):
             self.generator.convert_new_exception(len(call.args))
+        elif isinstance(symbol, type(Builtin.Super)) and len(args_to_generate) == 0:
+            self_or_cls_id = list(self.current_method.args)[0]
+            self.generator.convert_load_symbol(self_or_cls_id)
         elif isinstance(symbol, IBuiltinMethod):
             self.generator.convert_builtin_method_call(symbol, args_addresses)
         else:
