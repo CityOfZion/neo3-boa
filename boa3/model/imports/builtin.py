@@ -9,6 +9,7 @@ from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
 from boa3.model.type.typeutils import TypeUtils
+from boa3.model.type.math import Math
 
 __all__ = ['get_package',
            'get_internal_symbol'
@@ -37,6 +38,7 @@ class CompilerBuiltin:
         self.packages: List[Package] = []
 
         self._generate_builtin_package('typing', TypeUtils.get_types_from_typing_lib())
+        self._generate_builtin_package('math', Math.get_methods_from_math_lib())
         self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)
         self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols('contract'))
         self._generate_builtin_package('boa3.builtin.interop', Interop.package_symbols)

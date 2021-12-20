@@ -48,7 +48,6 @@ class Builtin:
     Min = MinIntMethod()
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
-    Sqrt = SqrtMethod()
     StrSplit = StrSplitMethod()
     Sum = SumMethod()
 
@@ -131,7 +130,6 @@ class Builtin:
                                                 SequencePop,
                                                 SequenceRemove,
                                                 SequenceReverse,
-                                                Sqrt,
                                                 StaticMethodDecorator,
                                                 StrIndex,
                                                 StrSplit,

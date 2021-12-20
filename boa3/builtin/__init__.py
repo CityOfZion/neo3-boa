@@ -39,20 +39,6 @@ def to_script_hash(data_bytes: Any) -> bytes:
     pass
 
 
-def sqrt(x: int) -> int:
-    """
-    Gets the square root of a number.
-
-    :param x: a non-negative number
-    :type x: int
-    :return: the square root of a number
-    :rtype: int
-
-    :raise Exception: raised when number is negative.
-    """
-    pass
-
-
 def Event(*args, **kwargs):
     """
     Describes an action that happened in the blockchain.

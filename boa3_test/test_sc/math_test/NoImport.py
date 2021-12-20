@@ -1,4 +1,4 @@
-from boa3.builtin import public, sqrt
+from boa3.builtin import public
 
 
 @public
