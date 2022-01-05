@@ -7,7 +7,7 @@ from boa3.model.symbol import ISymbol
 
 class Math:
 
-    # neo3-boa math methods
+    # python math methods
     Sqrt = SqrtMethod()
 
     @classmethod

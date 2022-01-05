@@ -456,44 +456,60 @@ class TestArithmetic(BoaTest):
     # region Modulo
 
     def test_modulo_operation(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG0
-            + Opcode.LDARG1
-            + Opcode.MOD
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('Modulo.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'mod', 10, 3)
-        self.assertEqual(1, result)
-        result = self.run_smart_contract(engine, path, 'mod', -42, -9)
-        self.assertEqual(-6, result)
-        result = self.run_smart_contract(engine, path, 'mod', -100, 3)
-        self.assertEqual(-1, result)
+
+        op1 = 10
+        op2 = 3
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
+
+        op1 = -42
+        op2 = -9
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
+
+        op1 = -100
+        op2 = 3
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
+
+        op1 = 100
+        op2 = -3
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
 
     def test_modulo_augmented_assignment(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG0
-            + Opcode.LDARG1
-            + Opcode.MOD
-            + Opcode.STARG0
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('ModuloAugmentedAssignment.py')
-        output = Boa3.compile(path)
+        engine = TestEngine()
 
-        self.assertEqual(expected_output, output)
+        op1 = 10
+        op2 = 3
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
+
+        op1 = -42
+        op2 = -9
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
+
+        op1 = -100
+        op2 = 3
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
+
+        op1 = 100
+        op2 = -3
+        expected_output = op1 % op2
+        result = self.run_smart_contract(engine, path, 'mod', op1, op2)
+        self.assertEqual(expected_output, result)
 
     def test_modulo_builtin_type(self):
         path = self.get_contract_path('ModuloBuiltinType.py')
