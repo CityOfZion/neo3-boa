@@ -24,7 +24,6 @@ class GetNeoScriptHashMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-
         value = NEO_SCRIPT
         return [
             Opcode.get_pushdata_and_data(value)

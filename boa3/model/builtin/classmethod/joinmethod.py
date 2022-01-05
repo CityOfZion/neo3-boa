@@ -34,7 +34,7 @@ class JoinMethod(IBuiltinMethod):
         if Type.dict.is_type_of(self._arg_iterable.type):
             return '-{0}_{1}'.format(self._identifier, Type.dict.identifier)
 
-        return self._identifier                             # JoinMethod default value for self
+        return self._identifier  # JoinMethod default value for self
 
     @property
     def _arg_self(self) -> Variable:

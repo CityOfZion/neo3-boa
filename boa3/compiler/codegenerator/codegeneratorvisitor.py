@@ -723,7 +723,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                          else call.args)
             args_to_generate = [arg for index, arg in enumerate(call_args) if index in symbol.args_to_be_generated()]
             keywords_dict = {keyword.arg: keyword.value for keyword in call.keywords}
-            keywords_with_index = {index: keywords_dict[arg_name] for index, arg_name in enumerate(symbol.args) if arg_name in keywords_dict}
+            keywords_with_index = {index: keywords_dict[arg_name]
+                                   for index, arg_name in enumerate(symbol.args)
+                                   if arg_name in keywords_dict}
 
             for index in keywords_with_index:
                 if index < len(args_to_generate):
@@ -916,7 +918,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                     symbol_id = attribute.attr if isinstance(generation_result, Variable) else class_attr_id
                     result_type = result
                 else:
-                    index = self.generator.convert_class_symbol(result, attribute.attr, isinstance(attribute.ctx, ast.Load))
+                    index = self.generator.convert_class_symbol(result,
+                                                                attribute.attr,
+                                                                isinstance(attribute.ctx, ast.Load))
                     generated = True
                     symbol = result
                     if not isinstance(result, UserClass):

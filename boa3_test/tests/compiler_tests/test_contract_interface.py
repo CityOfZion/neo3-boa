@@ -5,7 +5,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestContractInterface(BoaTest):
-
     default_folder: str = 'test_sc/contract_interface_test'
 
     def test_contract_interface_decorator_literal_hash_str(self):

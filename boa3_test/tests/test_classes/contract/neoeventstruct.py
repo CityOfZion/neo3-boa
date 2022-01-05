@@ -6,7 +6,6 @@ from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
 
 
 class NeoEventStruct(NeoStruct):
-
     _name_field = 'name'
     _parameters_field = 'parameters'
 

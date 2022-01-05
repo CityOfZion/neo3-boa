@@ -7,7 +7,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestLogical(BoaTest):
-
     default_folder: str = 'test_sc/logical_test'
 
     # region BoolAnd

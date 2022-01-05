@@ -16,7 +16,7 @@ class IndexMethod(IBuiltinMethod):
     def identifier(self) -> str:
         from boa3.model.type.type import Type
 
-        if self._arg_self.type is Type.sequence:    # IndexSequenceMethod default value for self
+        if self._arg_self.type is Type.sequence:  # IndexSequenceMethod default value for self
             return self._identifier
 
         if self._arg_self.type is Type.str:

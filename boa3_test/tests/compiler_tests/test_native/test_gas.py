@@ -4,7 +4,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestGasClass(BoaTest):
-
     default_folder: str = 'test_sc/native_test/gas'
 
     def test_symbol(self):

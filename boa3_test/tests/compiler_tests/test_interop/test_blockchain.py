@@ -14,7 +14,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBlockchainInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/blockchain'
 
     def test_block_constructor(self):
@@ -27,16 +26,16 @@ class TestBlockchainInterop(BoaTest):
         for k in range(len(result)):
             if isinstance(result[k], str):
                 result[k] = String(result[k]).to_bytes()
-        self.assertEqual(UInt256(), UInt256(result[0]))   # hash
-        self.assertEqual(0, result[1])   # version
-        self.assertEqual(UInt256(), UInt256(result[2]))   # previous_hash
-        self.assertEqual(UInt256(), UInt256(result[3]))   # merkle_root
-        self.assertEqual(0, result[4])   # timestamp
-        self.assertEqual(0, result[5])   # nonce
-        self.assertEqual(0, result[6])   # index
-        self.assertEqual(0, result[7])   # primary_index
-        self.assertEqual(UInt160(), UInt160(result[8]))   # next_consensus
-        self.assertEqual(0, result[9])   # transaction_count
+        self.assertEqual(UInt256(), UInt256(result[0]))  # hash
+        self.assertEqual(0, result[1])  # version
+        self.assertEqual(UInt256(), UInt256(result[2]))  # previous_hash
+        self.assertEqual(UInt256(), UInt256(result[3]))  # merkle_root
+        self.assertEqual(0, result[4])  # timestamp
+        self.assertEqual(0, result[5])  # nonce
+        self.assertEqual(0, result[6])  # index
+        self.assertEqual(0, result[7])  # primary_index
+        self.assertEqual(UInt160(), UInt160(result[8]))  # next_consensus
+        self.assertEqual(0, result[9])  # transaction_count
 
     def test_get_contract(self):
         path = self.get_contract_path('GetContract.py')
@@ -112,18 +111,18 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(8, len(result))
         if isinstance(result[0], str):
             result[0] = String(result[0]).to_bytes()
-        self.assertEqual(UInt256(), UInt256(result[0]))   # hash
-        self.assertEqual(0, result[1])   # version
-        self.assertEqual(0, result[2])   # nonce
+        self.assertEqual(UInt256(), UInt256(result[0]))  # hash
+        self.assertEqual(0, result[1])  # version
+        self.assertEqual(0, result[2])  # nonce
         if isinstance(result[3], str):
             result[3] = String(result[3]).to_bytes()
-        self.assertEqual(UInt160(), UInt160(result[3]))   # sender
-        self.assertEqual(0, result[4])   # system_fee
-        self.assertEqual(0, result[5])   # network_fee
-        self.assertEqual(0, result[6])   # valid_until_block
+        self.assertEqual(UInt160(), UInt160(result[3]))  # sender
+        self.assertEqual(0, result[4])  # system_fee
+        self.assertEqual(0, result[5])  # network_fee
+        self.assertEqual(0, result[6])  # valid_until_block
         if isinstance(result[7], str):
             result[7] = String(result[7]).to_bytes()
-        self.assertEqual(b'', result[7])   # script
+        self.assertEqual(b'', result[7])  # script
 
     def test_get_transaction(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -168,18 +167,18 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(8, len(result))
         if isinstance(result[0], str):
             result[0] = String(result[0]).to_bytes()
-        self.assertEqual(UInt256(hash_), UInt256(result[0]))   # hash
-        self.assertIsInstance(result[1], int)   # version
-        self.assertIsInstance(result[2], int)   # nonce
+        self.assertEqual(UInt256(hash_), UInt256(result[0]))  # hash
+        self.assertIsInstance(result[1], int)  # version
+        self.assertIsInstance(result[2], int)  # nonce
         if isinstance(result[3], str):
             result[3] = String(result[3]).to_bytes()
-        self.assertEqual(UInt160(sender), UInt160(result[3]))   # sender
-        self.assertIsInstance(result[4], int)   # system_fee
-        self.assertIsInstance(result[5], int)   # network_fee
-        self.assertIsInstance(result[6], int)   # valid_until_block
+        self.assertEqual(UInt160(sender), UInt160(result[3]))  # sender
+        self.assertIsInstance(result[4], int)  # system_fee
+        self.assertIsInstance(result[5], int)  # network_fee
+        self.assertIsInstance(result[6], int)  # valid_until_block
         if isinstance(result[7], str):
             result[7] = String(result[7]).to_bytes()
-        self.assertEqual(script, result[7])   # script
+        self.assertEqual(script, result[7])  # script
 
     def test_get_transaction_mismatched_type(self):
         path = self.get_contract_path('GetTransactionMismatchedType.py')

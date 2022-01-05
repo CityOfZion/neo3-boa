@@ -4,12 +4,11 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestMetadata(BoaTest):
-
     default_folder: str = 'test_sc/metadata_test'
 
     def test_metadata_info_method(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -31,7 +30,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_multiple_method(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -64,7 +63,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_author(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -83,7 +82,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_email(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -102,7 +101,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_description(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -121,7 +120,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_extras(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -140,7 +139,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_new_extras(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 

@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTemplate(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -231,8 +230,8 @@ class TestTemplate(BoaTest):
         output, manifest = self.compile_and_save(path)
         wrapped_neo_address = hash160(output)
 
-        engine.add_neo(wrapped_neo_address, 10_000_000 * 10**8)
-        burned_amount = 100 * 10**8
+        engine.add_neo(wrapped_neo_address, 10_000_000 * 10 ** 8)
+        burned_amount = 100 * 10 ** 8
 
         # deploying this smart contract will give 10m total supply * 10^8 zNEOs to OWNER
         result = self.run_smart_contract(engine, path, 'deploy',

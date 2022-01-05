@@ -10,7 +10,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestException(BoaTest):
-
     default_folder: str = 'test_sc/exception_test'
 
     EXCEPTION_EMPTY_MESSAGE = String(Builtin.Exception.default_message).to_bytes()

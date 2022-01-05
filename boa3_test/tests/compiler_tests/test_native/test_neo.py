@@ -5,7 +5,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestNeoClass(BoaTest):
-
     default_folder: str = 'test_sc/native_test/neo'
 
     def test_symbol(self):

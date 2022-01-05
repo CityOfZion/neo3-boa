@@ -6,7 +6,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestJsonInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/json'
 
     def test_json_serialize(self):

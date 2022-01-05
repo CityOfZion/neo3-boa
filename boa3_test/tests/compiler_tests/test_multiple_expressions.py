@@ -7,7 +7,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestMultipleExpressions(BoaTest):
-
     default_folder: str = 'test_sc'
 
     def test_multiple_arithmetic_expressions(self):

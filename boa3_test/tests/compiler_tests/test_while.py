@@ -10,7 +10,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestWhile(BoaTest):
-
     default_folder: str = 'test_sc/while_test'
 
     def test_while_constant_condition(self):

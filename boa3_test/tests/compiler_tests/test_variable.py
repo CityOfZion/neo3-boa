@@ -14,7 +14,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestVariable(BoaTest):
-
     default_folder: str = 'test_sc/variable_test'
 
     def test_declaration_with_type(self):
@@ -320,7 +319,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSHDATA1    # a = '1'
+            + Opcode.PUSHDATA1  # a = '1'
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
             + Opcode.STLOC0
@@ -336,7 +335,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH3    # a = 1 + 2
+            + Opcode.PUSH3  # a = 1 + 2
             + Opcode.STLOC0
             + Opcode.RET
         )
@@ -350,7 +349,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH5    # a = -5
+            + Opcode.PUSH5  # a = -5
             + Opcode.NEGATE
             + Opcode.STLOC0
             + Opcode.RET
@@ -365,7 +364,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x03'
-            + Opcode.LDARG1     # b = min <= a - 2 <= max
+            + Opcode.LDARG1  # b = min <= a - 2 <= max
             + Opcode.LDARG0
             + Opcode.PUSH2
             + Opcode.SUB
@@ -389,7 +388,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x01'
-            + Opcode.LDARG0     # b = a[0]
+            + Opcode.LDARG0  # b = a[0]
             + Opcode.PUSH0
             + Opcode.DUP
             + Opcode.SIGN
@@ -671,3 +670,9 @@ class TestVariable(BoaTest):
     def test_assign_starred_variable(self):
         path = self.get_contract_path('AssignStarredVariable.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_variables_in_different_scope_with_same_name(self):
+        path = self.get_contract_path('DifferentScopesWithSameName.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'test')
+        self.assertEqual(1_000, result)

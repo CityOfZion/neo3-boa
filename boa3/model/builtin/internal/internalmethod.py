@@ -15,7 +15,6 @@ class IInternalMethod(IBuiltinMethod, abc.ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None,
                  defaults: List[ast.AST] = None, return_type: IType = None,
                  vararg: Optional[Tuple[str, Variable]] = None):
-
         super().__init__(identifier, args, defaults, return_type, vararg)
 
     @classmethod

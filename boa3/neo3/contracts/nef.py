@@ -129,9 +129,9 @@ class NEF(serialization.ISerializable):
             s.uint32  # magic
             + 32  # compiler
             + (s.uint64 * 4)  # version
-            + 2   # reserve
-            + utils.get_var_size(bytes())   # TODO: method tokens
-            + 2   # reserve
+            + 2  # reserve
+            + utils.get_var_size(bytes())  # TODO: method tokens
+            + 2  # reserve
             + utils.get_var_size(self.script)
             + s.uint32)  # checksum
 

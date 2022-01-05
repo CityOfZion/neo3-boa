@@ -7,7 +7,6 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestAny(BoaTest):
-
     default_folder: str = 'test_sc/any_test'
 
     def test_any_variable_assignments(self):

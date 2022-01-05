@@ -5,7 +5,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBuiltinMethod(BoaTest):
-
     default_folder: str = 'test_sc/boa_built_in_methods_test'
 
     def test_abort(self):

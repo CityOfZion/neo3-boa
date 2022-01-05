@@ -15,7 +15,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestContractInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/contract'
 
     def test_call_contract(self):
@@ -169,8 +168,8 @@ class TestContractInterop(BoaTest):
 
         notifies = engine.get_events('notify')
         self.assertEqual(2, len(notifies))
-        self.assertEqual(False, notifies[0].arguments[0])   # not updated
-        self.assertEqual(data, notifies[1].arguments[0])    # data
+        self.assertEqual(False, notifies[0].arguments[0])  # not updated
+        self.assertEqual(data, notifies[1].arguments[0])  # data
         result = self.run_smart_contract(engine, call_contract_path, 'main')
         self.assertEqual(data, result)
 
@@ -439,7 +438,7 @@ class TestContractInterop(BoaTest):
         path = self.get_contract_path('GetMinimumDeploymentFee.py')
         engine = TestEngine()
 
-        minimum_cost = 10 * 10**8   # minimum deployment cost is 10 GAS right now
+        minimum_cost = 10 * 10 ** 8  # minimum deployment cost is 10 GAS right now
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(minimum_cost, result)
 

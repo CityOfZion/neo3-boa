@@ -1384,7 +1384,7 @@ class CodeGenerator:
 
         symbol = self.get_symbol(symbol_id, is_internal=is_internal)
 
-        if symbol is Type.none and class_type is not None and symbol_id in class_type.symbols:
+        if class_type is not None and symbol_id in class_type.symbols:
             symbol = class_type.symbols[symbol_id]
 
         if symbol is not Type.none:

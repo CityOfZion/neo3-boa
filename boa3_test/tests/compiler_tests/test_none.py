@@ -6,7 +6,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestNone(BoaTest):
-
     default_folder: str = 'test_sc/none_test'
 
     def test_variable_none(self):

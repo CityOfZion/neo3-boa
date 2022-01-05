@@ -5,7 +5,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestReversed(BoaTest):
-
     default_folder: str = 'test_sc/reversed_test'
 
     def test_reversed_list_bool(self):

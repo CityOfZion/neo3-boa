@@ -14,7 +14,6 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestFileGeneration(BoaTest):
-
     default_folder: str = 'test_sc/generation_test'
 
     def test_generate_files(self):

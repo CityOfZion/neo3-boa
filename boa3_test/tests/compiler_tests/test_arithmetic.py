@@ -11,7 +11,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestArithmetic(BoaTest):
-
     default_folder: str = 'test_sc/arithmetic_test'
 
     # region Addition

@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class ISymbol(ABC):
-
     defined_by_entry: bool = False
 
     @property

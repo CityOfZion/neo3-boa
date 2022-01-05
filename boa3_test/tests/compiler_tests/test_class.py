@@ -8,7 +8,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestClass(BoaTest):
-
     default_folder: str = 'test_sc/class_test'
 
     def test_notification_get_variables(self):

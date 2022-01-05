@@ -8,7 +8,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestIf(BoaTest):
-
     default_folder: str = 'test_sc/if_test'
 
     def test_if_constant_condition(self):
