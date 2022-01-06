@@ -1,5 +1,6 @@
 from typing import Any
 
+from boa3 import constants
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.neo.vm.type.AbiType import AbiType
@@ -37,6 +38,8 @@ class IntType(PrimitiveType):
 
         for instance_method in instance_methods:
             self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
+        self._instance_methods[constants.INIT_METHOD_ID] = Builtin.IntInt
 
     @classmethod
     def build(cls, value: Any) -> IType:

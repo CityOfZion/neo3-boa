@@ -54,6 +54,8 @@ class Builtin:
     # python builtin class constructor
     ByteArray = ByteArrayMethod()
     Exception = ExceptionMethod()
+    IntByteString = IntByteStringMethod()
+    IntInt = IntIntMethod()
     Range = RangeMethod()
     Reversed = ReversedMethod()
     Super = SuperMethod()
