@@ -99,59 +99,9 @@ class TestWhile(BoaTest):
             output = Boa3.compile(path)
 
     def test_nested_while(self):
-        outer_jmpif_address = Integer(23).to_byte_array(min_length=1, signed=True)
-        outer_jmp_address = Integer(-26).to_byte_array(min_length=1, signed=True)
-
-        inner_jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
-        inner_jmp_address = Integer(-9).to_byte_array(min_length=1, signed=True)
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x02'
-            + b'\x00'
-            + Opcode.PUSH0      # c = 0
-            + Opcode.STLOC0
-            + Opcode.PUSH0      # d = c
-            + Opcode.STLOC1
-            + Opcode.JMP        # begin outer while
-            + outer_jmpif_address
-            + Opcode.LDLOC0     # c = c + 2
-            + Opcode.PUSH2
-            + Opcode.ADD
-            + Opcode.STLOC0
-            + Opcode.JMP        # begin inner while
-            + inner_jmpif_address
-            + Opcode.LDLOC1     # d = d + 3
-            + Opcode.PUSH3
-            + Opcode.ADD
-            + Opcode.STLOC1
-            + Opcode.LDLOC1     # while d % 10 < 5
-            + Opcode.PUSH10
-            + Opcode.MOD
-            + Opcode.PUSH5
-            + Opcode.LT
-            + Opcode.JMPIF      # end inner while arg1
-            + inner_jmp_address
-            + Opcode.LDLOC0     # c = c + d
-            + Opcode.LDLOC1
-            + Opcode.ADD
-            + Opcode.STLOC0
-            + Opcode.LDLOC0     # while c % 3 < 2
-            + Opcode.PUSH3
-            + Opcode.MOD
-            + Opcode.PUSH2
-            + Opcode.LT
-            + Opcode.JMPIF      # end outer while arg0
-            + outer_jmp_address
-            + Opcode.LDLOC0     # return c
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('NestedWhile.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(8, result)
 
@@ -277,140 +227,16 @@ class TestWhile(BoaTest):
         self.assertEqual(20, result)
 
     def test_while_continue(self):
-        jmpif_address = Integer(31).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-33).to_byte_array(min_length=1, signed=True)
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x04'
-            + b'\x00'
-            + Opcode.PUSH0      # a = 0
-            + Opcode.STLOC0
-            + Opcode.PUSH0      # b = 0
-            + Opcode.STLOC1
-            + Opcode.PUSH15     # sequence = (3, 5, 15)
-            + Opcode.PUSH5
-            + Opcode.PUSH3
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC2
-            + Opcode.JMP        # begin while
-            + jmpif_address
-            + Opcode.LDLOC2     # x = sequence[a]
-            + Opcode.LDLOC0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.STLOC3
-            + Opcode.LDLOC0     # a += 1
-            + Opcode.PUSH1
-            + Opcode.ADD
-            + Opcode.STLOC0
-            + Opcode.LDLOC3     # if x % 5 != 0
-            + Opcode.PUSH5
-            + Opcode.MOD
-            + Opcode.PUSH0
-            + Opcode.NUMNOTEQUAL
-            + Opcode.JMPIFNOT
-            + Integer(4).to_byte_array(min_length=1, signed=True)
-            + Opcode.JMP        # continue
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC1     # b += x
-            + Opcode.LDLOC3
-            + Opcode.ADD
-            + Opcode.STLOC1
-            + Opcode.LDLOC0
-            + Opcode.LDLOC2
-            + Opcode.SIZE
-            + Opcode.LT
-            + Opcode.JMPIF      # end while a < len(sequence)
-            + jmp_address
-            + Opcode.LDLOC1     # return b
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('WhileContinue.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(20, result)
 
     def test_while_break(self):
-        jmpif_address = Integer(35).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-37).to_byte_array(min_length=1, signed=True)
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x04'
-            + b'\x00'
-            + Opcode.PUSH0      # a = 0
-            + Opcode.STLOC0
-            + Opcode.PUSH0      # b = 0
-            + Opcode.STLOC1
-            + Opcode.PUSH15     # sequence = (3, 5, 15)
-            + Opcode.PUSH5
-            + Opcode.PUSH3
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.STLOC2
-            + Opcode.JMP        # begin while
-            + jmpif_address
-            + Opcode.LDLOC2         # x = sequence[a]
-            + Opcode.LDLOC0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-            + Opcode.PICKITEM
-            + Opcode.STLOC3
-            + Opcode.LDLOC0         # a += 1
-            + Opcode.PUSH1
-            + Opcode.ADD
-            + Opcode.STLOC0
-            + Opcode.LDLOC3         # if x % 5 == 0
-            + Opcode.PUSH5
-            + Opcode.MOD
-            + Opcode.PUSH0
-            + Opcode.NUMEQUAL
-            + Opcode.JMPIFNOT
-            + Integer(8).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC1             # b += x
-            + Opcode.LDLOC3
-            + Opcode.ADD
-            + Opcode.STLOC1
-            + Opcode.JMP                # break
-            + Integer(12).to_byte_array(min_length=1, signed=True)
-            + Opcode.LDLOC1         # b += 1
-            + Opcode.PUSH1
-            + Opcode.ADD
-            + Opcode.STLOC1
-            + Opcode.LDLOC0
-            + Opcode.LDLOC2
-            + Opcode.SIZE
-            + Opcode.LT
-            + Opcode.JMPIF      # end while a < len(sequence)
-            + jmp_address
-            + Opcode.LDLOC1     # return b
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('WhileBreak.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
 

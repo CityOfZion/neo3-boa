@@ -37,4 +37,38 @@ class Modulo(BinaryOperation):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.MOD, b'')]
+        jmp_place_holder = (Opcode.JMP, b'')
+
+        mod = [
+            (Opcode.SWAP, b''),  # neo's mod has a different result from python's mod in some cases
+            (Opcode.OVER, b''),
+            (Opcode.MOD, b''),
+            (Opcode.DUP, b''),
+            (Opcode.SIGN, b''),
+            (Opcode.PUSH2, b''),
+            (Opcode.PICK, b''),
+            (Opcode.SIGN, b''),
+            (Opcode.OVER, b''),      # if the result is not zero and the sign is different than the second operator
+            (Opcode.NUMEQUAL, b''),  # the result is different
+            (Opcode.SWAP, b''),
+            (Opcode.PUSH0, b''),
+            (Opcode.NUMEQUAL, b''),  # the result is different
+            (Opcode.BOOLOR, b''),
+            jmp_place_holder,
+        ]
+
+        from boa3.compiler.codegenerator import get_bytes_count
+        if_negative = [
+            (Opcode.ADD, b''),
+            jmp_place_holder
+        ]
+        num_jmp_code = get_bytes_count(if_negative)
+        mod[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, num_jmp_code, True)
+
+        else_negative = [
+            (Opcode.NIP, b'')
+        ]
+        num_jmp_code = get_bytes_count(else_negative)
+        if_negative[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+
+        return mod + if_negative + else_negative
