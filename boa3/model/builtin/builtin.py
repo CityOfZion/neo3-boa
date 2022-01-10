@@ -166,10 +166,12 @@ class Builtin:
 
     # region boa builtin modules
 
+    BuiltinMathCeil = DecimalCeilingMethod()
     BuiltinMathFloor = DecimalFloorMethod()
 
     MathModule = Package(identifier='math',
                          methods=[Math.Sqrt,
+                                  BuiltinMathCeil,
                                   BuiltinMathFloor])
 
     _modules = [MathModule]

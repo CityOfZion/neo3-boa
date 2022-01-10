@@ -244,7 +244,7 @@ class TestFor(BoaTest):
     def test_for_break(self):
         path = self.get_contract_path('ForBreak.py')
         engine = TestEngine()
-        
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(6, result)
 

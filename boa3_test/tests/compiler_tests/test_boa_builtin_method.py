@@ -89,7 +89,7 @@ class TestBuiltinMethod(BoaTest):
 
         multiplier = 10 ** decimals
         value_floor = int(floor(value)) * multiplier
-        integer_value = int(value) * multiplier
+        integer_value = int(value * multiplier)
         result = self.run_smart_contract(engine, path, 'main', integer_value, decimals)
         self.assertEqual(value_floor, result)
 
@@ -97,7 +97,7 @@ class TestBuiltinMethod(BoaTest):
 
         multiplier = 10 ** decimals
         value_floor = int(floor(value)) * multiplier
-        integer_value = int(value) * multiplier
+        integer_value = int(value * multiplier)
         result = self.run_smart_contract(engine, path, 'main', integer_value, decimals)
         self.assertEqual(value_floor, result)
 
@@ -108,6 +108,41 @@ class TestBuiltinMethod(BoaTest):
         integer_value = int(value * multiplier)
         result = self.run_smart_contract(engine, path, 'main', integer_value, decimals)
         self.assertEqual(value_floor, result)
+
+        # negative decimals will raise an exception
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', integer_value, -1)
+
+    def test_decimal_ceil_method(self):
+        path = self.get_contract_path('DecimalCeiling.py')
+        engine = TestEngine()
+
+        from math import ceil
+
+        value = 4.2
+        decimals = 8
+
+        multiplier = 10 ** decimals
+        value_ceiling = int(ceil(value)) * multiplier
+        integer_value = int(value * multiplier)
+        result = self.run_smart_contract(engine, path, 'main', integer_value, decimals)
+        self.assertEqual(value_ceiling, result)
+
+        decimals = 12
+
+        multiplier = 10 ** decimals
+        value_ceiling = int(ceil(value)) * multiplier
+        integer_value = int(value * multiplier)
+        result = self.run_smart_contract(engine, path, 'main', integer_value, decimals)
+        self.assertEqual(value_ceiling, result)
+
+        value = -3.983541
+
+        multiplier = 10 ** decimals
+        value_ceiling = int(ceil(value) * multiplier)
+        integer_value = int(value * multiplier)
+        result = self.run_smart_contract(engine, path, 'main', integer_value, decimals)
+        self.assertEqual(value_ceiling, result)
 
         # negative decimals will raise an exception
         with self.assertRaises(TestExecutionException):
