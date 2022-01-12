@@ -5,6 +5,8 @@ __all__ = ['AbsMethod',
            'EventType',
            'ExceptionMethod',
            'ExitMethod',
+           'IntByteStringMethod',
+           'IntIntMethod',
            'IsInstanceMethod',
            'LenMethod',
            'MaxIntMethod',
@@ -26,6 +28,8 @@ from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
 from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
 from boa3.model.builtin.method.exitmethod import ExitMethod
+from boa3.model.builtin.method.intbytestringmethod import IntByteStringMethod
+from boa3.model.builtin.method.intintmethod import IntIntMethod
 from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
 from boa3.model.builtin.method.maxbytestringmethod import MaxByteStringMethod
