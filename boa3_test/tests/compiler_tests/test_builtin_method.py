@@ -1620,3 +1620,115 @@ class TestBuiltinMethod(BoaTest):
 
     # endregion
 
+    # region bool test
+
+    def test_bool(self):
+        path = self.get_contract_path('Bool.py')
+        engine = TestEngine()
+
+        val = 1
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = 'test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = b'test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = [1, 2, 3]
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = {'1': 2}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_bytes(self):
+        path = self.get_contract_path('BoolBytes.py')
+        engine = TestEngine()
+
+        val = b'123'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = b''
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_class(self):
+        path = self.get_contract_path('BoolClass.py')
+        engine = TestEngine()
+
+        # dunder methods are not supported in neo3-boa
+        class Example:
+            def __init__(self):
+                self.test = 123
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(bool(Example()), result)
+
+    def test_bool_dict(self):
+        path = self.get_contract_path('BoolDict.py')
+        engine = TestEngine()
+
+        val = {}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = {'a': 123, 'b': 56, 'c': 1}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_int(self):
+        path = self.get_contract_path('BoolInt.py')
+        engine = TestEngine()
+
+        val = -1
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = 0
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = 1
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_list(self):
+        path = self.get_contract_path('BoolList.py')
+        engine = TestEngine()
+
+        val = []
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = [1, 2, 3, 4, 5]
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_range(self):
+        path = self.get_contract_path('BoolRange.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'range_0')
+        self.assertEqual(bool(range(0)), result)
+
+        result = self.run_smart_contract(engine, path, 'range_not_0')
+        self.assertEqual(bool(range(10)), result)
+
+    def test_bool_str(self):
+        path = self.get_contract_path('BoolStr.py')
+        engine = TestEngine()
+
+        val = 'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = ''
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    # endregion
