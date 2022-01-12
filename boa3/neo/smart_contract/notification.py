@@ -51,14 +51,20 @@ class Notification:
         if not isinstance(value, list):
             value = [value]
 
+        if isinstance(script, str):
+            script = cls._get_script_from_str(script)
+
+        return cls(name, script, *value)
+
+    @classmethod
+    def _get_script_from_str(cls, script: str) -> bytes:
         if isinstance(script, str) and script.startswith('0x'):
             bytes_script = bytearray()
             for x in range(2, len(script), 2):
                 bytes_script.append(int(script[x:x + 2], 16))
             bytes_script.reverse()
             script = bytes(bytes_script)
-
-        return cls(name, script, *value)
+        return script
 
     def __str__(self) -> str:
         return '[{0}] {1}'.format(to_hex_str(self.origin), self._event_name)
