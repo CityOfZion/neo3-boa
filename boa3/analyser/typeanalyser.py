@@ -1101,6 +1101,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
         attr: Attribute = self.visit(call.func)
+        if not isinstance(attr, Attribute):
+            attr_id = str(attr)
+            attr_id_split = attr_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)
+            attr_call_id = attr_id
+            if len(attr_id_split) > 0:
+                attr_call_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(attr_id_split[:-1])
+
+            self._log_error(
+                CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, attr_call_id)
+            )
+
+            return attr_id, None
+
         arg0, callable_target, callable_id = attr.values
 
         if isinstance(arg0, Package):

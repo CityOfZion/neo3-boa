@@ -1692,6 +1692,8 @@ class CodeGenerator:
             method = symbol.getter if load else symbol.setter
         elif symbol_id in class_type.instance_methods:
             method = class_type.instance_methods[symbol_id]
+        elif symbol_id in class_type.class_methods:
+            method = class_type.class_methods[symbol_id]
         elif isinstance(class_type, UserClass):
             return self.convert_user_class(class_type, symbol_id)
         else:
