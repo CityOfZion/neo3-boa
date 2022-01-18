@@ -82,11 +82,11 @@ class IntByteStringMethod(IntMethod):
         # endregion
 
         verify_base = (
-                verify_base_ge37 +
-                verify_base_equal1 +
-                verify_base_le_minus1 +
-                verify_base_jump_error +
-                verify_base_error
+            verify_base_ge37 +
+            verify_base_equal1 +
+            verify_base_le_minus1 +
+            verify_base_jump_error +
+            verify_base_error
         )
 
         # endregion
@@ -328,17 +328,17 @@ class IntByteStringMethod(IntMethod):
                                                                        get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
-                ascii_to_int_while +
-                ascii_to_int_verify_az_lower_lt +
-                ascii_to_int_verify_az_lower_gt +
-                ascii_to_int_verify_az_lower +
-                ascii_to_int_verify_az_upper_lt +
-                ascii_to_int_verify_az_upper_gt +
-                ascii_to_int_verify_az_upper +
-                ascii_to_int_verify_09_gt +
-                ascii_to_int_verify_09_lt +
-                ascii_to_int_verify_09 +
-                ascii_to_int_verify_while
+            ascii_to_int_while +
+            ascii_to_int_verify_az_lower_lt +
+            ascii_to_int_verify_az_lower_gt +
+            ascii_to_int_verify_az_lower +
+            ascii_to_int_verify_az_upper_lt +
+            ascii_to_int_verify_az_upper_gt +
+            ascii_to_int_verify_az_upper +
+            ascii_to_int_verify_09_gt +
+            ascii_to_int_verify_09_lt +
+            ascii_to_int_verify_09 +
+            ascii_to_int_verify_while
         )
 
         ascii_to_int_verify_while.append(Opcode.get_jump_and_data(Opcode.JMPGE,
@@ -458,13 +458,13 @@ class IntByteStringMethod(IntMethod):
         compare_char[-1] = Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
-                compare_char +
-                char_not_equal +
-                change_base +
-                put_true_in_stack +
-                verify_base_is_the_same +
-                verify_base_is_0 +
-                remove_base_char
+            compare_char +
+            char_not_equal +
+            change_base +
+            put_true_in_stack +
+            verify_base_is_the_same +
+            verify_base_is_0 +
+            remove_base_char
         )
         top_stack_is_true[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 

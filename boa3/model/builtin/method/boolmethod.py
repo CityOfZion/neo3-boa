@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
-from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
@@ -95,13 +94,13 @@ class BoolMethod(IBuiltinMethod):
         verify_is_array[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
-                verify_is_array +
-                verify_is_map +
-                verify_is_int +
-                verify_is_bytestring +
-                put_true +
-                collection_non_zero +
-                non_zero
+            verify_is_array +
+            verify_is_map +
+            verify_is_int +
+            verify_is_bytestring +
+            put_true +
+            collection_non_zero +
+            non_zero
         )
         value_is_none[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 
