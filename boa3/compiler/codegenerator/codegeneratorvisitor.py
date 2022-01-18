@@ -621,7 +621,10 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param if_node: the python ast if statement node
         """
-        self.visit_to_map(if_node.test, generate=True)
+        test = self.visit_to_map(if_node.test, generate=True)
+
+        if not Type.bool.is_type_of(test.type) and test.type is not None:
+            self.generator.convert_builtin_method_call(Builtin.Bool)
 
         start_addr: int = self.generator.convert_begin_if()
         for stmt in if_node.body:
