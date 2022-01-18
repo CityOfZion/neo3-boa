@@ -8,6 +8,7 @@ from boa3.model.symbol import ISymbol
 class Math:
 
     # python math methods
+    Pow = PowMethod()
     Sqrt = SqrtMethod()
 
     @classmethod
@@ -15,7 +16,8 @@ class Math:
         from boa3.model.builtin.builtincallable import IBuiltinCallable
 
         functions = [
-            cls.Sqrt
+            cls.Pow,
+            cls.Sqrt,
         ]
 
         return {method._identifier: method for method in functions if isinstance(method, IBuiltinCallable)}
