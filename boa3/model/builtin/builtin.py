@@ -55,6 +55,7 @@ class Builtin:
     Sum = SumMethod()
 
     # python builtin class constructor
+    Bool = BoolMethod()
     ByteArray = ByteArrayMethod()
     Exception = ExceptionMethod()
     IntByteString = IntByteStringMethod()

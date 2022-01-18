@@ -1,5 +1,6 @@
 from typing import Any
 
+from boa3 import constants
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.inttype import IntType
 from boa3.neo.vm.type.AbiType import AbiType
@@ -26,6 +27,12 @@ class BoolType(IntType):
     @property
     def stack_item(self) -> StackItemType:
         return StackItemType.Boolean
+
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+        self._instance_methods[constants.INIT_METHOD_ID] = Builtin.Bool
 
     @classmethod
     def build(cls, value: Any) -> IType:
