@@ -163,7 +163,6 @@ class TestTuple(BoaTest):
         path = self.get_contract_path('MismatchedTypeTupleIndex.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    @unittest.skip("get values from inner arrays is not working as expected")
     def test_tuple_of_tuple(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -194,17 +193,23 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('TupleOfTuple.py')
+        nef_path = path.replace('.py', '.nef')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        with self.assertRaises(TestExecutionException):
+            # TODO: TestEngine fails when running contracts with arrays inside arrays args
+            self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+
+        result = engine.run(nef_path, 'Main', ((1, 2), (3, 4)))
         self.assertEqual(1, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
-            self.run_smart_contract(engine, path, 'Main', ())
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
-            self.run_smart_contract(engine, path, 'Main', ((), (1, 2), (3, 4)))
+        engine.run(nef_path, 'Main', ())
+        self.assertIsNotNone(engine.error)
+
+        engine.run(nef_path, 'Main', ((), (1, 2), (3, 4)))
+        self.assertIsNotNone(engine.error)
 
     def test_nep5_main(self):
         expected_output = (
