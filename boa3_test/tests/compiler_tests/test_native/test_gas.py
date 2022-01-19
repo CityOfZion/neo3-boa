@@ -97,3 +97,10 @@ class TestGasClass(BoaTest):
     def test_transfer_too_few__parameters(self):
         path = self.get_contract_path('TransferTooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_import_with_alias(self):
+        path = self.get_contract_path('ImportWithAlias.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', bytes(20))
+        self.assertEqual(0, result)

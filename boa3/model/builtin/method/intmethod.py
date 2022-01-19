@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
