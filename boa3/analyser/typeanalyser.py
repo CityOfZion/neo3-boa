@@ -665,14 +665,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         test = self.visit(if_node.test)
         test_type: IType = self.get_type(test)
 
-        if test_type is not Type.bool:
-            self._log_error(
-                CompilerError.MismatchedTypes(
-                    if_node.lineno, if_node.col_offset,
-                    actual_type_id=test_type.identifier,
-                    expected_type_id=Type.bool.identifier)
-            )
-
         return self._get_is_instance_function_calls(if_node.test)
 
     def _get_is_instance_function_calls(self, node: ast.AST) -> Tuple[Dict[str, ISymbol], Dict[str, ISymbol]]:
