@@ -160,7 +160,7 @@ class FileGenerator:
             "trusts": [],
             "features": {},
             "supportedstandards": self._metadata.supported_standards,
-            "extra": self._metadata.extra if len(self._metadata.extra) > 0 else None
+            "extra": self._get_extras()
         }
 
     def _get_abi_info(self) -> Dict[str, Any]:
@@ -219,6 +219,22 @@ class FileGenerator:
                 ],
             } for name, event in self._events.items()
         ]
+
+    def _get_extras(self) -> Optional[Dict[str, Any]]:
+        """
+        Gets the abi information in a dictionary format
+
+        :return: a dictionary with the abi information
+        """
+        extras = {}
+        for key, value in self._metadata.extras.items():
+            try:
+                json.dumps(value)  # include only json like extras
+                extras[key] = value
+            except BaseException:
+                continue
+
+        return extras if len(extras) > 0 else None
 
     # endregion
 

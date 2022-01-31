@@ -311,6 +311,20 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
                 return
 
+            # validate if the extras field can be converted to json
+            try:
+                import json
+                json.dumps(obj.extras)
+            except BaseException as e:
+                print()
+                self._log_error(
+                    CompilerError.InvalidType(
+                        line=node.lineno, col=node.col_offset,
+                        symbol_id=str(e)
+                    )
+                )
+                return
+
             # validates the metadata attributes types
             attributes: Dict[str, Any] = {attr: value
                                           for attr, value in dict(obj.__dict__).items()
