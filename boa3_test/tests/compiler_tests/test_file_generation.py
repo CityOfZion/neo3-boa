@@ -20,8 +20,17 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
-        expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
         Boa3.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_nef_output))
+        self.assertTrue(os.path.exists(expected_manifest_output))
+
+    def test_generate_files_with_debug_info(self):
+        path = self.get_contract_path('GenerationWithDecorator.py')
+        expected_nef_output = path.replace('.py', '.nef')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
+        Boa3.compile_and_save(path, debug=True)
 
         self.assertTrue(os.path.exists(expected_nef_output))
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -199,7 +208,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -247,7 +256,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         events: Dict[str, Event] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -285,7 +294,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         variables: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -321,7 +330,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_all_imported_methods(compiler).items()
@@ -449,7 +458,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('GenerationWithMultipleFlows.py')
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -494,7 +503,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/variable_test', 'GlobalAssignmentWithType.py')
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
