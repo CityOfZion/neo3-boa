@@ -35,7 +35,6 @@ from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
-from boa3.neo3.core.types import UInt160
 
 
 class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
@@ -542,8 +541,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if contract_interface_decorator is not None:
             from boa3.model.type.classes.contractinterfaceclass import ContractInterfaceClass
-            contract_hash = self._evaluate_contract_interface(contract_interface_decorator.origin)
-            user_class = ContractInterfaceClass(contract_hash=contract_hash,
+            user_class = ContractInterfaceClass(contract_hash=contract_interface_decorator.contract_hash,
                                                 identifier=class_node.name,
                                                 decorators=class_decorators,
                                                 bases=bases)
@@ -654,7 +652,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
                         vararg=fun_args.vararg,
-                        origin_node=function, is_public=Builtin.Public in fun_decorators,
+                        origin_node=function,
+                        is_public=any(isinstance(decorator, type(Builtin.Public)) for decorator in fun_decorators),
                         decorators=valid_decorators,
                         is_init=is_class_constructor)
 
@@ -727,31 +726,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 symbol = self.get_symbol(decorator_visit, origin_node=decorator)
                 if hasattr(symbol, 'build'):
-                    symbol = symbol.build(decorator)
+                    symbol = symbol.build(decorator, self)
                 decorators.append(symbol)
 
         return decorators
-
-    def _evaluate_contract_interface(self, decorator_node: ast.AST) -> UInt160:
-        if not isinstance(decorator_node, ast.Call) or len(decorator_node.args) == 0:
-            return UInt160()
-
-        argument_hash = self.visit(decorator_node.args[0])
-
-        try:
-            if isinstance(argument_hash, str):
-                from boa3.neo import from_hex_str
-                argument_hash = from_hex_str(argument_hash)
-
-            if isinstance(argument_hash, bytes):
-                return UInt160(argument_hash)
-        except BaseException:
-            self._log_error(CompilerError.InvalidUsage(decorator_node.lineno,
-                                                       decorator_node.col_offset,
-                                                       "Only literal values are accepted for 'script_hash' argument"
-                                                       ))
-
-        return UInt160()
 
     def _set_instance_variables(self, scope: SymbolScope):
         if (isinstance(self._current_class, UserClass)

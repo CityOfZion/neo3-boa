@@ -27,8 +27,9 @@ class Method(Callable):
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
                  is_init: bool = False,
+                 is_safe: bool = False,
                  origin_node: Optional[ast.AST] = None):
-        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, origin_node)
+        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, is_safe, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}
