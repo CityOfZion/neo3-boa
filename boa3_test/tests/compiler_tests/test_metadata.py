@@ -173,3 +173,24 @@ class TestMetadata(BoaTest):
     def test_metadata_info_supported_standards_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_metadata_info_trusts(self):
+        path = self.get_contract_path('MetadataInfoTrusts.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 4)
+        self.assertIn('0x1234567890123456789012345678901234567890', manifest['trusts'])
+        self.assertIn('0x1234567890123456789012345678901234abcdef', manifest['trusts'])
+        self.assertIn('030000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
+        self.assertIn('020000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
+
+    def test_metadata_info_trusts_wildcard(self):
+        path = self.get_contract_path('MetadataInfoTrustsWildcard.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 1)
+        self.assertIn('*', manifest['trusts'])

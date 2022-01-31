@@ -70,6 +70,8 @@ class NeoMetadata:
 
     :ivar supported_standards: Neo standards supported by this smart contract. Empty by default;
     :vartype supported_standards: List[str]
+    :ivar trusts: a list of contracts that this smart contract trust. Empty by default;
+    :vartype trusts: List[str]
     :ivar author: the smart contract author. None by default;
     :vartype author: str or None
     :ivar email: the smart contract author email. None by default;
@@ -84,6 +86,7 @@ class NeoMetadata:
         from typing import Optional
 
         self.supported_standards: List[str] = []
+        self.trusts: List[str] = []
 
         # extras
         self.author: Optional[str] = None
@@ -106,3 +109,35 @@ class NeoMetadata:
         if isinstance(self.description, str):
             extra['Description'] = self.description
         return extra
+
+    def add_trusted_source(self, hash_or_address: str):
+        """
+        Adds a valid contract hash, valid group public key, or the * wildcard to trusts.
+
+        :param hash_or_address: a contract hash, group public key or *
+        :type hash_or_address: str
+        """
+        if len(self.trusts) == 1 and self.trusts == ['*']:
+            return
+
+        if hash_or_address == '*':
+            self.trusts.clear()
+            self.trusts = ['*']
+
+        # verifies if it's a valid contract hash
+        elif hash_or_address.startswith('0x'):
+            try:
+                if len(bytes.fromhex(hash_or_address[2:])) == 20:
+                    if hash_or_address not in self.trusts:
+                        self.trusts.append(hash_or_address.lower())
+            except ValueError:
+                pass
+
+        # verifies if it's a valid public key
+        elif hash_or_address.startswith('03') or hash_or_address.startswith('02'):
+            try:
+                if len(bytes.fromhex(hash_or_address)) == 33:
+                    if hash_or_address not in self.trusts:
+                        self.trusts.append(hash_or_address.lower())
+            except ValueError:
+                pass
