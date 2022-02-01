@@ -157,7 +157,7 @@ class FileGenerator:
                     "methods": "*"
                 }
             ],
-            "trusts": [],
+            "trusts": self._metadata._trusts,
             "features": {},
             "supportedstandards": self._metadata.supported_standards,
             "extra": self._get_extras()
