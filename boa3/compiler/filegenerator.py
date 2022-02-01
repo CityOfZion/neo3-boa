@@ -189,7 +189,7 @@ class FileGenerator:
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
         from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         return {
-            "name": method_id,
+            "name": method.external_name if isinstance(method.external_name, str) else method_id,
             "offset": (VMCodeMapping.instance().get_start_address(method.start_bytecode)
                        if method.start_bytecode is not None else 0),
             "parameters": [
@@ -199,7 +199,7 @@ class FileGenerator:
                 } for arg_id, arg in method.args.items()
             ],
             "returntype": method.type.abi_type,
-            "safe": False
+            "safe": method.is_safe
         }
 
     def _get_abi_events(self) -> List[Dict[str, Any]]:

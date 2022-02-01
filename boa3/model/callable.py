@@ -26,6 +26,7 @@ class Callable(IExpression, ABC):
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
+                 is_safe: bool = False,
                  origin_node: Optional[ast.AST] = None):
 
         if args is None:
@@ -61,13 +62,23 @@ class Callable(IExpression, ABC):
         self._kwargs: Dict[str, Variable] = kwargs.copy()
 
         self.return_type: IType = return_type
-        self.is_public: bool = is_public
 
         if decorators is None:
             decorators = []
         from boa3.model.decorator import IDecorator
         self.decorators: List[IDecorator] = [decorator for decorator in decorators
                                              if isinstance(decorator, IDecorator)]
+
+        from boa3.model.builtin.decorator import PublicDecorator
+        public_decorator = next((decorator for decorator in self.decorators
+                                 if isinstance(decorator, PublicDecorator)),
+                                None)
+
+        self.is_public: bool = is_public or public_decorator is not None
+        self.external_name: Optional[str] = (public_decorator.name
+                                             if isinstance(public_decorator, PublicDecorator)
+                                             else None)
+        self.is_safe: bool = is_safe or (isinstance(public_decorator, PublicDecorator) and public_decorator.safe)
 
         super().__init__(origin_node)
 

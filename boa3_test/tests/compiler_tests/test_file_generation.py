@@ -4,6 +4,7 @@ from typing import Dict
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
+from boa3.exception import CompilerError
 from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.model.event import Event
 from boa3.model.method import Method
@@ -201,6 +202,84 @@ class TestFileGeneration(BoaTest):
                 self.assertIn('type', event_param)
                 self.assertEqual(event_args[event_param['name']].type.abi_type,
                                  event_param['type'])
+
+    def test_generate_manifest_file_with_public_name_decorator_kwarg(self):
+        path = self.get_contract_path('MetadataMethodName.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+
+    def test_generate_manifest_file_with_public_name_decorator_arg(self):
+        path = self.get_contract_path('MetadataMethodNameArg.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+
+    def test_metadata_abi_method_name_mismatched_type(self):
+        path = self.get_contract_path('MetadataMethodNameMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_generate_manifest_file_with_public_safe_decorator_kwarg(self):
+        path = self.get_contract_path('MetadataMethodSafe.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main
+        method0 = abi['methods'][0]
+        self.assertIn('safe', method0)
+        self.assertEqual(True, method0['safe'])
+
+    def test_generate_manifest_file_with_public_safe_decorator_arg(self):
+        path = self.get_contract_path('MetadataMethodSafeArg.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+        self.assertIn('safe', method0)
+        self.assertEqual(True, method0['safe'])
+
+    def test_metadata_abi_method_safe_mismatched_type(self):
+        path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_generate_nefdbgnfo_file(self):
         from boa3.model.type.itype import IType

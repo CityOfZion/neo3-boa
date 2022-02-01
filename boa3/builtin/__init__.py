@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Tuple, Union
 
 
-def public(*args):
+def public(*args, **kwargs):
     """
     This decorator identifies which methods should be included in the abi file.
     """
