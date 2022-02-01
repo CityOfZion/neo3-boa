@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
+from boa3.exception import CompilerWarning
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer

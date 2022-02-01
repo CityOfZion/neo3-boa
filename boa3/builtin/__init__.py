@@ -76,33 +76,29 @@ class NeoMetadata:
     :vartype email: str or None
     :ivar description: the smart contract description. None by default;
     :vartype description: str or None
-    :ivar extras: A json object with additional information. Empty by default;
-    :vartype extras: Dict[str, Any]
     """
 
     def __init__(self):
-        from typing import Optional
-
         self.supported_standards: List[str] = []
 
-        # extras
-        self.author: Optional[str] = None
-        self.email: Optional[str] = None
-        self.description: Optional[str] = None
-        self.extras: Dict[str, Any] = {}
-
     @property
-    def extra(self) -> Dict[str, Any]:
+    def extras(self) -> Dict[str, Any]:
         """
         Gets the metadata extra information.
 
         :return: a dictionary that maps each extra value with its name. Empty by default
         """
-        extra = self.extras.copy()
-        if isinstance(self.author, str):
-            extra['Author'] = self.author
-        if isinstance(self.email, str):
-            extra['Email'] = self.email
-        if isinstance(self.description, str):
-            extra['Description'] = self.description
+        # list the variables names that are part of the manifest
+        specific_field_names = ['supported_standards',
+                                ]
+        extra = {}
+
+        for var_name, var_value in vars(self).items():
+            if var_name in specific_field_names:
+                continue
+
+            if var_value is not None and not var_name.startswith('_'):
+                extra_field = var_name.title().replace('_', '')
+                extra[extra_field] = var_value
+
         return extra
