@@ -1,5 +1,8 @@
 from typing import Any, Dict, List, Tuple, Union
 
+from boa3.constants import IMPORT_WILDCARD
+from boa3.neo3.core.types import UInt160
+
 
 def public(*args):
     """
@@ -86,7 +89,7 @@ class NeoMetadata:
         from typing import Optional
 
         self.supported_standards: List[str] = []
-        self.trusts: List[str] = []
+        self._trusts: List[str] = []
 
         # extras
         self.author: Optional[str] = None
@@ -117,27 +120,31 @@ class NeoMetadata:
         :param hash_or_address: a contract hash, group public key or *
         :type hash_or_address: str
         """
-        if len(self.trusts) == 1 and self.trusts == ['*']:
+        if not isinstance(hash_or_address, str):
             return
 
-        if hash_or_address == '*':
-            self.trusts.clear()
-            self.trusts = ['*']
+        if self._trusts == [IMPORT_WILDCARD]:
+            return
+
+        if hash_or_address == IMPORT_WILDCARD:
+            self._trusts.clear()
+            self._trusts = [IMPORT_WILDCARD]
 
         # verifies if it's a valid contract hash
         elif hash_or_address.startswith('0x'):
             try:
-                if len(bytes.fromhex(hash_or_address[2:])) == 20:
-                    if hash_or_address not in self.trusts:
-                        self.trusts.append(hash_or_address.lower())
+                if len(UInt160.from_string(hash_or_address[2:])) == 20:
+                    if hash_or_address not in self._trusts:
+                        self._trusts.append(hash_or_address.lower())
             except ValueError:
                 pass
 
         # verifies if it's a valid public key
+        # compressed public keys in Neo start with either 03 or 02 and is followed by 32 bytes
         elif hash_or_address.startswith('03') or hash_or_address.startswith('02'):
             try:
                 if len(bytes.fromhex(hash_or_address)) == 33:
-                    if hash_or_address not in self.trusts:
-                        self.trusts.append(hash_or_address.lower())
+                    if hash_or_address not in self._trusts:
+                        self._trusts.append(hash_or_address.lower())
             except ValueError:
                 pass

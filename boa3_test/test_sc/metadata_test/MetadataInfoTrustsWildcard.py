@@ -6,7 +6,7 @@ def Main() -> int:
 
 
 @metadata
-def author_manifest() -> NeoMetadata:
+def trusts_manifest() -> NeoMetadata:
     meta = NeoMetadata()
 
     # the * wildcard will remove all but itself from trusts

@@ -1,3 +1,4 @@
+from boa3.constants import IMPORT_WILDCARD
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
@@ -193,4 +194,20 @@ class TestMetadata(BoaTest):
         self.assertIn('trusts', manifest)
         self.assertIsInstance(manifest['trusts'], list)
         self.assertEqual(len(manifest['trusts']), 1)
-        self.assertIn('*', manifest['trusts'])
+        self.assertIn(IMPORT_WILDCARD, manifest['trusts'])
+
+    def test_metadata_info_trusts_mismatched_types(self):
+        path = self.get_contract_path('MetadataInfoTrustsMismatchedTypes.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 0)
+
+    def test_metadata_info_trusts_default(self):
+        path = self.get_contract_path('MetadataInfoTrustsDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 0)
