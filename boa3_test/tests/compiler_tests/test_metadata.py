@@ -211,3 +211,41 @@ class TestMetadata(BoaTest):
         self.assertIn('trusts', manifest)
         self.assertIsInstance(manifest['trusts'], list)
         self.assertEqual(len(manifest['trusts']), 0)
+
+    def test_metadata_info_permissions(self):
+        path = self.get_contract_path('MetadataInfoPermissions.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 3)
+        self.assertIn({"contract": "*", "methods": ['onNEP17Payment']}, manifest['permissions'])
+        self.assertIn({"contract": "0x3846a4aa420d9831044396dd3a56011514cd10e3", "methods": ["get_object"]}, manifest['permissions'])
+        self.assertIn({"contract": "0333b24ee50a488caa5deec7e021ff515f57b7993b93b45d7df901e23ee3004916", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoPermissionsMismatchedType.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_default(self):
+        path = self.get_contract_path('MetadataInfoPermissionsDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_Wildcard(self):
+        path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
-from boa3.constants import ENCODING
+from boa3.constants import ENCODING, IMPORT_WILDCARD
 from boa3.model.event import Event
 from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
@@ -151,17 +151,22 @@ class FileGenerator:
             "name": self._entry_file,
             "groups": [],
             "abi": self._get_abi_info(),
-            "permissions": [
-                {
-                    "contract": "*",
-                    "methods": "*"
-                }
-            ],
+            "permissions": self._get_permissions(),
             "trusts": self._metadata._trusts,
             "features": {},
             "supportedstandards": self._metadata.supported_standards,
             "extra": self._get_extras()
         }
+
+    def _get_permissions(self) -> List[Dict[str, Any]]:
+        """
+        Gets the permission information in a dictionary format, if _metadata._permissions is empty, then consider it
+        with the import wildcard inside it.
+
+        :return: a dictionary with the permission information
+        """
+        return self._metadata._permissions if len(self._metadata._permissions) else [{"contract": IMPORT_WILDCARD,
+                                                                                      "methods": IMPORT_WILDCARD}]
 
     def _get_abi_info(self) -> Dict[str, Any]:
         """

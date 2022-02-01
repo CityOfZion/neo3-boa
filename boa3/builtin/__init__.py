@@ -86,6 +86,7 @@ class NeoMetadata:
     def __init__(self):
         self.supported_standards: List[str] = []
         self._trusts: List[str] = []
+        self._permissions: List[dict] = []
 
     @property
     def extras(self) -> Dict[str, Any]:
@@ -123,24 +124,84 @@ class NeoMetadata:
             return
 
         if hash_or_address == IMPORT_WILDCARD:
-            self._trusts.clear()
             self._trusts = [IMPORT_WILDCARD]
 
         # verifies if it's a valid contract hash
-        elif hash_or_address.startswith('0x'):
-            try:
-                if len(UInt160.from_string(hash_or_address[2:])) == 20:
-                    if hash_or_address not in self._trusts:
-                        self._trusts.append(hash_or_address.lower())
-            except ValueError:
-                pass
+        elif self.verify_is_valid_contract_hash(hash_or_address):
+            if hash_or_address not in self._trusts:
+                self._trusts.append(hash_or_address.lower())
 
         # verifies if it's a valid public key
+        elif self.verify_is_valid_public_key(hash_or_address):
+            if hash_or_address not in self._trusts:
+                self._trusts.append(hash_or_address.lower())
+
+    def add_permission(self, *, contract: str = None, methods: Union[List[str], str] = None):
+        """
+        Adds a valid contract and a valid methods to the permissions in the manifest.
+
+        :param contract: a contract hash, group public key or *
+        :type contract: str
+        :param methods: a list of methods or *
+        :type methods: Union[List[str], str]
+        """
+
+        if contract is None and methods is None:
+            return
+
+        if not isinstance(contract, str) and contract is not None:
+            return
+
+        if not isinstance(methods, (str, list)) and methods is not None:
+            return
+
+        all_permissions = {
+            'contract': IMPORT_WILDCARD,
+            'methods': IMPORT_WILDCARD,
+        }
+
+        if all_permissions in self._permissions:
+            return
+
+        # verifies if contract is a valid value
+        elif contract is not None and (not self.verify_is_valid_contract_hash(contract) and
+                                       not self.verify_is_valid_public_key(contract) and
+                                       contract != IMPORT_WILDCARD):
+            return
+
+        # verifies if methods is a valid value
+        elif ((isinstance(methods, str) and methods != '*') or
+              (isinstance(methods, list) and any(not isinstance(method, str) for method in methods))):
+            return
+
+        new_permission = {
+            'contract': contract.lower() if contract is not None else IMPORT_WILDCARD,
+            'methods': methods if methods is not None else IMPORT_WILDCARD,
+        }
+
+        if new_permission == all_permissions:
+            self._permissions = [new_permission]
+
+        elif new_permission not in self._permissions:
+            self._permissions.append(new_permission)
+
+    @staticmethod
+    def verify_is_valid_public_key(public_key: str) -> bool:
         # compressed public keys in Neo start with either 03 or 02 and is followed by 32 bytes
-        elif hash_or_address.startswith('03') or hash_or_address.startswith('02'):
+        if public_key.startswith('03') or public_key.startswith('02'):
             try:
-                if len(bytes.fromhex(hash_or_address)) == 33:
-                    if hash_or_address not in self._trusts:
-                        self._trusts.append(hash_or_address.lower())
+                if len(bytes.fromhex(public_key)) == 33:
+                    return True
             except ValueError:
                 pass
+        return False
+
+    @staticmethod
+    def verify_is_valid_contract_hash(contract_hash: str) -> bool:
+        if contract_hash.startswith('0x'):
+            try:
+                if len(UInt160.from_string(contract_hash[2:])) == 20:
+                    return True
+            except ValueError:
+                pass
+        return False
