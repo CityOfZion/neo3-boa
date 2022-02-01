@@ -22,8 +22,7 @@ class TestUpdateContractTemplate(BoaTest):
     def test_update_contract(self):
         path = self.get_contract_path('update_contract.py')
         path_new = self.get_contract_path('examples/auxiliary_contracts', 'update_contract.py')
-        self.compile_and_save(path_new)
-        self.compile_and_save(path)
+        self.get_output(path_new)
 
         new_nef, new_manifest = self.get_bytes_output(path_new)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
