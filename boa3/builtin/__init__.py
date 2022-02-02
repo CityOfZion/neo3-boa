@@ -127,16 +127,16 @@ class NeoMetadata:
             self._trusts = [IMPORT_WILDCARD]
 
         # verifies if it's a valid contract hash
-        elif self.verify_is_valid_contract_hash(hash_or_address):
+        elif self._verify_is_valid_contract_hash(hash_or_address):
             if hash_or_address not in self._trusts:
                 self._trusts.append(hash_or_address.lower())
 
         # verifies if it's a valid public key
-        elif self.verify_is_valid_public_key(hash_or_address):
+        elif self._verify_is_valid_public_key(hash_or_address):
             if hash_or_address not in self._trusts:
                 self._trusts.append(hash_or_address.lower())
 
-    def add_permission(self, *, contract: str = None, methods: Union[List[str], str] = None):
+    def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: Union[List[str], str] = IMPORT_WILDCARD):
         """
         Adds a valid contract and a valid methods to the permissions in the manifest.
 
@@ -146,48 +146,43 @@ class NeoMetadata:
         :type methods: Union[List[str], str]
         """
 
-        if contract is None and methods is None:
+        if not isinstance(contract, str):
             return
 
-        if not isinstance(contract, str) and contract is not None:
-            return
-
-        if not isinstance(methods, (str, list)) and methods is not None:
-            return
-
-        all_permissions = {
-            'contract': IMPORT_WILDCARD,
-            'methods': IMPORT_WILDCARD,
-        }
-
-        if all_permissions in self._permissions:
+        if not isinstance(methods, (str, list)):
             return
 
         # verifies if contract is a valid value
-        elif contract is not None and (not self.verify_is_valid_contract_hash(contract) and
-                                       not self.verify_is_valid_public_key(contract) and
-                                       contract != IMPORT_WILDCARD):
+        if (not self._verify_is_valid_contract_hash(contract) and
+                not self._verify_is_valid_public_key(contract) and
+                contract != IMPORT_WILDCARD):
             return
 
         # verifies if methods is a valid value
-        elif ((isinstance(methods, str) and methods != '*') or
+        elif ((isinstance(methods, str) and methods != IMPORT_WILDCARD) or
               (isinstance(methods, list) and any(not isinstance(method, str) for method in methods))):
             return
 
+        # if both values are the import wildcard, then it's not necessary to include it in the manifest
+        if contract == '*' and methods == '*':
+            return
+
         new_permission = {
-            'contract': contract.lower() if contract is not None else IMPORT_WILDCARD,
-            'methods': methods if methods is not None else IMPORT_WILDCARD,
+            'contract': contract.lower(),
+            'methods': methods,
         }
 
-        if new_permission == all_permissions:
-            self._permissions = [new_permission]
-
-        elif new_permission not in self._permissions:
+        if new_permission not in self._permissions:
             self._permissions.append(new_permission)
 
     @staticmethod
-    def verify_is_valid_public_key(public_key: str) -> bool:
-        # compressed public keys in Neo start with either 03 or 02 and is followed by 32 bytes
+    def _verify_is_valid_public_key(public_key: str) -> bool:
+        """
+        Verifies if a given compressed public key is valid. It should either start with 02 or 03 and be followed
+        by 32 bytes.
+
+        :return: whether the given public key is valid or not
+        """
         if public_key.startswith('03') or public_key.startswith('02'):
             try:
                 if len(bytes.fromhex(public_key)) == 33:
@@ -197,11 +192,17 @@ class NeoMetadata:
         return False
 
     @staticmethod
-    def verify_is_valid_contract_hash(contract_hash: str) -> bool:
+    def _verify_is_valid_contract_hash(contract_hash: str) -> bool:
+        """
+        Verifies if a given contract hash is valid. It should either start with 0x and be followed by 20 bytes.
+
+        :return: whether the given contract hash is valid or not
+        """
         if contract_hash.startswith('0x'):
             try:
-                if len(UInt160.from_string(contract_hash[2:])) == 20:
-                    return True
+                # if contract_hash is not a valid UInt160, it will raise a ValueError
+                UInt160.from_string(contract_hash[2:])
+                return True
             except ValueError:
                 pass
         return False

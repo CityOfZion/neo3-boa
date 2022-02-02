@@ -165,8 +165,8 @@ class FileGenerator:
 
         :return: a dictionary with the permission information
         """
-        return self._metadata._permissions if len(self._metadata._permissions) else [{"contract": IMPORT_WILDCARD,
-                                                                                      "methods": IMPORT_WILDCARD}]
+        return self._metadata._permissions if self._metadata._permissions else [{"contract": IMPORT_WILDCARD,
+                                                                                 "methods": IMPORT_WILDCARD}]
 
     def _get_abi_info(self) -> Dict[str, Any]:
         """

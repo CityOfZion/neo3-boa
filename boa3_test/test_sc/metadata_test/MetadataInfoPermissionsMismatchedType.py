@@ -22,6 +22,6 @@ def permissions_manifest() -> NeoMetadata:
     meta.add_permission(contract=True)
     meta.add_permission(contract=['0x3846a4aa420d9831044396dd3a56011514cd10e3'])
 
-    # meta.add_permission(contract='0x3846a4aa420d9831044396dd3a56011514cd10e3', methods=['get_object'])
+    meta.add_permission(contract=123, methods='onNEP17Payment')
 
     return meta
