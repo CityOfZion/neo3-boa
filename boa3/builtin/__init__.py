@@ -86,6 +86,7 @@ class NeoMetadata:
     def __init__(self):
         self.supported_standards: List[str] = []
         self._trusts: List[str] = []
+        self._permissions: List[dict] = []
 
     @property
     def extras(self) -> Dict[str, Any]:
@@ -123,24 +124,85 @@ class NeoMetadata:
             return
 
         if hash_or_address == IMPORT_WILDCARD:
-            self._trusts.clear()
             self._trusts = [IMPORT_WILDCARD]
 
         # verifies if it's a valid contract hash
-        elif hash_or_address.startswith('0x'):
-            try:
-                if len(UInt160.from_string(hash_or_address[2:])) == 20:
-                    if hash_or_address not in self._trusts:
-                        self._trusts.append(hash_or_address.lower())
-            except ValueError:
-                pass
+        elif self._verify_is_valid_contract_hash(hash_or_address):
+            if hash_or_address not in self._trusts:
+                self._trusts.append(hash_or_address.lower())
 
         # verifies if it's a valid public key
-        # compressed public keys in Neo start with either 03 or 02 and is followed by 32 bytes
-        elif hash_or_address.startswith('03') or hash_or_address.startswith('02'):
+        elif self._verify_is_valid_public_key(hash_or_address):
+            if hash_or_address not in self._trusts:
+                self._trusts.append(hash_or_address.lower())
+
+    def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: Union[List[str], str] = IMPORT_WILDCARD):
+        """
+        Adds a valid contract and a valid methods to the permissions in the manifest.
+
+        :param contract: a contract hash, group public key or *
+        :type contract: str
+        :param methods: a list of methods or *
+        :type methods: Union[List[str], str]
+        """
+
+        if not isinstance(contract, str):
+            return
+
+        if not isinstance(methods, (str, list)):
+            return
+
+        # verifies if contract is a valid value
+        if (not self._verify_is_valid_contract_hash(contract) and
+                not self._verify_is_valid_public_key(contract) and
+                contract != IMPORT_WILDCARD):
+            return
+
+        # verifies if methods is a valid value
+        elif ((isinstance(methods, str) and methods != IMPORT_WILDCARD) or
+              (isinstance(methods, list) and any(not isinstance(method, str) for method in methods))):
+            return
+
+        # if both values are the import wildcard, then it's not necessary to include it in the manifest
+        if contract == '*' and methods == '*':
+            return
+
+        new_permission = {
+            'contract': contract.lower(),
+            'methods': methods,
+        }
+
+        if new_permission not in self._permissions:
+            self._permissions.append(new_permission)
+
+    @staticmethod
+    def _verify_is_valid_public_key(public_key: str) -> bool:
+        """
+        Verifies if a given compressed public key is valid. It should either start with 02 or 03 and be followed
+        by 32 bytes.
+
+        :return: whether the given public key is valid or not
+        """
+        if public_key.startswith('03') or public_key.startswith('02'):
             try:
-                if len(bytes.fromhex(hash_or_address)) == 33:
-                    if hash_or_address not in self._trusts:
-                        self._trusts.append(hash_or_address.lower())
+                if len(bytes.fromhex(public_key)) == 33:
+                    return True
             except ValueError:
                 pass
+        return False
+
+    @staticmethod
+    def _verify_is_valid_contract_hash(contract_hash: str) -> bool:
+        """
+        Verifies if a given contract hash is valid. It should either start with 0x and be followed by 20 bytes.
+
+        :return: whether the given contract hash is valid or not
+        """
+        if contract_hash.startswith('0x'):
+            try:
+                # if contract_hash is not a valid UInt160, it will raise a ValueError
+                UInt160.from_string(contract_hash[2:])
+                return True
+            except ValueError:
+                pass
+        return False
