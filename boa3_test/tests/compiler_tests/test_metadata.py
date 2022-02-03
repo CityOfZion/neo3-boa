@@ -249,3 +249,25 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['permissions'], list)
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_name(self):
+        path = self.get_contract_path('MetadataInfoName.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('name', manifest)
+        self.assertIsInstance(manifest['name'], str)
+        self.assertGreater(len(manifest['name']), 0)
+        self.assertEqual((manifest['name']), "SmartContractCustomName")
+
+    def test_metadata_info_name_default(self):
+        path = self.get_contract_path('MetadataInfoNameDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('name', manifest)
+        self.assertIsInstance(manifest['name'], str)
+        self.assertGreater(len(manifest['name']), 0)
+        self.assertEqual((manifest['name']), "MetadataInfoNameDefault")
+
+    def test_metadata_info_name_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoNameMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

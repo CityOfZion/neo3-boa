@@ -71,8 +71,13 @@ class NeoMetadata:
     """
     This class stores the smart contract manifest information.
 
+    :ivar name: the smart contract name. Will be the name of the file by default;
+    :vartype name: str
     :ivar supported_standards: Neo standards supported by this smart contract. Empty by default;
     :vartype supported_standards: List[str]
+    :ivar permissions: a list of contracts and methods that this smart contract permits to invoke and caçç. All
+    contracts and methods permitted by default;
+    :vartype permissions: List[str]
     :ivar trusts: a list of contracts that this smart contract trust. Empty by default;
     :vartype trusts: List[str]
     :ivar author: the smart contract author. None by default;
@@ -84,6 +89,7 @@ class NeoMetadata:
     """
 
     def __init__(self):
+        self.name: str = ''
         self.supported_standards: List[str] = []
         self._trusts: List[str] = []
         self._permissions: List[dict] = []
@@ -96,7 +102,8 @@ class NeoMetadata:
         :return: a dictionary that maps each extra value with its name. Empty by default
         """
         # list the variables names that are part of the manifest
-        specific_field_names = ['supported_standards',
+        specific_field_names = ['name',
+                                'supported_standards',
                                 ]
         extra = {}
 

@@ -148,7 +148,7 @@ class FileGenerator:
         """
         # TODO: fill the information of the manifest
         return {
-            "name": self._entry_file,
+            "name": self._get_name(),
             "groups": [],
             "abi": self._get_abi_info(),
             "permissions": self._get_permissions(),
@@ -157,6 +157,14 @@ class FileGenerator:
             "supportedstandards": self._metadata.supported_standards,
             "extra": self._get_extras()
         }
+
+    def _get_name(self) -> str:
+        """
+        Gets the name of the contract, if name wasn't specified it will be the file name.
+
+        :return: the contract name
+        """
+        return self._metadata.name if self._metadata.name else self._entry_file
 
     def _get_permissions(self) -> List[Dict[str, Any]]:
         """
