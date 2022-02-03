@@ -4,7 +4,7 @@ from boa3.builtin import contract, public
 from boa3.builtin.type import UInt160
 
 
-@contract('0xf3349090a6abd4771739da994dd155a4294e6837')
+@contract('0x5695642fcf208fc8b55c6163b3518afd7d35ff02')
 class Nep17:
 
     @staticmethod

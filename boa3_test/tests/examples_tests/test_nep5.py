@@ -16,32 +16,6 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('nep5.py')
         Boa3.compile(path)
 
-    def test_nep5_deploy(self):
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
-
-        # needs the owner signature
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        # should return false if the signature isn't from the owner
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # must always return false after first execution
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
     def test_nep5_name(self):
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
@@ -73,13 +47,6 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(0, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(total_supply, result)
@@ -95,20 +62,6 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
-
-        # should fail before running deploy
-        result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount,
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-        # deploying the smart contract will transfer tokens to owner
-        transfer_events = engine.get_events('transfer')
-        self.assertEqual(1, len(transfer_events))
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',

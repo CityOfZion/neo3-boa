@@ -18,44 +18,13 @@ class TestHTLCTemplate(BoaTest):
     OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
     OTHER_ACCOUNT_2 = bytes(range(20))
 
-    def test_HTLC_compile(self):
+    def test_htlc_compile(self):
         path = self.get_contract_path('htlc.py')
         Boa3.compile(path)
 
-    def test_HTLC_deploy(self):
+    def test_htlc_atomic_swap(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
-
-        # deploying the smart contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # deploy can not occur more than once
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-    def test_HTLC_atomic_swap(self):
-        path = self.get_contract_path('htlc.py')
-        engine = TestEngine()
-
-        # can not atomic_swap() without deploying first
-        result = self.run_smart_contract(engine, path, 'atomic_swap',
-                                         self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10 ** 8,
-                                         self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10 ** 8,
-                                         hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        # deploying contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         # starting atomic swap by using the atomic_swap method
         result = self.run_smart_contract(engine, path, 'atomic_swap',
@@ -66,31 +35,25 @@ class TestHTLCTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-    def test_HTLC_onNEP17Payment(self):
+    def test_htlc_on_nep17_payment(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         htlc_address = hash160(output)
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
+        output, manifest = self.get_output(aux_path)
         aux_address = hash160(output)
 
         aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
-        output, manifest = self.compile_and_save(aux_path2)
+        output, manifest = self.get_output(aux_path2)
         aux_address2 = hash160(output)
 
         engine.add_neo(aux_address, transferred_amount_neo)
         engine.add_gas(aux_address2, transferred_amount_gas)
-
-        # deploying contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         # starting atomic swap
         result = self.run_smart_contract(engine, path, 'atomic_swap',
@@ -191,31 +154,25 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_gas_sender_before - transferred_amount_gas, balance_gas_sender_after)
         self.assertEqual(balance_gas_receiver_before + transferred_amount_gas, balance_gas_receiver_after)
 
-    def test_HTLC_withdraw(self):
+    def test_htlc_withdraw(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         htlc_address = hash160(output)
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
+        output, manifest = self.get_output(aux_path)
         aux_address = hash160(output)
 
         aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
-        output, manifest = self.compile_and_save(aux_path2)
+        output, manifest = self.get_output(aux_path2)
         aux_address2 = hash160(output)
 
         engine.add_neo(aux_address, transferred_amount_neo)
         engine.add_gas(aux_address2, transferred_amount_gas)
-
-        # deploying smart contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         # saving the balance to compare after the withdraw
         balance_neo_person_a_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', aux_address)
@@ -314,30 +271,25 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_gas_person_b_before - transferred_amount_gas, balance_gas_person_b_after)
         self.assertEqual(balance_gas_htlc_before, balance_gas_htlc_after)
 
-    def test_HTLC_refund(self):
+    def test_htlc_refund(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         htlc_address = hash160(output)
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
+        output, manifest = self.get_output(aux_path)
         aux_address = hash160(output)
 
         aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
-        output, manifest = self.compile_and_save(aux_path2)
+        output, manifest = self.get_output(aux_path2)
         aux_address2 = hash160(output)
 
         engine.add_neo(aux_address, transferred_amount_neo)
         engine.add_gas(aux_address2, transferred_amount_gas)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'atomic_swap',
                                          aux_address, constants.NEO_SCRIPT, transferred_amount_neo,

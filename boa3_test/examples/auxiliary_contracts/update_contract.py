@@ -1,9 +1,9 @@
 from typing import Any, Union
 
 from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
-from boa3.builtin.interop.contract import update_contract
+from boa3.builtin.interop import storage
 from boa3.builtin.interop.runtime import check_witness
-from boa3.builtin.interop.storage import get, put
+from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160
 
 # -------------------------------------------
@@ -14,12 +14,13 @@ from boa3.builtin.type import UInt160
 # Script hash of the contract owner
 OWNER = UInt160()
 SUPPLY_KEY = 'totalSupply'
-TOKEN_TOTAL_SUPPLY = 10_000_000 * 10**8  # 10m total supply * 10^8 (decimals)
+TOKEN_TOTAL_SUPPLY = 10_000_000 * 10 ** 8  # 10m total supply * 10^8 (decimals)
 
 
 # -------------------------------------------
 # METADATA
 # -------------------------------------------
+
 
 @metadata
 def manifest_metadata() -> NeoMetadata:
@@ -27,11 +28,13 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information.
     """
     meta = NeoMetadata()
+
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "Update Contract Example. This contract represents the updated smart contract to be deployed " \
                        "on the blockchain, with the method now working properly"
     meta.email = "contact@coz.io"
     return meta
+
 
 # -------------------------------------------
 # Events
@@ -52,14 +55,14 @@ on_transfer = CreateNewEvent(
 # Methods
 # -------------------------------------------
 
-@public
+@public(safe=True)
 def update_sc(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the smart contract. In this example there is a bugged method, so, the smart contract will be updated to fix
     the bug.
     """
     if check_witness(OWNER):
-        update_contract(nef_file, manifest, data)
+        ContractManagement.update(nef_file, manifest, data)
 
 
 @public
@@ -71,8 +74,8 @@ def method(account: UInt160):
 
     # now there is a verification to this method
     if check_witness(OWNER):
-        put(account, get(account).to_int() + 2 * 10**8)
-        on_transfer(None, account, 2 * 10**8)
+        storage.put(account, storage.get(account).to_int() + 2 * 10 ** 8)
+        on_transfer(None, account, 2 * 10 ** 8)
     # more omitted code
 
 
@@ -82,15 +85,15 @@ def _deploy(data: Any, update: bool):
     Initializes the storage when the smart contract is deployed. When this smart contract is updated, it should do nothing.
     """
     if not update:
-        put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        put(OWNER, TOKEN_TOTAL_SUPPLY)
+        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put(OWNER, TOKEN_TOTAL_SUPPLY)
         on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
 
 
-@public
+@public(safe=True)
 def balanceOf(account: UInt160) -> int:
     """
     Get the current balance of an address.
     """
     assert len(account) == 20
-    return get(account).to_int()
+    return storage.get(account).to_int()

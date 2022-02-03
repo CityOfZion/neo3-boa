@@ -115,13 +115,13 @@ class BoaTest(TestCase):
             raise FileNotFoundError(path)
         return path
 
-    def compile_and_save(self, path: str, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
+    def compile_and_save(self, path: str, debug: bool = False, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         manifest_output = path.replace('.py', '.manifest.json')
 
         from boa3.boa3 import Boa3
         from boa3.neo.contracts.neffile import NefFile
-        Boa3.compile_and_save(path, show_errors=log)
+        Boa3.compile_and_save(path, show_errors=log, debug=debug)
 
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
@@ -147,6 +147,9 @@ class BoaTest(TestCase):
 
     def get_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
+        if not os.path.isfile(nef_output):
+            return self.compile_and_save(path)
+
         manifest_output = path.replace('.py', '.manifest.json')
 
         from boa3.neo.contracts.neffile import NefFile
@@ -169,6 +172,9 @@ class BoaTest(TestCase):
 
     def get_bytes_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
+        if not os.path.isfile(nef_output):
+            return self.compile_and_save(path)
+
         manifest_output = path.replace('.py', '.manifest.json')
 
         if not os.path.isfile(nef_output):
