@@ -21,11 +21,6 @@ class Nep17:
         pass
 
     @staticmethod
-    @display_name('totalSupply')
-    def total_supply_2(a: int) -> int:
-        pass
-
-    @staticmethod
     @display_name('balanceOf')
     def balance_of(account: UInt160) -> int:
         pass

@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
-from boa3.constants import ENCODING, IMPORT_WILDCARD
 from boa3.model.event import Event
 from boa3.model.imports.importsymbol import Import
 from boa3.model.method import Method
@@ -138,7 +137,7 @@ class FileGenerator:
         """
         data: Dict[str, Any] = self._get_manifest_info()
         json_data: str = json.dumps(data, indent=4)
-        return bytes(json_data, ENCODING)
+        return bytes(json_data, constants.ENCODING)
 
     def _get_manifest_info(self) -> Dict[str, Any]:
         """
@@ -152,7 +151,7 @@ class FileGenerator:
             "groups": [],
             "abi": self._get_abi_info(),
             "permissions": self._get_permissions(),
-            "trusts": self._metadata._trusts,
+            "trusts": self._metadata.trusts,
             "features": {},
             "supportedstandards": self._metadata.supported_standards,
             "extra": self._get_extras()
@@ -173,8 +172,8 @@ class FileGenerator:
 
         :return: a dictionary with the permission information
         """
-        return self._metadata._permissions if self._metadata._permissions else [{"contract": IMPORT_WILDCARD,
-                                                                                 "methods": IMPORT_WILDCARD}]
+        return self._metadata.permissions if self._metadata.permissions else [{"contract": constants.IMPORT_WILDCARD,
+                                                                               "methods": constants.IMPORT_WILDCARD}]
 
     def _get_abi_info(self) -> Dict[str, Any]:
         """
@@ -261,7 +260,7 @@ class FileGenerator:
         """
         data: Dict[str, Any] = self._get_debug_info()
         json_data: str = json.dumps(data, indent=4)
-        return bytes(json_data, ENCODING)
+        return bytes(json_data, constants.ENCODING)
 
     def _get_debug_info(self) -> Dict[str, Any]:
         """
