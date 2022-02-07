@@ -610,11 +610,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                               and not is_static_method)
         is_class_constructor = is_instance_method and function.name == constants.INIT_METHOD_ID
 
-        if isinstance(self._current_class, ContractInterfaceClass) and not is_static_method:
-            self._log_error(CompilerError
-                            .InvalidUsage(function.lineno, function.col_offset,
-                                          "Only static methods are accepted when defining contract interfaces"
-                                          ))
+        external_function_name = None
+        if isinstance(self._current_class, ContractInterfaceClass):
+            if not is_static_method:
+                self._log_error(CompilerError
+                                .InvalidUsage(function.lineno, function.col_offset,
+                                              "Only static methods are accepted when defining contract interfaces"
+                                              ))
+            else:
+                display_name_decorator = next((decorator for decorator in valid_decorators
+                                               if isinstance(decorator, type(Builtin.ContractMethodDisplayName))),
+                                              None)
+                if display_name_decorator is not None:
+                    external_function_name = display_name_decorator.external_name
 
         if is_instance_method:
             if Builtin.InstanceMethodDecorator not in valid_decorators:
@@ -669,6 +677,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         origin_node=function,
                         is_public=any(isinstance(decorator, type(Builtin.Public)) for decorator in fun_decorators),
                         decorators=valid_decorators,
+                        external_name=external_function_name,
                         is_init=is_class_constructor)
 
         if function.name in Builtin.internal_methods:

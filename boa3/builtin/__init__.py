@@ -1,18 +1,17 @@
 from typing import Any, Dict, List, Tuple, Union
 
-from boa3.constants import IMPORT_WILDCARD
-from boa3.neo3.core.types import UInt160
 
-
-def public(*args, **kwargs):
+def public(name: str = None, safe: bool = True, *args, **kwargs):
     """
     This decorator identifies which methods should be included in the abi file.
+
+    :param name: Identifier for this method that'll be used on the abi. If not specified, it'll be the same
+    identifier from Python method definition
+    :type name: str
+    :param safe: Whether this method is an abi safe method. False by default
+    :type safe: bool
     """
-
-    def public_wrapper():
-        pass
-
-    return public_wrapper
+    pass
 
 
 def metadata(*args):
@@ -20,16 +19,26 @@ def metadata(*args):
     This decorator identifies the function that returns the metadata object of the smart contract.
     This can be used to only one function. Using this decorator in multiple functions will raise a compiler error.
     """
-
-    def metadata_wrapper():
-        pass
-
-    return metadata_wrapper
+    pass
 
 
 def contract(script_hash: Union[str, bytes]):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
+
+    :param script_hash: Script hash of the interfaced contract
+    :type script_hash: str or bytes
+    """
+    pass
+
+
+def display_name(name: str):
+    """
+    This decorator identifies which methods from a contract interface should have a different identifier from the one
+    interfacing it. It only works in contract interface classes.
+
+    :param name: Method identifier from the contract manifest.
+    :type name: str
     """
     pass
 
@@ -87,6 +96,7 @@ class NeoMetadata:
     :ivar description: the smart contract description. None by default;
     :vartype description: str or None
     """
+    from boa3.constants import IMPORT_WILDCARD
 
     def __init__(self):
         self.name: str = ''
@@ -117,6 +127,14 @@ class NeoMetadata:
 
         return extra
 
+    @property
+    def trusts(self) -> List[str]:
+        return self._trusts.copy()
+
+    @property
+    def permissions(self) -> List[dict]:
+        return self._permissions.copy()
+
     def add_trusted_source(self, hash_or_address: str):
         """
         Adds a valid contract hash, valid group public key, or the * wildcard to trusts.
@@ -127,6 +145,7 @@ class NeoMetadata:
         if not isinstance(hash_or_address, str):
             return
 
+        from boa3.constants import IMPORT_WILDCARD
         if self._trusts == [IMPORT_WILDCARD]:
             return
 
@@ -159,6 +178,7 @@ class NeoMetadata:
         if not isinstance(methods, (str, list)):
             return
 
+        from boa3.constants import IMPORT_WILDCARD
         # verifies if contract is a valid value
         if (not self._verify_is_valid_contract_hash(contract) and
                 not self._verify_is_valid_public_key(contract) and
@@ -207,6 +227,7 @@ class NeoMetadata:
         """
         if contract_hash.startswith('0x'):
             try:
+                from boa3.neo3.core.types import UInt160
                 # if contract_hash is not a valid UInt160, it will raise a ValueError
                 UInt160.from_string(contract_hash[2:])
                 return True

@@ -1631,10 +1631,13 @@ class CodeGenerator:
                     self.convert_new_empty_array(size, function_result)
 
         if isinstance(function.origin_class, ContractInterfaceClass):
-            function_id = next((symbol_id
-                                for symbol_id, symbol in function.origin_class.symbols.items()
-                                if symbol is function),
-                               None)
+            if function.external_name is not None:
+                function_id = function.external_name
+            else:
+                function_id = next((symbol_id
+                                    for symbol_id, symbol in function.origin_class.symbols.items()
+                                    if symbol is function),
+                                   None)
 
             if isinstance(function_id, str):
                 self.convert_new_array(len(function.args))
