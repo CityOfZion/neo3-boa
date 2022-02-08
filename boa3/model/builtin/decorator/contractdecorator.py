@@ -24,7 +24,7 @@ class ContractDecorator(IBuiltinDecorator):
             if len(args) > 1:
                 values = self.validate_values(*args[:2])
 
-                hash_arg = values[0]
+                hash_arg = values[0] if len(values) > 0 else None
                 if isinstance(hash_arg, UInt160):
                     decorator.contract_hash = hash_arg
             return decorator
@@ -39,11 +39,11 @@ class ContractDecorator(IBuiltinDecorator):
         origin, visitor = params
         values.append(self.contract_hash)
         from boa3.analyser.astanalyser import IAstAnalyser
-        if not isinstance(origin, ast.Call) or not isinstance(visitor, IAstAnalyser):
+        if not isinstance(visitor, IAstAnalyser):
             return values
 
         from boa3.exception import CompilerError
-        if len(origin.args) < 1:
+        if not isinstance(origin, ast.Call) or len(origin.args) < 1:
             visitor._log_error(
                 CompilerError.UnfilledArgument(origin.lineno, origin.col_offset, list(self.args.keys())[0])
             )

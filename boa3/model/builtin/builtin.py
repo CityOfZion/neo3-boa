@@ -150,6 +150,7 @@ class Builtin:
 
     # boa builtin decorator
     ContractInterface = ContractDecorator()
+    ContractMethodDisplayName = DisplayNameDecorator()
     Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
@@ -182,6 +183,7 @@ class Builtin:
     # endregion
 
     boa_builtins: List[IdentifiedSymbol] = [ContractInterface,
+                                            ContractMethodDisplayName,
                                             Event,
                                             Metadata,
                                             NeoMetadataType,

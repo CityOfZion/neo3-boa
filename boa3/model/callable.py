@@ -26,6 +26,7 @@ class Callable(IExpression, ABC):
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
+                 external_name: str = None,
                  is_safe: bool = False,
                  origin_node: Optional[ast.AST] = None):
 
@@ -75,9 +76,12 @@ class Callable(IExpression, ABC):
                                 None)
 
         self.is_public: bool = is_public or public_decorator is not None
-        self.external_name: Optional[str] = (public_decorator.name
-                                             if isinstance(public_decorator, PublicDecorator)
-                                             else None)
+        if self.is_public:
+            external_name = (public_decorator.name
+                             if isinstance(public_decorator, PublicDecorator)
+                             else None)
+
+        self.external_name: Optional[str] = external_name
         self.is_safe: bool = is_safe or (isinstance(public_decorator, PublicDecorator) and public_decorator.safe)
 
         super().__init__(origin_node)

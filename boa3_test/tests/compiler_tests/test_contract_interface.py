@@ -31,6 +31,10 @@ class TestContractInterface(BoaTest):
         path = self.get_contract_path('ContractInterfaceTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
+    def test_contract_interface_decorator_without_call(self):
+        path = self.get_contract_path('ContractInterfaceWithoutCall.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
     def test_contract_interface_with_instance_method(self):
         path = self.get_contract_path('ContractInterfaceInstanceMethod.py')
         self.assertCompilerLogs(CompilerError.InvalidUsage, path)
@@ -48,4 +52,39 @@ class TestContractInterface(BoaTest):
 
         nep17_result = self.run_smart_contract(engine, nep17_path, 'symbol')
         result = self.run_smart_contract(engine, path, 'nep17_symbol')
+        self.assertEqual(nep17_result, result)
+
+    def test_contract_interface_display_name_argument(self):
+        path = self.get_contract_path('ContractInterfaceDisplayNameRegularArgument.py')
+        Boa3.compile(path)  # test if compiles because the smart contract doesn't exist
+
+    def test_contract_interface_display_name_keyword_argument(self):
+        path = self.get_contract_path('ContractInterfaceDisplayNameKeywordArgument.py')
+        Boa3.compile(path)  # test if compiles because the smart contract doesn't exist
+
+    def test_contract_interface_display_name_variable_name(self):
+        path = self.get_contract_path('ContractInterfaceDisplayNameVariableArgument.py')
+        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+
+    def test_contract_interface_display_name_too_few_arguments(self):
+        path = self.get_contract_path('ContractInterfaceDisplayNameTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_contract_interface_display_name_without_call(self):
+        path = self.get_contract_path('ContractInterfaceDisplayNameWithoutCall.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_contract_interface_display_name_too_many_arguments(self):
+        path = self.get_contract_path('ContractInterfaceDisplayNameTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_contract_interface_nep17_with_display_name(self):
+        path = self.get_contract_path('Nep17InterfaceWithDisplayName.py')
+        nep17_path = self.get_contract_path('examples', 'nep17.py')
+
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        nep17_result = self.run_smart_contract(engine, nep17_path, 'totalSupply')
+        result = self.run_smart_contract(engine, path, 'nep17_total_supply')
         self.assertEqual(nep17_result, result)
