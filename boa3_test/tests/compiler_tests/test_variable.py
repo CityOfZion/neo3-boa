@@ -676,3 +676,9 @@ class TestVariable(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test')
         self.assertEqual(1_000, result)
+
+    def test_instance_variable_and_variable_with_same_name(self):
+        path = self.get_contract_path('InstanceVariableAndVariableWithSameName.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'test')
+        self.assertEqual([10], result)

@@ -1455,7 +1455,7 @@ class CodeGenerator:
         inner_index = None
         index, local, is_arg = self._get_variable_info(var_id)
 
-        if user_class is None and index < 0 and len(self._stack) > 1 and isinstance(self._stack[-2], UserClass):
+        if user_class is None and len(self._stack) > 1 and isinstance(self._stack[-2], UserClass):
             user_class = self._stack[-2]
 
         if isinstance(user_class, UserClass) and var_id in user_class.variables:
