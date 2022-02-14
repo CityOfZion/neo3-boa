@@ -4,7 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.builtinfunctioncallanalyser import BuiltinFunctionCallAnalyser
-from boa3.analyser.model.optimizer import UndefinedType
+from boa3.analyser.model.optimizer import Undefined, UndefinedType
 from boa3.analyser.model.symbolscope import SymbolScope
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.attribute import Attribute
@@ -360,10 +360,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             target_type = None
             var: ISymbol = self.get_symbol(node.id if hasattr(node, 'id') else node)
             if isinstance(var, Variable):
-                if var.type is UndefinedType:
+                if (var.type is UndefinedType
+                        or (var.type is Undefined and var not in self.symbols.values())):
                     var = var.copy()
 
-                if var.type in (None, UndefinedType):
+                if var.type in (None, UndefinedType, Undefined):
                     # it is an declaration with assignment and the value is neither literal nor another variable
                     var.set_type(value_type)
                 target_type = var.type
