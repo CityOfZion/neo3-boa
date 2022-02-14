@@ -1176,6 +1176,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return value.inner_packages[attribute.attr]
         elif Builtin.get_symbol(attribute.attr) is not None:
             return Builtin.get_symbol(attribute.attr)
+        elif isinstance(value, UndefinedType):
+            return value
         else:
             return '{0}.{1}'.format(value_id, attribute.attr)
 
