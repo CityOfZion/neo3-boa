@@ -70,3 +70,21 @@ class TestIteratorInterop(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'search_storage', prefix)
         self.assertEqual({f'{prefix}1': 1, f'{prefix}2': 2}, result)
+
+    def test_iterator_value_access(self):
+        path = self.get_contract_path('IteratorValueAccess.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        prefix = 'test_iterator_'
+        result = self.run_smart_contract(engine, path, 'search_storage', prefix)
+        self.assertEqual({}, result)
+
+        result = self.run_smart_contract(engine, path, 'store', f'{prefix}1', 1)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'store', f'{prefix}2', 2)
+        self.assertIsVoid(result)
+
+        result = self.run_smart_contract(engine, path, 'search_storage', prefix)
+        self.assertEqual({f'{prefix}1': 1, f'{prefix}2': 2}, result)
