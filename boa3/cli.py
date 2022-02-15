@@ -21,7 +21,7 @@ def main():
     path, filename = os.path.split(fullpath)
 
     try:
-        Boa3.compile_and_save(args.input, args.debug)
+        Boa3.compile_and_save(args.input, debug=args.debug)
         logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
     except NotLoadedException as e:
         logging.error("Could not compile")
