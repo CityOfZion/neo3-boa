@@ -1640,7 +1640,13 @@ class CodeGenerator:
                                    None)
 
             if isinstance(function_id, str):
-                self.convert_new_array(len(function.args))
+                len_func_args = len(function.args)
+                if num_args >= len_func_args:
+                    num_args -= len_func_args
+                else:
+                    num_args = 0
+
+                self.convert_new_array(len_func_args)
                 self.convert_literal(Interop.CallFlagsType.default_value)
                 self.convert_literal(function_id)
                 self.convert_literal(function.origin_class.contract_hash.to_array())
