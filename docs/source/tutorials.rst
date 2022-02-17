@@ -138,8 +138,8 @@ All of the examples presented here can be found in the `examples folder of the N
         return TOKEN_DECIMALS
 
 
-    @public(safe=True)
-    def totalSupply() -> int:
+    @public(name='totalSupply', safe=True)
+    def total_supply() -> int:
         """
         Gets the total token supply deployed in the system.
 
@@ -151,8 +151,8 @@ All of the examples presented here can be found in the `examples folder of the N
         return storage.get(SUPPLY_KEY).to_int()
 
 
-    @public(safe=True)
-    def balanceOf(account: UInt160) -> int:
+    @public(name='balanceOf', safe=True)
+    def balance_of(account: UInt160) -> int:
         """
         Get the current balance of an address
 
@@ -251,8 +251,8 @@ All of the examples presented here can be found in the `examples folder of the N
         """
         assert amount >= 0
         if amount != 0:
-            current_total_supply = totalSupply()
-            account_balance = balanceOf(account)
+            current_total_supply = total_supply()
+            account_balance = balance_of(account)
 
             storage.put(SUPPLY_KEY, current_total_supply + amount)
             storage.put(account, account_balance + amount)
@@ -697,8 +697,8 @@ All of the examples presented here can be found in the `examples folder of the N
             return False
 
         if amount > 0:
-            current_total_supply = totalSupply()
-            owner_balance = balanceOf(TOKEN_OWNER)
+            current_total_supply = total_supply()
+            owner_balance = balance_of(TOKEN_OWNER)
 
             storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
             storage.put(TOKEN_OWNER, owner_balance + amount)
@@ -776,8 +776,8 @@ All of the examples presented here can be found in the `examples folder of the N
         return TOKEN_DECIMALS
 
 
-    @public(safe=True)
-    def totalSupply() -> int:
+    @public(name='totalSupply', safe=True)
+    def total_supply() -> int:
         """
         Gets the total token supply deployed in the system.
 
@@ -789,8 +789,8 @@ All of the examples presented here can be found in the `examples folder of the N
         return storage.get(TOKEN_TOTAL_SUPPLY_PREFIX).to_int()
 
 
-    @public(safe=True)
-    def balanceOf(account: UInt160) -> int:
+    @public(name='balanceOf', safe=True)
+    def balance_of(account: UInt160) -> int:
         """
         Get the current balance of an address
 
@@ -934,7 +934,7 @@ All of the examples presented here can be found in the `examples folder of the N
         if approved_transfer_amount < amount:
             return False
 
-        originator_balance = balanceOf(originator)
+        originator_balance = balance_of(originator)
         if originator_balance < amount:
             return False
 
@@ -992,7 +992,7 @@ All of the examples presented here can be found in the `examples folder of the N
             # one of the address doesn't passed the kyc yet
             return False
 
-        if balanceOf(originator) < amount:
+        if balance_of(originator) < amount:
             return False
 
         storage.put(TRANSFER_ALLOWANCE_PREFIX + originator + to_address, amount)
@@ -1151,8 +1151,8 @@ All of the examples presented here can be found in the `examples folder of the N
         return TOKEN_DECIMALS
 
 
-    @public(safe=True)
-    def totalSupply() -> int:
+    @public(name='totalSupply', safe=True)
+    def total_supply() -> int:
         """
         Gets the total token supply deployed in the system.
 
@@ -1164,8 +1164,8 @@ All of the examples presented here can be found in the `examples folder of the N
         return storage.get(SUPPLY_KEY).to_int()
 
 
-    @public(safe=True)
-    def balanceOf(account: UInt160) -> int:
+    @public(name='balanceOf', safe=True)
+    def balance_of(account: UInt160) -> int:
         """
         Get the current balance of an address.
 
@@ -1316,7 +1316,7 @@ All of the examples presented here can be found in the `examples folder of the N
         assert len(spender) == 20
         assert amount >= 0
 
-        if balanceOf(runtime.calling_script_hash) >= amount:
+        if balance_of(runtime.calling_script_hash) >= amount:
             storage.put(ALLOWANCE_PREFIX + runtime.calling_script_hash + spender, amount)
             on_approval(runtime.calling_script_hash, spender, amount)
             return True
@@ -1371,8 +1371,8 @@ All of the examples presented here can be found in the `examples folder of the N
         """
         assert amount >= 0
         if amount != 0:
-            current_total_supply = totalSupply()
-            account_balance = balanceOf(account)
+            current_total_supply = total_supply()
+            account_balance = balance_of(account)
 
             storage.put(SUPPLY_KEY, current_total_supply + amount)
             storage.put(account, account_balance + amount)
@@ -1397,8 +1397,8 @@ All of the examples presented here can be found in the `examples folder of the N
         assert amount >= 0
         if runtime.check_witness(account):
             if amount != 0:
-                current_total_supply = totalSupply()
-                account_balance = balanceOf(account)
+                current_total_supply = total_supply()
+                account_balance = balance_of(account)
 
                 assert account_balance >= amount
 
