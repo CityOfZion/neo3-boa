@@ -882,6 +882,27 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             expected_type: str = expected_op.operand_type.identifier
             raise CompilerError.MismatchedTypes(0, 0, expected_type, actual_type)
 
+    def visit_Assert(self, assert_: ast.Assert):
+        """
+        Verifies if the types of condition and error message in the assert are valid
+
+        If the operations are valid, changes de Python operator by the Boa operator in the syntax tree
+
+        :param assert_: the python ast assert operation node
+        :return: the type of the result of the operation if the operation is valid. Otherwise, returns None
+        """
+        self.visit(assert_.test)
+
+        if assert_.msg is not None:
+            msg = self.visit(assert_.msg)
+
+            if not isinstance(msg, str):
+                # TODO: remove this error when str constructor is implemented
+                self._log_error(
+                    CompilerError.NotSupportedOperation(assert_.msg.lineno, assert_.msg.col_offset,
+                                                        "assert error message should be a str")
+                )
+
     def visit_Compare(self, compare: ast.Compare) -> Optional[IType]:
         """
         Verifies if the types of the operands are valid to the compare operations

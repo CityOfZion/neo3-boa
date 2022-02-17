@@ -1,4 +1,5 @@
 from boa3.boa3 import Boa3
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
@@ -59,28 +60,18 @@ class TestAssert(BoaTest):
             self.run_smart_contract(engine, path, 'Main', 20, 20)
 
     def test_assert_with_message(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0     # assert a > 0, 'a must be greater than zero'
-            + Opcode.PUSH0
-            + Opcode.GT
-            + Opcode.ASSERT         # neo assert doesn't receive messages yet
-            + Opcode.LDARG0     # return a
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('AssertWithMessage.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
+
+    def test_assert_with_int_message(self):
+        path = self.get_contract_path('AssertWithIntMessage.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_assert_int(self):
         expected_output = (

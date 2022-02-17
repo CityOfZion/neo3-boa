@@ -8,6 +8,7 @@ from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.codegenerator.generatordata import GeneratorData
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.imports.package import Package
@@ -683,6 +684,19 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param assert_node: the python ast assert node
         """
         self.visit_to_generate(assert_node.test)
+
+        if assert_node.msg is not None:
+            self.generator.duplicate_stack_top_item()
+            self.generator.insert_not()
+
+            # if assert is false, log the message
+            start_addr: int = self.generator.convert_begin_if()
+
+            self.visit_to_generate(assert_node.msg)
+            self.generator.convert_builtin_method_call(Interop.Log)
+
+            self.generator.convert_end_if(start_addr)
+
         self.generator.convert_assert()
         return self.build_data(assert_node)
 
