@@ -253,6 +253,10 @@ class MissingStandardDefinition(CompilerError):
                                                                   self.symbol.shadowing_name,
                                                                   self.symbol)
 
+    @property
+    def message(self) -> str:
+        return self._error_message
+
 
 class NotSupportedOperation(CompilerError):
     """

@@ -89,8 +89,8 @@ def _deploy(data: Any, update: bool):
         on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
 
 
-@public(safe=True)
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address.
     """

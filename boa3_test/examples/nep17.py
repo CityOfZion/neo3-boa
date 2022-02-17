@@ -91,8 +91,8 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public(safe=True)
-def totalSupply() -> int:
+@public(name='totalSupply', safe=True)
+def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -104,8 +104,8 @@ def totalSupply() -> int:
     return storage.get(SUPPLY_KEY).to_int()
 
 
-@public(safe=True)
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address
 
@@ -204,8 +204,8 @@ def mint(account: UInt160, amount: int):
     """
     assert amount >= 0
     if amount != 0:
-        current_total_supply = totalSupply()
-        account_balance = balanceOf(account)
+        current_total_supply = total_supply()
+        account_balance = balance_of(account)
 
         storage.put(SUPPLY_KEY, current_total_supply + amount)
         storage.put(account, account_balance + amount)

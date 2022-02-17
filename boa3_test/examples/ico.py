@@ -128,8 +128,8 @@ def mint(amount: int) -> bool:
         return False
 
     if amount > 0:
-        current_total_supply = totalSupply()
-        owner_balance = balanceOf(TOKEN_OWNER)
+        current_total_supply = total_supply()
+        owner_balance = balance_of(TOKEN_OWNER)
 
         storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
         storage.put(TOKEN_OWNER, owner_balance + amount)
@@ -207,8 +207,8 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public(safe=True)
-def totalSupply() -> int:
+@public(name='totalSupply', safe=True)
+def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -220,8 +220,8 @@ def totalSupply() -> int:
     return storage.get(TOKEN_TOTAL_SUPPLY_PREFIX).to_int()
 
 
-@public(safe=True)
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address
 
@@ -365,7 +365,7 @@ def transfer_from(originator: UInt160, from_address: UInt160, to_address: UInt16
     if approved_transfer_amount < amount:
         return False
 
-    originator_balance = balanceOf(originator)
+    originator_balance = balance_of(originator)
     if originator_balance < amount:
         return False
 
@@ -423,7 +423,7 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
         # one of the address doesn't passed the kyc yet
         return False
 
-    if balanceOf(originator) < amount:
+    if balance_of(originator) < amount:
         return False
 
     storage.put(TRANSFER_ALLOWANCE_PREFIX + originator + to_address, amount)
