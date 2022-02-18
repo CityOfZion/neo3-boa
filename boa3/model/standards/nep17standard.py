@@ -9,21 +9,26 @@ class Nep17Standard(INeoStandard):
     def __init__(self):
         type_uint160 = UInt160Type.build()
 
-        methods = {
-            'symbol': StandardMethod(args={},
-                                     return_type=Type.str),
-            'decimals': StandardMethod(args={},
-                                       return_type=Type.int),
-            'totalSupply': StandardMethod(args={},
-                                          return_type=Type.int),
-            'balanceOf': StandardMethod(args={'account': type_uint160},
-                                        return_type=Type.int),
-            'transfer': StandardMethod(args={'from': type_uint160,
-                                             'to': type_uint160,
-                                             'amount': Type.int,
-                                             'data': Type.any},
-                                       return_type=Type.bool)
-        }
+        methods = [
+            StandardMethod('symbol', safe=True,
+                           args={},
+                           return_type=Type.str),
+            StandardMethod('decimals', safe=True,
+                           args={},
+                           return_type=Type.int),
+            StandardMethod('totalSupply', safe=True,
+                           args={},
+                           return_type=Type.int),
+            StandardMethod('balanceOf', safe=True,
+                           args={'account': type_uint160},
+                           return_type=Type.int),
+            StandardMethod('transfer',
+                           args={'from': type_uint160,
+                                 'to': type_uint160,
+                                 'amount': Type.int,
+                                 'data': Type.any},
+                           return_type=Type.bool)
+        ]
         events = [
             Builtin.Nep17Transfer
         ]

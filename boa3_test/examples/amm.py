@@ -134,8 +134,8 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public(safe=True)
-def totalSupply() -> int:
+@public(name='totalSupply', safe=True)
+def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -147,8 +147,8 @@ def totalSupply() -> int:
     return storage.get(SUPPLY_KEY).to_int()
 
 
-@public(safe=True)
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address
 
@@ -469,7 +469,7 @@ def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min
         assert runtime.check_witness(user_address)
 
     assert runtime.check_witness(user_address)
-    assert liquidity <= balanceOf(user_address)
+    assert liquidity <= balance_of(user_address)
     amount = burn(liquidity, user_address)
     # Verify if the amount of token_a and token_b are equal or greater than the minimum amount
     assert amount[0] >= amount_token_a_min and amount[1] >= amount_token_b_min
@@ -510,7 +510,7 @@ def burn(liquidity: int, user_address: UInt160) -> List[int]:
         assert amount_token_a > 0 and amount_token_b > 0
 
         # changing the user balance after burning the liquidity
-        storage.put(user_address, balanceOf(user_address) - liquidity)
+        storage.put(user_address, balance_of(user_address) - liquidity)
         # update the amount of AMM tokens in this smart contract
         storage.put(SUPPLY_KEY, total_supply - liquidity)
         on_transfer(user_address, None, liquidity)

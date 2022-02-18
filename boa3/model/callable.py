@@ -77,9 +77,10 @@ class Callable(IExpression, ABC):
 
         self.is_public: bool = is_public or public_decorator is not None
         if self.is_public:
-            external_name = (public_decorator.name
-                             if isinstance(public_decorator, PublicDecorator)
-                             else None)
+            if isinstance(public_decorator, PublicDecorator):
+                external_name = public_decorator.name
+            elif self.defined_by_entry:
+                external_name = None
 
         self.external_name: Optional[str] = external_name
         self.is_safe: bool = is_safe or (isinstance(public_decorator, PublicDecorator) and public_decorator.safe)

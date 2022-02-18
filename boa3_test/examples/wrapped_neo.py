@@ -99,8 +99,8 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public(safe=True)
-def totalSupply() -> int:
+@public(name='totalSupply', safe=True)
+def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -112,8 +112,8 @@ def totalSupply() -> int:
     return storage.get(SUPPLY_KEY).to_int()
 
 
-@public(safe=True)
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address.
 
@@ -264,7 +264,7 @@ def approve(spender: UInt160, amount: int) -> bool:
     assert len(spender) == 20
     assert amount >= 0
 
-    if balanceOf(runtime.calling_script_hash) >= amount:
+    if balance_of(runtime.calling_script_hash) >= amount:
         storage.put(ALLOWANCE_PREFIX + runtime.calling_script_hash + spender, amount)
         on_approval(runtime.calling_script_hash, spender, amount)
         return True
@@ -319,8 +319,8 @@ def mint(account: UInt160, amount: int):
     """
     assert amount >= 0
     if amount != 0:
-        current_total_supply = totalSupply()
-        account_balance = balanceOf(account)
+        current_total_supply = total_supply()
+        account_balance = balance_of(account)
 
         storage.put(SUPPLY_KEY, current_total_supply + amount)
         storage.put(account, account_balance + amount)
@@ -345,8 +345,8 @@ def burn(account: UInt160, amount: int):
     assert amount >= 0
     if runtime.check_witness(account):
         if amount != 0:
-            current_total_supply = totalSupply()
-            account_balance = balanceOf(account)
+            current_total_supply = total_supply()
+            account_balance = balance_of(account)
 
             assert account_balance >= amount
 

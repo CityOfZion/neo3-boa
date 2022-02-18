@@ -1,25 +1,24 @@
 import abc
-from typing import Dict, List, Union
+from typing import List, Union
 
 from boa3.model.event import Event
 from boa3.model.method import Method
 
 
 class INeoStandard(abc.ABC):
-    def __init__(self, methods: Dict[str, Method], events: List[Event]):
-        self.methods: Dict[str, Method] = methods
-        self.events: Dict[str, Event] = {event.name: event for event in events}
+    def __init__(self, methods: List[Method], events: List[Event]):
+        self.methods: List[Method] = methods.copy()
+        self.events: List[Event] = events.copy()
 
-    def match_definition(self, symbol_id: str, symbol: Union[Method, Event]) -> bool:
-        if not isinstance(symbol, (Method, Event)) or not isinstance(symbol_id, str):
+    def match_definition(self, standard: Union[Method, Event], symbol: Union[Method, Event]) -> bool:
+        if not isinstance(standard, (Method, Event)) or not isinstance(symbol, (Method, Event)):
             return False
 
         standard_symbols = self.methods if isinstance(symbol, Method) else self.events
-        if symbol_id not in standard_symbols:
+        if standard not in standard_symbols:
             return False
 
-        standard_def = standard_symbols[symbol_id]
-        return self._have_same_signature(standard_def, symbol)
+        return self._have_same_signature(standard, symbol)
 
     def _have_same_signature(self, symbol: Union[Method, Event], other: Union[Method, Event]) -> bool:
         if (isinstance(symbol, Method) and not isinstance(other, Method)
@@ -30,6 +29,9 @@ class INeoStandard(abc.ABC):
             return False
 
         if symbol.is_public != other.is_public:
+            return False
+
+        if symbol.is_safe != other.is_safe:
             return False
 
         if len(symbol.args) != len(other.args):
