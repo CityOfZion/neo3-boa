@@ -9,6 +9,7 @@ class VerifyWithECDsaMethod(CryptoLibMethod):
     def __init__(self):
         from boa3.model.type.type import Type
         from boa3.model.type.collection.sequence.ecpointtype import ECPointType
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
         from boa3.model.builtin.interop.crypto.namedcurvetype import NamedCurveType
 
         identifier = 'verify_with_ecdsa'
@@ -16,8 +17,7 @@ class VerifyWithECDsaMethod(CryptoLibMethod):
         args: Dict[str, Variable] = {
             'data': Variable(Type.any),
             'pubkey': Variable(ECPointType.build()),
-            'signature': Variable(Type.union.build([Type.str,
-                                                    Type.bytes])),
+            'signature': Variable(ByteStringType.build()),
             'curve': Variable(NamedCurveType.build())
         }
         super().__init__(identifier, native_identifier, args, return_type=Type.bool)

@@ -8,11 +8,10 @@ from boa3.neo3.core.types import UInt160
 
 class ContractDecorator(IBuiltinDecorator):
     def __init__(self):
-        from boa3.model.type.type import Type
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'contract'
-        args: Dict[str, Variable] = {'script_hash': Variable(Type.union.build([Type.str,
-                                                                               Type.bytes]))}
+        args: Dict[str, Variable] = {'script_hash': Variable(ByteStringType.build())}
         super().__init__(identifier, args)
         self.contract_hash = UInt160()
 

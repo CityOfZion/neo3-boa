@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, List
 
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -19,11 +19,29 @@ class StackItemType(bytes, Enum):
     Map = b'\x48'
     InteropInterface = b'\x60'
 
-    @classmethod
-    def get_stack_item_type(cls, stack_item_type: str) -> StackItemType:
+    @staticmethod
+    def get_stack_item_type(stack_item_type: str) -> StackItemType:
         try:
             return StackItemType[stack_item_type]
         except BaseException:
+            return StackItemType.Any
+
+    @staticmethod
+    def union(stack_item_types: List[StackItemType]) -> StackItemType:
+        if len(stack_item_types) == 0:
+            return StackItemType.Any
+
+        if len(stack_item_types) == 1:
+            return stack_item_types[0]
+
+        stacks = stack_item_types[:1]
+        for union in stack_item_types[1:]:
+            if union not in stacks:
+                stacks.append(union)
+
+        if len(stacks) == 1:
+            return stacks[0]
+        else:
             return StackItemType.Any
 
 

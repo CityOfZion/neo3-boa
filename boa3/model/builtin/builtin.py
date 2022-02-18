@@ -18,6 +18,7 @@ from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 from boa3.model.type.math import Math
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 
 
 class BoaPackage(str, Enum):
@@ -155,6 +156,7 @@ class Builtin:
     Public = PublicDecorator()
 
     # boa builtin type
+    ByteString = ByteStringType.build()
     Event = EventType
     UInt160 = UInt160Type.build()
     UInt256 = UInt256Type.build()
@@ -220,7 +222,8 @@ class Builtin:
                               Nep5Transfer,
                               ],
         BoaPackage.Interop: Interop.package_symbols,
-        BoaPackage.Type: [ECPoint,
+        BoaPackage.Type: [ByteString,
+                          ECPoint,
                           UInt160,
                           UInt256
                           ]

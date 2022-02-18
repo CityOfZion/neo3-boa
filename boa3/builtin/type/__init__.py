@@ -29,3 +29,10 @@ class ECPoint(bytes):
     def __init__(self, arg: bytes):
         super().__init__()
         pass
+
+
+class ByteString:
+    """
+    An type annotation for values that can be str or bytes. Same as Union[str, bytes]
+    """
+    pass

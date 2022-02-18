@@ -1,4 +1,6 @@
-from typing import Any, Union
+from typing import Any
+
+from boa3.builtin.type import ByteString
 
 
 def base58_encode(key: bytes) -> str:
@@ -133,7 +135,7 @@ def itoa(value: int, base: int = 10) -> str:
     pass
 
 
-def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int = 0, backward: bool = False) -> int:
+def memory_search(mem: ByteString, value: ByteString, start: int = 0, backward: bool = False) -> int:
     """
     Searches for a given value in a given memory.
 
@@ -152,7 +154,7 @@ def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int =
     pass
 
 
-def memory_compare(mem1: Union[bytes, str], mem2: Union[bytes, str]) -> int:
+def memory_compare(mem1: ByteString, mem2: ByteString) -> int:
     """
     Compares a memory with another one.
 

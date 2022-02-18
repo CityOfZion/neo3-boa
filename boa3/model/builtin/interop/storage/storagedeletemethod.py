@@ -14,14 +14,14 @@ class StorageDeleteMethod(InteropMethod):
     def __init__(self):
         from boa3.model.type.type import Type
         from boa3.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'delete'
         syscall = 'System.Storage.Delete'
         context_type = StorageContextType.build()
+        byte_string_type = ByteStringType.build()
 
-        args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
-                                                                       Type.str
-                                                                       ])),
+        args: Dict[str, Variable] = {'key': Variable(byte_string_type),
                                      'context': Variable(context_type)}
 
         from boa3.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
@@ -29,22 +29,6 @@ class StorageDeleteMethod(InteropMethod):
         context_default = set_internal_call(ast.parse("{0}()".format(default_id)
                                                       ).body[0].value)
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
-
-    def validate_parameters(self, *params: IExpression) -> bool:
-        if any(not isinstance(param, IExpression) for param in params):
-            return False
-
-        args: List[IType] = [arg.type for arg in self.args.values()]
-        # TODO: refactor when default arguments are implemented
-        if len(params) != len(args):
-            return False
-
-        return self._validate_key_type(params[0].type)
-
-    def _validate_key_type(self, key_type: IType):
-        # TODO: refactor when `Union` type is implemented
-        from boa3.model.type.type import Type
-        return Type.str.is_type_of(key_type) or Type.bytes.is_type_of(key_type)
 
     @property
     def generation_order(self) -> List[int]:

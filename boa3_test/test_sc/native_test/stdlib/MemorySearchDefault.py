@@ -1,9 +1,8 @@
-from typing import Union
-
 from boa3.builtin import public
 from boa3.builtin.nativecontract.stdlib import StdLib
+from boa3.builtin.type import ByteString
 
 
 @public
-def main(mem: Union[bytes, str], value: Union[bytes, str]) -> int:
+def main(mem: ByteString, value: ByteString) -> int:
     return StdLib.memory_search(mem, value)

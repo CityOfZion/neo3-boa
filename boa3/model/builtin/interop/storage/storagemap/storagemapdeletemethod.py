@@ -10,12 +10,13 @@ class StorageMapDeleteMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap
         from boa3.model.type.type import Type
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'delete'
+        byte_string_type = ByteStringType.build()
+
         args: Dict[str, Variable] = {'self': Variable(_StorageMap),
-                                     'key': Variable(Type.union.build([Type.bytes,
-                                                                       Type.str
-                                                                       ]))}
+                                     'key': Variable(byte_string_type)}
 
         super().__init__(identifier, args, return_type=Type.none)
 

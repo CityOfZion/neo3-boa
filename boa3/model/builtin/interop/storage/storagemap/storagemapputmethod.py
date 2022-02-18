@@ -10,14 +10,14 @@ class StorageMapPutMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap
         from boa3.model.type.type import Type
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'put'
+        byte_string_type = ByteStringType.build()
+
         args: Dict[str, Variable] = {'self': Variable(_StorageMap),
-                                     'key': Variable(Type.union.build([Type.bytes,
-                                                                       Type.str
-                                                                       ])),
-                                     'value': Variable(Type.union.build([Type.bytes,
-                                                                         Type.str,
+                                     'key': Variable(byte_string_type),
+                                     'value': Variable(Type.union.build([byte_string_type,
                                                                          Type.int
                                                                          ]))}
 

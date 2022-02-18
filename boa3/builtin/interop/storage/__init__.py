@@ -4,9 +4,10 @@ from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.interop.storage.storagecontext import StorageContext
 from boa3.builtin.interop.storage.storagemap import StorageMap
+from boa3.builtin.type import ByteString
 
 
-def get(key: Union[str, bytes], context: StorageContext = None) -> bytes:
+def get(key: ByteString, context: StorageContext = None) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
 
@@ -40,7 +41,7 @@ def get_read_only_context() -> StorageContext:
     pass
 
 
-def put(key: Union[str, bytes], value: Union[int, str, bytes], context: StorageContext = None):
+def put(key: ByteString, value: Union[int, ByteString], context: StorageContext = None):
     """
     Inserts a given value in the key-value format into the persistent storage.
 
@@ -54,7 +55,7 @@ def put(key: Union[str, bytes], value: Union[int, str, bytes], context: StorageC
     pass
 
 
-def delete(key: Union[str, bytes], context: StorageContext = None):
+def delete(key: ByteString, context: StorageContext = None):
     """
     Removes a given key from the persistent storage if exists.
 
@@ -66,7 +67,7 @@ def delete(key: Union[str, bytes], context: StorageContext = None):
     pass
 
 
-def find(prefix: Union[str, bytes],
+def find(prefix: ByteString,
          context: StorageContext = None,
          options: FindOptions = FindOptions.NONE) -> Iterator:
     """
