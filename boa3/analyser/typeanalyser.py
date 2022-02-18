@@ -895,12 +895,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if assert_.msg is not None:
             msg = self.visit(assert_.msg)
+            msg_type = self.get_type(msg)
 
-            if not isinstance(msg, str):
+            if not Type.str.is_type_of(msg_type) and not Type.bytes.is_type_of(msg_type):
+
                 # TODO: remove this error when str constructor is implemented
                 self._log_error(
-                    CompilerError.NotSupportedOperation(assert_.msg.lineno, assert_.msg.col_offset,
-                                                        "assert error message should be a str")
+                    CompilerError.MismatchedTypes(
+                        assert_.msg.lineno, assert_.msg.col_offset,
+                        expected_type_id=Type.str.identifier,
+                        actual_type_id=str(msg_type)
+                    )
                 )
 
     def visit_Compare(self, compare: ast.Compare) -> Optional[IType]:

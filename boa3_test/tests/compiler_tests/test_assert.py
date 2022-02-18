@@ -69,9 +69,47 @@ class TestAssert(BoaTest):
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
 
+    def test_assert_with_bytes_message(self):
+        path = self.get_contract_path('AssertWithBytesMessage.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(10, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'Main', -10)
+
     def test_assert_with_int_message(self):
         path = self.get_contract_path('AssertWithIntMessage.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_assert_with_bool_message(self):
+        path = self.get_contract_path('AssertWithBoolMessage.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_assert_with_list_message(self):
+        path = self.get_contract_path('AssertWithListMessage.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_assert_with_str_var_message(self):
+        path = self.get_contract_path('AssertWithStrVarMessage.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(10, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'Main', -10)
+
+    def test_assert_with_str_function_message(self):
+        path = self.get_contract_path('AssertWithStrFunctionMessage.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main', 10)
+        self.assertEqual(10, result)
+
+        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'Main', -10)
 
     def test_assert_int(self):
         expected_output = (
