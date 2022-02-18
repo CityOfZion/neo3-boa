@@ -414,6 +414,12 @@ class CodeGenerator:
         """
         self.__insert1(OpcodeInfo.RET)
 
+    def insert_not(self):
+        """
+        Insert a `not` to change the value of a bool
+        """
+        self.__insert1(OpcodeInfo.NOT)
+
     def convert_begin_while(self, is_for: bool = False) -> int:
         """
         Converts the beginning of the while statement
