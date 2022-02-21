@@ -2,6 +2,7 @@ boa3.builtin package
 ====================
 
 .. automodule:: boa3.builtin
+   :no-undoc-members:
 
 .. toctree::
    :caption: Subpackages:
