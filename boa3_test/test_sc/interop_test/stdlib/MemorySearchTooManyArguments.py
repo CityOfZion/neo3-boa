@@ -1,7 +1,8 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.interop.stdlib import memory_search
+from boa3.builtin.type import ByteString
 
 
-def main(mem: Union[bytes, str], value: Union[bytes, str], start: int, backward: bool, arg: Any) -> int:
+def main(mem: ByteString, value: ByteString, start: int, backward: bool, arg: Any) -> int:
     return memory_search(mem, value, start, backward, arg)

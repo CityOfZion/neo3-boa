@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Union
-
 from boa3.builtin.interop.storage.storagemap import StorageMap
+from boa3.builtin.type import ByteString
 
 
 class StorageContext:
@@ -13,7 +12,7 @@ class StorageContext:
     def __init__(self):
         pass
 
-    def create_map(self, prefix: Union[str, bytes]) -> StorageMap:
+    def create_map(self, prefix: ByteString) -> StorageMap:
         """
         Creates a storage map with the given prefix.
 

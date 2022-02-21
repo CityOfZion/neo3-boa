@@ -1,7 +1,7 @@
-from typing import Any, List, Union
+from typing import Any, List
 
 from boa3.builtin.interop.crypto.namedcurve import NamedCurve
-from boa3.builtin.type import ECPoint
+from boa3.builtin.type import ByteString, ECPoint
 
 
 def sha256(key: Any) -> bytes:
@@ -80,7 +80,7 @@ def check_multisig(pubkeys: List[ECPoint], signatures: List[bytes]) -> bool:
     pass
 
 
-def verify_with_ecdsa(message: Any, pubkey: ECPoint, signature: Union[bytes, str], curve: NamedCurve) -> bool:
+def verify_with_ecdsa(message: Any, pubkey: ECPoint, signature: ByteString, curve: NamedCurve) -> bool:
     """
     Using the elliptic curve, it checks if the signature of the any item was originally produced by the public key.
 

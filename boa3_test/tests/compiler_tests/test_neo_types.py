@@ -264,6 +264,110 @@ class TestNeoTypes(BoaTest):
 
     # endregion
 
+    # region ByteString
+
+    def test_byte_string_to_bool(self):
+        path = self.get_contract_path('ByteStringToBool.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_bool', b'\x00')
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'to_bool', '\x00')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'to_bool', b'\x01')
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'to_bool', '\x01')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'to_bool', b'\x02')
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'to_bool', '\x02')
+        self.assertEqual(True, result)
+
+    def test_byte_string_to_bool_with_builtin(self):
+        path = self.get_contract_path('ByteStringToBoolWithBuiltin.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_bool', b'\x00')
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'to_bool', '\x00')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'to_bool', b'\x01')
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'to_bool', '\x01')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'to_bool', b'\x02')
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'to_bool', '\x02')
+        self.assertEqual(True, result)
+
+    def test_byte_string_to_int(self):
+        path = self.get_contract_path('ByteStringToInt.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_int', b'\x01\x02')
+        self.assertEqual(513, result)
+        result = self.run_smart_contract(engine, path, 'to_int', '\x01\x02')
+        self.assertEqual(513, result)
+
+    def test_byte_string_to_int_with_builtin(self):
+        path = self.get_contract_path('ByteStringToIntWithBuiltin.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_int', b'\x01\x02')
+        self.assertEqual(513, result)
+        result = self.run_smart_contract(engine, path, 'to_int', '\x01\x02')
+        self.assertEqual(513, result)
+
+    def test_byte_string_to_str(self):
+        path = self.get_contract_path('ByteStringToStr.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_str', b'abc')
+        self.assertEqual('abc', result)
+
+        result = self.run_smart_contract(engine, path, 'to_str', b'123')
+        self.assertEqual('123', result)
+
+    def test_byte_string_to_str_with_builtin(self):
+        path = self.get_contract_path('ByteStringToStrWithBuiltin.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_str', b'abc')
+        self.assertEqual('abc', result)
+
+        result = self.run_smart_contract(engine, path, 'to_str', b'123')
+        self.assertEqual('123', result)
+
+    def test_byte_string_to_bytes(self):
+        path = self.get_contract_path('ByteStringToBytes.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_bytes', 'abc',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'abc', result)
+
+        result = self.run_smart_contract(engine, path, 'to_bytes', '123',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'123', result)
+
+    def test_byte_string_to_bytes_with_builtin(self):
+        path = self.get_contract_path('ByteStringToBytesWithBuiltin.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'to_bytes', 'abc',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'abc', result)
+
+        result = self.run_smart_contract(engine, path, 'to_bytes', '123',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'123', result)
+
+    # endregion
+
     # region IsInstance Neo Types
 
     def test_isinstance_contract(self):

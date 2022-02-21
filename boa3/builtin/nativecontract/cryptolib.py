@@ -1,7 +1,7 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.interop.crypto import NamedCurve
-from boa3.builtin.type import ECPoint
+from boa3.builtin.type import ByteString, ECPoint
 
 
 class CryptoLib:
@@ -34,7 +34,7 @@ class CryptoLib:
         pass
 
     @classmethod
-    def verify_with_ecdsa(cls, message: Any, pubkey: ECPoint, signature: Union[bytes, str], curve: NamedCurve) -> bool:
+    def verify_with_ecdsa(cls, message: Any, pubkey: ECPoint, signature: ByteString, curve: NamedCurve) -> bool:
         """
         Using the elliptic curve, it checks if the signature of the any item was originally produced by the public key.
 

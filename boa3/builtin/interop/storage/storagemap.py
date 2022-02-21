@@ -1,18 +1,20 @@
 from typing import Union
 
+from boa3.builtin.type import ByteString
+
 
 class StorageMap:
     """
     The key-value storage for the specific prefix in the given storage context.
     """
 
-    def __init__(self, context, prefix: Union[bytes, str]):
+    def __init__(self, context, prefix: ByteString):
         from boa3.builtin.interop.storage.storagecontext import StorageContext
 
         self._context: StorageContext
-        self._prefix: Union[bytes, str]
+        self._prefix: ByteString
 
-    def get(self, key: Union[str, bytes]) -> bytes:
+    def get(self, key: ByteString) -> bytes:
         """
         Gets a value from the map based on the given key.
 
@@ -23,7 +25,7 @@ class StorageMap:
         """
         pass
 
-    def put(self, key: Union[str, bytes], value: Union[int, str, bytes]):
+    def put(self, key: ByteString, value: Union[int, ByteString]):
         """
         Inserts a given value in the key-value format into the map.
 
@@ -34,7 +36,7 @@ class StorageMap:
         """
         pass
 
-    def delete(self, key: Union[str, bytes]):
+    def delete(self, key: ByteString):
         """
         Removes a given key from the map if exists.
 

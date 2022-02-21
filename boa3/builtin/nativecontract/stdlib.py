@@ -1,4 +1,6 @@
-from typing import Any, Union
+from typing import Any
+
+from boa3.builtin.type import ByteString
 
 
 class StdLib:
@@ -168,7 +170,7 @@ class StdLib:
         pass
 
     @classmethod
-    def memory_compare(cls, mem1: Union[bytes, str], mem2: Union[bytes, str]) -> int:
+    def memory_compare(cls, mem1: ByteString, mem2: ByteString) -> int:
         """
         Compares a memory with another one.
 
@@ -183,7 +185,7 @@ class StdLib:
         pass
 
     @classmethod
-    def memory_search(cls, mem: Union[bytes, str], value: Union[bytes, str], start: int = 0, backward: bool = False) -> int:
+    def memory_search(cls, mem: ByteString, value: ByteString, start: int = 0, backward: bool = False) -> int:
         """
         Searches for a given value in a given memory.
 

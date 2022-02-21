@@ -1,6 +1,27 @@
 from typing import Any, Dict, List, Tuple, Union
 
 
+def Event(*args, **kwargs):
+    """
+    Describes an action that happened in the blockchain.
+    """
+    pass
+
+
+def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '') -> Event:
+    """
+    Creates a new event.
+
+    :param arguments: the list of the events args' names and types
+    :type arguments: List[Tuple[str, type]]
+    :param event_name: custom name of the event. It's filled with the variable name if not specified
+    :type event_name: str
+    :return: the new event
+    :rtype: Event
+    """
+    pass
+
+
 def public(name: str = None, safe: bool = True, *args, **kwargs):
     """
     This decorator identifies which methods should be included in the abi file.
@@ -22,7 +43,11 @@ def metadata(*args):
     pass
 
 
-def contract(script_hash: Union[str, bytes]):
+# import is after because there was conflict with Python built-in type
+from boa3.builtin import type
+
+
+def contract(script_hash: type.ByteString):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
 
@@ -51,27 +76,6 @@ def to_script_hash(data_bytes: Any) -> bytes:
     :type data_bytes: Any
     :return: the script hash of the data
     :rtype: bytes
-    """
-    pass
-
-
-def Event(*args, **kwargs):
-    """
-    Describes an action that happened in the blockchain.
-    """
-    pass
-
-
-def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '') -> Event:
-    """
-    Creates a new event.
-
-    :param arguments: the list of the events args' names and types
-    :type arguments: List[Tuple[str, type]]
-    :param event_name: custom name of the event. It's filled with the variable name if not specified
-    :type event_name: str
-    :return: the new event
-    :rtype: Event
     """
     pass
 

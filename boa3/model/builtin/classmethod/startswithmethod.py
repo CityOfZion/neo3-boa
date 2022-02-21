@@ -2,17 +2,18 @@ import ast
 from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
-from boa3.model.type.primitive.bytestringtype import ByteStringType
+from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class StartsWithMethod(IBuiltinMethod):
-    def __init__(self, self_type: ByteStringType = None):
+    def __init__(self, self_type: IByteStringType = None):
         from boa3.model.type.type import Type
 
-        if not isinstance(self_type, ByteStringType):
-            self_type = Type.str
+        if not isinstance(self_type, IByteStringType):
+            from boa3.model.type.primitive.bytestringtype import ByteStringType
+            self_type = ByteStringType.build()
 
         identifier = 'startswith'
         args: Dict[str, Variable] = {
@@ -186,6 +187,6 @@ class StartsWithMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, ByteStringType):
+        if isinstance(value, IByteStringType):
             return StartsWithMethod(value)
         return super().build(value)

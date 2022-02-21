@@ -14,15 +14,15 @@ class StoragePutMethod(InteropMethod):
     def __init__(self):
         from boa3.model.type.type import Type
         from boa3.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'put'
         syscall = 'System.Storage.Put'
         context_type = StorageContextType.build()
-        args: Dict[str, Variable] = {'key': Variable(Type.union.build([Type.bytes,
-                                                                       Type.str
-                                                                       ])),
-                                     'value': Variable(Type.union.build([Type.bytes,
-                                                                         Type.str,
+        byte_string_type = ByteStringType.build()
+
+        args: Dict[str, Variable] = {'key': Variable(byte_string_type),
+                                     'value': Variable(Type.union.build([byte_string_type,
                                                                          Type.int
                                                                          ])),
                                      'context': Variable(context_type)}
@@ -32,18 +32,6 @@ class StoragePutMethod(InteropMethod):
         context_default = set_internal_call(ast.parse("{0}()".format(default_id)
                                                       ).body[0].value)
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
-
-    def validate_parameters(self, *params: IExpression) -> bool:
-        if any(not isinstance(param, IExpression) for param in params):
-            return False
-
-        args: List[IType] = [arg.type for arg in self.args.values()]
-        # TODO: refactor when default arguments are implemented
-        if len(params) != len(args):
-            return False
-
-        return (self.key_arg.type.is_type_of(params[0].type)
-                and self.value_arg.type.is_type_of(params[1].type))
 
     @property
     def generation_order(self) -> List[int]:

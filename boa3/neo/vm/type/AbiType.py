@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
+from typing import List
 
 
 class AbiType(str, Enum):
@@ -15,3 +18,46 @@ class AbiType(str, Enum):
     InteropInterface = 'InteropInterface'
     Any = 'Any'
     Void = 'Void'
+
+    @staticmethod
+    def union(abi_types: List[AbiType]) -> AbiType:
+        if len(abi_types) == 0:
+            return AbiType.Any
+
+        if len(abi_types) == 1:
+            return abi_types[0]
+
+        abis = abi_types[:1]
+        for abi in abi_types[1:]:
+            if abi not in abis:
+                abis.append(abi)
+
+        if len(abis) == 1:
+            return abis[0]
+
+        generic_mapping = {
+            AbiType.Signature: AbiType.ByteArray,
+            AbiType.Boolean: AbiType.Integer,
+            AbiType.Integer: AbiType.Integer,
+            AbiType.Hash160: AbiType.ByteArray,
+            AbiType.Hash256: AbiType.ByteArray,
+            AbiType.ByteArray: AbiType.ByteArray,
+            AbiType.PublicKey: AbiType.ByteArray,
+            AbiType.String: AbiType.ByteArray,
+            AbiType.Array: AbiType.Array,
+            AbiType.Map: AbiType.Map,
+            AbiType.InteropInterface: AbiType.InteropInterface,
+            AbiType.Any: AbiType.Any,
+            AbiType.Void: AbiType.Void
+        }
+
+        generic_abis = [generic_mapping[abis[0]]]
+        for abi in abis[1:]:
+            generic = generic_mapping[abi]
+            if generic not in generic_abis:
+                generic_abis.append(generic)
+
+        if len(generic_abis) == 1:
+            return generic_abis[0]
+        else:
+            return AbiType.Any

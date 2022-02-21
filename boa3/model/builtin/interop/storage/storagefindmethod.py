@@ -21,9 +21,9 @@ class StorageFindMethod(InteropMethod):
         context_type = StorageContextType.build()
 
         if prefix_type is None:
-            prefix_type = Type.union.build([Type.bytes,
-                                            Type.str
-                                            ])
+            from boa3.model.type.primitive.bytestringtype import ByteStringType
+            prefix_type = ByteStringType.build()
+
         args: Dict[str, Variable] = {'prefix': Variable(prefix_type),
                                      'context': Variable(context_type),
                                      'options': Variable(find_options_type)}
@@ -47,17 +47,6 @@ class StorageFindMethod(InteropMethod):
     @property
     def identifier(self) -> str:
         return '-{0}_{1}'.format(self._identifier, self.prefix_arg.type.identifier)
-
-    def validate_parameters(self, *params: IExpression) -> bool:
-        if any(not isinstance(param, IExpression) for param in params):
-            return False
-
-        args: List[IType] = [arg.type for arg in self.args.values()]
-        # TODO: refactor when default arguments are implemented
-        if len(params) != len(args):
-            return False
-
-        return self.prefix_arg.type.is_type_of(params[0].type)
 
     @property
     def generation_order(self) -> List[int]:

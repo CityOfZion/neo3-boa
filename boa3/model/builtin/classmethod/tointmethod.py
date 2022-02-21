@@ -5,6 +5,7 @@ from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.type.itype import IType
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -53,7 +54,7 @@ class _ConvertToIntMethod(ToIntMethod):
         super().__init__(None)
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, BytesType):
+        if isinstance(value, (BytesType, ByteStringType)):
             return BytesToIntMethod(value)
         # if it is not a valid type, show mismatched type with bytes
         return BytesToIntMethod()
@@ -64,7 +65,7 @@ ToInt = _ConvertToIntMethod()
 
 class BytesToIntMethod(ToIntMethod):
     def __init__(self, self_type: IType = None):
-        if not isinstance(self_type, BytesType):
+        if not isinstance(self_type, (BytesType, ByteStringType)):
             from boa3.model.type.type import Type
             self_type = Type.bytes
         super().__init__(self_type)

@@ -1,11 +1,11 @@
 from typing import Any
 
 from boa3.model.type.itype import IType
-from boa3.model.type.primitive.bytestringtype import ByteStringType
+from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.neo.vm.type.AbiType import AbiType
 
 
-class BytesType(ByteStringType):
+class BytesType(IByteStringType):
     """
     A class used to represent Python bytes type
     """

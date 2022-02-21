@@ -1,6 +1,8 @@
 from typing import Any, Iterable, List, Set
 
 from boa3.model.type.itype import IType
+from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class UnionType(IType):
@@ -13,6 +15,10 @@ class UnionType(IType):
         super().__init__(identifier)
         self._union_types: Set[IType] = union_types
 
+        # variables to not reevaluate everytime we need to access
+        self._abi_type: AbiType = None
+        self._stack_item: StackItemType = None
+
     @property
     def identifier(self) -> str:
         return '{0}[{1}]'.format(self._identifier,
@@ -21,6 +27,18 @@ class UnionType(IType):
     @property
     def union_types(self) -> List[IType]:
         return list(self._union_types)
+
+    @property
+    def abi_type(self) -> AbiType:
+        if self._abi_type is None:
+            self._abi_type = AbiType.union([union.abi_type for union in self._union_types])
+        return self._abi_type
+
+    @property
+    def stack_item(self) -> StackItemType:
+        if self._stack_item is None:
+            self._stack_item = StackItemType.union([union.stack_item for union in self._union_types])
+        return self._stack_item
 
     def _is_type_of(self, value: Any) -> bool:
         if not isinstance(self._union_types, Iterable):
