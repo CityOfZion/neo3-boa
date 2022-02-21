@@ -5,8 +5,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [0.11.0] - 2022-02-21
 ### Added
+- Support to contract manifest modifiers. See [NeoMetadata](https://dojo.coz.io/neo3/boa/boa3/builtin/boa3-builtins.html#boa3.builtin.NeoMetadata) 
 - Initial support to inheritance on user-created classes
+- Implemented Python `+` operator for lists
+- Implemented implicit conversion to `bool` on if statements
+- Support to Python's builtins:
+  - `pow` method
+  - `int` and `bool` constructors
+- Implemented `builtin.math` module
+  - Methods `floor` and `ceil` with decimals argument
+- Implemented `ByteString` to interface when both `str` and `bytes` are supported.
+  - Similar to `Union[str, bytes]`
+
+### Changed
+- Moved `boa3.builtin.sqrt` to `boar.builtin.math.sqrt`
+- `assert` message is actually logged at runtime
+
+### Fixed
+- Fixed class import with alias
+- Fixed runtime errors with lists of lists
+- Fixed runtime errors when using variables with the same name in classes and functions
 
 
 ## [0.10.1] - 2021-11-30
@@ -292,7 +314,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...HEAD
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.11.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.0
 [0.10.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.1
 [0.10.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.0
 [0.9.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.9.0
