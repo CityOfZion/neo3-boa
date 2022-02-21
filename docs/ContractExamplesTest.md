@@ -51,11 +51,12 @@
   - [v0.8.3](#v083)
     - [Relational operations](#relational-operations-1)
     - [Bitwise augmented assignment operators](#bitwise-augmented-assignment-operators)
-    - [Built in function](#built-in-function-6)
     - [Import](#import-2)
 - [v0.10](#v010)
   - [User-created classes](#user-created-classes)
   - [Sequence slicing](#sequence-slicing-1)
+- [v0.11](#v011)
+  - [Built in function](#built-in-function-7)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -586,3 +587,8 @@
 - <a href="/boa3_test/test_sc/tuple_test/TupleSlicingWithNegativeStride.py">TupleSlicingWithNegativeStride.py</a>,
 - <a href="/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithStride.py">TupleSlicingOmittedWithStride.py</a>,
 - <a href="/boa3_test/test_sc/tuple_test/TupleSlicingOmittedWithNegativeStride.py">TupleSlicingOmittedWithNegativeStride.py</a>
+
+## v0.11
+### Built in function
+- <a href="/boa3_test/test_sc/math_test/Pow.py">Pow.py</a>,
+- <a href="/boa3_test/test_sc/math_test/PowFromMath.py">PowFromMath.py</a>

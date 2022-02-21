@@ -250,11 +250,7 @@ Functions
          h = min(1, 6, 2)
          i = sum(list_of_num, 0)
          j = reversed([1, 2, 3, 4])
-   * - 🔜
-     - Built in functions
-     - ::
-
-         a = pow(2, 2)
+         k = pow(2, 2)
 
 Other Features
 --------------

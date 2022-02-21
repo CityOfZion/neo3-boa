@@ -782,8 +782,8 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.11.0</td>
     <td>Built in function</td>
     <td>
       <pre>
@@ -793,6 +793,7 @@ python -m unittest discover boa3_test
       </pre>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#built-in-function-7">List of examples</a>
     </td>
   </tbody>
   <tbody>
