@@ -19,6 +19,7 @@ class BinaryOp:
     Mul = Multiplication()
     Div = Division()
     IntDiv = FloorDivision()
+    ListAdd = ListAddition()
     Mod = Modulo()
     Pow = Power()
     Concat = Concat()

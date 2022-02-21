@@ -10,7 +10,6 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestRoleManagementClass(BoaTest):
-
     default_folder: str = 'test_sc/native_test/rolemanagement'
 
     def test_get_designated_by_role(self):

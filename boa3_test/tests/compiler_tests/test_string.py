@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestString(BoaTest):
-
     default_folder: str = 'test_sc/string_test'
 
     def test_string_get_value(self):

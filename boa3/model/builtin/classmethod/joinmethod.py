@@ -1,20 +1,20 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
-from boa3.model.type.primitive.bytestringtype import ByteStringType
-from boa3.model.type.primitive.strtype import StrType
+from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class JoinMethod(IBuiltinMethod):
-    def __init__(self, self_type: ByteStringType = None, iterable_type: Union[SequenceType, DictType] = None):
+    def __init__(self, self_type: IByteStringType = None, iterable_type: Union[SequenceType, DictType] = None):
         from boa3.model.type.type import Type
 
-        if not isinstance(self_type, ByteStringType):
-            self_type = Type.str
+        if not isinstance(self_type, IByteStringType):
+            from boa3.model.type.primitive.bytestringtype import ByteStringType
+            self_type = ByteStringType.build()
 
         if not isinstance(iterable_type, (SequenceType, DictType)):
             iterable_type = Type.sequence.build_collection([self_type])
@@ -34,7 +34,7 @@ class JoinMethod(IBuiltinMethod):
         if Type.dict.is_type_of(self._arg_iterable.type):
             return '-{0}_{1}'.format(self._identifier, Type.dict.identifier)
 
-        return self._identifier                             # JoinMethod default value for self
+        return self._identifier  # JoinMethod default value for self
 
     @property
     def _arg_self(self) -> Variable:
@@ -147,9 +147,15 @@ class JoinMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
+        if not isinstance(value, Iterable):
+            value = [value]
         if isinstance(value, list) and len(value) <= 2:
-            if isinstance(value[0], StrType) and isinstance(value[1], SequenceType):
+            self_type = self._arg_self.type
+            if len(value) < 2:
+                value.append(None)
+            if isinstance(value[0], type(self_type)) and isinstance(value[1], SequenceType):
                 return self
             else:
                 return JoinMethod(value[0], value[1])
+
         return super().build(value)

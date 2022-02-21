@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestImport(BoaTest):
-
     default_folder: str = 'test_sc/import_test'
 
     def test_import_typing(self):

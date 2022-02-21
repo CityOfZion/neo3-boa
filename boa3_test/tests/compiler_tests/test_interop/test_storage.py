@@ -12,7 +12,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestStorageInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/storage'
 
     def test_storage_get_bytes_key(self):

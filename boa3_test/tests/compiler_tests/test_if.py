@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
+from boa3.exception import CompilerWarning
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
@@ -8,7 +8,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestIf(BoaTest):
-
     default_folder: str = 'test_sc/if_test'
 
     def test_if_constant_condition(self):
@@ -60,10 +59,6 @@ class TestIf(BoaTest):
         self.assertEqual(2, result)
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual(0, result)
-
-    def test_if_mismatched_type_condition(self):
-        path = self.get_contract_path('MismatchedTypeCondition.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_if_no_condition(self):
         path = self.get_contract_path('IfWithoutCondition.py')
@@ -479,7 +474,7 @@ class TestIf(BoaTest):
         self.assertEqual(False, result)
 
     def test_boa2_compare_test0int(self):
-        path = self.get_contract_path('CompareBoa2Test0str.py')
+        path = self.get_contract_path('CompareBoa2Test0int.py')
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'main', 2, 4)
@@ -596,3 +591,44 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'Main', False)
         self.assertEqual('{[value1,value2,value3]}', result)
+
+    def test_if_implicit_boolean(self):
+        path = self.get_contract_path('IfImplicitBoolean.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 1)
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 0)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 'unit_test')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', '')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'unit test')
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', b'')
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4])
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', [])
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', {'a': 1, 'b': 2})
+        self.assertEqual(True, result)
+
+        result = self.run_smart_contract(engine, path, 'main', {})
+        self.assertEqual(False, result)
+
+    def test_if_implicit_boolean_literal(self):
+        path = self.get_contract_path('IfImplicitBooleanLiteral.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(4, result)

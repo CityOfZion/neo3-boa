@@ -7,7 +7,6 @@ from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
 
 
 class NeoPermissionsStruct(NeoStruct):
-
     _contract_fields = 'contract'
     _methods_fields = 'methods'
 

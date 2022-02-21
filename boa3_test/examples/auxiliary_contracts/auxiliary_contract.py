@@ -21,6 +21,8 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
+    meta.add_permission(methods=['approve', 'transfer'])
+
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "Smart contract that will help during test"
     meta.email = "contact@coz.io"

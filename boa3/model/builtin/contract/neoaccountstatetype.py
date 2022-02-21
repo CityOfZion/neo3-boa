@@ -83,9 +83,8 @@ class NeoAccountStateMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-
         return [
-            Opcode.get_pushdata_and_data(bytes(33)),    # vote_to
+            Opcode.get_pushdata_and_data(bytes(33)),  # vote_to
             (Opcode.PUSH0, b''),  # height
             (Opcode.PUSH0, b''),  # balance
             (Opcode.PUSH3, b''),

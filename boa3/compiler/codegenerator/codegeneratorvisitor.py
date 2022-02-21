@@ -8,6 +8,7 @@ from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.codegenerator.generatordata import GeneratorData
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.imports.package import Package
@@ -236,6 +237,10 @@ class VisitorCodeGenerator(IAstAnalyser):
                 address = self.generator.bytecode_size
                 self.generator.convert_new_empty_array(len(class_symbol.class_variables), class_symbol)
                 self.generator.convert_store_variable(node.name, address)
+            else:
+                init_method = class_symbol.constructor_method()
+                if isinstance(init_method, Method) and init_method.start_address is None:
+                    self.generator.generate_implicit_init_user_class(init_method)
 
         for stmt in node.body:
             self.visit(stmt)
@@ -617,7 +622,10 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param if_node: the python ast if statement node
         """
-        self.visit_to_map(if_node.test, generate=True)
+        test = self.visit_to_map(if_node.test, generate=True)
+
+        if not Type.bool.is_type_of(test.type) and test.type is not None:
+            self.generator.convert_builtin_method_call(Builtin.Bool)
 
         start_addr: int = self.generator.convert_begin_if()
         for stmt in if_node.body:
@@ -676,6 +684,19 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param assert_node: the python ast assert node
         """
         self.visit_to_generate(assert_node.test)
+
+        if assert_node.msg is not None:
+            self.generator.duplicate_stack_top_item()
+            self.generator.insert_not()
+
+            # if assert is false, log the message
+            start_addr: int = self.generator.convert_begin_if()
+
+            self.visit_to_generate(assert_node.msg)
+            self.generator.convert_builtin_method_call(Interop.Log)
+
+            self.generator.convert_end_if(start_addr)
+
         self.generator.convert_assert()
         return self.build_data(assert_node)
 
@@ -719,7 +740,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                          else call.args)
             args_to_generate = [arg for index, arg in enumerate(call_args) if index in symbol.args_to_be_generated()]
             keywords_dict = {keyword.arg: keyword.value for keyword in call.keywords}
-            keywords_with_index = {index: keywords_dict[arg_name] for index, arg_name in enumerate(symbol.args) if arg_name in keywords_dict}
+            keywords_with_index = {index: keywords_dict[arg_name]
+                                   for index, arg_name in enumerate(symbol.args)
+                                   if arg_name in keywords_dict}
 
             for index in keywords_with_index:
                 if index < len(args_to_generate):
@@ -757,6 +780,9 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if self.is_exception_name(function_id):
             self.generator.convert_new_exception(len(call.args))
+        elif isinstance(symbol, type(Builtin.Super)) and len(args_to_generate) == 0:
+            self_or_cls_id = list(self.current_method.args)[0]
+            self.generator.convert_load_symbol(self_or_cls_id)
         elif isinstance(symbol, IBuiltinMethod):
             self.generator.convert_builtin_method_call(symbol, args_addresses)
         else:
@@ -909,7 +935,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                     symbol_id = attribute.attr if isinstance(generation_result, Variable) else class_attr_id
                     result_type = result
                 else:
-                    index = self.generator.convert_class_symbol(result, attribute.attr, isinstance(attribute.ctx, ast.Load))
+                    index = self.generator.convert_class_symbol(result,
+                                                                attribute.attr,
+                                                                isinstance(attribute.ctx, ast.Load))
                     generated = True
                     symbol = result
                     if not isinstance(result, UserClass):

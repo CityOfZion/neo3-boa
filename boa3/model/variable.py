@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-from typing import Optional
+from typing import Optional, Union
 
 from boa3.model.expression import IExpression
 from boa3.model.type.itype import IType
@@ -17,7 +17,11 @@ class Variable(IExpression):
     def __init__(self, var_type: Optional[IType], origin_node: Optional[ast.AST] = None):
         super().__init__(origin_node)
         self.defined_by_entry = True
-        self._var_type: Optional[IType] = var_type
+        if var_type is None:
+            from boa3.analyser.model.optimizer import Undefined, UndefinedType
+            var_type = Undefined
+
+        self._var_type: Union[IType, UndefinedType] = var_type
 
         self.is_reassigned = False
         self._origin_variable: Optional[Variable] = None

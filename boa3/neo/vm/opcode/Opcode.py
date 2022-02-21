@@ -9,7 +9,6 @@ from boa3.neo.vm.type.String import String
 
 
 class Opcode(bytes, Enum):
-
     # region Constants
 
     # Pushes a 1-byte signed integer onto the stack.

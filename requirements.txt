@@ -1,6 +1,1 @@
-autopep8==1.4.4
-base58==1.0.3
-coverage==4.5.4
-pycodestyle==2.5.0
-Sphinx==4.0.0
-sphinx-rtd-theme==0.5.2
+base58>=1.0.3

@@ -155,7 +155,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
                     and self.is_symmetric_operation(bin_op.op, bin_op.left.op)):
                 left_value, right_value = self.reorder_operations(bin_op, bin_op.left)
             elif (right_value is Undefined and isinstance(bin_op.right, ast.BinOp)
-                    and self.is_symmetric_operation(bin_op.op, bin_op.right.op)):
+                  and self.is_symmetric_operation(bin_op.op, bin_op.right.op)):
                 left_value, right_value = self.reorder_operations(bin_op, bin_op.right)
 
             value = self._evaluate_binary_operation(left_value, right_value, bin_op.op)

@@ -1,22 +1,31 @@
 from typing import Optional
 
 from boa3 import constants
-from boa3.model.builtin.method import IBuiltinMethod
+from boa3.model.identifiedsymbol import IdentifiedSymbol
+from boa3.model.method import Method
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.variable import Variable
 
 
-class ClassInitMethod(IBuiltinMethod):
+class ClassInitMethod(IdentifiedSymbol, Method):
     def __init__(self, user_class: UserClass):
-        self.origin_class = user_class
+        self_var = Variable(user_class)
         args = {
-            'self': Variable(user_class)
+            'self': self_var
         }
+        if len(user_class.bases) == 1:
+            # TODO: change when class inheritance with multiple bases is implemented
+            # use update to keep the original order
+            args.update(user_class.bases[0].constructor_method().args)
+            # but change the self type
+            args['self'] = self_var
 
-        super().__init__(identifier=constants.INIT_METHOD_ID,
-                         args=args,
-                         return_type=user_class)
+        Method.__init__(self, args=args, return_type=user_class)
+        IdentifiedSymbol.__init__(self, identifier=constants.INIT_METHOD_ID)
+
+        self.defined_by_entry = False
         self.is_init = True
+        self.origin_class = user_class
         # __init__ method behave like class methods
         from boa3.model.builtin.builtin import Builtin
         self.decorators.append(Builtin.ClassMethodDecorator)

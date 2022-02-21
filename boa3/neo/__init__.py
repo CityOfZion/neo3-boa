@@ -31,8 +31,9 @@ def to_hex_str(data_bytes: bytes) -> str:
     """
     if isinstance(data_bytes, bytes):
         data_bytes = bytearray(data_bytes)
-    data_bytes.reverse()
-    return '0x' + data_bytes.hex()
+    data_copy = data_bytes.copy()
+    data_copy.reverse()
+    return '0x' + data_copy.hex()
 
 
 def from_hex_str(hex_string: str) -> bytes:

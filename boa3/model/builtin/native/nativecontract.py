@@ -8,7 +8,6 @@ from boa3.model.imports.package import Package
 
 
 class NativeContract:
-
     # Class Interfaces
     ContractManagement = ContractManagementClass()
     CryptoLib = CryptoLibClass()

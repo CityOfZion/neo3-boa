@@ -1,6 +1,6 @@
 import ast
 from abc import ABC
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.decorator import IDecorator
@@ -16,3 +16,6 @@ class IBuiltinDecorator(IBuiltinCallable, IDecorator, ABC):
 
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == len(self.args)
+
+    def validate_values(self, *params: Any) -> List[Any]:
+        return []

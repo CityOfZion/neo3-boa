@@ -35,7 +35,6 @@ from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
-from boa3.neo3.core.types import UInt160
 
 
 class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
@@ -186,7 +185,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param callable_id: method id
         :param callable: method to be included
         """
-        if callable_id not in self._current_scope.symbols and hasattr(self._current_scope, 'include_callable'):
+        if ((self._current_scope is self._current_class or callable_id not in self._current_scope.symbols)
+                and hasattr(self._current_scope, 'include_callable')):
             self._current_scope.include_callable(callable_id, callable)
 
     def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
@@ -306,6 +306,20 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         line=node.lineno, col=node.col_offset,
                         expected_type_id=NeoMetadata.__name__,
                         actual_type_id=obj_type
+                    )
+                )
+                return
+
+            # validate if the extras field can be converted to json
+            try:
+                import json
+                json.dumps(obj.extras)
+            except BaseException as e:
+                print()
+                self._log_error(
+                    CompilerError.InvalidType(
+                        line=node.lineno, col=node.col_offset,
+                        symbol_id=str(e)
                     )
                 )
                 return
@@ -488,12 +502,29 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         Includes the class in the scope of its module
         """
-        # TODO: change when class inheritance is implemented
-        if len(class_node.bases) > 0:
+        bases = []
+        for base in class_node.bases:
+            base_type_id: Any = ast.NodeVisitor.visit(self, base)
+            if isinstance(base_type_id, ast.Name):
+                base_type_id = base_type_id.id
+
+            base_symbol = self.get_symbol(base_type_id)
+            # TODO: change when class inheritance with builtin types is implemented
+            if not isinstance(base_symbol, UserClass):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(
+                        class_node.lineno, class_node.col_offset,
+                        symbol_id='class inheritance with builtins'
+                    )
+                )
+            bases.append(base_symbol)
+
+        # TODO: change when class inheritance with multiple bases is implemented
+        if len(bases) > 1:
             self._log_error(
                 CompilerError.NotSupportedOperation(
                     class_node.lineno, class_node.col_offset,
-                    symbol_id='class inheritance'
+                    symbol_id='class inheritance with multiple bases'
                 )
             )
 
@@ -524,12 +555,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if contract_interface_decorator is not None:
             from boa3.model.type.classes.contractinterfaceclass import ContractInterfaceClass
-            contract_hash = self._evaluate_contract_interface(contract_interface_decorator.origin)
-            user_class = ContractInterfaceClass(contract_hash=contract_hash,
+            user_class = ContractInterfaceClass(contract_hash=contract_interface_decorator.contract_hash,
                                                 identifier=class_node.name,
-                                                decorators=class_decorators)
+                                                decorators=class_decorators,
+                                                bases=bases)
         else:
-            user_class = UserClass(identifier=class_node.name, decorators=class_decorators)
+            user_class = UserClass(identifier=class_node.name,
+                                   decorators=class_decorators,
+                                   bases=bases)
 
         self._current_class = user_class
         if self._current_symbol_scope is not None:
@@ -577,11 +610,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                               and not is_static_method)
         is_class_constructor = is_instance_method and function.name == constants.INIT_METHOD_ID
 
-        if isinstance(self._current_class, ContractInterfaceClass) and not is_static_method:
-            self._log_error(CompilerError
-                            .InvalidUsage(function.lineno, function.col_offset,
-                                          "Only static methods are accepted when defining contract interfaces"
-                                          ))
+        external_function_name = None
+        if isinstance(self._current_class, ContractInterfaceClass):
+            if not is_static_method:
+                self._log_error(CompilerError
+                                .InvalidUsage(function.lineno, function.col_offset,
+                                              "Only static methods are accepted when defining contract interfaces"
+                                              ))
+            else:
+                display_name_decorator = next((decorator for decorator in valid_decorators
+                                               if isinstance(decorator, type(Builtin.ContractMethodDisplayName))),
+                                              None)
+                if display_name_decorator is not None:
+                    external_function_name = display_name_decorator.external_name
 
         if is_instance_method:
             if Builtin.InstanceMethodDecorator not in valid_decorators:
@@ -633,8 +674,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         method = Method(args=fun_args.args, defaults=function.args.defaults, return_type=fun_return,
                         vararg=fun_args.vararg,
-                        origin_node=function, is_public=Builtin.Public in fun_decorators,
+                        origin_node=function,
+                        is_public=any(isinstance(decorator, type(Builtin.Public)) for decorator in fun_decorators),
                         decorators=valid_decorators,
+                        external_name=external_function_name,
                         is_init=is_class_constructor)
 
         if function.name in Builtin.internal_methods:
@@ -706,31 +749,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 symbol = self.get_symbol(decorator_visit, origin_node=decorator)
                 if hasattr(symbol, 'build'):
-                    symbol = symbol.build(decorator)
+                    symbol = symbol.build(decorator, self)
                 decorators.append(symbol)
 
         return decorators
-
-    def _evaluate_contract_interface(self, decorator_node: ast.AST) -> UInt160:
-        if not isinstance(decorator_node, ast.Call) or len(decorator_node.args) == 0:
-            return UInt160()
-
-        argument_hash = self.visit(decorator_node.args[0])
-
-        try:
-            if isinstance(argument_hash, str):
-                from boa3.neo import from_hex_str
-                argument_hash = from_hex_str(argument_hash)
-
-            if isinstance(argument_hash, bytes):
-                return UInt160(argument_hash)
-        except BaseException:
-            self._log_error(CompilerError.InvalidUsage(decorator_node.lineno,
-                                                       decorator_node.col_offset,
-                                                       "Only literal values are accepted for 'script_hash' argument"
-                                                       ))
-
-        return UInt160()
 
     def _set_instance_variables(self, scope: SymbolScope):
         if (isinstance(self._current_class, UserClass)
@@ -776,7 +798,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             fun_args.set_vararg(var_id, var)
 
         if arguments.kwarg is not None:
-            var_id, var = self.visit_arg(arguments.kwarg)   # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arguments.kwarg)  # Tuple[str, Variable]
             fun_args.add_kwarg(var_id, var)
 
         return fun_args
@@ -1154,6 +1176,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return value.inner_packages[attribute.attr]
         elif Builtin.get_symbol(attribute.attr) is not None:
             return Builtin.get_symbol(attribute.attr)
+        elif isinstance(value, UndefinedType):
+            return value
         else:
             return '{0}.{1}'.format(value_id, attribute.attr)
 

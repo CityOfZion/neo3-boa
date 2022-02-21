@@ -7,14 +7,18 @@ from boa3.model.builtin.contract import *
 from boa3.model.builtin.decorator import *
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop
+from boa3.model.builtin.math import *
 from boa3.model.builtin.method import *
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.identifiedsymbol import IdentifiedSymbol
+from boa3.model.imports.package import Package
 from boa3.model.type.collection.sequence.ecpointtype import ECPointType
 from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
+from boa3.model.type.math import Math
+from boa3.model.type.primitive.bytestringtype import ByteStringType
 
 
 class BoaPackage(str, Enum):
@@ -48,15 +52,18 @@ class Builtin:
     Min = MinIntMethod()
     Print = PrintMethod()
     ScriptHash = ScriptHashMethod()
-    Sqrt = SqrtMethod()
     StrSplit = StrSplitMethod()
     Sum = SumMethod()
 
     # python builtin class constructor
+    Bool = BoolMethod()
     ByteArray = ByteArrayMethod()
+    Exception = ExceptionMethod()
+    IntByteString = IntByteStringMethod()
+    IntInt = IntIntMethod()
     Range = RangeMethod()
     Reversed = ReversedMethod()
-    Exception = ExceptionMethod()
+    Super = SuperMethod()
 
     # python class method
     BytesStringIsDigit = IsDigitMethod()
@@ -130,11 +137,11 @@ class Builtin:
                                                 SequencePop,
                                                 SequenceRemove,
                                                 SequenceReverse,
-                                                Sqrt,
                                                 StaticMethodDecorator,
                                                 StrIndex,
                                                 StrSplit,
-                                                Sum
+                                                Sum,
+                                                Super,
                                                 ]
 
     @classmethod
@@ -144,10 +151,12 @@ class Builtin:
 
     # boa builtin decorator
     ContractInterface = ContractDecorator()
+    ContractMethodDisplayName = DisplayNameDecorator()
     Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
     # boa builtin type
+    ByteString = ByteStringType.build()
     Event = EventType
     UInt160 = UInt160Type.build()
     UInt256 = UInt256Type.build()
@@ -161,17 +170,34 @@ class Builtin:
     # boa smart contract methods
     Abort = AbortMethod()
 
+    # region boa builtin modules
+
+    BuiltinMathCeil = DecimalCeilingMethod()
+    BuiltinMathFloor = DecimalFloorMethod()
+
+    MathModule = Package(identifier='math',
+                         methods=[Math.Sqrt,
+                                  BuiltinMathCeil,
+                                  BuiltinMathFloor])
+
+    _modules = [MathModule]
+
+    # endregion
+
     boa_builtins: List[IdentifiedSymbol] = [ContractInterface,
+                                            ContractMethodDisplayName,
                                             Event,
                                             Metadata,
                                             NeoMetadataType,
                                             NewEvent,
                                             Public,
                                             ScriptHash
-                                            ]
+                                            ] + _modules
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
+        'name': str,
         'supported_standards': list,
+        'trusts': list,
         'author': (str, type(None)),
         'email': (str, type(None)),
         'description': (str, type(None)),
@@ -196,7 +222,8 @@ class Builtin:
                               Nep5Transfer,
                               ],
         BoaPackage.Interop: Interop.package_symbols,
-        BoaPackage.Type: [ECPoint,
+        BoaPackage.Type: [ByteString,
+                          ECPoint,
                           UInt160,
                           UInt256
                           ]

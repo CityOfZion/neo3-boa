@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTemplate(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -19,32 +18,6 @@ class TestTemplate(BoaTest):
     def test_wrapped_neo_compile(self):
         path = self.get_contract_path('wrapped_neo.py')
         Boa3.compile(path)
-
-    def test_wrapped_neo_deploy(self):
-        path = self.get_contract_path('wrapped_neo.py')
-        engine = TestEngine()
-
-        # needs the owner signature
-        result = self.run_smart_contract(engine, path, method='deploy',
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        # should return false if the signature isn't from the owner
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # must always return false after first execution
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
 
     def test_wrapped_neo_symbol(self):
         path = self.get_contract_path('wrapped_neo.py')
@@ -63,12 +36,7 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'totalSupply')
-        self.assertEqual(0, result)
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
+
         result = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(total_supply, result)
 
@@ -77,13 +45,6 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(0, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(total_supply, result)
@@ -98,34 +59,10 @@ class TestTemplate(BoaTest):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
 
         path = self.get_contract_path('wrapped_neo.py')
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         wrapped_neo_address = hash160(output)
 
         engine = TestEngine()
-
-        # should fail before running deploy
-        result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "",
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-        # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
-
-        sender, receiver, amount = transfer_events[0].arguments
-        if isinstance(sender, str):
-            sender = String(sender).to_bytes()
-        if isinstance(receiver, str):
-            receiver = String(receiver).to_bytes()
-        self.assertEqual(None, sender)
-        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
-        self.assertEqual(10_000_000 * 100_000_000, amount)
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -161,10 +98,10 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(2, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
+        self.assertEqual(1, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
 
-        sender, receiver, amount = transfer_events[1].arguments
+        sender, receiver, amount = transfer_events[0].arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -228,31 +165,11 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         wrapped_neo_address = hash160(output)
 
-        engine.add_neo(wrapped_neo_address, 10_000_000 * 10**8)
-        burned_amount = 100 * 10**8
-
-        # deploying this smart contract will give 10m total supply * 10^8 zNEOs to OWNER
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-        # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(1, len(transfer_events))
-        wrapped_token_transfer_event = transfer_events[0]
-        self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
-
-        sender, receiver, amount = wrapped_token_transfer_event.arguments
-        if isinstance(sender, str):
-            sender = String(sender).to_bytes()
-        if isinstance(receiver, str):
-            receiver = String(receiver).to_bytes()
-        self.assertEqual(None, sender)
-        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
-        self.assertEqual(10_000_000 * 100_000_000, amount)
+        engine.add_neo(wrapped_neo_address, 10_000_000 * 10 ** 8)
+        burned_amount = 100 * 10 ** 8
 
         # burning zNEO will end up giving NEO to the one who burned it
         neo_wrapped_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
@@ -315,9 +232,9 @@ class TestTemplate(BoaTest):
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         wrapped_neo_address = hash160(output)
-        output, manifest = self.compile_and_save(path_aux_contract)
+        output, manifest = self.get_output(path_aux_contract)
         aux_contract_address = hash160(output)
 
         allowed_amount = 10 * 10 ** 8
@@ -328,12 +245,6 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
-
-        # deploying this smart contract will give 10m total supply * 10^8 zNEOs to OWNER
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         # OWNER will give zNEO to aux_contract_address so that it can approve
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -368,9 +279,9 @@ class TestTemplate(BoaTest):
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         wrapped_neo_address = hash160(output)
-        output, manifest = self.compile_and_save(path_aux_contract)
+        output, manifest = self.get_output(path_aux_contract)
         aux_contract_address = hash160(output)
 
         allowed_amount = 10 * 10 ** 8
@@ -380,12 +291,6 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[aux_contract_address],
                                          expected_result_type=bool)
         self.assertEqual(0, result)
-
-        # deploying smart contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         # OWNER will give zNEO to aux_contract_address so that it can approve
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -412,31 +317,12 @@ class TestTemplate(BoaTest):
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         wrapped_neo_address = hash160(output)
-        output, manifest = self.compile_and_save(path_aux_contract)
+        output, manifest = self.get_output(path_aux_contract)
         aux_contract_address = hash160(output)
 
         allowed_amount = 10 * 10 ** 8
-
-        # deploying smart contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-        # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer')
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
-
-        sender, receiver, amount = transfer_events[0].arguments
-        if isinstance(sender, str):
-            sender = String(sender).to_bytes()
-        if isinstance(receiver, str):
-            receiver = String(receiver).to_bytes()
-        self.assertEqual(None, sender)
-        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
-        self.assertEqual(10_000_000 * 100_000_000, amount)
 
         # OWNER will give zNEO to aux_contract_address so that it can approve another contracts
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -468,7 +354,7 @@ class TestTemplate(BoaTest):
 
         # this transfer will fail,
         # because OTHER_SCRIPT_HASH is not allowed to transfer more than aux_contract_address approved
-        result = self.run_smart_contract(engine, path, 'transfer_from', self.OTHER_ACCOUNT_1, aux_contract_address,
+        result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount + 1 * 10 ** 8, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
@@ -480,7 +366,7 @@ class TestTemplate(BoaTest):
         balance_spender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', aux_contract_address)
         balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
-        result = self.run_smart_contract(engine, path, 'transfer_from', self.OTHER_ACCOUNT_1, aux_contract_address,
+        result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
@@ -521,7 +407,7 @@ class TestTemplate(BoaTest):
 
         transferred_amount = allowed_amount - 4 * 10 ** 8
 
-        result = self.run_smart_contract(engine, path, 'transfer_from', self.OTHER_ACCOUNT_1, aux_contract_address,
+        result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
@@ -535,54 +421,34 @@ class TestTemplate(BoaTest):
 
         # should fail when any of the scripts' length is not 20
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer_from',
+            self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OWNER_SCRIPT_HASH, bytes(10), self.OTHER_ACCOUNT_1, allowed_amount, None)
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer_from',
+            self.run_smart_contract(engine, path, 'transferFrom',
                                     bytes(10), self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, allowed_amount, None)
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer_from',
+            self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, bytes(10), allowed_amount, None)
 
         # should fail when the amount is less than 0
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer_from',
+            self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_2, -10, None)
 
-    def test_wrapped_neo_onNEP17Payment(self):
+    def test_wrapped_neo_on_nep17_payment(self):
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         wrapped_neo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(aux_path)
+        output, manifest = self.get_output(aux_path)
         aux_address = hash160(output)
 
         minted_amount = 10 * 10 ** 8
-        # deploying wrapped_neo smart contract
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-        # when deploying, the contract will mint tokens to the owner
-        transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(1, len(transfer_events))
-        wrapped_token_transfer_event = transfer_events[0]
-        self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
-
-        sender, receiver, amount = wrapped_token_transfer_event.arguments
-        if isinstance(sender, str):
-            sender = String(sender).to_bytes()
-        if isinstance(receiver, str):
-            receiver = String(receiver).to_bytes()
-        self.assertEqual(None, sender)
-        self.assertEqual(self.OWNER_SCRIPT_HASH, receiver)
-        self.assertEqual(10_000_000 * 100_000_000, amount)
-
         engine.add_neo(aux_address, minted_amount)
 
         # the smart contract will abort if some address other than NEO calls the onPayment method
@@ -615,8 +481,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(minted_amount, amount)
 
         transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(2, len(transfer_events))
-        wrapped_token_transfer_event = transfer_events[1]
+        self.assertEqual(1, len(transfer_events))
+        wrapped_token_transfer_event = transfer_events[0]
         self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
 
         sender, receiver, amount = wrapped_token_transfer_event.arguments

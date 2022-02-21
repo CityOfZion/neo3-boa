@@ -37,16 +37,17 @@ class Compiler:
         self._analyse(fullpath, log)
         return self._compile()
 
-    def compile_and_save(self, path: str, output_path: str, log: bool = True):
+    def compile_and_save(self, path: str, output_path: str, log: bool = True, debug: bool = False):
         """
         Save the compiled file and the metadata files
 
         :param path: the path of the Python file to compile
         :param output_path: the path to save the generated files
         :param log: if compiler errors should be logged.
+        :param debug: if nefdbgnfo file should be generated.
         """
         self.bytecode = self.compile(path, log)
-        self._save(output_path)
+        self._save(output_path, debug)
 
     def _analyse(self, path: str, log: bool = True):
         """
@@ -68,12 +69,13 @@ class Compiler:
             raise NotLoadedException
         return CodeGenerator.generate_code(self._analyser)
 
-    def _save(self, output_path: str):
+    def _save(self, output_path: str, debug: bool):
         """
         Save the compiled file and the metadata files
 
         :param output_path: the path to save the generated files
         :raise NotLoadedException: raised if no file were compiled
+        :param debug: if nefdbgnfo file should be generated.
         """
         if (self._analyser is None
                 or not self._analyser.is_analysed
@@ -91,7 +93,8 @@ class Compiler:
             manifest_file.write(manifest_bytes)
             manifest_file.close()
 
-        from zipfile import ZipFile, ZIP_DEFLATED
-        with ZipFile(output_path.replace('.nef', '.nefdbgnfo'), 'w', ZIP_DEFLATED) as nef_debug_info:
-            debug_bytes = generator.generate_nefdbgnfo_file()
-            nef_debug_info.writestr(os.path.basename(output_path.replace('.nef', '.debug.json')), debug_bytes)
+        if debug:
+            from zipfile import ZipFile, ZIP_DEFLATED
+            with ZipFile(output_path.replace('.nef', '.nefdbgnfo'), 'w', ZIP_DEFLATED) as nef_debug_info:
+                debug_bytes = generator.generate_nefdbgnfo_file()
+                nef_debug_info.writestr(os.path.basename(output_path.replace('.nef', '.debug.json')), debug_bytes)

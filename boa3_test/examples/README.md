@@ -34,7 +34,7 @@ adopters usually pay less for the tokens than others.
 ## NEP-5
 
 The [NEP-5](https://github.com/neo-project/proposals/blob/master/obsolete/nep-5.mediawiki) smart contract demonstrates 
-the obsolete token standard for the Neo blockchain. It was replaced by NEP-17.
+the obsolete token standard for the Neo blockchain. This is deprecated, check [NEP-17](#nep-17).
 
 ## NEP-17
 

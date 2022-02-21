@@ -7,7 +7,6 @@ from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
 
 
 class NeoMethodStruct(NeoStruct):
-
     _name_field = 'name'
     _parameters_field = 'parameters'
     _return_type_field = 'returntype'

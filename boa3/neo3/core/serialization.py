@@ -15,6 +15,7 @@ class ISerializable(abc.ABC):
     """
     An interface like class supporting NEO's network serialization protocol.
     """
+
     @abc.abstractmethod
     def serialize(self, writer: BinaryWriter) -> None:
         """

@@ -2,10 +2,9 @@ from typing import Any, Union
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
-from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract import GAS, NEO, call_contract
-from boa3.builtin.interop.runtime import calling_script_hash, check_witness
-from boa3.builtin.interop.storage import delete, get, put
+from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
+from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160
 
 
@@ -20,6 +19,8 @@ def manifest_metadata() -> NeoMetadata:
     """
     meta = NeoMetadata()
     meta.supported_standards = ['NEP-17']
+    meta.add_permission(methods=['onNEP17Payment'])
+
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "NEP-17 Example"
     meta.email = "contact@coz.io"
@@ -42,14 +43,13 @@ TOKEN_SYMBOL = 'NEP17'
 TOKEN_DECIMALS = 8
 
 # Total Supply of tokens in the system
-TOKEN_TOTAL_SUPPLY = 10_000_000 * 100_000_000  # 10m total supply * 10^8 (decimals)
+TOKEN_TOTAL_SUPPLY = 10_000_000 * 10 ** TOKEN_DECIMALS  # 10m total supply * 10^8 (decimals)
 
-# Value of this NEP17 token corresponds to NEO
+# Value of this NEP-17 token corresponds to NEO
 AMOUNT_PER_NEO = 10
 
-# Value of this NEP17 token compared to GAS
+# Value of this NEP-17 token compared to GAS
 AMOUNT_PER_GAS = 2
-
 
 # -------------------------------------------
 # Events
@@ -64,7 +64,7 @@ on_transfer = Nep17TransferEvent
 # -------------------------------------------
 
 
-@public
+@public(safe=True)
 def symbol() -> str:
     """
     Gets the symbols of the token.
@@ -78,7 +78,7 @@ def symbol() -> str:
     return TOKEN_SYMBOL
 
 
-@public
+@public(safe=True)
 def decimals() -> int:
     """
     Gets the amount of decimals used by the token.
@@ -91,8 +91,8 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public
-def totalSupply() -> int:
+@public(name='totalSupply', safe=True)
+def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -101,11 +101,11 @@ def totalSupply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return get(SUPPLY_KEY).to_int()
+    return storage.get(SUPPLY_KEY).to_int()
 
 
-@public
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address
 
@@ -115,7 +115,7 @@ def balanceOf(account: UInt160) -> int:
     :type account: UInt160
     """
     assert len(account) == 20
-    return get(account).to_int()
+    return storage.get(account).to_int()
 
 
 @public
@@ -144,26 +144,26 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = get(from_address).to_int()
+    from_balance = storage.get(from_address).to_int()
     if from_balance < amount:
         return False
 
     # The function should check whether the from address equals the caller contract hash.
     # If so, the transfer should be processed;
     # If not, the function should use the check_witness to verify the transfer.
-    if from_address != calling_script_hash:
-        if not check_witness(from_address):
+    if from_address != runtime.calling_script_hash:
+        if not runtime.check_witness(from_address):
             return False
 
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
     if from_address != to_address and amount != 0:
         if from_balance == amount:
-            delete(from_address)
+            storage.delete(from_address)
         else:
-            put(from_address, from_balance - amount)
+            storage.put(from_address, from_balance - amount)
 
-        to_balance = get(to_address).to_int()
-        put(to_address, to_balance + amount)
+        to_balance = storage.get(to_address).to_int()
+        storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -186,9 +186,9 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
     :param data: any pertinent data that might validate the transaction
     :type data: Any
     """
-    if not isinstance(to_address, None):    # TODO: change to 'is not None' when `is` semantic is implemented
-        contract = get_contract(to_address)
-        if not isinstance(contract, None):      # TODO: change to 'is not None' when `is` semantic is implemented
+    if not isinstance(to_address, None):  # TODO: change to 'is not None' when `is` semantic is implemented
+        contract = ContractManagement.get_contract(to_address)
+        if not isinstance(contract, None):  # TODO: change to 'is not None' when `is` semantic is implemented
             call_contract(to_address, 'onNEP17Payment', [from_address, amount, data])
 
 
@@ -204,11 +204,11 @@ def mint(account: UInt160, amount: int):
     """
     assert amount >= 0
     if amount != 0:
-        current_total_supply = totalSupply()
-        account_balance = balanceOf(account)
+        current_total_supply = total_supply()
+        account_balance = balance_of(account)
 
-        put(SUPPLY_KEY, current_total_supply + amount)
-        put(account, account_balance + amount)
+        storage.put(SUPPLY_KEY, current_total_supply + amount)
+        storage.put(account, account_balance + amount)
 
         on_transfer(None, account, amount)
         post_transfer(None, account, amount, None)
@@ -223,27 +223,21 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    return check_witness(OWNER)
+    return runtime.check_witness(OWNER)
 
 
 @public
-def deploy() -> bool:
+def _deploy(data: Any, update: bool):
     """
     Initializes the storage when the smart contract is deployed.
 
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
-    if not check_witness(OWNER):
-        return False
+    if not update:
+        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put(OWNER, TOKEN_TOTAL_SUPPLY)
 
-    if get(SUPPLY_KEY).to_int() > 0:
-        return False
-
-    put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-    put(OWNER, TOKEN_TOTAL_SUPPLY)
-
-    on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
-    return True
+        on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
 
 
 @public
@@ -266,10 +260,10 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     :type data: Any
     """
     # Use calling_script_hash to identify if the incoming token is NEO or GAS
-    if calling_script_hash == NEO:
+    if runtime.calling_script_hash == NEO_SCRIPT:
         corresponding_amount = amount * AMOUNT_PER_NEO
         mint(from_address, corresponding_amount)
-    elif calling_script_hash == GAS:
+    elif runtime.calling_script_hash == GAS_SCRIPT:
         corresponding_amount = amount * AMOUNT_PER_GAS
         mint(from_address, corresponding_amount)
     else:

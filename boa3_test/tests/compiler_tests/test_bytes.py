@@ -10,7 +10,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBytes(BoaTest):
-
     default_folder: str = 'test_sc/bytes_test'
 
     def test_bytes_literal_value(self):

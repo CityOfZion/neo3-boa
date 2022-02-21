@@ -1,15 +1,15 @@
+from boa3.constants import IMPORT_WILDCARD
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 
 
 class TestMetadata(BoaTest):
-
     default_folder: str = 'test_sc/metadata_test'
 
     def test_metadata_info_method(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -31,7 +31,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_multiple_method(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -64,7 +64,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_author(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -83,7 +83,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_email(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -102,7 +102,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_description(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -121,7 +121,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_extras(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -140,7 +140,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_new_extras(self):
         expected_output = (
-            Opcode.PUSH5        # return 5
+            Opcode.PUSH5  # return 5
             + Opcode.RET
         )
 
@@ -149,14 +149,14 @@ class TestMetadata(BoaTest):
         self.assertEqual(expected_output, output)
         self.assertIn('extra', manifest)
         self.assertIsNotNone(manifest['extra'])
-        self.assertIn('unittest1', manifest['extra'])
-        self.assertEqual('string', manifest['extra']['unittest1'])
-        self.assertIn('unittest2', manifest['extra'])
-        self.assertEqual(123, manifest['extra']['unittest2'])
-        self.assertIn('unittest3', manifest['extra'])
-        self.assertEqual(True, manifest['extra']['unittest3'])
-        self.assertIn('unittest4', manifest['extra'])
-        self.assertEqual(['list', 3210], manifest['extra']['unittest4'])
+        self.assertIn('UnitTest1', manifest['extra'])
+        self.assertEqual('string', manifest['extra']['UnitTest1'])
+        self.assertIn('UnitTest2', manifest['extra'])
+        self.assertEqual(123, manifest['extra']['UnitTest2'])
+        self.assertIn('UnitTest3', manifest['extra'])
+        self.assertEqual(True, manifest['extra']['UnitTest3'])
+        self.assertIn('UnitTest4', manifest['extra'])
+        self.assertEqual(['list', 3210], manifest['extra']['UnitTest4'])
 
     def test_metadata_info_supported_standards(self):
         path = self.get_contract_path('MetadataInfoSupportedStandards.py')
@@ -173,4 +173,101 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_supported_standards_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_metadata_info_trusts(self):
+        path = self.get_contract_path('MetadataInfoTrusts.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 4)
+        self.assertIn('0x1234567890123456789012345678901234567890', manifest['trusts'])
+        self.assertIn('0x1234567890123456789012345678901234abcdef', manifest['trusts'])
+        self.assertIn('030000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
+        self.assertIn('020000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
+
+    def test_metadata_info_trusts_wildcard(self):
+        path = self.get_contract_path('MetadataInfoTrustsWildcard.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 1)
+        self.assertIn(IMPORT_WILDCARD, manifest['trusts'])
+
+    def test_metadata_info_trusts_mismatched_types(self):
+        path = self.get_contract_path('MetadataInfoTrustsMismatchedTypes.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 0)
+
+    def test_metadata_info_trusts_default(self):
+        path = self.get_contract_path('MetadataInfoTrustsDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('trusts', manifest)
+        self.assertIsInstance(manifest['trusts'], list)
+        self.assertEqual(len(manifest['trusts']), 0)
+
+    def test_metadata_info_permissions(self):
+        path = self.get_contract_path('MetadataInfoPermissions.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 3)
+        self.assertIn({"contract": "*", "methods": ['onNEP17Payment']}, manifest['permissions'])
+        self.assertIn({"contract": "0x3846a4aa420d9831044396dd3a56011514cd10e3", "methods": ["get_object"]}, manifest['permissions'])
+        self.assertIn({"contract": "0333b24ee50a488caa5deec7e021ff515f57b7993b93b45d7df901e23ee3004916", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoPermissionsMismatchedType.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_default(self):
+        path = self.get_contract_path('MetadataInfoPermissionsDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_Wildcard(self):
+        path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_name(self):
+        path = self.get_contract_path('MetadataInfoName.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('name', manifest)
+        self.assertIsInstance(manifest['name'], str)
+        self.assertGreater(len(manifest['name']), 0)
+        self.assertEqual((manifest['name']), "SmartContractCustomName")
+
+    def test_metadata_info_name_default(self):
+        path = self.get_contract_path('MetadataInfoNameDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('name', manifest)
+        self.assertIsInstance(manifest['name'], str)
+        self.assertGreater(len(manifest['name']), 0)
+        self.assertEqual((manifest['name']), "MetadataInfoNameDefault")
+
+    def test_metadata_info_name_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoNameMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

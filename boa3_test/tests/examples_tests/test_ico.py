@@ -6,7 +6,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTemplate(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -18,32 +17,6 @@ class TestTemplate(BoaTest):
     def test_ico_compile(self):
         path = self.get_contract_path('ico.py')
         Boa3.compile(path)
-
-    def test_ico_deploy(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-
-        # needs the owner signature
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        # should return false if the signature isn't from the owner
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # must always return false after first execution
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
 
     def test_ico_verify(self):
         path = self.get_contract_path('ico.py')
@@ -59,19 +32,10 @@ class TestTemplate(BoaTest):
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
-    def test_ico_totalSupply(self):
+    def test_ico_total_supply(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
         total_supply = 10_000_000 * 10 ** 8
-
-        result = self.run_smart_contract(engine, path, 'totalSupply',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(0, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'totalSupply',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
@@ -94,13 +58,6 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(0, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(total_supply, result)
@@ -203,19 +160,6 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(2, result)
 
-        # should fail if the origin's balance is less than passed amount
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        # initialize account and owner's balance
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
         result = self.run_smart_contract(engine, path, 'approve',
                                          self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -231,11 +175,6 @@ class TestTemplate(BoaTest):
         result = self.run_smart_contract(engine, path, 'allowance', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1)
         self.assertEqual(0, result)
 
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
         result = self.run_smart_contract(engine, path, 'kyc_register',
                                          [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
@@ -250,7 +189,7 @@ class TestTemplate(BoaTest):
         result = self.run_smart_contract(engine, path, 'allowance', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1)
         self.assertEqual(approved_amount, result)
 
-    def test_ico_transferFrom(self):
+    def test_ico_transfer_from(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
 
@@ -286,11 +225,6 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
         self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'kyc_register',
                                          [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
@@ -354,14 +288,9 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
 
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
         # should fail if amount is a negative number
         with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'mint', -10 * 10**8)
+            self.run_smart_contract(engine, path, 'mint', -10 * 10 ** 8)
 
         minted_amount = 10_000 * 10 ** 8
         # should fail if not signed by the administrator

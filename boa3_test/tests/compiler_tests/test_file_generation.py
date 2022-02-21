@@ -4,6 +4,7 @@ from typing import Dict
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.compiler.compiler import Compiler
+from boa3.exception import CompilerError
 from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.model.event import Event
 from boa3.model.method import Method
@@ -14,15 +15,23 @@ from boa3_test.tests.boa_test import BoaTest
 
 
 class TestFileGeneration(BoaTest):
-
     default_folder: str = 'test_sc/generation_test'
 
     def test_generate_files(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
-        expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
         Boa3.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_nef_output))
+        self.assertTrue(os.path.exists(expected_manifest_output))
+
+    def test_generate_files_with_debug_info(self):
+        path = self.get_contract_path('GenerationWithDecorator.py')
+        expected_nef_output = path.replace('.py', '.nef')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
+        Boa3.compile_and_save(path, debug=True)
 
         self.assertTrue(os.path.exists(expected_nef_output))
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -194,13 +203,91 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(event_args[event_param['name']].type.abi_type,
                                  event_param['type'])
 
+    def test_generate_manifest_file_with_public_name_decorator_kwarg(self):
+        path = self.get_contract_path('MetadataMethodName.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+
+    def test_generate_manifest_file_with_public_name_decorator_arg(self):
+        path = self.get_contract_path('MetadataMethodNameArg.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+
+    def test_metadata_abi_method_name_mismatched_type(self):
+        path = self.get_contract_path('MetadataMethodNameMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_generate_manifest_file_with_public_safe_decorator_kwarg(self):
+        path = self.get_contract_path('MetadataMethodSafe.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main
+        method0 = abi['methods'][0]
+        self.assertIn('safe', method0)
+        self.assertEqual(True, method0['safe'])
+
+    def test_generate_manifest_file_with_public_safe_decorator_arg(self):
+        path = self.get_contract_path('MetadataMethodSafeArg.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        # method Main named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+        self.assertIn('safe', method0)
+        self.assertEqual(True, method0['safe'])
+
+    def test_metadata_abi_method_safe_mismatched_type(self):
+        path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_generate_nefdbgnfo_file(self):
         from boa3.model.type.itype import IType
         path = self.get_contract_path('GenerationWithDecorator.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -248,7 +335,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         events: Dict[str, Event] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -286,7 +373,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         variables: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -322,7 +409,7 @@ class TestFileGeneration(BoaTest):
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_all_imported_methods(compiler).items()
@@ -450,7 +537,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('GenerationWithMultipleFlows.py')
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
@@ -495,7 +582,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/variable_test', 'GlobalAssignmentWithType.py')
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
         methods: Dict[str, Method] = {
             name: method
             for name, method in self.get_compiler_analyser(compiler).symbol_table.items()

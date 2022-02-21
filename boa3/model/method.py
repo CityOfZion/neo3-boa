@@ -27,8 +27,10 @@ class Method(Callable):
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
                  is_init: bool = False,
+                 external_name: str = None,
+                 is_safe: bool = False,
                  origin_node: Optional[ast.AST] = None):
-        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, origin_node)
+        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, external_name, is_safe, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}
@@ -111,7 +113,7 @@ class Method(Callable):
         """
         if not any((info.start_line == instr_info.start_line and info.start_col == instr_info.start_col
                     for info in self._debug_map)):
-            existing_instr_info: Optional[DebugInstruction] =\
+            existing_instr_info: Optional[DebugInstruction] = \
                 next((info for info in self._debug_map if info.code == instr_info.code), None)
             if existing_instr_info is not None:
                 self._debug_map.remove(existing_instr_info)

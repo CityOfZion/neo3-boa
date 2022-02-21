@@ -15,7 +15,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestCryptoInterop(BoaTest):
-
     default_folder: str = 'test_sc/interop_test/crypto'
     ecpoint_init = (
         Opcode.CONVERT + Type.bytes.stack_item

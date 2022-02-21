@@ -130,7 +130,6 @@ class TestNativeContracts(BoaTest):
             self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
 
     def test_oracle_get_price(self):
-
         from boa3.model.builtin.interop.interop import Interop
         from boa3.neo3.contracts import CallFlags
         from boa3.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod

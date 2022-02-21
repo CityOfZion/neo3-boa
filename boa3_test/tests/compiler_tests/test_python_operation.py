@@ -5,7 +5,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestPythonOperation(BoaTest):
-
     default_folder: str = 'test_sc/python_operation_test'
 
     # region Membership

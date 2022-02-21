@@ -360,7 +360,7 @@ class CodeGenerator:
         """
         Converts the signature of the method
         """
-        self.__insert1(OpcodeInfo.RET)
+        self.insert_return()
         self.initialized_static_fields = True
 
         if constants.INITIALIZE_METHOD_ID in self.symbol_table:
@@ -413,6 +413,12 @@ class CodeGenerator:
         Insert the return statement
         """
         self.__insert1(OpcodeInfo.RET)
+
+    def insert_not(self):
+        """
+        Insert a `not` to change the value of a bool
+        """
+        self.__insert1(OpcodeInfo.NOT)
 
     def convert_begin_while(self, is_for: bool = False) -> int:
         """
@@ -1384,7 +1390,7 @@ class CodeGenerator:
 
         symbol = self.get_symbol(symbol_id, is_internal=is_internal)
 
-        if symbol is Type.none and class_type is not None and symbol_id in class_type.symbols:
+        if class_type is not None and symbol_id in class_type.symbols:
             symbol = class_type.symbols[symbol_id]
 
         if symbol is not Type.none:
@@ -1455,7 +1461,7 @@ class CodeGenerator:
         inner_index = None
         index, local, is_arg = self._get_variable_info(var_id)
 
-        if user_class is None and index < 0 and len(self._stack) > 1 and isinstance(self._stack[-2], UserClass):
+        if user_class is None and len(self._stack) > 1 and isinstance(self._stack[-2], UserClass):
             user_class = self._stack[-2]
 
         if isinstance(user_class, UserClass) and var_id in user_class.variables:
@@ -1593,7 +1599,13 @@ class CodeGenerator:
 
         for opcode, data in function.opcode:
             op_info = OpcodeInfo.get_info(opcode)
-            self.__insert1(op_info, data)
+            if opcode is Opcode.CALL and isinstance(data, Method):
+                # avoid losing current stack state
+                for _ in data.args:
+                    self._stack_append(Type.any)
+                self.convert_method_call(data, len(data.args) - 1)
+            else:
+                self.__insert1(op_info, data)
 
         if store_opcode is not None:
             self._insert_jump(OpcodeInfo.JMP)
@@ -1625,13 +1637,22 @@ class CodeGenerator:
                     self.convert_new_empty_array(size, function_result)
 
         if isinstance(function.origin_class, ContractInterfaceClass):
-            function_id = next((symbol_id
-                                for symbol_id, symbol in function.origin_class.symbols.items()
-                                if symbol is function),
-                               None)
+            if function.external_name is not None:
+                function_id = function.external_name
+            else:
+                function_id = next((symbol_id
+                                    for symbol_id, symbol in function.origin_class.symbols.items()
+                                    if symbol is function),
+                                   None)
 
             if isinstance(function_id, str):
-                self.convert_new_array(len(function.args))
+                len_func_args = len(function.args)
+                if num_args >= len_func_args:
+                    num_args -= len_func_args
+                else:
+                    num_args = 0
+
+                self.convert_new_array(len_func_args)
                 self.convert_literal(Interop.CallFlagsType.default_value)
                 self.convert_literal(function_id)
                 self.convert_literal(function.origin_class.contract_hash.to_array())
@@ -1643,6 +1664,8 @@ class CodeGenerator:
 
         for arg in range(num_args):
             self._stack_pop()
+        if function.is_init:
+            self._stack_pop()  # pop duplicated result if it's init
 
         if function.return_type is not Type.none:
             self._stack_append(function.return_type)
@@ -1684,6 +1707,8 @@ class CodeGenerator:
             method = symbol.getter if load else symbol.setter
         elif symbol_id in class_type.instance_methods:
             method = class_type.instance_methods[symbol_id]
+        elif symbol_id in class_type.class_methods:
+            method = class_type.class_methods[symbol_id]
         elif isinstance(class_type, UserClass):
             return self.convert_user_class(class_type, symbol_id)
         else:
@@ -2002,3 +2027,19 @@ class CodeGenerator:
 
             self.__insert1(OpcodeInfo.PACK)  # packs everything together
             self._stack_pop()
+
+    def generate_implicit_init_user_class(self, init_method: Method):
+        self.convert_begin_method(init_method)
+        class_type = init_method.return_type
+        for base in class_type.bases:
+            base_constructor = base.constructor_method()
+            num_args = len(base_constructor.args)
+
+            for arg_id, arg_var in reversed(list(init_method.args.items())):
+                self.convert_load_variable(arg_id, arg_var)
+
+            args_to_call = num_args - 1 if num_args > 0 else num_args
+            self.convert_method_call(base_constructor, args_to_call)
+            self.remove_stack_top_item()
+
+        self.convert_end_method()

@@ -50,29 +50,46 @@ class StandardAnalyser(IAstAnalyser):
         self.standards.clear()
         self.standards.extend(filtered_standards)
 
+    def get_methods_by_display_name(self, method_id: str) -> List[Method]:
+        methods = []
+        for symbol_id, symbol in self.symbols.items():
+            if isinstance(symbol, Method) and symbol.is_public:
+                display_name = symbol.external_name if symbol.external_name is not None else symbol_id
+                if display_name == method_id:
+                    methods.append(symbol)
+        return methods
+
     def _validate_standards(self):
         for standard in self.standards:
             if standard in supportedstandard.neo_standards:
                 current_standard = supportedstandard.neo_standards[standard]
 
                 # validade standard's methods
-                for method_id, standard_method in current_standard.methods.items():
-                    if (method_id not in self.symbols or 
-                            not isinstance(self.symbols[method_id], Method) or 
-                            not current_standard.match_definition(method_id, self.symbols[method_id])):
+                for standard_method in current_standard.methods:
+                    method_id = standard_method.external_name
+                    is_implemented = False
+
+                    found_methods = self.get_methods_by_display_name(method_id)
+                    for method in found_methods:
+                        if isinstance(method, Method) and current_standard.match_definition(standard_method, method):
+                            is_implemented = True
+                            break
+
+                    if not is_implemented:
                         self._log_error(
                             CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
                         )
 
                 # validade standard's events
                 events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
-                for standard_event in current_standard.events.values():
-                    events_with_same_name = [event for event in events if event.name == standard_event.name]
-                    if (len(events_with_same_name) == 0 or
-                            all(not current_standard.match_definition(event.name, event)
-                                for event in events_with_same_name
-                                )):
+                for standard_event in current_standard.events:
+                    is_implemented = False
+                    for event in events:
+                        if event.name == standard_event.name and current_standard.match_definition(standard_event, event):
+                            is_implemented = True
+                            break
 
+                    if not is_implemented:
                         self._log_error(
                             CompilerError.MissingStandardDefinition(standard,
                                                                     standard_event.name,

@@ -12,7 +12,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestBuiltinMethod(BoaTest):
-
     default_folder: str = 'test_sc/built_in_methods_test'
 
     # region len test
@@ -985,43 +984,6 @@ class TestBuiltinMethod(BoaTest):
 
     # endregion
 
-    # region sqrt test
-
-    def test_sqrt_method(self):
-        path = self.get_contract_path('Sqrt.py')
-        engine = TestEngine()
-
-        from math import sqrt
-
-        expected_result = int(sqrt(0))
-        result = self.run_smart_contract(engine, path, 'main', 0)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(1))
-        result = self.run_smart_contract(engine, path, 'main', 1)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(3))
-        result = self.run_smart_contract(engine, path, 'main', 3)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(4))
-        result = self.run_smart_contract(engine, path, 'main', 4)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(8))
-        result = self.run_smart_contract(engine, path, 'main', 8)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(10))
-        result = self.run_smart_contract(engine, path, 'main', 10)
-        self.assertEqual(expected_result, result)
-
-        with self.assertRaises(TestExecutionException):
-            self.run_smart_contract(engine, path, 'main', -1)
-
-        val = 25
-        expected_result = int(sqrt(val))
-        result = self.run_smart_contract(engine, path, 'main', val)
-        self.assertEqual(expected_result, result)
-
-    # endregion
-
     # region abs test
 
     def test_abs(self):
@@ -1413,5 +1375,360 @@ class TestBuiltinMethod(BoaTest):
     def test_count_str_too_few_parameters(self):
         path = self.get_contract_path('CountStrTooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    # endregion
+
+    # region super test
+
+    def test_super_with_args(self):
+        # TODO: Change when super with args is implemented
+        path = self.get_contract_path('SuperWithArgs.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_super_call_method(self):
+        path = self.get_contract_path('SuperCallMethod.py')
+        engine = TestEngine()
+
+        super_method_expected_result = -20
+        arg = 20
+        result = self.run_smart_contract(engine, path, 'example_method', arg)
+        self.assertEqual(arg, result)
+
+        arg = 30
+        result = self.run_smart_contract(engine, path, 'example_method', arg)
+        self.assertEqual(arg, result)
+
+        arg = 40
+        result = self.run_smart_contract(engine, path, 'example_method', arg)
+        self.assertEqual(super_method_expected_result, result)
+
+    # endregion
+
+    # region int test
+
+    # TODO: Int constructor is not accepting more than one method
+    # def test_int_str(self):
+    #     path = self.get_contract_path('IntStr.py')
+    #     engine = TestEngine()
+    #
+    #     value = '0b101'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0B101'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0b101'
+    #     base = 2
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0B101'
+    #     base = 2
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0o123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0O123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0o123'
+    #     base = 8
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0O123'
+    #     base = 8
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0x123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0X123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0x123'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '0X123'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '123'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = '11'
+    #     base = 11
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = 'abcdef'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = 'abcdefg'
+    #     base = 16
+    #     with self.assertRaises(TestExecutionException):
+    #         self.run_smart_contract(engine, path, 'main', value, base)
+    #     with self.assertRaises(ValueError):
+    #         int(value, base)
+    #
+    #     value = '0x123'
+    #     base = 8
+    #     with self.assertRaises(TestExecutionException):
+    #         self.run_smart_contract(engine, path, 'main', value, base)
+    #     with self.assertRaises(ValueError):
+    #         int(value, base)
+
+    # TODO: Int constructor is not accepting more than one method
+    # def test_int_bytes(self):
+    #     path = self.get_contract_path('IntBytes.py')
+    #     self.compile_and_save(path)
+    #     engine = TestEngine()
+    #
+    #     value = b'0b101'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0B101'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0b101'
+    #     base = 2
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0B101'
+    #     base = 2
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0o123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0O123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0o123'
+    #     base = 8
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0O123'
+    #     base = 8
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0x123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0X123'
+    #     base = 0
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0x123'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'0X123'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'123'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'11'
+    #     base = 11
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'abcdef'
+    #     base = 16
+    #     result = self.run_smart_contract(engine, path, 'main', value, base)
+    #     self.assertEqual(int(value, base), result)
+    #
+    #     value = b'abcdefg'
+    #     base = 16
+    #     with self.assertRaises(TestExecutionException):
+    #         self.run_smart_contract(engine, path, 'main', value, base)
+    #     with self.assertRaises(ValueError):
+    #         int(value, base)
+    #
+    #     value = b'0x123'
+    #     base = 8
+    #     with self.assertRaises(TestExecutionException):
+    #         self.run_smart_contract(engine, path, 'main', value, base)
+    #     with self.assertRaises(ValueError):
+    #         int(value, base)
+
+    def test_int_int(self):
+        path = self.get_contract_path('IntInt.py')
+        engine = TestEngine()
+
+        value = 10
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(int(value), result)
+
+        value = -10
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(int(value), result)
+
+    def test_int_int_too_many_parameters(self):
+        path = self.get_contract_path('IntIntTooManyParameters.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_int_no_parameters(self):
+        path = self.get_contract_path('IntNoParameters.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(int(), result)
+
+    # endregion
+
+    # region bool test
+
+    def test_bool(self):
+        path = self.get_contract_path('Bool.py')
+        engine = TestEngine()
+
+        val = 1
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = 'test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = b'test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = [1, 2, 3]
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = {'1': 2}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_bytes(self):
+        path = self.get_contract_path('BoolBytes.py')
+        engine = TestEngine()
+
+        val = b'123'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = b''
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_class(self):
+        path = self.get_contract_path('BoolClass.py')
+        engine = TestEngine()
+
+        # dunder methods are not supported in neo3-boa
+        class Example:
+            def __init__(self):
+                self.test = 123
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(bool(Example()), result)
+
+    def test_bool_dict(self):
+        path = self.get_contract_path('BoolDict.py')
+        engine = TestEngine()
+
+        val = {}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = {'a': 123, 'b': 56, 'c': 1}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_int(self):
+        path = self.get_contract_path('BoolInt.py')
+        engine = TestEngine()
+
+        val = -1
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = 0
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = 1
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_list(self):
+        path = self.get_contract_path('BoolList.py')
+        engine = TestEngine()
+
+        val = []
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = [1, 2, 3, 4, 5]
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+    def test_bool_range(self):
+        path = self.get_contract_path('BoolRange.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'range_0')
+        self.assertEqual(bool(range(0)), result)
+
+        result = self.run_smart_contract(engine, path, 'range_not_0')
+        self.assertEqual(bool(range(10)), result)
+
+    def test_bool_str(self):
+        path = self.get_contract_path('BoolStr.py')
+        engine = TestEngine()
+
+        val = 'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
+
+        val = ''
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(bool(val), result)
 
     # endregion

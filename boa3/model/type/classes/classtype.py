@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 
@@ -15,7 +17,8 @@ class ClassType(IType, ABC):
     An abstract class used to represent Python class
     """
 
-    def __init__(self, identifier: str, decorators: list = None):
+    def __init__(self, identifier: str, decorators: list = None,
+                 bases: List[ClassType] = None):
         super().__init__(identifier)
 
         if decorators is None:
@@ -28,13 +31,20 @@ class ClassType(IType, ABC):
 
         self.decorators = decorators
 
+        if not isinstance(bases, list):
+            bases = []
+        self.bases: List[ClassType] = bases
+
     @property
     @abstractmethod
     def class_variables(self):
         """
         :rtype: Dict[str, boa3.model.variable.Variable]
         """
-        return {}
+        class_vars = {}
+        for base in self.bases:
+            class_vars.update(base.class_variables)
+        return class_vars
 
     @property
     @abstractmethod
@@ -42,7 +52,10 @@ class ClassType(IType, ABC):
         """
         :rtype: Dict[str, boa3.model.variable.Variable]
         """
-        return {}
+        instance_vars = {}
+        for base in self.bases:
+            instance_vars.update(base.instance_variables)
+        return instance_vars
 
     @property
     def variables(self):
@@ -66,7 +79,10 @@ class ClassType(IType, ABC):
         """
         :rtype: Dict[str, boa3.model.property.Property]
         """
-        return {}
+        props = {}
+        for base in self.bases:
+            props.update(base.properties)
+        return props
 
     @property
     @abstractmethod
@@ -74,7 +90,10 @@ class ClassType(IType, ABC):
         """
         :rtype: Dict[str, boa3.model.method.Method]
         """
-        return {}
+        static_funcs = {}
+        for base in self.bases:
+            static_funcs.update(base.static_methods)
+        return static_funcs
 
     @property
     @abstractmethod
@@ -82,7 +101,10 @@ class ClassType(IType, ABC):
         """
         :rtype: Dict[str, boa3.model.method.Method]
         """
-        return {}
+        class_funcs = {}
+        for base in self.bases:
+            class_funcs.update(base.class_methods)
+        return class_funcs
 
     @property
     @abstractmethod
@@ -90,7 +112,10 @@ class ClassType(IType, ABC):
         """
         :rtype: Dict[str, boa3.model.method.Method]
         """
-        return {}
+        instance_funcs = {}
+        for base in self.bases:
+            instance_funcs.update(base.instance_methods)
+        return instance_funcs
 
     @abstractmethod
     def constructor_method(self):

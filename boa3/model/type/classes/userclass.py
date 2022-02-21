@@ -7,13 +7,15 @@ from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.type.classes.classscope import ClassScope
+from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 
 
 class UserClass(ClassArrayType):
-    def __init__(self, identifier: str, decorators: List[Callable] = None):
-        super(ClassArrayType, self).__init__(identifier, decorators)
+    def __init__(self, identifier: str, decorators: List[Callable] = None,
+                 bases: List[ClassType] = None):
+        super(ClassArrayType, self).__init__(identifier, decorators, bases)
 
         self._static_methods: Dict[str, Method] = {}
 
@@ -32,27 +34,39 @@ class UserClass(ClassArrayType):
 
     @property
     def class_variables(self) -> Dict[str, Variable]:
-        return self._class_variables.copy()
+        class_vars = super().class_variables
+        class_vars.update(self._class_variables)
+        return class_vars
 
     @property
     def instance_variables(self) -> Dict[str, Variable]:
-        return self._instance_variables.copy()
+        instance_vars = super().instance_variables
+        instance_vars.update(self._instance_variables)
+        return instance_vars
 
     @property
     def properties(self) -> Dict[str, Property]:
-        return self._properties.copy()
+        props = super().properties
+        props.update(self._properties)
+        return props
 
     @property
     def static_methods(self) -> Dict[str, Method]:
-        return self._static_methods.copy()
+        static_funcs = super().static_methods
+        static_funcs.update(self._static_methods)
+        return static_funcs
 
     @property
     def class_methods(self) -> Dict[str, Method]:
-        return self._class_methods.copy()
+        class_funcs = super().class_methods
+        class_funcs.update(self._class_methods)
+        return class_funcs
 
     @property
     def instance_methods(self) -> Dict[str, Method]:
-        return self._instance_methods.copy()
+        instance_funcs = super().instance_methods
+        instance_funcs.update(self._instance_methods)
+        return instance_funcs
 
     def include_variable(self, var_id: str, var: Variable, is_instance: bool):
         """
@@ -120,12 +134,12 @@ class UserClass(ClassArrayType):
         return self._class_methods[constants.INIT_METHOD_ID]
 
     def is_type_of(self, value: Any) -> bool:
-        # TODO: change when class inheritance is implemented
-        return value is self
+        if value is self:
+            return True
+        return any(base.is_type_of(value) for base in self.bases)
 
     @classmethod
     def _is_type_of(cls, value: Any) -> bool:
-        # TODO: change when class inheritance is implemented
         return isinstance(value, UserClass)
 
     @classmethod

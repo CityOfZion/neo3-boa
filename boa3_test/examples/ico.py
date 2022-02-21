@@ -2,10 +2,11 @@ from typing import Any, List, Union
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent
-from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract import GAS, NEO, call_contract
-from boa3.builtin.interop.runtime import calling_script_hash, check_witness
-from boa3.builtin.interop.storage import delete, get, put
+from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.contract import call_contract
+from boa3.builtin.nativecontract.contractmanagement import ContractManagement
+from boa3.builtin.nativecontract.gas import GAS as GAS_TOKEN
+from boa3.builtin.nativecontract.neo import NEO as NEO_TOKEN
 from boa3.builtin.type import UInt160
 
 
@@ -21,6 +22,8 @@ def manifest_metadata() -> NeoMetadata:
     """
     meta = NeoMetadata()
     meta.supported_standards = ['NEP-17']
+    meta.add_permission(methods=['onNEP17Payment'])
+
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "ICO Example"
     meta.email = "contact@coz.io"
@@ -52,8 +55,7 @@ TOKEN_SYMBOL = 'ICO'
 TOKEN_DECIMALS = 8
 
 # Initial Supply of tokens in the system
-TOKEN_INITIAL_SUPPLY = 10_000_000 * 100_000_000  # 10m total supply * 10^8 (decimals)
-
+TOKEN_INITIAL_SUPPLY = 10_000_000 * 10 ** TOKEN_DECIMALS  # 10m total supply * 10^8 (decimals)
 
 # -------------------------------------------
 # Events
@@ -86,7 +88,7 @@ def is_administrator() -> bool:
 
     :return: whether the contract's invoker is an administrator
     """
-    return check_witness(TOKEN_OWNER)
+    return runtime.check_witness(TOKEN_OWNER)
 
 
 def is_valid_address(address: UInt160) -> bool:
@@ -95,27 +97,21 @@ def is_valid_address(address: UInt160) -> bool:
 
     :return: whether the given address is validated by kyc
     """
-    return get(KYC_WHITELIST_PREFIX + address).to_int() > 0
+    return storage.get(KYC_WHITELIST_PREFIX + address).to_int() > 0
 
 
 @public
-def deploy() -> bool:
+def _deploy(data: Any, update: bool):
     """
     Initializes the storage when the smart contract is deployed.
 
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
-    if not check_witness(TOKEN_OWNER):
-        return False
+    if not update:
+        storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
+        storage.put(TOKEN_OWNER, TOKEN_INITIAL_SUPPLY)
 
-    if get(TOKEN_TOTAL_SUPPLY_PREFIX).to_int() > 0:
-        return False
-
-    put(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
-    put(TOKEN_OWNER, TOKEN_INITIAL_SUPPLY)
-
-    on_transfer(None, TOKEN_OWNER, TOKEN_INITIAL_SUPPLY)
-    return True
+        on_transfer(None, TOKEN_OWNER, TOKEN_INITIAL_SUPPLY)
 
 
 @public
@@ -132,11 +128,11 @@ def mint(amount: int) -> bool:
         return False
 
     if amount > 0:
-        current_total_supply = totalSupply()
-        owner_balance = balanceOf(TOKEN_OWNER)
+        current_total_supply = total_supply()
+        owner_balance = balance_of(TOKEN_OWNER)
 
-        put(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
-        put(TOKEN_OWNER, owner_balance + amount)
+        storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
+        storage.put(TOKEN_OWNER, owner_balance + amount)
 
     on_transfer(None, TOKEN_OWNER, amount)
     post_transfer(None, TOKEN_OWNER, amount, None)
@@ -163,15 +159,15 @@ def refund(address: UInt160, neo_amount: int, gas_amount: int) -> bool:
         return False
 
     if neo_amount > 0:
-        result = call_contract(NEO, 'transfer', [calling_script_hash, address, neo_amount, None])
-        if result != True:
+        result = NEO_TOKEN.transfer(runtime.calling_script_hash, address, neo_amount)
+        if not result:
             # due to a current limitation in the neo3-boa, changing the condition to `not result`
             # will result in a compiler error
             return False
 
     if gas_amount > 0:
-        result = call_contract(GAS, 'transfer', [calling_script_hash, address, gas_amount, None])
-        if result != True:
+        result = GAS_TOKEN.transfer(runtime.calling_script_hash, address, gas_amount)
+        if not result:
             # due to a current limitation in the neo3-boa, changing the condition to `not result`
             # will result in a compiler error
             return False
@@ -180,11 +176,11 @@ def refund(address: UInt160, neo_amount: int, gas_amount: int) -> bool:
 
 
 # -------------------------------------------
-# Public methods from NEP5.1
+# Public methods from NEP-17
 # -------------------------------------------
 
 
-@public
+@public(safe=True)
 def symbol() -> str:
     """
     Gets the symbols of the token.
@@ -198,7 +194,7 @@ def symbol() -> str:
     return TOKEN_SYMBOL
 
 
-@public
+@public(safe=True)
 def decimals() -> int:
     """
     Gets the amount of decimals used by the token.
@@ -211,8 +207,8 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public
-def totalSupply() -> int:
+@public(name='totalSupply', safe=True)
+def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -221,11 +217,11 @@ def totalSupply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return get(TOKEN_TOTAL_SUPPLY_PREFIX).to_int()
+    return storage.get(TOKEN_TOTAL_SUPPLY_PREFIX).to_int()
 
 
-@public
-def balanceOf(account: UInt160) -> int:
+@public(name='balanceOf', safe=True)
+def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address
 
@@ -238,7 +234,7 @@ def balanceOf(account: UInt160) -> int:
     :raise AssertionError: raised if `account` length is not 20.
     """
     assert len(account) == 20
-    return get(account).to_int()
+    return storage.get(account).to_int()
 
 
 @public
@@ -267,26 +263,26 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = get(from_address).to_int()
+    from_balance = storage.get(from_address).to_int()
     if from_balance < amount:
         return False
 
     # The function should check whether the from address equals the caller contract hash.
     # If so, the transfer should be processed;
     # If not, the function should use the check_witness to verify the transfer.
-    if from_address != calling_script_hash:
-        if not check_witness(from_address):
+    if from_address != runtime.calling_script_hash:
+        if not runtime.check_witness(from_address):
             return False
 
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
     if from_address != to_address and amount != 0:
         if from_balance == amount:
-            delete(from_address)
+            storage.delete(from_address)
         else:
-            put(from_address, from_balance - amount)
+            storage.put(from_address, from_balance - amount)
 
-        to_balance = get(to_address).to_int()
-        put(to_address, to_balance + amount)
+        to_balance = storage.get(to_address).to_int()
+        storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -309,10 +305,10 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
     :param data: any pertinent data that might validate the transaction
     :type data: Any
     """
-    if not isinstance(to_address, None):    # TODO: change to 'is not None' when `is` semantic is implemented
-        contract = get_contract(to_address)
-        if not isinstance(contract, None):      # TODO: change to 'is not None' when `is` semantic is implemented
-            call_contract(to_address, 'onPayment', [from_address, amount, data])
+    if not isinstance(to_address, None):  # TODO: change to 'is not None' when `is` semantic is implemented
+        contract = ContractManagement.get_contract(to_address)
+        if not isinstance(contract, None):  # TODO: change to 'is not None' when `is` semantic is implemented
+            call_contract(to_address, 'onNEP17Payment', [from_address, amount, data])
 
 
 @public
@@ -330,11 +326,11 @@ def allowance(from_address: UInt160, to_address: UInt160) -> int:
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
     assert len(from_address) == 20 and len(to_address) == 20
-    return get(TRANSFER_ALLOWANCE_PREFIX + from_address + to_address).to_int()
+    return storage.get(TRANSFER_ALLOWANCE_PREFIX + from_address + to_address).to_int()
 
 
-@public
-def transferFrom(originator: UInt160, from_address: UInt160, to_address: UInt160, amount: int, data: Any) -> bool:
+@public(name='transferFrom')
+def transfer_from(originator: UInt160, from_address: UInt160, to_address: UInt160, amount: int, data: Any) -> bool:
     """
     Transfers an amount from the `from` account to the `to` account if the `originator` has been approved to transfer
     the requested amount.
@@ -361,35 +357,35 @@ def transferFrom(originator: UInt160, from_address: UInt160, to_address: UInt160
     # The function should check whether the from address equals the caller contract hash.
     # If so, the transfer should be processed;
     # If not, the function should use the check_witness to verify the transfer.
-    if from_address != calling_script_hash:
-        if not check_witness(from_address):
+    if from_address != runtime.calling_script_hash:
+        if not runtime.check_witness(from_address):
             return False
 
     approved_transfer_amount = allowance(originator, from_address)
     if approved_transfer_amount < amount:
         return False
 
-    originator_balance = balanceOf(originator)
+    originator_balance = balance_of(originator)
     if originator_balance < amount:
         return False
 
     # update allowance between originator and from
     if approved_transfer_amount == amount:
-        delete(TRANSFER_ALLOWANCE_PREFIX + originator + from_address)
+        storage.delete(TRANSFER_ALLOWANCE_PREFIX + originator + from_address)
     else:
-        put(TRANSFER_ALLOWANCE_PREFIX + originator + from_address, approved_transfer_amount - amount)
+        storage.put(TRANSFER_ALLOWANCE_PREFIX + originator + from_address, approved_transfer_amount - amount)
 
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
     if amount != 0 and from_address != to_address:
         # update originator's balance
         if originator_balance == amount:
-            delete(originator)
+            storage.delete(originator)
         else:
-            put(originator, originator_balance - amount)
+            storage.put(originator, originator_balance - amount)
 
         # updates to's balance
-        to_balance = get(to_address).to_int()
-        put(to_address, to_balance + amount)
+        to_balance = storage.get(to_address).to_int()
+        storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -417,7 +413,7 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
     assert len(originator) == 20 and len(to_address) == 20
     assert amount >= 0
 
-    if not check_witness(originator):
+    if not runtime.check_witness(originator):
         return False
 
     if originator == to_address:
@@ -427,10 +423,10 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
         # one of the address doesn't passed the kyc yet
         return False
 
-    if balanceOf(originator) < amount:
+    if balance_of(originator) < amount:
         return False
 
-    put(TRANSFER_ALLOWANCE_PREFIX + originator + to_address, amount)
+    storage.put(TRANSFER_ALLOWANCE_PREFIX + originator + to_address, amount)
     return True
 
 
@@ -452,7 +448,7 @@ def kyc_register(addresses: List[UInt160]) -> int:
         for address in addresses:
             if len(address) == 20:
                 kyc_key = KYC_WHITELIST_PREFIX + address
-                put(kyc_key, True)
+                storage.put(kyc_key, True)
                 included_addresses += 1
 
     return included_addresses
@@ -471,7 +467,7 @@ def kyc_remove(addresses: List[UInt160]) -> int:
         for address in addresses:
             if len(address) == 20:
                 kyc_key = KYC_WHITELIST_PREFIX + address
-                delete(kyc_key)
+                storage.delete(kyc_key)
                 removed_addresses += 1
 
     return removed_addresses

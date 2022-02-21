@@ -9,7 +9,6 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTemplate(BoaTest):
-
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -20,32 +19,6 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         Boa3.compile(path)
 
-    def test_amm_deploy(self):
-        path = self.get_contract_path('amm.py')
-        engine = TestEngine()
-
-        # needs the owner signature
-        result = self.run_smart_contract(engine, path, method='deploy',
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        # should return false if the signature isn't from the owner
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # must always return false after first execution
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
     def test_amm_set_address(self):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
@@ -55,22 +28,11 @@ class TestTemplate(BoaTest):
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path_zneo)
+        output, manifest = self.get_output(path_zneo)
         zneo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zgas)
+        output, manifest = self.get_output(path_zgas)
         zgas_address = hash160(output)
-
-        # won't work because the contract must have been deployed before
-        result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         # won't work because it needs the owner signature
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
@@ -130,7 +92,7 @@ class TestTemplate(BoaTest):
         amount_zgas = amount_zneo * reserve_zgas // reserve_zneo
         self.assertEqual(amount_zgas, result)
 
-    def test_amm_onNEP17Payment(self):
+    def test_amm_on_nep17_payment(self):
         transferred_amount = 10 * 10 ** 8
 
         path = self.get_contract_path('amm.py')
@@ -143,22 +105,17 @@ class TestTemplate(BoaTest):
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         amm_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_aux)
+        output, manifest = self.get_output(path_aux)
         aux_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zneo)
+        output, manifest = self.get_output(path_zneo)
         zneo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zgas)
+        output, manifest = self.get_output(path_zgas)
         zgas_address = hash160(output)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -201,22 +158,17 @@ class TestTemplate(BoaTest):
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         amm_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zneo)
+        output, manifest = self.get_output(path_zneo)
         zneo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zgas)
+        output, manifest = self.get_output(path_zgas)
         zgas_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_aux)
+        output, manifest = self.get_output(path_aux)
         aux_address = hash160(output)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -436,22 +388,17 @@ class TestTemplate(BoaTest):
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         amm_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zneo)
+        output, manifest = self.get_output(path_zneo)
         zneo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zgas)
+        output, manifest = self.get_output(path_zgas)
         zgas_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_aux)
+        output, manifest = self.get_output(path_aux)
         aux_address = hash160(output)
-
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
@@ -463,21 +410,9 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'remove_liquidity', 10000, 0, 0, aux_address,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH])
 
-        # deploying the wrapped_neo smart contract will give 10_000_000 zNEOs to the OWNER
-        result = self.run_smart_contract(engine, path_zneo, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
         # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # deploying the wrapped_gas smart contract will give 10_000_000 zGASs to the OWNER
-        result = self.run_smart_contract(engine, path_zgas, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -596,30 +531,19 @@ class TestTemplate(BoaTest):
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         amm_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zneo)
+        output, manifest = self.get_output(path_zneo)
         zneo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zgas)
+        output, manifest = self.get_output(path_zgas)
         zgas_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_aux)
+        output, manifest = self.get_output(path_aux)
         aux_address = hash160(output)
 
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # deploying the wrapped_neo smart contract will give 10_000_000 zNEOs to the OWNER
-        result = self.run_smart_contract(engine, path_zneo, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -627,12 +551,6 @@ class TestTemplate(BoaTest):
         # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # deploying the wrapped_gas smart contract will give 10_000_000 zGASs to the OWNER
-        result = self.run_smart_contract(engine, path_zgas, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -755,30 +673,19 @@ class TestTemplate(BoaTest):
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.get_output(path)
         amm_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zneo)
+        output, manifest = self.get_output(path_zneo)
         zneo_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_zgas)
+        output, manifest = self.get_output(path_zgas)
         zgas_address = hash160(output)
 
-        output, manifest = self.compile_and_save(path_aux)
+        output, manifest = self.get_output(path_aux)
         aux_address = hash160(output)
 
-        result = self.run_smart_contract(engine, path, 'deploy',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # deploying the wrapped_neo smart contract will give 10_000_000 zNEOs to the OWNER
-        result = self.run_smart_contract(engine, path_zneo, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
@@ -786,12 +693,6 @@ class TestTemplate(BoaTest):
         # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        # deploying the wrapped_gas smart contract will give 10_000_000 zGASs to the OWNER
-        result = self.run_smart_contract(engine, path_zgas, 'deploy',
                                          signer_accounts=[self.OWNER_SCRIPT_HASH],
                                          expected_result_type=bool)
         self.assertEqual(True, result)

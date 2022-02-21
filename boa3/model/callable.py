@@ -26,6 +26,8 @@ class Callable(IExpression, ABC):
                  defaults: List[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
                  decorators: List[Callable] = None,
+                 external_name: str = None,
+                 is_safe: bool = False,
                  origin_node: Optional[ast.AST] = None):
 
         if args is None:
@@ -61,13 +63,27 @@ class Callable(IExpression, ABC):
         self._kwargs: Dict[str, Variable] = kwargs.copy()
 
         self.return_type: IType = return_type
-        self.is_public: bool = is_public
 
         if decorators is None:
             decorators = []
         from boa3.model.decorator import IDecorator
         self.decorators: List[IDecorator] = [decorator for decorator in decorators
                                              if isinstance(decorator, IDecorator)]
+
+        from boa3.model.builtin.decorator import PublicDecorator
+        public_decorator = next((decorator for decorator in self.decorators
+                                 if isinstance(decorator, PublicDecorator)),
+                                None)
+
+        self.is_public: bool = is_public or public_decorator is not None
+        if self.is_public:
+            if isinstance(public_decorator, PublicDecorator):
+                external_name = public_decorator.name
+            elif self.defined_by_entry:
+                external_name = None
+
+        self.external_name: Optional[str] = external_name
+        self.is_safe: bool = is_safe or (isinstance(public_decorator, PublicDecorator) and public_decorator.safe)
 
         super().__init__(origin_node)
 
@@ -99,6 +115,13 @@ class Callable(IExpression, ABC):
     @property
     def has_cls_or_self(self) -> bool:
         return any(decorator.has_cls_or_self for decorator in self.decorators)
+
+    @property
+    def cls_or_self_type(self) -> Optional[IType]:
+        if not self.has_cls_or_self or len(self.args) == 0:
+            return None
+
+        return list(self.args.values())[0].type
 
     @property
     def has_starred_argument(self) -> bool:
@@ -143,3 +166,7 @@ class Callable(IExpression, ABC):
             signature = '({0})'.format(', '.join(args_types))
         public = 'public ' if self.is_public else ''
         return '{0}{1}'.format(public, signature)
+
+    def __repr__(self) -> str:
+        name = self.identifier if hasattr(self, 'identifier') else self.__class__.__name__
+        return f'{name}{str(self)}'
