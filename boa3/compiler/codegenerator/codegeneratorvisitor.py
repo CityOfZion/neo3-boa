@@ -776,7 +776,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             if self.generator.stack_size > num_args:
                 value = self.generator._stack_pop(-num_args - 1)
                 self.generator._stack_append(value)
-            VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
+            end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
+            if not symbol.is_init:
+                args_addresses.append(end_address)
 
         if self.is_exception_name(function_id):
             self.generator.convert_new_exception(len(call.args))

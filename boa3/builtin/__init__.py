@@ -106,7 +106,7 @@ class NeoMetadata:
         self.name: str = ''
         self.supported_standards: List[str] = []
         self._trusts: List[str] = []
-        self._: List[dict] = []
+        self._permissions: List[dict] = []
 
     @property
     def extras(self) -> Dict[str, Any]:
