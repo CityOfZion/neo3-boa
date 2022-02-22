@@ -24,3 +24,9 @@ def get_from_global() -> List[int]:
 @public
 def get_from_class() -> List[int]:
     return Test.get_global()
+
+
+@public
+def get_from_class_without_assigning() -> List[int]:
+    Test.get_global()
+    return []

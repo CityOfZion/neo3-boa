@@ -27,7 +27,7 @@ def public(name: str = None, safe: bool = True, *args, **kwargs):
     This decorator identifies which methods should be included in the abi file.
 
     :param name: Identifier for this method that'll be used on the abi. If not specified, it'll be the same
-    identifier from Python method definition
+     identifier from Python method definition
     :type name: str
     :param safe: Whether this method is an abi safe method. False by default
     :type safe: bool
@@ -85,11 +85,11 @@ class NeoMetadata:
     This class stores the smart contract manifest information.
 
     :ivar name: the smart contract name. Will be the name of the file by default;
-    :vartype name: str
+    :vartype type name: str
     :ivar supported_standards: Neo standards supported by this smart contract. Empty by default;
     :vartype supported_standards: List[str]
-    :ivar permissions: a list of contracts and methods that this smart contract permits to invoke and caçç. All
-    contracts and methods permitted by default;
+    :ivar permissions: a list of contracts and methods that this smart contract permits to invoke and call. All
+     contracts and methods permitted by default;
     :vartype permissions: List[str]
     :ivar trusts: a list of contracts that this smart contract trust. Empty by default;
     :vartype trusts: List[str]
@@ -141,9 +141,9 @@ class NeoMetadata:
 
     def add_trusted_source(self, hash_or_address: str):
         """
-        Adds a valid contract hash, valid group public key, or the * wildcard to trusts.
+        Adds a valid contract hash, valid group public key, or the '*' wildcard to trusts.
 
-        :param hash_or_address: a contract hash, group public key or *
+        :param hash_or_address: a contract hash, group public key or '*'
         :type hash_or_address: str
         """
         if not isinstance(hash_or_address, str):
@@ -170,9 +170,9 @@ class NeoMetadata:
         """
         Adds a valid contract and a valid methods to the permissions in the manifest.
 
-        :param contract: a contract hash, group public key or *
+        :param contract: a contract hash, group public key or '*'
         :type contract: str
-        :param methods: a list of methods or *
+        :param methods: a list of methods or '*'
         :type methods: Union[List[str], str]
         """
 
@@ -209,8 +209,7 @@ class NeoMetadata:
     @staticmethod
     def _verify_is_valid_public_key(public_key: str) -> bool:
         """
-        Verifies if a given compressed public key is valid. It should either start with 02 or 03 and be followed
-        by 32 bytes.
+        Verifies if a given compressed public key is valid.
 
         :return: whether the given public key is valid or not
         """
@@ -225,7 +224,7 @@ class NeoMetadata:
     @staticmethod
     def _verify_is_valid_contract_hash(contract_hash: str) -> bool:
         """
-        Verifies if a given contract hash is valid. It should either start with 0x and be followed by 20 bytes.
+        Verifies if a given contract hash is valid.
 
         :return: whether the given contract hash is valid or not
         """

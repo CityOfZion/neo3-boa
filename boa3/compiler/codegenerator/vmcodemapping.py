@@ -258,10 +258,12 @@ class VMCodeMapping:
                 break
 
         self._update_addresses(first_code_address)
+        index = self.bytecode_size
 
         for code in moved_codes:
             self.insert_code(code)
         self._update_targets()
+        return index
 
     def remove_opcodes(self, first_code_address: int, last_code_address: int):
         if last_code_address < first_code_address:
