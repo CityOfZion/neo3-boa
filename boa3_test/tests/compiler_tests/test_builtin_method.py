@@ -720,59 +720,44 @@ class TestBuiltinMethod(BoaTest):
         path = self.get_contract_path('IsInstanceManyTypesWithClass.py')
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', 42)
         self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'Main', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', [],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', [])
         self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'Main', 'some string',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', 'some string')
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', bytes(20),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(20))
         self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'Main', None,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', None)
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 4},
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 4})
         self.assertEqual(True, result)
 
     def test_isinstance_uint160(self):
         path = self.get_contract_path('IsInstanceUInt160.py')
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', bytes(20),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(20))
         self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'Main', bytes(30),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', bytes(30))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'Main', 42)
         self.assertEqual(False, result)
 
     def test_isinstance_uint256(self):
         path = self.get_contract_path('IsInstanceUInt256.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'main', bytes(20),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', bytes(20))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'main', bytes(30),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', bytes(30))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'main', bytes(32),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', bytes(32))
         self.assertEqual(True, result)
 
     # endregion

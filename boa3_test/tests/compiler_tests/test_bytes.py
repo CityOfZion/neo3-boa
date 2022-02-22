@@ -151,7 +151,7 @@ class TestBytes(BoaTest):
         path = self.get_contract_path('BytesToBoolWithBuiltinHardCodedFalse.py')
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'bytes_to_bool', expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'bytes_to_bool')
         self.assertEqual(False, result)
 
     def test_bytes_to_bool_with_builtin_hard_coded_true(self):

@@ -6,6 +6,7 @@ from boa3.model.type.type import Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
@@ -209,7 +210,8 @@ class TestConstant(BoaTest):
         byte_input1 = String(input[1]).to_bytes()
 
         expected_output = (
-            Opcode.PUSH0        # True
+            Opcode.PUSH0        # False
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSHDATA1  # '2'
             + Integer(len(byte_input1)).to_byte_array()
             + byte_input1
@@ -305,6 +307,7 @@ class TestConstant(BoaTest):
 
         expected_output = (
             Opcode.PUSH0        # False
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSHDATA1  # '2'
             + Integer(len(byte_input1)).to_byte_array()
             + byte_input1

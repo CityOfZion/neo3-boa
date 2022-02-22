@@ -503,21 +503,23 @@ class CodeGenerator:
 
         self._current_loop.pop()
 
+        is_break_pos = self.bytecode_size
         self.convert_literal(False)  # is not break
-        is_break_pos = self.last_code_start_address
+        is_break_end = self.last_code_start_address
         self._update_break_jumps(start_address)
 
         if is_for:
             self._current_for.pop()
-            self.swap_reverse_stack_items(3)
             reverse_to_drop_pos = self.last_code_start_address
+            self.swap_reverse_stack_items(3)
+            reverse_to_drop_end = self.last_code_start_address
 
             self.remove_stack_top_item()    # removes index and sequence from stack
             self.remove_stack_top_item()
 
-            self._insert_loop_break_addresses(start_address, reverse_to_drop_pos, self.bytecode_size)
+            self._insert_loop_break_addresses(start_address, reverse_to_drop_pos, reverse_to_drop_end, self.bytecode_size)
 
-        self._insert_loop_break_addresses(start_address, is_break_pos, self.bytecode_size)
+        self._insert_loop_break_addresses(start_address, is_break_pos, is_break_end, self.bytecode_size)
         self._insert_jump(OpcodeInfo.JMPIF)
 
     def convert_end_loop_else(self, start_address: int, else_begin: int, has_else: bool = False, is_for: bool = False):
@@ -538,7 +540,7 @@ class CodeGenerator:
             if not has_else:
                 self._opcodes_to_remove.extend(is_loop_insertions)
             else:
-                min_break_addresses = 4 if is_for else 3
+                min_break_addresses = 5 if is_for else 4
                 if (start_address in self._jumps_to_loop_break
                         and len(self._jumps_to_loop_break[start_address]) < 2
                         and len(is_loop_insertions) < min_break_addresses):
@@ -734,24 +736,31 @@ class CodeGenerator:
 
     def convert_loop_break(self):
         loop_start = self._current_loop[-1]
+        is_break_pos = self.bytecode_size
         self.convert_literal(True)  # is break
         self._stack_pop()
-        is_break_pos = self.last_code_start_address
+        is_break_end = self.last_code_start_address
         self._insert_jump(OpcodeInfo.JMP)
         break_address = self.last_code_start_address
 
-        self._insert_loop_break_addresses(loop_start, is_break_pos, break_address)
+        self._insert_loop_break_addresses(loop_start, is_break_pos, is_break_end, break_address)
 
-    def _insert_loop_break_addresses(self, loop_start: int, is_break_pos: int, break_address: int):
+    def _insert_loop_break_addresses(self, loop_start: int, is_break_start: int, is_break_end: int, break_address: int):
         if loop_start not in self._jumps_to_loop_condition:
             self._jumps_to_loop_break[loop_start] = [break_address]
         elif break_address not in self._jumps_to_loop_break[loop_start]:
             self._jumps_to_loop_break[loop_start].append(break_address)
 
+        is_break_instructions = VMCodeMapping.instance().get_addresses(is_break_start, is_break_end)
+
         if loop_start not in self._inserted_loop_breaks:
-            self._inserted_loop_breaks[loop_start] = [is_break_pos]
+            self._inserted_loop_breaks[loop_start] = is_break_instructions
         else:
-            self._inserted_loop_breaks[loop_start].append(is_break_pos)
+            loop_breaks_list = self._inserted_loop_breaks[loop_start]
+            for address in is_break_instructions:
+                # don't include duplicated addresses
+                if address not in loop_breaks_list:
+                    loop_breaks_list.append(address)
 
     def _update_break_jumps(self, loop_start_address) -> int:
         jump_target = VMCodeMapping.instance().bytecode_size
@@ -828,7 +837,8 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.PUSH1)
         else:
             self.__insert1(OpcodeInfo.PUSH0)
-        self._stack_append(Type.bool)
+        self._stack_append(Type.int)  # don't add bool to stack directly for optimizations
+        self.convert_cast(Type.bool)
 
     def convert_byte_array(self, array: bytes):
         """
@@ -1646,13 +1656,7 @@ class CodeGenerator:
                                    None)
 
             if isinstance(function_id, str):
-                len_func_args = len(function.args)
-                if num_args >= len_func_args:
-                    num_args -= len_func_args
-                else:
-                    num_args = 0
-
-                self.convert_new_array(len_func_args)
+                self.convert_new_array(len(function.args))
                 self.convert_literal(Interop.CallFlagsType.default_value)
                 self.convert_literal(function_id)
                 self.convert_literal(function.origin_class.contract_hash.to_array())

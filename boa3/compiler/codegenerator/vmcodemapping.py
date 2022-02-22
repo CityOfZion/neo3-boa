@@ -116,6 +116,16 @@ class VMCodeMapping:
                 code_address = addr
             return self._codes[code_address]
 
+    def get_addresses(self, start_address: int, end_address: int) -> List[int]:
+        if start_address > end_address:
+            start_address, end_address = end_address, start_address
+
+        addresses = []
+        for address in range(start_address, end_address + 1):
+            if address in self._codes:
+                addresses.append(address)
+        return addresses
+
     def get_start_address(self, vm_code: VMCode) -> int:
         """
         Gets the vm code's first byte address

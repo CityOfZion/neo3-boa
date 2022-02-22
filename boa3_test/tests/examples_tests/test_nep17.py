@@ -66,15 +66,13 @@ class TestNEP17Template(BoaTest):
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, None,
-                                         expected_result_type=bool)
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, None)
         self.assertEqual(False, result)
 
         # should fail if the sender doesn't have enough balance
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
 
         # should fail when any of the scripts' length is not 20
@@ -94,8 +92,7 @@ class TestNEP17Template(BoaTest):
         balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transferred_amount, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(2, len(transfer_events))
@@ -119,8 +116,7 @@ class TestNEP17Template(BoaTest):
         balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(3, len(transfer_events))
@@ -167,8 +163,7 @@ class TestNEP17Template(BoaTest):
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.NEO_SCRIPT,
                                          aux_address, nep17_address, transferred_amount, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(4, len(transfer_events))
@@ -216,8 +211,7 @@ class TestNEP17Template(BoaTest):
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.GAS_SCRIPT,
                                          aux_address, nep17_address, transferred_amount, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(6, len(transfer_events))
@@ -267,17 +261,14 @@ class TestNEP17Template(BoaTest):
         engine = TestEngine()
 
         # should fail without signature
-        result = self.run_smart_contract(engine, path, 'verify',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'verify')
         self.assertEqual(False, result)
 
         # should fail if not signed by the owner
         result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
