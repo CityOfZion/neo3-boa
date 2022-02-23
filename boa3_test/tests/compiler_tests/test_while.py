@@ -4,6 +4,7 @@ from boa3.exception import CompilerError
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -14,7 +15,7 @@ class TestWhile(BoaTest):
 
     def test_while_constant_condition(self):
         jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-7).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -29,6 +30,7 @@ class TestWhile(BoaTest):
             + Opcode.ADD
             + Opcode.STLOC0
             + Opcode.PUSH0
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.JMPIF      # end while False
             + jmp_address
             + Opcode.LDLOC0     # return a
@@ -107,7 +109,7 @@ class TestWhile(BoaTest):
 
     def test_while_else(self):
         jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
-        jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-7).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT
@@ -122,6 +124,7 @@ class TestWhile(BoaTest):
             + Opcode.ADD
             + Opcode.STLOC0
             + Opcode.PUSH0
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.JMPIF      # end while False
             + jmp_address
             + Opcode.LDLOC0     # else

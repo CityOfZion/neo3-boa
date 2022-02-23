@@ -6,6 +6,7 @@ from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import TriggerType
 from boa3_test.tests.boa_test import BoaTest
@@ -111,6 +112,7 @@ class TestRuntimeInterop(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH1
             + Opcode.PACK
             + Opcode.SWAP
@@ -130,7 +132,7 @@ class TestRuntimeInterop(BoaTest):
 
         event_notifications = engine.get_events(event_name=Interop.Notify.name)
         self.assertEqual(1, len(event_notifications))
-        self.assertEqual((1,), event_notifications[0].arguments)
+        self.assertEqual((True,), event_notifications[0].arguments)
 
     def test_notify_none(self):
         event_name = String('notify').to_bytes()

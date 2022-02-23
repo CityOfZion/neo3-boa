@@ -244,16 +244,11 @@ class TestStdlibClass(BoaTest):
         expected_result = True
         value = serialize(expected_result)
         result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
-
-        # it shouldn't be equal to the convertion, because it converts as an int instead of a boolean
         self.assertEqual(expected_result, result)
-        self.assertNotEqual(type(expected_result), type(result))
 
         value = StackItemType.Boolean + value[1:]
-        result = self.run_smart_contract(engine, path, 'deserialize_arg', value,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'deserialize_arg', value)
         self.assertEqual(expected_result, result)
-        self.assertEqual(type(expected_result), type(result))
 
         expected_result = '42'
         value = serialize(expected_result)
@@ -303,7 +298,7 @@ class TestStdlibClass(BoaTest):
         path = self.get_contract_path('JsonSerializeBool.py')
 
         engine = TestEngine()
-        expected_result = json.dumps(1)
+        expected_result = json.dumps(True)
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 

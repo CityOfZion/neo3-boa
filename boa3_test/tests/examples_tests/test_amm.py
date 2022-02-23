@@ -36,20 +36,17 @@ class TestTemplate(BoaTest):
 
         # won't work because it needs the owner signature
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
 
         # it will work now
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # initialize will work once
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(False, result)
 
     def test_amm_symbol(self):
@@ -118,8 +115,7 @@ class TestTemplate(BoaTest):
         zgas_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
@@ -132,16 +128,14 @@ class TestTemplate(BoaTest):
         # adding the transferred_amount into the aux_address
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
                                          constants.NEO_SCRIPT, aux_address, zneo_address, transferred_amount, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # the AMM will accept this transaction, but there is no reason to send tokens directly to the smart contract.
         # to send tokens to the AMM you should use the add_liquidity function
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
                                          zneo_address, aux_address, amm_address, transferred_amount, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
     def test_amm_add_liquidity(self):
@@ -171,24 +165,21 @@ class TestTemplate(BoaTest):
         aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         engine.add_neo(aux_address, 10_000_000 * 10 ** 8)
         # minting zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
                                          constants.NEO_SCRIPT, aux_address, zneo_address, 10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         engine.add_gas(aux_address, 10_000_000 * 10 ** 8)
         # minting zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
                                          constants.GAS_SCRIPT, aux_address, zgas_address, 10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # won't work, because the user did not allow the amm to transfer zNEO and zGAS
@@ -200,15 +191,13 @@ class TestTemplate(BoaTest):
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zGAS from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
@@ -288,15 +277,13 @@ class TestTemplate(BoaTest):
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zGAS from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
@@ -401,8 +388,7 @@ class TestTemplate(BoaTest):
         aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # can't remove liquidity, because the user doesn't have any
@@ -413,29 +399,25 @@ class TestTemplate(BoaTest):
         # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # transferring zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zGAS from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
@@ -544,36 +526,31 @@ class TestTemplate(BoaTest):
         aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # transferring zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zGAS from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
@@ -597,8 +574,7 @@ class TestTemplate(BoaTest):
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zneo_address, amm_address, swapped_zneo,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
@@ -686,36 +662,31 @@ class TestTemplate(BoaTest):
         aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # transferring zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
         result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
                                          10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # approving the AMM contract, so that it will be able to transfer zGAS from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
@@ -739,8 +710,7 @@ class TestTemplate(BoaTest):
         # approving the AMM contract, so that it will be able to transfer zNEO from test_address
         result = self.run_smart_contract(engine, path_aux, 'calling_approve',
                                          zgas_address, amm_address, swapped_zgas,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later

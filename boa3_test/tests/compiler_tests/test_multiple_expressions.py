@@ -1,6 +1,7 @@
 from boa3.boa3 import Boa3
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -177,6 +178,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(one)).to_byte_array() + one
             + Opcode.PUSH0
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH5
             + Opcode.PACK
             + Opcode.STLOC0     # items2 = array

@@ -29,7 +29,7 @@ class TestJsonInterop(BoaTest):
         path = self.get_contract_path('JsonSerializeBool.py')
 
         engine = TestEngine()
-        expected_result = json.dumps(1)
+        expected_result = json.dumps(True)
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 

@@ -373,42 +373,32 @@ class TestNeoTypes(BoaTest):
     def test_isinstance_contract(self):
         path = self.get_contract_path('IsInstanceContract.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_contract', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_contract', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_contract', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_contract', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_contract', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_contract', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_contract', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_contract', 42)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'is_get_contract_a_contract',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_get_contract_a_contract')
         self.assertEqual(True, result)
 
     def test_isinstance_block(self):
         path = self.get_contract_path('IsInstanceBlock.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_block', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_block', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_block', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_block', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_block', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_block', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_block', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_block', 42)
         self.assertEqual(False, result)
 
         engine.increase_block(10)
-        result = self.run_smart_contract(engine, path, 'get_block_is_block', 5,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'get_block_is_block', 5)
         self.assertEqual(True, result)
 
     def test_transaction_cast_and_get_hash(self):
@@ -426,122 +416,93 @@ class TestNeoTypes(BoaTest):
     def test_isinstance_transaction(self):
         path = self.get_contract_path('IsInstanceTransaction.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_tx', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_tx', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_tx', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_tx', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_tx', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_tx', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_tx', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_tx', 42)
         self.assertEqual(False, result)
 
         txs = engine.current_block.get_transactions()
         self.assertGreater(len(txs), 0)
         tx_hash = txs[-1].hash
 
-        result = self.run_smart_contract(engine, path, 'get_transaction_is_tx', tx_hash,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'get_transaction_is_tx', tx_hash)
         self.assertEqual(True, result)
 
     def test_isinstance_notification(self):
         path = self.get_contract_path('IsInstanceNotification.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_notification', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_notification', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_notification', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_notification', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_notification', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_notification', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_notification', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_notification', 42)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'get_notifications_is_notification',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'get_notifications_is_notification')
         self.assertEqual(True, result)
 
     def test_isinstance_storage_context(self):
         path = self.get_contract_path('IsInstanceStorageContext.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_context', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_context', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_context', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_context', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_context', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_context', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_context', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_context', 42)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'get_context_is_context',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'get_context_is_context')
         self.assertEqual(True, result)
 
     def test_isinstance_storage_map(self):
         path = self.get_contract_path('IsInstanceStorageMap.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_storage_map', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_storage_map', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_storage_map', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_storage_map', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_storage_map', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_storage_map', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_storage_map', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_storage_map', 42)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'create_map_is_storage_map',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'create_map_is_storage_map')
         self.assertEqual(True, result)
 
     def test_isinstance_iterator(self):
         path = self.get_contract_path('IsInstanceIterator.py')
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_iterator', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_iterator', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_iterator', [1, 2, 3],
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_iterator', [1, 2, 3])
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_iterator', "test_with_string",
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_iterator', "test_with_string")
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_iterator', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_iterator', 42)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'storage_find_is_context',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'storage_find_is_context')
         self.assertEqual(True, result)
 
     def test_isinstance_ecpoint(self):
         path = self.get_contract_path('IsInstanceECPoint.py')
         engine = TestEngine()
 
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(10),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(10))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(33),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(33))
         self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(30),
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(30))
         self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', 42,
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'is_ecpoint', 42)
         self.assertEqual(False, result)
 
     # endregion

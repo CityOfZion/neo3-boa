@@ -31,8 +31,7 @@ class TestHTLCTemplate(BoaTest):
                                          self.OWNER_SCRIPT_HASH, constants.NEO_SCRIPT, 10 * 10 ** 8,
                                          self.OTHER_ACCOUNT_1, constants.GAS_SCRIPT, 10000 * 10 ** 8,
                                          hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
     def test_htlc_on_nep17_payment(self):
@@ -60,8 +59,7 @@ class TestHTLCTemplate(BoaTest):
                                          aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
                                          aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # transfer wil be aborted at onPayment if the transfer is not valid
@@ -69,8 +67,7 @@ class TestHTLCTemplate(BoaTest):
             self.run_smart_contract(engine, aux_path, 'calling_transfer',
                                     constants.NEO_SCRIPT, aux_address, htlc_address,
                                     transferred_amount_neo - 100, None,
-                                    signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                    expected_result_type=bool)
+                                    signer_accounts=[self.OWNER_SCRIPT_HASH])
 
         # since the transfer was aborted, it was not registered in the events
         transfer_events = engine.get_events('Transfer')
@@ -83,8 +80,7 @@ class TestHTLCTemplate(BoaTest):
         # this transfer will be accepted
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
                                          constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # transfer was accepted so it was registered
@@ -114,8 +110,7 @@ class TestHTLCTemplate(BoaTest):
             self.run_smart_contract(engine, aux_path2, 'calling_transfer',
                                     constants.GAS_SCRIPT, aux_address2, htlc_address,
                                     transferred_amount_gas - 100, None,
-                                    signer_accounts=[aux_address2],
-                                    expected_result_type=bool)
+                                    signer_accounts=[aux_address2])
 
         transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)
         # the NEO transfer
@@ -128,8 +123,7 @@ class TestHTLCTemplate(BoaTest):
         # this transfer will be accepted
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
                                          constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
-                                         signer_accounts=[aux_address2],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address2])
         self.assertEqual(True, result)
 
         # the transfer was accepted so it was registered
@@ -187,42 +181,36 @@ class TestHTLCTemplate(BoaTest):
                                          aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
                                          aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # won't be able to withdraw, because no one transferred cryptocurrency to the smart contract
         result = self.run_smart_contract(engine, path, 'withdraw', 'unit test',
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
                                          constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)
         self.assertEqual(1, len(transfer_events))
 
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
                                          constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
-                                         signer_accounts=[aux_address2],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address2])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer', constants.GAS_SCRIPT)
         self.assertEqual(2, len(transfer_events))
 
         # the withdraw will fail, because the secret is wrong
         result = self.run_smart_contract(engine, path, 'withdraw', 'wrong one',
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(False, result)
 
         # the withdraw will occur
         result = self.run_smart_contract(engine, path, 'withdraw', 'unit test',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # the transfer were accepted so they were registered
@@ -295,14 +283,12 @@ class TestHTLCTemplate(BoaTest):
                                          aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
                                          aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # won't be able to refund, because not enough time has passed
         result = self.run_smart_contract(engine, path, 'refund',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(False, result)
 
         # this simulates a new block in the blockchain
@@ -310,8 +296,7 @@ class TestHTLCTemplate(BoaTest):
         engine.increase_block()
         # will be able to refund, because enough time has passed
         result = self.run_smart_contract(engine, path, 'refund',
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         transfer_events: List[Notification] = []
@@ -327,14 +312,12 @@ class TestHTLCTemplate(BoaTest):
                                          aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
                                          aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
                                          constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
         for k in engine.get_events('Transfer'):
             if k.arguments[0] is not None:
@@ -345,8 +328,7 @@ class TestHTLCTemplate(BoaTest):
         engine.increase_block()
         # will be able to refund, because enough time has passed
         result = self.run_smart_contract(engine, path, 'refund',
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # OWNER transferred cryptocurrency to the contract, so only he will be refunded
@@ -372,14 +354,12 @@ class TestHTLCTemplate(BoaTest):
                                          aux_address, constants.NEO_SCRIPT, transferred_amount_neo,
                                          aux_address2, constants.GAS_SCRIPT, transferred_amount_gas,
                                          hash160(String('unit test').to_bytes()),
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer',
                                          constants.NEO_SCRIPT, aux_address, htlc_address, transferred_amount_neo, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
         transfer_events = []
         for k in engine.get_events('Transfer'):
@@ -390,8 +370,7 @@ class TestHTLCTemplate(BoaTest):
 
         result = self.run_smart_contract(engine, aux_path2, 'calling_transfer',
                                          constants.GAS_SCRIPT, aux_address2, htlc_address, transferred_amount_gas, None,
-                                         signer_accounts=[aux_address2],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address2])
         self.assertEqual(True, result)
         transfer_events = []
         for k in engine.get_events('Transfer'):
@@ -403,8 +382,7 @@ class TestHTLCTemplate(BoaTest):
         engine.increase_block()
         # will be able to refund, because enough time has passed
         result = self.run_smart_contract(engine, path, 'refund',
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         # OWNER and OTHER_ACCOUNT transferred cryptocurrency to the contract, so they both will be refunded
