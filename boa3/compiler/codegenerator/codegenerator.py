@@ -68,6 +68,7 @@ class CodeGenerator:
             analyser.ast_tree.body.remove(deploy_method.origin)
 
         visitor = VisitorCodeGenerator(generator)
+        visitor._root_module = analyser.ast_tree
         visitor.visit(analyser.ast_tree)
 
         analyser.update_symbol_table(generator.symbol_table)
@@ -126,6 +127,7 @@ class CodeGenerator:
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
+        self.additional_symbols: Optional[Dict[str, ISymbol]] = None
 
         self._current_method: Method = None
         self._current_class: Method = None
@@ -291,6 +293,10 @@ class CodeGenerator:
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
+        cur_symbol_table = self.symbol_table.copy()
+        if isinstance(self.additional_symbols, dict):
+            cur_symbol_table.update(self.additional_symbols)
+
         if len(self._scope_stack) > 0:
             for symbol_scope in self._scope_stack:
                 if identifier in symbol_scope:
@@ -302,8 +308,8 @@ class CodeGenerator:
         else:
             if self._current_method is not None and identifier in self._current_method.symbols:
                 return self._current_method.symbols[identifier]
-            elif identifier in self.symbol_table:
-                return self.symbol_table[identifier]
+            elif identifier in cur_symbol_table:
+                return cur_symbol_table[identifier]
 
             # the symbol may be a built in. If not, returns None
             symbol = Builtin.get_symbol(identifier)
