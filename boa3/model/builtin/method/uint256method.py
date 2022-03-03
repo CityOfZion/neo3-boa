@@ -51,6 +51,23 @@ class UInt256Method(IBuiltinMethod):
         return (Type.bytes.is_type_of(param_type)
                 or Type.int.is_type_of(param_type))
 
+    def evaluate_literal(self, *args: Any) -> Any:
+        from boa3.neo3.core.types import UInt256
+
+        if len(args) == 0:
+            return UInt256.zero().to_array()
+
+        if len(args) == 1:
+            arg = args[0]
+            if isinstance(arg, int):
+                from boa3.neo.vm.type.Integer import Integer
+                arg = Integer(arg).to_byte_array(min_length=UInt256._BYTE_LEN)
+            if isinstance(arg, bytes):
+                value = UInt256(arg).to_array()
+                return value
+
+        return super().evaluate_literal(*args)
+
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer

@@ -47,7 +47,6 @@ class TestContractInterface(BoaTest):
         path = self.get_contract_path('Nep17Interface.py')
         nep17_path = self.get_contract_path('examples', 'nep17.py')
 
-        self.compile_and_save(path)
         engine = TestEngine()
 
         nep17_result = self.run_smart_contract(engine, nep17_path, 'symbol')
@@ -82,7 +81,6 @@ class TestContractInterface(BoaTest):
         path = self.get_contract_path('Nep17InterfaceWithDisplayName.py')
         nep17_path = self.get_contract_path('examples', 'nep17.py')
 
-        self.compile_and_save(path)
         engine = TestEngine()
 
         nep17_result = self.run_smart_contract(engine, nep17_path, 'totalSupply')

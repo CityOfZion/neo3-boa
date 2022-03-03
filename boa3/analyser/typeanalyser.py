@@ -117,8 +117,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # the symbol exists in the modules scope
             return self.modules[symbol_id]
 
+        if self._current_method is not None:
+            cur_symbols = self._current_method.symbols
+        elif self._current_class is not None:
+            cur_symbols = self._current_class.symbols
+        else:
+            cur_symbols = self.modules
+
         if check_raw_id:
-            found_symbol = self._search_by_raw_id(symbol_id, list(self._current_method.symbols.values()))
+            found_symbol = self._search_by_raw_id(symbol_id, list(cur_symbols.values()))
             if found_symbol is not None:
                 return found_symbol
 
