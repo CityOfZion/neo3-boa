@@ -6,7 +6,6 @@ from boa3.builtin.type import UInt160
 
 @contract('0xa34afa0e5414255d1093e92a1a6f1f505c82cd3f')
 class Nep17:
-    _hash = UInt160(b'\x0d\xbf\x77\x30\x13\x17\x66\x9c\xec\x3d\xab\x7f\xfb\x9c\x7b\x09\x89\xa9\x6c\x42')
 
     @staticmethod
     def symbol() -> str:
