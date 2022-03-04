@@ -26,6 +26,7 @@ from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.pythonclass import PythonClass
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.type import IType, Type
@@ -1160,8 +1161,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         elif isinstance(arg0, UserClass):
             arg0_identifier = arg0.identifier
-        else:
+        elif isinstance(arg0, ast.AST):
             arg0_identifier = self.visit(arg0)
+        else:
+            arg0_identifier = None
 
         if isinstance(arg0_identifier, ast.Name):
             arg0_identifier = arg0_identifier.id
@@ -1599,7 +1602,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if (isinstance(symbol, (Package, Attribute))
                 or (isinstance(symbol, ClassType) and isinstance(value, (Package, Attribute)))):
-            attr_value = symbol
+            attr_value = symbol if not isinstance(symbol, PythonClass) else attribute.value
         else:
             attr_value = attribute.value
 

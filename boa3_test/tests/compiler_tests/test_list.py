@@ -763,6 +763,12 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual([6, 7], result)
 
+    def test_list_append_in_class_variable(self):
+        path = self.get_contract_path('AppendInClassVariable.py')
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual([1, 2, 3, 4], result)
+
     # endregion
 
     # region TestClear
