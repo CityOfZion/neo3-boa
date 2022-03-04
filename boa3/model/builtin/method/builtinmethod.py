@@ -167,6 +167,16 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         return False
 
+    def evaluate_literal(self, *args: Any) -> Any:
+        """
+        Tries to evaluate the result during compile time. If it cannot be evaluated, returns Undefined.
+
+        :return: arguments to try to run the method
+        :rtype: Any
+        """
+        from boa3.analyser.model.optimizer import Undefined
+        return Undefined
+
     @property
     def body(self) -> Optional[str]:
         """

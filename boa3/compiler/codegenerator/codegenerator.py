@@ -68,6 +68,7 @@ class CodeGenerator:
             analyser.ast_tree.body.remove(deploy_method.origin)
 
         visitor = VisitorCodeGenerator(generator)
+        visitor._root_module = analyser.ast_tree
         visitor.visit(analyser.ast_tree)
 
         analyser.update_symbol_table(generator.symbol_table)
@@ -126,6 +127,7 @@ class CodeGenerator:
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
+        self.additional_symbols: Optional[Dict[str, ISymbol]] = None
 
         self._current_method: Method = None
         self._current_class: Method = None
@@ -291,6 +293,10 @@ class CodeGenerator:
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
+        cur_symbol_table = self.symbol_table.copy()
+        if isinstance(self.additional_symbols, dict):
+            cur_symbol_table.update(self.additional_symbols)
+
         if len(self._scope_stack) > 0:
             for symbol_scope in self._scope_stack:
                 if identifier in symbol_scope:
@@ -302,8 +308,8 @@ class CodeGenerator:
         else:
             if self._current_method is not None and identifier in self._current_method.symbols:
                 return self._current_method.symbols[identifier]
-            elif identifier in self.symbol_table:
-                return self.symbol_table[identifier]
+            elif identifier in cur_symbol_table:
+                return cur_symbol_table[identifier]
 
             # the symbol may be a built in. If not, returns None
             symbol = Builtin.get_symbol(identifier)
@@ -932,39 +938,39 @@ class CodeGenerator:
                 self._stack_pop()
             self._stack_append(array_type)
 
-    def _set_array_item(self, value_start_address: int):
+    def _set_array_item(self, value_start_address: int, check_for_negative_index: bool = True):
         """
         Converts the end of setting af a value in an array
         """
         index_type: IType = self._stack[-2]  # top: index
-        if index_type is Type.int:
+        if index_type is Type.int and check_for_negative_index:
             self.fix_negative_index(value_start_address)
 
-    def convert_set_item(self, value_start_address: int):
+    def convert_set_item(self, value_start_address: int, index_inserted_internally: bool = False):
         """
         Converts the end of setting af a value in an array
         """
         item_type: IType = self._stack[-3]  # top: index, 2nd-to-top: value, 3nd-to-top: array or map
         if item_type.stack_item is not StackItemType.Map:
-            self._set_array_item(value_start_address)
+            self._set_array_item(value_start_address, check_for_negative_index=not index_inserted_internally)
 
         self.__insert1(OpcodeInfo.SETITEM)
         self._stack_pop()  # value
         self._stack_pop()  # index
         self._stack_pop()  # array or map
 
-    def _get_array_item(self):
+    def _get_array_item(self, check_for_negative_index: bool = True):
         """
         Converts the end of get a value in an array
         """
         index_type: IType = self._stack[-1]  # top: index
-        if index_type is Type.int:
+        if index_type is Type.int and check_for_negative_index:
             self.fix_negative_index()
 
-    def convert_get_item(self):
+    def convert_get_item(self, index_inserted_internally: bool = False):
         array_or_map_type: IType = self._stack[-2]  # second-to-top: array or map
         if array_or_map_type.stack_item is not StackItemType.Map:
-            self._get_array_item()
+            self._get_array_item(check_for_negative_index=not index_inserted_internally)
 
         if array_or_map_type is Type.str:
             self.convert_literal(1)  # length of substring
@@ -1458,7 +1464,7 @@ class CodeGenerator:
             if var_id in class_type.variables:
                 index = list(class_type.variables).index(var_id)
                 self.convert_literal(index)
-                self.convert_get_item()
+                self.convert_get_item(index_inserted_internally=True)
                 self._stack_pop()             # pop class type
                 self._stack_append(var.type)  # push variable type
 
@@ -1491,7 +1497,7 @@ class CodeGenerator:
                 no_stack_items_to_swap = 2
 
             self.swap_reverse_stack_items(no_stack_items_to_swap)
-            self.convert_set_item(index_address)
+            self.convert_set_item(index_address, index_inserted_internally=True)
             return
 
         if index >= 0:

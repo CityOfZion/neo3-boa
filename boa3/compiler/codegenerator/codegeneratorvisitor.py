@@ -45,6 +45,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         self.global_stmts: List[ast.AST] = []
         self._is_generating_initialize = False
+        self._root_module: ast.AST = self._tree
 
     @property
     def _symbols(self) -> Dict[str, ISymbol]:
@@ -173,14 +174,30 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         global_stmts = [node for node in module.body if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
         function_stmts = module.body[len(global_stmts):]
+        mandatory_global_stmts = []
+        for stmt in global_stmts:
+            if isinstance(stmt, ast.ClassDef):
+                class_symbol = self.get_symbol(stmt.name)
+                if isinstance(class_symbol, UserClass) and len(class_symbol.class_variables) > 0:
+                    mandatory_global_stmts.append(stmt)
+            elif not isinstance(stmt, (ast.Import, ast.ImportFrom)):
+                mandatory_global_stmts.append(stmt)
 
         for stmt in function_stmts:
             self.visit(stmt)
 
         if self.generator.initialize_static_fields():
+            last_symbols = self.symbols  # save to revert in the end and not compromise consequent visits
             class_non_static_stmts = []
+
             for node in global_stmts.copy():
                 if isinstance(node, ast.ClassDef):
+                    if (hasattr(node, 'origin')
+                            and node.origin is not self._root_module
+                            and hasattr(node.origin, 'symbols')):
+                        # symbols unique to imports are not included in the symbols
+                        self.symbols = node.origin.symbols
+
                     class_variables = []
                     class_functions = []
                     for stmt in node.body:
@@ -213,12 +230,16 @@ class VisitorCodeGenerator(IAstAnalyser):
             for stmt in class_non_static_stmts:
                 self.visit(stmt)
 
-        elif len(function_stmts) > 0:
+            self.symbols = last_symbols  # revert in the end to not compromise consequent visits
+            self.generator.additional_symbols = None
+
+        elif len(function_stmts) > 0 or len(mandatory_global_stmts) > 0:
             # to organize syntax tree nodes from other modules
             for stmt in global_stmts:
                 if not hasattr(stmt, 'origin'):
                     stmt.origin = module
 
+            module.symbols = self._symbols
             self.global_stmts.extend(global_stmts)
         else:
             # to generate objects when there are no static variables to generate 'initialize'

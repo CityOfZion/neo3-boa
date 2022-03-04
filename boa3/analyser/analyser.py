@@ -143,7 +143,8 @@ class Analyser:
         """
         Tries to optimize the ast after validations
         """
-        AstOptimizer(self, log=self._log)
+        optimizer = AstOptimizer(self, log=self._log)
+        self.__update_logs(optimizer)
 
     def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
         for symbol_id, symbol in symbol_table.items():
