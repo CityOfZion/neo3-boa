@@ -5,110 +5,79 @@ Python compiler for the Neo3 Virtual Machine
 
 -  `Overview <#overview>`__
 
+   -  `Product Strategy <#product-strategy>`__
+-  `Quickstart <#quickstart>`__
+
+   -  `Compiling your Smart Contract <#compiling-your-smart-contract>`__
+-  `Docs <#docs>`__
+-  `Reference Examples <#reference-examples>`__
+-  `License <#license>`__
+
 Overview
 --------
 
-The ``neo3-boa`` compiler is a tool for compiling Python files to the
-``.nef`` and ``.manisfest.json`` formats for usage in the `Neo Virtual
-Machine <https://github.com/neo-project/neo-vm/>`__ which is used to
-execute contracts on the `Neo
-Blockchain <https://github.com/neo-project/neo/>`__.
+Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manisfest.json` formats for usage in the `Neo Virtual Machine <https://github.com/neo-project/neo-vm/>`__ which is used to execute contracts on the `Neo Blockchain <https://github.com/neo-project/neo/>`__.
 
-What it currently does...
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Neo-boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
 
--  Compiles a subset of the Python language to the ``.nef`` and
-   ``.manisfest.json`` format for use in the `Neo Virtual
-   Machine <https://github.com/neo-project/neo-vm>`__
+Product Strategy
+================
 
--  Works for Python 3.7+
+Pure Python
+^^^^^^^^^^^
+We want Python developers to feel comfortable when trying neo3-boa for the first time. It should look and behave like regular Python. For this reason we decided to avoid adding new keywords, but use decorators and helper functions instead.
 
--  Logs compiler errors and warnings
+Neo Python Framework
+^^^^^^^^^^^^^^^^^^^^
+In the real world, simply coding a smart contract is not enough. Developers need to debug, deploy and invoke it. Therefore, it’s important for this tool to be part of a bigger Python framework. To help the developers and avoid a bad user experience, we need to use logs and inform errors with details.
 
--  Logs when the main method is analysed
+Testing against Neo VM
+^^^^^^^^^^^^^^^^^^^^^^
+We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo repository already contains a class called TestEngine that is capable of running tests using C# smart-contracts. It will be adjusted to support compiled smart-contracts.
 
--  Logs method inclusions in ``.abi`` file to work with Neo Debuggers.
+Maintenance
+^^^^^^^^^^^
+Create a product that is easy to maintain and upgrade. Use Unit tests, typed and documented code to ensure its maintainability.
 
--  Converts Functions
+Quickstart
+----------
 
--  Converts Local Variable Declarations and Assignments
+Installation requires Python 3.7 or later.
 
-.. code:: python
+Compiling your Smart Contract
+=============================
 
-    foo: int = 42
-    bar = foo
+Using CLI
+^^^^^^^^^
 
--  Converts Number Arithmetic Operations (``+``, ``-``, ``*``, ``//``,
-   ``%``)
+::
 
--  Converts Numeric Arithmetic Augmented assignment Operators (``+=``,
-   ``-=``, ``*=``, ``//=``, ``%=``)
+  $ neo3-boa path/to/your/file.py
 
--  Converts Relational Operations (``==``, ``!=``, ``<``, ``<=``, ``>``,
-   ``>=``)
+.. note::  When resolving compilation errors it is recommended to resolve the first reported error and try to compile again. An error can have a cascading effect and throw more errors all caused by the first.
 
--  Converts Boolean Logic Operations and chained comparisons (``and``,
-   ``or``, ``not``)
+Using Python Script
+^^^^^^^^^^^^^^^^^^^
 
--  Converts Tuple type (``get`` and ``set`` operations)
+::
 
--  Converts List type
+  from boa3.boa3 import Boa3
 
--  Converts While Statement
+  Boa3.compile_and_save('path/to/your/file.py')
 
-.. code:: python
+Docs
+----
+You can `read the docs here <https://docs.coz.io/neo3/boa/index.html>`__. Please check our examples for reference.
 
-    foo = 0
-    while condition:
-        foo = foo + 2
+Reference Examples
+------------------
 
--  Converts If, elif, else Statements
+For an extensive collection of examples:
 
-.. code:: python
+- `Smart contract examples </boa3_test/examples>`__
+- `Features tests </boa3_test/test_sc>`__
 
-    if condition1:
-        foo = 0
-    elif condition2:
-        foo = 1
-    else:
-        bar = 2
+License
+-------
 
--  Converts For Statement
-
-.. code:: python
-
-    for x in (1, 2, 3):
-        ...
-
--  Converts Function Call
-
-.. code:: python
-
-    def Main(num: int):
-        a = foo(num)
-        ...
-
-    def foo(num: int) -> int:
-        ...
-
--  Converts ``len()`` for ``str``, ``tuple`` and ``list``
-
--  Converts Multiple Expressions in the same line
-   (``i = i + h; a = 1; b = 3 + a; count = 0``)
-
--  Converts String Slicing (``x = 'example'[2:4]``,
-   ``x = 'example'[:4]``, ``x = 'example'[4:]``, ``x = 'example'[:]``)
-
-What it will do...
-^^^^^^^^^^^^^^^^^^
-
--  ``continue``, ``break`` and ``pass``
-
--  Convert Numeric Arithmetic Augmented assignment Operators (``/=``)
-
--  Convert Number Arithmetic Operations (``/``, ``**``)
-
--  Convert Relational Operations (``is``, ``is not``)
-
--  Convert String Slicing (``x = 'example'[2:4:2]``,
-   ``x = 'example'[::2]``)
+- Open-source `Apache 2.0 <https://github.com/CityOfZion/neo3-boa/blob/master/LICENSE>`__.
