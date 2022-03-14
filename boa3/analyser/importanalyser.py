@@ -13,13 +13,23 @@ from boa3.model.type.type import Type
 
 class ImportAnalyser(IAstAnalyser):
 
-    def __init__(self, import_target: str, root_folder: str, importer_file: Optional[str] = None,
-                 already_imported_modules: List[str] = None, log: bool = False):
+    def __init__(self, import_target: str, root_folder: str,
+                 importer_file: Optional[str] = None,
+                 import_stack: List[str] = None,
+                 already_imported_modules: dict = None,
+                 log: bool = False):
+
         self.can_be_imported: bool = False
         self.is_builtin_import: bool = False
         self.recursive_import: bool = False
         self._import_identifier: str = import_target
-        self._imported_files: List[str] = already_imported_modules if already_imported_modules is not None else []
+
+        from boa3.analyser.analyser import Analyser
+        self._imported_files: Dict[str, Analyser] = (already_imported_modules
+                                                     if isinstance(already_imported_modules, dict)
+                                                     else {})
+        self._import_stack: List[str] = import_stack if isinstance(import_stack, list) else []
+        self.analyser: Analyser = None  # set if the import is successful
 
         if isinstance(root_folder, str):
             if os.path.isfile(root_folder):
@@ -43,7 +53,7 @@ class ImportAnalyser(IAstAnalyser):
 
         path: List[str] = module_origin.split(os.sep)
         self.filename = path[-1]
-        self.path: str = module_origin.replace(os.sep, '/')
+        self.path: str = module_origin.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._find_package(module_origin, importer_file)
 
@@ -63,7 +73,7 @@ class ImportAnalyser(IAstAnalyser):
             self.is_builtin_import = True
             return
 
-        if not ('boa3' in path and '/'.join(path[path.index('boa3'):]).startswith('boa3/builtin')):
+        if not ('boa3' in path and constants.PATH_SEPARATOR.join(path[path.index('boa3'):]).startswith('boa3/builtin')):
             # doesn't analyse boa3.builtin packages that aren't included in the imports.builtin as an user module
             # TODO: refactor when importing from user modules is accepted
             import re
@@ -73,17 +83,22 @@ class ImportAnalyser(IAstAnalyser):
 
             if not (inside_python_folder and 'lib' in path):
                 # check circular imports to avoid recursions inside the compiler
-                if self.path in self._imported_files:
+                if self.path in self._import_stack:
                     self.recursive_import = True
                     return
 
                 # TODO: only user modules and typing lib imports are implemented
                 try:
-                    from boa3.analyser.analyser import Analyser
-                    files = self._imported_files
-                    files.append(origin_file)
-                    analyser = Analyser.analyse(module_origin, root=self.root_folder,
-                                                analysed_files=files, log=self._log)
+                    if self.path in self._imported_files:
+                        analyser = self._imported_files[self.path]
+                    else:
+                        from boa3.analyser.analyser import Analyser
+                        origin = origin_file.replace(os.sep, constants.PATH_SEPARATOR)
+                        files = self._import_stack
+                        files.append(origin)
+                        analyser = Analyser.analyse(module_origin, root=self.root_folder,
+                                                    imported_files=self._imported_files,
+                                                    import_stack=files, log=self._log)
 
                     # include only imported symbols
                     if analyser.is_analysed:
@@ -96,6 +111,7 @@ class ImportAnalyser(IAstAnalyser):
                     self.warnings.extend(analyser.warnings)
 
                     updated_tree = analyser.ast_tree
+                    self.analyser = analyser
                     self.can_be_imported = analyser.is_analysed
                 except FileNotFoundError:
                     self.can_be_imported = False

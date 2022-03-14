@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Tuple, Union
 
+from boa3 import constants
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.native.nativecontract import NativeContract
@@ -51,7 +52,7 @@ class CompilerBuiltin:
         if not isinstance(symbols, dict):
             symbols = {}
 
-        package_ids = package_full_path.split('.')
+        package_ids = package_full_path.split(constants.ATTRIBUTE_NAME_SEPARATOR)
         cur_package: Package = None
 
         for package_id in package_ids:
@@ -79,7 +80,7 @@ class CompilerBuiltin:
                 cur_package.include_symbol(symbol_id, symbol)
 
     def get_package(self, package_full_path: str) -> Optional[Package]:
-        package_ids = package_full_path.split('.')
+        package_ids = package_full_path.split(constants.ATTRIBUTE_NAME_SEPARATOR)
 
         cur_package: Package = next((root_package for root_package in self._instance.packages
                                      if root_package.identifier == package_ids[0]),

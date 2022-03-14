@@ -40,6 +40,7 @@ class Import(ISymbol):
                 # methods imported are treated as methods defined in the entry file
                 method.defined_by_entry = True
 
+        self.analyser = import_analyser.analyser
         self.origin: str = origin
         self.ast: ast.AST = syntax_tree
 

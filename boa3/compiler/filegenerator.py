@@ -24,7 +24,7 @@ class FileGenerator:
         self._symbols: Dict[str, ISymbol] = analyser.symbol_table
 
         self._entry_file = entry_file
-        self._entry_file_full_path = analyser.path.replace(os.sep, '/')
+        self._entry_file_full_path = analyser.path.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._files: List[str] = [self._entry_file_full_path]
         self._nef: NefFile = NefFile(bytecode)
@@ -366,7 +366,7 @@ class FileGenerator:
                 values.append(str(var_slot_index))
 
             static_variables.append(
-                ','.join(values)
+                constants.VARIABLE_NAME_SEPARATOR.join(values)
             )
 
         return static_variables
@@ -444,26 +444,26 @@ class FileGenerator:
 
         for index in range(len(imports_paths)):
             name = imports_paths[index]
-            split_name = name.split('/')
+            split_name = name.split(constants.PATH_SEPARATOR)
             index = -1
             short_name = split_name[index]
             while short_name in imports_duplicated_ids:
                 index -= 1
-                short_name = '.'.join(split_name[index:])
+                short_name = constants.ATTRIBUTE_NAME_SEPARATOR.join(split_name[index:])
 
             if short_name in imports_unique_ids:
                 index_of_duplicated = imports_unique_ids.index(short_name)
 
-                dup_split_name = imports_paths[index_of_duplicated].split('/')
+                dup_split_name = imports_paths[index_of_duplicated].split(constants.PATH_SEPARATOR)
                 dup_new_id = short_name
-                dup_index = -len(imports_unique_ids[index].split('.'))
+                dup_index = -len(imports_unique_ids[index].split(constants.ATTRIBUTE_NAME_SEPARATOR))
 
                 while dup_new_id == short_name:
                     imports_duplicated_ids.append(short_name)
                     index -= 1
                     dup_index -= 1
-                    short_name = '.'.join(split_name[index:])
-                    dup_new_id = '.'.join(dup_split_name[dup_index:])
+                    short_name = constants.ATTRIBUTE_NAME_SEPARATOR.join(split_name[index:])
+                    dup_new_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(dup_split_name[dup_index:])
 
                 imports_unique_ids[index_of_duplicated] = dup_new_id
 

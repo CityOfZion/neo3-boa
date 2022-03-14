@@ -50,15 +50,31 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def __init__(self, analyser, symbol_table: Dict[str, ISymbol],
                  filename: str = None, root_folder: str = None,
-                 analysed_files: Optional[List[str]] = None, log: bool = False):
+                 analysed_files: Optional[dict] = None,
+                 import_stack: Optional[List[str]] = None,
+                 log: bool = False):
         super().__init__(analyser.ast_tree, filename, root_folder, log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
-        if isinstance(analysed_files, list):
-            analysed_files = [file_path.replace(os.sep, '/') if isinstance(file_path, str) else file_path
-                              for file_path in analysed_files]
-        self._analysed_files: Optional[List[str]] = analysed_files
+        from boa3.analyser.analyser import Analyser
+        if isinstance(analysed_files, dict):
+            analysed_files = {file_path.replace(os.sep, constants.PATH_SEPARATOR): file_analyser
+                              for file_path, file_analyser in analysed_files.items()
+                              if isinstance(file_path, str)}
+        else:
+            analysed_files = {}
+
+        analysed_files[filename.replace(os.sep, constants.PATH_SEPARATOR)] = analyser
+        self._analysed_files: Optional[Dict[str, Analyser]] = analysed_files
+
+        if isinstance(import_stack, list):
+            import_stack = [file_path.replace(os.sep, constants.PATH_SEPARATOR)
+                            if isinstance(file_path, str) else file_path
+                            for file_path in import_stack]
+        else:
+            import_stack = []
+        self._import_stack: List[str] = import_stack
 
         self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
@@ -410,16 +426,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._current_scope.include_symbol(alias, imported_module)
 
     def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
-        already_imported = {imported.origin for imported in self._current_module.symbols.values()
-                            if isinstance(imported, Import)
+        already_imported = {imported.origin: imported.analyser
+                            for imported in self._current_module.symbols.values()
+                            if isinstance(imported, Import) and imported.analyser is not None
                             }
-        if self._analysed_files is not None:
-            already_imported = already_imported.union(self._analysed_files)
+
+        if isinstance(self._analysed_files, dict):
+            already_imported.update(self._analysed_files)
 
         analyser = ImportAnalyser(import_target=target,
                                   root_folder=self.root_folder,
                                   importer_file=self.filename,
-                                  already_imported_modules=list(already_imported),
+                                  already_imported_modules=already_imported,
+                                  import_stack=self._import_stack.copy(),
                                   log=self._log)
 
         if analyser.recursive_import:
