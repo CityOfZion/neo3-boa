@@ -45,6 +45,20 @@ class InvalidArgument(CompilerWarning):
         return message
 
 
+class DuplicatedIdentifier(CompilerWarning):
+    """
+    An warning raised when more than one symbol uses the same identifier in the same scope and cannot be overwritten.
+    """
+
+    def __init__(self, line: int, col: int, duplicated_id: str = None):
+        self._duplicated_id = duplicated_id
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        return f"Duplicate identifier: '{self._duplicated_id}'"
+
+
 class NameShadowing(CompilerWarning):
     """
     A warning raised when a name from an outer scope symbol is used as the name of an inner scope symbol

@@ -90,7 +90,7 @@ class UserClass(ClassArrayType):
         """
         self._properties[prop_id] = prop
 
-    def include_callable(self, method_id: str, method: Callable, scope: ClassScope = ClassScope.INSTANCE):
+    def include_callable(self, method_id: str, method: Callable, scope: ClassScope = ClassScope.INSTANCE) -> bool:
         """
         Includes a method into the scope of the class
 
@@ -101,11 +101,17 @@ class UserClass(ClassArrayType):
         from boa3.model.builtin.builtin import Builtin
         if isinstance(method, Method):
             if Builtin.ClassMethodDecorator in method.decorators or scope is ClassScope.CLASS:
-                self._class_methods[method_id] = method
+                methods_map = self._class_methods
             elif Builtin.StaticMethodDecorator in method.decorators or scope is ClassScope.STATIC:
-                self._static_methods[method_id] = method
+                methods_map = self._static_methods
             else:
-                self._instance_methods[method_id] = method
+                methods_map = self._instance_methods
+
+            if method_id not in methods_map:
+                methods_map[method_id] = method
+                return True
+
+        return False
 
     def include_symbol(self, symbol_id: str, symbol: ISymbol, scope: ClassScope = ClassScope.INSTANCE):
         """

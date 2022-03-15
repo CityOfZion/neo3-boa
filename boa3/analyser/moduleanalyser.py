@@ -203,7 +203,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         if ((self._current_scope is self._current_class or callable_id not in self._current_scope.symbols)
                 and hasattr(self._current_scope, 'include_callable')):
-            self._current_scope.include_callable(callable_id, callable)
+            already_exists = not self._current_scope.include_callable(callable_id, callable)
+        else:
+            symbol = self.get_symbol(callable_id)
+            already_exists = symbol is not None and not isinstance(symbol, IBuiltinMethod)
+
+        if already_exists:
+            self._log_warning(CompilerWarning.DuplicatedIdentifier(callable.origin.lineno,
+                                                                   callable.origin.col_offset,
+                                                                   callable_id))
 
     def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
         """
