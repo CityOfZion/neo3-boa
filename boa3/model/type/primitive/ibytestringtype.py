@@ -4,6 +4,7 @@ from typing import Any, List
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.primitivetype import PrimitiveType
+from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.StackItem import StackItemType
 
 
@@ -18,6 +19,10 @@ class IByteStringType(SequenceType, PrimitiveType, abc.ABC):
     @property
     def identifier(self) -> str:
         return self._identifier
+
+    @property
+    def abi_type(self) -> AbiType:
+        return AbiType.ByteArray
 
     @property
     def stack_item(self) -> StackItemType:
