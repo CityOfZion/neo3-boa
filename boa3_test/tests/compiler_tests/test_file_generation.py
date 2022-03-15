@@ -302,7 +302,7 @@ class TestFileGeneration(BoaTest):
 
         for debug_method in debug_info['methods']:
             self.assertIn('name', debug_method)
-            parsed_name = debug_method['name'].split(',')
+            parsed_name = debug_method['name'].split(constants.VARIABLE_NAME_SEPARATOR)
             self.assertEqual(2, len(parsed_name))
             self.assertIn(parsed_name[-1], methods)
             actual_method = methods[parsed_name[-1]]
@@ -315,8 +315,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('params', debug_method)
             self.assertEqual(len(actual_method.args), len(debug_method['params']))
             for var in debug_method['params']:
-                self.assertEqual(2, len(var.split(',')))
-                param_id, param_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                param_id, param_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(param_id, actual_method.args)
                 self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
 
@@ -324,8 +324,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('variables', debug_method)
             self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
             for var in debug_method['variables']:
-                self.assertEqual(2, len(var.split(',')))
-                var_id, var_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                var_id, var_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(var_id, actual_method.locals)
                 local_type = actual_method.locals[var_id].type
                 self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
@@ -350,7 +350,7 @@ class TestFileGeneration(BoaTest):
 
         for debug_event in debug_info['events']:
             self.assertIn('name', debug_event)
-            parsed_name = debug_event['name'].split(',')
+            parsed_name = debug_event['name'].split(constants.VARIABLE_NAME_SEPARATOR)
             self.assertEqual(2, len(parsed_name))
             self.assertIn(parsed_name[-1], events)
             actual_event = events[parsed_name[-1]]
@@ -363,8 +363,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('params', debug_event)
             self.assertEqual(len(actual_event.args), len(debug_event['params']))
             for var in debug_event['params']:
-                self.assertEqual(2, len(var.split(',')))
-                param_id, param_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                param_id, param_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(param_id, actual_event.args)
                 self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
@@ -389,8 +389,8 @@ class TestFileGeneration(BoaTest):
 
         for static_variable in debug_info['static-variables']:
             # validate parameters
-            self.assertEqual(3, len(static_variable.split(',')))
-            var_id, var_type, var_slot = static_variable.split(',')
+            self.assertEqual(3, len(static_variable.split(constants.VARIABLE_NAME_SEPARATOR)))
+            var_id, var_type, var_slot = static_variable.split(constants.VARIABLE_NAME_SEPARATOR)
             if var_id not in variables:
                 self.assertIn(var_id, [var_full_id.split(constants.VARIABLE_NAME_SEPARATOR)[-1]
                                        for var_full_id in variables])
@@ -425,7 +425,7 @@ class TestFileGeneration(BoaTest):
         for debug_method in debug_info['methods']:
             self.assertIn('name', debug_method)
             name_without_parsing = debug_method['name']
-            parsed_name = name_without_parsing.split(',')
+            parsed_name = name_without_parsing.split(constants.VARIABLE_NAME_SEPARATOR)
             self.assertEqual(2, len(parsed_name))
             self.assertIn(name_without_parsing, methods)
             actual_method = methods[name_without_parsing]
@@ -438,8 +438,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('params', debug_method)
             self.assertEqual(len(actual_method.args), len(debug_method['params']))
             for var in debug_method['params']:
-                self.assertEqual(2, len(var.split(',')))
-                param_id, param_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                param_id, param_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(param_id, actual_method.args)
                 self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
 
@@ -447,8 +447,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('variables', debug_method)
             self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
             for var in debug_method['variables']:
-                self.assertEqual(2, len(var.split(',')))
-                var_id, var_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                var_id, var_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(var_id, actual_method.locals)
                 local_type = actual_method.locals[var_id].type
                 self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
@@ -551,7 +551,7 @@ class TestFileGeneration(BoaTest):
 
         for debug_method in debug_info['methods']:
             self.assertIn('name', debug_method)
-            parsed_name = debug_method['name'].split(',')
+            parsed_name = debug_method['name'].split(constants.VARIABLE_NAME_SEPARATOR)
             self.assertEqual(2, len(parsed_name))
             self.assertIn(parsed_name[-1], methods)
             actual_method = methods[parsed_name[-1]]
@@ -564,8 +564,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('params', debug_method)
             self.assertEqual(len(actual_method.args), len(debug_method['params']))
             for var in debug_method['params']:
-                self.assertEqual(2, len(var.split(',')))
-                param_id, param_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                param_id, param_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(param_id, actual_method.args)
                 self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
 
@@ -573,8 +573,8 @@ class TestFileGeneration(BoaTest):
             self.assertIn('variables', debug_method)
             self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
             for var in debug_method['variables']:
-                self.assertEqual(2, len(var.split(',')))
-                var_id, var_type = var.split(',')
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                var_id, var_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
                 self.assertIn(var_id, actual_method.locals)
                 self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
 
@@ -617,7 +617,7 @@ class TestFileGeneration(BoaTest):
         debug_method = next((method for method in debug_info['methods']
                              if 'id' in method and method['id'] == str(id(init_method))), None)
         self.assertIsNotNone(debug_method)
-        parsed_name = debug_method['name'].split(',')
+        parsed_name = debug_method['name'].split(constants.VARIABLE_NAME_SEPARATOR)
         self.assertEqual(2, len(parsed_name))
         self.assertIn(parsed_name[-1], methods)
 

@@ -318,9 +318,9 @@ class CodeGenerator:
 
             if not isinstance(identifier, str):
                 return symbol
-            split = identifier.split('.')
+            split = identifier.split(constants.ATTRIBUTE_NAME_SEPARATOR)
             if len(split) > 1:
-                attribute, symbol_id = '.'.join(split[:-1]), split[-1]
+                attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
                 attr = self.get_symbol(attribute, is_internal=is_internal)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                     return attr.symbols[symbol_id]
@@ -1451,7 +1451,7 @@ class CodeGenerator:
         elif hasattr(var.type, 'get_value'):
             # the variable is a type constant
             # TODO: change this when implement class conversion
-            value = var.type.get_value(var_id.split('.')[-1])
+            value = var.type.get_value(var_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)[-1])
             if value is not None:
                 self.convert_literal(value)
 

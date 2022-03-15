@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
-from boa3 import env
+from boa3 import constants, env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
 from boa3.model.method import Method
@@ -43,7 +43,7 @@ class BoaTest(TestCase):
     def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
         from boa3.compiler.filegenerator import FileGenerator
         generator = FileGenerator(compiler.bytecode, compiler._analyser, compiler._entry_smart_contract)
-        return {','.join(name): value for name, value in generator._methods_with_imports.items()}
+        return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
     def indent_text(self, text: str, no_spaces: int = 4) -> str:
         import re

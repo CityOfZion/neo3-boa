@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import Iterable, Optional, Union
 
+from boa3 import constants
 from boa3.model.builtin.internal.internalmethod import IInternalMethod
 from boa3.model.event import Event
 from boa3.model.method import Method
@@ -44,7 +45,7 @@ class CircularImport(CompilerError):
     def __init__(self, line: int, col: int, target_import: str, target_origin: str):
         import os
         self.target_import = target_import
-        self.target_origin = target_origin.replace(os.sep, '/')
+        self.target_origin = target_origin.replace(os.sep, constants.PATH_SEPARATOR)
         super().__init__(line, col)
 
     @property
