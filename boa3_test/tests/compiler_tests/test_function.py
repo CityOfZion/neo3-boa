@@ -1,6 +1,6 @@
 from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
+from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
@@ -1066,4 +1066,4 @@ class TestFunction(BoaTest):
 
     def test_functions_with_duplicated_name(self):
         path = self.get_contract_path('FunctionsWithDuplicatedName.py')
-        self.assertCompilerLogs(CompilerWarning.DuplicatedIdentifier, path)
+        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, path)

@@ -209,9 +209,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             already_exists = symbol is not None and not isinstance(symbol, IBuiltinMethod)
 
         if already_exists:
-            self._log_warning(CompilerWarning.DuplicatedIdentifier(callable.origin.lineno,
-                                                                   callable.origin.col_offset,
-                                                                   callable_id))
+            self._log_error(CompilerError.DuplicatedIdentifier(callable.origin.lineno,
+                                                               callable.origin.col_offset,
+                                                               callable_id))
 
     def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
         """

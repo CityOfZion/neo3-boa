@@ -1,6 +1,7 @@
+from typing import List
+
 from boa3.builtin import public
 from boa3.builtin.type import UInt160
-from typing import List
 
 
 @public
