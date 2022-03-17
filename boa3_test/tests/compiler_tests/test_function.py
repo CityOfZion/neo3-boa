@@ -1063,3 +1063,7 @@ class TestFunction(BoaTest):
     def test_function_with_dictionary_unpacking_operator(self):
         path = self.get_contract_path('FunctionWithDictionaryUnpackingOperator.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_functions_with_duplicated_name(self):
+        path = self.get_contract_path('FunctionsWithDuplicatedName.py')
+        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, path)

@@ -53,6 +53,20 @@ class CircularImport(CompilerError):
         return "Circular import with '%s' ('%s')" % (self.target_import, self.target_origin)
 
 
+class DuplicatedIdentifier(CompilerError):
+    """
+    An error raised when more than one symbol uses the same identifier in the same scope and cannot be overwritten.
+    """
+
+    def __init__(self, line: int, col: int, duplicated_id: str = None):
+        self._duplicated_id = duplicated_id
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return f"Duplicate identifier: '{self._duplicated_id}'"
+
+
 class IncorrectNumberOfOperands(CompilerError):
     """
     An error raised when an operation is used with the wrong number of operands
