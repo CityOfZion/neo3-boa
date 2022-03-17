@@ -267,6 +267,28 @@ class TestNeoTypes(BoaTest):
 
     # region ByteString
 
+    def test_byte_string_manifest_generation(self):
+        path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.get_output(path)
+
+        import os
+        from boa3.neo.vm.type.AbiType import AbiType
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(1, len(abi['methods']))
+
+        method = abi['methods'][0]
+
+        self.assertIn('parameters', method)
+        self.assertEqual(1, len(method['parameters']))
+        self.assertIn('type', method['parameters'][0])
+        self.assertEqual(AbiType.ByteArray, method['parameters'][0]['type'])
+
     def test_byte_string_to_bool(self):
         path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
 
