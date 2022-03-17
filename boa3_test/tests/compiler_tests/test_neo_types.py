@@ -1,5 +1,6 @@
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -11,7 +12,7 @@ class TestNeoTypes(BoaTest):
     # region UInt160
 
     def test_uint160_call_bytes(self):
-        path = self.get_contract_path('UInt160CallBytes.py')
+        path = self.get_contract_path('uint160', 'UInt160CallBytes.py')
 
         engine = TestEngine()
         value = bytes(20)
@@ -33,7 +34,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint160_call_int(self):
-        path = self.get_contract_path('UInt160CallInt.py')
+        path = self.get_contract_path('uint160', 'UInt160CallInt.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint160', 0,
                                          expected_result_type=bytes)
@@ -53,7 +54,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint160_call_without_args(self):
-        path = self.get_contract_path('UInt160CallWithoutArgs.py')
+        path = self.get_contract_path('uint160', 'UInt160CallWithoutArgs.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint160',
@@ -61,7 +62,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(bytes(20), result)
 
     def test_uint160_return_bytes(self):
-        path = self.get_contract_path('UInt160ReturnBytes.py')
+        path = self.get_contract_path('uint160', 'UInt160ReturnBytes.py')
 
         engine = TestEngine()
         value = bytes(20)
@@ -83,7 +84,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint160_concat_with_bytes(self):
-        path = self.get_contract_path('UInt160ConcatWithBytes.py')
+        path = self.get_contract_path('uint160', 'UInt160ConcatWithBytes.py')
         engine = TestEngine()
         value = bytes(20)
         result = self.run_smart_contract(engine, path, 'uint160_method', value,
@@ -96,7 +97,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(value + b'123', result)
 
     def test_uint160_mismatched_type(self):
-        path = self.get_contract_path('UInt160CallMismatchedType.py')
+        path = self.get_contract_path('uint160', 'UInt160CallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
@@ -104,7 +105,7 @@ class TestNeoTypes(BoaTest):
     # region UInt256
 
     def test_uint256_call_bytes(self):
-        path = self.get_contract_path('UInt256CallBytes.py')
+        path = self.get_contract_path('uint256', 'UInt256CallBytes.py')
 
         engine = TestEngine()
         value = bytes(32)
@@ -126,7 +127,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint256_call_int(self):
-        path = self.get_contract_path('UInt256CallInt.py')
+        path = self.get_contract_path('uint256', 'UInt256CallInt.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint256', 0,
                                          expected_result_type=bytes)
@@ -146,7 +147,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint256_call_without_args(self):
-        path = self.get_contract_path('UInt256CallWithoutArgs.py')
+        path = self.get_contract_path('uint256', 'UInt256CallWithoutArgs.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'uint256',
@@ -154,7 +155,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(bytes(32), result)
 
     def test_uint256_return_bytes(self):
-        path = self.get_contract_path('UInt256ReturnBytes.py')
+        path = self.get_contract_path('uint256', 'UInt256ReturnBytes.py')
 
         engine = TestEngine()
         value = bytes(32)
@@ -176,7 +177,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_uint256_concat_with_bytes(self):
-        path = self.get_contract_path('UInt256ConcatWithBytes.py')
+        path = self.get_contract_path('uint256', 'UInt256ConcatWithBytes.py')
         engine = TestEngine()
         value = bytes(32)
         result = self.run_smart_contract(engine, path, 'uint256_method', value,
@@ -189,7 +190,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(value + b'123', result)
 
     def test_uint256_mismatched_type(self):
-        path = self.get_contract_path('UInt256CallMismatchedType.py')
+        path = self.get_contract_path('uint256', 'UInt256CallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
@@ -197,7 +198,7 @@ class TestNeoTypes(BoaTest):
     # region ECPoint
 
     def test_ecpoint_call_bytes(self):
-        path = self.get_contract_path('ECPointCallBytes.py')
+        path = self.get_contract_path('ecpoint', 'ECPointCallBytes.py')
         engine = TestEngine()
 
         value = bytes(33)
@@ -219,11 +220,11 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_ecpoint_call_without_args(self):
-        path = self.get_contract_path('ECPointCallWithoutArgs.py')
+        path = self.get_contract_path('ecpoint', 'ECPointCallWithoutArgs.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_ecpoint_return_bytes(self):
-        path = self.get_contract_path('ECPointReturnBytes.py')
+        path = self.get_contract_path('ecpoint', 'ECPointReturnBytes.py')
         engine = TestEngine()
 
         value = bytes(33)
@@ -245,7 +246,7 @@ class TestNeoTypes(BoaTest):
                                     expected_result_type=bytes)
 
     def test_ecpoint_concat_with_bytes(self):
-        path = self.get_contract_path('ECPointConcatWithBytes.py')
+        path = self.get_contract_path('ecpoint', 'ECPointConcatWithBytes.py')
         engine = TestEngine()
 
         value = bytes(33)
@@ -259,7 +260,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(value + b'123', result)
 
     def test_ecpoint_mismatched_type(self):
-        path = self.get_contract_path('ECPointCallMismatchedType.py')
+        path = self.get_contract_path('ecpoint', 'ECPointCallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
@@ -267,7 +268,7 @@ class TestNeoTypes(BoaTest):
     # region ByteString
 
     def test_byte_string_to_bool(self):
-        path = self.get_contract_path('ByteStringToBool.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_bool', b'\x00')
@@ -286,7 +287,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(True, result)
 
     def test_byte_string_to_bool_with_builtin(self):
-        path = self.get_contract_path('ByteStringToBoolWithBuiltin.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToBoolWithBuiltin.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_bool', b'\x00')
@@ -305,7 +306,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(True, result)
 
     def test_byte_string_to_int(self):
-        path = self.get_contract_path('ByteStringToInt.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToInt.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_int', b'\x01\x02')
@@ -314,7 +315,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(513, result)
 
     def test_byte_string_to_int_with_builtin(self):
-        path = self.get_contract_path('ByteStringToIntWithBuiltin.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToIntWithBuiltin.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_int', b'\x01\x02')
@@ -323,7 +324,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(513, result)
 
     def test_byte_string_to_str(self):
-        path = self.get_contract_path('ByteStringToStr.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToStr.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_str', b'abc')
@@ -333,7 +334,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual('123', result)
 
     def test_byte_string_to_str_with_builtin(self):
-        path = self.get_contract_path('ByteStringToStrWithBuiltin.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToStrWithBuiltin.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_str', b'abc')
@@ -343,7 +344,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual('123', result)
 
     def test_byte_string_to_bytes(self):
-        path = self.get_contract_path('ByteStringToBytes.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToBytes.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_bytes', 'abc',
@@ -355,7 +356,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(b'123', result)
 
     def test_byte_string_to_bytes_with_builtin(self):
-        path = self.get_contract_path('ByteStringToBytesWithBuiltin.py')
+        path = self.get_contract_path('bytestring', 'ByteStringToBytesWithBuiltin.py')
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'to_bytes', 'abc',
@@ -365,6 +366,68 @@ class TestNeoTypes(BoaTest):
         result = self.run_smart_contract(engine, path, 'to_bytes', '123',
                                          expected_result_type=bytes)
         self.assertEqual(b'123', result)
+
+    def test_concat_with_bytes(self):
+        path = self.get_contract_path('bytestring', 'ConcatWithBytes.py')
+        engine = TestEngine()
+
+        prefix = b'12345'
+        arg = b'a'
+        result = self.run_smart_contract(engine, path, 'concat', arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(prefix + arg, result)
+
+        arg = '6789'
+        result = self.run_smart_contract(engine, path, 'concat', arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(prefix + String(arg).to_bytes(), result)
+
+    def test_concat_with_str(self):
+        path = self.get_contract_path('bytestring', 'ConcatWithStr.py')
+        engine = TestEngine()
+
+        prefix = '12345'
+        arg = 'a'
+        result = self.run_smart_contract(engine, path, 'concat', arg)
+        self.assertEqual(prefix + arg, result)
+
+        arg = b'6789'
+        result = self.run_smart_contract(engine, path, 'concat', arg)
+        self.assertEqual(prefix + String.from_bytes(arg), result)
+
+    def test_concat_with_bytestring(self):
+        path = self.get_contract_path('bytestring', 'ConcatWithByteString.py')
+        engine = TestEngine()
+
+        prefix = '12345'
+        arg = 'a'
+        result = self.run_smart_contract(engine, path, 'concat', prefix, arg)
+        self.assertEqual(prefix + arg, result)
+
+        arg = b'a'
+        result = self.run_smart_contract(engine, path, 'concat', prefix, arg)
+        self.assertEqual(prefix + String.from_bytes(arg), result)
+
+        prefix = b'12345'
+        arg = b'6789'
+        result = self.run_smart_contract(engine, path, 'concat', prefix, arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(prefix + arg, result)
+
+        arg = '6789'
+        result = self.run_smart_contract(engine, path, 'concat', prefix, arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(prefix + String(arg).to_bytes(), result)
+
+    def test_bytestring_multiplication(self):
+        path = self.get_contract_path('bytestring', 'ByteStringMultiplication.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'bytestring_mult', b'a', 4,
+                                         expected_result_type=bytes)
+        self.assertEqual(b'aaaa', result)
+        result = self.run_smart_contract(engine, path, 'bytestring_mult', 'unit', 50)
+        self.assertEqual('unit' * 50, result)
 
     # endregion
 
