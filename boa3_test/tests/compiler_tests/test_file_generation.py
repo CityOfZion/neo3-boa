@@ -649,6 +649,24 @@ class TestFileGeneration(BoaTest):
         self.assertIn('events', abi)
         self.assertEqual(0, len(abi['events']))
 
+    def test_generate_with_user_module_import_with_project_root(self):
+        path = self.get_contract_path('GenerationWithUserModuleImportsFromProjectRoot.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertNotIn('entryPoint', abi)
+        self.assertIn('methods', abi)
+        self.assertEqual(2, len(abi['methods']))
+
+        self.assertIn('events', abi)
+        self.assertEqual(0, len(abi['events']))
+
     def test_compiler_error(self):
         path = self.get_contract_path('test_sc/built_in_methods_test', 'ClearTooManyParameters.py')
 

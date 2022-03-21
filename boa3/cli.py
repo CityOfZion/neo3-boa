@@ -10,7 +10,8 @@ from boa3.exception.NotLoadedException import NotLoadedException
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help=".py smart contract to compile")
-    parser.add_argument("-db", "--debug", action='store_true', help="generates a nefdbgnfo file")
+    parser.add_argument("-db", "--debug", action='store_true', help="generates a .nefdbgnfo file")
+    parser.add_argument("--project-path", help="Project root path. Path of the contract by default.", type=str)
     args = parser.parse_args()
 
     if not args.input.endswith(".py") or not os.path.isfile(args.input):
@@ -20,8 +21,11 @@ def main():
     fullpath = os.path.realpath(args.input)
     path, filename = os.path.split(fullpath)
 
+    if not args.project_path:
+        args.project_path = os.path.dirname(path)
+
     try:
-        Boa3.compile_and_save(args.input, debug=args.debug)
+        Boa3.compile_and_save(args.input, debug=args.debug, root_folder=args.project_path)
         logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
     except NotLoadedException as e:
         logging.error("Could not compile")

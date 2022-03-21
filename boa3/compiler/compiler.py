@@ -20,11 +20,12 @@ class Compiler:
         self._analyser: Analyser = None
         self._entry_smart_contract: str = ''
 
-    def compile(self, path: str, log: bool = True) -> bytes:
+    def compile(self, path: str, root_folder: str = None, log: bool = True) -> bytes:
         """
         Load a Python file and tries to compile it
 
         :param path: the path of the Python file to compile
+        :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         :return: the bytecode of the compiled .nef file
         """
@@ -34,29 +35,31 @@ class Compiler:
         logging.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
         logging.info(f'Started compiling\t{filename}')
         self._entry_smart_contract = os.path.splitext(filename)[0]
-        self._analyse(fullpath, log)
+        self._analyse(fullpath, root_folder, log)
         return self._compile()
 
-    def compile_and_save(self, path: str, output_path: str, log: bool = True, debug: bool = False):
+    def compile_and_save(self, path: str, output_path: str, root_folder: str = None, log: bool = True, debug: bool = False):
         """
         Save the compiled file and the metadata files
 
         :param path: the path of the Python file to compile
         :param output_path: the path to save the generated files
+        :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         :param debug: if nefdbgnfo file should be generated.
         """
-        self.bytecode = self.compile(path, log)
+        self.bytecode = self.compile(path, root_folder, log)
         self._save(output_path, debug)
 
-    def _analyse(self, path: str, log: bool = True):
+    def _analyse(self, path: str, root_folder: str = None, log: bool = True):
         """
         Load a Python file and analyses its syntax
 
         :param path: the path of the Python file to compile
+        :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         """
-        self._analyser = Analyser.analyse(path, log)
+        self._analyser = Analyser.analyse(path, log=log, root=root_folder)
 
     def _compile(self) -> bytes:
         """

@@ -40,8 +40,13 @@ class Analyser:
         self.path: str = path
         self.filename: str = path if path is None else os.path.realpath(path)
 
-        if project_root is not None and os.path.isfile(project_root):
-            project_root = os.path.dirname(os.path.abspath(project_root))
+        if project_root is not None:
+            if not os.path.exists(project_root):
+                project_root = os.path.abspath(f'{os.path.curdir}{os.path.sep}{project_root}')
+
+            if os.path.isfile(project_root):
+                project_root = os.path.dirname(os.path.abspath(project_root))
+
         self.root: str = (os.path.realpath(project_root)
                           if project_root is not None and os.path.isdir(project_root)
                           else path)

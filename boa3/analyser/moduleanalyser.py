@@ -315,11 +315,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             module.body.append(function)
             ast.copy_location(module, function)
 
-            # executes the function
-            code = compile(module, filename='<boa3>', mode='exec')
-            namespace = {}
-            exec(code, namespace)
-            obj: Any = namespace[function.name]()
+            try:
+                # executes the function
+                code = compile(module, filename='<boa3>', mode='exec')
+                namespace = {}
+                exec(code, namespace)
+                obj: Any = namespace[function.name]()
+            except ModuleNotFoundError:
+                # will fail if any imports can't be executed
+                # in this case, the error is already logged
+                return
 
             node: ast.AST = function.body[-1] if len(function.body) > 0 else function
             # return must be a NeoMetadata object
@@ -339,7 +344,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 import json
                 json.dumps(obj.extras)
             except BaseException as e:
-                print()
                 self._log_error(
                     CompilerError.InvalidType(
                         line=node.lineno, col=node.col_offset,
