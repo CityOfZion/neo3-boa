@@ -2,7 +2,7 @@ from typing import Any
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.interop.contract import call_contract
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, ByteString
 
 
 # This smart contract is being used to call methods that require the calling_scripthash. Right now it is returning None
@@ -49,3 +49,10 @@ def calling_transfer(address: UInt160, from_address: UInt160, to_address: UInt16
 @public
 def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     pass
+
+
+# Always accept cryptocurrency
+@public
+def onNEP11Payment(from_address: UInt160, amount: int, token_id: ByteString, data: Any):
+    pass
+

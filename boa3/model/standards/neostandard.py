@@ -1,20 +1,23 @@
 import abc
-from typing import List, Union
+from typing import List, Union, Optional
 
 from boa3.model.event import Event
 from boa3.model.method import Method
 
 
 class INeoStandard(abc.ABC):
-    def __init__(self, methods: List[Method], events: List[Event]):
+    def __init__(self, methods: List[Method], events: List[Event], optionals: Optional[List[Method]] = None):
+        if optionals is None:
+            optionals = []
         self.methods: List[Method] = methods.copy()
         self.events: List[Event] = events.copy()
+        self.optionals: List[Method] = optionals.copy()
 
     def match_definition(self, standard: Union[Method, Event], symbol: Union[Method, Event]) -> bool:
         if not isinstance(standard, (Method, Event)) or not isinstance(symbol, (Method, Event)):
             return False
 
-        standard_symbols = self.methods if isinstance(symbol, Method) else self.events
+        standard_symbols = self.methods + self.optionals if isinstance(symbol, Method) else self.events
         if standard not in standard_symbols:
             return False
 
@@ -25,7 +28,9 @@ class INeoStandard(abc.ABC):
                 or isinstance(symbol, Event) and not isinstance(other, Event)):
             return False
 
-        if symbol.return_type != other.return_type:
+        if symbol.return_type != other.return_type and not (
+                # verifies if both return types are equal if they are a neo3-boa type
+                symbol.return_type.is_type_of(other.return_type) and other.return_type.is_type_of(symbol.return_type)):
             return False
 
         if symbol.is_public != other.is_public:

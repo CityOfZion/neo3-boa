@@ -1,7 +1,7 @@
 from typing import Union
 
 from boa3.builtin import CreateNewEvent, Event
-from boa3.builtin.type import ECPoint, UInt160
+from boa3.builtin.type import ECPoint, UInt160, ByteString
 
 Nep5TransferEvent: Event = CreateNewEvent(
     [
@@ -17,6 +17,23 @@ addresses of the sender, receiver and the amount transferred.
 
 :meta hide-value:
 """
+
+Nep11TransferEvent: Event = CreateNewEvent(
+    [
+        ('from_addr', Union[UInt160, None]),
+        ('to_addr', Union[UInt160, None]),
+        ('amount', int),
+        ('tokenId', ByteString)
+    ],
+    'Transfer'
+)
+"""
+The NEP-11 Transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
+addresses of the sender, receiver, amount transferred and the id of the token.
+
+:meta hide-value:
+"""
+
 
 Nep17TransferEvent: Event = CreateNewEvent(
     [
