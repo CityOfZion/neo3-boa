@@ -634,3 +634,39 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(4, result)
+
+    def test_if_pass(self):
+        path = self.get_contract_path('IfPass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(result, 0)
+
+    def test_else_pass(self):
+        path = self.get_contract_path('ElsePass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(result, 5)
+        result = self.run_smart_contract(engine, path, 'main', False)
+        self.assertEqual(result, 0)
+
+    def test_if_else_pass(self):
+        path = self.get_contract_path('IfElsePass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        n_nop = 0
+        for byte_value in output:
+            if byte_value == int.from_bytes(Opcode.NOP.value, 'little'):
+                n_nop += 1
+        self.assertEqual(n_nop, 2)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(result, 0)

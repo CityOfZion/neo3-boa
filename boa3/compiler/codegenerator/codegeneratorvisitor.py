@@ -1085,6 +1085,18 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return self.build_data(dict_node, result_type=result_type, already_generated=True)
 
+    def visit_Pass(self, pass_node: ast.Pass) -> GeneratorData:
+        """
+        Visitor of pass node
+
+        :param pass_node: the python ast dict node
+        """
+        result_type = None
+
+        self.generator.insert_nop()
+
+        return self.build_data(pass_node, result_type=result_type, already_generated=True)
+
     def _create_array(self, values: List[ast.AST], array_type: IType):
         """
         Creates a new array from a literal sequence
