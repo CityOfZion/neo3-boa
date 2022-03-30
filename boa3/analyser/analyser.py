@@ -50,6 +50,8 @@ class Analyser:
         self.root: str = (os.path.realpath(project_root)
                           if project_root is not None and os.path.isdir(project_root)
                           else path)
+        import logging
+        logging.warning(f'root path for this execution is {self.root}')
 
     @staticmethod
     def analyse(path: str, log: bool = False,

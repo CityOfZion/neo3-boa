@@ -650,11 +650,11 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_with_user_module_import_with_project_root(self):
-        path = self.get_contract_path('GenerationWithUserModuleImportsFromProjectRoot.py')
+        path = self.get_contract_path('project_path', 'GenerationWithUserModuleImportsFromProjectRoot.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
         expected_manifest_output = path.replace('.py', '.manifest.json')
-        output, manifest = self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
+        output, manifest = self.compile_and_save(path, root_folder=self.get_dir_path(self.default_test_folder))
 
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
