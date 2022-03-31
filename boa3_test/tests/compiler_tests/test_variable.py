@@ -664,6 +664,10 @@ class TestVariable(BoaTest):
     def test_assign_void_function_call(self):
         path = self.get_contract_path('AssignVoidFunctionCall.py')
         engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(None, result)
 

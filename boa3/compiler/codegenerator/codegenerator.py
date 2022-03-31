@@ -426,6 +426,12 @@ class CodeGenerator:
         """
         self.__insert1(OpcodeInfo.NOT)
 
+    def insert_nop(self):
+        """
+        Insert a NOP opcode
+        """
+        self.__insert1(OpcodeInfo.NOP)
+
     def convert_begin_while(self, is_for: bool = False) -> int:
         """
         Converts the beginning of the while statement

@@ -67,6 +67,9 @@ class TestFunction(BoaTest):
         path = self.get_contract_path('NoneFunctionPass.py')
         engine = TestEngine()
 
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
         result = self.run_smart_contract(engine, path, 'main', 1)
         self.assertIsVoid(result)
 
@@ -136,6 +139,7 @@ class TestFunction(BoaTest):
             Opcode.INITSLOT  # function signature
             + b'\x00'  # num local variables
             + b'\x01'  # num arguments
+            + Opcode.NOP  # pass
             + Opcode.RET  # return
         )
 

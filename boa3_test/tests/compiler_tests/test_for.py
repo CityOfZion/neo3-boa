@@ -304,3 +304,13 @@ class TestFor(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(6, result)
+
+    def test_for_pass(self):
+        path = self.get_contract_path('ForPass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertIsVoid(result)

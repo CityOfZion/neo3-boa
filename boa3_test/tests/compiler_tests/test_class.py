@@ -97,6 +97,7 @@ class TestClass(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.RET
+            + Opcode.NOP
         )
 
         path = self.get_contract_path('UserClassEmpty.py')
