@@ -925,12 +925,13 @@ python -m unittest discover boa3_test
     </td>
   </tbody>
   <tbody>
-    <td>🔜</td>
-    <td>backlog</td>
+    <td>✅</td>
+    <td>v0.11.2</td>
     <td>Pass</td>
     <td>
     </td>
     <td>
+      <a href="/docs/ContractExamplesTest.md#pass-keyword">List of examples</a>
     </td>
   </tbody>
   <tbody>

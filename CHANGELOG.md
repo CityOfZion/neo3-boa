@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.11.2] - 2022-04-01
+### Added
+- New compiling option to set the project root path
+- Support to `pass` keyword
+
+### Changed
+- `bool` functions that returned `Integer` values during runtime now returns actual `Boolean` values
+- Logs when there are different symbols using the same identifier 
+
+
+### Fixed
+- Fixed Circular import detection
+- Fixed an error raised when using instance methods from variables in a user-created class
+- Fixed manifest generation of `ByteString` type
+
+
 ## [0.11.0] - 2022-02-21
 ### Added
 - Support to contract manifest modifiers. See [NeoMetadata](https://dojo.coz.io/neo3/boa/boa3/builtin/boa3-builtins.html#boa3.builtin.NeoMetadata) 
@@ -22,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Similar to `Union[str, bytes]`
 
 ### Changed
-- Moved `boa3.builtin.sqrt` to `boar.builtin.math.sqrt`
+- Moved `boa3.builtin.sqrt` to `boa3.builtin.math.sqrt`
 - `assert` message is actually logged at runtime
 
 ### Fixed
@@ -315,6 +331,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.11.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.2
 [0.11.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.0
 [0.10.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.1
 [0.10.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.0
