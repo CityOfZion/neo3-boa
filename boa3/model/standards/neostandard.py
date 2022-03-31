@@ -1,5 +1,5 @@
 import abc
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 from boa3.model.event import Event
 from boa3.model.method import Method
