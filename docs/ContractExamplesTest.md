@@ -57,6 +57,8 @@
   - [Sequence slicing](#sequence-slicing-1)
 - [v0.11](#v011)
   - [Built in function](#built-in-function-7)
+  - [v0.11.2](#v0112)
+    - [Pass keyword](#pass-keyword)
 
 ## v0.3
 ### Arithmetic augmented assignment operators
@@ -592,3 +594,10 @@
 ### Built in function
 - <a href="/boa3_test/test_sc/math_test/Pow.py">Pow.py</a>,
 - <a href="/boa3_test/test_sc/math_test/PowFromMath.py">PowFromMath.py</a>
+
+### v0.11.2
+#### Pass keyword
+- <a href="/boa3_test/test_sc/for_test/ForPass.py">ForPass.py</a>,
+- <a href="/boa3_test/test_sc/if_test/IfPass.py">IfPass.py</a>,
+- <a href="/boa3_test/test_sc/if_test/ElsePass.py">ElsePass.py</a>,
+- <a href="/boa3_test/test_sc/if_test/IfElsePass.py">IfElsePass.py</a>

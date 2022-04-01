@@ -2,7 +2,7 @@
 # supported_standards at the metadata correctly verifies the methods, for examples that are fully functional check
 # https://github.com/CityOfZion/props and https://github.com/OnBlockIO/NEP11TemplatePy
 
-from typing import Any, Union, cast, Optional
+from typing import Any, Optional, Union, cast
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep11TransferEvent, abort
@@ -11,7 +11,7 @@ from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.stdlib import deserialize, serialize
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160, ByteString
+from boa3.builtin.type import ByteString, UInt160
 
 
 # -------------------------------------------

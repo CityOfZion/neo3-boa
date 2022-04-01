@@ -1,7 +1,7 @@
 from typing import Union
 
 from boa3.builtin import CreateNewEvent, Event
-from boa3.builtin.type import ECPoint, UInt160, ByteString
+from boa3.builtin.type import ByteString, ECPoint, UInt160
 
 Nep5TransferEvent: Event = CreateNewEvent(
     [
