@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -63,8 +64,11 @@ class TestTuple(BoaTest):
             + b'\x01'
             + b'\x00'
             + Opcode.PUSH0      # a = (True, True, False)
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0

@@ -65,7 +65,7 @@ class Module(ISymbol):
         if var_id in self.variables:
             self.assigned_variables.append(var_id)
 
-    def include_callable(self, method_id: str, method: Callable):
+    def include_callable(self, method_id: str, method: Callable) -> bool:
         """
         Includes a method into the scope of the module
 
@@ -77,6 +77,10 @@ class Module(ISymbol):
                 self.methods[method_id] = method
             else:
                 self.callables[method_id] = method
+
+            return True
+
+        return False
 
     def include_class(self, class_id: str, class_obj: ClassType):
         """

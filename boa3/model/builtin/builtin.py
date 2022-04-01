@@ -165,6 +165,7 @@ class Builtin:
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
+    Nep11Transfer = Nep11TransferEvent()
     Nep17Transfer = Nep17TransferEvent()
 
     # boa smart contract methods
@@ -218,6 +219,7 @@ class Builtin:
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
                               NeoAccountState,
+                              Nep11Transfer,
                               Nep17Transfer,
                               Nep5Transfer,
                               ],

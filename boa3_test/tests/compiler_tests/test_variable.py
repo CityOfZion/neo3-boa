@@ -8,6 +8,7 @@ from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -104,6 +105,7 @@ class TestVariable(BoaTest):
             + b'\x03'
             + b'\x00'
             + Opcode.PUSH1      # a = b = c = True
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.DUP            # c = True
             + Opcode.STLOC2
             + Opcode.DUP            # b = True
@@ -197,6 +199,7 @@ class TestVariable(BoaTest):
             + string
             + Opcode.STLOC0
             + Opcode.PUSH1      # a = b = c = True
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.DUP            # c = True
             + Opcode.STLOC0
             + Opcode.DUP            # b = True
@@ -661,6 +664,10 @@ class TestVariable(BoaTest):
     def test_assign_void_function_call(self):
         path = self.get_contract_path('AssignVoidFunctionCall.py')
         engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual(None, result)
 

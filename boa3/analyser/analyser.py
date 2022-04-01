@@ -40,21 +40,32 @@ class Analyser:
         self.path: str = path
         self.filename: str = path if path is None else os.path.realpath(path)
 
-        if project_root is not None and os.path.isfile(project_root):
-            project_root = os.path.dirname(os.path.abspath(project_root))
+        if project_root is not None:
+            if not os.path.exists(project_root):
+                project_root = os.path.abspath(f'{os.path.curdir}{os.path.sep}{project_root}')
+
+            if os.path.isfile(project_root):
+                project_root = os.path.dirname(os.path.abspath(project_root))
+
         self.root: str = (os.path.realpath(project_root)
                           if project_root is not None and os.path.isdir(project_root)
                           else path)
 
     @staticmethod
-    def analyse(path: str, log: bool = False, analysed_files: Optional[List[str]] = None, root: str = None) -> Analyser:
+    def analyse(path: str, log: bool = False,
+                imported_files: Optional[Dict[str, Analyser]] = None,
+                import_stack: Optional[List[str]] = None,
+                root: str = None) -> Analyser:
         """
         Analyses the syntax of the Python code
 
         :param path: the path of the Python file
         :param log: if compiler errors should be logged.
-        :param analysed_files: a list with the paths of the files that were analysed if it's from an import.
-                               if it's not triggered by an import, must be None.
+        :param import_stack: a list that represents the current import stack if it's from an import.
+                             If it's not triggered by an import, must be None.
+        :param imported_files: a dict that maps the paths of the files that were analysed if it's from an import.
+                               If it's not triggered by an import, must be None.
+        :param root: the path of the project root that the current smart contract is part of.
         :return: a boolean value that represents if the analysis was successful
         :rtype: Analyser
         """
@@ -65,7 +76,7 @@ class Analyser:
         analyser.__pre_execute()
 
         # fill symbol table
-        if not analyser.__analyse_modules(analysed_files):
+        if not analyser.__analyse_modules(imported_files, import_stack):
             return analyser
         # check if standards are correctly implemented
         if not analyser.__check_standards():
@@ -103,7 +114,9 @@ class Analyser:
         self.__update_logs(type_analyser)
         return not type_analyser.has_errors
 
-    def __analyse_modules(self, analysed_files: Optional[List[str]] = None) -> bool:
+    def __analyse_modules(self,
+                          imported_files: Optional[Dict[str, Analyser]] = None,
+                          import_stack: Optional[List[str]] = None) -> bool:
         """
         Validates the symbols and constructs the symbol table of the ast tree
 
@@ -113,7 +126,8 @@ class Analyser:
                                          log=self._log,
                                          filename=self.filename,
                                          root_folder=self.root,
-                                         analysed_files=analysed_files)
+                                         analysed_files=imported_files,
+                                         import_stack=import_stack)
         self.symbol_table.update(module_analyser.global_symbols)
         self.ast_tree.body.extend(module_analyser.imported_nodes)
         self.__update_logs(module_analyser)
@@ -143,14 +157,15 @@ class Analyser:
         """
         Tries to optimize the ast after validations
         """
-        AstOptimizer(self, log=self._log)
+        optimizer = AstOptimizer(self, log=self._log)
+        self.__update_logs(optimizer)
 
     def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
         for symbol_id, symbol in symbol_table.items():
             if (hasattr(symbol, 'origin')
                     and hasattr(symbol.origin, 'origin')
                     and isinstance(symbol.origin.origin, ast.AST)
-                    and len(symbol_id.split(',')) <= 1):
+                    and len(symbol_id.split(constants.VARIABLE_NAME_SEPARATOR)) <= 1):
 
                 if symbol_id in self.symbol_table:
                     self.symbol_table.pop(symbol_id)

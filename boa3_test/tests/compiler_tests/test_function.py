@@ -3,6 +3,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -50,6 +51,7 @@ class TestFunction(BoaTest):
         expected_output = (
             # functions without arguments and local variables don't need initslot
             Opcode.PUSH1  # body
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.RET  # return
         )
 
@@ -59,11 +61,14 @@ class TestFunction(BoaTest):
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(1, result)
+        self.assertEqual(True, result)
 
     def test_none_function_pass(self):
         path = self.get_contract_path('NoneFunctionPass.py')
         engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
 
         result = self.run_smart_contract(engine, path, 'main', 1)
         self.assertIsVoid(result)
@@ -134,6 +139,7 @@ class TestFunction(BoaTest):
             Opcode.INITSLOT  # function signature
             + b'\x00'  # num local variables
             + b'\x01'  # num arguments
+            + Opcode.NOP  # pass
             + Opcode.RET  # return
         )
 
@@ -184,12 +190,13 @@ class TestFunction(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
-        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(6).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.CALL  # TestFunction()
             + called_function_address
             + Opcode.PUSH1  # return True
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.RET
             + Opcode.INITSLOT  # TestFunction
             + b'\x01'
@@ -232,7 +239,7 @@ class TestFunction(BoaTest):
         self.assertEqual(1, result)
 
     def test_call_void_function_with_literal_args(self):
-        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(6).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.PUSH2  # TestAdd(1, 2)
@@ -240,6 +247,7 @@ class TestFunction(BoaTest):
             + Opcode.CALL
             + called_function_address
             + Opcode.PUSH1  # return True
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.RET
             + Opcode.INITSLOT  # TestFunction
             + b'\x01'
@@ -291,7 +299,7 @@ class TestFunction(BoaTest):
         self.assertEqual(3, result)
 
     def test_call_void_function_with_variable_args(self):
-        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(6).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT  # Main
@@ -306,6 +314,7 @@ class TestFunction(BoaTest):
             + Opcode.CALL
             + called_function_address
             + Opcode.PUSH1  # return True
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.RET
             + Opcode.INITSLOT  # TestFunction
             + b'\x01'
@@ -1058,3 +1067,7 @@ class TestFunction(BoaTest):
     def test_function_with_dictionary_unpacking_operator(self):
         path = self.get_contract_path('FunctionWithDictionaryUnpackingOperator.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_functions_with_duplicated_name(self):
+        path = self.get_contract_path('FunctionsWithDuplicatedName.py')
+        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, path)

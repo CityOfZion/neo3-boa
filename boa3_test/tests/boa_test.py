@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
-from boa3 import env
+from boa3 import constants, env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
 from boa3.model.method import Method
@@ -43,7 +43,7 @@ class BoaTest(TestCase):
     def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
         from boa3.compiler.filegenerator import FileGenerator
         generator = FileGenerator(compiler.bytecode, compiler._analyser, compiler._entry_smart_contract)
-        return {','.join(name): value for name, value in generator._methods_with_imports.items()}
+        return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
     def indent_text(self, text: str, no_spaces: int = 4) -> str:
         import re
@@ -71,6 +71,21 @@ class BoaTest(TestCase):
     def assertIsVoid(self, obj: Any):
         if obj is not VoidType:
             self.fail('{0} is not Void'.format(obj))
+
+    def get_dir_path(self, *args: str) -> str:
+        type_error_message = 'get_contract_path() takes {0} positional argument but {1} were given'
+        num_args = len(args)
+        if num_args == 0:
+            raise TypeError(type_error_message.format(2, num_args + 1))
+        if num_args > 2:
+            raise TypeError(type_error_message.format(3, num_args + 1))
+
+        values = [None, env.PROJECT_ROOT_DIRECTORY]
+        for index, value in enumerate(reversed(args)):
+            values[index] = value
+
+        dir_folder, root_path = values
+        return '{0}/{1}'.format(root_path, dir_folder)
 
     def get_contract_path(self, *args: str) -> str:
         """
@@ -115,13 +130,13 @@ class BoaTest(TestCase):
             raise FileNotFoundError(path)
         return path
 
-    def compile_and_save(self, path: str, debug: bool = False, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
+    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         manifest_output = path.replace('.py', '.manifest.json')
 
         from boa3.boa3 import Boa3
         from boa3.neo.contracts.neffile import NefFile
-        Boa3.compile_and_save(path, show_errors=log, debug=debug)
+        Boa3.compile_and_save(path, root_folder=root_folder, show_errors=log, debug=debug)
 
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
@@ -145,10 +160,10 @@ class BoaTest(TestCase):
             debug_info = json.loads(dbgnfo.read(os.path.basename(path.replace('.py', '.debug.json'))))
         return debug_info
 
-    def get_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+    def get_output(self, path: str, root_folder: str = None) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         if not os.path.isfile(nef_output):
-            return self.compile_and_save(path)
+            return self.compile_and_save(path, root_folder=root_folder)
 
         manifest_output = path.replace('.py', '.manifest.json')
 

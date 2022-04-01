@@ -3,6 +3,7 @@ from boa3.exception import CompilerWarning
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -18,6 +19,7 @@ class TestIf(BoaTest):
             + Opcode.PUSH0      # a = 0
             + Opcode.STLOC0
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.JMPIFNOT   # if True
             + Integer(4).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSH2     # a = a + 2
@@ -449,28 +451,28 @@ class TestIf(BoaTest):
         path = self.get_contract_path('VariablesInIfScopes.py')
         engine = TestEngine()
 
-        result = self.run_smart_contract(engine, path, 'main', 1, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 1)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 2, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 2)
         self.assertEqual(True, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 3, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 3)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 4, expected_result_type=bool)
-        self.assertEqual(True, result)
-
-        result = self.run_smart_contract(engine, path, 'main', 5, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 4)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 6, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 5)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 7, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 6)
         self.assertEqual(False, result)
 
-        result = self.run_smart_contract(engine, path, 'main', 8, expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'main', 7)
+        self.assertEqual(False, result)
+
+        result = self.run_smart_contract(engine, path, 'main', 8)
         self.assertEqual(False, result)
 
     def test_boa2_compare_test0int(self):
@@ -632,3 +634,39 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(4, result)
+
+    def test_if_pass(self):
+        path = self.get_contract_path('IfPass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(result, 0)
+
+    def test_else_pass(self):
+        path = self.get_contract_path('ElsePass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        self.assertIn(Opcode.NOP, output)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(result, 5)
+        result = self.run_smart_contract(engine, path, 'main', False)
+        self.assertEqual(result, 0)
+
+    def test_if_else_pass(self):
+        path = self.get_contract_path('IfElsePass.py')
+        engine = TestEngine()
+
+        output = Boa3.compile(path)
+        n_nop = 0
+        for byte_value in output:
+            if byte_value == int.from_bytes(Opcode.NOP.value, 'little'):
+                n_nop += 1
+        self.assertEqual(n_nop, 2)
+
+        result = self.run_smart_contract(engine, path, 'main', True)
+        self.assertEqual(result, 0)

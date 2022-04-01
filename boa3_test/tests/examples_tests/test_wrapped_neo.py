@@ -66,15 +66,13 @@ class TestTemplate(BoaTest):
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "",
-                                         expected_result_type=bool)
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "")
         self.assertEqual(False, result)
 
         # should fail if the sender doesn't have enough balance
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount, "",
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
 
         # should fail when any of the scripts' length is not 20
@@ -94,8 +92,7 @@ class TestTemplate(BoaTest):
         balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transferred_amount, "",
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
         self.assertEqual(1, len(transfer_events))
@@ -119,8 +116,7 @@ class TestTemplate(BoaTest):
         balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "",
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(3, len(transfer_events))
@@ -146,19 +142,16 @@ class TestTemplate(BoaTest):
         engine = TestEngine()
 
         # should fail without signature
-        result = self.run_smart_contract(engine, path, 'verify',
-                                         expected_result_type=bool)
+        result = self.run_smart_contract(engine, path, 'verify')
         self.assertEqual(False, result)
 
         # should fail if not signed by the owner
         result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
     def test_wrapped_neo_burn(self):
@@ -177,8 +170,7 @@ class TestTemplate(BoaTest):
         zneo_owner_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         # in this case, NEO will be given to the OWNER_SCRIPT_HASH
         result = self.run_smart_contract(engine, path, 'burn', self.OWNER_SCRIPT_HASH, burned_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertIsVoid(result)
 
         transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
@@ -242,22 +234,19 @@ class TestTemplate(BoaTest):
         # this approve will fail, because aux_contract_address doesn't have enough zNEO
         result = self.run_smart_contract(engine, path_aux_contract, 'calling_approve',
                                          wrapped_neo_address, self.OTHER_ACCOUNT_1, allowed_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(False, result)
 
         # OWNER will give zNEO to aux_contract_address so that it can approve
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, aux_contract_address, allowed_amount, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # this approve will succeed, because aux_contract_address have enough zNEO
         result = self.run_smart_contract(engine, path_aux_contract, 'calling_approve',
                                          wrapped_neo_address, self.OTHER_ACCOUNT_1, allowed_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # approved fired an event
@@ -288,22 +277,19 @@ class TestTemplate(BoaTest):
 
         # aux_contract_address did not approve OTHER_SCRIPT_HASH
         result = self.run_smart_contract(engine, path, 'allowance', aux_contract_address, self.OTHER_ACCOUNT_1,
-                                         signer_accounts=[aux_contract_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_contract_address])
         self.assertEqual(0, result)
 
         # OWNER will give zNEO to aux_contract_address so that it can approve
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, aux_contract_address, allowed_amount, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
         # this approve will succeed, because aux_contract_address have enough zNEO
         result = self.run_smart_contract(engine, path_aux_contract, 'calling_approve',
                                          wrapped_neo_address, self.OTHER_ACCOUNT_1, allowed_amount,
-                                         signer_accounts=[aux_contract_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_contract_address])
         self.assertEqual(True, result)
 
         # aux_contract_address allowed OTHER_SCRIPT_HASH to spend transferred_amount of zNEO
@@ -327,8 +313,7 @@ class TestTemplate(BoaTest):
         # OWNER will give zNEO to aux_contract_address so that it can approve another contracts
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, aux_contract_address, 10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(2, len(transfer_events))
@@ -346,8 +331,7 @@ class TestTemplate(BoaTest):
         # this approve will succeed, because aux_contract_address have enough zNEO
         result = self.run_smart_contract(engine, path_aux_contract, 'calling_approve',
                                          wrapped_neo_address, self.OTHER_ACCOUNT_1, allowed_amount,
-                                         signer_accounts=[aux_contract_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_contract_address])
         self.assertEqual(True, result)
 
         transferred_amount = allowed_amount
@@ -356,8 +340,7 @@ class TestTemplate(BoaTest):
         # because OTHER_SCRIPT_HASH is not allowed to transfer more than aux_contract_address approved
         result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount + 1 * 10 ** 8, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(2, len(transfer_events))
@@ -368,8 +351,7 @@ class TestTemplate(BoaTest):
         balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
         result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(3, len(transfer_events))
@@ -394,29 +376,25 @@ class TestTemplate(BoaTest):
 
         # aux_contract_address and OTHER_SCRIPT_HASH allowance was reduced to 0
         result = self.run_smart_contract(engine, path, 'allowance', aux_contract_address, self.OTHER_ACCOUNT_1,
-                                         signer_accounts=[aux_contract_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_contract_address])
         self.assertEqual(0, result)
 
         # this approve will succeed, because aux_contract_address have enough zNEO
         result = self.run_smart_contract(engine, path_aux_contract, 'calling_approve',
                                          wrapped_neo_address, self.OTHER_ACCOUNT_1, allowed_amount,
-                                         signer_accounts=[aux_contract_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_contract_address])
         self.assertEqual(True, result)
 
         transferred_amount = allowed_amount - 4 * 10 ** 8
 
         result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, aux_contract_address,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1],
-                                         expected_result_type=bool)
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # aux_contract_address and OTHER_SCRIPT_HASH allowance was reduced to allowed_amount - transferred_amount
         result = self.run_smart_contract(engine, path, 'allowance', aux_contract_address, self.OTHER_ACCOUNT_1,
-                                         signer_accounts=[aux_contract_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_contract_address])
         self.assertEqual(allowed_amount - transferred_amount, result)
 
         # should fail when any of the scripts' length is not 20
@@ -462,8 +440,7 @@ class TestTemplate(BoaTest):
         # transferring NEO to the wrapped_neo_address will mint them
         result = self.run_smart_contract(engine, aux_path, 'calling_transfer', constants.NEO_SCRIPT,
                                          aux_address, wrapped_neo_address, minted_amount, None,
-                                         signer_accounts=[aux_address],
-                                         expected_result_type=bool)
+                                         signer_accounts=[aux_address])
         self.assertEqual(True, result)
 
         transfer_events = engine.get_events('Transfer', origin=constants.NEO_SCRIPT)

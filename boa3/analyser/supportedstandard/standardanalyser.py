@@ -64,7 +64,7 @@ class StandardAnalyser(IAstAnalyser):
             if standard in supportedstandard.neo_standards:
                 current_standard = supportedstandard.neo_standards[standard]
 
-                # validade standard's methods
+                # validate standard's methods
                 for standard_method in current_standard.methods:
                     method_id = standard_method.external_name
                     is_implemented = False
@@ -80,7 +80,7 @@ class StandardAnalyser(IAstAnalyser):
                             CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
                         )
 
-                # validade standard's events
+                # validate standard's events
                 events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
                 for standard_event in current_standard.events:
                     is_implemented = False
@@ -94,6 +94,22 @@ class StandardAnalyser(IAstAnalyser):
                             CompilerError.MissingStandardDefinition(standard,
                                                                     standard_event.name,
                                                                     standard_event)
+                        )
+
+                # validate optional methods
+                for optional_method in current_standard.optionals:
+                    method_id = optional_method.external_name
+                    is_implemented = False
+
+                    found_methods = self.get_methods_by_display_name(method_id)
+                    for method in found_methods:
+                        if isinstance(method, Method) and current_standard.match_definition(optional_method, method):
+                            is_implemented = True
+                            break
+
+                    if found_methods and not is_implemented:
+                        self._log_error(
+                            CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
                         )
 
     def _check_other_implemented_standards(self):

@@ -8,5 +8,5 @@ def Main() -> int:
 @metadata
 def standards_manifest() -> NeoMetadata:
     meta = NeoMetadata()
-    meta.supported_standards = ['NEP-11']
+    meta.supported_standards = ['NEP-5']
     return meta

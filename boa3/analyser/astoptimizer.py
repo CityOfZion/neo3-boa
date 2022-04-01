@@ -1,9 +1,12 @@
 import ast
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
+from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.model.optimizer import ScopeValue, Undefined
 from boa3.analyser.model.optimizer.Operation import Operation
+from boa3.exception import CompilerWarning
+from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.method import Method
 from boa3.model.module import Module
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
@@ -27,7 +30,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     """
 
     def __init__(self, analyser, log: bool = False):
-        super().__init__(analyser.ast_tree, log=log)
+        super().__init__(analyser.ast_tree, filename=analyser.filename, log=log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = analyser.symbol_table
 
@@ -38,6 +41,15 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         self._current_class: UserClass = None
 
         self.visit(self._tree)
+
+    @property
+    def tree(self) -> ast.AST:
+        """
+        Gets the analysed abstract syntax tree
+
+        :return: the analysed ast
+        """
+        return self._tree
 
     def literal_eval(self, node: ast.AST) -> Any:
         """
@@ -71,6 +83,18 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
 
     def reset_state(self):
         self.current_scope.reset()
+
+    def get_symbol_id(self, node: ast.AST) -> Optional[str]:
+        parts = []
+        cur_node = node
+        while isinstance(cur_node, ast.Attribute):
+            parts.insert(0, cur_node.attr)
+            cur_node = cur_node.value
+
+        if isinstance(cur_node, ast.Name):
+            parts.insert(0, cur_node.id)
+
+        return constants.ATTRIBUTE_NAME_SEPARATOR.join(parts)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
         if node.name in self.symbols:
@@ -378,4 +402,44 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
             if isinstance(value, str):
                 value = "'{0}'".format(value)
             return self.parse_to_node(str(value), node)
+        return node
+
+    def visit_Call(self, node: ast.Call) -> ast.AST:
+        # check if the call can be evaluated during compile time
+        # TODO: right now only UInt160 and UInt256 constructors are evaluated
+        literal_args = []
+        args_are_literal = True
+
+        for index, arg in enumerate(node.args.copy()):
+            updated_arg = self.visit(arg)  # first try to optimize the arguments
+            if updated_arg != arg:
+                node.args[index] = updated_arg
+
+            if args_are_literal:
+                value = self.literal_eval(updated_arg)
+                if value is Undefined:
+                    # don't break if one argument is not literal to make sure that all arguments were checked
+                    # if they can be optimized
+                    args_are_literal = False
+
+                literal_args.append(value)
+
+        if args_are_literal:
+            # try to get the result
+            try:
+                func_id = self.get_symbol_id(node.func)
+            except BaseException:
+                return node
+            func = self.get_symbol(func_id)
+
+            if isinstance(func, IBuiltinMethod):
+                try:
+                    result = func.evaluate_literal(*literal_args)
+                    if result is not Undefined:
+                        return self.parse_to_node(str(result), node, is_origin_str=isinstance(result, str))
+                except BaseException:
+                    self._log_warning(CompilerWarning.InvalidArgument(
+                        node.lineno, node.col_offset
+                    ))
+
         return node

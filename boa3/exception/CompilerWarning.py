@@ -28,6 +28,23 @@ class CompilerWarning(ABC, BaseException):
         return self.message == other.message
 
 
+class InvalidArgument(CompilerWarning):
+    """
+    An warning raised when an attempt of method evaluation fails during optimization because an argument is invalid.
+    """
+
+    def __init__(self, line: int, col: int, custom_error_message: str = None):
+        self.custom_error_message = custom_error_message
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        message = "One or more arguments are invalid values"
+        if self.custom_error_message is not None:
+            message += f": {self.custom_error_message}"
+        return message
+
+
 class NameShadowing(CompilerWarning):
     """
     A warning raised when a name from an outer scope symbol is used as the name of an inner scope symbol

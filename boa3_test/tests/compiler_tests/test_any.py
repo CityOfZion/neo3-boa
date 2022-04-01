@@ -2,6 +2,7 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
@@ -23,6 +24,7 @@ class TestAny(BoaTest):
             + Integer(len(two)).to_byte_array() + two
             + Opcode.STLOC0
             + Opcode.PUSH1      # a = True
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.STLOC0
             + Opcode.PUSH3      # a = [1, 2, 3]
             + Opcode.PUSH2
@@ -51,6 +53,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
@@ -71,6 +74,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
@@ -92,30 +96,34 @@ class TestAny(BoaTest):
             + b'\x01'
             + b'\x00'
             + Opcode.PUSH0          # bool_tuple = True, False
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC0
             + Opcode.LDLOC0         # SequenceFunction(bool_tuple)
             + Opcode.CALL
-            + Integer(45).to_byte_array(min_length=1, signed=True)
+            + Integer(49).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSHDATA1      # SequenceFunction([True, 1, 'ok'])
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
-            + Integer(35).to_byte_array(min_length=1, signed=True)
+            + Integer(37).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSHDATA1      # SequenceFunction('some_string')
             + Integer(len(some_string)).to_byte_array()
             + some_string
             + Opcode.CALL
-            + Integer(20).to_byte_array(min_length=1, signed=True)
+            + Integer(22).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSHDATA1      # SequenceFunction((True, 1, 'ok'))
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.CALL
@@ -152,6 +160,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
@@ -165,11 +174,14 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC2
             + Opcode.PUSH0      # bool_tuple = True, False
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC3
@@ -201,6 +213,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
@@ -223,6 +236,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
@@ -263,6 +277,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC0
@@ -280,7 +295,9 @@ class TestAny(BoaTest):
             + Opcode.PACK
             + Opcode.STLOC2
             + Opcode.PUSH0      # bool_tuple = True, False
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH2
             + Opcode.PACK
             + Opcode.STLOC3
@@ -343,6 +360,7 @@ class TestAny(BoaTest):
             + Integer(len(ok)).to_byte_array() + ok
             + Opcode.PUSH1
             + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSH3
             + Opcode.PACK
             + Opcode.STLOC1

@@ -327,3 +327,10 @@ class TestImport(BoaTest):
 
         path = self.get_contract_path('NotImportedBuiltinFromTypingInVariable.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_incorrect_circular_import(self):
+        path = self.get_contract_path('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(3, result)

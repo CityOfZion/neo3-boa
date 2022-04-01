@@ -49,6 +49,11 @@ def serialize(value: Any) -> bytes:
     if value is None:
         return StackItemType.Any
 
+    if isinstance(value, bool):
+        stack_type = StackItemType.Boolean
+        span = Integer(value).to_byte_array(signed=False, min_length=1)
+        return stack_type + span
+
     if isinstance(value, (int, str, bytes)):
         if isinstance(value, int):
             stack_type = StackItemType.Integer

@@ -68,6 +68,7 @@ class CodeGenerator:
             analyser.ast_tree.body.remove(deploy_method.origin)
 
         visitor = VisitorCodeGenerator(generator)
+        visitor._root_module = analyser.ast_tree
         visitor.visit(analyser.ast_tree)
 
         analyser.update_symbol_table(generator.symbol_table)
@@ -126,6 +127,7 @@ class CodeGenerator:
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
+        self.additional_symbols: Optional[Dict[str, ISymbol]] = None
 
         self._current_method: Method = None
         self._current_class: Method = None
@@ -291,6 +293,10 @@ class CodeGenerator:
         :param identifier: id of the symbol
         :return: the symbol if exists. Symbol None otherwise
         """
+        cur_symbol_table = self.symbol_table.copy()
+        if isinstance(self.additional_symbols, dict):
+            cur_symbol_table.update(self.additional_symbols)
+
         if len(self._scope_stack) > 0:
             for symbol_scope in self._scope_stack:
                 if identifier in symbol_scope:
@@ -302,8 +308,8 @@ class CodeGenerator:
         else:
             if self._current_method is not None and identifier in self._current_method.symbols:
                 return self._current_method.symbols[identifier]
-            elif identifier in self.symbol_table:
-                return self.symbol_table[identifier]
+            elif identifier in cur_symbol_table:
+                return cur_symbol_table[identifier]
 
             # the symbol may be a built in. If not, returns None
             symbol = Builtin.get_symbol(identifier)
@@ -312,9 +318,9 @@ class CodeGenerator:
 
             if not isinstance(identifier, str):
                 return symbol
-            split = identifier.split('.')
+            split = identifier.split(constants.ATTRIBUTE_NAME_SEPARATOR)
             if len(split) > 1:
-                attribute, symbol_id = '.'.join(split[:-1]), split[-1]
+                attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
                 attr = self.get_symbol(attribute, is_internal=is_internal)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
                     return attr.symbols[symbol_id]
@@ -420,6 +426,12 @@ class CodeGenerator:
         """
         self.__insert1(OpcodeInfo.NOT)
 
+    def insert_nop(self):
+        """
+        Insert a NOP opcode
+        """
+        self.__insert1(OpcodeInfo.NOP)
+
     def convert_begin_while(self, is_for: bool = False) -> int:
         """
         Converts the beginning of the while statement
@@ -503,21 +515,23 @@ class CodeGenerator:
 
         self._current_loop.pop()
 
+        is_break_pos = self.bytecode_size
         self.convert_literal(False)  # is not break
-        is_break_pos = self.last_code_start_address
+        is_break_end = self.last_code_start_address
         self._update_break_jumps(start_address)
 
         if is_for:
             self._current_for.pop()
-            self.swap_reverse_stack_items(3)
             reverse_to_drop_pos = self.last_code_start_address
+            self.swap_reverse_stack_items(3)
+            reverse_to_drop_end = self.last_code_start_address
 
             self.remove_stack_top_item()    # removes index and sequence from stack
             self.remove_stack_top_item()
 
-            self._insert_loop_break_addresses(start_address, reverse_to_drop_pos, self.bytecode_size)
+            self._insert_loop_break_addresses(start_address, reverse_to_drop_pos, reverse_to_drop_end, self.bytecode_size)
 
-        self._insert_loop_break_addresses(start_address, is_break_pos, self.bytecode_size)
+        self._insert_loop_break_addresses(start_address, is_break_pos, is_break_end, self.bytecode_size)
         self._insert_jump(OpcodeInfo.JMPIF)
 
     def convert_end_loop_else(self, start_address: int, else_begin: int, has_else: bool = False, is_for: bool = False):
@@ -538,7 +552,7 @@ class CodeGenerator:
             if not has_else:
                 self._opcodes_to_remove.extend(is_loop_insertions)
             else:
-                min_break_addresses = 4 if is_for else 3
+                min_break_addresses = 5 if is_for else 4
                 if (start_address in self._jumps_to_loop_break
                         and len(self._jumps_to_loop_break[start_address]) < 2
                         and len(is_loop_insertions) < min_break_addresses):
@@ -734,24 +748,31 @@ class CodeGenerator:
 
     def convert_loop_break(self):
         loop_start = self._current_loop[-1]
+        is_break_pos = self.bytecode_size
         self.convert_literal(True)  # is break
         self._stack_pop()
-        is_break_pos = self.last_code_start_address
+        is_break_end = self.last_code_start_address
         self._insert_jump(OpcodeInfo.JMP)
         break_address = self.last_code_start_address
 
-        self._insert_loop_break_addresses(loop_start, is_break_pos, break_address)
+        self._insert_loop_break_addresses(loop_start, is_break_pos, is_break_end, break_address)
 
-    def _insert_loop_break_addresses(self, loop_start: int, is_break_pos: int, break_address: int):
+    def _insert_loop_break_addresses(self, loop_start: int, is_break_start: int, is_break_end: int, break_address: int):
         if loop_start not in self._jumps_to_loop_condition:
             self._jumps_to_loop_break[loop_start] = [break_address]
         elif break_address not in self._jumps_to_loop_break[loop_start]:
             self._jumps_to_loop_break[loop_start].append(break_address)
 
+        is_break_instructions = VMCodeMapping.instance().get_addresses(is_break_start, is_break_end)
+
         if loop_start not in self._inserted_loop_breaks:
-            self._inserted_loop_breaks[loop_start] = [is_break_pos]
+            self._inserted_loop_breaks[loop_start] = is_break_instructions
         else:
-            self._inserted_loop_breaks[loop_start].append(is_break_pos)
+            loop_breaks_list = self._inserted_loop_breaks[loop_start]
+            for address in is_break_instructions:
+                # don't include duplicated addresses
+                if address not in loop_breaks_list:
+                    loop_breaks_list.append(address)
 
     def _update_break_jumps(self, loop_start_address) -> int:
         jump_target = VMCodeMapping.instance().bytecode_size
@@ -828,7 +849,8 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.PUSH1)
         else:
             self.__insert1(OpcodeInfo.PUSH0)
-        self._stack_append(Type.bool)
+        self._stack_append(Type.int)  # don't add bool to stack directly for optimizations
+        self.convert_cast(Type.bool)
 
     def convert_byte_array(self, array: bytes):
         """
@@ -922,39 +944,39 @@ class CodeGenerator:
                 self._stack_pop()
             self._stack_append(array_type)
 
-    def _set_array_item(self, value_start_address: int):
+    def _set_array_item(self, value_start_address: int, check_for_negative_index: bool = True):
         """
         Converts the end of setting af a value in an array
         """
         index_type: IType = self._stack[-2]  # top: index
-        if index_type is Type.int:
+        if index_type is Type.int and check_for_negative_index:
             self.fix_negative_index(value_start_address)
 
-    def convert_set_item(self, value_start_address: int):
+    def convert_set_item(self, value_start_address: int, index_inserted_internally: bool = False):
         """
         Converts the end of setting af a value in an array
         """
         item_type: IType = self._stack[-3]  # top: index, 2nd-to-top: value, 3nd-to-top: array or map
         if item_type.stack_item is not StackItemType.Map:
-            self._set_array_item(value_start_address)
+            self._set_array_item(value_start_address, check_for_negative_index=not index_inserted_internally)
 
         self.__insert1(OpcodeInfo.SETITEM)
         self._stack_pop()  # value
         self._stack_pop()  # index
         self._stack_pop()  # array or map
 
-    def _get_array_item(self):
+    def _get_array_item(self, check_for_negative_index: bool = True):
         """
         Converts the end of get a value in an array
         """
         index_type: IType = self._stack[-1]  # top: index
-        if index_type is Type.int:
+        if index_type is Type.int and check_for_negative_index:
             self.fix_negative_index()
 
-    def convert_get_item(self):
+    def convert_get_item(self, index_inserted_internally: bool = False):
         array_or_map_type: IType = self._stack[-2]  # second-to-top: array or map
         if array_or_map_type.stack_item is not StackItemType.Map:
-            self._get_array_item()
+            self._get_array_item(check_for_negative_index=not index_inserted_internally)
 
         if array_or_map_type is Type.str:
             self.convert_literal(1)  # length of substring
@@ -1435,7 +1457,7 @@ class CodeGenerator:
         elif hasattr(var.type, 'get_value'):
             # the variable is a type constant
             # TODO: change this when implement class conversion
-            value = var.type.get_value(var_id.split('.')[-1])
+            value = var.type.get_value(var_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)[-1])
             if value is not None:
                 self.convert_literal(value)
 
@@ -1448,7 +1470,7 @@ class CodeGenerator:
             if var_id in class_type.variables:
                 index = list(class_type.variables).index(var_id)
                 self.convert_literal(index)
-                self.convert_get_item()
+                self.convert_get_item(index_inserted_internally=True)
                 self._stack_pop()             # pop class type
                 self._stack_append(var.type)  # push variable type
 
@@ -1481,7 +1503,7 @@ class CodeGenerator:
                 no_stack_items_to_swap = 2
 
             self.swap_reverse_stack_items(no_stack_items_to_swap)
-            self.convert_set_item(index_address)
+            self.convert_set_item(index_address, index_inserted_internally=True)
             return
 
         if index >= 0:
@@ -1646,13 +1668,7 @@ class CodeGenerator:
                                    None)
 
             if isinstance(function_id, str):
-                len_func_args = len(function.args)
-                if num_args >= len_func_args:
-                    num_args -= len_func_args
-                else:
-                    num_args = 0
-
-                self.convert_new_array(len_func_args)
+                self.convert_new_array(len(function.args))
                 self.convert_literal(Interop.CallFlagsType.default_value)
                 self.convert_literal(function_id)
                 self.convert_literal(function.origin_class.contract_hash.to_array())
