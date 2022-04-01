@@ -74,8 +74,8 @@ Reference Examples
 
 For an extensive collection of examples:
 
-- `Smart contract examples </boa3_test/examples>`__
-- `Features tests </boa3_test/test_sc>`__
+- `Smart contract examples <https://github.com/CityOfZion/neo3-boa/tree/master/boa3_test/examples>`__
+- `Features tests <https://github.com/CityOfZion/neo3-boa/tree/master/boa3_test/test_sc>`__
 
 License
 -------
