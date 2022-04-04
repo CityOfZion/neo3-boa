@@ -168,7 +168,7 @@ class Callable(IExpression, ABC):
         try:
             self._self_calls.add(origin)
             return True
-        except:
+        except BaseException:
             return False
 
     def __str__(self) -> str:

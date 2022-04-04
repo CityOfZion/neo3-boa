@@ -2047,6 +2047,9 @@ class CodeGenerator:
             self._stack_pop()
 
     def generate_implicit_init_user_class(self, init_method: Method):
+        if not init_method.is_called:
+            return
+
         self.convert_begin_method(init_method)
         class_type = init_method.return_type
         for base in class_type.bases:

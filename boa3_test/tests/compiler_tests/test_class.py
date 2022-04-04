@@ -1,7 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.cryptography import hash160
-from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -91,18 +90,12 @@ class TestClass(BoaTest):
         self.assertEqual({}, result[4])
 
     def test_user_class_empty(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0
-            + Opcode.RET
-            + Opcode.NOP
-        )
-
+        # since 0.11.2 methods that are not public nor are called are not generated to optimize code
+        # this test generates an empty contract
         path = self.get_contract_path('UserClassEmpty.py')
-        output = Boa3.compile(path)
 
+        expected_output = b''
+        output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_user_class_with_static_method_from_class(self):

@@ -296,9 +296,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         if isinstance(method, Property):
             method = method.getter
 
-        if isinstance(method, Method) and (method.is_public or method.is_called):
+        if isinstance(method, Method):
             self.current_method = method
-
             if isinstance(self.current_class, ClassType):
                 function_name = self.current_class.identifier + constants.ATTRIBUTE_NAME_SEPARATOR + function.name
             else:
@@ -306,15 +305,16 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             self._log_info(f"Compiling '{function_name}' function")
 
-            if not isinstance(self.current_class, ClassType) or not self.current_class.is_interface:
-                self.generator.convert_begin_method(method)
+            if method.is_public or method.is_called:
+                if not isinstance(self.current_class, ClassType) or not self.current_class.is_interface:
+                    self.generator.convert_begin_method(method)
 
-                for stmt in function.body:
-                    self.visit_to_map(stmt)
+                    for stmt in function.body:
+                        self.visit_to_map(stmt)
 
-                self.generator.convert_end_method(function.name)
+                    self.generator.convert_end_method(function.name)
 
-            self.current_method = None
+                self.current_method = None
 
         return self.build_data(function, symbol=method, symbol_id=function.name)
 
@@ -1113,11 +1113,15 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param pass_node: the python ast dict node
         """
+        # only generates if the scope is a function
         result_type = None
+        generated = False
 
-        self.generator.insert_nop()
+        if isinstance(self.current_method, Method):
+            self.generator.insert_nop()
+            generated = True
 
-        return self.build_data(pass_node, result_type=result_type, already_generated=True)
+        return self.build_data(pass_node, result_type=result_type, already_generated=generated)
 
     def _create_array(self, values: List[ast.AST], array_type: IType):
         """
