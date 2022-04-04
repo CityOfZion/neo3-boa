@@ -1,4 +1,5 @@
 from boa3.builtin import public
+
 from boa3_test.test_sc.import_test.FromImportTyping import *
 
 

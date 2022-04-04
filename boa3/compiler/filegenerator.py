@@ -194,14 +194,17 @@ class FileGenerator:
         """
         methods = []
         for method_id, method in self._public_methods.items():
-            logging.info("'{0}' method included in the ABI".format(method_id))
             methods.append(self._construct_abi_method(method_id, method))
         return methods
 
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
         from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+
+        abi_method_name = method.external_name if isinstance(method.external_name, str) else method_id
+        logging.info(f"'{abi_method_name}' method included in the manifest")
+
         return {
-            "name": method.external_name if isinstance(method.external_name, str) else method_id,
+            "name": abi_method_name,
             "offset": (VMCodeMapping.instance().get_start_address(method.start_bytecode)
                        if method.start_bytecode is not None else 0),
             "parameters": [

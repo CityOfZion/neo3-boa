@@ -1,6 +1,7 @@
-from boa3.builtin import NeoMetadata, metadata
+from boa3.builtin import NeoMetadata, metadata, public
 
 
+@public
 def Main() -> int:
     return 5
 

@@ -128,7 +128,7 @@ class TestFileGeneration(BoaTest):
         abi = manifest['abi']
 
         self.assertIn('methods', abi)
-        self.assertEqual(0, len(abi['methods']))
+        self.assertEqual(1, len(abi['methods']))
 
         self.assertIn('events', abi)
         self.assertEqual(0, len(abi['events']))
@@ -490,20 +490,12 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_without_main_and_public_methods(self):
+        # since 0.11.2 methods that are not public nor are called are not generated to optimize code
+        # this test generates an empty contract, which results in failing compilation
         path = self.get_contract_path('GenerationWithoutMainAndPublicMethods.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
-        output, manifest = self.compile_and_save(path)
 
-        self.assertTrue(os.path.exists(expected_manifest_output))
-        self.assertIn('abi', manifest)
-        abi = manifest['abi']
-
-        self.assertNotIn('entryPoint', abi)
-        self.assertIn('methods', abi)
-        self.assertEqual(0, len(abi['methods']))
-
-        self.assertIn('events', abi)
-        self.assertEqual(0, len(abi['events']))
+        with self.assertRaises(NotLoadedException):
+            output, manifest = self.compile_and_save(path)
 
     def test_generate_manifest_file_abi_method_offset(self):
         path = self.get_contract_path('GenerationWithDecorator.py')

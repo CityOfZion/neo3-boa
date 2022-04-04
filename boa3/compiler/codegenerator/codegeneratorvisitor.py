@@ -1,4 +1,5 @@
 import ast
+import os.path
 from inspect import isclass
 from typing import Dict, List, Optional, Tuple
 
@@ -36,8 +37,9 @@ class VisitorCodeGenerator(IAstAnalyser):
     :ivar generator:
     """
 
-    def __init__(self, generator: CodeGenerator):
-        super().__init__(ast.parse(""), log=True)
+    def __init__(self, generator: CodeGenerator, filename: str = None):
+        super().__init__(ast.parse(""), filename=filename, log=True)
+
         self.generator = generator
         self.current_method: Optional[Method] = None
         self.current_class: Optional[UserClass] = None
@@ -164,6 +166,13 @@ class VisitorCodeGenerator(IAstAnalyser):
     def _get_unique_name(self, name_id: str, node: ast.AST) -> str:
         return '{0}{2}{1}'.format(node.__hash__(), name_id, constants.VARIABLE_NAME_SEPARATOR)
 
+    def set_filename(self, filename: str):
+        if isinstance(filename, str) and os.path.isfile(filename):
+            if constants.PATH_SEPARATOR != os.path.sep:
+                self.filename = filename.replace(constants.PATH_SEPARATOR, os.path.sep)
+            else:
+                self.filename = filename
+
     def visit_Module(self, module: ast.Module) -> GeneratorData:
         """
         Visitor of the module node
@@ -221,7 +230,12 @@ class VisitorCodeGenerator(IAstAnalyser):
             # to generate the 'initialize' method for Neo
             self._is_generating_initialize = True
             for stmt in global_stmts:
+                cur_filename = self.filename
+                if hasattr(stmt, 'origin') and hasattr(stmt.origin, 'filename'):
+                    self.set_filename(stmt.origin.filename)
+
                 self.visit(stmt)
+                self.filename = cur_filename
 
             self._is_generating_initialize = False
             self.generator.end_initialize()
@@ -282,8 +296,16 @@ class VisitorCodeGenerator(IAstAnalyser):
         if isinstance(method, Property):
             method = method.getter
 
-        if isinstance(method, Method):
+        if isinstance(method, Method) and (method.is_public or method.is_called):
             self.current_method = method
+
+            if isinstance(self.current_class, ClassType):
+                function_name = self.current_class.identifier + constants.ATTRIBUTE_NAME_SEPARATOR + function.name
+            else:
+                function_name = function.name
+
+            self._log_info(f"Compiling '{function_name}' function")
+
             if not isinstance(self.current_class, ClassType) or not self.current_class.is_interface:
                 self.generator.convert_begin_method(method)
 
