@@ -314,7 +314,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
                     self.generator.convert_end_method(function.name)
 
-                self.current_method = None
+            self.current_method = None
 
         return self.build_data(function, symbol=method, symbol_id=function.name)
 
