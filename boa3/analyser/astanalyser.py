@@ -63,6 +63,15 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             if self._log:
                 logging.warning(warning)
 
+    def _log_info(self, info_message: str, log_filename: bool = True):
+        if self._log:
+            if log_filename and self.filename:
+                formatted_message = f'{info_message} <{self.filename}>'
+            else:
+                formatted_message = info_message
+
+            logging.info(formatted_message)
+
     def visit(self, node: ast.AST) -> Any:
         try:
             return super().visit(node)

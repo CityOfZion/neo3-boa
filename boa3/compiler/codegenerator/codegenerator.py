@@ -67,7 +67,7 @@ class CodeGenerator:
         if hasattr(deploy_method, 'origin') and deploy_method.origin in analyser.ast_tree.body:
             analyser.ast_tree.body.remove(deploy_method.origin)
 
-        visitor = VisitorCodeGenerator(generator)
+        visitor = VisitorCodeGenerator(generator, analyser.filename)
         visitor._root_module = analyser.ast_tree
         visitor.visit(analyser.ast_tree)
 
@@ -82,6 +82,7 @@ class CodeGenerator:
                 symbol.ast.body.remove(deploy_method.origin)
                 deploy_origin_module = symbol.ast
 
+            visitor.set_filename(symbol.origin)
             visitor.visit(symbol.ast)
 
             analyser.update_symbol_table(symbol.all_symbols)
@@ -115,6 +116,7 @@ class CodeGenerator:
             generator.symbol_table.clear()
             generator.symbol_table.update(analyser.symbol_table.copy())
 
+        visitor.set_filename(analyser.filename)
         generator.can_init_static_fields = True
         if len(visitor.global_stmts) > 0:
             global_ast = ast.parse("")
@@ -2045,6 +2047,9 @@ class CodeGenerator:
             self._stack_pop()
 
     def generate_implicit_init_user_class(self, init_method: Method):
+        if not init_method.is_called:
+            return
+
         self.convert_begin_method(init_method)
         class_type = init_method.return_type
         for base in class_type.bases:

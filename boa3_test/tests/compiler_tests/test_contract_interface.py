@@ -86,3 +86,98 @@ class TestContractInterface(BoaTest):
         nep17_result = self.run_smart_contract(engine, nep17_path, 'totalSupply')
         result = self.run_smart_contract(engine, path, 'nep17_total_supply')
         self.assertEqual(nep17_result, result)
+
+    def test_contract_interface_code_optimization(self):
+        from boa3.model.builtin.interop.interop import Interop
+        from boa3.neo.vm.opcode.Opcode import Opcode
+        from boa3.neo.vm.type.Integer import Integer
+        from boa3.neo.vm.type.String import String
+        from boa3.neo3.core.types import UInt160
+
+        external_contract_name = 'symbol'
+        function_name_bytes = String(external_contract_name).to_bytes()
+        contract_script_bytes = UInt160.from_string('a34afa0e5414255d1093e92a1a6f1f505c82cd3f').to_array()
+
+        expected_output = (
+            Opcode.NEWARRAY0    # arguments list
+            + Opcode.PUSH15     # CallFlag
+            + Opcode.PUSHDATA1  # function name
+            + Integer(len(function_name_bytes)).to_byte_array()
+            + function_name_bytes
+            + Opcode.PUSHDATA1  # contract script
+            + Integer(len(contract_script_bytes)).to_byte_array()
+            + contract_script_bytes
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('ContractInterfaceCodeOptimization.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        nep17_path = self.get_contract_path('examples', 'nep17.py')
+        engine = TestEngine()
+
+        nep17_result = self.run_smart_contract(engine, nep17_path, 'symbol')
+        result = self.run_smart_contract(engine, path, 'nep17_symbol')
+        self.assertEqual(nep17_result, result)
+
+    def test_contract_manual_interface_code_optimization(self):
+        from boa3.model.builtin.interop.interop import Interop
+        from boa3.neo.vm.opcode.Opcode import Opcode
+        from boa3.neo.vm.type.Integer import Integer
+        from boa3.neo.vm.type.String import String
+        from boa3.neo3.core.types import UInt160
+
+        external_contract_name = 'symbol'
+        function_name_bytes = String(external_contract_name).to_bytes()
+        contract_script_bytes = UInt160.from_string('a34afa0e5414255d1093e92a1a6f1f505c82cd3f').to_array()
+
+        expected_output = (
+            # start public method
+            Opcode.LDSFLD0      # generated cls arg
+            + Opcode.CALL
+            + Integer(35).to_byte_array()
+            + Opcode.RET
+            # end public method
+            # start initialize method
+            + Opcode.INITSSLOT + b'\x01'
+            + Opcode.PUSH1
+            + Opcode.NEWARRAY
+            + Opcode.STSFLD0
+            + Opcode.PUSHDATA1
+            + Integer(len(contract_script_bytes)).to_byte_array()
+            + contract_script_bytes
+            + Opcode.PUSH0
+            + Opcode.LDSFLD0
+            + Opcode.REVERSE3
+            + Opcode.SETITEM
+            + Opcode.RET
+            # end initialize method
+            # start 'symbol' class method
+            + Opcode.INITSLOT + b'\x00\x01'
+            + Opcode.NEWARRAY0    # arguments list
+            + Opcode.PUSH15     # CallFlag
+            + Opcode.PUSHDATA1  # function name
+            + Integer(len(function_name_bytes)).to_byte_array()
+            + function_name_bytes
+            + Opcode.LDARG0     # contract script
+            + Opcode.PUSH0
+            + Opcode.PICKITEM
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+            # start class method
+        )
+
+        path = self.get_contract_path('ContractManualInterfaceCodeOptimization.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        nep17_path = self.get_contract_path('examples', 'nep17.py')
+        engine = TestEngine()
+
+        nep17_result = self.run_smart_contract(engine, nep17_path, 'symbol')
+        result = self.run_smart_contract(engine, path, 'nep17_symbol')
+        self.assertEqual(nep17_result, result)

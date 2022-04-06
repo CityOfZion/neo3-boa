@@ -16,7 +16,7 @@ Python compiler for the Neo3 Virtual Machine
 Overview
 --------
 
-Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manisfest.json` formats for usage in the `Neo Virtual Machine <https://github.com/neo-project/neo-vm/>`__ which is used to execute contracts on the `Neo Blockchain <https://github.com/neo-project/neo/>`__.
+Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manifest.json` formats for usage in the `Neo Virtual Machine <https://github.com/neo-project/neo-vm/>`__ which is used to execute contracts on the `Neo Blockchain <https://github.com/neo-project/neo/>`__.
 
 Neo-boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
 

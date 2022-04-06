@@ -91,6 +91,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
         self.imported_nodes: List[ast.AST] = []
+
+        if self.filename:
+            self._tree.filename = self.filename
         self.visit(self._tree)
 
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()

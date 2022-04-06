@@ -1384,6 +1384,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return None
 
     def update_callable_after_validation(self, call: ast.Call, callable_id: str, callable_target: Callable):
+        callable_target.add_call_origin(call)
+
         # if the arguments are not generic, include the specified method in the symbol table
         if (isinstance(callable_target, IBuiltinMethod)
                 and callable_target.identifier != callable_id
@@ -1606,6 +1608,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             attr_value = attribute.value
 
+        if isinstance(attr_symbol, Property):
+            if isinstance(attribute.ctx, ast.Load):
+                attr_symbol.getter.add_call_origin(attribute)
         return Attribute(attr_value, attribute.attr, attr_symbol, attribute)
 
     def visit_Constant(self, constant: ast.Constant) -> Any:

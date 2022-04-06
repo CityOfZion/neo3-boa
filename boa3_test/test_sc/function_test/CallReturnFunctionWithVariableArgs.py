@@ -1,6 +1,7 @@
 from boa3.builtin import public
 
 
+@public
 def Main(operation: str, args: tuple) -> int:
     a = 1
     b = 2
