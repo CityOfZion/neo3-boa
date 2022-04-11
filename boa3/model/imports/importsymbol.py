@@ -63,3 +63,10 @@ class Import(ISymbol):
         symbol = self.symbols.copy()
         symbol.update(self._symbols_not_imported)
         return symbol
+
+
+class BuiltinImport(Import):
+    """
+    A class used to differentiate built-in importings
+    """
+    pass

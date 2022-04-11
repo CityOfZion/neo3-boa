@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.model.event import Event
-from boa3.model.imports.importsymbol import Import
+from boa3.model.imports.importsymbol import BuiltinImport, Import
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
@@ -104,7 +104,29 @@ class FileGenerator:
 
         :return: a dictionary that maps each event with its identifier
         """
-        return {event.name: event for event in self._symbols.values() if isinstance(event, Event)}
+        events = set()
+        for imported in self._all_imports:
+            events.update([event for event in imported.all_symbols.values() if isinstance(event, Event)])
+        events.update([event for event in self._symbols.values() if isinstance(event, Event)])
+
+        return {event.name: event for event in events}
+
+    @property
+    def _all_imports(self) -> List[Import]:
+        all_imports = [imported for imported in self._symbols.values()
+                       if (isinstance(imported, Import)
+                           and not isinstance(imported, BuiltinImport))]
+        index = 0
+        while index < len(all_imports):
+            imported = all_imports[index]
+            for inner in imported.all_symbols.values():
+                if (isinstance(inner, Import)
+                        and not isinstance(inner, BuiltinImport)
+                        and inner not in all_imports):
+                    all_imports.append(inner)
+            index += 1
+
+        return list(reversed(all_imports))  # first positions are the most inner imports
 
     # region NEF
 

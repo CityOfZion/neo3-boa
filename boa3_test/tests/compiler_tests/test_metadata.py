@@ -167,6 +167,19 @@ class TestMetadata(BoaTest):
         self.assertGreater(len(manifest['supportedstandards']), 0)
         self.assertIn('NEP-5', manifest['supportedstandards'])
 
+    def test_metadata_info_supported_standards_with_imported_event(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsImportedEvent.py')
+        output, manifest = self.get_output(path)
+
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('events', abi)
+        self.assertEqual(1, len(abi['events']))
+
+        self.assertIn('name', abi['events'][0])
+        self.assertEqual('Transfer', abi['events'][0]['name'])
+
     def test_metadata_info_supported_standards_missing_implementations_nep17(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
