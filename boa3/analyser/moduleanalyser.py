@@ -19,7 +19,7 @@ from boa3.model.callable import Callable
 from boa3.model.decorator import IDecorator
 from boa3.model.event import Event
 from boa3.model.expression import IExpression
-from boa3.model.imports.importsymbol import Import
+from boa3.model.imports.importsymbol import BuiltinImport, Import
 from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -409,7 +409,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         import_alias[imported_symbol_id] = imported_symbol_id
 
             # includes the module to be able to generate the functions
-            imported_module = Import(analyser.path, analyser.tree, analyser, import_alias)
+            imported_module = self._build_import(analyser.path, analyser.tree, analyser, import_alias)
             self._current_scope.include_symbol(import_from.module, imported_module)
 
             for name, alias in import_alias.items():
@@ -437,8 +437,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
 
-                imported_module = Import(analyser.path, analyser.tree, analyser)
+                imported_module = self._build_import(analyser.path, analyser.tree, analyser)
                 self._current_scope.include_symbol(alias, imported_module)
+
+    def _build_import(self, origin: str, syntax_tree: ast.AST,
+                      import_analyser: ImportAnalyser,
+                      imported_symbols: Dict[str, ISymbol] = None,) -> Import:
+
+        if import_analyser.is_builtin_import:
+            return BuiltinImport(origin, syntax_tree, import_analyser, imported_symbols)
+
+        return Import(origin, syntax_tree, import_analyser, imported_symbols)
 
     def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
         already_imported = {imported.origin: imported.analyser
