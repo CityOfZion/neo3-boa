@@ -228,6 +228,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                         class_non_static_stmts.append(cls_fun)
 
             # to generate the 'initialize' method for Neo
+            self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
             self._is_generating_initialize = True
             for stmt in global_stmts:
                 cur_filename = self.filename
@@ -391,7 +392,9 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_data = self.visit(ann_assign.target)
         var_id = var_data.symbol_id
         # filter to find the imported variables
-        if var_id not in self._symbols and hasattr(ann_assign, 'origin') and isinstance(ann_assign.origin, ast.AST):
+        if (var_id not in self.generator.symbol_table
+                and hasattr(ann_assign, 'origin')
+                and isinstance(ann_assign.origin, ast.AST)):
             var_id = self._get_unique_name(var_id, ann_assign.origin)
         self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
         return self.build_data(ann_assign)
@@ -411,7 +414,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             var_index = target_data.index
 
             # filter to find the imported variables
-            if var_id not in self._symbols and hasattr(assign, 'origin') and isinstance(assign.origin, ast.AST):
+            if (var_id not in self.generator.symbol_table
+                    and hasattr(assign, 'origin')
+                    and isinstance(assign.origin, ast.AST)):
                 var_id = self._get_unique_name(var_id, assign.origin)
             vars_ids.append((var_id, var_index, var_value_address))
 
@@ -427,7 +432,9 @@ class VisitorCodeGenerator(IAstAnalyser):
         var_data = self.visit(aug_assign.target)
         var_id = var_data.symbol_id
         # filter to find the imported variables
-        if var_id not in self._symbols and hasattr(aug_assign, 'origin') and isinstance(aug_assign.origin, ast.AST):
+        if (var_id not in self.generator.symbol_table
+                and hasattr(aug_assign, 'origin')
+                and isinstance(aug_assign.origin, ast.AST)):
             var_id = self._get_unique_name(var_id, aug_assign.origin)
 
         self.generator.convert_load_symbol(var_id)

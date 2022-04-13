@@ -154,6 +154,9 @@ class CodeGenerator:
         self.can_init_static_fields: bool = False
         self.initialized_static_fields: bool = False
 
+        self._static_vars: Optional[list] = None
+        self._global_vars: Optional[list] = None
+
     @property
     def bytecode(self) -> bytes:
         """
@@ -254,10 +257,26 @@ class CodeGenerator:
 
         :return: A list with the variables names
         """
-        module_global_variables = [var_id for var_id, var in self.symbol_table.items()
-                                   if isinstance(var, Variable) and var.is_reassigned == modified_variable]
-        class_with_class_variables = [class_id for class_id, class_symbol in self.symbol_table.items()
-                                      if isinstance(class_symbol, UserClass) and len(class_symbol.class_variables) > 0]
+        if modified_variable:
+            vars_map = self._global_vars
+        else:
+            vars_map = self._static_vars
+
+        module_global_variables = []
+        module_global_ids = []
+        result_global_vars = []
+        for var_id, var in self.symbol_table.items():
+            if isinstance(var, Variable) and var.is_reassigned == modified_variable:
+                module_global_variables.append((var_id, var))
+                module_global_ids.append(var_id)
+                result_global_vars.append(var)
+
+        class_with_class_variables = []
+        class_with_variables_ids = []
+        for class_id, class_symbol in self.symbol_table.items():
+            if isinstance(class_symbol, UserClass) and len(class_symbol.class_variables) > 0:
+                class_with_class_variables.append((class_id, class_symbol))
+                class_with_variables_ids.append(class_id)
 
         if not self.can_init_static_fields:
             for imported in self.symbol_table.values():
@@ -266,14 +285,64 @@ class CodeGenerator:
                     for var_id, var in imported.variables.items():
                         if (isinstance(var, Variable)
                                 and var.is_reassigned == modified_variable
-                                and var_id not in module_global_variables):
-                            module_global_variables.append(var_id)
+                                and var_id not in module_global_ids
+                                and var not in result_global_vars):
+                            module_global_variables.append((var_id, var))
+                            module_global_ids.append(var_id)
+                            result_global_vars.append(var)
 
                     # TODO: include user class from imported symbols as well
 
-        return (module_global_variables
-                if modified_variable
-                else module_global_variables + class_with_class_variables)
+        if modified_variable:
+            result_map = module_global_variables
+            result = module_global_ids
+        else:
+            result_map = module_global_variables + class_with_class_variables
+            result_global_vars = result_global_vars + [classes for (class_id, classes) in class_with_class_variables]
+            result = module_global_ids + class_with_variables_ids
+
+        original_ids = []
+        for value in result:
+            split = value.split(constants.VARIABLE_NAME_SEPARATOR)
+            if len(split) > 1:
+                new_index = split[-1]
+            else:
+                new_index = value
+            original_ids.append(new_index)
+
+        if vars_map != result_map:
+            if vars_map is None:
+                # save to keep the same order in future accesses
+                if modified_variable:
+                    self._global_vars = result_map
+                else:
+                    self._static_vars = result_map
+
+            else:
+                # reorder to keep the same order as the first access
+                pre_reordered_ids = [var_id for (var_id, var) in vars_map]
+                for index, (value, var) in enumerate(vars_map):
+                    if value not in result:
+                        if var in result_global_vars:
+                            var_index = result_global_vars.index(var)
+                            new_value = result_map[var_index]
+                        else:
+                            var_index = original_ids.index(value)
+                            new_value = result_map[var_index]
+
+                        vars_map[index] = new_value
+
+                # add new symbols at the end always
+                reordered_ids = [var_id for (var_id, var) in vars_map]
+                additional_items = []
+                for index, var_id in enumerate(result):
+                    if var_id not in reordered_ids and var_id not in pre_reordered_ids:
+                        additional_items.append(var_id)
+                        vars_map.append(result_map[index])
+
+                result = reordered_ids + additional_items
+
+        return result
 
     @property
     def _current_scope(self) -> SymbolScope:
