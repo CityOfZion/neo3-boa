@@ -437,6 +437,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                 and isinstance(aug_assign.origin, ast.AST)):
             var_id = self._get_unique_name(var_id, aug_assign.origin)
 
+        if isinstance(var_data.type, UserClass):
+            self.generator.duplicate_stack_top_item()
+
         self.generator.convert_load_symbol(var_id)
         value_address = self.generator.bytecode_size
         self.visit_to_generate(aug_assign.value)

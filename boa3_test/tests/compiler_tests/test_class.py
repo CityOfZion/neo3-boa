@@ -477,3 +477,25 @@ class TestClass(BoaTest):
     def test_user_class_with_property_without_self(self):
         path = self.get_contract_path('UserClassWithPropertyWithoutSelf.py')
         self.assertCompilerLogs(CompilerError.SelfArgumentError, path)
+
+    def test_user_class_with_augmented_assignment_operator_with_variable(self):
+        path = self.get_contract_path('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'add')
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'sub')
+        self.assertEqual(-2, result)
+
+        result = self.run_smart_contract(engine, path, 'mult')
+        self.assertEqual(16, result)
+
+        result = self.run_smart_contract(engine, path, 'div')
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'mod')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'mix')
+        self.assertEqual(0, result)
