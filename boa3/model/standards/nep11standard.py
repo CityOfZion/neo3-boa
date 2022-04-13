@@ -45,7 +45,7 @@ class Nep11Standard(INeoStandard):
                            return_type=type_iterator),
             StandardMethod('properties', safe=True,
                            args={
-                               'tokenId': Type.str,
+                               'tokenId': type_bytestring,
                            },
                            return_type=Type.dict),
         ]

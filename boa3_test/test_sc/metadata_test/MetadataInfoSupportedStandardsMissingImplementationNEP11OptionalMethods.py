@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from boa3.builtin import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep11TransferEvent
@@ -17,7 +17,7 @@ def standards_manifest() -> NeoMetadata:
 
 # this method has the same name as an NEP-11 optional method, but with a different signature
 @public(safe=True)
-def properties():
+def properties(token_id: str) -> Dict[Any, Any]:
     pass
 
 
