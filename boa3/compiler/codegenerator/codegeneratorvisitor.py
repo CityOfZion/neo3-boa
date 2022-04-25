@@ -127,12 +127,15 @@ class VisitorCodeGenerator(IAstAnalyser):
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
                     class_type = result.type
 
-                    if (self.is_implemented_class_type(result.type)
+                    if ((self.is_implemented_class_type(result.type))
                             and len(result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)) > 1):
                         # if the symbol id has the attribute separator and the top item on the stack is a user class,
                         # then this value is an attribute from that class
                         # change the id for correct generation
                         result.symbol_id = result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)[-1]
+
+                    elif isinstance(result.index, Package):
+                        class_type = None
 
                     self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type)
 
@@ -927,6 +930,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         attr = self.generator.get_symbol(attribute.attr)
         value = attribute.value
         value_symbol = None
+        value_type = None
         value_data = self.visit(value)
         need_to_visit_again = True
 
@@ -960,7 +964,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                                if self.is_implemented_class_type(value_symbol)
                                else value_data.symbol_id)
             attribute_id = f'{value_symbol_id}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
-            return self.build_data(attribute, symbol_id=attribute_id, symbol=attr)
+            index = value_type if isinstance(value_type, Package) else None
+            return self.build_data(attribute, symbol_id=attribute_id, symbol=attr, index=index)
 
         if isinstance(value, ast.Attribute):
             value_data = self.visit(value)

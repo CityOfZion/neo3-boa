@@ -45,17 +45,46 @@ class ImportAnalyser(IAstAnalyser):
 
         sys.path.append(self.root_folder)
         try:
-            module_origin: str = importlib.util.find_spec(import_target).origin
-        except BaseException:
+            import_spec = importlib.util.find_spec(import_target)
+            module_origin: str = import_spec.origin
+        except BaseException as e:
             return
         finally:
             sys.path.remove(self.root_folder)
 
         path: List[str] = module_origin.split(os.sep)
         self.filename = path[-1]
+        self._submodule_search_locations = import_spec.submodule_search_locations
+        self._importer_file = importer_file
         self.path: str = module_origin.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._find_package(module_origin, importer_file)
+
+    @property
+    def tree(self) -> ast.AST:
+        return self._tree
+
+    def export_symbols(self, identifiers: List[str] = None) -> Dict[str, ISymbol]:
+        """
+        Gets a dictionary that maps each exported symbol with its identifier
+
+        :param identifiers: list of identifiers of the imported symbols
+        :return:
+        """
+        if identifiers is None:
+            identifiers = list([name for name, symbol in self.symbols.items() if symbol is not None])
+        if not self.can_be_imported or not isinstance(identifiers, (list, str)):
+            return {}
+
+        if isinstance(identifiers, str):
+            identifiers = [identifiers]
+
+        if constants.IMPORT_WILDCARD in identifiers:
+            symbols = self.symbols.copy()
+        else:
+            symbols = {symbol_id: symbol for symbol_id, symbol in self.symbols.items()
+                       if symbol_id in identifiers and symbol is not None}
+        return symbols
 
     def _find_package(self, module_origin: str, origin_file: Optional[str] = None):
         path: List[str] = module_origin.split(os.sep)
@@ -100,6 +129,8 @@ class ImportAnalyser(IAstAnalyser):
                                                     imported_files=self._imported_files,
                                                     import_stack=files, log=self._log)
 
+                        self._include_inner_packages(analyser)
+
                     # include only imported symbols
                     if analyser.is_analysed:
                         for symbol_id, symbol in analyser.symbol_table.items():
@@ -119,28 +150,29 @@ class ImportAnalyser(IAstAnalyser):
                 if updated_tree is not None:
                     self._tree = updated_tree
 
-    @property
-    def tree(self) -> ast.AST:
-        return self._tree
+    def _include_inner_packages(self, analyser):
+        if self.filename != f'{constants.INIT_METHOD_ID}.py':
+            return
 
-    def export_symbols(self, identifiers: List[str] = None) -> Dict[str, ISymbol]:
-        """
-        Gets a dictionary that maps each exported symbol with its identifier
+        import pkgutil
+        from boa3.model.imports.importsymbol import Import
+        from boa3.model.imports.package import Package
 
-        :param identifiers: list of identifiers of the imported symbols
-        :return:
-        """
-        if identifiers is None:
-            identifiers = list([name for name, symbol in self.symbols.items() if symbol is not None])
-        if not self.can_be_imported or not isinstance(identifiers, (list, str)):
-            return {}
+        modules = {}
+        for importer, modname, is_pkg in pkgutil.iter_modules(self._submodule_search_locations):
+            mod_target = self._import_identifier + constants.ATTRIBUTE_NAME_SEPARATOR + modname
+            import_analyser = ImportAnalyser(mod_target, self.root_folder,
+                                             importer_file=self._importer_file,
+                                             import_stack=self._import_stack,
+                                             already_imported_modules=self._imported_files,
+                                             log=self._log)
 
-        if isinstance(identifiers, str):
-            identifiers = [identifiers]
+            imported = Package(identifier=modname,
+                               other_symbols=import_analyser.symbols,
+                               import_origin=Import(import_analyser.path,
+                                                    import_analyser._tree,
+                                                    import_analyser))
+            modules[modname] = imported
 
-        if constants.IMPORT_WILDCARD in identifiers:
-            symbols = self.symbols.copy()
-        else:
-            symbols = {symbol_id: symbol for symbol_id, symbol in self.symbols.items()
-                       if symbol_id in identifiers and symbol is not None}
-        return symbols
+        if len(modules) > 0 and hasattr(analyser, 'symbol_table') and isinstance(analyser.symbol_table, dict):
+            analyser.symbol_table.update(modules)
