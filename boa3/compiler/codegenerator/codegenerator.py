@@ -422,7 +422,7 @@ class CodeGenerator:
                 found_symbol = imports.builtin.get_internal_symbol(identifier)
                 if isinstance(found_symbol, ISymbol):
                     return identifier, found_symbol
-        return Type.none
+        return identifier, Type.none
 
     def initialize_static_fields(self) -> bool:
         """
