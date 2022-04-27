@@ -58,6 +58,7 @@ class CodeGenerator:
         import ast
         from boa3.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
+        all_imports = CodeGenerator._find_all_imports(analyser)
         generator = CodeGenerator(analyser.symbol_table)
         deploy_method = (analyser.symbol_table[constants.DEPLOY_METHOD_ID]
                          if constants.DEPLOY_METHOD_ID in analyser.symbol_table
@@ -75,7 +76,7 @@ class CodeGenerator:
         generator.symbol_table.clear()
         generator.symbol_table.update(analyser.symbol_table.copy())
 
-        for symbol in [symbol for symbol in analyser.symbol_table.values() if isinstance(symbol, Import)]:
+        for symbol in all_imports.values():
             generator.symbol_table.update(symbol.all_symbols)
 
             if hasattr(deploy_method, 'origin') and deploy_method.origin in symbol.ast.body:
@@ -125,7 +126,25 @@ class CodeGenerator:
             generator.initialized_static_fields = True
 
         analyser.update_symbol_table(generator.symbol_table)
-        return generator.bytecode
+        bytecode = generator.bytecode
+        return bytecode
+
+    @staticmethod
+    def _find_all_imports(analyser: Analyser) -> Dict[str, Import]:
+        imports = {}
+        for key, symbol in analyser.symbol_table.copy().items():
+            if isinstance(symbol, Import):
+                importing = symbol
+            elif isinstance(symbol, Package) and isinstance(symbol.origin, Import):
+                importing = symbol.origin
+                analyser.symbol_table[symbol.origin.origin] = symbol.origin
+            else:
+                importing = None
+
+            if importing is not None and importing.origin not in imports:
+                imports[importing.origin] = importing
+
+        return imports
 
     def __init__(self, symbol_table: Dict[str, ISymbol]):
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
@@ -357,7 +376,7 @@ class CodeGenerator:
         return (self.last_code.opcode is Opcode.PUSHNULL or
                 (len(self._stack) > 0 and self._stack[-1] is Type.none))
 
-    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> ISymbol:
+    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> Tuple[str, ISymbol]:
         """
         Gets a symbol in the symbol table by its id
 
@@ -371,39 +390,39 @@ class CodeGenerator:
         if len(self._scope_stack) > 0:
             for symbol_scope in self._scope_stack:
                 if identifier in symbol_scope:
-                    return symbol_scope[identifier]
+                    return identifier, symbol_scope[identifier]
 
         if scope is not None and hasattr(scope, 'symbols') and isinstance(scope.symbols, dict):
             if identifier in scope.symbols and isinstance(scope.symbols[identifier], ISymbol):
-                return scope.symbols[identifier]
+                return identifier, scope.symbols[identifier]
         else:
             if self._current_method is not None and identifier in self._current_method.symbols:
-                return self._current_method.symbols[identifier]
+                return identifier, self._current_method.symbols[identifier]
             elif identifier in cur_symbol_table:
-                return cur_symbol_table[identifier]
+                return identifier, cur_symbol_table[identifier]
 
             # the symbol may be a built in. If not, returns None
             symbol = Builtin.get_symbol(identifier)
             if symbol is not None:
-                return symbol
+                return identifier, symbol
 
             if not isinstance(identifier, str):
-                return symbol
+                return identifier, symbol
             split = identifier.split(constants.ATTRIBUTE_NAME_SEPARATOR)
             if len(split) > 1:
                 attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
-                attr = self.get_symbol(attribute, is_internal=is_internal)
+                another_attr_id, attr = self.get_symbol(attribute, is_internal=is_internal)
                 if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
-                    return attr.symbols[symbol_id]
+                    return symbol_id, attr.symbols[symbol_id]
                 elif isinstance(attr, Package) and symbol_id in attr.inner_packages:
-                    return attr.inner_packages[symbol_id]
+                    return symbol_id, attr.inner_packages[symbol_id]
 
             if is_internal:
                 from boa3.model import imports
                 found_symbol = imports.builtin.get_internal_symbol(identifier)
                 if isinstance(found_symbol, ISymbol):
-                    return found_symbol
-        return Type.none
+                    return identifier, found_symbol
+        return identifier, Type.none
 
     def initialize_static_fields(self) -> bool:
         """
@@ -1481,7 +1500,7 @@ class CodeGenerator:
         if class_type is None and len(self._stack) > 0 and isinstance(self._stack[-1], UserClass):
             class_type = self._stack[-1]
 
-        symbol = self.get_symbol(symbol_id, is_internal=is_internal)
+        another_symbol_id, symbol = self.get_symbol(symbol_id, is_internal=is_internal)
 
         if class_type is not None and symbol_id in class_type.symbols:
             symbol = class_type.symbols[symbol_id]
@@ -1497,6 +1516,7 @@ class CodeGenerator:
                 params_addresses = []
 
             if isinstance(symbol, Variable):
+                symbol_id = another_symbol_id
                 self.convert_load_variable(symbol_id, symbol, class_type)
             elif isinstance(symbol, IBuiltinMethod) and symbol.body is None:
                 self.convert_builtin_method_call(symbol, params_addresses)
@@ -1533,7 +1553,7 @@ class CodeGenerator:
                 self.convert_literal(value)
 
         elif var_id in self._globals:
-            var = self.get_symbol(var_id)
+            another_var_id, var = self.get_symbol(var_id)
             storage_key = codegenerator.get_storage_key_for_variable(var)
             self._convert_builtin_storage_get_or_put(True, storage_key)
 
@@ -1591,14 +1611,14 @@ class CodeGenerator:
                 from boa3.analyser.model.optimizer import UndefinedType
                 if (var_id in self._current_scope.symbols or
                         (var_id in self._locals and self._current_method.locals[var_id].type is UndefinedType)):
-                    symbol = self.get_symbol(var_id)
+                    another_symbol_id, symbol = self.get_symbol(var_id)
                     if isinstance(symbol, Variable):
                         var = symbol.copy()
                         var.set_type(stored_type)
                         self._current_scope.include_symbol(var_id, var)
 
         elif var_id in self._globals:
-            var = self.get_symbol(var_id)
+            another_var_id, var = self.get_symbol(var_id)
             storage_key = codegenerator.get_storage_key_for_variable(var)
             if value_start_address is None:
                 value_start_address = self.bytecode_size

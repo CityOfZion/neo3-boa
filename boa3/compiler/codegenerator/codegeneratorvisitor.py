@@ -80,7 +80,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             if symbol_id in self._symbols:
                 found_symbol = self._symbols[symbol_id]
             else:
-                found_symbol = self.generator.get_symbol(symbol_id)
+                _, found_symbol = self.generator.get_symbol(symbol_id)
                 if found_symbol is Type.none:
                     # generator get_symbol returns Type.none if the symbol is not found
                     found_symbol = None
@@ -133,6 +133,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                         # then this value is an attribute from that class
                         # change the id for correct generation
                         result.symbol_id = result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)[-1]
+
+                    elif isinstance(result.index, Package):
+                        class_type = None
 
                     self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type)
 
@@ -775,7 +778,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if not isinstance(symbol, Method):
             is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
-            symbol = self.generator.get_symbol(function_id, is_internal=is_internal)
+            _, symbol = self.generator.get_symbol(function_id, is_internal=is_internal)
 
         if self.is_implemented_class_type(symbol):
             self.generator.convert_init_user_class(symbol)
@@ -924,17 +927,19 @@ class VisitorCodeGenerator(IAstAnalyser):
         last_address = VMCodeMapping.instance().bytecode_size
         last_stack = self.generator.stack_size
 
-        attr = self.generator.get_symbol(attribute.attr)
+        _, attr = self.generator.get_symbol(attribute.attr)
         value = attribute.value
         value_symbol = None
+        value_type = None
         value_data = self.visit(value)
         need_to_visit_again = True
 
         if value_data.symbol_id is not None and not value_data.already_generated:
             value_id = value_data.symbol_id
-            value_symbol = (value_data.symbol
-                            if value_data.symbol is not None
-                            else self.generator.get_symbol(value_id))
+            if value_data.symbol is not None:
+                value_symbol = value_data.symbol
+            else:
+                _, value_symbol = self.generator.get_symbol(value_id)
             value_type = value_symbol.type if hasattr(value_symbol, 'type') else value_symbol
 
             if hasattr(value_type, 'symbols') and attribute.attr in value_type.symbols:
@@ -960,7 +965,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                                if self.is_implemented_class_type(value_symbol)
                                else value_data.symbol_id)
             attribute_id = f'{value_symbol_id}{constants.ATTRIBUTE_NAME_SEPARATOR}{attribute.attr}'
-            return self.build_data(attribute, symbol_id=attribute_id, symbol=attr)
+            index = value_type if isinstance(value_type, Package) else None
+            return self.build_data(attribute, symbol_id=attribute_id, symbol=attr, index=index)
 
         if isinstance(value, ast.Attribute):
             value_data = self.visit(value)
@@ -972,7 +978,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             result = value_data.type
             generation_result = value_data.symbol
             if result is None and value_data.symbol_id is not None:
-                result = self.generator.get_symbol(value_data.symbol_id)
+                _, result = self.generator.get_symbol(value_data.symbol_id)
                 if isinstance(result, IExpression):
                     generation_result = result
                     result = result.type

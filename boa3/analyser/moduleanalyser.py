@@ -442,7 +442,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _build_import(self, origin: str, syntax_tree: ast.AST,
                       import_analyser: ImportAnalyser,
-                      imported_symbols: Dict[str, ISymbol] = None,) -> Import:
+                      imported_symbols: Dict[str, ISymbol] = None) -> Import:
 
         if import_analyser.is_builtin_import:
             return BuiltinImport(origin, syntax_tree, import_analyser, imported_symbols)
@@ -1038,7 +1038,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         symbol = self.get_symbol(value, is_internal=is_internal, origin_node=subscript.value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, (Collection, MetaType)) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
+            if (isinstance(symbol, (Collection, MetaType))
+                    and isinstance(subscript.value, (ast.Name, ast.NameConstant, ast.Attribute))):
                 # for evaluating names like List[str], Dict[int, bool], etc
                 value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
                 values_type: Iterable[IType] = self.get_values_type(value)

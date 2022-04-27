@@ -18,8 +18,19 @@ class Package(IdentifiedSymbol):
                  properties: List[IdentifiedSymbol] = None,
                  methods: List[IdentifiedSymbol] = None,
                  types: List[IdentifiedSymbol] = None,
-                 packages: List[Package] = None
+                 packages: List[Package] = None,
+                 other_symbols: dict = None,
+                 import_origin=None
                  ):
+        """
+        :param packages: a list that stores the inner packages and modules of this package. Empty by default.
+        :param other_symbols: a dictionary with other symbols that are evaluated during the compilation. Empty by
+          default. Should be None for builtin packages.
+        :type other_symbols: dict or None
+        :param import_origin: the analyser that generated this package. Should be None for builtin packages.
+        :type import_origin: boa3.model.imports.importsymbol.Import
+        """
+
         from enum import Enum
         if isinstance(identifier, Enum):
             identifier = identifier.value
@@ -46,6 +57,19 @@ class Package(IdentifiedSymbol):
         for package in packages:
             package._parent = self
 
+        # for packages that are not builtin
+        if isinstance(other_symbols, dict):
+            from boa3.model.symbol import ISymbol
+            self._additional_symbols = {key: value
+                                        for key, value in other_symbols.items()
+                                        if (value not in self._all_symbols
+                                            and isinstance(key, str)
+                                            and isinstance(value, ISymbol))}
+            self.origin = import_origin
+        else:
+            self._additional_symbols = {}
+            self.origin = None
+
         self._aliases: Dict[str, str] = {}
         self._parent: Optional[Package] = None
 
@@ -60,10 +84,12 @@ class Package(IdentifiedSymbol):
 
         :return: a list that stores every symbol in the package
         """
-        return {(self._aliases[symbol.raw_identifier]
-                 if symbol.raw_identifier in self._aliases
-                 else symbol.raw_identifier): symbol
-                for symbol in self._all_symbols}
+        symbol_map = {(self._aliases[symbol.raw_identifier]
+                       if symbol.raw_identifier in self._aliases
+                       else symbol.raw_identifier): symbol
+                      for symbol in self._all_symbols}
+        symbol_map.update(self._additional_symbols)
+        return symbol_map
 
     @property
     def inner_packages(self) -> Dict[str, Package]:
