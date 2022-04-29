@@ -347,7 +347,6 @@ class TestImport(BoaTest):
 
     def test_import_module_with_init(self):
         path = self.get_contract_path('ImportModuleWithInit.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         result = self.run_smart_contract(engine, path, 'call_imported_method')
@@ -355,3 +354,15 @@ class TestImport(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'call_imported_variable')
         self.assertEqual(42, result)
+
+    def test_import_user_class_inner_files(self):
+        inner_path = self.get_contract_path('class_import', 'ImportUserClass.py')
+        path = self.get_contract_path('ImportUserClassInnerFiles.py')
+
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, inner_path, 'build_example_object')
+        self.assertEqual([42, '42'], result)
+
+        result = self.run_smart_contract(engine, path, 'build_example_object')
+        self.assertEqual('42', result)

@@ -86,6 +86,14 @@ class ImportAnalyser(IAstAnalyser):
                        if symbol_id in identifiers and symbol is not None}
         return symbols
 
+    def update_external_analysed_files(self, external_files: dict):
+        if self.can_be_imported and self.path in self._imported_files and self.path not in external_files:
+            external_files[self.path] = self._imported_files[self.path]
+
+        for path, analyser in self._imported_files.items():
+            if path not in external_files and analyser.is_analysed:
+                external_files[path] = analyser
+
     def _find_package(self, module_origin: str, origin_file: Optional[str] = None):
         path: List[str] = module_origin.split(os.sep)
 
@@ -129,6 +137,8 @@ class ImportAnalyser(IAstAnalyser):
                                                     imported_files=self._imported_files,
                                                     import_stack=files, log=self._log)
 
+                        if analyser.is_analysed:
+                            self._imported_files[self.path] = analyser
                         self._include_inner_packages(analyser)
 
                     # include only imported symbols
