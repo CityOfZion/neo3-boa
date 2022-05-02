@@ -184,6 +184,7 @@ class Analyser:
                 unique_id = symbol_id
 
             from boa3.model.identifiedsymbol import IdentifiedSymbol
-            if not isinstance(symbol, IdentifiedSymbol):
+            from boa3.model.type.classes.userclass import UserClass
+            if not isinstance(symbol, IdentifiedSymbol) or isinstance(symbol, UserClass):
                 if unique_id not in self.symbol_table:
                     self.symbol_table[unique_id] = symbol

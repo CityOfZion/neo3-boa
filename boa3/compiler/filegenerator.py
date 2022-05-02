@@ -84,8 +84,13 @@ class FileGenerator:
                     if need_to_map:
                         variables[(module_id, name)] = symbol
 
-            self._all_static_vars = {f'{unique_id}{constants.VARIABLE_NAME_SEPARATOR}{var_id}': var
-                                     for (unique_id, var_id), var in variables.items()}
+            if len(imports_unique_ids) > 1:
+                self._all_static_vars = {f'{unique_id}{constants.VARIABLE_NAME_SEPARATOR}{var_id}': var
+                                         for (unique_id, var_id), var in variables.items()}
+            else:
+                self._all_static_vars = {var_id: var
+                                         for (unique_id, var_id), var in variables.items()}
+
             return self._all_static_vars
 
     @property
