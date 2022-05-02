@@ -164,6 +164,10 @@ class Callable(IExpression, ABC):
     def is_called(self) -> bool:
         return len(self._self_calls) > 0
 
+    @property
+    def is_compiled(self) -> bool:
+        return self.start_address is not None and self.end_address is not None
+
     def add_call_origin(self, origin: ast.AST) -> bool:
         try:
             self._self_calls.add(origin)

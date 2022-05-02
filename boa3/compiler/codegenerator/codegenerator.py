@@ -51,7 +51,7 @@ class CodeGenerator:
         """
         Generates the Neo VM bytecode using of the analysed Python code
 
-        :param analyser: semantic analyser it tge Python code
+        :param analyser: semantic analyser of the Python code
         :return: the Neo VM bytecode
         """
         VMCodeMapping.reset()

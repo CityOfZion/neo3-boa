@@ -98,6 +98,14 @@ class Analyser:
     def warnings(self) -> List[CompilerWarning]:
         return self._warnings.copy()
 
+    def copy(self) -> Analyser:
+        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root, log=self._log)
+        copied.metadata = self.metadata
+        copied.is_analysed = self.is_analysed
+        copied.symbol_table = self.symbol_table.copy()
+        copied.filename = self.filename
+        return copied
+
     def __include_builtins_symbols(self):
         """
         Include the Python builtins in the global symbol table

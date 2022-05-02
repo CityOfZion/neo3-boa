@@ -70,7 +70,15 @@ class Compiler:
         """
         if not self._analyser.is_analysed:
             raise NotLoadedException
-        return CodeGenerator.generate_code(self._analyser)
+        analyser = self._analyser.copy()
+        result = CodeGenerator.generate_code(analyser)
+
+        if constants.INITIALIZE_METHOD_ID in analyser.symbol_table:
+            self._analyser.symbol_table[constants.INITIALIZE_METHOD_ID] = analyser.symbol_table[constants.INITIALIZE_METHOD_ID]
+        if constants.DEPLOY_METHOD_ID in analyser.symbol_table:
+            self._analyser.symbol_table[constants.DEPLOY_METHOD_ID] = analyser.symbol_table[constants.DEPLOY_METHOD_ID]
+
+        return result
 
     def _save(self, output_path: str, debug: bool):
         """
