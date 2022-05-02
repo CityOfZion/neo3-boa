@@ -59,14 +59,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         from boa3.analyser.analyser import Analyser
         if isinstance(analysed_files, dict):
-            analysed_files = {file_path.replace(os.sep, constants.PATH_SEPARATOR): file_analyser
-                              for file_path, file_analyser in analysed_files.items()
-                              if isinstance(file_path, str)}
+            for file_path, file_analyser in analysed_files.copy().items():
+                fixed_path = file_path.replace(os.sep, constants.PATH_SEPARATOR)
+                if file_path != fixed_path:
+                    analysed_files.pop(file_path)
+                    analysed_files[fixed_path] = file_analyser
         else:
             analysed_files = {}
 
         analysed_files[filename.replace(os.sep, constants.PATH_SEPARATOR)] = analyser
-        self._analysed_files: Optional[Dict[str, Analyser]] = analysed_files
+        self._analysed_files: Dict[str, Analyser] = analysed_files
 
         if isinstance(import_stack, list):
             import_stack = [file_path.replace(os.sep, constants.PATH_SEPARATOR)
@@ -454,9 +456,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                             for imported in self._current_module.symbols.values()
                             if isinstance(imported, Import) and imported.analyser is not None
                             }
-
-        if isinstance(self._analysed_files, dict):
-            already_imported.update(self._analysed_files)
+        already_imported.update(self._analysed_files)
 
         analyser = ImportAnalyser(import_target=target,
                                   root_folder=self.root_folder,
@@ -485,6 +485,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._log_unresolved_import(origin_node, target)
 
         else:
+            analyser.update_external_analysed_files(self._analysed_files)
             return analyser
 
     def visit_Module(self, module: ast.Module):
