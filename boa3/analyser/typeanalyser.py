@@ -1553,12 +1553,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
         origin = value
+        module_symbols = origin.symbols if isinstance(origin, Package) else symbol.methods if isinstance(symbol, Import) else None
         if isinstance(origin, Attribute):
             while isinstance(origin, Attribute):
                 origin = origin.value
         else:
             origin = attribute.value
 
+        is_invalid_method = module_symbols is not None and isinstance(attr_symbol, Method) and attribute.attr not in module_symbols
         is_from_class_name = isinstance(origin, ast.Name) and isinstance(self.get_symbol(origin.id), UserClass)
         is_instance_variable_from_class = (isinstance(symbol, UserClass)
                                            and attribute.attr in symbol.instance_variables)
@@ -1566,13 +1568,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties
 
         if ((attr_symbol is None and hasattr(symbol, 'symbols'))
+                or is_invalid_method
                 or (is_from_class_name and is_instance_variable_from_class)
                 or (is_from_class_name and is_property_from_class)):
             # if it couldn't find the symbol in the attribute symbols, raise unresolved reference
             self._log_error(
                 CompilerError.UnresolvedReference(
                     attribute.lineno, attribute.col_offset,
-                    symbol_id='{0}.{1}'.format(symbol.identifier, attribute.attr)
+                    symbol_id='{0}.{1}'.format(symbol.identifier if module_symbols is None else attribute.value.id, attribute.attr)
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 

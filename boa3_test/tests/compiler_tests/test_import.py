@@ -366,3 +366,11 @@ class TestImport(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'build_example_object')
         self.assertEqual('42', result)
+
+    def test_from_import_not_existing_method(self):
+        path = self.get_contract_path('FromImportNotExistingMethod.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_import_not_existing_method(self):
+        path = self.get_contract_path('ImportNotExistingMethod.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
