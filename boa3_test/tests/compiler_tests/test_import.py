@@ -132,6 +132,17 @@ class TestImport(BoaTest):
         result = self.run_smart_contract(engine, path, 'get_bar')
         self.assertEqual('bar', result)
 
+    def test_variable_access_from_imported_module(self):
+        path = self.get_contract_path('variable_import', 'VariableAccessFromImportedModule.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'get_foo', expected_result_type=bytes)
+        self.assertEqual(b'Foo', result)
+
+        result = self.run_smart_contract(engine, path, 'get_bar')
+        self.assertEqual('bar', result)
+
     def test_typing_python_library(self):
         path = self.get_contract_path('ImportPythonLib.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)

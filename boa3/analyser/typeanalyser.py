@@ -197,6 +197,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._validate_return(function)
 
             method_scope = self.pop_local_scope()
+            for symbol_id, symbol in self._current_method.symbols.items():
+                if isinstance(symbol, Variable) and symbol.type is UndefinedType and symbol_id in method_scope:
+                    new_scope_symbol = method_scope[symbol_id]
+                    if hasattr(new_scope_symbol, 'type') and new_scope_symbol.type is not UndefinedType:
+                        symbol.set_type(new_scope_symbol.type)
+
             self._current_method = None
         elif (isinstance(method, Event)  # events don't have return
               and function.returns is not None):
