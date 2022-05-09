@@ -400,26 +400,38 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             import_alias: Dict[str] = \
                 {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_from.names}
 
-            new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
+            if hasattr(analyser, 'is_namespace_package') and analyser.is_namespace_package:
+                new_symbols: Dict[str, ISymbol] = {}
 
-            # check if the wildcard is used and filter the symbols
-            if constants.IMPORT_WILDCARD in import_alias:
-                import_alias.pop(constants.IMPORT_WILDCARD)
-                for imported_symbol_id in new_symbols:
-                    # add the symbols imported with the wildcard without specific aliases in the dict
-                    if imported_symbol_id not in import_alias:
-                        import_alias[imported_symbol_id] = imported_symbol_id
+                for module in import_from.names:
+                    analyser = self._analyse_module_to_import(import_from, module.name)
+                    if analyser is not None:
+                        import_alias: Dict[str] = \
+                            {alias.name: alias.asname if alias.asname is not None else alias.name for alias in
+                             import_from.names}
+                        new_symbols.update(analyser.export_symbols(list(import_alias.keys())))
 
-            # includes the module to be able to generate the functions
-            imported_module = self._build_import(analyser.path, analyser.tree, analyser, import_alias)
-            self._current_scope.include_symbol(import_from.module, imported_module)
+            else:
+                new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
 
-            for name, alias in import_alias.items():
-                if name in new_symbols:
-                    self._current_scope.include_symbol(alias, imported_module.symbols[name])
-                else:
-                    # if there's a symbol that couldn't be loaded, log a compiler error
-                    self._log_unresolved_import(import_from, name)
+                # check if the wildcard is used and filter the symbols
+                if constants.IMPORT_WILDCARD in import_alias:
+                    import_alias.pop(constants.IMPORT_WILDCARD)
+                    for imported_symbol_id in new_symbols:
+                        # add the symbols imported with the wildcard without specific aliases in the dict
+                        if imported_symbol_id not in import_alias:
+                            import_alias[imported_symbol_id] = imported_symbol_id
+
+                # includes the module to be able to generate the functions
+                imported_module = self._build_import(analyser.path, analyser.tree, analyser, import_alias)
+                self._current_scope.include_symbol(import_from.module, imported_module)
+
+                for name, alias in import_alias.items():
+                    if name in new_symbols:
+                        self._current_scope.include_symbol(alias, imported_module.symbols[name])
+                    else:
+                        # if there's a symbol that couldn't be loaded, log a compiler error
+                        self._log_unresolved_import(import_from, name)
 
     def visit_Import(self, import_node: ast.Import):
         """
@@ -481,6 +493,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if circular_import_error is not None:
                 # if the problem was a circular import, the error was already logged
                 self.errors.append(circular_import_error)
+            elif hasattr(analyser, 'is_namespace_package') and analyser.is_namespace_package:
+                return analyser
             else:
                 self._log_unresolved_import(origin_node, target)
 

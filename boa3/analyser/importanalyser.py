@@ -52,11 +52,22 @@ class ImportAnalyser(IAstAnalyser):
         finally:
             sys.path.remove(self.root_folder)
 
+        if module_origin is None:
+            self.is_namespace_package = True
+            return
+
         path: List[str] = module_origin.split(os.sep)
         self.filename = path[-1]
         self._submodule_search_locations = import_spec.submodule_search_locations
         self._importer_file = importer_file
         self.path: str = module_origin.replace(os.sep, constants.PATH_SEPARATOR)
+
+        # module_origin: str = import_spec.submodule_search_locations[0] # + "\\" + names[0] + '.py'
+        # path: List[str] = module_origin.split(os.sep)
+        # self.filename = path[-1]
+        # self._submodule_search_locations = module_origin
+        # self._importer_file = importer_file
+        # self.path: str = module_origin.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._find_package(module_origin, importer_file)
 
