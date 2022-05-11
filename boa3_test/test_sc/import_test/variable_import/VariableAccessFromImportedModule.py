@@ -1,6 +1,6 @@
 
-from boa3.builtin import public
 import boa3_test.test_sc.import_test.variable_import.StaticVariables as StaticVariables
+from boa3.builtin import public
 
 
 @public

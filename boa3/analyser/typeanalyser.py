@@ -645,7 +645,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             outer_symbol = self.get_symbol(new_symbol)
             outer_value_type = outer_symbol.type if isinstance(outer_symbol, IExpression) else Type.none
 
-            new_type = Type.union.build([new_value_type, outer_value_type])
+            if isinstance(outer_symbol, IType):
+                new_type = Type.union.build([new_value_type, outer_value_type])
+            else:
+                new_type = new_value_type
             scope.include_symbol(new_symbol, Variable(new_type))
 
     def visit_IfExp(self, if_node: ast.IfExp):

@@ -481,6 +481,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if circular_import_error is not None:
                 # if the problem was a circular import, the error was already logged
                 self.errors.append(circular_import_error)
+            elif hasattr(analyser, 'is_namespace_package') and analyser.is_namespace_package:
+                return analyser
             else:
                 self._log_unresolved_import(origin_node, target)
 

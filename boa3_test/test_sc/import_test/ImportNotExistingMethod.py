@@ -1,6 +1,8 @@
 from typing import Any, Dict
-from boa3.builtin import public
+
 import FromImportAll as imported_module
+
+from boa3.builtin import public
 
 
 @public

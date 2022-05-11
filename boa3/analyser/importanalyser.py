@@ -21,6 +21,7 @@ class ImportAnalyser(IAstAnalyser):
 
         self.can_be_imported: bool = False
         self.is_builtin_import: bool = False
+        self.is_namespace_package: bool = False
         self.recursive_import: bool = False
         self._import_identifier: str = import_target
 
@@ -47,15 +48,29 @@ class ImportAnalyser(IAstAnalyser):
         try:
             import_spec = importlib.util.find_spec(import_target)
             module_origin: str = import_spec.origin
-        except BaseException as e:
+        except BaseException:
             return
         finally:
             sys.path.remove(self.root_folder)
 
+        self._importer_file = importer_file
+        is_importing_a_module = module_origin is not None
+
+        if not is_importing_a_module:
+            self.is_namespace_package = True
+
+            # submodule_search_locations type doesn't support indexing, so we need to iterate to get the first
+            for module_ in import_spec.submodule_search_locations:
+                module_origin: str = module_  # + "\\" + names[0] + '.py'
+                break
+
+            # if the origin is still not set, there's nothing to import
+            if module_origin is None:
+                return
+
         path: List[str] = module_origin.split(os.sep)
         self.filename = path[-1]
         self._submodule_search_locations = import_spec.submodule_search_locations
-        self._importer_file = importer_file
         self.path: str = module_origin.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._find_package(module_origin, importer_file)
@@ -133,13 +148,19 @@ class ImportAnalyser(IAstAnalyser):
                         origin = origin_file.replace(os.sep, constants.PATH_SEPARATOR)
                         files = self._import_stack
                         files.append(origin)
-                        analyser = Analyser.analyse(module_origin, root=self.root_folder,
-                                                    imported_files=self._imported_files,
-                                                    import_stack=files, log=self._log)
+                        if self.is_namespace_package:
+                            analyser = Analyser(self.tree, module_origin, self.root_folder, self._log)
+                            if self._include_inner_packages(analyser):
+                                analyser.is_analysed = True
+                                self._imported_files[self.path] = analyser
+                        else:
+                            analyser = Analyser.analyse(module_origin, root=self.root_folder,
+                                                        imported_files=self._imported_files,
+                                                        import_stack=files, log=self._log)
+                            self._include_inner_packages(analyser)
 
                         if analyser.is_analysed:
                             self._imported_files[self.path] = analyser
-                        self._include_inner_packages(analyser)
 
                     # include only imported symbols
                     if analyser.is_analysed:
@@ -160,14 +181,15 @@ class ImportAnalyser(IAstAnalyser):
                 if updated_tree is not None:
                     self._tree = updated_tree
 
-    def _include_inner_packages(self, analyser):
-        if self.filename != f'{constants.INIT_METHOD_ID}.py':
-            return
+    def _include_inner_packages(self, analyser) -> bool:
+        if self.path.endswith('.py') and self.filename != f'{constants.INIT_METHOD_ID}.py':
+            return False
 
         import pkgutil
         from boa3.model.imports.importsymbol import Import
         from boa3.model.imports.package import Package
 
+        inner_packages_have_errors = False
         modules = {}
         for importer, modname, is_pkg in pkgutil.iter_modules(self._submodule_search_locations):
             mod_target = self._import_identifier + constants.ATTRIBUTE_NAME_SEPARATOR + modname
@@ -176,6 +198,9 @@ class ImportAnalyser(IAstAnalyser):
                                              import_stack=self._import_stack,
                                              already_imported_modules=self._imported_files,
                                              log=self._log)
+
+            if not inner_packages_have_errors and not import_analyser.can_be_imported:
+                inner_packages_have_errors = True
 
             imported = Package(identifier=modname,
                                other_symbols=import_analyser.symbols,
@@ -186,3 +211,5 @@ class ImportAnalyser(IAstAnalyser):
 
         if len(modules) > 0 and hasattr(analyser, 'symbol_table') and isinstance(analyser.symbol_table, dict):
             analyser.symbol_table.update(modules)
+
+        return not inner_packages_have_errors
