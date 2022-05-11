@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 empty_dict = {}
 
