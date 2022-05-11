@@ -58,6 +58,8 @@ class ImportAnalyser(IAstAnalyser):
 
         if not is_importing_a_module:
             self.is_namespace_package = True
+            if import_spec.submodule_search_locations is None:
+                return
 
             # submodule_search_locations type doesn't support indexing, so we need to iterate to get the first
             for module_ in import_spec.submodule_search_locations:
