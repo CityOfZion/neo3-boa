@@ -32,6 +32,15 @@ class ECPoint(bytes):
         super().__init__()
         pass
 
+    def to_script_hash(self) -> bytes:
+        """
+        Converts a data to a script hash.
+
+        :return: the script hash of the data
+        :rtype: bytes
+        """
+        pass
+
 
 class ByteString:
     """

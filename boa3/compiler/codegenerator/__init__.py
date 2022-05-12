@@ -6,6 +6,10 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 
 
+def get_bytes(instructions: List[Tuple[Opcode, bytes]]) -> bytes:
+    return b''.join([opcode + arg for opcode, arg in instructions])
+
+
 def get_bytes_count(instructions: List[Tuple[Opcode, bytes]]) -> int:
     return sum([len(opcode) + len(arg) for opcode, arg in instructions])
 

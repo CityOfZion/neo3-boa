@@ -41,12 +41,24 @@ class ECPointType(BytesType):
     def _is_type_of(cls, value: Any):
         return isinstance(value, ECPointType)
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.ScriptHash,
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.classes.pythonclass import PythonClass
         return super(PythonClass, self).is_instance_opcodes()
 
     def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
-        push_int_opcode, size_data = Opcode.get_push_and_data(33)
+        from boa3 import constants
+        push_int_opcode, size_data = Opcode.get_push_and_data(constants.SIZE_OF_ECPOINT)
 
         return [
             (Opcode.SIZE, b''),  # return len(value) == 33
