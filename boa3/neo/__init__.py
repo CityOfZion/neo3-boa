@@ -1,3 +1,8 @@
+from typing import Union
+
+from boa3 import constants
+
+
 def to_script_hash(data_bytes: bytes) -> bytes:
     """
     Converts a data to a script hash.
@@ -17,6 +22,30 @@ def to_script_hash(data_bytes: bytes) -> bytes:
         return bytes(base58_decoded[:SIZE_OF_INT160])
     except BaseException:
         return cryptography.hash160(data_bytes)
+
+
+def public_key_to_script_hash(public_key: Union[str, bytes]) -> bytes:
+    """
+    Converts a public key bytes sequence to a script hash.
+
+    :return: the script hash of the data
+    :rtype: bytes
+    """
+    if isinstance(public_key, str):
+        public_key = from_hex_str(public_key)
+
+    if len(public_key) != constants.SIZE_OF_ECPOINT:
+        # it's not a public key
+        return to_script_hash(public_key)
+
+    # public keys must include a check sig script when converting to script hash
+    from boa3.neo.vm.opcode.Opcode import Opcode
+    from boa3.neo.vm.type.Integer import Integer
+    from boa3.model.builtin.interop.crypto.checksigmethod import CheckSigMethod
+
+    check_sig_arg = Opcode.PUSHDATA1 + Integer(constants.SIZE_OF_ECPOINT).to_byte_array() + public_key
+    check_sig_call = CheckSigMethod.get_raw_bytes()
+    return to_script_hash(check_sig_arg + check_sig_call)
 
 
 def to_hex_str(data_bytes: bytes) -> str:

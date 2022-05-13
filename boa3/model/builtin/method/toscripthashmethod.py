@@ -20,6 +20,14 @@ class ScriptHashMethod(IBuiltinMethod):
         args: Dict[str, Variable] = {'self': Variable(data_type)}
         super().__init__(identifier, args, return_type=Type.bytes)
 
+    @property
+    def identifier(self) -> str:
+        from boa3.model.type.type import Type
+        self_type = self.args['self'].type
+        if self_type is Type.any:
+            return self._identifier
+        return '-{0}_from_{1}'.format(self._identifier, self_type._identifier)
+
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 1:
             return False
@@ -82,6 +90,7 @@ class ScriptHashMethod(IBuiltinMethod):
         if 'self' in self.args and self.args['self'].type is not Type.any:
             return self
 
+        from boa3.model.type.collection.sequence.ecpointtype import ECPointType
         from boa3.model.type.primitive.inttype import IntType
         from boa3.model.type.primitive.strtype import StrType
         from boa3.model.type.primitive.bytestype import BytesType
@@ -89,7 +98,10 @@ class ScriptHashMethod(IBuiltinMethod):
         if isinstance(value, Sized) and len(value) == 1:
             value = value[0]
 
-        if isinstance(value, (IntType, StrType, BytesType)):
+        if isinstance(value, ECPointType):
+            from boa3.model.builtin.method.ecpointtoscripthashmethod import ECPointToScriptHashMethod
+            return ECPointToScriptHashMethod()
+        elif isinstance(value, (IntType, StrType, BytesType)):
             return ScriptHashMethod(value)
         elif isinstance(value, IType):
             return ScriptHashMethod(Type.bytes)
