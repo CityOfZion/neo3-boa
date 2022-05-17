@@ -258,7 +258,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         clone._attributes = node._attributes
         clone._fields = node._fields
 
-        for attr in node._attributes + node._fields:
+        for attr in node.__dict__:
             clone.__setattr__(attr, node.__getattribute__(attr))
 
         return clone
