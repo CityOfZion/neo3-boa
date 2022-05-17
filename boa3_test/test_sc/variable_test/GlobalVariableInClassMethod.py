@@ -13,11 +13,11 @@ class Example:
         return {
             'val1': self.val1,
             'val2': self.val2,
-            'bar': GLOBAL_TEST  # without this, it works
+            'bar': GLOBAL_TEST
         }
 
     def get_constant(self) -> int:
-        return GLOBAL_TEST  # this works as expected
+        return GLOBAL_TEST
 
 
 @public
