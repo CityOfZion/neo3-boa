@@ -204,11 +204,13 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             for node in global_stmts.copy():
                 if isinstance(node, ast.ClassDef):
-                    if (hasattr(node, 'origin')
-                            and node.origin is not self._root_module
-                            and hasattr(node.origin, 'symbols')):
-                        # symbols unique to imports are not included in the symbols
-                        self.symbols = node.origin.symbols
+                    class_origin_module = None
+                    if hasattr(node, 'origin'):
+                        class_origin_module = node.origin
+                        if (node.origin is not self._root_module
+                                and hasattr(node.origin, 'symbols')):
+                            # symbols unique to imports are not included in the symbols
+                            self.symbols = node.origin.symbols
 
                     class_variables = []
                     class_functions = []
@@ -219,6 +221,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                             class_functions.append(stmt)
 
                     if len(class_functions) > 0:
+                        if class_origin_module is not None and not hasattr(node, 'origin'):
+                            node.origin = class_origin_module
+
                         cls_fun = node
                         if len(class_variables) > 0:
                             cls_var = node
@@ -234,19 +239,27 @@ class VisitorCodeGenerator(IAstAnalyser):
             self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
             self._is_generating_initialize = True
             for stmt in global_stmts:
+                cur_tree = self._tree
                 cur_filename = self.filename
-                if hasattr(stmt, 'origin') and hasattr(stmt.origin, 'filename'):
-                    self.set_filename(stmt.origin.filename)
+                if hasattr(stmt, 'origin'):
+                    if hasattr(stmt.origin, 'filename'):
+                        self.set_filename(stmt.origin.filename)
+                    self._tree = stmt.origin
 
                 self.visit(stmt)
                 self.filename = cur_filename
+                self._tree = cur_tree
 
             self._is_generating_initialize = False
             self.generator.end_initialize()
 
             # generate any symbol inside classes that's not variables AFTER generating 'initialize' method
             for stmt in class_non_static_stmts:
+                cur_tree = self._tree
+                if hasattr(stmt, 'origin'):
+                    self._tree = stmt.origin
                 self.visit(stmt)
+                self._tree = cur_tree
 
             self.symbols = last_symbols  # revert in the end to not compromise consequent visits
             self.generator.additional_symbols = None
