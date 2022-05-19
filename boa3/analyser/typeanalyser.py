@@ -792,7 +792,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
                 )
             elif not operation.is_supported:
-                # TODO: concat and power not implemented yet
                 # number float division is not supported by Neo VM
                 self._log_error(
                     CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
@@ -966,7 +965,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         CompilerError.NotSupportedOperation(line, col, operator)
                     )
                 elif not operation.is_supported:
-                    # TODO: is, is not and eq were not implemented yet
                     self._log_error(
                         CompilerError.NotSupportedOperation(line, col, operator)
                     )
