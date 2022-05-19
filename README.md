@@ -166,6 +166,23 @@ Debugger launch configuration example:
 }
 ```
 
+It's necessary to generate the nef debugger info file to use Neo Debugger.
+
+#### Using CLI
+
+```shell
+$ neo3-boa path/to/your/file.py -d|--debug
+```
+
+#### Using Python Script
+
+```python
+from boa3.boa3 import Boa3
+
+Boa3.compile_and_save('path/to/your/file.py', debug=True)
+```
+
+
 ### TestEngine
 
 #### Downloading
