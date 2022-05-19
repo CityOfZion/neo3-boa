@@ -38,7 +38,7 @@ class __EventType(IType):
     """
 
     def __init__(self):
-        identifier = 'event'
+        identifier = 'Event'
         super().__init__(identifier)
 
     @property
