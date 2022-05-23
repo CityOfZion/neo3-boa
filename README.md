@@ -81,6 +81,9 @@ The diagram bellow shows the basic building blocks of the Neo3-Boa project.
 
 Installation requires Python 3.7 or later.
 
+> WARNING: Currently there is a known bug with Python 3.10 and we are working on fixing it. In the meantime, try using 
+> another Python version. 
+
 ### Installation 
 
 ##### Make a Python 3 virtual environment and activate it:
