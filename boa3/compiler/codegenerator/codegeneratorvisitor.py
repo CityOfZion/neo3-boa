@@ -973,6 +973,10 @@ class VisitorCodeGenerator(IAstAnalyser):
             need_to_visit_again = value_data.already_generated
             self._remove_inserted_opcodes_since(last_address, last_stack)
 
+        # the verification above only verify variables, this one will should work with literals and constants
+        if isinstance(value, ast.Constant) and len(attr.args) > 0 and isinstance(attr, IBuiltinMethod) and attr.has_self_argument:
+            attr = attr.build(value_data.type)
+
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
             value_symbol_id = (value_symbol.identifier
                                if self.is_implemented_class_type(value_symbol)

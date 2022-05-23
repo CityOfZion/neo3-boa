@@ -75,11 +75,45 @@ class IntToBytesMethod(ToBytesMethod):
         super().__init__(self_type)
 
     def build(self, value: Any) -> IBuiltinMethod:
+        if isinstance(value, List) and len(value) == 1:
+            value = value[0]
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, IntType):
             return IntToBytesMethod(value)
         return super().build(value)
+
+    @property
+    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+        from boa3.compiler.codegenerator import get_bytes_count
+        from boa3.neo.vm.type.Integer import Integer
+
+        number_zero_to_bytes = b'\x00'
+        jmp_place_holder = (Opcode.JMP, b'\x01')
+
+        verify_number_is_zero = [
+            (Opcode.DUP, b''),
+            (Opcode.NZ, b''),
+            jmp_place_holder
+        ]
+
+        number_is_not_zero = super().opcode.copy()
+        number_is_not_zero.append(jmp_place_holder)
+
+        number_is_zero = [
+            (Opcode.DROP, b''),
+            (Opcode.PUSHDATA1, Integer(len(number_zero_to_bytes)).to_byte_array() + number_zero_to_bytes),
+        ]
+
+        number_is_not_zero[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(number_is_zero))
+
+        verify_number_is_zero[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(number_is_not_zero))
+
+        return (
+            verify_number_is_zero +
+            number_is_not_zero +
+            number_is_zero + [(Opcode.NOP, b'')]    # TODO: change this when refactoring calling methods with methods as args
+        )
 
 
 class StrToBytesMethod(ToBytesMethod):
@@ -95,6 +129,8 @@ class StrToBytesMethod(ToBytesMethod):
         return []
 
     def build(self, value: Any) -> IBuiltinMethod:
+        if isinstance(value, List) and len(value) == 1:
+            value = value[0]
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, StrType):
