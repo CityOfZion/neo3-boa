@@ -35,6 +35,8 @@ class Analyser:
         self.__include_builtins_symbols()
         self._errors = []
         self._warnings = []
+        self._imported_files: Dict[str, Analyser] = {}
+        self._included_imported_files: bool = False
 
         import os
         self.path: str = path
@@ -100,10 +102,14 @@ class Analyser:
 
     def copy(self) -> Analyser:
         copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root, log=self._log)
+
         copied.metadata = self.metadata
         copied.is_analysed = self.is_analysed
         copied.symbol_table = self.symbol_table.copy()
         copied.filename = self.filename
+        copied._imported_files = self._imported_files.copy()
+        copied._included_imported_files = self._included_imported_files
+
         return copied
 
     def __include_builtins_symbols(self):
@@ -139,6 +145,7 @@ class Analyser:
         self.symbol_table.update(module_analyser.global_symbols)
         self.ast_tree.body.extend(module_analyser.imported_nodes)
         self.__update_logs(module_analyser)
+        self._imported_files = module_analyser.analysed_files.copy()
         return not module_analyser.has_errors
 
     def __check_standards(self) -> bool:
@@ -188,3 +195,27 @@ class Analyser:
             if not isinstance(symbol, IdentifiedSymbol) or isinstance(symbol, UserClass):
                 if unique_id not in self.symbol_table:
                     self.symbol_table[unique_id] = symbol
+
+    def update_symbol_table_with_imports(self):
+        if self._included_imported_files:
+            return
+
+        import os
+        from boa3.analyser.importanalyser import ImportAnalyser
+        from boa3.model.imports.importsymbol import Import
+
+        imports = self._imported_files.copy()
+        paths_already_imported = [imported.origin for imported in self.symbol_table.values()
+                                  if isinstance(imported, Import) and isinstance(imported.origin, str)]
+        if isinstance(self.path, str):
+            paths_already_imported.append(self.path.replace(os.path.sep, constants.PATH_SEPARATOR))
+
+        for file_path, analyser in imports.items():
+            if file_path not in paths_already_imported:
+                import_analyser = ImportAnalyser(file_path, self.root,
+                                                 already_imported_modules=imports,
+                                                 log=False)
+                import_symbol = Import(file_path, analyser.ast_tree, import_analyser, {})
+                self.symbol_table[file_path] = import_symbol
+
+        self._included_imported_files = True

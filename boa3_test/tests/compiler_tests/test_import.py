@@ -134,7 +134,6 @@ class TestImport(BoaTest):
 
     def test_variable_access_from_imported_module(self):
         path = self.get_contract_path('variable_import', 'VariableAccessFromImportedModule.py')
-        self.compile_and_save(path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'get_foo', expected_result_type=bytes)

@@ -136,6 +136,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return global_symbols
 
+    @property
+    def analysed_files(self) -> Dict[str, Any]:
+        return self._analysed_files.copy()
+
     def __include_variable(self, var_id: str, var_type_id: Union[str, IType],
                            source_node: ast.AST,
                            var_enumerate_type: IType = Type.none, assignment: bool = True):
