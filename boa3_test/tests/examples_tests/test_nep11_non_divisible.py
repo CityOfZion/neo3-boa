@@ -115,13 +115,10 @@ class TestNEP11Template(BoaTest):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_nep11_total_tokens_of(self):
-        # TODO: Implement this test on issue #855
         pass
 
     def test_nep11_total_owner_of(self):
-        # TODO: Implement this test on issue #855
         pass
 
     def test_nep11_total_transfer(self):
-        # TODO: Implement this test on issue #855
         pass

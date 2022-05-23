@@ -531,7 +531,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 module.body.remove(stmt)
 
         # TODO: include the body of the builtin methods to the ast
-        # TODO: get module name
         self.modules['main'] = mod
         module_scope = self._scope_stack.pop()
         for symbol_id, symbol in module_scope.symbols.items():
