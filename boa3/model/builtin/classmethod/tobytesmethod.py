@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Sequence
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -75,7 +75,7 @@ class IntToBytesMethod(ToBytesMethod):
         super().__init__(self_type)
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, List) and len(value) == 1:
+        if isinstance(value, Sequence) and len(value) == 1:
             value = value[0]
         if type(value) == type(self.args['self'].type):
             return self
@@ -129,7 +129,7 @@ class StrToBytesMethod(ToBytesMethod):
         return []
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, List) and len(value) == 1:
+        if isinstance(value, Sequence) and len(value) == 1:
             value = value[0]
         if type(value) == type(self.args['self'].type):
             return self

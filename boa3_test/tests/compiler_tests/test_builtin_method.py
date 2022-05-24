@@ -505,9 +505,10 @@ class TestBuiltinMethod(BoaTest):
         path = self.get_contract_path('IntZeroToBytes.py')
         engine = TestEngine()
 
+        value = Integer(0).to_byte_array(min_length=1)
         result = self.run_smart_contract(engine, path, 'int_to_bytes',
                                          expected_result_type=bytes)
-        self.assertEqual(b'\x00', result)
+        self.assertEqual(value, result)
 
     def test_int_to_bytes_with_builtin(self):
         path = self.get_contract_path('IntToBytesWithBuiltin.py')
