@@ -17,13 +17,15 @@ class ImportAnalyser(IAstAnalyser):
                  importer_file: Optional[str] = None,
                  import_stack: List[str] = None,
                  already_imported_modules: dict = None,
-                 log: bool = False):
+                 log: bool = False,
+                 get_entry: bool = False):
 
         self.can_be_imported: bool = False
         self.is_builtin_import: bool = False
         self.is_namespace_package: bool = False
         self.recursive_import: bool = False
         self._import_identifier: str = import_target
+        self._get_from_entry: bool = get_entry and (os.path.isfile(import_target) or os.path.isdir(import_target))
 
         from boa3.analyser.analyser import Analyser
         self._imported_files: Dict[str, Analyser] = (already_imported_modules
@@ -31,6 +33,7 @@ class ImportAnalyser(IAstAnalyser):
                                                      else {})
         self._import_stack: List[str] = import_stack if isinstance(import_stack, list) else []
         self.analyser: Analyser = None  # set if the import is successful
+        self._submodule_search_locations = None
 
         if isinstance(root_folder, str):
             if os.path.isfile(root_folder):
@@ -43,6 +46,11 @@ class ImportAnalyser(IAstAnalyser):
             root = os.path.dirname(importer_file)
 
         super().__init__(ast.Module(body=[]), root_folder=root, log=log)
+
+        if self._get_from_entry:
+            self.path: str = import_target.replace(os.sep, constants.PATH_SEPARATOR)
+            self._find_package(import_target, importer_file)
+            return
 
         sys.path.append(self.root_folder)
         try:
@@ -168,7 +176,8 @@ class ImportAnalyser(IAstAnalyser):
                     if analyser.is_analysed:
                         for symbol_id, symbol in analyser.symbol_table.items():
                             if symbol_id not in Type.all_types():
-                                symbol.defined_by_entry = False
+                                if not self._get_from_entry:
+                                    symbol.defined_by_entry = False
                                 self.symbols[symbol_id] = symbol
 
                     self.errors.extend(analyser.errors)

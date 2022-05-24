@@ -22,7 +22,7 @@ class FileGenerator:
     def __init__(self, bytecode: bytes, analyser: Analyser, entry_file: str):
         import os
         self._metadata = analyser.metadata
-        self._symbols: Dict[str, ISymbol] = analyser.symbol_table
+        self._symbols: Dict[str, ISymbol] = analyser.symbol_table.copy()
 
         self._entry_file = entry_file
         self._entry_file_full_path = analyser.path.replace(os.sep, constants.PATH_SEPARATOR)

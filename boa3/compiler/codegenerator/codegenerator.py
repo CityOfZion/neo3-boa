@@ -55,6 +55,7 @@ class CodeGenerator:
         :return: the Neo VM bytecode
         """
         VMCodeMapping.reset()
+        analyser.update_symbol_table_with_imports()
         import ast
         from boa3.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
