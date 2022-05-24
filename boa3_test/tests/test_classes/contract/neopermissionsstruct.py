@@ -26,7 +26,7 @@ class NeoPermissionsStruct(NeoStruct):
     def _is_wildcard(cls, value: Any) -> bool:
         if value is None:
             return True
-        return value is '*'
+        return value == '*'
 
     @classmethod
     def get_contract(cls, value: Any) -> Optional[UInt160]:
