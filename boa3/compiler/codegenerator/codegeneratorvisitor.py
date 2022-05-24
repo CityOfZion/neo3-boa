@@ -8,6 +8,7 @@ from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.compiler.codegenerator.generatordata import GeneratorData
 from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+from boa3.constants import SYS_VERSION_INFO
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -972,6 +973,11 @@ class VisitorCodeGenerator(IAstAnalyser):
         else:
             need_to_visit_again = value_data.already_generated
             self._remove_inserted_opcodes_since(last_address, last_stack)
+
+        # the verification above only verify variables, this one will should work with literals and constants
+        if isinstance(value, (ast.Constant if SYS_VERSION_INFO >= (3, 8) else (ast.Num, ast.Str, ast.Bytes))) \
+                and len(attr.args) > 0 and isinstance(attr, IBuiltinMethod) and attr.has_self_argument:
+            attr = attr.build(value_data.type)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
             value_symbol_id = (value_symbol.identifier
