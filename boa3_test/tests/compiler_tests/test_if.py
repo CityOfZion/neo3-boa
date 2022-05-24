@@ -670,3 +670,21 @@ class TestIf(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main', True)
         self.assertEqual(result, 0)
+
+    def test_if_is_none(self):
+        path = self.get_contract_path('IfIsNone.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 123)
+        self.assertEqual(False, result)
+        result = self.run_smart_contract(engine, path, 'main', None)
+        self.assertEqual(True, result)
+
+    def test_if_is_not_none(self):
+        path = self.get_contract_path('IfIsNotNone.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 123)
+        self.assertEqual(True, result)
+        result = self.run_smart_contract(engine, path, 'main', None)
+        self.assertEqual(False, result)
