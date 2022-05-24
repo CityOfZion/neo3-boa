@@ -1,5 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
+from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
@@ -94,9 +95,10 @@ class TestClass(BoaTest):
         # this test generates an empty contract
         path = self.get_contract_path('UserClassEmpty.py')
 
-        expected_output = b''
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        with self.assertRaises(NotLoadedException) as e:
+            output = Boa3.compile(path)
+
+        self.assertTrue(e.exception.empty_script)
 
     def test_user_class_with_static_method_from_class(self):
         path = self.get_contract_path('UserClassWithStaticMethodFromClass.py')

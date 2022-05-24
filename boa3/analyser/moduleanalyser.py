@@ -974,6 +974,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         var_id: str = self.visit(ann_assign.target)
         var_type: IType = self.visit_type(ann_assign.annotation)
+        if var_type is Builtin.Event:
+            self.visit(ann_assign.value)
 
         # TODO: check if the annotated type and the value type are the same
         return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)

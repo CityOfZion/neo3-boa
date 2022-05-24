@@ -28,7 +28,12 @@ def main():
         Boa3.compile_and_save(args.input, debug=args.debug, root_folder=args.project_path)
         logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
     except NotLoadedException as e:
-        logging.error("Could not compile")
+        error_message = e.message
+        log_error = 'Could not compile'
+        if len(error_message) > 0:
+            log_error += f': {error_message}'
+
+        logging.error(log_error)
     except Exception as e:
         logging.exception(e)
 

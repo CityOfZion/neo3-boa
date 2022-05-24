@@ -93,6 +93,34 @@ class TestEvent(BoaTest):
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((10,), event_notifications[0].arguments)
 
+    def test_event_with_annotation(self):
+        event_id = 'example'
+        event_name = String(event_id).to_bytes(min_length=1)
+        expected_output = (
+            Opcode.PUSH10       # Main()
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1      # on_example(10)
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.SYSCALL
+            + Interop.Notify.interop_method_hash
+            + Opcode.RET      # return
+        )
+
+        path = self.get_contract_path('EventWithAnnotation.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((10,), event_notifications[0].arguments)
+
     def test_event_nep5_transfer(self):
         event_id = 'transfer'
         event_name = String(event_id).to_bytes(min_length=1)
@@ -188,6 +216,39 @@ class TestEvent(BoaTest):
         event_notifications = engine.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
+
+    def test_event_nep11_transfer(self):
+        event_id = 'Transfer'
+        event_name = String(event_id).to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # Main()
+            + b'\x00\x04'
+            + Opcode.LDARG3         # event(from_addr, to_addr, amount, token_id)
+            + Opcode.LDARG2
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH4
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(event_name)).to_byte_array(min_length=1)
+            + event_name
+            + Opcode.SYSCALL
+            + Interop.Notify.interop_method_hash
+            + Opcode.RET       # return
+        )
+
+        path = self.get_contract_path('EventNep11Transfer.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10, b'someToken')
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual(('1', '2', 10, 'someToken'), event_notifications[0].arguments)
 
     def test_event_with_return(self):
         path = self.get_contract_path('EventWithoutTypes.py')
