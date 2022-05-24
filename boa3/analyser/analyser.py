@@ -214,7 +214,7 @@ class Analyser:
             if file_path not in paths_already_imported:
                 import_analyser = ImportAnalyser(file_path, self.root,
                                                  already_imported_modules=imports,
-                                                 log=False)
+                                                 log=False, get_entry=True)
                 import_symbol = Import(file_path, analyser.ast_tree, import_analyser, {})
                 self.symbol_table[file_path] = import_symbol
 
