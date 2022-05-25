@@ -710,12 +710,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                      and condition.func.id in is_instance_objs and len(condition.args) == 2)
 
             # verifies if condition is a identity condition (is None or is not None)
-            from boa3.model.operation.unary.noneidentity import NoneIdentity
-            from boa3.model.operation.unary.nonenotidentity import NoneNotIdentity
             identity_condition = isinstance(condition, ast.Compare) \
-                                 and isinstance(condition.ops[0], (NoneIdentity, NoneNotIdentity))
+                                 and isinstance(condition.ops[0], (type(BinaryOp.IsNone), type(BinaryOp.IsNotNone)))
 
-            if identity_condition and isinstance(condition.ops[0], NoneNotIdentity):
+            if identity_condition and isinstance(condition.ops[0], type(BinaryOp.IsNotNone)):
                 negate = True
 
             if is_instance_condition or identity_condition:
@@ -725,7 +723,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 else:
                     left_value = condition.left
-                    right_value = None
+                    right_value = Type.none
 
                 original = self.get_symbol(left_value)
                 if isinstance(original, Variable) and isinstance(left_value, ast.Name):
