@@ -165,7 +165,24 @@ class TestMetadata(BoaTest):
         self.assertIn('supportedstandards', manifest)
         self.assertIsInstance(manifest['supportedstandards'], list)
         self.assertGreater(len(manifest['supportedstandards']), 0)
-        self.assertIn('NEP-5', manifest['supportedstandards'])
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+        # verify using NeoManifestStruct
+        script, manifest = self.get_output(path)
+        nef, manifest = self.get_bytes_output(path)
+        from boa3.neo.cryptography import hash160
+        call_hash = hash160(script)
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        from boa3_test.tests.test_classes.testengine import TestEngine
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+        self.assertEqual(manifest_struct, result[4])
 
     def test_metadata_info_supported_standards_with_imported_event(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsImportedEvent.py')

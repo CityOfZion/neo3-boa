@@ -34,7 +34,7 @@ class NeoManifestStruct(NeoStruct):
         struct.append(json[cls._name_field])
         struct.append(json[cls._groups_field])  # TODO: groups aren't implemented yet
         struct.append({})  # TODO: features aren't implemented yet
-        struct.append(json[cls._supported_standards_field])  # TODO: supported standards aren't implemented
+        struct.append(json[cls._supported_standards_field])
         struct.append(NeoAbiStruct.from_json(json[cls._abi_field]))
         struct.append([NeoPermissionsStruct.from_json(permission) for permission in json[cls._permissions_field]])
         struct.append(json[cls._trusts_field])  # TODO: trusts aren't implemented
