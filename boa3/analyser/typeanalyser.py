@@ -705,22 +705,40 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 condition = condition.operand
                 negate = True
 
-            if (isinstance(condition, ast.Call) and isinstance(condition.func, ast.Name)
-                    and condition.func.id in is_instance_objs and len(condition.args) == 2):
-                original = self.get_symbol(condition.args[0])
-                if isinstance(original, Variable) and isinstance(condition.args[0], ast.Name):
-                    original_id = condition.args[0].id
+            # verifies if condition is an is_instance condition
+            is_instance_condition = (isinstance(condition, ast.Call) and isinstance(condition.func, ast.Name)
+                                     and condition.func.id in is_instance_objs and len(condition.args) == 2)
+
+            # verifies if condition is a identity condition (is None or is not None)
+            identity_condition = isinstance(condition, ast.Compare) \
+                                 and isinstance(condition.ops[0], (type(BinaryOp.IsNone), type(BinaryOp.IsNotNone)))
+
+            if identity_condition and isinstance(condition.ops[0], type(BinaryOp.IsNotNone)):
+                negate = True
+
+            if is_instance_condition or identity_condition:
+                if is_instance_condition:
+                    left_value = condition.args[0]
+                    right_value = condition.args[1]
+
+                else:
+                    left_value = condition.left
+                    right_value = Type.none
+
+                original = self.get_symbol(left_value)
+                if isinstance(original, Variable) and isinstance(left_value, ast.Name):
+                    original_id = left_value.id
                     original_type = (original.type
                                      if original_id not in is_instance_symbols
                                      else is_instance_symbols[original_id])
 
-                    instance_obj = self.get_symbol(condition.func.id)
+                    instance_obj = self.get_symbol(condition.func.id) if is_instance_condition else None
                     if isinstance(instance_obj, type(Builtin.IsInstance)):
                         is_instance_type = instance_obj._instances_type
                         if isinstance(is_instance_type, list):
                             is_instance_type = Type.union.build(is_instance_type)
                     else:
-                        is_instance_type = self.get_type(condition.args[1])
+                        is_instance_type = self.get_type(right_value)
                     is_instance_type = is_instance_type.intersect_type(original_type)
                     negation = original_type.except_type(is_instance_type)
                     resulting_type = is_instance_type if not negate else negation
@@ -732,7 +750,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                     if len(is_instance_symbols) == 1:
                         is_not_instance_symbols[original_id] = is_instance_type if negate else negation
-                    elif len(is_not_instance_symbols) > 1:
+                    elif len(is_not_instance_symbols) == 1:
+                        # if there is more than one isinstance it's not possible to determine in compiler time what is
+                        # the type of the variables on the else body
                         is_not_instance_symbols.clear()
 
         for key, value in is_instance_symbols.copy().items():
