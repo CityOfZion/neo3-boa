@@ -44,11 +44,8 @@ class TestConstant(BoaTest):
         input = -100
         byte_input = Integer(input).to_byte_array()
         expected_output = (
-            Opcode.PUSHDATA1            # push the bytes
-            + Integer(len(byte_input)).to_byte_array()
+            Opcode.PUSHINT8             # push the bytes
             + byte_input
-            + Opcode.CONVERT            # convert to integer
-            + Type.int.stack_item
         )
 
         generator = self.build_code_generator()
@@ -61,11 +58,8 @@ class TestConstant(BoaTest):
         input = 42
         byte_input = Integer(input).to_byte_array()
         expected_output = (
-            Opcode.PUSHDATA1            # push the bytes
-            + Integer(len(byte_input)).to_byte_array(min_length=1)
+            Opcode.PUSHINT8             # push the bytes
             + byte_input
-            + Opcode.CONVERT            # convert to integer
-            + Type.int.stack_item
         )
 
         generator = self.build_code_generator()
@@ -78,11 +72,8 @@ class TestConstant(BoaTest):
         byte_input = bytes(300) + b'\x01'
         input = Integer.from_bytes(byte_input)
         expected_output = (
-            Opcode.PUSHDATA2            # push the bytes
-            + Integer(len(byte_input)).to_byte_array(min_length=2)
-            + byte_input
-            + Opcode.CONVERT            # convert to integer
-            + Type.int.stack_item
+            Opcode.PUSHINT256           # push the bytes
+            + byte_input[:32]
         )
 
         generator = self.build_code_generator()
@@ -95,11 +86,8 @@ class TestConstant(BoaTest):
         byte_input = bytes(100000) + b'\x01'
         input = Integer.from_bytes(byte_input)
         expected_output = (
-            Opcode.PUSHDATA4            # push the bytes
-            + Integer(len(byte_input)).to_byte_array(min_length=4)
-            + byte_input
-            + Opcode.CONVERT            # convert to integer
-            + Type.int.stack_item
+            Opcode.PUSHINT256           # push the bytes
+            + byte_input[:32]
         )
 
         generator = self.build_code_generator()
@@ -114,14 +102,11 @@ class TestConstant(BoaTest):
         signed = Integer.from_bytes(byte_input, signed=True)
         self.assertNotEqual(unsigned, signed)
 
-        unsigned_byte_input = Integer(unsigned).to_byte_array(signed=True)
+        unsigned_byte_input = Integer(unsigned).to_byte_array(signed=True, min_length=4)
         self.assertNotEqual(byte_input, unsigned_byte_input)
         unsigned_expected_output = (
-            Opcode.PUSHDATA1            # push the bytes
-            + Integer(len(unsigned_byte_input)).to_byte_array(min_length=1)
+            Opcode.PUSHINT32            # push the bytes
             + unsigned_byte_input
-            + Opcode.CONVERT            # convert to integer
-            + Type.int.stack_item
         )
 
         generator = self.build_code_generator()
@@ -130,14 +115,11 @@ class TestConstant(BoaTest):
 
         self.assertEqual(unsigned_expected_output, output)
 
-        signed_byte_input = Integer(signed).to_byte_array(signed=True)
+        signed_byte_input = Integer(signed).to_byte_array(signed=True, min_length=2)
         self.assertEqual(byte_input, signed_byte_input)
         signed_expected_output = (
-            Opcode.PUSHDATA1            # push the bytes
-            + Integer(len(signed_byte_input)).to_byte_array(min_length=1)
+            Opcode.PUSHINT16           # push the bytes
             + signed_byte_input
-            + Opcode.CONVERT            # convert to integer
-            + Type.int.stack_item
         )
 
         generator = self.build_code_generator()

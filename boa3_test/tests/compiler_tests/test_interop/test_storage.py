@@ -121,15 +121,9 @@ class TestStorageInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x01'
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHINT8 + value
             + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHINT8 + value
             + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.StorageGetContext.interop_method_hash
@@ -251,15 +245,9 @@ class TestStorageInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x01'
             + b'\x01'
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHINT8 + value
             + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.CONVERT + Type.int.stack_item
+            + Opcode.PUSHINT8 + value
             + Opcode.LDARG0
             + Opcode.SYSCALL
             + Interop.StorageGetContext.interop_method_hash

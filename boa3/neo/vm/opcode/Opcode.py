@@ -98,9 +98,9 @@ class Opcode(bytes, Enum):
         :return: the respective opcode and its required data
         :rtype: Tuple[Opcode, bytes]
         """
-        if -1 <= integer <= 16:
-            opcode_value: int = Integer.from_bytes(Opcode.PUSH0) + integer
-            return Opcode(Integer(opcode_value).to_byte_array()), b''
+        opcode = Opcode.get_literal_push(integer)
+        if isinstance(opcode, Opcode):
+            return opcode, b''
         else:
             data = Integer(integer).to_byte_array(signed=True, min_length=1)
             if len(data) == 1:

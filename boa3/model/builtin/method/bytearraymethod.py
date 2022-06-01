@@ -50,7 +50,8 @@ class ByteArrayMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return []
+        from boa3.neo.vm.type.StackItem import StackItemType
+        return [(Opcode.CONVERT, StackItemType.Buffer)]
 
     @property
     def is_supported(self) -> bool:

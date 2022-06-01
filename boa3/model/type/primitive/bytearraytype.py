@@ -3,6 +3,7 @@ from typing import Any
 from boa3.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
+from boa3.neo.vm.type.StackItem import StackItemType
 
 
 class ByteArrayType(BytesType, MutableSequenceType):
@@ -13,6 +14,10 @@ class ByteArrayType(BytesType, MutableSequenceType):
     def __init__(self):
         super().__init__()
         self._identifier = 'bytearray'
+
+    @property
+    def stack_item(self) -> StackItemType:
+        return StackItemType.Buffer
 
     @property
     def default_value(self) -> Any:

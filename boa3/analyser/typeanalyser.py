@@ -710,8 +710,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                      and condition.func.id in is_instance_objs and len(condition.args) == 2)
 
             # verifies if condition is a identity condition (is None or is not None)
-            identity_condition = isinstance(condition, ast.Compare) \
-                                 and isinstance(condition.ops[0], (type(BinaryOp.IsNone), type(BinaryOp.IsNotNone)))
+            identity_condition = (isinstance(condition, ast.Compare)
+                                  and isinstance(condition.ops[0], (type(BinaryOp.IsNone), type(BinaryOp.IsNotNone))))
 
             if identity_condition and isinstance(condition.ops[0], type(BinaryOp.IsNotNone)):
                 negate = True

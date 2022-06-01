@@ -1,9 +1,8 @@
-import unittest
-
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -192,6 +191,7 @@ class TestBytes(BoaTest):
             + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
+            + Opcode.CONVERT + StackItemType.Buffer
             + Opcode.STLOC0
             + Opcode.LDLOC0     # b = a
             + Opcode.STLOC1
@@ -539,13 +539,15 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', b'0')
         self.assertEqual(48, result)
 
-    @unittest.skip("bytestring setitem is not working yet")
     def test_byte_array_set_value(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
-            + b'\x00'
             + b'\x01'
-            + Opcode.LDARG0     # arg[0] = 0x01
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.CONVERT + StackItemType.Buffer
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # var[0] = 0x01
             + Opcode.PUSH0
             + Opcode.DUP
             + Opcode.SIGN
@@ -557,7 +559,7 @@ class TestBytes(BoaTest):
             + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
-            + Opcode.LDARG0
+            + Opcode.LDLOC0
             + Opcode.RET        # return
         )
 
@@ -566,18 +568,22 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'123')
+        result = self.run_smart_contract(engine, path, 'Main', b'123',
+                                         expected_result_type=bytes)
         self.assertEqual(b'\x0123', result)
-        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        result = self.run_smart_contract(engine, path, 'Main', b'0',
+                                         expected_result_type=bytes)
         self.assertEqual(b'\x01', result)
 
-    @unittest.skip("bytestring setitem is not working yet")
     def test_byte_array_set_value_negative_index(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
-            + b'\x00'
             + b'\x01'
-            + Opcode.LDARG0     # arg[-1] = 0x01
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.CONVERT + StackItemType.Buffer
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # var[-1] = 0x01
             + Opcode.PUSHM1
             + Opcode.DUP
             + Opcode.SIGN
@@ -589,7 +595,7 @@ class TestBytes(BoaTest):
             + Opcode.ADD
             + Opcode.PUSH1
             + Opcode.SETITEM
-            + Opcode.LDARG0
+            + Opcode.LDLOC0
             + Opcode.RET        # return
         )
 
@@ -598,9 +604,11 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'123')
+        result = self.run_smart_contract(engine, path, 'Main', b'123',
+                                         expected_result_type=bytes)
         self.assertEqual(b'12\x01', result)
-        result = self.run_smart_contract(engine, path, 'Main', b'0')
+        result = self.run_smart_contract(engine, path, 'Main', b'0',
+                                         expected_result_type=bytes)
         self.assertEqual(b'\x01', result)
 
     def test_byte_array_literal_value(self):
@@ -629,6 +637,7 @@ class TestBytes(BoaTest):
             + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
+            + Opcode.CONVERT + StackItemType.Buffer
             + Opcode.STLOC0
             + Opcode.RET        # return
         )
@@ -650,6 +659,7 @@ class TestBytes(BoaTest):
             + Opcode.PUSHDATA1  # b = bytearray(a)
             + Integer(len(data)).to_byte_array(min_length=1)
             + data
+            + Opcode.CONVERT + StackItemType.Buffer
             + Opcode.STLOC1
             + Opcode.RET        # return
         )
@@ -694,7 +704,6 @@ class TestBytes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(b'', result)
 
-    @unittest.skip("reverse items doesn't work with bytestring")
     def test_byte_array_reverse(self):
         path = self.get_contract_path('BytearrayReverse.py')
         Boa3.compile(path)
