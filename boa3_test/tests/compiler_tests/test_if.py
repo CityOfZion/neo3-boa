@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerWarning
-from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
@@ -236,42 +235,38 @@ class TestIf(BoaTest):
             + Opcode.LT
             + Opcode.JMPIFNOT       # if arg0 < 0
             + Integer(6).to_byte_array(min_length=1)
-            + Opcode.PUSH0          # a = 0
+            + Opcode.PUSH0              # a = 0
             + Opcode.STLOC0
             + Opcode.JMP
-            + Integer(35).to_byte_array(min_length=1)
+            + Integer(32).to_byte_array(min_length=1)
             + Opcode.LDARG0
             + Opcode.PUSH5
             + Opcode.LT
             + Opcode.JMPIFNOT       # elif arg0 < 5
             + Integer(6).to_byte_array(min_length=1)
-            + Opcode.PUSH5          # a = 5
+            + Opcode.PUSH5              # a = 5
             + Opcode.STLOC0
             + Opcode.JMP
-            + Integer(26).to_byte_array(min_length=1)
+            + Integer(23).to_byte_array(min_length=1)
             + Opcode.LDARG0
             + Opcode.PUSH10
             + Opcode.LT
             + Opcode.JMPIFNOT       # elif arg0 < 10
             + Integer(6).to_byte_array(min_length=1)
-            + Opcode.PUSH10         # a = 10
+            + Opcode.PUSH10             # a = 10
             + Opcode.STLOC0
             + Opcode.JMP
-            + Integer(17).to_byte_array(min_length=1)
+            + Integer(14).to_byte_array(min_length=1)
             + Opcode.LDARG0
             + Opcode.PUSH15
             + Opcode.LT
             + Opcode.JMPIFNOT       # elif arg0 < 15
             + Integer(6).to_byte_array(min_length=1)
-            + Opcode.PUSH15         # a = 15
+            + Opcode.PUSH15             # a = 15
             + Opcode.STLOC0
             + Opcode.JMP            # else
-            + Integer(8).to_byte_array(min_length=1)
-            + Opcode.PUSHDATA1      # a = 20
-            + Integer(len(twenty)).to_byte_array()
-            + twenty
-            + Opcode.CONVERT
-            + Type.int.stack_item
+            + Integer(5).to_byte_array(min_length=1)
+            + Opcode.PUSHINT8 + twenty  # a = 20
             + Opcode.STLOC0
             + Opcode.LDLOC0     # return a
             + Opcode.RET
@@ -455,7 +450,7 @@ class TestIf(BoaTest):
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'main', 2)
-        self.assertEqual(True, result)
+        self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'main', 3)
         self.assertEqual(False, result)

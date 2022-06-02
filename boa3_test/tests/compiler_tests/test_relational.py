@@ -416,7 +416,7 @@ class TestRelational(BoaTest):
         self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'main', 2)
-        self.assertEqual(True, result)
+        self.assertEqual(False, result)
 
         result = self.run_smart_contract(engine, path, 'main', 3)
         self.assertEqual(True, result)

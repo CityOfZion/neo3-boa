@@ -1,5 +1,4 @@
 from boa3.boa3 import Boa3
-from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -19,12 +18,8 @@ class TestUnion(BoaTest):
             + b'\x01'
             + Opcode.LDARG0
             + Opcode.JMPIFNOT
-            + Integer(8).to_byte_array(signed=True, min_length=1)
-            + Opcode.PUSHDATA1  # return 42
-            + Integer(len(integer)).to_byte_array(min_length=1)
-            + integer
-            + Opcode.CONVERT
-            + Type.int.stack_item
+            + Integer(5).to_byte_array(signed=True, min_length=1)
+            + Opcode.PUSHINT8 + integer  # return 42
             + Opcode.RET
             + Opcode.PUSHDATA1  # a = b'\x01\x02\x03'
             + Integer(len(string)).to_byte_array(min_length=1)

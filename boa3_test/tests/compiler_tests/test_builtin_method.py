@@ -1,5 +1,3 @@
-import unittest
-
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.type.type import Type
@@ -336,7 +334,6 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([3, 2, 1], result)
 
-    @unittest.skip("reverse items doesn't work with bytestring")
     def test_reverse_mutable_sequence_with_builtin(self):
         path = self.get_contract_path('ReverseMutableSequenceBuiltinCall.py')
         output = Boa3.compile(path)

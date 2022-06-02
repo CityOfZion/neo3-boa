@@ -915,10 +915,10 @@ class CodeGenerator:
                 self._stack_append(Type.int)
                 self.convert_operation(UnaryOp.Negative)
             else:
-                array = Integer(value).to_byte_array(signed=True)
-                self.insert_push_data(array)
-                # cast the value to integer
-                self.convert_cast(Type.int)
+                opcode, data = Opcode.get_push_and_data(value)
+                op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
+                self.__insert1(op_info, data)
+                self._stack_append(Type.int)
 
     def convert_string_literal(self, value: str):
         """
