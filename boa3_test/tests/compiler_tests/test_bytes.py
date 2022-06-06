@@ -631,10 +631,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_default(self):
         expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x01'
-            + Opcode.PUSH0      # bytearray()
+            Opcode.PUSH0      # bytearray()
             + Opcode.NEWBUFFER
             + Opcode.RET        # return
         )
