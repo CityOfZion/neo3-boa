@@ -5,6 +5,7 @@ from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -628,6 +629,25 @@ class TestBytes(BoaTest):
         output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
+    def test_byte_array_default(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.PUSH0      # bytearray()
+            + Opcode.NEWBUFFER
+            + Opcode.RET        # return
+        )
+
+        path = self.get_contract_path('BytearrayDefault.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'create_bytearray',
+                                         expected_result_type=bytearray)
+        self.assertEqual(bytearray(), result)
+
     def test_byte_array_from_literal_bytes(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -668,9 +688,55 @@ class TestBytes(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_byte_array_from_size(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # bytearray(size)
+            + Opcode.NEWBUFFER
+            + Opcode.RET        # return
+        )
+
+        path = self.get_contract_path('BytearrayFromSize.py')
+        output, manifest = self.compile_and_save(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'create_bytearray', 10,
+                                         expected_result_type=bytearray)
+        self.assertEqual(bytearray(10), result)
+
+        result = self.run_smart_contract(engine, path, 'create_bytearray', 0,
+                                         expected_result_type=bytearray)
+        self.assertEqual(bytearray(0), result)
+
+        # cannot build with negative size
+        with self.assertRaises(TestExecutionException) as exception:
+            result = self.run_smart_contract(engine, path, 'create_bytearray', -10,
+                                             expected_result_type=bytes)
+
+        self.assertGreater(len(exception.exception.args), 0)
+        self.assertTrue(exception.exception.args[0].startswith('MaxItemSize exceed'))
+
+    def test_byte_array_from_list_of_int(self):
+        path = self.get_contract_path('BytearrayFromListOfInt.py')
+        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+        from boa3.model.builtin.builtin import Builtin
+        from boa3.model.type.type import Type
+        arg_type = Type.list.build([Type.int])
+        expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({arg_type.identifier})')
+        self.assertEqual(expected_error._error_message, compiler_error_message)
+
     def test_byte_array_string(self):
         path = self.get_contract_path('BytearrayFromString.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+        from boa3.model.builtin.builtin import Builtin
+        from boa3.model.type.type import Type
+        expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({Type.str.identifier})')
+        self.assertEqual(expected_error._error_message, compiler_error_message)
 
     def test_byte_array_append(self):
         path = self.get_contract_path('BytearrayAppend.py')
