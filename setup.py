@@ -85,7 +85,13 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
 
-    packages=find_packages(),
+    packages=find_packages(
+        # do not include the compiler unit tests in the installed package
+        exclude=('boa3_test.tests.*_tests*',),
+        include=('boa3', 'boa3.*',
+                 'boa3_test.tests', 'boa3_test.tests.*',
+                 'test_runner', 'test_runner.*'),
+    ),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
