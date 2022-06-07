@@ -1,6 +1,5 @@
 from boa3 import constants
 from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -143,14 +142,15 @@ class TestNEP17Template(BoaTest):
         path = self.get_contract_path('nep17.py')
         engine = TestEngine()
 
-        engine.add_contract(path.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        nep17_address = hash160(output)
+        self.run_smart_contract(engine, path, 'symbol')
+        nep17_address = engine.executed_script_hash.to_array()
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
+        engine.add_contract(path.replace('.py', '.nef'))
 
         engine.add_neo(aux_address, transferred_amount)
         engine.add_gas(aux_address, transferred_amount)
@@ -167,8 +167,8 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
         self.assertEqual(4, len(transfer_events))
-        neo_transfer_event = transfer_events[2]
-        transfer_event = transfer_events[3]
+        neo_transfer_event = transfer_events[1]
+        transfer_event = transfer_events[2]
         self.assertEqual(3, len(neo_transfer_event.arguments))
         self.assertEqual(3, len(transfer_event.arguments))
 

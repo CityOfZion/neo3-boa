@@ -167,15 +167,15 @@ class TestMetadata(BoaTest):
         self.assertGreater(len(manifest['supportedstandards']), 0)
         self.assertIn('NEP-17', manifest['supportedstandards'])
 
+        from boa3_test.tests.test_classes.testengine import TestEngine
+        engine = TestEngine()
         # verify using NeoManifestStruct
-        script, manifest = self.get_output(path)
         nef, manifest = self.get_bytes_output(path)
-        from boa3.neo.cryptography import hash160
-        call_hash = hash160(script)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
         path = path.replace('.py', '.nef')
 
         get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
-        from boa3_test.tests.test_classes.testengine import TestEngine
         engine = TestEngine()
         engine.add_contract(path)
 

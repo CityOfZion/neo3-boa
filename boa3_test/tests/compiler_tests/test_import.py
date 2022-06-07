@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -278,8 +277,10 @@ class TestImport(BoaTest):
 
     def test_import_user_module_with_not_imported_symbols(self):
         path = self.get_contract_path('ImportUserModuleWithNotImportedSymbols.py')
-        output, manifest = self.compile_and_save(path)
-        script = hash160(output)
+
+        engine = TestEngine()
+        self.run_smart_contract(engine, path, 'main', [], b'')
+        script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', [], script)

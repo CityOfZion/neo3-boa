@@ -44,3 +44,8 @@ def calling_transfer(address: UInt160, from_address: UInt160, to_address: UInt16
 @public
 def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     pass
+
+
+@public
+def get_name() -> str:
+    return 'Test Contract'

@@ -1,7 +1,6 @@
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
@@ -263,12 +262,11 @@ class TestWhile(BoaTest):
 
     def test_while_interop_condition(self):
         path = self.get_contract_path('WhileWithInteropCondition.py')
-        output, manifest = self.compile_and_save(path)
-        contract_hash = hash160(output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'deploy')
         self.assertEqual(True, result)
+        contract_hash = engine.executed_script_hash.to_array()
         result = self.run_smart_contract(engine, path, 'test_end_while_jump')
         self.assertEqual(True, result)
 

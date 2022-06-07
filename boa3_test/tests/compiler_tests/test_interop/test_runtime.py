@@ -2,7 +2,6 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.interop.interop import Interop
 from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
@@ -427,12 +426,11 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_notifications(self):
         path = self.get_contract_path('GetNotifications.py')
-        output, manifest = self.compile_and_save(path)
-        script = hash160(output)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'without_param', [])
         self.assertEqual([], result)
+        script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
