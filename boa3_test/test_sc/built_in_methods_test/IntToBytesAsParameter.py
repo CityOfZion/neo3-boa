@@ -1,6 +1,5 @@
-from boa3.builtin.interop import storage
-
 from boa3.builtin import public
+from boa3.builtin.interop import storage
 from boa3.builtin.interop.stdlib import serialize
 
 
