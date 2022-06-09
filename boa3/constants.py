@@ -1,12 +1,22 @@
+import os
 import platform
 import sys
 
 from boa3 import __version__ as boa_version
 from boa3.neo import from_hex_str
 
+ENCODING = 'utf-8'
+BYTEORDER = 'little'
+
+ATTRIBUTE_NAME_SEPARATOR = '.'
+VARIABLE_NAME_SEPARATOR = ','
+PATH_SEPARATOR = '/'
+IMPORT_WILDCARD = '*'
+
 SYS_VERSION_INFO = sys.version_info
 SYS_VERSION = platform.python_version()
 BOA_VERSION = boa_version
+BOA_PACKAGE_PATH = os.path.abspath(f'{__file__}/..')
 
 ONE_BYTE_MAX_VALUE = 255
 TWO_BYTES_MAX_VALUE = 256 ** 2 - 1
@@ -17,14 +27,6 @@ SIZE_OF_INT160 = 20
 SIZE_OF_ECPOINT = 33
 DEFAULT_UINT32 = 0
 GAS_DECIMALS = 8
-
-ENCODING = 'utf-8'
-BYTEORDER = 'little'
-
-ATTRIBUTE_NAME_SEPARATOR = '.'
-VARIABLE_NAME_SEPARATOR = ','
-PATH_SEPARATOR = '/'
-IMPORT_WILDCARD = '*'
 
 INIT_METHOD_ID = '__init__'
 INITIALIZE_METHOD_ID = '_initialize'

@@ -135,7 +135,8 @@ class ImportAnalyser(IAstAnalyser):
             self.is_builtin_import = True
             return
 
-        if not ('boa3' in path and constants.PATH_SEPARATOR.join(path[path.index('boa3'):]).startswith('boa3/builtin')):
+        if (os.path.commonpath([self.path, constants.BOA_PACKAGE_PATH]) != constants.BOA_PACKAGE_PATH or
+                ('boa3' in path and constants.PATH_SEPARATOR.join(path[path.index('boa3'):]).startswith('boa3/builtin'))):
             # doesn't analyse boa3.builtin packages that aren't included in the imports.builtin as an user module
             # TODO: refactor when importing from user modules is accepted
             import re
