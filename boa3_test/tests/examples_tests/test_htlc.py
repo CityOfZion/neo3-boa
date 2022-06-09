@@ -40,17 +40,18 @@ class TestHTLCTemplate(BoaTest):
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
-        output, manifest = self.get_output(path)
-        htlc_address = hash160(output)
+        self.run_smart_contract(engine, path, 'refund')
+        htlc_address = engine.executed_script_hash.to_array()
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
 
         aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
-        output, manifest = self.get_output(aux_path2)
-        aux_address2 = hash160(output)
+        self.run_smart_contract(engine, aux_path2, 'get_name')
+        aux_address2 = engine.executed_script_hash.to_array()
 
+        engine = TestEngine()
         engine.add_neo(aux_address, transferred_amount_neo)
         engine.add_gas(aux_address2, transferred_amount_gas)
 
@@ -154,17 +155,18 @@ class TestHTLCTemplate(BoaTest):
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
-        output, manifest = self.get_output(path)
-        htlc_address = hash160(output)
+        self.run_smart_contract(engine, path, 'refund')
+        htlc_address = engine.executed_script_hash.to_array()
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
 
         aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
-        output, manifest = self.get_output(aux_path2)
-        aux_address2 = hash160(output)
+        self.run_smart_contract(engine, aux_path2, 'get_name')
+        aux_address2 = engine.executed_script_hash.to_array()
 
+        engine = TestEngine()
         engine.add_neo(aux_address, transferred_amount_neo)
         engine.add_gas(aux_address2, transferred_amount_gas)
 
@@ -265,17 +267,18 @@ class TestHTLCTemplate(BoaTest):
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
-        output, manifest = self.get_output(path)
-        htlc_address = hash160(output)
+        self.run_smart_contract(engine, path, 'refund')
+        htlc_address = engine.executed_script_hash.to_array()
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
 
         aux_path2 = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract_2.py')
-        output, manifest = self.get_output(aux_path2)
-        aux_address2 = hash160(output)
+        self.run_smart_contract(engine, aux_path2, 'get_name')
+        aux_address2 = engine.executed_script_hash.to_array()
 
+        engine = TestEngine()
         engine.add_neo(aux_address, transferred_amount_neo)
         engine.add_gas(aux_address2, transferred_amount_gas)
 

@@ -55,3 +55,8 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
 @public
 def onNEP11Payment(from_address: UInt160, amount: int, token_id: ByteString, data: Any):
     pass
+
+
+@public
+def get_name() -> str:
+    return 'Test Contract'

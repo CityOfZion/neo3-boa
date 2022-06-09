@@ -4,7 +4,6 @@ from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.interop.interop import Interop
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -20,19 +19,19 @@ class TestContractInterop(BoaTest):
     def test_call_contract(self):
         path = self.get_contract_path('CallScriptHash.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
-
-        contract, manifest = self.get_output(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine = TestEngine()
+        expected_output = self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
-        self.assertEqual(3, result)
+        self.assertEqual(expected_output, result)
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, -24])
         self.assertEqual(-66, result)
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, 24])
@@ -41,13 +40,13 @@ class TestContractInterop(BoaTest):
     def test_call_contract_with_cast(self):
         path = self.get_contract_path('CallScriptHashWithCast.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
-
-        contract, manifest = self.get_output(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine = TestEngine()
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
         engine.add_contract(call_contract_path)
@@ -60,27 +59,29 @@ class TestContractInterop(BoaTest):
         call_contract_path = self.get_contract_path('test_sc/list_test', 'IntList.py')
         Boa3.compile_and_save(call_contract_path)
 
-        contract, manifest = self.get_output(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
+        engine = TestEngine()
+        expected_output = self.run_smart_contract(engine, call_contract_path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
-        self.assertEqual([1, 2, 3], result)
+        self.assertEqual(expected_output, result)
 
     def test_call_contract_with_flags(self):
         path = self.get_contract_path('CallScriptHashWithFlags.py')
         call_contract_path = self.get_contract_path('CallFlagsUsage.py')
 
-        contract, manifest = self.compile_and_save(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
+        engine = TestEngine()
+        self.run_smart_contract(engine, call_contract_path, 'notify_user')
+        call_hash = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         engine.add_contract(call_contract_path)
@@ -227,12 +228,11 @@ class TestContractInterop(BoaTest):
 
     def test_destroy_contract(self):
         path = self.get_contract_path('DestroyContract.py')
-        output = Boa3.compile(path)
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
-        script_hash = hash160(output)
+        script_hash = engine.executed_script_hash.to_array()
         call_contract_path = self.get_contract_path('CallScriptHash.py')
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, call_contract_path, 'Main',
@@ -330,11 +330,12 @@ class TestContractInterop(BoaTest):
         call_contract_path = self.get_contract_path('GetCallFlags.py')
         Boa3.compile_and_save(call_contract_path)
 
-        contract, manifest = self.get_output(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
+        engine = TestEngine()
+        self.run_smart_contract(engine, call_contract_path, 'main')
+        call_hash = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'main')
         engine.add_contract(call_contract_path)
@@ -361,18 +362,17 @@ class TestContractInterop(BoaTest):
     def test_import_contract(self):
         path = self.get_contract_path('ImportContract.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(path)
-        Boa3.compile_and_save(call_contract_path)
-
-        contract, manifest = self.get_output(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
 
         engine = TestEngine()
+        expected_output = self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash, 'add', [1, 2])
-        self.assertEqual(3, result)
+        self.assertEqual(expected_output, result)
 
         result = self.run_smart_contract(engine, path, 'call_flags_all')
         from boa3.neo3.contracts import CallFlags
@@ -382,18 +382,16 @@ class TestContractInterop(BoaTest):
         path = self.get_contract_path('ImportInteropContract.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
 
-        self.compile_and_save(path)
-        self.compile_and_save(call_contract_path)
-
-        contract, manifest = self.get_output(call_contract_path)
-        call_hash = hash160(contract)
-        call_contract_path = call_contract_path.replace('.py', '.nef')
+        engine = TestEngine()
+        expected_output = self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
+        call_contract_path = call_contract_path.replace('.py', '.nef')
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash, 'add', [1, 2])
-        self.assertEqual(3, result)
+        self.assertEqual(expected_output, result)
 
         result = self.run_smart_contract(engine, path, 'call_flags_all')
         from boa3.neo3.contracts import CallFlags

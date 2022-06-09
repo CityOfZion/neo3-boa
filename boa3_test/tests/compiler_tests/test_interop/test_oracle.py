@@ -1,6 +1,5 @@
 from boa3 import constants
 from boa3.exception import CompilerError
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -15,8 +14,6 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request(self):
         path = self.get_contract_path('OracleRequestCall.py')
-        output, manifest = self.compile_and_save(path)
-        contract_script = hash160(output)
 
         engine = TestEngine()
 
@@ -27,6 +24,7 @@ class TestNativeContracts(BoaTest):
         result = self.run_smart_contract(engine, path, 'oracle_call',
                                          test_url, request_filter, callback, None, gas_for_response)
         self.assertIsVoid(result)
+        contract_script = engine.executed_script_hash.to_array()
 
         oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(1, len(oracle_requests))
@@ -77,8 +75,6 @@ class TestNativeContracts(BoaTest):
 
     def test_import_interop_oracle(self):
         path = self.get_contract_path('ImportOracle.py')
-        output, manifest = self.compile_and_save(path)
-        contract_script = hash160(output)
 
         engine = TestEngine()
 
@@ -89,6 +85,7 @@ class TestNativeContracts(BoaTest):
         result = self.run_smart_contract(engine, path, 'oracle_call',
                                          test_url, request_filter, callback, None, gas_for_response)
         self.assertIsVoid(result)
+        contract_script = engine.executed_script_hash.to_array()
 
         oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(1, len(oracle_requests))
@@ -104,8 +101,6 @@ class TestNativeContracts(BoaTest):
 
     def test_import_interop_oracle_package(self):
         path = self.get_contract_path('ImportInteropOracle.py')
-        output, manifest = self.compile_and_save(path)
-        contract_script = hash160(output)
 
         engine = TestEngine()
 
@@ -116,6 +111,7 @@ class TestNativeContracts(BoaTest):
         result = self.run_smart_contract(engine, path, 'oracle_call',
                                          test_url, request_filter, callback, None, gas_for_response)
         self.assertIsVoid(result)
+        contract_script = engine.executed_script_hash.to_array()
 
         oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(1, len(oracle_requests))

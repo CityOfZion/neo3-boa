@@ -1,7 +1,6 @@
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -25,14 +24,15 @@ class TestTemplate(BoaTest):
         path_zgas = self.get_contract_path('wrapped_gas.py')
         engine = TestEngine()
 
+        self.run_smart_contract(engine, path_zneo, 'symbol')
+        zneo_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zgas, 'symbol')
+        zgas_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path_zneo)
-        zneo_address = hash160(output)
-
-        output, manifest = self.get_output(path_zgas)
-        zgas_address = hash160(output)
 
         # won't work because it needs the owner signature
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
@@ -98,21 +98,22 @@ class TestTemplate(BoaTest):
         path_zgas = self.get_contract_path('wrapped_gas.py')
         engine = TestEngine()
 
+        self.run_smart_contract(engine, path, 'symbol')
+        amm_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_aux, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zneo, 'symbol')
+        zneo_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zgas, 'symbol')
+        zgas_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        amm_address = hash160(output)
-
-        output, manifest = self.get_output(path_aux)
-        aux_address = hash160(output)
-
-        output, manifest = self.get_output(path_zneo)
-        zneo_address = hash160(output)
-
-        output, manifest = self.get_output(path_zgas)
-        zgas_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
@@ -148,21 +149,22 @@ class TestTemplate(BoaTest):
         path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
+        self.run_smart_contract(engine, path, 'symbol')
+        amm_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_aux, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zneo, 'symbol')
+        zneo_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zgas, 'symbol')
+        zgas_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        amm_address = hash160(output)
-
-        output, manifest = self.get_output(path_zneo)
-        zneo_address = hash160(output)
-
-        output, manifest = self.get_output(path_zgas)
-        zgas_address = hash160(output)
-
-        output, manifest = self.get_output(path_aux)
-        aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
@@ -371,21 +373,22 @@ class TestTemplate(BoaTest):
         path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
+        self.run_smart_contract(engine, path, 'symbol')
+        amm_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_aux, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zneo, 'symbol')
+        zneo_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zgas, 'symbol')
+        zgas_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        amm_address = hash160(output)
-
-        output, manifest = self.get_output(path_zneo)
-        zneo_address = hash160(output)
-
-        output, manifest = self.get_output(path_zgas)
-        zgas_address = hash160(output)
-
-        output, manifest = self.get_output(path_aux)
-        aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
@@ -509,21 +512,22 @@ class TestTemplate(BoaTest):
         path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
+        self.run_smart_contract(engine, path, 'symbol')
+        amm_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_aux, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zneo, 'symbol')
+        zneo_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zgas, 'symbol')
+        zgas_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        amm_address = hash160(output)
-
-        output, manifest = self.get_output(path_zneo)
-        zneo_address = hash160(output)
-
-        output, manifest = self.get_output(path_zgas)
-        zgas_address = hash160(output)
-
-        output, manifest = self.get_output(path_aux)
-        aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
@@ -645,21 +649,22 @@ class TestTemplate(BoaTest):
         path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
+        self.run_smart_contract(engine, path, 'symbol')
+        amm_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_aux, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zneo, 'symbol')
+        zneo_address = engine.executed_script_hash.to_array()
+
+        self.run_smart_contract(engine, path_zgas, 'symbol')
+        zgas_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        amm_address = hash160(output)
-
-        output, manifest = self.get_output(path_zneo)
-        zneo_address = hash160(output)
-
-        output, manifest = self.get_output(path_zgas)
-        zgas_address = hash160(output)
-
-        output, manifest = self.get_output(path_aux)
-        aux_address = hash160(output)
 
         result = self.run_smart_contract(engine, path, 'set_address', zneo_address, zgas_address,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])

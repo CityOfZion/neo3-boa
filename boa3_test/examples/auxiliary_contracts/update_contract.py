@@ -97,3 +97,8 @@ def balance_of(account: UInt160) -> int:
     """
     assert len(account) == 20
     return storage.get(account).to_int()
+
+
+@public
+def get_name() -> str:
+    return 'Test Contract'

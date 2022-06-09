@@ -2,7 +2,6 @@ from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -44,13 +43,13 @@ class TestBlockchainInterop(BoaTest):
         self.assertIsNone(result)
 
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
 
-        script, manifest = self.get_output(call_contract_path)
         nef, manifest = self.get_bytes_output(call_contract_path)
-        call_hash = hash160(script)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
+        engine = TestEngine()
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)
@@ -360,13 +359,13 @@ class TestBlockchainInterop(BoaTest):
         self.assertIsNone(result)
 
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
 
-        script, manifest = self.get_output(call_contract_path)
         nef, manifest = self.get_bytes_output(call_contract_path)
-        call_hash = hash160(script)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
+        engine = TestEngine()
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)
@@ -383,13 +382,13 @@ class TestBlockchainInterop(BoaTest):
         self.assertIsNone(result)
 
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
 
-        script, manifest = self.get_output(call_contract_path)
         nef, manifest = self.get_bytes_output(call_contract_path)
-        call_hash = hash160(script)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
+        engine = TestEngine()
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)

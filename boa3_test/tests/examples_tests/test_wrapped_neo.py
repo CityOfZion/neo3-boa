@@ -1,7 +1,6 @@
 from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -57,10 +56,7 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_total_transfer(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
-
         path = self.get_contract_path('wrapped_neo.py')
-        output, manifest = self.get_output(path)
-        wrapped_neo_address = hash160(output)
 
         engine = TestEngine()
 
@@ -68,6 +64,7 @@ class TestTemplate(BoaTest):
         result = self.run_smart_contract(engine, path, 'transfer',
                                          self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount, "")
         self.assertEqual(False, result)
+        wrapped_neo_address = engine.executed_script_hash.to_array()
 
         # should fail if the sender doesn't have enough balance
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -158,9 +155,10 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
 
-        output, manifest = self.get_output(path)
-        wrapped_neo_address = hash160(output)
+        self.run_smart_contract(engine, path, 'symbol')
+        wrapped_neo_address = engine.executed_script_hash.to_array()
 
+        engine = TestEngine()
         engine.add_neo(wrapped_neo_address, 10_000_000 * 10 ** 8)
         burned_amount = 100 * 10 ** 8
 
@@ -222,13 +220,14 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
+
+        self.run_smart_contract(engine, path, 'symbol')
+        wrapped_neo_address = engine.executed_script_hash.to_array()
+        self.run_smart_contract(engine, path_aux_contract, 'get_name')
+        aux_contract_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        wrapped_neo_address = hash160(output)
-        output, manifest = self.get_output(path_aux_contract)
-        aux_contract_address = hash160(output)
-
         allowed_amount = 10 * 10 ** 8
 
         # this approve will fail, because aux_contract_address doesn't have enough zNEO
@@ -266,13 +265,14 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
+
+        self.run_smart_contract(engine, path, 'symbol')
+        wrapped_neo_address = engine.executed_script_hash.to_array()
+        self.run_smart_contract(engine, path_aux_contract, 'get_name')
+        aux_contract_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        wrapped_neo_address = hash160(output)
-        output, manifest = self.get_output(path_aux_contract)
-        aux_contract_address = hash160(output)
-
         allowed_amount = 10 * 10 ** 8
 
         # aux_contract_address did not approve OTHER_SCRIPT_HASH
@@ -301,13 +301,14 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('wrapped_neo.py')
         path_aux_contract = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
+
+        self.run_smart_contract(engine, path, 'symbol')
+        wrapped_neo_address = engine.executed_script_hash.to_array()
+        self.run_smart_contract(engine, path_aux_contract, 'get_name')
+        aux_contract_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
-
-        output, manifest = self.get_output(path)
-        wrapped_neo_address = hash160(output)
-        output, manifest = self.get_output(path_aux_contract)
-        aux_contract_address = hash160(output)
-
         allowed_amount = 10 * 10 ** 8
 
         # OWNER will give zNEO to aux_contract_address so that it can approve another contracts
@@ -415,17 +416,16 @@ class TestTemplate(BoaTest):
 
     def test_wrapped_neo_on_nep17_payment(self):
         path = self.get_contract_path('wrapped_neo.py')
+        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
+        engine = TestEngine()
+
+        self.run_smart_contract(engine, path, 'symbol')
+        wrapped_neo_address = engine.executed_script_hash.to_array()
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
         engine = TestEngine()
         engine.add_contract(path.replace('.py', '.nef'))
-
-        aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-
-        output, manifest = self.get_output(path)
-        wrapped_neo_address = hash160(output)
-
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
-
         minted_amount = 10 * 10 ** 8
         engine.add_neo(aux_address, minted_amount)
 
