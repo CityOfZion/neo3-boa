@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support to Python 3.10
+- `to_script_hash` to convert ECPoint and public keys
+- `bytearray` constructor given array length
+
+
+### Changed
+- Updated debug file generation to map imported modules
+- Included `--debug` flag information in the docs
+- `x is None` and `x is not None` now have the same behaviour as `(not) isinstance(x, None)`
+- Importing packages inside `boa3` in a smart contract will always raise an `UnresolvedReference` error, except for `boa3.builtin`
+
+
+### Fixed
+- Fixed `bytearray` set value
+- Fixed bytecode generation for imported modules
+- Fixed standard validators event and type checking
+- Fixed global variables usage inside classes
+- Fixed `int.to_bytes(0)` return to a non-empty bytes  
 
 
 ## [0.11.2] - 2022-04-01
