@@ -395,3 +395,7 @@ class TestImport(BoaTest):
     def test_import_not_existing_method(self):
         path = self.get_contract_path('ImportNotExistingMethod.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_import_boa_invalid_package(self):
+        path = self.get_contract_path('ImportBoaInvalidPackage.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
