@@ -302,9 +302,9 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
     :type call_onPayment: bool
     """
     if call_onPayment:
-        if not isinstance(to_address, None):  # TODO: change to 'is not None' when `is` semantic is implemented
+        if to_address is not None:
             contract = ContractManagement.get_contract(to_address)
-            if not isinstance(contract, None):  # TODO: change to 'is not None' when `is` semantic is implemented
+            if contract is not None:
                 call_contract(to_address, 'onNEP17Payment', [from_address, amount, data])
 
 

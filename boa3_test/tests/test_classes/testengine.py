@@ -32,6 +32,7 @@ class TestEngine:
 
         self._test_engine_path = engine_path
         self._vm_state: VMState = VMState.NONE
+        self._executed_script_hash: Optional[UInt160] = None
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
 
@@ -58,6 +59,10 @@ class TestEngine:
     @property
     def gas_consumed(self) -> int:
         return self._gas_consumed
+
+    @property
+    def executed_script_hash(self) -> Optional[UInt160]:
+        return self._executed_script_hash
 
     @property
     def result_stack(self) -> List[Any]:
@@ -283,6 +288,9 @@ class TestEngine:
             if 'vmstate' in result:
                 self._vm_state = VMState.get_vm_state(result['vmstate'])
 
+            if 'executedscripthash' in result:
+                self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
+
             if 'gasconsumed' in result:
                 self._gas_consumed = int(result['gasconsumed'])
 
@@ -339,6 +347,7 @@ class TestEngine:
 
     def reset_state(self):
         self._vm_state = VMState.NONE
+        self._executed_script_hash = None
         self._gas_consumed = 0
         self._result_stack = []
         self._accounts = []

@@ -70,7 +70,17 @@ class Compiler:
         """
         if not self._analyser.is_analysed:
             raise NotLoadedException
-        return CodeGenerator.generate_code(self._analyser)
+        analyser = self._analyser.copy()
+        result = CodeGenerator.generate_code(analyser)
+        if len(result) == 0:
+            raise NotLoadedException(empty_script=True)
+
+        if constants.INITIALIZE_METHOD_ID in analyser.symbol_table:
+            self._analyser.symbol_table[constants.INITIALIZE_METHOD_ID] = analyser.symbol_table[constants.INITIALIZE_METHOD_ID]
+        if constants.DEPLOY_METHOD_ID in analyser.symbol_table:
+            self._analyser.symbol_table[constants.DEPLOY_METHOD_ID] = analyser.symbol_table[constants.DEPLOY_METHOD_ID]
+
+        return result
 
     def _save(self, output_path: str, debug: bool):
         """
@@ -80,10 +90,11 @@ class Compiler:
         :raise NotLoadedException: raised if no file were compiled
         :param debug: if nefdbgnfo file should be generated.
         """
+        is_bytecode_empty = len(self.bytecode) == 0
         if (self._analyser is None
                 or not self._analyser.is_analysed
-                or len(self.bytecode) == 0):
-            raise NotLoadedException
+                or is_bytecode_empty):
+            raise NotLoadedException(empty_script=is_bytecode_empty)
 
         generator = FileGenerator(self.bytecode, self._analyser, self._entry_smart_contract)
         with open(output_path, 'wb+') as nef_file:

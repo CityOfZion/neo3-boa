@@ -122,10 +122,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -163,10 +160,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -203,10 +197,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -243,10 +234,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -289,10 +277,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -329,10 +314,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -368,10 +350,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2
@@ -407,10 +386,7 @@ class TestCryptoLibClass(BoaTest):
         call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
-            Opcode.PUSHDATA1
-            + Integer(len(named_curve)).to_byte_array(min_length=1)
-            + named_curve
-            + Opcode.CONVERT + Type.int.stack_item
+            Opcode.PUSHINT8 + named_curve
             + Opcode.PUSHDATA1
             + Integer(len(byte_input2)).to_byte_array(min_length=1)
             + byte_input2

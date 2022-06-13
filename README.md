@@ -50,7 +50,7 @@
 
 ## Overview
 
-Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manisfest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
+Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manifest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
 
 Neo-boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
 
@@ -166,6 +166,23 @@ Debugger launch configuration example:
 }
 ```
 
+It's necessary to generate the nef debugger info file to use Neo Debugger.
+
+#### Using CLI
+
+```shell
+$ neo3-boa path/to/your/file.py -d|--debug
+```
+
+#### Using Python Script
+
+```python
+from boa3.boa3 import Boa3
+
+Boa3.compile_and_save('path/to/your/file.py', debug=True)
+```
+
+
 ### TestEngine
 
 #### Downloading
@@ -175,7 +192,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 > Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.1.0
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.2.1
 $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.11.3] - 2022-06-13
+### Added
+- Support to Python 3.10
+- `to_script_hash` to convert ECPoint and public keys
+- `bytearray` constructor given array length
+
+
+### Changed
+- Updated debug file generation to map imported modules
+- Included `--debug` flag information in the docs
+- `x is None` and `x is not None` now have the same behaviour as `(not) isinstance(x, None)`
+- Importing packages inside `boa3` in a smart contract will always raise an `UnresolvedReference` error, except for `boa3.builtin`
+
+
+### Fixed
+- Fixed `bytearray` set value
+- Fixed bytecode generation for imported modules
+- Fixed standard validators event and type checking
+- Fixed global variables usage inside classes
+- Fixed `int.to_bytes(0)` return to a non-empty bytes
+
+
 ## [0.11.2] - 2022-04-01
 ### Added
 - New compiling option to set the project root path
@@ -331,6 +353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.11.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.3
 [0.11.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.2
 [0.11.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.0
 [0.10.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.1

@@ -5,8 +5,8 @@ from boa3.builtin.type import UInt160
 
 transfer = CreateNewEvent(
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from', Union[UInt160, None]),
+        ('to', Union[UInt160, None]),
         ('amount', int)
     ],
     'Transfer'

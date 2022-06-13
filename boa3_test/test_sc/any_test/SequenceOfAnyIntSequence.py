@@ -1,6 +1,9 @@
 from typing import Sequence
 
+from boa3.builtin import public
 
+
+@public
 def Main():
     int_list = [1, 2, 3]
     any_tuple = (True, 1, 'ok')

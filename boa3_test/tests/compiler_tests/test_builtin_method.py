@@ -1,5 +1,3 @@
-import unittest
-
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.type.type import Type
@@ -336,7 +334,6 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([3, 2, 1], result)
 
-    @unittest.skip("reverse items doesn't work with bytestring")
     def test_reverse_mutable_sequence_with_builtin(self):
         path = self.get_contract_path('ReverseMutableSequenceBuiltinCall.py')
         output = Boa3.compile(path)
@@ -493,48 +490,41 @@ class TestBuiltinMethod(BoaTest):
     # region to_bytes test
 
     def test_int_to_bytes(self):
-        value = Integer(123).to_byte_array()
-        expected_output = (
-            Opcode.PUSHDATA1        # (123).to_bytes()
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IntToBytes.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
+        value = Integer(123).to_byte_array()
+        result = self.run_smart_contract(engine, path, 'int_to_bytes',
+                                         expected_result_type=bytes)
+        self.assertEqual(value, result)
+
+    def test_int_zero_to_bytes(self):
+        path = self.get_contract_path('IntZeroToBytes.py')
+        engine = TestEngine()
+
+        value = Integer(0).to_byte_array(min_length=1)
         result = self.run_smart_contract(engine, path, 'int_to_bytes',
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
     def test_int_to_bytes_with_builtin(self):
-        value = Integer(123).to_byte_array()
-        expected_output = (
-            Opcode.PUSHDATA1        # int.to_bytes(123)
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.CONVERT
-            + Type.int.stack_item
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('IntToBytesWithBuiltin.py')
-        output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
-
         engine = TestEngine()
+
+        value = Integer(123).to_byte_array()
         result = self.run_smart_contract(engine, path, 'int_to_bytes',
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
+
+    def test_int_to_bytes_as_parameter(self):
+        path = self.get_contract_path('IntToBytesAsParameter.py')
+        engine = TestEngine()
+
+        self.run_smart_contract(engine, path, 'int_to_bytes', 1111,
+                                expected_result_type=bytes)
+        from boa3.neo3.vm import VMState
+        # return is Void, checking to see if there is no error
+        self.assertEqual(engine.vm_state, VMState.HALT)
 
     def test_str_to_bytes(self):
         value = String('123').to_bytes()
@@ -542,8 +532,6 @@ class TestBuiltinMethod(BoaTest):
             Opcode.PUSHDATA1        # '123'.to_bytes()
             + Integer(len(value)).to_byte_array(min_length=1)
             + value
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 

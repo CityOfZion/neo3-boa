@@ -88,5 +88,9 @@ class UndefinedType:
     def __init__(self):
         pass
 
+    @property
+    def identifier(self) -> str:
+        return 'undefined'
+
 
 Undefined = UndefinedType()

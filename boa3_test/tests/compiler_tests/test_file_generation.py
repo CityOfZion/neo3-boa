@@ -128,7 +128,7 @@ class TestFileGeneration(BoaTest):
         abi = manifest['abi']
 
         self.assertIn('methods', abi)
-        self.assertEqual(0, len(abi['methods']))
+        self.assertEqual(1, len(abi['methods']))
 
         self.assertIn('events', abi)
         self.assertEqual(0, len(abi['events']))
@@ -186,6 +186,39 @@ class TestFileGeneration(BoaTest):
 
         self.assertIn('methods', abi)
         self.assertEqual(1, len(abi['methods']))
+
+        self.assertIn('events', abi)
+        self.assertEqual(1, len(abi['events']))
+
+        for abi_event in abi['events']:
+            self.assertIn('name', abi_event)
+            self.assertIn(abi_event['name'], events)
+            self.assertIn('parameters', abi_event)
+
+            event_args = events[abi_event['name']].args
+            for event_param in abi_event['parameters']:
+                self.assertIn('name', event_param)
+                self.assertIn(event_param['name'], event_args)
+                self.assertIn('type', event_param)
+                self.assertEqual(event_args[event_param['name']].type.abi_type,
+                                 event_param['type'])
+
+    def test_generate_manifest_file_with_imported_event(self):
+        path = self.get_contract_path('GenerationWithImportedEvent.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        events: Dict[str, Event] = {}
+        for name, method in self.get_compiler_analyser(compiler).symbol_table.items():
+            if isinstance(method, Event):
+                events[name] = method
+                if method.name not in events:
+                    events[method.name] = method
+
+        output, manifest = self.get_output(path)
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
 
         self.assertIn('events', abi)
         self.assertEqual(1, len(abi['events']))
@@ -490,20 +523,12 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(0, len(abi['events']))
 
     def test_generate_without_main_and_public_methods(self):
+        # since 0.11.2 methods that are not public nor are called are not generated to optimize code
+        # this test generates an empty contract, which results in failing compilation
         path = self.get_contract_path('GenerationWithoutMainAndPublicMethods.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
-        output, manifest = self.compile_and_save(path)
 
-        self.assertTrue(os.path.exists(expected_manifest_output))
-        self.assertIn('abi', manifest)
-        abi = manifest['abi']
-
-        self.assertNotIn('entryPoint', abi)
-        self.assertIn('methods', abi)
-        self.assertEqual(0, len(abi['methods']))
-
-        self.assertIn('events', abi)
-        self.assertEqual(0, len(abi['events']))
+        with self.assertRaises(NotLoadedException):
+            output, manifest = self.compile_and_save(path)
 
     def test_generate_manifest_file_abi_method_offset(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
@@ -647,7 +672,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(2, len(abi['methods']))
 
         self.assertIn('events', abi)
-        self.assertEqual(0, len(abi['events']))
+        self.assertEqual(1, len(abi['events']))
 
     def test_generate_with_user_module_import_with_project_root(self):
         path = self.get_contract_path('project_path', 'GenerationWithUserModuleImportsFromProjectRoot.py')
@@ -665,7 +690,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(2, len(abi['methods']))
 
         self.assertIn('events', abi)
-        self.assertEqual(0, len(abi['events']))
+        self.assertEqual(1, len(abi['events']))
 
     def test_compiler_error(self):
         path = self.get_contract_path('test_sc/built_in_methods_test', 'ClearTooManyParameters.py')

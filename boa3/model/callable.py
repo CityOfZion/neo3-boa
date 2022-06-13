@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from abc import ABC
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from boa3.model import set_internal_call
 from boa3.model.expression import IExpression
@@ -85,6 +85,8 @@ class Callable(IExpression, ABC):
         self.external_name: Optional[str] = external_name
         self.is_safe: bool = is_safe or (isinstance(public_decorator, PublicDecorator) and public_decorator.safe)
 
+        self._self_calls: Set[ast.AST] = set()
+
         super().__init__(origin_node)
 
         self.init_address: Optional[int] = None
@@ -157,6 +159,21 @@ class Callable(IExpression, ABC):
         else:
             from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
             return VMCodeMapping.instance().get_end_address(self.end_bytecode)
+
+    @property
+    def is_called(self) -> bool:
+        return len(self._self_calls) > 0
+
+    @property
+    def is_compiled(self) -> bool:
+        return self.start_address is not None and self.end_address is not None
+
+    def add_call_origin(self, origin: ast.AST) -> bool:
+        try:
+            self._self_calls.add(origin)
+            return True
+        except BaseException:
+            return False
 
     def __str__(self) -> str:
         args_types: List[str] = [str(arg.type) for arg in self.args.values()]

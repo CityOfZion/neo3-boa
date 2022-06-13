@@ -2,7 +2,6 @@ import json
 
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -32,13 +31,12 @@ class TestContractManagementContract(BoaTest):
         self.assertIsNone(result)
 
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
-
-        script, manifest = self.get_output(call_contract_path)
         nef, manifest = self.get_bytes_output(call_contract_path)
-        call_hash = hash160(script)
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
+        engine = TestEngine()
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)
@@ -142,12 +140,11 @@ class TestContractManagementContract(BoaTest):
 
     def test_destroy_contract(self):
         path = self.get_contract_path('DestroyContract.py')
-        output = Boa3.compile(path)
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertIsVoid(result)
 
-        script_hash = hash160(output)
+        script_hash = engine.executed_script_hash.to_array()
         call_contract_path = self.get_contract_path('boa3_test/test_sc/interop_test/contract', 'CallScriptHash.py')
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, call_contract_path, 'Main',

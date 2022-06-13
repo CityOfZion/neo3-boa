@@ -1,7 +1,7 @@
 1. Getting Started
 ##################
 
-**Neo3-Boa** is a tool for creating **Neo Smart Contracts using Python**. It compiles ``.py`` files to ``.nef`` and ``.manisfest.json`` formats for usage in the **Neo Virtual Machine** which is used to execute contracts on the **Neo Blockchain**.
+**Neo3-Boa** is a tool for creating **Neo Smart Contracts using Python**. It compiles ``.py`` files to ``.nef`` and ``.manifest.json`` formats for usage in the **Neo Virtual Machine** which is used to execute contracts on the **Neo Blockchain**.
 
 1.1 Installation
 ================
@@ -107,6 +107,24 @@ Neo3-boa is compatible with the Neo Debugger. Debugger launch configuration exam
         ]
     }
 
+It's necessary to generate the nef debugger info file to use Neo Debugger.
+
+Using CLI
+---------
+::
+
+    $ neo3-boa path/to/your/file.py -d|--debug
+
+Using Python Script
+-------------------
+
+::
+
+    from boa3.boa3 import Boa3
+
+    Boa3.compile_and_save('path/to/your/file.py', debug=True)
+
+
 Test Engine
 -----------
 
@@ -120,7 +138,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 
 ::
     
-    $ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.1.0
+    $ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.2.1
     $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 
 

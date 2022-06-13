@@ -32,7 +32,9 @@ def public(name: str = None, safe: bool = True, *args, **kwargs):
     :param safe: Whether this method is an abi safe method. False by default
     :type safe: bool
     """
-    pass
+    def decorator_wrapper(*args, **kwargs):
+        pass
+    return decorator_wrapper
 
 
 def metadata(*args):

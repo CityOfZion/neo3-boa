@@ -13,10 +13,12 @@ class ClassInitMethod(IdentifiedSymbol, Method):
         args = {
             'self': self_var
         }
+        base_init = None
         if len(user_class.bases) == 1:
             # TODO: change when class inheritance with multiple bases is implemented
             # use update to keep the original order
-            args.update(user_class.bases[0].constructor_method().args)
+            base_init = user_class.bases[0].constructor_method()
+            args.update(base_init.args)
             # but change the self type
             args['self'] = self_var
 
@@ -29,6 +31,10 @@ class ClassInitMethod(IdentifiedSymbol, Method):
         # __init__ method behave like class methods
         from boa3.model.builtin.builtin import Builtin
         self.decorators.append(Builtin.ClassMethodDecorator)
+
+        if base_init is not None:
+            origin = self.origin if self.origin else self
+            base_init.add_call_origin(origin)
 
     @property
     def _args_on_stack(self) -> int:

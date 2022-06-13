@@ -19,7 +19,7 @@ from boa3.model.callable import Callable
 from boa3.model.decorator import IDecorator
 from boa3.model.event import Event
 from boa3.model.expression import IExpression
-from boa3.model.imports.importsymbol import Import
+from boa3.model.imports.importsymbol import BuiltinImport, Import
 from boa3.model.imports.package import Package
 from boa3.model.method import Method
 from boa3.model.module import Module
@@ -59,14 +59,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         from boa3.analyser.analyser import Analyser
         if isinstance(analysed_files, dict):
-            analysed_files = {file_path.replace(os.sep, constants.PATH_SEPARATOR): file_analyser
-                              for file_path, file_analyser in analysed_files.items()
-                              if isinstance(file_path, str)}
+            for file_path, file_analyser in analysed_files.copy().items():
+                fixed_path = file_path.replace(os.sep, constants.PATH_SEPARATOR)
+                if file_path != fixed_path:
+                    analysed_files.pop(file_path)
+                    analysed_files[fixed_path] = file_analyser
         else:
             analysed_files = {}
 
         analysed_files[filename.replace(os.sep, constants.PATH_SEPARATOR)] = analyser
-        self._analysed_files: Optional[Dict[str, Analyser]] = analysed_files
+        self._analysed_files: Dict[str, Analyser] = analysed_files
 
         if isinstance(import_stack, list):
             import_stack = [file_path.replace(os.sep, constants.PATH_SEPARATOR)
@@ -91,6 +93,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
         self.imported_nodes: List[ast.AST] = []
+
+        if self.filename:
+            self._tree.filename = self.filename
         self.visit(self._tree)
 
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
@@ -130,6 +135,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             global_symbols.update(mod.symbols)
 
         return global_symbols
+
+    @property
+    def analysed_files(self) -> Dict[str, Any]:
+        return self._analysed_files.copy()
 
     def __include_variable(self, var_id: str, var_type_id: Union[str, IType],
                            source_node: ast.AST,
@@ -406,7 +415,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         import_alias[imported_symbol_id] = imported_symbol_id
 
             # includes the module to be able to generate the functions
-            imported_module = Import(analyser.path, analyser.tree, analyser, import_alias)
+            imported_module = self._build_import(analyser.path, analyser.tree, analyser, import_alias)
             self._current_scope.include_symbol(import_from.module, imported_module)
 
             for name, alias in import_alias.items():
@@ -434,17 +443,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
 
-                imported_module = Import(analyser.path, analyser.tree, analyser)
+                imported_module = self._build_import(analyser.path, analyser.tree, analyser)
                 self._current_scope.include_symbol(alias, imported_module)
+
+    def _build_import(self, origin: str, syntax_tree: ast.AST,
+                      import_analyser: ImportAnalyser,
+                      imported_symbols: Dict[str, ISymbol] = None) -> Import:
+
+        if import_analyser.is_builtin_import:
+            return BuiltinImport(origin, syntax_tree, import_analyser, imported_symbols)
+
+        return Import(origin, syntax_tree, import_analyser, imported_symbols)
 
     def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
         already_imported = {imported.origin: imported.analyser
                             for imported in self._current_module.symbols.values()
                             if isinstance(imported, Import) and imported.analyser is not None
                             }
-
-        if isinstance(self._analysed_files, dict):
-            already_imported.update(self._analysed_files)
+        already_imported.update(self._analysed_files)
 
         analyser = ImportAnalyser(import_target=target,
                                   root_folder=self.root_folder,
@@ -469,10 +485,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if circular_import_error is not None:
                 # if the problem was a circular import, the error was already logged
                 self.errors.append(circular_import_error)
+            elif hasattr(analyser, 'is_namespace_package') and analyser.is_namespace_package:
+                return analyser
             else:
                 self._log_unresolved_import(origin_node, target)
 
         else:
+            analyser.update_external_analysed_files(self._analysed_files)
             return analyser
 
     def visit_Module(self, module: ast.Module):
@@ -516,7 +535,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 module.body.remove(stmt)
 
         # TODO: include the body of the builtin methods to the ast
-        # TODO: get module name
         self.modules['main'] = mod
         module_scope = self._scope_stack.pop()
         for symbol_id, symbol in module_scope.symbols.items():
@@ -960,6 +978,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         var_id: str = self.visit(ann_assign.target)
         var_type: IType = self.visit_type(ann_assign.annotation)
+        if var_type is Builtin.Event:
+            self.visit(ann_assign.value)
 
         # TODO: check if the annotated type and the value type are the same
         return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
@@ -1026,7 +1046,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         symbol = self.get_symbol(value, is_internal=is_internal, origin_node=subscript.value) if isinstance(value, str) else value
 
         if isinstance(subscript.ctx, ast.Load):
-            if isinstance(symbol, (Collection, MetaType)) and isinstance(subscript.value, (ast.Name, ast.NameConstant)):
+            if (isinstance(symbol, (Collection, MetaType))
+                    and isinstance(subscript.value, (ast.Name, ast.NameConstant, ast.Attribute))):
                 # for evaluating names like List[str], Dict[int, bool], etc
                 value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
                 values_type: Iterable[IType] = self.get_values_type(value)

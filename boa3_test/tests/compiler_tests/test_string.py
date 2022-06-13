@@ -414,7 +414,7 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', string)
 
         with self.assertRaises(AssertionError):
-            # TODO: upper was implemented for ASCII characters only
+            # TODO: lower was implemented for ASCII characters only
             self.assertEqual(string.lower(), result)
 
     def test_string_startswith_method(self):

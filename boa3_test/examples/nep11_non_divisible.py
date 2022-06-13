@@ -184,7 +184,6 @@ def transfer(to_address: UInt160, token_id: ByteString, data: Any) -> bool:
     :return: whether the transfer was successful
     :raise AssertionError: raised if `to_address` length is not 20 or if `token_id` length is greater than 64.
     """
-    # TODO: Implement this transfer method on issue #855
     pass
 
 

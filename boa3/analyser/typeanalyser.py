@@ -197,6 +197,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 self._validate_return(function)
 
             method_scope = self.pop_local_scope()
+            for symbol_id, symbol in self._current_method.symbols.items():
+                if isinstance(symbol, Variable) and symbol.type is UndefinedType and symbol_id in method_scope:
+                    new_scope_symbol = method_scope[symbol_id]
+                    if hasattr(new_scope_symbol, 'type') and new_scope_symbol.type is not UndefinedType:
+                        symbol.set_type(new_scope_symbol.type)
+
             self._current_method = None
         elif (isinstance(method, Event)  # events don't have return
               and function.returns is not None):
@@ -639,7 +645,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             outer_symbol = self.get_symbol(new_symbol)
             outer_value_type = outer_symbol.type if isinstance(outer_symbol, IExpression) else Type.none
 
-            new_type = Type.union.build([new_value_type, outer_value_type])
+            if isinstance(outer_symbol, IType):
+                new_type = Type.union.build([new_value_type, outer_value_type])
+            else:
+                new_type = new_value_type
             scope.include_symbol(new_symbol, Variable(new_type))
 
     def visit_IfExp(self, if_node: ast.IfExp):
@@ -696,22 +705,40 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 condition = condition.operand
                 negate = True
 
-            if (isinstance(condition, ast.Call) and isinstance(condition.func, ast.Name)
-                    and condition.func.id in is_instance_objs and len(condition.args) == 2):
-                original = self.get_symbol(condition.args[0])
-                if isinstance(original, Variable) and isinstance(condition.args[0], ast.Name):
-                    original_id = condition.args[0].id
+            # verifies if condition is an is_instance condition
+            is_instance_condition = (isinstance(condition, ast.Call) and isinstance(condition.func, ast.Name)
+                                     and condition.func.id in is_instance_objs and len(condition.args) == 2)
+
+            # verifies if condition is a identity condition (is None or is not None)
+            identity_condition = (isinstance(condition, ast.Compare)
+                                  and isinstance(condition.ops[0], (type(BinaryOp.IsNone), type(BinaryOp.IsNotNone))))
+
+            if identity_condition and isinstance(condition.ops[0], type(BinaryOp.IsNotNone)):
+                negate = True
+
+            if is_instance_condition or identity_condition:
+                if is_instance_condition:
+                    left_value = condition.args[0]
+                    right_value = condition.args[1]
+
+                else:
+                    left_value = condition.left
+                    right_value = Type.none
+
+                original = self.get_symbol(left_value)
+                if isinstance(original, Variable) and isinstance(left_value, ast.Name):
+                    original_id = left_value.id
                     original_type = (original.type
                                      if original_id not in is_instance_symbols
                                      else is_instance_symbols[original_id])
 
-                    instance_obj = self.get_symbol(condition.func.id)
+                    instance_obj = self.get_symbol(condition.func.id) if is_instance_condition else None
                     if isinstance(instance_obj, type(Builtin.IsInstance)):
                         is_instance_type = instance_obj._instances_type
                         if isinstance(is_instance_type, list):
                             is_instance_type = Type.union.build(is_instance_type)
                     else:
-                        is_instance_type = self.get_type(condition.args[1])
+                        is_instance_type = self.get_type(right_value)
                     is_instance_type = is_instance_type.intersect_type(original_type)
                     negation = original_type.except_type(is_instance_type)
                     resulting_type = is_instance_type if not negate else negation
@@ -723,7 +750,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                     if len(is_instance_symbols) == 1:
                         is_not_instance_symbols[original_id] = is_instance_type if negate else negation
-                    elif len(is_not_instance_symbols) > 1:
+                    elif len(is_not_instance_symbols) == 1:
+                        # if there is more than one isinstance it's not possible to determine in compiler time what is
+                        # the type of the variables on the else body
                         is_not_instance_symbols.clear()
 
         for key, value in is_instance_symbols.copy().items():
@@ -783,7 +812,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
                 )
             elif not operation.is_supported:
-                # TODO: concat and power not implemented yet
                 # number float division is not supported by Neo VM
                 self._log_error(
                     CompilerError.NotSupportedOperation(node.lineno, node.col_offset, operator)
@@ -957,7 +985,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         CompilerError.NotSupportedOperation(line, col, operator)
                     )
                 elif not operation.is_supported:
-                    # TODO: is, is not and eq were not implemented yet
                     self._log_error(
                         CompilerError.NotSupportedOperation(line, col, operator)
                     )
@@ -1384,6 +1411,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return None
 
     def update_callable_after_validation(self, call: ast.Call, callable_id: str, callable_target: Callable):
+        callable_target.add_call_origin(call)
+
         # if the arguments are not generic, include the specified method in the symbol table
         if (isinstance(callable_target, IBuiltinMethod)
                 and callable_target.identifier != callable_id
@@ -1551,12 +1580,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
 
         origin = value
+        module_symbols = origin.symbols if isinstance(origin, Package) else symbol.methods if isinstance(symbol, Import) else None
         if isinstance(origin, Attribute):
             while isinstance(origin, Attribute):
                 origin = origin.value
         else:
             origin = attribute.value
 
+        is_invalid_method = module_symbols is not None and isinstance(attr_symbol, Method) and attribute.attr not in module_symbols
         is_from_class_name = isinstance(origin, ast.Name) and isinstance(self.get_symbol(origin.id), UserClass)
         is_instance_variable_from_class = (isinstance(symbol, UserClass)
                                            and attribute.attr in symbol.instance_variables)
@@ -1564,13 +1595,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties
 
         if ((attr_symbol is None and hasattr(symbol, 'symbols'))
+                or is_invalid_method
                 or (is_from_class_name and is_instance_variable_from_class)
                 or (is_from_class_name and is_property_from_class)):
             # if it couldn't find the symbol in the attribute symbols, raise unresolved reference
             self._log_error(
                 CompilerError.UnresolvedReference(
                     attribute.lineno, attribute.col_offset,
-                    symbol_id='{0}.{1}'.format(symbol.identifier, attribute.attr)
+                    symbol_id='{0}.{1}'.format(symbol.identifier if module_symbols is None else attribute.value.id, attribute.attr)
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 
@@ -1606,6 +1638,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             attr_value = attribute.value
 
+        if isinstance(attr_symbol, Property):
+            if isinstance(attribute.ctx, ast.Load):
+                attr_symbol.getter.add_call_origin(attribute)
         return Attribute(attr_value, attribute.attr, attr_symbol, attribute)
 
     def visit_Constant(self, constant: ast.Constant) -> Any:

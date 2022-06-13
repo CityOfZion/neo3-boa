@@ -263,6 +263,29 @@ class TestNeoTypes(BoaTest):
         path = self.get_contract_path('ecpoint', 'ECPointCallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_ecpoint_script_hash(self):
+        path = self.get_contract_path('ecpoint', 'ECPointScriptHash.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        from boa3.neo import public_key_to_script_hash
+        value = bytes(range(33))
+        script_hash = public_key_to_script_hash(value)
+
+        result = self.run_smart_contract(engine, path, 'Main', value)
+        self.assertEqual(script_hash, result)
+
+    def test_ecpoint_script_hash_from_builtin(self):
+        path = self.get_contract_path('ecpoint', 'ECPointScriptHashBuiltinCall.py')
+        engine = TestEngine()
+
+        from boa3.neo import public_key_to_script_hash
+        value = bytes(range(33))
+        script_hash = public_key_to_script_hash(value)
+
+        result = self.run_smart_contract(engine, path, 'Main', value)
+        self.assertEqual(script_hash, result)
+
     # endregion
 
     # region ByteString

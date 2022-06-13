@@ -165,7 +165,37 @@ class TestMetadata(BoaTest):
         self.assertIn('supportedstandards', manifest)
         self.assertIsInstance(manifest['supportedstandards'], list)
         self.assertGreater(len(manifest['supportedstandards']), 0)
-        self.assertIn('NEP-5', manifest['supportedstandards'])
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+        from boa3_test.tests.test_classes.testengine import TestEngine
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+        self.assertEqual(manifest_struct, result[4])
+
+    def test_metadata_info_supported_standards_with_imported_event(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsImportedEvent.py')
+        output, manifest = self.get_output(path)
+
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('events', abi)
+        self.assertEqual(1, len(abi['events']))
+
+        self.assertIn('name', abi['events'][0])
+        self.assertEqual('Transfer', abi['events'][0]['name'])
 
     def test_metadata_info_supported_standards_missing_implementations_nep17(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')

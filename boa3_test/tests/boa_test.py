@@ -5,6 +5,7 @@ from unittest import TestCase
 from boa3 import constants, env
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.compiler import Compiler
+from boa3.exception.CompilerError import CompilerError
 from boa3.model.method import Method
 from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.vm.type.Integer import Integer
@@ -49,7 +50,21 @@ class BoaTest(TestCase):
         import re
         return re.sub('\n[ \t]+', '\n' + ' ' * no_spaces, text)
 
-    def assertCompilerLogs(self, expected_logged_exception, path):
+    def assertCompilerLogs(self, expected_logged_exception, path) -> Union[bytes, str]:
+        output, error_msg = self.assertCompilerLogsError(expected_logged_exception, path)
+        if not issubclass(expected_logged_exception, CompilerError):
+            return output
+        else:
+            # filter to get only the error message, without location information
+            import re
+
+            result = re.search('^\\d+:\\d+ - (?P<msg>.*?)\t\\W+\\<.*?\\>', error_msg)
+            try:
+                return result.group('msg')
+            except BaseException:
+                return output
+
+    def assertCompilerLogsError(self, expected_logged_exception, path):
         output = None
         with self.assertLogs() as log:
             from boa3.exception.NotLoadedException import NotLoadedException
@@ -64,9 +79,11 @@ class BoaTest(TestCase):
             import logging
             logging.log(level=logger.levelno, msg=logger.msg)
 
-        if len([exception for exception in log.records if isinstance(exception.msg, expected_logged_exception)]) <= 0:
+        expected_logged = [exception for exception in log.records
+                           if isinstance(exception.msg, expected_logged_exception)]
+        if len(expected_logged) < 1:
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
-        return output
+        return output, expected_logged[0].message
 
     def assertIsVoid(self, obj: Any):
         if obj is not VoidType:

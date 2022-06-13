@@ -1,3 +1,4 @@
+import ast
 from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -17,7 +18,9 @@ class ByteArrayMethod(IBuiltinMethod):
 
         identifier = 'bytearray'
         args: Dict[str, Variable] = {'object': Variable(argument_type)}
-        super().__init__(identifier, args, return_type=Type.bytearray)
+        object_default = ast.parse(f"{Type.int.default_value}"
+                                   ).body[0].value
+        super().__init__(identifier, args, defaults=[object_default], return_type=Type.bytearray)
 
     @property
     def _arg_object(self) -> Variable:
@@ -42,7 +45,10 @@ class ByteArrayMethod(IBuiltinMethod):
 
         param_type: IType = params[0].type if isinstance(params[0], IExpression) else params[0]
         from boa3.model.type.type import Type
-        # TODO: change when building bytearray given size is implemented
+
+        if Type.int.is_type_of(param_type):
+            return True
+
         return (isinstance(param_type, SequenceType)
                 and (param_type is Type.str
                      or isinstance(param_type.value_type, type(Type.int))
@@ -50,13 +56,19 @@ class ByteArrayMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return []
+        from boa3.neo.vm.type.StackItem import StackItemType
+        from boa3.model.type.type import Type
+
+        if self._arg_object.type is Type.int:
+            return [(Opcode.NEWBUFFER, b'')]
+        else:
+            return [(Opcode.CONVERT, StackItemType.Buffer)]
 
     @property
     def is_supported(self) -> bool:
         # TODO: change when building bytearray from string and int iterators are implemented
         from boa3.model.type.type import Type
-        return self._arg_object.type is Type.bytes
+        return self._arg_object.type in (Type.bytes, Type.int)
 
     @property
     def _args_on_stack(self) -> int:

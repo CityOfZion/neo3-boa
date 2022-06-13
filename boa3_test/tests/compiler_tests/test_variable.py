@@ -576,6 +576,16 @@ class TestVariable(BoaTest):
         result = self.run_smart_contract(engine, path, 'example')
         self.assertEqual(5, result)
 
+    def test_global_variable_in_class_method(self):
+        path = self.get_contract_path('GlobalVariableInClassMethod.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'use_variable_in_func')
+        self.assertEqual(42, result)
+
+        result = self.run_smart_contract(engine, path, 'use_variable_in_map')
+        self.assertEqual({'val1': 1, 'val2': 2, 'bar': 42}, result)
+
     def test_get_global_variable_value_written_after(self):
         expected_output = (
             Opcode.LDSFLD + b'\x07'

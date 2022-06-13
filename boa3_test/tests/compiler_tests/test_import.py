@@ -1,6 +1,5 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
@@ -121,6 +120,26 @@ class TestImport(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
+
+    def test_variable_from_imported_module(self):
+        path = self.get_contract_path('variable_import', 'VariableFromImportedModule.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'get_foo', expected_result_type=bytes)
+        self.assertEqual(b'Foo', result)
+
+        result = self.run_smart_contract(engine, path, 'get_bar')
+        self.assertEqual('bar', result)
+
+    def test_variable_access_from_imported_module(self):
+        path = self.get_contract_path('variable_import', 'VariableAccessFromImportedModule.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'get_foo', expected_result_type=bytes)
+        self.assertEqual(b'Foo', result)
+
+        result = self.run_smart_contract(engine, path, 'get_bar')
+        self.assertEqual('bar', result)
 
     def test_typing_python_library(self):
         path = self.get_contract_path('ImportPythonLib.py')
@@ -258,8 +277,10 @@ class TestImport(BoaTest):
 
     def test_import_user_module_with_not_imported_symbols(self):
         path = self.get_contract_path('ImportUserModuleWithNotImportedSymbols.py')
-        output, manifest = self.compile_and_save(path)
-        script = hash160(output)
+
+        engine = TestEngine()
+        self.run_smart_contract(engine, path, 'main', [], b'')
+        script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main', [], script)
@@ -334,3 +355,47 @@ class TestImport(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(3, result)
+
+    def test_import_module_with_init(self):
+        path = self.get_contract_path('ImportModuleWithInit.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_imported_method')
+        self.assertEqual([], result)
+
+        result = self.run_smart_contract(engine, path, 'call_imported_variable')
+        self.assertEqual(42, result)
+
+    def test_import_module_without_init(self):
+        path = self.get_contract_path('ImportModuleWithoutInit.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'call_imported_method')
+        self.assertEqual({}, result)
+
+        result = self.run_smart_contract(engine, path, 'call_imported_variable')
+        self.assertEqual([], result)
+
+    def test_import_user_class_inner_files(self):
+        inner_path = self.get_contract_path('class_import', 'ImportUserClass.py')
+        path = self.get_contract_path('ImportUserClassInnerFiles.py')
+
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, inner_path, 'build_example_object')
+        self.assertEqual([42, '42'], result)
+
+        result = self.run_smart_contract(engine, path, 'build_example_object')
+        self.assertEqual('42', result)
+
+    def test_from_import_not_existing_method(self):
+        path = self.get_contract_path('FromImportNotExistingMethod.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_import_not_existing_method(self):
+        path = self.get_contract_path('ImportNotExistingMethod.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+
+    def test_import_boa_invalid_package(self):
+        path = self.get_contract_path('ImportBoaInvalidPackage.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)

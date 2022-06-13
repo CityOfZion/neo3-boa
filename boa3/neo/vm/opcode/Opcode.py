@@ -62,6 +62,19 @@ class Opcode(bytes, Enum):
         return opcode, data
 
     @staticmethod
+    def get_pushdata_and_data_from_size(data_size: int) -> Tuple[Opcode, bytes]:
+        bytes_size = Integer(data_size).to_byte_array(min_length=1)
+        if len(bytes_size) == 1:
+            opcode = Opcode.PUSHDATA1
+        elif len(bytes_size) == 2:
+            opcode = Opcode.PUSHDATA2
+        else:
+            bytes_size = FOUR_BYTES_MAX_VALUE
+            opcode = Opcode.PUSHDATA4
+
+        return opcode, bytes_size
+
+    @staticmethod
     def get_literal_push(integer: int) -> Optional[Opcode]:
         """
         Gets the push opcode to the respective integer
@@ -85,9 +98,9 @@ class Opcode(bytes, Enum):
         :return: the respective opcode and its required data
         :rtype: Tuple[Opcode, bytes]
         """
-        if -1 <= integer <= 16:
-            opcode_value: int = Integer.from_bytes(Opcode.PUSH0) + integer
-            return Opcode(Integer(opcode_value).to_byte_array()), b''
+        opcode = Opcode.get_literal_push(integer)
+        if isinstance(opcode, Opcode):
+            return opcode, b''
         else:
             data = Integer(integer).to_byte_array(signed=True, min_length=1)
             if len(data) == 1:

@@ -1,7 +1,6 @@
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.neo.cryptography import hash160
-from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.exception.NotLoadedException import NotLoadedException
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -14,55 +13,57 @@ class TestClass(BoaTest):
         path = self.get_contract_path('NotificationGetVariables.py')
         output, manifest = self.compile_and_save(path)
 
-        script = hash160(output)
-
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'script_hash', [],
                                          expected_result_type=bytes)
-        contract_notifications = engine.get_events(origin=script)
+        script = engine.executed_script_hash.to_array()
+
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 0)
         self.assertEqual(bytes(20), result)
 
         result = self.run_smart_contract(engine, path, 'event_name', [])
-        contract_notifications = engine.get_events(origin=script)
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 0)
         self.assertEqual('', result)
 
         result = self.run_smart_contract(engine, path, 'state', [])
-        contract_notifications = engine.get_events(origin=script)
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 0)
         self.assertEqual([], result)
 
         result = self.run_smart_contract(engine, path, 'script_hash', [1])
-        contract_notifications = engine.get_events(origin=script)
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 1)
         self.assertEqual(script, result)
 
         engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'event_name', [1])
-        contract_notifications = engine.get_events(origin=script)
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 1)
         self.assertEqual('notify', result)
 
         engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'state', [1])
-        contract_notifications = engine.get_events(origin=script)
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 1)
         self.assertEqual([1], result)
 
         engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'state', ['1'])
-        contract_notifications = engine.get_events(origin=script)
+        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
         self.assertEqual(len(contract_notifications), 1)
         self.assertEqual(['1'], result)
 
     def test_notification_set_variables(self):
         path = self.get_contract_path('NotificationSetVariables.py')
-        output, manifest = self.compile_and_save(path)
-
-        script = hash160(output)
 
         engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'script_hash', b'',
+                                         expected_result_type=bytes)
+        self.assertEqual(b'', result)
+        script = engine.executed_script_hash.to_array()
+
         result = self.run_smart_contract(engine, path, 'script_hash', script,
                                          expected_result_type=bytes)
         self.assertEqual(script, result)
@@ -91,19 +92,14 @@ class TestClass(BoaTest):
         self.assertEqual({}, result[4])
 
     def test_user_class_empty(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0
-            + Opcode.RET
-            + Opcode.NOP
-        )
-
+        # since 0.11.2 methods that are not public nor are called are not generated to optimize code
+        # this test generates an empty contract
         path = self.get_contract_path('UserClassEmpty.py')
-        output = Boa3.compile(path)
 
-        self.assertEqual(expected_output, output)
+        with self.assertRaises(NotLoadedException) as e:
+            output = Boa3.compile(path)
+
+        self.assertTrue(e.exception.empty_script)
 
     def test_user_class_with_static_method_from_class(self):
         path = self.get_contract_path('UserClassWithStaticMethodFromClass.py')
@@ -484,3 +480,25 @@ class TestClass(BoaTest):
     def test_user_class_with_property_without_self(self):
         path = self.get_contract_path('UserClassWithPropertyWithoutSelf.py')
         self.assertCompilerLogs(CompilerError.SelfArgumentError, path)
+
+    def test_user_class_with_augmented_assignment_operator_with_variable(self):
+        path = self.get_contract_path('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'add')
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'sub')
+        self.assertEqual(-2, result)
+
+        result = self.run_smart_contract(engine, path, 'mult')
+        self.assertEqual(16, result)
+
+        result = self.run_smart_contract(engine, path, 'div')
+        self.assertEqual(2, result)
+
+        result = self.run_smart_contract(engine, path, 'mod')
+        self.assertEqual(1, result)
+
+        result = self.run_smart_contract(engine, path, 'mix')
+        self.assertEqual(0, result)

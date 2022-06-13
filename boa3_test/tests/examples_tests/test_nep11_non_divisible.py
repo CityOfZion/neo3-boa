@@ -1,6 +1,5 @@
 from boa3 import constants
 from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -44,14 +43,16 @@ class TestNEP11Template(BoaTest):
     def test_nep11_mint(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
-        engine.add_contract(path.replace('.py', '.nef'))
 
-        output, manifest = self.get_output(path)
-        nep11_address = hash160(output)
+        self.run_smart_contract(engine, path, 'symbol')
+        nep11_address = engine.executed_script_hash.to_array()
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
+        engine.add_contract(path.replace('.py', '.nef'))
 
         # can't call the mint function directly
         with self.assertRaises(TestExecutionException):
@@ -69,14 +70,16 @@ class TestNEP11Template(BoaTest):
     def test_nep11_total_balance_of(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
-        engine.add_contract(path.replace('.py', '.nef'))
 
-        output, manifest = self.get_output(path)
-        nep11_address = hash160(output)
+        self.run_smart_contract(engine, path, 'symbol')
+        nep11_address = engine.executed_script_hash.to_array()
 
         aux_path = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.get_output(aux_path)
-        aux_address = hash160(output)
+        self.run_smart_contract(engine, aux_path, 'get_name')
+        aux_address = engine.executed_script_hash.to_array()
+
+        engine = TestEngine()
+        engine.add_contract(path.replace('.py', '.nef'))
 
         # every account starts with zero tokens
         result = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
@@ -115,13 +118,10 @@ class TestNEP11Template(BoaTest):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_nep11_total_tokens_of(self):
-        # TODO: Implement this test on issue #855
         pass
 
     def test_nep11_total_owner_of(self):
-        # TODO: Implement this test on issue #855
         pass
 
     def test_nep11_total_transfer(self):
-        # TODO: Implement this test on issue #855
         pass

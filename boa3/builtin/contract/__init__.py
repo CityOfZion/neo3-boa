@@ -5,8 +5,8 @@ from boa3.builtin.type import ByteString, ECPoint, UInt160
 
 Nep5TransferEvent: Event = CreateNewEvent(
     [
-        ('from_addr', bytes),
-        ('to_addr', bytes),
+        ('from', bytes),
+        ('to', bytes),
         ('amount', int)
     ],
     'transfer'
@@ -20,8 +20,8 @@ addresses of the sender, receiver and the amount transferred.
 
 Nep11TransferEvent: Event = CreateNewEvent(
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from', Union[UInt160, None]),
+        ('to', Union[UInt160, None]),
         ('amount', int),
         ('tokenId', ByteString)
     ],
@@ -37,8 +37,8 @@ addresses of the sender, receiver, amount transferred and the id of the token.
 
 Nep17TransferEvent: Event = CreateNewEvent(
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from', Union[UInt160, None]),
+        ('to', Union[UInt160, None]),
         ('amount', int)
     ],
     'Transfer'
