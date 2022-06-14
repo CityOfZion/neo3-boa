@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [0.11.3] - 2022-06-13
 ### Added
 - Support to Python 3.10
 - `to_script_hash` to convert ECPoint and public keys
@@ -23,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bytecode generation for imported modules
 - Fixed standard validators event and type checking
 - Fixed global variables usage inside classes
-- Fixed `int.to_bytes(0)` return to a non-empty bytes  
+- Fixed `int.to_bytes(0)` return to a non-empty bytes
 
 
 ## [0.11.2] - 2022-04-01
@@ -350,6 +353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.11.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.3
 [0.11.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.2
 [0.11.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.0
 [0.10.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.10.1

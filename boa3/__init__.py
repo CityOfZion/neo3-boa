@@ -1,4 +1,4 @@
 import logging
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-__version__ = '0.11.2'
+__version__ = '0.11.3'
