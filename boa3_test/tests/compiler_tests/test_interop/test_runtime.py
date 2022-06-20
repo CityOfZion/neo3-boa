@@ -426,20 +426,30 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_notifications(self):
         path = self.get_contract_path('GetNotifications.py')
-
         engine = TestEngine()
+
+        from boa3.constants import MANAGEMENT_SCRIPT
+
         result = self.run_smart_contract(engine, path, 'without_param', [])
-        self.assertEqual([], result)
+        self.assertEqual(1, len(result))
+        self.assertEqual(MANAGEMENT_SCRIPT, result[0][0])
+        self.assertEqual('Deploy', result[0][1])
         script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
-        expected_result = []
-        for x in [1, 2, 3]:
-            expected_result.append([script,
-                                    'notify',
-                                    [x]])
-        self.assertEqual(expected_result, result)
+        expected_result = [
+            [MANAGEMENT_SCRIPT, 'Deploy', script],
+            [script, 'notify', [1]],
+            [script, 'notify', [2]],
+            [script, 'notify', [3]],
+        ]
+
+        # the Deploy parameter should have been the smart contract address, but the deploy method does uses a
+        # ReferenceCounter and the test engine didn't replicate this behavior
+        # new VM.Types.Array(engine.ReferenceCounter) { contract.Hash.ToArray() }
+        self.assertEqual((expected_result[0][0], expected_result[0][1]), (result[0][0], result[0][1]))
+        self.assertEqual(expected_result[1:], result[1:])
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'with_param', [], script)
