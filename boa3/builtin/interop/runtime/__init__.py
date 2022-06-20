@@ -94,6 +94,14 @@ def get_random() -> int:
     pass
 
 
+address_version: int = 0
+"""
+Gets the address version of the current network.
+
+:meta hide-value:
+"""
+
+
 executing_script_hash: UInt160 = UInt160()
 """
 Gets the script hash of the current context.

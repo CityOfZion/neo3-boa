@@ -643,3 +643,14 @@ class TestRuntimeInterop(BoaTest):
     def test_get_random_too_many_parameters(self):
         path = self.get_contract_path('GetRandomTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_address_version(self):
+        path = self.get_contract_path('AddressVersion.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(53, result)    # current Neo protocol version is 53
+
+    def test_address_version_cant_assign(self):
+        path = self.get_contract_path('AddressVersionCantAssign.py')
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
