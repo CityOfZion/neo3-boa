@@ -117,6 +117,7 @@ class Interop:
     GetDesignatedByRole = GetDesignatedByRoleMethod()
 
     # Runtime Interops
+    AddressVersion = AddressVersionProperty()
     BlockTime = BlockTimeProperty()
     BurnGas = BurnGasMethod()
     CallingScriptHash = CallingScriptHashProperty()
@@ -293,7 +294,8 @@ class Interop:
                              types=[NotificationType,
                                     TriggerType
                                     ],
-                             properties=[BlockTime,
+                             properties=[AddressVersion,
+                                         BlockTime,
                                          CallingScriptHash,
                                          ExecutingScriptHash,
                                          GasLeft,
