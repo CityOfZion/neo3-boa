@@ -695,6 +695,11 @@ class Opcode(bytes, Enum):
     POW = b'\xA3'
     # Returns the square root of a specified number.
     SQRT = b'\xA4'
+    # Performs modulus division on a number multiplied by another number.
+    MODMUL = b'\xA5'
+    # Performs modulus division on a number raised to the power of another number.
+    # If the exponent is -1, it will have the calculation of the modular inverse.
+    MODPOW = b'\xA6'
     # Shifts a left b bits, preserving sign.
     SHL = b'\xA8'
     # Shifts a right b bits, preserving sign.

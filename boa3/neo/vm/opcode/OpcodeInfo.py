@@ -383,6 +383,11 @@ class OpcodeInfo:
     POW = OpcodeInformation(Opcode.POW)
     # Returns the square root of a specified number.
     SQRT = OpcodeInformation(Opcode.SQRT)
+    # Performs modulus division on a number multiplied by another number.
+    MODMUL = OpcodeInformation(Opcode.MODMUL)
+    # Performs modulus division on a number raised to the power of another number.
+    # If the exponent is -1, it will have the calculation of the modular inverse.
+    MODPOW = OpcodeInformation(Opcode.MODPOW)
     # Shifts a left b bits, preserving sign.
     SHL = OpcodeInformation(Opcode.SHL)
     # Shifts a right b bits, preserving sign.
