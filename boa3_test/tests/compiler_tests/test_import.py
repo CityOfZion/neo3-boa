@@ -279,7 +279,7 @@ class TestImport(BoaTest):
         path = self.get_contract_path('ImportUserModuleWithNotImportedSymbols.py')
 
         engine = TestEngine()
-        self.run_smart_contract(engine, path, 'main', [], b'')
+        self.run_smart_contract(engine, path, 'main', [], b'00000000000000000000')
         script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
