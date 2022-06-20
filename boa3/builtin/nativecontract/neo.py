@@ -143,6 +143,16 @@ class NEO:
         pass
 
     @classmethod
+    def get_candidate_vote(cls, pubkey: ECPoint) -> int:
+        """
+        Gets votes from specific candidate.
+
+        :return: Votes or -1 if it was not found.
+        :rtype: int
+        """
+        pass
+
+    @classmethod
     def get_committee(cls) -> List[ECPoint]:
         """
         Gets all committee members list.
