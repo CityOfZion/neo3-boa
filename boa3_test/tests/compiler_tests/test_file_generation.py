@@ -310,6 +310,32 @@ class TestFileGeneration(BoaTest):
         self.assertIn('safe', method0)
         self.assertEqual(True, method0['safe'])
 
+    def test_generate_manifest_file_with_unused_event(self):
+        path = self.get_contract_path('MetadataUnusedEvent.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(1, len(abi['methods']))
+
+        # notify and uncalled_event shouldn't be added on the abi, because they were not called
+        self.assertIn('events', abi)
+        self.assertEqual(1, len(abi['events']))
+
+        event = abi['events'][0]
+        self.assertIn('name', event)
+        self.assertEqual('CalledEvent', event['name'])
+        self.assertIn('parameters', event)
+        self.assertEqual(3, len(event['parameters']))
+        parameters = event['parameters']
+        self.assertEqual(('var4', 'Integer'), (parameters[0]['name'], parameters[0]['type']))
+        self.assertEqual(('var5', 'String'), (parameters[1]['name'], parameters[1]['type']))
+        self.assertEqual(('var6', 'ByteArray'), (parameters[2]['name'], parameters[2]['type']))
+
     def test_metadata_abi_method_safe_mismatched_type(self):
         path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
