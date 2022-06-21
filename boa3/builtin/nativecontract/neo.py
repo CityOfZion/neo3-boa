@@ -144,6 +144,16 @@ class NEO:
         pass
 
     @classmethod
+    def un_vote(cls, account: UInt160) -> bool:
+        """
+        Removes the vote of the candidate voted. It would be the same as calling vote(account, None).
+
+        :param account: the account that is removing the vote
+        :type account: UInt160
+        """
+        pass
+
+    @classmethod
     def get_candidates(cls) -> List[Tuple[ECPoint, int]]:
         """
         Gets the list of all registered candidates.
