@@ -43,8 +43,8 @@ class NeoClass(ClassArrayType):
         from boa3.model.builtin.native.nep17_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
                                                              TotalSupplyMethod, TransferMethod)
         from boa3.model.builtin.native.neo_contract_methods import (GetAccountStateMethod, GetCandidatesMethod,
-                                                                    GetCommitteeMethod, GetGasPerBlockMethod,
-                                                                    GetNextBlockValidatorsMethod,
+                                                                    GetCandidateVoteMethod, GetCommitteeMethod,
+                                                                    GetGasPerBlockMethod, GetNextBlockValidatorsMethod,
                                                                     RegisterCandidateMethod, UnclaimedGasMethod,
                                                                     UnregisterCandidateMethod, VoteMethod)
         from boa3.model.builtin.contract import NeoAccountStateType
@@ -59,6 +59,7 @@ class NeoClass(ClassArrayType):
 
                 'get_account_state': GetAccountStateMethod(NeoAccountStateType.build()),
                 'get_candidates': GetCandidatesMethod(),
+                'get_candidate_vote': GetCandidateVoteMethod(),
                 'get_committee': GetCommitteeMethod(),
                 'get_gas_per_block': GetGasPerBlockMethod(),
                 'get_next_block_validators': GetNextBlockValidatorsMethod(),

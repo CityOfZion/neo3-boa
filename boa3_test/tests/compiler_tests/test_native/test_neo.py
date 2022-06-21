@@ -199,6 +199,33 @@ class TestNeoClass(BoaTest):
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
 
+    def test_get_candidate_vote(self):
+        path = self.get_contract_path('GetCandidateVote.py')
+        engine = TestEngine()
+
+        account = bytes(range(20))
+        n_votes = 100
+        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
+        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
+        # will fail check_witness
+        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
+        self.assertEqual(-1, result)
+
+        engine.add_neo(account, n_votes)
+        path_register = self.get_contract_path('RegisterCandidate.py')
+        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
+                                         signer_accounts=[candidate_scripthash])
+        self.assertTrue(result)
+
+        # candidate was registered
+        path_vote = self.get_contract_path('Vote.py')
+        result = self.run_smart_contract(engine, path_vote, 'main', account, candidate_pubkey,
+                                         signer_accounts=[account])
+        self.assertTrue(result)
+
+        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
+        self.assertEqual(n_votes, result)
+
     def test_get_committee(self):
         path = self.get_contract_path('GetCommittee.py')
         engine = TestEngine()

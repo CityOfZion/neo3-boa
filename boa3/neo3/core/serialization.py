@@ -289,8 +289,6 @@ class BinaryReader(object):
         """
         Read bytes from the stream that were stored using the special grouping format.
 
-        TODO: add documentation explaining grouping
-
         See also: :func:`~neo3.core.serialization.BinaryWriter.write_bytes_with_grouping`
 
         Args:
@@ -653,7 +651,6 @@ class BinaryWriter(object):
         Note:
             This is a helper function specifically made to help serialize keys to be stored in the backend that must
             be prefix searchable via `DataCache.Find`.
-            TODO: write small page explaining the problem of varint usage
 
         Args:
             value: bytes to write to the stream.
