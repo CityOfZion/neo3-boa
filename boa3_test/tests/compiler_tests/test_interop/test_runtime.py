@@ -666,4 +666,4 @@ class TestRuntimeInterop(BoaTest):
 
     def test_address_version_cant_assign(self):
         path = self.get_contract_path('AddressVersionCantAssign.py')
-        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
