@@ -179,6 +179,28 @@ class TestNeoClass(BoaTest):
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(n_votes, result[0][1])
 
+    def test_get_all_candidates(self):
+        path = self.get_contract_path('GetAllCandidates.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        # no candidate was registered
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(0, len(result))
+
+        path_register = self.get_contract_path('RegisterCandidate.py')
+        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
+        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
+        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
+                                         signer_accounts=[candidate_scripthash])
+        self.assertTrue(result)
+
+        # after registering one
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(1, len(result))
+        self.assertEqual(candidate_pubkey, result[0][0])
+        self.assertEqual(0, result[0][1])
+
     def test_get_candidates(self):
         path = self.get_contract_path('GetCandidates.py')
         engine = TestEngine()
