@@ -311,7 +311,7 @@ class FileGenerator:
                         "type": arg.type.abi_type
                     } for arg_id, arg in event.args_to_generate.items()
                 ],
-            } for name, event in self._events.items()
+            } for name, event in self._events.items() if event.is_called
         ]
 
     def _get_extras(self) -> Optional[Dict[str, Any]]:

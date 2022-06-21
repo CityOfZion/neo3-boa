@@ -14,6 +14,7 @@ from boa3.model.builtin.interop.role import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.stdlib import *
 from boa3.model.builtin.interop.storage import *
+from boa3.model.event import Event
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 
@@ -42,6 +43,14 @@ class Interop:
         lst: List[IdentifiedSymbol] = []
         for symbols in cls._interop_symbols.values():
             lst.extend(symbols)
+        return lst
+
+    @classmethod
+    def interop_events(cls) -> List[Event]:
+        lst: List[Event] = []
+        for symbols in cls._interop_symbols.values():
+            lst.extend([event for event in symbols if isinstance(event, Event)])
+
         return lst
 
     # region Interops

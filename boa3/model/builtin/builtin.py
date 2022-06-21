@@ -19,6 +19,7 @@ from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 from boa3.model.type.math import Math
 from boa3.model.type.primitive.bytestringtype import ByteStringType
+from boa3.model.event import Event as EventSymbol
 
 
 class BoaPackage(str, Enum):
@@ -215,6 +216,15 @@ class Builtin:
             return {symbol.identifier: symbol for symbol in cls._boa_symbols[package]}
 
         return cls.boa_symbols()
+
+    @classmethod
+    def builtin_events(cls) -> List[EventSymbol]:
+        lst: List[EventSymbol] = [event for event in cls.boa_builtins if isinstance(event, EventSymbol)]
+
+        for symbols in cls._boa_symbols.values():
+            lst.extend([event for event in symbols if isinstance(event, EventSymbol)])
+
+        return lst
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
