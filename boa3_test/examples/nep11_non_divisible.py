@@ -122,7 +122,7 @@ def balance_of(owner_address: UInt160) -> int:
     balance = 0
 
     owner: Account = get_account(owner_address)
-    if not isinstance(owner, None):
+    if owner is not None:
         balance = owner.balance
 
     return balance
@@ -203,9 +203,9 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
     # the transfer event will be fired
     on_transfer(from_address, to_address, 1, token_id)
 
-    if not isinstance(to_address, None):
+    if to_address is not None:
         contract = ContractManagement.get_contract(to_address)
-        if not isinstance(contract, None):
+        if contract is not None:
             call_contract(to_address, 'onNEP11Payment', [from_address, 1, token_id, data])
 
 
@@ -276,7 +276,7 @@ def mint(account_address: UInt160, amount: int):
     """
     assert amount >= 0
     account = get_account(account_address)
-    if isinstance(account, None):
+    if account is None:
         account = Account(account_address)
 
     for x in range(amount):

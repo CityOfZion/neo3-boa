@@ -11,6 +11,7 @@ from boa3.model.builtin.math import *
 from boa3.model.builtin.method import *
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
+from boa3.model.event import Event as EventSymbol
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 from boa3.model.type.collection.sequence.ecpointtype import ECPointType
@@ -19,7 +20,6 @@ from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 from boa3.model.type.math import Math
 from boa3.model.type.primitive.bytestringtype import ByteStringType
-from boa3.model.event import Event as EventSymbol
 
 
 class BoaPackage(str, Enum):

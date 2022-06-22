@@ -23,6 +23,8 @@ class SymbolScope:
         :param symbol_id: symbol identifier
         :param symbol: symbol to be included
         """
+        if symbol_id in self._symbols and hasattr(symbol, 'set_is_reassigned'):
+            symbol.set_is_reassigned()
         self._symbols[symbol_id] = symbol
 
     def remove_symbol(self, symbol_id: str):

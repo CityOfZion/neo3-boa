@@ -1,5 +1,6 @@
-from boa3.builtin import public, CreateNewEvent
+from boa3.builtin import CreateNewEvent, public
 from boa3.builtin.interop.runtime import notify
+
 uncalled_event = CreateNewEvent(
     [
         ('var1', int),
