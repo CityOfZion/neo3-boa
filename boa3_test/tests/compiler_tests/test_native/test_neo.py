@@ -201,6 +201,14 @@ class TestNeoClass(BoaTest):
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
 
+    def test_un_vote_too_many_parameters(self):
+        path = self.get_contract_path('UnVoteTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_un_vote_too_few_parameters(self):
+        path = self.get_contract_path('UnVoteTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
     def test_get_all_candidates(self):
         path = self.get_contract_path('GetAllCandidates.py')
         self.compile_and_save(path)
