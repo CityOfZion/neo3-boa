@@ -383,13 +383,21 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
 
                 except_scopes.append(except_scope)
 
+        if len(node.orelse) > 0:
+            else_scope = outer_scope.new_scope()
+            self.current_scope = else_scope
+
+            for stmt in node.orelse:
+                self.visit(stmt)
+
+            except_scopes.append(else_scope)
+
         self.current_scope = self.current_scope.previous_scope()
         self.current_scope.update_values(try_scope, *except_scopes)
 
         for stmt in node.finalbody:
             self.visit(stmt)
 
-        # TODO: include else scope
         return node
 
     def visit_Name(self, node: ast.Name) -> ast.AST:
