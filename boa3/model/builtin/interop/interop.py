@@ -105,6 +105,7 @@ class Interop:
     CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
+    Murmur32 = Murmur32Method()
     Ripemd160 = Ripemd160Method()
     Sha256 = Sha256Method()
     VerifyWithECDsa = VerifyWithECDsaMethod()
@@ -245,6 +246,7 @@ class Interop:
                                      CheckSig,
                                      Hash160,
                                      Hash256,
+                                     Murmur32,
                                      Ripemd160,
                                      Sha256,
                                      VerifyWithECDsa,
