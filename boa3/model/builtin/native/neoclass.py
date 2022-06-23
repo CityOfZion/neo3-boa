@@ -47,7 +47,7 @@ class NeoClass(ClassArrayType):
                                                                     GetCommitteeMethod, GetGasPerBlockMethod,
                                                                     GetNextBlockValidatorsMethod,
                                                                     RegisterCandidateMethod, UnclaimedGasMethod,
-                                                                    UnregisterCandidateMethod, VoteMethod)
+                                                                    UnregisterCandidateMethod, UnVoteMethod, VoteMethod)
         from boa3.model.builtin.contract import NeoAccountStateType
 
         if len(self._class_methods) == 0:
@@ -68,6 +68,7 @@ class NeoClass(ClassArrayType):
                 'register_candidate': RegisterCandidateMethod(),
                 'unclaimed_gas': UnclaimedGasMethod(),
                 'unregister_candidate': UnregisterCandidateMethod(),
+                'un_vote': UnVoteMethod(),
                 'vote': VoteMethod(),
             }
         return self._class_methods

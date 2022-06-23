@@ -8,6 +8,7 @@ __all__ = ['GetAccountStateMethod',
            'RegisterCandidateMethod',
            'UnclaimedGasMethod',
            'UnregisterCandidateMethod',
+           'UnVoteMethod',
            'VoteMethod',
            ]
 
@@ -21,4 +22,5 @@ from boa3.model.builtin.native.neo_contract_methods.getnextblockvalidators impor
 from boa3.model.builtin.native.neo_contract_methods.registercandidatemethod import RegisterCandidateMethod
 from boa3.model.builtin.native.neo_contract_methods.unclaimedgasmethod import UnclaimedGasMethod
 from boa3.model.builtin.native.neo_contract_methods.unregistercandidatemethod import UnregisterCandidateMethod
+from boa3.model.builtin.native.neo_contract_methods.unvote import UnVoteMethod
 from boa3.model.builtin.native.neo_contract_methods.vote import VoteMethod

@@ -155,9 +155,6 @@ class TestNeoClass(BoaTest):
 
         # adding NEO to the account will make NeoAccountState not None
         engine.add_neo(account, n_votes)
-        # it's possible to vote for no one
-        result = self.run_smart_contract(engine, path, 'main', account, None, signer_accounts=[account])
-        self.assertEqual(True, result)
 
         # candidate is not registered yet
         result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
@@ -178,6 +175,39 @@ class TestNeoClass(BoaTest):
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(n_votes, result[0][1])
+
+        # remove votes from candidate
+        result = self.run_smart_contract(engine, path, 'un_vote', account, signer_accounts=[account])
+        self.assertEqual(True, result)
+
+        # candidate has no votes now
+        result = self.run_smart_contract(engine, path_get, 'main')
+        self.assertEqual(1, len(result))
+        self.assertEqual(candidate_pubkey, result[0][0])
+        self.assertEqual(0, result[0][1])
+
+        # voting for candidate again
+        result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
+        result = self.run_smart_contract(engine, path_get, 'main')
+        self.assertEqual(n_votes, result[0][1])
+
+        # it's also possible to remove votes by voting for None instead of using un_vote
+        result = self.run_smart_contract(engine, path, 'main', account, None, signer_accounts=[account])
+        self.assertEqual(True, result)
+
+        # candidate has no votes now again
+        result = self.run_smart_contract(engine, path_get, 'main')
+        self.assertEqual(1, len(result))
+        self.assertEqual(candidate_pubkey, result[0][0])
+        self.assertEqual(0, result[0][1])
+
+    def test_un_vote_too_many_parameters(self):
+        path = self.get_contract_path('UnVoteTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_un_vote_too_few_parameters(self):
+        path = self.get_contract_path('UnVoteTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_get_all_candidates(self):
         path = self.get_contract_path('GetAllCandidates.py')
