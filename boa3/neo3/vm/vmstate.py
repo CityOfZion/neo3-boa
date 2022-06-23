@@ -12,9 +12,9 @@ class VMState(IntEnum):
     FAULT = 2
     BREAK = 4
 
-    @classmethod
-    def get_vm_state(cls, state_name: str) -> VMState:
-        try:
-            return VMState[state_name]
-        except BaseException:
-            return VMState.NONE
+
+def get_vm_state(state_name: str) -> VMState:
+    try:
+        return VMState[state_name]
+    except BaseException:
+        return VMState.NONE

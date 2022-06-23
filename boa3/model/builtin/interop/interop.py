@@ -71,6 +71,7 @@ class Interop:
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
     TriggerType = TriggerType()
+    VMStateType = VMStateType.build()
 
     # Blockchain Interops
     CurrentHash = CurrentHashProperty()
@@ -80,6 +81,7 @@ class Interop:
     GetTransaction = GetTransactionMethod(TransactionType)
     GetTransactionFromBlock = GetTransactionFromBlockMethod(TransactionType)
     GetTransactionHeight = GetTransactionHeightMethod()
+    GetTransactionVMState = GetTransactionVMStateMethod(VMStateType)
 
     # Contract Interops
     CallContract = CallMethod()
@@ -179,9 +181,14 @@ class Interop:
                                 types=[TransactionType]
                                 )
 
+    VMStateModule = Package(identifier=VMStateType.identifier.lower(),
+                            types=[VMStateType]
+                            )
+
     BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
                                 types=[BlockType,
-                                       TransactionType
+                                       TransactionType,
+                                       VMStateType
                                        ],
                                 methods=[CurrentHash,
                                          CurrentIndex,
@@ -189,10 +196,12 @@ class Interop:
                                          GetContract,
                                          GetTransaction,
                                          GetTransactionFromBlock,
-                                         GetTransactionHeight
+                                         GetTransactionHeight,
+                                         GetTransactionVMState
                                          ],
                                 packages=[BlockModule,
-                                          TransactionModule
+                                          TransactionModule,
+                                          VMStateModule
                                           ]
                                 )
 

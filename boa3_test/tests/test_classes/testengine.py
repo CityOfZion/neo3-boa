@@ -7,7 +7,7 @@ from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
-from boa3.neo3.vm import VMState
+from boa3.neo3.vm import VMState, vmstate
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.signer import Signer
 from boa3_test.tests.test_classes.storage import Storage
@@ -286,7 +286,7 @@ class TestEngine:
             self._error_message = result['error'] if 'error' in result else None
 
             if 'vmstate' in result:
-                self._vm_state = VMState.get_vm_state(result['vmstate'])
+                self._vm_state = vmstate.get_vm_state(result['vmstate'])
 
             if 'executedscripthash' in result:
                 self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
