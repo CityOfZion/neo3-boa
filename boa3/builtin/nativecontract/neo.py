@@ -1,6 +1,7 @@
 from typing import Any, List, Tuple
 
 from boa3.builtin.contract import NeoAccountState
+from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.type import ECPoint, UInt160
 
 
@@ -129,6 +130,16 @@ class NEO:
         :type account: UInt160
         :param vote_to: the public key of the one being voted
         :type vote_to: ECPoint
+        """
+        pass
+
+    @classmethod
+    def get_all_candidates(cls) -> Iterator:
+        """
+        Gets the registered candidates iterator.
+
+        :return: all registered candidates
+        :rtype: Iterator
         """
         pass
 

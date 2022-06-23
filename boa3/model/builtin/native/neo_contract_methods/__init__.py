@@ -1,4 +1,5 @@
 __all__ = ['GetAccountStateMethod',
+           'GetAllCandidatesMethod',
            'GetCandidatesMethod',
            'GetCandidateVoteMethod',
            'GetCommitteeMethod',
@@ -11,6 +12,7 @@ __all__ = ['GetAccountStateMethod',
            ]
 
 from boa3.model.builtin.native.neo_contract_methods.getaccountstatemethod import GetAccountStateMethod
+from boa3.model.builtin.native.neo_contract_methods.getallcandidatesmethod import GetAllCandidatesMethod
 from boa3.model.builtin.native.neo_contract_methods.getcandidatesmethod import GetCandidatesMethod
 from boa3.model.builtin.native.neo_contract_methods.getcandidatevotemethod import GetCandidateVoteMethod
 from boa3.model.builtin.native.neo_contract_methods.getcommitteemethod import GetCommitteeMethod
