@@ -12,7 +12,7 @@ class UnVoteMethod(NeoContractMethod):
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
 
         identifier = 'un_vote'
-        native_identifier = ''  # un_vote is not neo native
+        native_identifier = 'vote'  # un_vote is not neo native
         args: Dict[str, Variable] = {
             'account': Variable(UInt160Type.build()),
         }
@@ -21,7 +21,6 @@ class UnVoteMethod(NeoContractMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.model.builtin.native.nativecontract import NativeContract
         return (
             [
                 (Opcode.UNPACK, b''),
@@ -31,5 +30,5 @@ class UnVoteMethod(NeoContractMethod):
                 (Opcode.PUSH2, b''),
                 (Opcode.PACK, b''),
             ] +
-            NativeContract.NEO.class_methods['vote'].opcode
+            super().opcode
         )
