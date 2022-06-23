@@ -134,13 +134,11 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     :raise AssertionError: raised if `from_address` length is not 20
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
-    aux_var = from_address is not None  # TODO: using identity operators or isinstance as a condition of an if is bugged
-    if aux_var:
+    if from_address is not None:
         assert len(from_address) == 20
 
     # this validation will verify if Neo is trying to mint GAS to this smart contract
-    aux_var = from_address is None      # TODO: using identity operators or isinstance as a condition of an if is bugged
-    if aux_var and runtime.calling_script_hash == GAS_SCRIPT:
+    if from_address is None and runtime.calling_script_hash == GAS_SCRIPT:
         return
 
     if not storage.get(NOT_INITIALIZED).to_bool():

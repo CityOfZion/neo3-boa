@@ -683,3 +683,15 @@ class TestIf(BoaTest):
         self.assertEqual(True, result)
         result = self.run_smart_contract(engine, path, 'main', None)
         self.assertEqual(False, result)
+
+    def test_if_is_none_type_check(self):
+        path = self.get_contract_path('IfIsNoneTypeCheck.py')
+        engine = TestEngine()
+
+        test_input = bytes(20)
+        result = self.run_smart_contract(engine, path, 'main', test_input,
+                                         expected_result_type=bytes)
+        self.assertEqual(test_input, result)
+
+        result = self.run_smart_contract(engine, path, 'main', None)
+        self.assertEqual(None, result)
