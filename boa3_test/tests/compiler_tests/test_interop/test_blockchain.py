@@ -352,6 +352,52 @@ class TestBlockchainInterop(BoaTest):
         path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_get_transaction_vm_state(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionVMState').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionVMState.py')
+        output, manifest = self.get_output(path)
+        self.assertEqual(expected_output, output)
+
+        path_burn_gas = self.get_contract_path('../runtime', 'BurnGas.py')
+        engine = TestEngine()
+        from boa3.neo3.vm import VMState
+
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
+        expected_vm_state = engine.vm_state.value
+
+        txs = engine.get_transactions()
+        self.assertGreater(len(txs), 0)
+        hash_ = txs[0].hash
+
+        result = self.run_smart_contract(engine, path, 'main', hash_)
+        # TODO: TestEngine does not save the state of previous transactions
+        self.assertEqual(VMState.NONE, result)
+
+    def test_get_transaction_vm_state_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionVMStateMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_import_blockchain(self):
         path = self.get_contract_path('ImportBlockchain.py')
         engine = TestEngine()

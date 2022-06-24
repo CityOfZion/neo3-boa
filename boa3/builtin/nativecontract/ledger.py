@@ -1,6 +1,6 @@
 from typing import Union
 
-from boa3.builtin.interop.blockchain import Block, Transaction
+from boa3.builtin.interop.blockchain import Block, Transaction, VMState
 from boa3.builtin.type import UInt256
 
 
@@ -63,5 +63,16 @@ class Ledger:
         :param hash_: hash identifier of the transaction
         :type hash_: UInt256
         :return: height of the transaction
+        """
+        pass
+
+    @classmethod
+    def get_transaction_vm_state(cls, hash_: UInt256) -> VMState:
+        """
+        Gets the VM state of a transaction.
+
+        :param hash_: hash identifier of the transaction
+        :type hash_: UInt256
+        :return: VM state of the transaction
         """
         pass

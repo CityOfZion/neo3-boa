@@ -8,7 +8,7 @@ from boa3.neo import utils as neo_utils
 from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
-from boa3.neo3.vm import VMState
+from boa3.neo3.vm import VMState, vmstate
 from test_runner import neoxp_utils
 from test_runner.blockchain import *
 from test_runner.blockchain.contractcollection import ContractCollection
@@ -220,7 +220,7 @@ class NeoTestRunner:
         self._error_message = result['exception'] if 'exception' in result else None
 
         if 'state' in result:
-            self._vm_state = VMState.get_vm_state(result['state'])
+            self._vm_state = vmstate.get_vm_state(result['state'])
 
         if 'gasconsumed' in result:
             self._gas_consumed = int(float(result['gasconsumed']) * 10 ** constants.GAS_DECIMALS)
