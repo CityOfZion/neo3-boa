@@ -1768,7 +1768,9 @@ class CodeGenerator:
                 self._stack_pop()  # remove call contract 'any' result from the stack
         else:
             from boa3.neo.vm.CallCode import CallCode
-            self.__insert_code(CallCode(function))
+            call_code = CallCode(function)
+            self.__insert_code(call_code)
+            self._update_codes_with_target(call_code)
 
         for arg in range(num_args):
             self._stack_pop()

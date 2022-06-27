@@ -112,7 +112,7 @@ class IntToBytesMethod(ToBytesMethod):
         return (
             verify_number_is_zero +
             number_is_not_zero +
-            number_is_zero + [(Opcode.NOP, b'')]    # TODO: change this when refactoring calling methods with methods as args
+            number_is_zero
         )
 
 
