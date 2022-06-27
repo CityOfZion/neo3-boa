@@ -12,30 +12,26 @@ from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class BlockType(ClassArrayType):
+class SignerType(ClassArrayType):
     """
-    A class used to represent Neo Block class
+    A class used to represent Neo Signer class
     """
 
     def __init__(self):
-        super().__init__('Block')
+        super().__init__('Signer')
+        from boa3.model.builtin.interop.blockchain.witnessruletype import WitnessRuleType
         from boa3.model.type.type import Type
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
-        from boa3.model.type.collection.sequence.uint256type import UInt256Type
 
-        uint256 = UInt256Type.build()
+        uint160 = UInt160Type.build()
+        list_uint160 = Type.list.build([uint160])
 
         self._variables: Dict[str, Variable] = {
-            'hash': Variable(uint256),
-            'version': Variable(Type.int),
-            'previous_hash': Variable(uint256),
-            'merkle_root': Variable(uint256),
-            'timestamp': Variable(Type.int),
-            'nonce': Variable(Type.int),
-            'index': Variable(Type.int),
-            'primary_index': Variable(Type.int),
-            'next_consensus': Variable(UInt160Type.build()),
-            'transaction_count': Variable(Type.int)
+            'account': Variable(uint160),
+            'scopes': Variable(UInt160Type.build()),
+            'allowed_contracts': Variable(list_uint160),
+            'allowed_groups': Variable(list_uint160),
+            'rules': Variable(Type.list.build([WitnessRuleType.build()]))
         }
         self._constructor: Method = None
 
@@ -66,26 +62,26 @@ class BlockType(ClassArrayType):
     def constructor_method(self) -> Optional[Method]:
         # was having a problem with recursive import
         if self._constructor is None:
-            self._constructor: Method = BlockMethod(self)
+            self._constructor: Method = SignerMethod(self)
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> BlockType:
+    def build(cls, value: Any = None) -> SignerType:
         if value is None or cls._is_type_of(value):
-            return _Block
+            return _Signer
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, BlockType)
+        return isinstance(value, SignerType)
 
 
-_Block = BlockType()
+_Signer = SignerType()
 
 
-class BlockMethod(IBuiltinMethod):
+class SignerMethod(IBuiltinMethod):
 
-    def __init__(self, return_type: BlockType):
-        identifier = '-Block__init__'
+    def __init__(self, return_type: SignerType):
+        identifier = '-Signer__init__'
         args: Dict[str, Variable] = {}
         super().__init__(identifier, args, return_type=return_type)
 
@@ -97,20 +93,14 @@ class BlockMethod(IBuiltinMethod):
         from boa3.neo.vm.type.Integer import Integer
 
         uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
-        uint256_default = Integer(constants.SIZE_OF_INT256).to_byte_array() + bytes(constants.SIZE_OF_INT256)
 
         return [
-            (Opcode.PUSH0, b''),  # transaction_count
-            (Opcode.PUSHDATA1, uint160_default),  # next_consensus
-            (Opcode.PUSH0, b''),  # primary_index
-            (Opcode.PUSH0, b''),  # index
-            (Opcode.PUSH0, b''),  # nonce
-            (Opcode.PUSH0, b''),  # timestamp
-            (Opcode.PUSHDATA1, uint256_default),  # merkle_root
-            (Opcode.PUSHDATA1, uint256_default),  # previous_hash
-            (Opcode.PUSH0, b''),  # version
-            (Opcode.PUSHDATA1, uint256_default),  # hash
-            (Opcode.PUSH10, b''),
+            (Opcode.NEWARRAY0, b''),  # rules
+            (Opcode.NEWARRAY0, b''),  # allowed_groups
+            (Opcode.NEWARRAY0, b''),  # allowed_contracts
+            (Opcode.PUSH0, b''),  # scopes
+            (Opcode.PUSHDATA1, uint160_default),  # account
+            (Opcode.PUSH5, b''),
             (Opcode.PACK, b'')
         ]
 

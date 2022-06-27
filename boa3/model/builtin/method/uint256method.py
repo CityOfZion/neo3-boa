@@ -1,6 +1,7 @@
 import ast
 from typing import Any, Dict, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
@@ -85,12 +86,13 @@ class UInt256Method(IBuiltinMethod):
 
             (Opcode.DUP, b''),                       # if len(num) < 32
             (Opcode.SIZE, b''),                        # increase number's length to 32
-            (Opcode.PUSHINT8, Integer(32).to_byte_array(signed=True)),
+            (Opcode.PUSHINT8, Integer(constants.SIZE_OF_INT256).to_byte_array(signed=True)),
             (Opcode.OVER, b''),
             (Opcode.OVER, b''),
 
             (Opcode.JMPGE, Integer(44).to_byte_array(signed=True)),
-            (Opcode.PUSHDATA1, Integer(32).to_byte_array(signed=True) + bytes(32)),
+            (Opcode.PUSHDATA1, (Integer(constants.SIZE_OF_INT256).to_byte_array(signed=True)
+                                + bytes(constants.SIZE_OF_INT256))),
             (Opcode.REVERSE3, b''),
             (Opcode.SUB, b''),
             (Opcode.LEFT, b''),
@@ -103,7 +105,7 @@ class UInt256Method(IBuiltinMethod):
             (Opcode.CONVERT, StackItemType.ByteString),  # convert to uint256
             (Opcode.DUP, b''),
             (Opcode.SIZE, b''),
-            (Opcode.PUSHINT8, Integer(32).to_byte_array(signed=True)),
+            (Opcode.PUSHINT8, Integer(constants.SIZE_OF_INT256).to_byte_array(signed=True)),
             (Opcode.NUMEQUAL, b''),
             (Opcode.ASSERT, b''),
         ]

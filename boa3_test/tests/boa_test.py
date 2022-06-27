@@ -25,6 +25,7 @@ class BoaTest(TestCase):
     STORAGE_VALUE_IS_OUT_OF_RANGE_MSG = 'Specified argument was out of the range of valid values.'
     CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
     ABORTED_CONTRACT_MSG = 'ABORT is executed'
+    NULL_POINTER_MSG = 'Object reference not set to an instance of an object.'
 
     default_folder: str = ''
 

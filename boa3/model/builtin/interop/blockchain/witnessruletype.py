@@ -11,22 +11,21 @@ from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class NeoAccountStateType(ClassArrayType):
+class WitnessRuleType(ClassArrayType):
     """
-    A class used to represent Neo NeoAccountState class
+    A class used to represent Neo WitnessRule class
     """
 
     def __init__(self):
-        super().__init__('NeoAccountState')
-        from boa3.model.type.type import Type
-        from boa3.model.type.collection.sequence.ecpointtype import ECPointType
+        super().__init__('WitnessRule')
+        from boa3.model.builtin.interop.blockchain.witnessruleactiontype import WitnessRuleActionType
+        from boa3.model.builtin.interop.blockchain.witnessconditiontype import WitnessConditionType
 
         self._variables: Dict[str, Variable] = {
-            'balance': Variable(Type.int),
-            'height': Variable(Type.int),
-            'vote_to': Variable(ECPointType.build()),
+            'action': Variable(WitnessRuleActionType.build()),
+            'condition': Variable(WitnessConditionType.build())
         }
-        self._constructor: Optional[Method] = None
+        self._constructor: Method = None
 
     @property
     def class_variables(self) -> Dict[str, Variable]:
@@ -55,26 +54,26 @@ class NeoAccountStateType(ClassArrayType):
     def constructor_method(self) -> Optional[Method]:
         # was having a problem with recursive import
         if self._constructor is None:
-            self._constructor: Method = NeoAccountStateMethod(self)
+            self._constructor: Method = WitnessRuleMethod(self)
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> NeoAccountStateType:
+    def build(cls, value: Any = None) -> WitnessRuleType:
         if value is None or cls._is_type_of(value):
-            return _NeoAccountState
+            return _WitnessRule
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, NeoAccountStateType)
+        return isinstance(value, WitnessRuleType)
 
 
-_NeoAccountState = NeoAccountStateType()
+_WitnessRule = WitnessRuleType()
 
 
-class NeoAccountStateMethod(IBuiltinMethod):
+class WitnessRuleMethod(IBuiltinMethod):
 
-    def __init__(self, return_type: NeoAccountStateType):
-        identifier = '-NeoAccountState__init__'
+    def __init__(self, return_type: WitnessRuleType):
+        identifier = '-WitnessRule__init__'
         args: Dict[str, Variable] = {}
         super().__init__(identifier, args, return_type=return_type)
 
@@ -83,14 +82,15 @@ class NeoAccountStateMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.model.type.collection.sequence.ecpointtype import ECPointType
-        return [
-            Opcode.get_pushdata_and_data(ECPointType.build().default_value),  # vote_to
-            (Opcode.PUSH0, b''),  # height
-            (Opcode.PUSH0, b''),  # balance
-            (Opcode.PUSH3, b''),
-            (Opcode.PACK, b'')
-        ]
+        from boa3.model.builtin.interop.blockchain.witnessconditiontype import WitnessConditionType
+        from boa3.model.builtin.interop.blockchain.witnessruleactiontype import WitnessRuleActionType
+
+        return (WitnessConditionType.build().constructor_method().opcode +  # condition
+                WitnessRuleActionType.build().constructor_method().opcode +  # action
+                [(Opcode.PUSH1, b''),
+                 (Opcode.PACK, b'')
+                 ]
+                )
 
     @property
     def _args_on_stack(self) -> int:

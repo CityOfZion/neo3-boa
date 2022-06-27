@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.method import Method
@@ -87,10 +88,13 @@ class ContractMethod(IBuiltinMethod):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
+
+        uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
+
         return [
             (Opcode.NEWMAP, b''),
             (Opcode.PUSHDATA1, Integer(0).to_byte_array()),
-            (Opcode.PUSHDATA1, Integer(20).to_byte_array() + bytes(20)),
+            (Opcode.PUSHDATA1, uint160_default),
             (Opcode.PUSH0, b''),
             (Opcode.PUSH0, b''),
             (Opcode.PUSH5, b''),
