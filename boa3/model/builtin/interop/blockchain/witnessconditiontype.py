@@ -11,22 +11,19 @@ from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
-class NeoAccountStateType(ClassArrayType):
+class WitnessConditionType(ClassArrayType):
     """
-    A class used to represent Neo NeoAccountState class
+    A class used to represent Neo WitnessCondition class
     """
 
     def __init__(self):
-        super().__init__('NeoAccountState')
-        from boa3.model.type.type import Type
-        from boa3.model.type.collection.sequence.ecpointtype import ECPointType
+        super().__init__('WitnessCondition')
+        from boa3.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
 
         self._variables: Dict[str, Variable] = {
-            'balance': Variable(Type.int),
-            'height': Variable(Type.int),
-            'vote_to': Variable(ECPointType.build()),
+            'type': Variable(WitnessConditionEnum.build())
         }
-        self._constructor: Optional[Method] = None
+        self._constructor: Method = None
 
     @property
     def class_variables(self) -> Dict[str, Variable]:
@@ -55,26 +52,26 @@ class NeoAccountStateType(ClassArrayType):
     def constructor_method(self) -> Optional[Method]:
         # was having a problem with recursive import
         if self._constructor is None:
-            self._constructor: Method = NeoAccountStateMethod(self)
+            self._constructor: Method = WitnessConditionMethod(self)
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> NeoAccountStateType:
+    def build(cls, value: Any = None) -> WitnessConditionType:
         if value is None or cls._is_type_of(value):
-            return _NeoAccountState
+            return _WitnessCondition
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, NeoAccountStateType)
+        return isinstance(value, WitnessConditionType)
 
 
-_NeoAccountState = NeoAccountStateType()
+_WitnessCondition = WitnessConditionType()
 
 
-class NeoAccountStateMethod(IBuiltinMethod):
+class WitnessConditionMethod(IBuiltinMethod):
 
-    def __init__(self, return_type: NeoAccountStateType):
-        identifier = '-NeoAccountState__init__'
+    def __init__(self, return_type: WitnessConditionType):
+        identifier = '-WitnessCondition__init__'
         args: Dict[str, Variable] = {}
         super().__init__(identifier, args, return_type=return_type)
 
@@ -83,12 +80,11 @@ class NeoAccountStateMethod(IBuiltinMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.model.type.collection.sequence.ecpointtype import ECPointType
+        from boa3.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
+
         return [
-            Opcode.get_pushdata_and_data(ECPointType.build().default_value),  # vote_to
-            (Opcode.PUSH0, b''),  # height
-            (Opcode.PUSH0, b''),  # balance
-            (Opcode.PUSH3, b''),
+            Opcode.get_push_and_data(WitnessConditionEnum.build().default_value),  # type
+            (Opcode.PUSH1, b''),
             (Opcode.PACK, b'')
         ]
 

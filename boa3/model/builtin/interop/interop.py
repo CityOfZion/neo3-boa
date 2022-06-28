@@ -67,11 +67,17 @@ class Interop:
     OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleType.build()
     RoleType = RoleType.build()
+    SignerType = SignerType.build()
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
     TriggerType = TriggerType()
     VMStateType = VMStateType.build()
+    WitnessCondition = WitnessConditionType.build()
+    WitnessConditionType = WitnessConditionEnumType.build()
+    WitnessRuleAction = WitnessRuleActionType.build()
+    WitnessRule = WitnessRuleType.build()
+    WitnessScope = WitnessScopeType.build()
 
     # Blockchain Interops
     CurrentHash = CurrentHashProperty()
@@ -81,6 +87,7 @@ class Interop:
     GetTransaction = GetTransactionMethod(TransactionType)
     GetTransactionFromBlock = GetTransactionFromBlockMethod(TransactionType)
     GetTransactionHeight = GetTransactionHeightMethod()
+    GetTransactionSigners = GetTransactionSignersMethod(SignerType)
     GetTransactionVMState = GetTransactionVMStateMethod(VMStateType)
 
     # Contract Interops
@@ -177,6 +184,16 @@ class Interop:
                           types=[BlockType]
                           )
 
+    SignerModule = Package(identifier=SignerType.identifier.lower(),
+                           types=[SignerType,
+                                  WitnessConditionType,
+                                  WitnessCondition,
+                                  WitnessRuleAction,
+                                  WitnessRule,
+                                  WitnessScope
+                                  ]
+                           )
+
     TransactionModule = Package(identifier=TransactionType.identifier.lower(),
                                 types=[TransactionType]
                                 )
@@ -187,6 +204,7 @@ class Interop:
 
     BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
                                 types=[BlockType,
+                                       SignerType,
                                        TransactionType,
                                        VMStateType
                                        ],
@@ -197,9 +215,11 @@ class Interop:
                                          GetTransaction,
                                          GetTransactionFromBlock,
                                          GetTransactionHeight,
+                                         GetTransactionSigners,
                                          GetTransactionVMState
                                          ],
                                 packages=[BlockModule,
+                                          SignerModule,
                                           TransactionModule,
                                           VMStateModule
                                           ]

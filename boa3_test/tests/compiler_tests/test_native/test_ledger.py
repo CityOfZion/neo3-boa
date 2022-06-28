@@ -8,6 +8,7 @@ from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import CallFlags
 from boa3.neo3.core.types import UInt160, UInt256
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -283,6 +284,58 @@ class TestLedgerContract(BoaTest):
 
     def test_get_transaction_height_mismatched_type(self):
         path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_get_transaction_signers(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionSigners').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionSigners.py')
+        output, manifest = self.get_output(path)
+        self.assertEqual(expected_output, output)
+
+        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
+        engine = TestEngine()
+
+        example_account = bytes(range(20))
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000, signer_accounts=[example_account])
+
+        txs = engine.get_transactions()
+        self.assertGreater(len(txs), 0)
+        hash_ = txs[0].hash
+
+        # TODO: TestEngine does not save the state of previous transactions, which is causing a NullPointerException
+        with self.assertRaises(TestExecutionException) as engine_exception:
+            result = self.run_smart_contract(engine, path, 'main', hash_)
+
+        self.assertGreater(len(engine_exception.exception.args), 0)
+        self.assertEqual(engine_exception.exception.args[0], self.NULL_POINTER_MSG)
+        
+        # self.assertIsInstance(result, list)
+        # self.assertEqual(len(result), 2)
+        # self.assertEqual(result[1], example_account)
+
+    def test_get_transaction_signers_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_get_transaction_vm_state(self):

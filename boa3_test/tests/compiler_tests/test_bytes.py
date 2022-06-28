@@ -709,12 +709,12 @@ class TestBytes(BoaTest):
         self.assertEqual(bytearray(0), result)
 
         # cannot build with negative size
-        with self.assertRaises(TestExecutionException) as exception:
+        with self.assertRaises(TestExecutionException) as engine_exception:
             result = self.run_smart_contract(engine, path, 'create_bytearray', -10,
                                              expected_result_type=bytes)
 
-        self.assertGreater(len(exception.exception.args), 0)
-        self.assertTrue(exception.exception.args[0].startswith('MaxItemSize exceed'))
+        self.assertGreater(len(engine_exception.exception.args), 0)
+        self.assertTrue(engine_exception.exception.args[0].startswith('MaxItemSize exceed'))
 
     def test_byte_array_from_list_of_int(self):
         path = self.get_contract_path('BytearrayFromListOfInt.py')

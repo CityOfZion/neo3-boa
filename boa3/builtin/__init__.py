@@ -217,7 +217,8 @@ class NeoMetadata:
         """
         if public_key.startswith('03') or public_key.startswith('02'):
             try:
-                if len(bytes.fromhex(public_key)) == 33:
+                from boa3 import constants
+                if len(bytes.fromhex(public_key)) == constants.SIZE_OF_ECPOINT:
                     return True
             except ValueError:
                 pass
