@@ -1,35 +1,38 @@
-# WARNING: This example is currently not fully functional and is being used mainly to test if the NEP-11 in the
-# supported_standards at the metadata correctly verifies the methods, for examples that are fully functional check
-# https://github.com/CityOfZion/props and https://github.com/OnBlockIO/NEP11TemplatePy
+# ------------------------------------------------------------------------------------------------------------------------
+# DISCLAIMER: this smart contract was made by GhostMarket and can be found on https://github.com/OnBlockIO/NEP11TemplatePy
+# with further instructions on how to modify and use it.
+# ------------------------------------------------------------------------------------------------------------------------
 
-from typing import Any, Optional, Union, cast
+from typing import Any, Dict, List, Union, cast
 
-from boa3.builtin import NeoMetadata, metadata, public
-from boa3.builtin.contract import Nep11TransferEvent, abort
-from boa3.builtin.interop import runtime, storage
-from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
+from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.interop.blockchain import get_contract, Transaction
+from boa3.builtin.interop.contract import call_contract, destroy_contract, update_contract
+from boa3.builtin.interop.runtime import check_witness, script_container
+from boa3.builtin.interop.stdlib import serialize, deserialize
+from boa3.builtin.interop.storage import delete, get, put, find, get_read_only_context
+from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.interop.stdlib import deserialize, serialize
-from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import ByteString, UInt160
+from boa3.builtin.type import UInt160, ByteString
+from boa3.builtin.interop.json import json_deserialize
+from boa3.builtin.interop.runtime import get_network
 
 
 # -------------------------------------------
 # METADATA
 # -------------------------------------------
-
 @metadata
-def manifest_metadata() -> NeoMetadata:
+def gm_manifest() -> NeoMetadata:
     """
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
-    meta.supported_standards = ['NEP-11']
-    meta.add_permission(methods=['onNEP11Payment'])
-
-    meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
-    meta.description = "A simplified NEP-11 example"
-    meta.email = "contact@coz.io"
+    meta.author = "Template Author"  # TODO_TEMPLATE
+    meta.description = "Some Description"  # TODO_TEMPLATE
+    meta.email = "hello@example.com"  # TODO_TEMPLATE
+    meta.supported_standards = ["NEP-11"]
+    meta.source = ["https://github.com/"]  # TODO_TEMPLATE
+    # meta.add_permission(contract='*', methods=['*'])
     return meta
 
 
@@ -37,34 +40,90 @@ def manifest_metadata() -> NeoMetadata:
 # TOKEN SETTINGS
 # -------------------------------------------
 
-
-SUPPLY_KEY = 'totalSupply'
-
 # Symbol of the Token
-TOKEN_SYMBOL = 'NEP11'
+TOKEN_SYMBOL = 'EXMP'  # TODO_TEMPLATE
 
 # Number of decimal places
 TOKEN_DECIMALS = 0
 
-# Value of this NEP-11 token compared to GAS
-AMOUNT_PER_GAS = 2 * 10 ** 8
+# Whether the smart contract was deployed or not
+DEPLOYED = b'deployed'
 
+# Whether the smart contract is paused or not
+PAUSED = b'paused'
+
+# -------------------------------------------
 # Prefixes
-PREFIX_ACCOUNT = b'a'
-PREFIX_TOKEN = b't'
+# -------------------------------------------
+
+ACCOUNT_PREFIX = b'ACC'
+TOKEN_PREFIX = b'TPF'
+TOKEN_DATA_PREFIX = b'TDP'
+LOCKED_PREFIX = b'LCP'
+BALANCE_PREFIX = b'BLP'
+SUPPLY_PREFIX = b'SPP'
+META_PREFIX = b'MDP'
+LOCKED_VIEW_COUNT_PREFIX = b'LVCP'
+ROYALTIES_PREFIX = b'RYP'
+
+# -------------------------------------------
+# Keys
+# -------------------------------------------
+
+TOKEN_COUNT = b'TOKEN_COUNT'
+AUTH_ADDRESSES = b'AUTH_ADDRESSES'
 
 # -------------------------------------------
 # Events
 # -------------------------------------------
 
+on_transfer = CreateNewEvent(
+    # trigger when tokens are transferred, including zero value transfers.
+    [
+        ('from_addr', Union[UInt160, None]),
+        ('to_addr', Union[UInt160, None]),
+        ('amount', int),
+        ('tokenId', ByteString)
+    ],
+    'Transfer'
+)
 
-on_transfer = Nep11TransferEvent
+on_auth = CreateNewEvent(
+    # trigger when an address has been authorized/whitelisted.
+    [
+        ('authorized', UInt160),
+        ('type', int),
+        ('add', bool),
+    ],
+    'Authorized'
+)
 
+on_unlock = CreateNewEvent(
+    [
+        ('tokenId', ByteString),
+        ('counter', int)
+    ],
+    'UnlockIncremented'
+)
+
+# DEBUG_START
+# -------------------------------------------
+# DEBUG
+# -------------------------------------------
+
+debug = CreateNewEvent(
+    [
+        ('params', list),
+    ],
+    'Debug'
+)
+
+
+# DEBUG_END
 
 # -------------------------------------------
-# Methods
+# NEP-11 Methods
 # -------------------------------------------
-
 
 @public(safe=True)
 def symbol() -> str:
@@ -77,6 +136,7 @@ def symbol() -> str:
 
     :return: a short string representing symbol of the token managed in this contract.
     """
+    debug(['symbol: ', TOKEN_SYMBOL])
     return TOKEN_SYMBOL
 
 
@@ -86,16 +146,16 @@ def decimals() -> int:
     Gets the amount of decimals used by the token.
 
     E.g. 8, means to divide the token amount by 100,000,000 (10 ^ 8) to get its user representation.
-    Since the token managed in this contract is indivisible, the function SHOULD return 0.
     This method must always return the same value every time it is invoked.
 
     :return: the number of decimals used by the token.
     """
+    debug(['decimals: ', TOKEN_DECIMALS])
     return TOKEN_DECIMALS
 
 
-@public(name='totalSupply', safe=True)
-def total_supply() -> int:
+@public(safe=True)
+def totalSupply() -> int:
     """
     Gets the total token supply deployed in the system.
 
@@ -104,255 +164,701 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return storage.get(SUPPLY_KEY).to_int()
+    debug(['totalSupply: ', get(SUPPLY_PREFIX).to_int()])
+    return get(SUPPLY_PREFIX, get_read_only_context()).to_int()
 
 
-@public(name='balanceOf', safe=True)
-def balance_of(owner_address: UInt160) -> int:
+@public(safe=True)
+def balanceOf(owner: UInt160) -> int:
     """
-    Get the total amount of NFTs owned by an address.
-
-    The parameter account must be a 20-byte address represented by a UInt160.
-
-    :param owner_address: the account address to retrieve the balance for
-    :type owner_address: UInt160
-    """
-    assert len(owner_address) == 20
-
-    balance = 0
-
-    owner: Account = get_account(owner_address)
-    if owner is not None:
-        balance = owner.balance
-
-    return balance
-
-
-@public(name='tokensOf', safe=True)
-def tokens_of(owner: UInt160) -> Iterator:
-    """
-    Get a iterator with all token ids owned by an address. The values inside the Iterator SHOULD be a ByteString with a
-    length of no more than 64 bytes.
+    Get the current balance of an address
 
     The parameter owner must be a 20-byte address represented by a UInt160.
 
-    :param owner: the account address to retrieve the balance for
+    :param owner: the owner address to retrieve the balance for
     :type owner: UInt160
+    :return: the total amount of tokens owned by the specified address.
+    :raise AssertionError: raised if `owner` length is not 20.
     """
-    assert len(owner) == 20
+    expect(validateAddress(owner), "Not a valid address")
+    debug(['balanceOf: ', get(mk_balance_key(owner), get_read_only_context()).to_int()])
+    return get(mk_balance_key(owner), get_read_only_context()).to_int()
 
-    return storage.find(account_prefix_key(owner))
+
+@public(safe=True)
+def tokensOf(owner: UInt160) -> Iterator:
+    """
+    Get all of the token ids owned by the specified address
+
+    The parameter owner must be a 20-byte address represented by a UInt160.
+
+    :param owner: the owner address to retrieve the tokens for
+    :type owner: UInt160
+    :return: an iterator that contains all of the token ids owned by the specified address.
+    :raise AssertionError: raised if `owner` length is not 20.
+    """
+    expect(validateAddress(owner), "Not a valid address")
+    flags = FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY
+    context = get_read_only_context()
+    return find(mk_account_key(owner), context, flags)
 
 
-@public(name='ownerOf', safe=True)
-def owner_of(token_id: ByteString) -> UInt160:
+@public
+def transfer(to: UInt160, tokenId: ByteString, data: Any) -> bool:
+    """
+    Transfers the token with id tokenId to address to
+
+    The parameter to SHOULD be a 20-byte address. If not, this method SHOULD throw an exception.
+    The parameter tokenId SHOULD be a valid NFT. If not, this method SHOULD throw an exception.
+    If the method succeeds, it MUST fire the Transfer event, and MUST return true, even if the token is sent to the owner.
+    If the receiver is a deployed contract, the function MUST call onNEP11Payment method on receiver contract with the
+    data parameter from transfer AFTER firing the Transfer event.
+
+    The function SHOULD check whether the owner address equals the caller contract hash. If so, the transfer SHOULD be
+    processed; If not, the function SHOULD use the SYSCALL Neo.Runtime.CheckWitness to verify the transfer.
+
+    If the transfer is not processed, the function SHOULD return false.
+
+    :param to: the address to transfer to
+    :type to: UInt160
+    :param tokenId: the token to transfer
+    :type tokenId: ByteString
+    :param data: whatever data is pertinent to the onPayment method
+    :type data: Any
+    :return: whether the transfer was successful
+    :raise AssertionError: raised if `to` length is not 20 or if `tokenId` is not a valid NFT or if the contract is paused.
+    """
+    expect(validateAddress(to), "Not a valid address")
+    expect(not isPaused(), "Contract is currently paused")
+    token_owner = get_owner_of(tokenId)
+
+    if not check_witness(token_owner):
+        return False
+
+    if (token_owner != to):
+        set_balance(token_owner, -1)
+        remove_token_account(token_owner, tokenId)
+
+        set_balance(to, 1)
+
+        set_owner_of(tokenId, to)
+        add_token_account(to, tokenId)
+    post_transfer(token_owner, to, tokenId, data)
+    return True
+
+
+def post_transfer(token_owner: Union[UInt160, None], to: Union[UInt160, None], tokenId: ByteString, data: Any):
+    """
+    Checks if the one receiving NEP11 tokens is a smart contract and if it's one the onPayment method will be called - internal
+
+    :param token_owner: the address of the sender
+    :type token_owner: UInt160
+    :param to: the address of the receiver
+    :type to: UInt160
+    :param tokenId: the token hash as ByteString
+    :type tokenId: ByteString
+    :param data: any pertinent data that might validate the transaction
+    :type data: Any
+    """
+    on_transfer(token_owner, to, 1, tokenId)
+    if not isinstance(to, None):
+        contract = get_contract(to)
+        if not isinstance(contract, None):
+            call_contract(to, 'onNEP11Payment', [token_owner, 1, tokenId, data])
+            pass
+
+
+@public(safe=True)
+def ownerOf(tokenId: ByteString) -> UInt160:
     """
     Get the owner of the specified token.
 
-    The parameter token_id SHOULD be a valid NFT ID (64 bytes maximum).
+    The parameter tokenId SHOULD be a valid NFT. If not, this method SHOULD throw an exception.
 
-    :param token_id: the id of a token
-    :type token_id: str
+    :param tokenId: the token for which to check the ownership
+    :type tokenId: ByteString
+    :return: the owner of the specified token.
+    :raise AssertionError: raised if `tokenId` is not a valid NFT.
     """
-    assert len(token_id) <= 64
-
-    owner = UInt160()
-
-    token_bytes = storage.get(account_prefix_key + token_id)
-    if len(token_bytes) != 0:
-        token = cast(NFT, deserialize(token_bytes))
-        owner = token.owner
-
+    owner = get_owner_of(tokenId)
+    debug(['ownerOf: ', owner])
     return owner
 
 
-@public
-def transfer(to_address: UInt160, token_id: ByteString, data: Any) -> bool:
+@public(safe=True)
+def tokens() -> Iterator:
     """
-    Transfers a NFT from one account to another.
+    Get all tokens minted by the contract
 
-    If the method succeeds, it must fire the `Transfer` event and must return true, even if the receiver and sender are
-    the same address.
-
-    :param to_address: the address to transfer to
-    :type to_address: UInt160
-    :param token_id: the id of the token that will be transferred
-    :type token_id: int
-    :param data: whatever data is pertinent to the onPayment method
-    :type data: Any
-
-    :return: whether the transfer was successful
-    :raise AssertionError: raised if `to_address` length is not 20 or if `token_id` length is greater than 64.
+    :return: an iterator that contains all of the tokens minted by the contract.
     """
-    pass
+    flags = FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY
+    context = get_read_only_context()
+    return find(TOKEN_PREFIX, context, flags)
 
 
-def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], token_id: ByteString, data: Any):
+@public(safe=True)
+def properties(tokenId: ByteString) -> Dict[Any, Any]:
     """
-    Checks if the one receiving NEP11 tokens is a smart contract and if it's one the onPayment method will be called.
+    Get the properties of a token.
 
-    :param from_address: the address of the sender
-    :type from_address: UInt160
-    :param to_address: the address of the receiver
-    :type to_address: UInt160
-    :param token_id: the id of the token that is being sent
-    :type token_id: ByteString
-    :param data: any pertinent data that might validate the transaction
-    :type data: Any
+    The parameter tokenId SHOULD be a valid NFT. If no metadata is found (invalid tokenId), an exception is thrown.
+
+    :param tokenId: the token for which to check the properties
+    :type tokenId: ByteString
+    :return: a serialized NVM object containing the properties for the given NFT.
+    :raise AssertionError: raised if `tokenId` is not a valid NFT, or if no metadata available.
     """
-    # the transfer event will be fired
-    on_transfer(from_address, to_address, 1, token_id)
+    metaBytes = cast(str, get_meta(tokenId))
+    expect(len(metaBytes) != 0, 'No metadata available for token')
+    metaObject = cast(Dict[str, str], json_deserialize(metaBytes))
 
-    if to_address is not None:
-        contract = ContractManagement.get_contract(to_address)
-        if contract is not None:
-            call_contract(to_address, 'onNEP11Payment', [from_address, 1, token_id, data])
+    return metaObject
 
 
-@public
-def _deploy(data: Any, update: bool):
+@public(safe=True)
+def propertiesJson(tokenId: ByteString) -> ByteString:
     """
-    Initializes the storage when the smart contract is deployed.
+    Get the properties of a token.
 
-    :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
+    The parameter tokenId SHOULD be a valid NFT. If no metadata is found (invalid tokenId), an exception is thrown.
+
+    :param tokenId: the token for which to check the properties
+    :type tokenId: ByteString
+    :return: a serialized NVM object containing the properties for the given NFT.
+    :raise AssertionError: raised if `tokenId` is not a valid NFT, or if no metadata available.
     """
-    if not update:
-        storage.put(SUPPLY_KEY, 0)
-
-
-@public(name='onNEP11Payment')
-def on_nep11_payment(from_address: UInt160, amount: int, token_id: ByteString, data: Any):
-    """
-    This contract will not receive another NEP-11 token.
-
-    :param from_address: the address of the one who is trying to send cryptocurrency to this smart contract
-    :type from_address: UInt160
-    :param amount: the amount of cryptocurrency that is being sent to the this smart contract
-    :type amount: int
-    :param token_id: the id of the token that is being sent
-    :type token_id: ByteString
-    :param data: any pertinent data that might validate the transaction
-    :type data: Any
-    """
-    abort()
+    meta = get_meta(tokenId)
+    expect(len(meta) != 0, 'No metadata available for token')
+    debug(['properties: ', meta])
+    return meta
 
 
 @public
-def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
+def _deploy(data: Any, upgrade: bool):
     """
-    NEP-17 affirms :"if the receiver is a deployed contract, the function MUST call onPayment method on receiver
-    contract with the data parameter from transfer AFTER firing the Transfer event. If the receiver doesn't want to
-    receive this transfer it MUST call ABORT." Therefore, since this is a smart contract, onPayment must exists.
-
-    There is no guideline as to how it should verify the transaction and it's up to the user to make this verification.
-
-    For instance, this onPayment method checks if this smart contract is receiving GAS so that it can mint a NEP11
-    token, else it will abort.
-
-    :param from_address: the address of the one who is trying to send cryptocurrency to this smart contract
-    :type from_address: UInt160
-    :param amount: the amount of cryptocurrency that is being sent to the this smart contract
-    :type amount: int
-    :param data: any pertinent data that might validate the transaction
-    :type data: Any
+    The contracts initial entry point, on deployment.
     """
-    if runtime.calling_script_hash == GAS_SCRIPT:
-        corresponding_amount = amount // AMOUNT_PER_GAS
-        mint(from_address, corresponding_amount)
+    debug(["deploy now"])
+    if upgrade:
+        return
+
+    if get(DEPLOYED, get_read_only_context()).to_bool():
+        return
+
+    tx = cast(Transaction, script_container)
+    debug(["tx.sender: ", tx.sender, get_network()])
+    owner: UInt160 = tx.sender
+    network = get_network()
+    # DEBUG_START
+    # custom owner for tests, ugly hack, because TestEnginge sets an unkown tx.sender...
+    if data is not None and network == 860833102:
+        newOwner = cast(UInt160, data)
+        debug(["check", newOwner])
+        internal_deploy(newOwner)
+        return
+
+    if data is None and network == 860833102:
+        return
+    # DEBUG_END
+    debug(["owner: ", owner])
+    internal_deploy(owner)
+
+
+def internal_deploy(owner: UInt160):
+    debug(["internal: ", owner])
+    put(DEPLOYED, True)
+    put(PAUSED, False)
+    put(TOKEN_COUNT, 0)
+
+    auth: List[UInt160] = []
+    auth.append(owner)
+    serialized = serialize(auth)
+    put(AUTH_ADDRESSES, serialized)
+
+
+# -------------------------------------------
+# Methods
+# -------------------------------------------
+
+@public
+def burn(tokenId: ByteString) -> bool:
+    """
+    Burn a token.
+
+    :param tokenId: the token to burn
+    :type tokenId: ByteString
+    :return: whether the burn was successful.
+    :raise AssertionError: raised if the contract is paused.
+    """
+    expect(not isPaused(), "Contract is currently paused")
+    return internal_burn(tokenId)
+
+
+@public
+def mint(account: UInt160, meta: ByteString, lockedContent: ByteString, royalties: ByteString) -> ByteString:
+    """
+    Mint new token.
+
+    :param account: the address of the account that is minting token
+    :type account: UInt160
+    :param meta: the metadata to use for this token
+    :type meta: ByteString
+    :param lockedContent: the lock content to use for this token
+    :type lockedContent: ByteString
+    :param royalties: the royalties to use for this token
+    :type royalties: ByteString
+    :return: tokenId of the token minted
+    :raise AssertionError: raised if the contract is paused or if check witness fails.
+    """
+    expect(validateAddress(account),
+           "Not a valid address")  # not really necessary because check_witness would catch an invalid address
+    expect(not isPaused(), "Contract is currently paused")
+
+    # TODO_TEMPLATE: add own logic if necessary, or uncomment below to restrict minting to contract authorized addresses
+    # verified: bool = verify()
+    # expect(verified, '`account` is not allowed for mint')
+    expect(check_witness(account), "Invalid witness")
+
+    return internal_mint(account, meta, lockedContent, royalties)
+
+
+@public(safe=True)
+def getRoyalties(tokenId: ByteString) -> ByteString:
+    """
+    Get a token royalties values.
+
+    :param tokenId: the token to get royalties values
+    :type tokenId: ByteString
+    :return: ByteString of addresses and values for this token royalties.
+    :raise AssertionError: raised if any `tokenId` is not a valid NFT.
+    """
+    royalties = get_royalties(tokenId)
+    debug(['getRoyalties: ', royalties])
+    return royalties
+
+
+@public(safe=True)
+def getLockedContentViewCount(tokenId: ByteString) -> int:
+    """
+    Get lock content view count of a token.
+
+    :param tokenId: the token to query
+    :type tokenId: ByteString
+    :return: number of times the lock content of this token was accessed.
+    """
+    debug(['getLockedContentViewCount: ', get_locked_view_counter(tokenId)])
+    return get_locked_view_counter(tokenId)
+
+
+@public
+def getLockedContent(tokenId: ByteString) -> ByteString:
+    """
+    Get lock content of a token.
+
+    :param tokenId: the token to query
+    :type tokenId: ByteString
+    :return: the lock content of this token.
+    :raise AssertionError: raised if witness is not owner
+    :emits UnlockIncremented
+    """
+    owner = get_owner_of(tokenId)
+
+    expect(check_witness(owner), "Prohibited access to locked content!")
+    set_locked_view_counter(tokenId)
+
+    debug(['getLockedContent: ', get_locked_content(tokenId)])
+    content = get_locked_content(tokenId)
+    counter = get_locked_view_counter(tokenId)
+    on_unlock(tokenId, counter)
+    return content
+
+
+@public(safe=True)
+def getAuthorizedAddress() -> list[UInt160]:
+    """
+    Configure authorized addresses.
+
+    When this contract address is included in the transaction signature,
+    this method will be triggered as a VerificationTrigger to verify that the signature is correct.
+    For example, this method needs to be called when withdrawing token from the contract.
+
+    :param address: the address of the account that is being authorized
+    :type address: UInt160
+    :param authorized: authorization status of this address
+    :type authorized: bool
+    :return: whether the transaction signature is correct
+    :raise AssertionError: raised if witness is not verified.
+    """
+    serialized = get(AUTH_ADDRESSES, get_read_only_context())
+    auth = cast(list[UInt160], deserialize(serialized))
+
+    return auth
+
+
+@public
+def setAuthorizedAddress(address: UInt160, authorized: bool):
+    """
+    Configure authorized addresses.
+
+    When this contract address is included in the transaction signature,
+    this method will be triggered as a VerificationTrigger to verify that the signature is correct.
+    For example, this method needs to be called when withdrawing token from the contract.
+
+    :param address: the address of the account that is being authorized
+    :type address: UInt160
+    :param authorized: authorization status of this address
+    :type authorized: bool
+    :return: whether the transaction signature is correct
+    :raise AssertionError: raised if witness is not verified.
+    """
+    verified: bool = verify()
+    expect(verified, '`account` is not allowed for setAuthorizedAddress')
+    expect(validateAddress(address), "Not a valid address")
+    expect(isinstance(authorized, bool), "authorized has to be of type bool")
+    serialized = get(AUTH_ADDRESSES, get_read_only_context())
+    auth = cast(list[UInt160], deserialize(serialized))
+
+    if authorized:
+        found = False
+        for i in auth:
+            if i == address:
+                found = True
+                break
+
+        if not found:
+            auth.append(address)
+
+        put(AUTH_ADDRESSES, serialize(auth))
+        on_auth(address, 0, True)
     else:
-        abort()
+        auth.remove(address)
+        put(AUTH_ADDRESSES, serialize(auth))
+        on_auth(address, 0, False)
 
 
-def mint(account_address: UInt160, amount: int):
+@public
+def updatePause(status: bool) -> bool:
     """
-    Mints new tokens. This is not a NEP-11 standard method, it's only being use to complement to generate a new NFT
-    whenever a user decides to buy one.
+    Set contract pause status.
 
-    :param account_address: the address of the account that is sending cryptocurrency to this contract
-    :type account_address: UInt160
-    :param amount: the amount of gas to be refunded
-    :type amount: int
-    :raise AssertionError: raised if amount is less than than 0
+    :param status: the status of the contract pause
+    :type status: bool
+    :return: the contract pause status
+    :raise AssertionError: raised if witness is not verified.
     """
-    assert amount >= 0
-    account = get_account(account_address)
-    if account is None:
-        account = Account(account_address)
-
-    for x in range(amount):
-        NFT(account_address)
-
-        nft_id = storage.get(SUPPLY_KEY)
-
-        account.register_token(nft_id)
-
-        post_transfer(None, account_address, nft_id, None)
+    verified: bool = verify()
+    expect(verified, '`account` is not allowed for updatePause')
+    expect(isinstance(status, bool), "status has to be of type bool")
+    put(PAUSED, status)
+    debug(['updatePause: ', get(PAUSED, get_read_only_context()).to_bool()])
+    return get(PAUSED, get_read_only_context()).to_bool()
 
 
-# -------------------------------------------
-# NFT class
-# -------------------------------------------
+@public(safe=True)
+def isPaused() -> bool:
+    """
+    Get the contract pause status.
+
+    If the contract is paused, some operations are restricted.
+
+    :return: whether the contract is paused
+    """
+    debug(['isPaused: ', get(PAUSED).to_bool()])
+    if get(PAUSED, get_read_only_context()).to_bool():
+        return True
+    return False
 
 
-class NFT:
-    def __init__(self, owner: UInt160):
-        self.owner: UInt160 = owner
+@public
+def verify() -> bool:
+    """
+    Check if the address is allowed.
 
-        # since this is an example, the attributes will be generated using the number of NFTs in the contract, but in
-        # a real contract it should be some sort of RNG instead
-        number = total_supply()
-        self.attr1 = (number + 10) * 10 % 9 + 1
-        self.attr2 = (number + 10) * 10 % 6 + 1
+    When this contract address is included in the transaction signature,
+    this method will be triggered as a VerificationTrigger to verify that the signature is correct.
+    For example, this method needs to be called when withdrawing token from the contract.
 
-        current_supply = total_supply() + 1
-        storage.put(SUPPLY_KEY, current_supply)
-        set_nft(current_supply.to_bytes(), self)
+    :return: whether the transaction signature is correct
+    """
+    serialized = get(AUTH_ADDRESSES, get_read_only_context())
+    auth = cast(list[UInt160], deserialize(serialized))
+    tx = cast(Transaction, script_container)
+    for addr in auth:
+        if check_witness(addr):
+            debug(["Verification successful", addr, tx.sender])
+            return True
 
-    def change_owner(self, new_owner: UInt160):
-        self.owner = new_owner
-
-# -------------------------------------------
-# Account class
-# -------------------------------------------
-
-
-class Account:
-    def __init__(self, address: UInt160):
-        self.address: UInt160 = address
-        self._balance: int = 0
-
-    @property
-    def balance(self) -> int:
-        return self._balance
-
-    def register_token(self, token_id: bytes):
-        storage.put(account_prefix_key(self.address) + token_id, True)
-        self._balance = self._balance + 1
-        self.set_account()
-
-    def remove_token(self, token_id: bytes):
-        storage.delete(account_prefix_key(self.address) + token_id)
-        self._balance = self._balance - 1
-        self.set_account()
-
-    def set_account(self):
-        storage.put(PREFIX_ACCOUNT + self.address, serialize(self))
-
-# -------------------------------------------
-# Storage helpers
-# -------------------------------------------
+    debug(["Verification failed", addr])
+    return False
 
 
-def account_prefix_key(account: UInt160) -> bytes:
-    return PREFIX_ACCOUNT + account + b'_'
+@public
+def update(script: bytes, manifest: bytes):
+    """
+    Upgrade the contract.
+
+    :param script: the contract script
+    :type script: ByteString
+    :param manifest: the contract manifest
+    :type manifest: ByteString
+    :raise AssertionError: raised if witness is not verified
+    """
+    verified: bool = verify()
+    expect(verified, '`account` is not allowed for update')
+    update_contract(script, manifest)
+    debug(['update called and done'])
 
 
-def get_account(account: UInt160) -> Optional[Account]:
-    account_bytes = storage.get(PREFIX_ACCOUNT + account)
-    if len(account_bytes) == 0:
-        return None
-    return cast(Account, deserialize(account_bytes))
+@public
+def destroy():
+    """
+    Destroy the contract.
+
+    :raise AssertionError: raised if witness is not verified
+    """
+    verified: bool = verify()
+    expect(verified, '`account` is not allowed for destroy')
+    destroy_contract()
+    debug(['destroy called and done'])
 
 
-def set_nft(token_id: bytes, token: NFT):
-    storage.put(PREFIX_TOKEN + token_id, serialize(token))
+def internal_burn(tokenId: ByteString) -> bool:
+    """
+    Burn a token - internal
+
+    :param tokenId: the token to burn
+    :type tokenId: ByteString
+    :return: whether the burn was successful.
+    :raise AssertionError: raised if `tokenId` is not a valid NFT.
+    """
+    owner = get_owner_of(tokenId)
+
+    if not check_witness(owner):
+        return False
+
+    remove_owner_of(tokenId)
+    set_balance(owner, -1)
+    add_to_supply(-1)
+    remove_meta(tokenId)
+    remove_locked_content(tokenId)
+    remove_royalties(tokenId)
+    remove_token_account(owner, tokenId)
+
+    post_transfer(owner, None, tokenId, None)
+    return True
+
+
+def internal_mint(account: UInt160, meta: ByteString, lockedContent: ByteString, royalties: ByteString) -> ByteString:
+    """
+    Mint new token - internal
+
+    :param account: the address of the account that is minting token
+    :type account: UInt160
+    :param meta: the metadata to use for this token
+    :type meta: ByteString
+    :param lockedContent: the lock content to use for this token
+    :type lockedContent: ByteString
+    :param royalties: the royalties to use for this token
+    :type royalties: ByteString
+    :return: tokenId of the token minted
+    :raise AssertionError: raised if meta is empty, or if contract is paused.
+    """
+    expect(len(meta) != 0, '`meta` can not be empty')
+
+    tokenId = get(TOKEN_COUNT, get_read_only_context()).to_int() + 1
+    put(TOKEN_COUNT, tokenId)
+    tokenIdBytes = tokenId.to_bytes()
+
+    set_owner_of(tokenIdBytes, account)
+    set_balance(account, 1)
+    add_to_supply(1)
+
+    add_meta(tokenIdBytes, meta)
+    debug(['metadata: ', meta])
+
+    if len(lockedContent) != 0:
+        add_locked_content(tokenIdBytes, lockedContent)
+        debug(['locked: ', lockedContent])
+
+    if len(royalties) != 0:
+        add_royalties(tokenIdBytes, cast(str, royalties))
+        debug(['royalties: ', royalties])
+
+    add_token_account(account, tokenIdBytes)
+    post_transfer(None, account, tokenIdBytes, None)
+    return tokenIdBytes
+
+
+def remove_token_account(holder: UInt160, tokenId: ByteString):
+    key = mk_account_key(holder) + tokenId
+    debug(['add_token_account: ', key, tokenId])
+    delete(key)
+
+
+def add_token_account(holder: UInt160, tokenId: ByteString):
+    key = mk_account_key(holder) + tokenId
+    debug(['add_token_account: ', key, tokenId])
+    put(key, tokenId)
+
+
+def get_owner_of(tokenId: ByteString) -> UInt160:
+    key = mk_token_key(tokenId)
+    debug(['get_owner_of: ', key, tokenId])
+    owner = get(key, get_read_only_context())
+    return UInt160(owner)
+
+
+def remove_owner_of(tokenId: ByteString):
+    key = mk_token_key(tokenId)
+    debug(['remove_owner_of: ', key, tokenId])
+    delete(key)
+
+
+def set_owner_of(tokenId: ByteString, owner: UInt160):
+    key = mk_token_key(tokenId)
+    debug(['set_owner_of: ', key, tokenId])
+    put(key, owner)
+
+
+def add_to_supply(amount: int):
+    total = totalSupply() + (amount)
+    debug(['add_to_supply: ', amount])
+    put(SUPPLY_PREFIX, total)
+
+
+def set_balance(owner: UInt160, amount: int):
+    old = balanceOf(owner)
+    new = old + (amount)
+    debug(['set_balance: ', amount])
+
+    key = mk_balance_key(owner)
+    if (new > 0):
+        put(key, new)
+    else:
+        delete(key)
+
+
+def get_meta(tokenId: ByteString) -> ByteString:
+    key = mk_meta_key(tokenId)
+    debug(['get_meta: ', key, tokenId])
+    val = get(key, get_read_only_context())
+    return val
+
+
+def remove_meta(tokenId: ByteString):
+    key = mk_meta_key(tokenId)
+    debug(['remove_meta: ', key, tokenId])
+    delete(key)
+
+
+def add_meta(tokenId: ByteString, meta: ByteString):
+    key = mk_meta_key(tokenId)
+    debug(['add_meta: ', key, tokenId])
+    put(key, meta)
+
+
+def get_locked_content(tokenId: ByteString) -> ByteString:
+    key = mk_locked_key(tokenId)
+    debug(['get_locked_content: ', key, tokenId])
+    val = get(key, get_read_only_context())
+    return val
+
+
+def remove_locked_content(tokenId: ByteString):
+    key = mk_locked_key(tokenId)
+    debug(['remove_locked_content: ', key, tokenId])
+    delete(key)
+
+
+def add_locked_content(tokenId: ByteString, content: ByteString):
+    key = mk_locked_key(tokenId)
+    debug(['add_locked_content: ', key, tokenId])
+    put(key, content)
+
+
+def get_royalties(tokenId: ByteString) -> ByteString:
+    key = mk_royalties_key(tokenId)
+    debug(['get_royalties: ', key, tokenId])
+    val = get(key, get_read_only_context())
+    return val
+
+
+def add_royalties(tokenId: ByteString, royalties: str):
+    key = mk_royalties_key(tokenId)
+    debug(['add_royalties: ', key, tokenId])
+    put(key, royalties)
+
+
+def remove_royalties(tokenId: ByteString):
+    key = mk_royalties_key(tokenId)
+    debug(['remove_royalties: ', key, tokenId])
+    delete(key)
+
+
+def get_locked_view_counter(tokenId: ByteString) -> int:
+    key = mk_lv_key(tokenId)
+    debug(['get_locked_view_counter: ', key, tokenId])
+    return get(key, get_read_only_context()).to_int()
+
+
+def remove_locked_view_counter(tokenId: ByteString):
+    key = mk_lv_key(tokenId)
+    debug(['remove_locked_view_counter: ', key, tokenId])
+    delete(key)
+
+
+def set_locked_view_counter(tokenId: ByteString):
+    key = mk_lv_key(tokenId)
+    debug(['set_locked_view_counter: ', key, tokenId])
+    count = get(key, get_read_only_context()).to_int() + 1
+    put(key, count)
+
+
+## helpers
+
+def expect(condition: bool, message: str):
+    # TODO: Add assert message back after PR #737 is fixed
+    # https://github.com/neo-project/neo-modules/pull/737
+    # assert condition, message
+    assert condition
+
+
+def validateAddress(address: UInt160) -> bool:
+    if not isinstance(address, UInt160):
+        return False
+    if address == 0:
+        return False
+    return True
+
+
+def mk_account_key(address: UInt160) -> ByteString:
+    return ACCOUNT_PREFIX + address
+
+
+def mk_balance_key(address: UInt160) -> ByteString:
+    return BALANCE_PREFIX + address
+
+
+def mk_token_key(tokenId: ByteString) -> ByteString:
+    return TOKEN_PREFIX + tokenId
+
+
+def mk_token_data_key(tokenId: ByteString) -> ByteString:
+    return TOKEN_DATA_PREFIX + tokenId
+
+
+def mk_meta_key(tokenId: ByteString) -> ByteString:
+    return META_PREFIX + tokenId
+
+
+def mk_locked_key(tokenId: ByteString) -> ByteString:
+    return LOCKED_PREFIX + tokenId
+
+
+def mk_royalties_key(tokenId: ByteString) -> ByteString:
+    return ROYALTIES_PREFIX + tokenId
+
+
+def mk_lv_key(tokenId: ByteString) -> ByteString:
+    return LOCKED_VIEW_COUNT_PREFIX + tokenId
