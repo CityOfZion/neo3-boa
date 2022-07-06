@@ -19,6 +19,7 @@ class SignerType(ClassArrayType):
 
     def __init__(self):
         super().__init__('Signer')
+        from boa3.model.builtin.interop.blockchain.witnessscopeenumtype import WitnessScopeType
         from boa3.model.builtin.interop.blockchain.witnessruletype import WitnessRuleType
         from boa3.model.type.type import Type
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
@@ -27,8 +28,9 @@ class SignerType(ClassArrayType):
         list_uint160 = Type.list.build([uint160])
 
         self._variables: Dict[str, Variable] = {
+            '-internal_signer': Variable(Type.bytes),
             'account': Variable(uint160),
-            'scopes': Variable(UInt160Type.build()),
+            'scopes': Variable(WitnessScopeType.build()),
             'allowed_contracts': Variable(list_uint160),
             'allowed_groups': Variable(list_uint160),
             'rules': Variable(Type.list.build([WitnessRuleType.build()]))

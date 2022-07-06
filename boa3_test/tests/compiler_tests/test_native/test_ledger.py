@@ -8,7 +8,6 @@ from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import CallFlags
 from boa3.neo3.core.types import UInt160, UInt256
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -323,13 +322,13 @@ class TestLedgerContract(BoaTest):
         self.assertGreater(len(txs), 0)
         hash_ = txs[0].hash
 
-        # TODO: TestEngine does not save the state of previous transactions, which is causing a NullPointerException
-        with self.assertRaisesRegex(TestExecutionException, self.NULL_POINTER_MSG):
-            result = self.run_smart_contract(engine, path, 'main', hash_)
+        result = self.run_smart_contract(engine, path, 'main', hash_)
 
-        # self.assertIsInstance(result, list)
-        # self.assertEqual(len(result), 2)
-        # self.assertEqual(result[1], example_account)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
+        self.assertIsInstance(result[0], list)
+        self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
+        self.assertEqual(result[0][1], String.from_bytes(example_account))
 
     def test_get_transaction_signers_mismatched_type(self):
         path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
@@ -364,7 +363,6 @@ class TestLedgerContract(BoaTest):
 
         path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
         engine = TestEngine()
-        from boa3.neo3.vm import VMState
 
         self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
         expected_vm_state = engine.vm_state.value
@@ -375,8 +373,7 @@ class TestLedgerContract(BoaTest):
         engine.increase_block()
 
         result = self.run_smart_contract(engine, path, 'main', hash_)
-        # TODO: TestEngine does not save the state of previous transactions
-        self.assertEqual(VMState.NONE, result)
+        self.assertEqual(expected_vm_state, result)
 
     def test_get_transaction_vm_state_mismatched_type(self):
         path = self.get_contract_path('GetTransactionVMStateMismatchedType.py')
