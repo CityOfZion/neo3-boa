@@ -11,6 +11,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestString(BoaTest):
     default_folder: str = 'test_sc/string_test'
 
+    SUBSTRING_NOT_FOUND_MSG = 'substring not found'
+
     def test_string_get_value(self):
         path = self.get_contract_path('GetValue.py')
         output = Boa3.compile(path)
@@ -21,7 +23,7 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', '123')
         self.assertEqual('1', result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_string_get_value_to_variable(self):
@@ -34,7 +36,7 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', '123')
         self.assertEqual('1', result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_string_set_value(self):
@@ -679,13 +681,13 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
         self.assertEqual(string.index(substring, start, end), result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
             self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 3, 4)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
             self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 4, -1)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
             self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 0, -99)
 
         string = 'unit test'
@@ -724,10 +726,10 @@ class TestString(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', string, substring, start)
         self.assertEqual(string.index(substring, start), result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
             self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 99)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
             self.run_smart_contract(engine, path, 'main', 'unit test', 't', -1)
 
         string = 'unit test'

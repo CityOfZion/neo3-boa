@@ -37,6 +37,7 @@ class WitnessRule:
     :ivar condition:
     :vartype condition: WitnessCondition
     """
+
     def __init__(self):
         self.action: WitnessRuleAction = WitnessRuleAction.DENY
         self.condition: WitnessCondition = WitnessCondition()
@@ -49,5 +50,6 @@ class WitnessCondition:
     :ivar type:
     :vartype type: WitnessConditionType
     """
+
     def __init__(self):
         self.type: WitnessConditionType = WitnessConditionType.BOOLEAN

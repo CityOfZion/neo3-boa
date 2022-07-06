@@ -97,7 +97,7 @@ class TestContractManagementContract(BoaTest):
     def test_update_contract(self):
         path = self.get_contract_path('UpdateContract.py')
         engine = TestEngine()
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : new_method'):
             self.run_smart_contract(engine, path, 'new_method')
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
@@ -114,7 +114,7 @@ class TestContractManagementContract(BoaTest):
     def test_update_contract_data_deploy(self):
         path = self.get_contract_path('UpdateContract.py')
         engine = TestEngine()
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : new_method'):
             self.run_smart_contract(engine, path, 'new_method')
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
@@ -146,7 +146,7 @@ class TestContractManagementContract(BoaTest):
 
         script_hash = engine.executed_script_hash.to_array()
         call_contract_path = self.get_contract_path('boa3_test/test_sc/interop_test/contract', 'CallScriptHash.py')
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG}'):
             self.run_smart_contract(engine, call_contract_path, 'Main',
                                     script_hash, 'Main', [])
 

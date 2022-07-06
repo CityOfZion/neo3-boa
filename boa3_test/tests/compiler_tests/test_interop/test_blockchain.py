@@ -391,11 +391,8 @@ class TestBlockchainInterop(BoaTest):
         hash_ = txs[0].hash
 
         # TODO: TestEngine does not save the state of previous transactions, which is causing a NullPointerException
-        with self.assertRaises(TestExecutionException) as engine_exception:
+        with self.assertRaisesRegex(TestExecutionException, self.NULL_POINTER_MSG):
             result = self.run_smart_contract(engine, path, 'main', hash_)
-
-        self.assertGreater(len(engine_exception.exception.args), 0)
-        self.assertEqual(engine_exception.exception.args[0], self.NULL_POINTER_MSG)
 
         # self.assertIsInstance(result, list)
         # self.assertEqual(len(result), 2)

@@ -763,7 +763,7 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(value_old, result)
 
         # Trying to put a new value in the storage using read_only won't work
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG):
             self.run_smart_contract(engine, path, 'put_value_in_storage_read_only', key, value_new)
 
         result = self.run_smart_contract(engine, path, 'get_value_in_storage_read_only', key)

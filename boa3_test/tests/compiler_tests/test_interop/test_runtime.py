@@ -532,12 +532,12 @@ class TestRuntimeInterop(BoaTest):
         burn_gas_cost = 2460  # 2460 * 10^-8 GAS
 
         # can not burn negative GAS
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.GAS_MUST_BE_POSITIVE_MSG):
             self.run_smart_contract(engine, path, 'main', -10 ** 8)
         self.assertEqual(engine.gas_consumed - burn_gas_cost, 0)
 
         # can not burn no GAS
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.GAS_MUST_BE_POSITIVE_MSG):
             self.run_smart_contract(engine, path, 'main', 0)
         self.assertEqual(engine.gas_consumed - burn_gas_cost, 0)
 

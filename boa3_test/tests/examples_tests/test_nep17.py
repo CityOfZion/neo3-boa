@@ -52,9 +52,9 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(total_supply, result)
 
         # should fail when the script length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(10))
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_nep17_total_transfer(self):
@@ -75,15 +75,15 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(False, result)
 
         # should fail when any of the scripts' length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     self.OWNER_SCRIPT_HASH, bytes(10), transferred_amount, "")
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     bytes(10), self.OTHER_ACCOUNT_1, transferred_amount, "")
 
         # should fail when the amount is less than 0
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10, None)
 
@@ -252,7 +252,7 @@ class TestNEP17Template(BoaTest):
         self.assertEqual(nep17_balance_sender_before + transferred_amount * 2, nep17_balance_sender_after)
 
         # trying to call onNEP17Transfer() will result in an abort if the one calling it is not NEO or GAS contracts
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : onNEP17Transfer'):
             self.run_smart_contract(engine, path, 'onNEP17Transfer',
                                     self.OWNER_SCRIPT_HASH, transferred_amount, None)
 

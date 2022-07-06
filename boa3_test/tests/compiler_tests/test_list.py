@@ -138,7 +138,7 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
         self.assertEqual(5, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_list_get_value_with_negative_index(self):
@@ -170,7 +170,7 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
         self.assertEqual(2, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_list_type_hint(self):
@@ -214,7 +214,7 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
         self.assertEqual([1, 3, 2], result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_list_set_value_with_negative_index(self):
@@ -226,7 +226,7 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
         self.assertEqual([5, 3, 1], result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_non_sequence_set_value(self):
@@ -311,7 +311,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX):
             # TODO: TestEngine fails when running contracts with arrays inside arrays args
             self.run_smart_contract(engine, path, 'Main', [[1, 2], [3, 4]])
 
@@ -353,7 +353,7 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 'op', ['a', False])
         self.assertEqual('a', result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', 'op', [])
 
     def test_boa2_demo1(self):
@@ -1182,7 +1182,7 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 2, 3], 3)
         self.assertEqual([1, 2, 2, 3], result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4], 6)
 
     def test_list_remove_int_value(self):
@@ -1290,13 +1290,14 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', list_, value, start, end)
         self.assertEqual(list_.index(value, start, end), result)
 
-        with self.assertRaises(TestExecutionException):
+        from boa3.model.builtin.builtin import Builtin
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 3, 3, 4)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 3, 4, -1)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 3, 0, -99)
 
         list_ = [1, 2, 3, 4]
@@ -1323,10 +1324,11 @@ class TestList(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', list_, value, start)
         self.assertEqual(list_.index(value, start), result)
 
-        with self.assertRaises(TestExecutionException):
+        from boa3.model.builtin.builtin import Builtin
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 2, 99)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', [1, 2, 3, 4], 4, -1)
 
         list_ = [1, 2, 3, 4]

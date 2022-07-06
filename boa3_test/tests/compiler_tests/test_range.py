@@ -296,7 +296,7 @@ class TestRange(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
         self.assertEqual(5, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_range_set_value(self):

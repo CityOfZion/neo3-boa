@@ -598,7 +598,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(4, result)
         result = self.run_smart_contract(engine, path, 'pow', 0, 20)
         self.assertEqual(0, result)
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, '^Invalid shift value'):
             self.run_smart_contract(engine, path, 'pow', 1, -2)
 
     def test_power_augmented_assignment(self):

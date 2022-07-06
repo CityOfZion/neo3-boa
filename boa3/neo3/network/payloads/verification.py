@@ -83,4 +83,3 @@ class WitnessConditionType(IntEnum):
             return "CalledByGroup"
         else:
             return self.name.title()
-

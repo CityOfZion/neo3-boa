@@ -6,6 +6,7 @@
 from typing import Any, Dict, List, Union, cast
 
 from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.contract import abort
 from boa3.builtin.interop.blockchain import get_contract, Transaction
 from boa3.builtin.interop.contract import call_contract, destroy_contract, update_contract
 from boa3.builtin.interop.runtime import check_witness, script_container
@@ -375,6 +376,23 @@ def internal_deploy(owner: UInt160):
     auth.append(owner)
     serialized = serialize(auth)
     put(AUTH_ADDRESSES, serialized)
+
+
+@public(name='onNEP11Payment')
+def on_nep11_payment(from_address: UInt160, amount: int, token_id: ByteString, data: Any):
+    """
+    This contract will not receive another NEP-11 token.
+
+    :param from_address: the address of the one who is trying to send cryptocurrency to this smart contract
+    :type from_address: UInt160
+    :param amount: the amount of cryptocurrency that is being sent to the this smart contract
+    :type amount: int
+    :param token_id: the id of the token that is being sent
+    :type token_id: ByteString
+    :param data: any pertinent data that might validate the transaction
+    :type data: Any
+    """
+    abort()
 
 
 # -------------------------------------------
@@ -815,7 +833,7 @@ def set_locked_view_counter(tokenId: ByteString):
     put(key, count)
 
 
-## helpers
+# helpers
 
 def expect(condition: bool, message: str):
     # TODO: Add assert message back after PR #737 is fixed
