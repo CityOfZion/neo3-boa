@@ -1207,8 +1207,7 @@ class CodeGenerator:
                 self.swap_reverse_stack_items(2)
                 self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
                 # reverts lower to its correct place
                 self.swap_reverse_stack_items(2)
@@ -1216,8 +1215,7 @@ class CodeGenerator:
                 # upper can not be greater than len(string)
                 self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.duplicate_stack_item(2)
@@ -1229,8 +1227,7 @@ class CodeGenerator:
                 self.convert_builtin_method_call(Builtin.Len)
 
                 # if slice end is greater than the array size, fixes them
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
                 self.convert_get_array_slice(array)
 
@@ -1266,8 +1263,7 @@ class CodeGenerator:
                 # upper can not be greater than len(string)
                 self.duplicate_stack_item(2)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.__insert1(OpcodeInfo.LEFT)
@@ -1282,8 +1278,7 @@ class CodeGenerator:
                 self.convert_builtin_method_call(Builtin.Len)
 
                 # if slice end is greater than the array size, fixes them
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.convert_literal(0)
@@ -1323,8 +1318,7 @@ class CodeGenerator:
                 # lower can not be greater than len(string)
                 self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.convert_operation(BinaryOp.Sub)
