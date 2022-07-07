@@ -762,7 +762,7 @@ class TestRelational(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', ['unittest', '123'], '123')
         self.assertEqual(False, result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
             self.run_smart_contract(engine, path, 'main', [], '')
 
     def test_string_equality_operation(self):

@@ -49,9 +49,9 @@ class TestTemplate(BoaTest):
         self.assertEqual(total_supply, result)
 
         # should fail when the script length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(10))
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_wrapped_neo_total_transfer(self):
@@ -73,15 +73,15 @@ class TestTemplate(BoaTest):
         self.assertEqual(False, result)
 
         # should fail when any of the scripts' length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     self.OWNER_SCRIPT_HASH, bytes(10), transferred_amount, "")
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     bytes(10), self.OTHER_ACCOUNT_1, transferred_amount, "")
 
         # should fail when the amount is less than 0
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10, "")
 
@@ -208,11 +208,11 @@ class TestTemplate(BoaTest):
         self.assertEqual(zneo_owner_before - burned_amount, zneo_owner_after)
 
         # should fail when the script length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'burn', bytes(15), burned_amount,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH])
         # or amount is less than 0
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'burn', self.OWNER_SCRIPT_HASH, -1,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH])
 
@@ -399,18 +399,18 @@ class TestTemplate(BoaTest):
         self.assertEqual(allowed_amount - transferred_amount, result)
 
         # should fail when any of the scripts' length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OWNER_SCRIPT_HASH, bytes(10), self.OTHER_ACCOUNT_1, allowed_amount, None)
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     bytes(10), self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, allowed_amount, None)
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, bytes(10), allowed_amount, None)
 
         # should fail when the amount is less than 0
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_2, -10, None)
 
@@ -430,7 +430,7 @@ class TestTemplate(BoaTest):
         engine.add_neo(aux_address, minted_amount)
 
         # the smart contract will abort if some address other than NEO calls the onPayment method
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, path, 'onNEP17Payment', aux_address, minted_amount, None,
                                     signer_accounts=[aux_address])
 

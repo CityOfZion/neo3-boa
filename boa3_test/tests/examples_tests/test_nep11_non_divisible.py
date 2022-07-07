@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict
+from typing import Dict, List
 
 from boa3.neo import to_script_hash
 from boa3.neo.cryptography import hash160
@@ -204,7 +204,7 @@ class TestNEP11Template(BoaTest):
         self.assertEqual(True, result)
 
         # should fail because contract is paused
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'mint',
                                     aux_address, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
                                     signer_accounts=[aux_address])
@@ -247,8 +247,7 @@ class TestNEP11Template(BoaTest):
         royalties = self.run_smart_contract(engine, path, 'getRoyalties', token, expected_result_type=str)
         self.assertEqual(royalties, self.ROYALTIES.decode('utf-8'))
 
-        with self.assertRaises(TestExecutionException,
-                               msg='An unhandled exception was thrown. Unable to parse metadata'):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'properties',
                                     bytes('thisisanonexistingtoken', 'utf-8'),
                                     expected_result_type=str)
@@ -301,7 +300,7 @@ class TestNEP11Template(BoaTest):
         self.assertEqual(1, nep11_supply_after_transfer)
 
         # try to transfer non existing token id
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
                                     self.OTHER_ACCOUNT_1, bytes('thisisanonexistingtoken', 'utf-8'), None,
                                     signer_accounts=[aux_address])
@@ -355,7 +354,7 @@ class TestNEP11Template(BoaTest):
         self.assertEqual('\x01', token)
 
         # the smart contract will abort if any address calls the NEP11 onPayment method
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, path, 'onNEP11Payment',
                                     self.OTHER_ACCOUNT_1, 1, token, None,
                                     signer_accounts=[self.OTHER_ACCOUNT_1])

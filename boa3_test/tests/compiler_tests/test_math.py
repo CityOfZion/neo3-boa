@@ -85,7 +85,7 @@ class TestMath(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 10)
         self.assertEqual(expected_result, result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_CANNOT_BE_NEGATIVE_MSG):
             self.run_smart_contract(engine, path, 'main', -1)
 
         val = 25

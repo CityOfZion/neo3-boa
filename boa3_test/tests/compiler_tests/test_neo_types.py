@@ -25,11 +25,11 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(10),
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
 
@@ -45,11 +45,11 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', -50,
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
 
@@ -75,11 +75,11 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(10),
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint160', bytes(30),
                                     expected_result_type=bytes)
 
@@ -118,12 +118,12 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint256', bytes(20),
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(30),
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
+            self.run_smart_contract(engine, path, 'uint256', bytes(30),
                                     expected_result_type=bytes)
 
     def test_uint256_call_int(self):
@@ -138,11 +138,11 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint256', -50,
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint256', bytes(30),
                                     expected_result_type=bytes)
 
@@ -168,11 +168,11 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint256', bytes(10),
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'uint256', bytes(30),
                                     expected_result_type=bytes)
 
@@ -211,12 +211,12 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'ecpoint', bytes(20),
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(30),
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
+            self.run_smart_contract(engine, path, 'ecpoint', bytes(30),
                                     expected_result_type=bytes)
 
     def test_ecpoint_call_without_args(self):
@@ -237,11 +237,11 @@ class TestNeoTypes(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(value, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'ecpoint', bytes(10),
                                     expected_result_type=bytes)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'ecpoint', bytes(30),
                                     expected_result_type=bytes)
 

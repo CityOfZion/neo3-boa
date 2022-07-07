@@ -14,7 +14,7 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', False)
         self.assertEqual(123, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, path, 'main', True)
 
     def test_deploy_def(self):
@@ -59,7 +59,7 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 10)
         self.assertEqual(expected_result, result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_CANNOT_BE_NEGATIVE_MSG):
             self.run_smart_contract(engine, path, 'main', -1)
 
         val = 25
@@ -110,7 +110,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(value_floor, result)
 
         # negative decimals will raise an exception
-        with self.assertRaises(TestExecutionException):
+        from boa3.model.builtin.builtin import Builtin
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.BuiltinMathFloor.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', integer_value, -1)
 
     def test_decimal_ceil_method(self):
@@ -145,7 +146,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(value_ceiling, result)
 
         # negative decimals will raise an exception
-        with self.assertRaises(TestExecutionException):
+        from boa3.model.builtin.builtin import Builtin
+        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.BuiltinMathCeil.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', integer_value, -1)
 
     # endregion

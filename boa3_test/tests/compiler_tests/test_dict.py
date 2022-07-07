@@ -252,7 +252,7 @@ class TestDict(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', {0: 'zero'})
         self.assertEqual('zero', result)
 
-        with self.assertRaises(TestExecutionException, msg=self.MAP_KEY_NOT_FOUND_ERROR_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.MAP_KEY_NOT_FOUND_ERROR_MSG):
             self.run_smart_contract(engine, path, 'Main', {1: 'one'})
 
     def test_dict_get_value_mismatched_type(self):
@@ -544,7 +544,7 @@ class TestDict(BoaTest):
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'key not inside'
-        with self.assertRaises(TestExecutionException, msg=self.MAP_KEY_NOT_FOUND_ERROR_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.MAP_KEY_NOT_FOUND_ERROR_MSG):
             self.run_smart_contract(engine, path, 'main', dict_, key)
 
     def test_dict_copy(self):

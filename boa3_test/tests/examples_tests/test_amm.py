@@ -74,9 +74,9 @@ class TestTemplate(BoaTest):
         self.assertEqual(0, result)
 
         # should fail when the script length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(10))
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_amm_quote(self):
@@ -120,7 +120,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, path, 'onNEP17Payment', aux_address, transferred_amount, None,
                                     signer_accounts=[aux_address])
 
@@ -185,7 +185,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # won't work, because the user did not allow the amm to transfer zNEO and zGAS
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'add_liquidity', transferred_amount_zneo, transferred_amount_zgas, 0,
                                     0, aux_address,
                                     signer_accounts=[aux_address])
@@ -395,7 +395,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # can't remove liquidity, because the user doesn't have any
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'remove_liquidity', 10000, 0, 0, aux_address,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH])
 
@@ -570,7 +570,7 @@ class TestTemplate(BoaTest):
 
         swapped_zneo = 1 * 10 ** 8
         # won't work, because user did not enough zNEO tokens
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'swap_tokens',
                                     swapped_zneo, 0, zneo_address, aux_address,
                                     signer_accounts=[aux_address])
@@ -707,7 +707,7 @@ class TestTemplate(BoaTest):
 
         swapped_zgas = 11 * 10 ** 8
         # won't work, because user did not enough zNEO tokens
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'swap_tokens',
                                     swapped_zgas, 0, zgas_address, aux_address,
                                     signer_accounts=[aux_address])

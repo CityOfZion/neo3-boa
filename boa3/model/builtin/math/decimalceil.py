@@ -15,12 +15,16 @@ class DecimalCeilingMethod(IBuiltinMethod):
         super().__init__(identifier, args, return_type=Type.int)
 
     @property
+    def exception_message(self) -> str:
+        return "decimals cannot be negative"
+
+    @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.String import String
 
-        message = String("decimals cannot be negative").to_bytes()
+        message = String(self.exception_message).to_bytes()
 
         if_negative_decimal = [
             (Opcode.PUSHDATA1, Integer(len(message)).to_byte_array(signed=True, min_length=1) + message),
