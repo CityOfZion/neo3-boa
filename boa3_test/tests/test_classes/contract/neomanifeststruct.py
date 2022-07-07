@@ -37,7 +37,7 @@ class NeoManifestStruct(NeoStruct):
         struct.append(json[cls._supported_standards_field])
         struct.append(NeoAbiStruct.from_json(json[cls._abi_field]))
         struct.append([NeoPermissionsStruct.from_json(permission) for permission in json[cls._permissions_field]])
-        struct.append(json[cls._trusts_field])  # TODO: trusts aren't implemented
+        struct.append(json[cls._trusts_field])
         extras = json[cls._extra_field]
         struct.append(extras if extras is not None else "null")
 
