@@ -222,8 +222,38 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['trusts']), 4)
         self.assertIn('0x1234567890123456789012345678901234567890', manifest['trusts'])
         self.assertIn('0x1234567890123456789012345678901234abcdef', manifest['trusts'])
-        self.assertIn('030000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
-        self.assertIn('020000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
+        self.assertIn('035a928f201639204e06b4368b1a93365462a8ebbff0b8818151b74faab3a2b61a', manifest['trusts'])
+        self.assertIn('03cdb067d930fd5adaa6c68545016044aaddec64ba39e548250eaea551172e535c', manifest['trusts'])
+
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        result_trusts = result[4][6]
+
+        # transform the str values to bytes values
+        manifest_struct_trusts = []
+        for item in manifest_struct[6]:
+            if isinstance(item, str):
+                if len(item) == 42:
+                    from boa3.neo3.core.types import UInt160
+                    item = UInt160.from_string(item).to_array()
+                elif len(item) == 66:
+                    item = bytes.fromhex(item)
+            manifest_struct_trusts.append(item)
+
+        # compare result from GetContract and NeoManifestStruct
+        self.assertEqual(manifest_struct_trusts, result_trusts)
 
     def test_metadata_info_trusts_wildcard(self):
         path = self.get_contract_path('MetadataInfoTrustsWildcard.py')
@@ -233,6 +263,25 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['trusts'], list)
         self.assertEqual(len(manifest['trusts']), 1)
         self.assertIn(IMPORT_WILDCARD, manifest['trusts'])
+
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        result_trusts = result[4][6]
+
+        # TODO: change when TestEngine is updated
+        self.assertEqual([''], result_trusts)
 
     def test_metadata_info_trusts_mismatched_types(self):
         path = self.get_contract_path('MetadataInfoTrustsMismatchedTypes.py')
