@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
@@ -891,8 +891,12 @@ class CodeGenerator:
             self.insert_none()
         elif isinstance(value, (bytes, bytearray)):
             self.convert_byte_array(value)
+        elif isinstance(value, Sequence):
+            self.convert_sequence_literal(value)
+        elif isinstance(value, dict):
+            self.convert_dict_literal(value)
         else:
-            # TODO: convert other python literals as they are implemented
+            # it's not a type that is supported by neo-boa
             raise NotImplementedError
         return start_address
 
@@ -942,6 +946,37 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.PUSH0)
         self._stack_append(Type.int)  # don't add bool to stack directly for optimizations
         self.convert_cast(Type.bool)
+
+    def convert_sequence_literal(self, sequence: Sequence):
+        """
+        Converts a sequence value
+
+        :param sequence: the value to be converted
+        """
+        if isinstance(sequence, tuple):
+            value_type = Type.tuple.build(sequence)
+        else:
+            value_type = Type.list.build(list(sequence))
+
+        for inner_value in reversed(sequence):
+            self.convert_literal(inner_value)
+
+        self.convert_new_array(len(sequence), value_type)
+
+    def convert_dict_literal(self, dictionary: dict):
+        """
+        Converts a dict value
+
+        :param dictionary: the value to be converted
+        """
+        value_type = Type.dict.build(dictionary)
+        self.convert_new_map(value_type)
+
+        for key, value in dictionary.items():
+            self.duplicate_stack_top_item()
+            self.convert_literal(key)
+            value_start = self.convert_literal(value)
+            self.convert_set_item(value_start)
 
     def convert_byte_array(self, array: bytes):
         """

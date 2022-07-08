@@ -146,19 +146,16 @@ class TestConstant(BoaTest):
     def test_integer_tuple_constant(self):
         input = (1, 2, 3)
         expected_output = (
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSH3      # 3
+            Opcode.PUSH3        # 3
             + Opcode.PUSH2      # 2
             + Opcode.PUSH1      # 1
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -196,8 +193,7 @@ class TestConstant(BoaTest):
         byte_input1 = String(input[1]).to_bytes()
 
         expected_output = (
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSH0      # False
+            Opcode.PUSH0        # False
             + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSHDATA1  # '2'
             + Integer(len(byte_input1)).to_byte_array()
@@ -205,13 +201,11 @@ class TestConstant(BoaTest):
             + Opcode.PUSH1      # 1
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -219,8 +213,7 @@ class TestConstant(BoaTest):
         input = ((1, 2), (3, 4, 5, 6), (7,))
         expected_output = (
             # tuple[2]
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSH7  # 7
+            Opcode.PUSH7    # 7
             + Opcode.PUSH1  # tuple length
             + Opcode.PACK
             # tuple[1]
@@ -237,32 +230,27 @@ class TestConstant(BoaTest):
             + Opcode.PACK
             + Opcode.PUSH3  # tuple length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
     def test_integer_list_constant(self):
         input = [1, 2, 3]
         expected_output = (
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSH3  # 3
+            Opcode.PUSH3    # 3
             + Opcode.PUSH2  # 2
             + Opcode.PUSH1  # 1
             + Opcode.PUSH3  # list length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -273,8 +261,7 @@ class TestConstant(BoaTest):
         byte_input2 = String(input[2]).to_bytes()
 
         expected_output = (
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSHDATA1      # '2'
+            Opcode.PUSHDATA1        # '2'
             + Integer(len(byte_input2)).to_byte_array()
             + byte_input2
             + Opcode.PUSHDATA1      # '1'
@@ -285,13 +272,11 @@ class TestConstant(BoaTest):
             + byte_input0
             + Opcode.PUSH3          # list length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -300,8 +285,7 @@ class TestConstant(BoaTest):
         byte_input1 = String(input[1]).to_bytes()
 
         expected_output = (
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSH0      # False
+            Opcode.PUSH0        # False
             + Opcode.CONVERT + StackItemType.Boolean
             + Opcode.PUSHDATA1  # '2'
             + Integer(len(byte_input1)).to_byte_array()
@@ -309,13 +293,11 @@ class TestConstant(BoaTest):
             + Opcode.PUSH1      # 1
             + Opcode.PUSH3      # list length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -323,8 +305,7 @@ class TestConstant(BoaTest):
         input = [[1, 2], [3, 4, 5, 6], [7]]
         expected_output = (
             # list[2]
-            Opcode.INITSSLOT + b'\x01'
-            + Opcode.PUSH7  # 7
+            Opcode.PUSH7    # 7
             + Opcode.PUSH1  # list length
             + Opcode.PACK
             # list[1]
@@ -341,13 +322,98 @@ class TestConstant(BoaTest):
             + Opcode.PACK
             + Opcode.PUSH3  # list length
             + Opcode.PACK
-            + Opcode.DROP
-            + Opcode.RET
         )
 
-        analyser = Analyser(ast.parse(str(input)))
-        analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
+
+        self.assertEqual(expected_output, output)
+
+    def test_integer_dict_constant(self):
+        input = {1: 15, 2: 14, 3: 13}
+        expected_output = (
+            Opcode.NEWMAP     # {1: 15, 2: 14, 3: 13}
+            + Opcode.DUP
+            + Opcode.PUSH1      # map[1] = 15
+            + Opcode.PUSH15
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH2      # map[2] = 14
+            + Opcode.PUSH14
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH3      # map[3] = 13
+            + Opcode.PUSH13
+            + Opcode.SETITEM
+        )
+
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
+
+        self.assertEqual(expected_output, output)
+
+    def test_string_dict_constant(self):
+        input = {'one': 1, 'two': 2, 'three': 3}
+        one = String('one').to_bytes()
+        two = String('two').to_bytes()
+        three = String('three').to_bytes()
+
+        expected_output = (
+            Opcode.NEWMAP     # {'one': 1, 'two': 2, 'three': 3}
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['one'] = 1
+            + Integer(len(one)).to_byte_array(min_length=1)
+            + one
+            + Opcode.PUSH1
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['two'] = 2
+            + Integer(len(two)).to_byte_array(min_length=1)
+            + two
+            + Opcode.PUSH2
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSHDATA1  # map['three'] = 3
+            + Integer(len(three)).to_byte_array(min_length=1)
+            + three
+            + Opcode.PUSH3
+            + Opcode.SETITEM
+        )
+
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
+
+        self.assertEqual(expected_output, output)
+
+    def test_any_dict_constant(self):
+        input = {1: True, 2: 4, 3: 'nine'}
+        nine = String('nine').to_bytes()
+
+        expected_output = (
+            Opcode.NEWMAP  # {1: True, 2: 4, 3: 'nine'}
+            + Opcode.DUP
+            + Opcode.PUSH1  # map[1] = True
+            + Opcode.PUSH1
+            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH2  # map[2] = 4
+            + Opcode.PUSH4
+            + Opcode.SETITEM
+            + Opcode.DUP
+            + Opcode.PUSH3  # map[3] = 'nine'
+            + Opcode.PUSHDATA1
+            + Integer(len(nine)).to_byte_array(min_length=1)
+            + nine
+            + Opcode.SETITEM
+        )
+
+        generator = self.build_code_generator()
+        generator.convert_literal(input)
+        output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
