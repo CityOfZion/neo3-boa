@@ -49,11 +49,6 @@ class StorageDeleteMethod(InteropMethod):
         return indexes
 
     @property
-    def storage_context_hash(self) -> bytes:
-        # TODO: refactor when default arguments are implemented
-        return self._method_hash(self._storage_context)
-
-    @property
     def key_arg(self) -> Variable:
         return self.args['key']
 
