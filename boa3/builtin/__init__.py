@@ -109,6 +109,7 @@ class NeoMetadata:
         self.supported_standards: List[str] = []
         self._trusts: List[str] = []
         self._permissions: List[dict] = []
+        self._groups: List[dict] = []
 
     @property
     def extras(self) -> Dict[str, Any]:
@@ -141,6 +142,10 @@ class NeoMetadata:
     def permissions(self) -> List[dict]:
         return self._permissions.copy()
 
+    @property
+    def groups(self) -> List[dict]:
+        return self._groups.copy()
+
     def add_trusted_source(self, hash_or_address: str):
         """
         Adds a valid contract hash, valid group public key, or the '*' wildcard to trusts.
@@ -167,6 +172,31 @@ class NeoMetadata:
         elif self._verify_is_valid_public_key(hash_or_address):
             if hash_or_address not in self._trusts:
                 self._trusts.append(hash_or_address.lower())
+
+    def add_group(self, pub_key: str, signature: str):
+        """
+        Adds a pair of public key and signature to the groups in the manifest.
+
+        :param pub_key: public key of the group
+        :type pub_key: str
+        :param signature: signature of the contract hash encoded in Base64
+        :type signature: str
+        """
+
+        if not isinstance(pub_key, str) or not isinstance(signature, str):
+            return
+
+        # verifies if pub_key is a valid value
+        if not self._verify_is_valid_public_key(pub_key):
+            return
+
+        new_group = {
+            'pubkey': pub_key.lower(),
+            'signature': signature,
+        }
+
+        if new_group not in self._permissions:
+            self._groups.append(new_group)
 
     def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: Union[List[str], str] = IMPORT_WILDCARD):
         """

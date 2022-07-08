@@ -32,7 +32,7 @@ class NeoManifestStruct(NeoStruct):
 
         struct = cls()
         struct.append(json[cls._name_field])
-        struct.append(json[cls._groups_field])  # TODO: groups aren't implemented yet
+        struct.append(json[cls._groups_field])
         struct.append({})  # TODO: features aren't implemented yet
         struct.append(json[cls._supported_standards_field])
         struct.append(NeoAbiStruct.from_json(json[cls._abi_field]))
