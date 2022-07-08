@@ -227,7 +227,7 @@ class FileGenerator:
         # TODO: fill the information of the manifest
         return {
             "name": self._get_name(),
-            "groups": [],
+            "groups": self._get_groups(),
             "abi": self._get_abi_info(),
             "permissions": self._get_permissions(),
             "trusts": self._metadata.trusts,
@@ -253,6 +253,14 @@ class FileGenerator:
         """
         return self._metadata.permissions if self._metadata.permissions else [{"contract": constants.IMPORT_WILDCARD,
                                                                                "methods": constants.IMPORT_WILDCARD}]
+
+    def _get_groups(self) -> List[Dict[str, Any]]:
+        """
+        Gets the group information in a dictionary format.
+
+        :return: a dictionary with the groups information
+        """
+        return self._metadata.groups
 
     def _get_abi_info(self) -> Dict[str, Any]:
         """
