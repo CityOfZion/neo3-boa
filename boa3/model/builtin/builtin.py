@@ -74,7 +74,8 @@ class Builtin:
     BytesStringStartswith = StartsWithMethod()
     BytesStringStrip = StripMethod()
     BytesStringUpper = UpperMethod()
-    CountSequence = CountSequenceMethod()
+    CountSequenceGeneric = CountSequenceGenericMethod()
+    CountSequencePrimitive = CountSequencePrimitiveMethod()
     CountStr = CountStrMethod()
     Copy = CopyListMethod()
     SequenceAppend = AppendMethod()
@@ -118,7 +119,8 @@ class Builtin:
                                                 ConvertToInt,
                                                 ConvertToStr,
                                                 Copy,
-                                                CountSequence,
+                                                CountSequenceGeneric,
+                                                CountSequencePrimitive,
                                                 CountStr,
                                                 DictKeys,
                                                 DictValues,

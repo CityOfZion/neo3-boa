@@ -28,9 +28,8 @@ class ListType(MutableSequenceType):
 
     @classmethod
     def build(cls, value: Any) -> IType:
-        if cls._is_type_of(value):
-            values_types: Set[IType] = cls.get_types(value)
-            return cls(values_types)
+        values_types: Set[IType] = cls.get_types(value)
+        return cls(values_types)
 
     @classmethod
     def _is_type_of(cls, value: Any):
