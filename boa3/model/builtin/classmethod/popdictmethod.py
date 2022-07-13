@@ -16,7 +16,6 @@ class PopDictMethod(PopMethod):
         args: Dict[str, Variable] = {
             'self': Variable(arg_value),
             'key': Variable(arg_value.valid_key)
-            # TODO: Add default parameter
         }
 
         super().__init__(args, return_type=arg_value.value_type)

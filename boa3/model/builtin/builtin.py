@@ -87,6 +87,7 @@ class Builtin:
     StrIndex = IndexStrMethod()
     DictKeys = MapKeysMethod()
     DictPop = PopDictMethod()
+    DictPopDefault = PopDictDefaultMethod()
     DictValues = MapValuesMethod()
 
     # custom class methods

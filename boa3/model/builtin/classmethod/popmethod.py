@@ -24,8 +24,13 @@ class PopMethod(IBuiltinMethod):
         if self._arg_self.type is Type.mutableSequence:
             return self._identifier
 
-        if self._arg_self.type is Type.dict:
-            return '-{0}_{1}'.format(self._identifier, Type.dict.identifier)
+        if Type.dict.is_type_of(self._arg_self.type):
+
+            if len(self.args) == 2:
+                return '-{0}_{1}'.format(self._identifier, Type.dict.identifier)
+
+            elif len(self.args) == 3:
+                return '-{0}_{1}_{2}'.format(self._identifier, Type.dict.identifier, 'default')
 
         if Type.mutableSequence.is_type_of(self._arg_self.type):
             return '-{0}_{1}'.format(self._identifier, Type.mutableSequence.identifier)
@@ -83,15 +88,17 @@ class PopMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, list) and len(value) > 0:
-            if len(value) == 2:
-                value = value[0]
+        if not isinstance(value, list):
+            value = [value]
 
         from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod
         from boa3.model.builtin.classmethod.popsequencemethod import PopSequenceMethod
         from boa3.model.type.type import Type
 
-        if Type.dict.is_type_of(value):
-            return PopDictMethod(value)
+        if Type.dict.is_type_of(value[0]):
+            if len(value) == 3:
+                from boa3.model.builtin.classmethod.popdictdefaultmethod import PopDictDefaultMethod
+                return PopDictDefaultMethod(value[0])
+            return PopDictMethod(value[0])
 
-        return PopSequenceMethod(value)
+        return PopSequenceMethod(value[0])
