@@ -31,6 +31,7 @@ class DictType(MutableMappingType):
         instance_methods = [Builtin.DictKeys,
                             Builtin.DictValues,
                             Builtin.DictPop,
+                            Builtin.DictPopDefault,
                             ]
 
         for instance_method in instance_methods:

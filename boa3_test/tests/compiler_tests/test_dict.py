@@ -547,6 +547,38 @@ class TestDict(BoaTest):
         with self.assertRaisesRegex(TestExecutionException, self.MAP_KEY_NOT_FOUND_ERROR_MSG):
             self.run_smart_contract(engine, path, 'main', dict_, key)
 
+    def test_dict_pop_default(self):
+        path = self.get_contract_path('DictPopDefault.py')
+        engine = TestEngine()
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'a'
+        default = 'test'
+        result = self.run_smart_contract(engine, path, 'main', dict_, key, default)
+        value = dict_.pop(key, default)
+        self.assertEqual((dict_, value), tuple(result))
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'd'
+        default = 'test'
+        result = self.run_smart_contract(engine, path, 'main', dict_, key, default)
+        value = dict_.pop(key, default)
+        self.assertEqual((dict_, value), tuple(result))
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'not inside'
+        default = 'test'
+        result = self.run_smart_contract(engine, path, 'main', dict_, key, default)
+        value = dict_.pop(key, default)
+        self.assertEqual((dict_, value), tuple(result))
+
+        dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        key = 'not inside'
+        default = 123456
+        result = self.run_smart_contract(engine, path, 'main', dict_, key, default)
+        value = dict_.pop(key, default)
+        self.assertEqual((dict_, value), tuple(result))
+
     def test_dict_copy(self):
         path = self.get_contract_path('DictCopy.py')
         engine = TestEngine()
