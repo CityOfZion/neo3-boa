@@ -43,8 +43,8 @@ from boa3.model.builtin.classmethod.joinmethod import JoinMethod
 from boa3.model.builtin.classmethod.lowermethod import LowerMethod
 from boa3.model.builtin.classmethod.mapkeysmethod import MapKeysMethod
 from boa3.model.builtin.classmethod.mapvaluesmethod import MapValuesMethod
-from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod
 from boa3.model.builtin.classmethod.popdictdefaultmethod import PopDictDefaultMethod
+from boa3.model.builtin.classmethod.popdictmethod import PopDictMethod
 from boa3.model.builtin.classmethod.popsequencemethod import PopSequenceMethod
 from boa3.model.builtin.classmethod.removemethod import RemoveMethod
 from boa3.model.builtin.classmethod.reversemethod import ReverseMethod
