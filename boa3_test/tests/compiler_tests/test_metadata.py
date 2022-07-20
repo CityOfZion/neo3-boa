@@ -197,6 +197,26 @@ class TestMetadata(BoaTest):
         self.assertIn('name', abi['events'][0])
         self.assertEqual('Transfer', abi['events'][0]['name'])
 
+    def test_metadata_info_supported_standards_filter(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsFilter.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+        # Using a dot is permitted and won't be removed by the filter
+        self.assertIn('NEP-17.1', manifest['supportedstandards'])
+
+        # Every NEP needs to be in uppercase and be separated by a dash
+        self.assertIn('NEP-100', manifest['supportedstandards'])
+        self.assertIn('NEP-101', manifest['supportedstandards'])
+        self.assertIn('NEP-102', manifest['supportedstandards'])
+
+        # Standards that doesn't begin with NEP will not the filtered
+        self.assertIn('not neo standard 1', manifest['supportedstandards'])
+
     def test_metadata_info_supported_standards_missing_implementations_nep17(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
