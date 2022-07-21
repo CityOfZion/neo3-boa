@@ -15,7 +15,10 @@ def Main() -> int:
 @metadata
 def standards_manifest() -> NeoMetadata:
     meta = NeoMetadata()
-    meta.supported_standards = ['NEP-17', 'NEP-17.1', 'nep 100', 'nEP101', 'Nep-102', 'not neo standard 1']
+    meta.supported_standards = [
+        'NEP-17', 'NEP-17.1', 'NEP-17.1.2', 'NEP-17.1.3.5.7.9.11.13',
+        'nep 100', 'nEP101', 'Nep-102', 'not neo standard 1'
+    ]
     return meta
 
 

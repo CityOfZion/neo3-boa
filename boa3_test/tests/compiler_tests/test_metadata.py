@@ -208,6 +208,8 @@ class TestMetadata(BoaTest):
 
         # Using a dot is permitted and won't be removed by the filter
         self.assertIn('NEP-17.1', manifest['supportedstandards'])
+        self.assertIn('NEP-17.1.2', manifest['supportedstandards'])
+        self.assertIn('NEP-17.1.3.5.7.9.11.13', manifest['supportedstandards'])     # possible to use more than 1 dot
 
         # Every NEP needs to be in uppercase and be separated by a dash
         self.assertIn('NEP-100', manifest['supportedstandards'])

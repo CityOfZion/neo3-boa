@@ -44,7 +44,7 @@ class StandardAnalyser(IAstAnalyser):
         for standard in self.standards:
             standard = standard.strip()
             if standard.upper().startswith('NEP'):
-                rebab_case = re.sub(r'([A-Z]+|(\d+\.\d+))[^a-zA-Z\d]?', r'\g<1>-', standard.upper())
+                rebab_case = re.sub(r'([A-Z]+|(.\d+)+|\d+)[^a-zA-Z\d]?', r'\g<1>-', standard.upper())
                 if rebab_case.endswith('-'):
                     rebab_case = rebab_case[:-1]
                 standard = rebab_case
