@@ -38,15 +38,18 @@ class StandardAnalyser(IAstAnalyser):
 
     def _filter_standards_names(self):
         """
-        Converts all the standards names to upper kebab case
+        Converts all the Neo standards names to upper kebab case
         """
         filtered_standards = set()
         for standard in self.standards:
-            rebab_case = re.sub(r'([a-z]+|[A-Z]+[a-z]*|\d+)[^a-zA-Z\d]?', r'\g<1>-', standard)
-            if rebab_case.endswith('-'):
-                rebab_case = rebab_case[:-1]
-            rebab_case = rebab_case.upper()
-            filtered_standards.add(rebab_case)
+            standard = standard.strip()
+            if standard.upper().startswith('NEP'):
+                rebab_case = re.sub(r'([A-Z]+|(.\d+)+|\d+)[^a-zA-Z\d]?', r'\g<1>-', standard.upper())
+                if rebab_case.endswith('-'):
+                    rebab_case = rebab_case[:-1]
+                standard = rebab_case
+
+            filtered_standards.add(standard)
 
         self.standards.clear()
         self.standards.extend(filtered_standards)
