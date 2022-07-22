@@ -59,6 +59,7 @@ class Builtin:
     # python builtin class constructor
     Bool = BoolMethod()
     ByteArray = ByteArrayMethod()
+    ByteArrayEncoding = ByteArrayEncodingMethod()
     Exception = ExceptionMethod()
     IntByteString = IntByteStringMethod()
     IntInt = IntIntMethod()
@@ -104,6 +105,7 @@ class Builtin:
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                ByteArrayEncoding,
                                                 BytesStringIsDigit,
                                                 BytesStringJoin,
                                                 BytesStringLower,

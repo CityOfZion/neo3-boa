@@ -725,12 +725,20 @@ class TestBytes(BoaTest):
 
     def test_byte_array_string(self):
         path = self.get_contract_path('BytearrayFromString.py')
-        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
 
-        from boa3.model.builtin.builtin import Builtin
-        from boa3.model.type.type import Type
-        expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({Type.str.identifier})')
-        self.assertEqual(expected_error._error_message, compiler_error_message)
+        # Neo3-boa's bytearray only converts with utf-8 encoding
+        string = 'string value'
+        result = self.run_smart_contract(engine, path, 'main', string, expected_result_type=bytearray)
+        self.assertEqual(bytearray(string, 'utf-8'), result)
+
+        string = 'áãõ😀'
+        result = self.run_smart_contract(engine, path, 'main', string, expected_result_type=bytearray)
+        self.assertEqual(bytearray(string, 'utf-8'), result)
+
+    def test_byte_array_string_with_encoding(self):
+        path = self.get_contract_path('BytearrayFromStringWithEncoding.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_byte_array_append(self):
         path = self.get_contract_path('BytearrayAppend.py')

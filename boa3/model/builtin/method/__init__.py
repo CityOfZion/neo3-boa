@@ -2,6 +2,7 @@ __all__ = ['AbsMethod',
            'BoolMethod',
            'IBuiltinMethod',
            'ByteArrayMethod',
+           'ByteArrayEncodingMethod',
            'CreateEventMethod',
            'EventType',
            'ExceptionMethod',
@@ -27,6 +28,7 @@ from boa3.model.builtin.method.absmethod import AbsMethod
 from boa3.model.builtin.method.boolmethod import BoolMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
+from boa3.model.builtin.method.bytearrayencodingmethod import ByteArrayEncodingMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
 from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
 from boa3.model.builtin.method.exitmethod import ExitMethod
