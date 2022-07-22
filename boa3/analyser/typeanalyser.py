@@ -1271,7 +1271,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 call_target = Builtin.Exception
 
             callable_target = call_target if call_target is not None else callable_target
-        elif isinstance(callable_target, IBuiltinMethod):
+        if isinstance(callable_target, IBuiltinMethod):
             # verify if it's a variation of the default builtin method
             args = [self.get_type(param, use_metatype=True) for param in call_args]
 
