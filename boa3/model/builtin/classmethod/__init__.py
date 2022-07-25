@@ -5,8 +5,8 @@ __all__ = ['AppendMethod',
            'CountSequenceMethod',
            'CountStrMethod',
            'ExtendMethod',
+           'IndexBytesStringMethod',
            'IndexSequenceMethod',
-           'IndexStrMethod',
            'InsertMethod',
            'IsDigitMethod',
            'JoinMethod',
@@ -36,7 +36,7 @@ from boa3.model.builtin.classmethod.countsequencemethod import CountSequenceMeth
 from boa3.model.builtin.classmethod.countstrmethod import CountStrMethod
 from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.indexsequencemethod import IndexSequenceMethod
-from boa3.model.builtin.classmethod.indexstrmethod import IndexStrMethod
+from boa3.model.builtin.classmethod.indexbytesstringmethod import IndexBytesStringMethod
 from boa3.model.builtin.classmethod.insertmethod import InsertMethod
 from boa3.model.builtin.classmethod.isdigitmethod import IsDigitMethod
 from boa3.model.builtin.classmethod.joinmethod import JoinMethod

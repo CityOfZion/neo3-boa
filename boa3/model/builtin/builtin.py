@@ -68,6 +68,7 @@ class Builtin:
     Super = SuperMethod()
 
     # python class method
+    BytesStringIndex = IndexBytesStringMethod()
     BytesStringIsDigit = IsDigitMethod()
     BytesStringJoin = JoinMethod()
     BytesStringLower = LowerMethod()
@@ -85,7 +86,6 @@ class Builtin:
     SequencePop = PopSequenceMethod()
     SequenceRemove = RemoveMethod()
     SequenceReverse = ReverseMethod()
-    StrIndex = IndexStrMethod()
     DictKeys = MapKeysMethod()
     DictPop = PopDictMethod()
     DictPopDefault = PopDictDefaultMethod()
@@ -106,6 +106,7 @@ class Builtin:
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
                                                 ByteArrayEncoding,
+                                                BytesStringIndex,
                                                 BytesStringIsDigit,
                                                 BytesStringJoin,
                                                 BytesStringLower,
@@ -142,7 +143,6 @@ class Builtin:
                                                 SequenceRemove,
                                                 SequenceReverse,
                                                 StaticMethodDecorator,
-                                                StrIndex,
                                                 StrSplit,
                                                 Sum,
                                                 Super,

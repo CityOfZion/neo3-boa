@@ -29,7 +29,7 @@ class StrType(IByteStringType):
 
         instance_methods = [Builtin.ConvertToBytes,
                             Builtin.StrSplit,
-                            Builtin.StrIndex,
+                            Builtin.BytesStringIndex,
                             ]
 
         for instance_method in instance_methods:
