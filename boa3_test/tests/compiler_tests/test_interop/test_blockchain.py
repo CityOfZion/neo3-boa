@@ -497,12 +497,9 @@ class TestBlockchainInterop(BoaTest):
 
         engine.increase_block()
 
-        result = self.run_smart_contract(engine, path, 'main')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
+        result = self.run_smart_contract(engine, path, 'main', expected_result_type=bytes)
 
         block = engine.current_block
-
         self.assertEqual(block.hash, result)
 
     def test_current_index(self):

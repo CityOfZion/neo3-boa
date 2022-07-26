@@ -2,5 +2,5 @@ from boa3.builtin import public
 
 
 @public
-def Main(a: bool) -> bool:
+def Main(a: bool) -> int:
     return ~a

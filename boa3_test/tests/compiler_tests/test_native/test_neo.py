@@ -187,7 +187,7 @@ class TestNeoClass(BoaTest):
         self.assertEqual(0, result[0][1])
 
         # voting for candidate again
-        result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
+        self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
         result = self.run_smart_contract(engine, path_get, 'main')
         self.assertEqual(n_votes, result[0][1])
 
