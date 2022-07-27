@@ -1724,3 +1724,133 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(bool(val), result)
 
     # endregion
+
+    # region list test
+
+    def test_list_any(self):
+        path = self.get_contract_path('ListAny.py')
+        engine = TestEngine()
+
+        val = [1, 2, 3, 4]
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = {'a': 1, 'b': '2', 'c': True, 'd': b'01', '12e12e12e12': 123}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = 'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(bytes(val, 'utf-8')), result)
+
+        val = b'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = 123
+        with self.assertRaises(TestExecutionException):
+            self.run_smart_contract(engine, path, 'main', val)
+
+    def test_list_default(self):
+        path = self.get_contract_path('ListDefault.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(list(), result)
+
+    def test_list_sequence(self):
+        path = self.get_contract_path('ListSequence.py')
+        engine = TestEngine()
+
+        val = [1, 2, 3, 4]
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = (1, 2, 3, 4)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = range(0, 10)
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = [1, 2, 3, 4]
+        result = self.run_smart_contract(engine, path, 'verify_list_unchanged', val)
+        new_list = list(val)
+        val[0] = val[1]
+        self.assertEqual(new_list, result)
+
+    def test_list_sequence_mismatched_return_type(self):
+        path = self.get_contract_path('ListSequenceMismatchedReturnType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_list_mapping(self):
+        path = self.get_contract_path('ListMapping.py')
+        engine = TestEngine()
+
+        val = {'a': 1, 'b': 2, 'c': 3, 'd': 0, '12e12e12e12': 123}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        # result should be a list of all the keys used in the dictionary, in insertion order
+        self.assertEqual(list(val), result)
+
+        val = {'a': 1, 'b': '2', 'c': True, 'd': b'01', '12e12e12e12': 123}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = {1: 0, 23: 12, -10: 412, 25: '123'}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+        val = {b'123': 123, b'test': 'test', b'unit': 'unit'}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        for index, item in enumerate(result):
+            if isinstance(item, str):
+                result[index] = String(item).to_bytes()
+        self.assertEqual(list(val), result)
+
+        val = {'a': 1, 'b': '2', 'c': True, 1: 0, 23: 12, 25: 'value'}
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+    def test_list_mapping_mismatched_return_type(self):
+        path = self.get_contract_path('ListMappingMismatchedReturnType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_list_bytes(self):
+        path = self.get_contract_path('ListBytes.py')
+        engine = TestEngine()
+
+        val = b'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+    def test_list_bytes_mismatched_return_type(self):
+        path = self.get_contract_path('ListBytesMismatchedReturnType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_list_str(self):
+        path = self.get_contract_path('ListString.py')
+        engine = TestEngine()
+
+        val = 'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+    def test_list_str_mismatched_return_type(self):
+        path = self.get_contract_path('ListStringMismatchedReturnType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_list_bytes_str(self):
+        path = self.get_contract_path('ListBytesString.py')
+        engine = TestEngine()
+
+        # If the compiler doesn't have a type hint to know if it's a bytes or str value it will consider it as bytes
+        val = 'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(bytes(val, 'utf-8')), result)
+
+        val = b'unit test'
+        result = self.run_smart_contract(engine, path, 'main', val)
+        self.assertEqual(list(val), result)
+
+    # endregion

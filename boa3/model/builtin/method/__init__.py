@@ -11,6 +11,10 @@ __all__ = ['AbsMethod',
            'IntIntMethod',
            'IsInstanceMethod',
            'LenMethod',
+           'ListBytesStringMethod',
+           'ListGenericMethod',
+           'ListMappingMethod',
+           'ListSequenceMethod',
            'MaxIntMethod',
            'MaxByteStringMethod',
            'MinByteStringMethod',
@@ -36,6 +40,10 @@ from boa3.model.builtin.method.intbytestringmethod import IntByteStringMethod
 from boa3.model.builtin.method.intintmethod import IntIntMethod
 from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.listbytesstringmethod import ListBytesStringMethod
+from boa3.model.builtin.method.listgenericmethod import ListGenericMethod
+from boa3.model.builtin.method.listmappingmethod import ListMappingMethod
+from boa3.model.builtin.method.listsequencemethod import ListSequenceMethod
 from boa3.model.builtin.method.maxbytestringmethod import MaxByteStringMethod
 from boa3.model.builtin.method.maxintmethod import MaxIntMethod
 from boa3.model.builtin.method.minbytestringmethod import MinByteStringMethod
