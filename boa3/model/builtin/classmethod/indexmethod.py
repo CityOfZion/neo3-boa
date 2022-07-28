@@ -63,8 +63,8 @@ class IndexMethod(IBuiltinMethod):
             return IndexSequenceMethod(value[0], value[1])
 
         from boa3.model.type.type import Type
-        if len(value) > 0 and Type.str.is_type_of(value[0]):
-            from boa3.model.builtin.classmethod.indexstrmethod import IndexStrMethod
-            return IndexStrMethod(value[0])
+        if len(value) > 0 and (Type.str.is_type_of(value[0]) or Type.bytes.is_type_of(value[0])):
+            from boa3.model.builtin.classmethod.indexbytesstringmethod import IndexBytesStringMethod
+            return IndexBytesStringMethod(value[0])
 
         return super().build(value)

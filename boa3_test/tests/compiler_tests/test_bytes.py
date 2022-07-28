@@ -12,6 +12,8 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 class TestBytes(BoaTest):
     default_folder: str = 'test_sc/bytes_test'
 
+    SUBSEQUENCE_NOT_FOUND_MSG = 'subsequence of bytes not found'
+
     def test_bytes_literal_value(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -1160,3 +1162,101 @@ class TestBytes(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', bytes_value, dictionary,
                                          expected_result_type=bytes)
         self.assertEqual(bytes_value.join(dictionary), result)
+
+    def test_bytes_index(self):
+        path = self.get_contract_path('IndexBytes.py')
+        engine = TestEngine()
+
+        bytes_ = b'unit test'
+        subsequence = b'i'
+        start = 0
+        end = 4
+        result = self.run_smart_contract(engine, path, 'main', bytes_, subsequence, start, end)
+        self.assertEqual(bytes_.index(subsequence, start, end), result)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b'i'
+        start = 2
+        end = 4
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start, end)
+        self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
+
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$'):
+            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 3, 4)
+
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$'):
+            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 4, -1)
+
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$'):
+            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 0, -99)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b'i'
+        start = 0
+        end = -1
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start, end)
+        self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b'n'
+        start = 0
+        end = 99
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start, end)
+        self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
+
+    def test_bytes_index_end_default(self):
+        path = self.get_contract_path('IndexBytesEndDefault.py')
+        engine = TestEngine()
+
+        bytes_ = b'unit test'
+        bytes_sequence = b't'
+        start = 0
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b't'
+        start = 4
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b't'
+        start = 6
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
+
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$'):
+            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 99)
+
+        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$'):
+            self.run_smart_contract(engine, path, 'main', 'unit test', 't', -1)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b'i'
+        start = -10
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence, start)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
+
+    def test_bytes_index_defaults(self):
+        path = self.get_contract_path('IndexBytesDefaults.py')
+        engine = TestEngine()
+
+        bytes_ = b'unit test'
+        bytes_sequence = b'u'
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence)
+        self.assertEqual(bytes_.index(bytes_sequence), result)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b't'
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence)
+        self.assertEqual(bytes_.index(bytes_sequence), result)
+
+        bytes_ = b'unit test'
+        bytes_sequence = b' '
+        result = self.run_smart_contract(engine, path, 'main', bytes_, bytes_sequence)
+        self.assertEqual(bytes_.index(bytes_sequence), result)
+
+    def test_bytes_index_mismatched_type(self):
+        path = self.get_contract_path('IndexBytesMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
