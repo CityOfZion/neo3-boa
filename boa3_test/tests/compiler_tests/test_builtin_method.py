@@ -1144,8 +1144,8 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, result)
 
-    def test_count_list_different_types(self):
-        path = self.get_contract_path('CountListDifferentTypes.py')
+    def test_count_list_different_primitive_types(self):
+        path = self.get_contract_path('CountListDifferentPrimitiveTypes.py')
         engine = TestEngine()
 
         list_ = [b'unit', 'test', b'unit', b'unit', 123, 123, True, False]
@@ -1153,10 +1153,35 @@ class TestBuiltinMethod(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_result, tuple(result))
 
-    def test_count_list_different_non_primitive_types(self):
-        path = self.get_contract_path('CountListDifferentNonPrimitiveTypes.py')
-        # TODO: change test when comparison of non primitive types are implemented in the Opcode
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+    def test_count_list_different_any_types(self):
+        path = self.get_contract_path('CountListAnyType.py')
+        engine = TestEngine()
+
+        mixed_list = [[b'unit', b'unit'], [123, 123], [True, False], [True, False], [b'unit', 'test'], 'not list']
+
+        count1 = mixed_list.count([b'unit', 'test'])
+        count2 = mixed_list.count([123, 123])
+        count3 = mixed_list.count([True, False])
+        count4 = mixed_list.count(['random value', 'random value', 'random value'])
+        expected_result = [count1, count2, count3, count4]
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
+
+    def test_count_list_only_sequences(self):
+        path = self.get_contract_path('CountListOnlySequences.py')
+        engine = TestEngine()
+
+        mixed_list = [[b'unit', b'unit'], [123, 123], [True, False], [True, False], [b'unit', 'test']]
+
+        count1 = mixed_list.count([b'unit', 'test'])
+        count2 = mixed_list.count([123, 123])
+        count3 = mixed_list.count([True, False])
+        count4 = mixed_list.count(['random value', 'random value', 'random value'])
+        expected_result = [count1, count2, count3, count4]
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
 
     def test_count_list_empty(self):
         path = self.get_contract_path('CountListEmpty.py')
@@ -1205,8 +1230,17 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_different_non_primitive_types(self):
         path = self.get_contract_path('CountTupleDifferentNonPrimitiveTypes.py')
-        # TODO: change test when comparison of non primitive types are implemented in the Opcode
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+
+        mixed_list = ([b'unit', 'test'], [b'unit', b'unit'], [123, 123], [True, False], [True, False])
+
+        count1 = mixed_list.count([b'unit', 'test'])
+        count2 = mixed_list.count([123, 123])
+        count3 = mixed_list.count([True, False])
+        expected_result = [count1, count2, count3]
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_result, result)
 
     def test_count_tuple_empty(self):
         path = self.get_contract_path('CountTupleEmpty.py')

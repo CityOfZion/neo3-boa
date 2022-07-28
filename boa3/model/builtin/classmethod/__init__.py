@@ -2,7 +2,8 @@ __all__ = ['AppendMethod',
            'ClearMethod',
            'CopyDictMethod',
            'CopyListMethod',
-           'CountSequenceMethod',
+           'CountSequenceGenericMethod',
+           'CountSequencePrimitiveMethod',
            'CountStrMethod',
            'ExtendMethod',
            'IndexSequenceMethod',
@@ -32,7 +33,8 @@ from boa3.model.builtin.classmethod.appendmethod import AppendMethod
 from boa3.model.builtin.classmethod.clearmethod import ClearMethod
 from boa3.model.builtin.classmethod.copydictmethod import CopyDictMethod
 from boa3.model.builtin.classmethod.copylistmethod import CopyListMethod
-from boa3.model.builtin.classmethod.countsequencemethod import CountSequenceMethod
+from boa3.model.builtin.classmethod.countsequencegenericmethod import CountSequenceGenericMethod
+from boa3.model.builtin.classmethod.countsequenceprimitivemethod import CountSequencePrimitiveMethod
 from boa3.model.builtin.classmethod.countstrmethod import CountStrMethod
 from boa3.model.builtin.classmethod.extendmethod import ExtendMethod
 from boa3.model.builtin.classmethod.indexsequencemethod import IndexSequenceMethod

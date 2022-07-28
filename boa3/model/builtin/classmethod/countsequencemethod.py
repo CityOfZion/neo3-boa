@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, List, Tuple
 
 from boa3.model.builtin.classmethod.countmethod import CountMethod
 from boa3.model.expression import IExpression
@@ -22,18 +22,9 @@ class CountSequenceMethod(CountMethod):
             'value': Variable(arg_value)
         }
 
+        self._generic_verification_opcodes = None
+
         super().__init__(args)
-
-    @property
-    def is_supported(self) -> bool:
-        value_type: IType = self._arg_value.type
-
-        # TODO: change when 'sequence.count(list or tuple)' is supported
-        from boa3.model.type.collection.sequence.mutable.listtype import ListType
-        from boa3.model.type.collection.sequence.tupletype import TupleType
-        if isinstance(value_type, (ListType, TupleType)):
-            return False
-        return True
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if len(params) != 2:
@@ -109,13 +100,16 @@ class CountSequenceMethod(CountMethod):
             # return to the while verification
         ]
 
+        in_depth_verification = self.generic_verification(get_bytes_count(sequence_count_inc),
+                                                          get_bytes_count(sequence_get_element + sequence_equals))
+
         num_jmp_code = -get_bytes_count(list_tuple_count_index_dec + sequence_count_inc + sequence_equals +
-                                        sequence_get_element + sequence_verify_while)
+                                        sequence_get_element + sequence_verify_while + in_depth_verification)
         jmp_back_to_while_verify_statement = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code)
         list_tuple_count_index_dec.append(jmp_back_to_while_verify_statement)
 
         num_jmp_code = get_bytes_count(sequence_get_element + sequence_equals +
-                                       sequence_count_inc + list_tuple_count_index_dec)
+                                       sequence_count_inc + list_tuple_count_index_dec + in_depth_verification)
         jmp_to_clean_statement = Opcode.get_jump_and_data(Opcode.JMPLT, num_jmp_code, True)
         sequence_verify_while[-1] = jmp_to_clean_statement
 
@@ -129,12 +123,20 @@ class CountSequenceMethod(CountMethod):
         # endregion
 
         return (
-            repack_array +
-            sequence_initialize +
-            sequence_verify_while +
-            sequence_get_element +
-            sequence_equals +
-            sequence_count_inc +
-            list_tuple_count_index_dec +
-            sequence_clean_stack
+                repack_array +
+                sequence_initialize +
+                sequence_verify_while +
+                in_depth_verification +
+                sequence_get_element +
+                sequence_equals +
+                sequence_count_inc +
+                list_tuple_count_index_dec +
+                sequence_clean_stack
         )
+
+    def generic_verification(self, inc_statement_bytes=None,
+                             get_equals_statement_bytes=None) -> List[Tuple[Opcode, bytes]]:
+        if self._generic_verification_opcodes is None:
+            self._generic_verification_opcodes = []
+
+        return self._generic_verification_opcodes
