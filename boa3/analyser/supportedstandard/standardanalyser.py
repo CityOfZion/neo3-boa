@@ -35,6 +35,7 @@ class StandardAnalyser(IAstAnalyser):
         self.standards: List[str] = standards
         self._filter_standards_names()
         self._validate_standards()
+        self._check_other_implemented_standards()
 
     def _filter_standards_names(self):
         """
@@ -138,5 +139,52 @@ class StandardAnalyser(IAstAnalyser):
         return all_imports
 
     def _check_other_implemented_standards(self):
-        # TODO: Implement when detecting standards from implemented methods and events
-        pass
+        other_standards = supportedstandard.neo_standards.copy()
+        # verify only standards that were not mentioned
+        for standard in self.standards:
+            if standard in supportedstandard.neo_standards:
+                other_standards.pop(standard)
+
+        # gets a list of all events
+        events = [symbol for symbol in self.symbols.copy().values() if isinstance(symbol, Event)]
+        for imported in self._get_all_imports():
+            events.extend([event for event in imported.all_symbols.values() if isinstance(event, Event)])
+
+        # verify if the methods and events that were implemented corresponds to a standard
+        for standard in other_standards:
+
+            # verify the methods
+            methods_implemented = True
+            standard_methods = other_standards[standard].methods
+            index = 0
+
+            while methods_implemented and index < len(standard_methods):
+                standard_method = standard_methods[index]
+                method_id = standard_method.external_name
+                found_methods = self.get_methods_by_display_name(method_id)
+
+                methods_implemented = any(
+                     other_standards[standard].match_definition(standard_method, method) for method in found_methods
+                )
+                index += 1
+
+            if not methods_implemented:
+                continue    # if even one of the methods was not implemented, then check the next standard
+
+            # verify the events
+            events_implemented = True
+            standard_events = other_standards[standard].events
+            index = 0
+
+            while events_implemented and index < len(standard_events):
+                standard_event = standard_events[index]
+                events_implemented = any(
+                    (event.name == standard_event.name and
+                     other_standards[standard].match_definition(standard_event, event)) for event in events
+                )
+                index += 1
+
+            if not events_implemented:
+                continue    # if even one of the events was not implemented, then check the next standard
+
+            self.standards.append(standard)

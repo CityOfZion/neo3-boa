@@ -219,6 +219,31 @@ class TestMetadata(BoaTest):
         # Standards that doesn't begin with NEP will not the filtered
         self.assertIn('not neo standard 1', manifest['supportedstandards'])
 
+    def test_metadata_info_supported_standards_not_explicit(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNotExplicit.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_not_explicit_incomplete_methods(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNotExplicitIncompleteMethods.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertEqual(len(manifest['supportedstandards']), 0)
+
+    def test_metadata_info_supported_standards_not_explicit_incomplete_events(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNotExplicitIncompleteEvents.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertEqual(len(manifest['supportedstandards']), 0)
+
     def test_metadata_info_supported_standards_missing_implementations_nep17(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
