@@ -155,30 +155,36 @@ class StandardAnalyser(IAstAnalyser):
 
             # verify the methods
             methods_implemented = True
-            for standard_method in other_standards[standard].methods:
+            standard_methods = other_standards[standard].methods
+            index = 0
+
+            while methods_implemented and index < len(standard_methods):
+                standard_method = standard_methods[index]
                 method_id = standard_method.external_name
                 found_methods = self.get_methods_by_display_name(method_id)
 
                 methods_implemented = any(
                      other_standards[standard].match_definition(standard_method, method) for method in found_methods
                 )
+                index += 1
 
-                if not methods_implemented:
-                    break
             if not methods_implemented:
-                continue    # if at least one of the methods were not implemented, then check the next standard
+                continue    # if even one of the methods was not implemented, then check the next standard
 
             # verify the events
             events_implemented = True
-            for standard_event in other_standards[standard].events:
+            standard_events = other_standards[standard].events
+            index = 0
+
+            while events_implemented and index < len(standard_events):
+                standard_event = standard_events[index]
                 events_implemented = any(
                     (event.name == standard_event.name and
                      other_standards[standard].match_definition(standard_event, event)) for event in events
                 )
-                if not events_implemented:
-                    break
+                index += 1
 
             if not events_implemented:
-                continue    # if at least one of the events were not implemented, then check the next standard
+                continue    # if even one of the events was not implemented, then check the next standard
 
             self.standards.append(standard)
