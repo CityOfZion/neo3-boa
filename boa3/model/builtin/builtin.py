@@ -11,6 +11,7 @@ from boa3.model.builtin.math import *
 from boa3.model.builtin.method import *
 from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
+from boa3.model.event import Event as EventSymbol
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 from boa3.model.type.collection.sequence.ecpointtype import ECPointType
@@ -58,21 +59,28 @@ class Builtin:
     # python builtin class constructor
     Bool = BoolMethod()
     ByteArray = ByteArrayMethod()
+    ByteArrayEncoding = ByteArrayEncodingMethod()
     Exception = ExceptionMethod()
     IntByteString = IntByteStringMethod()
     IntInt = IntIntMethod()
+    ListBytesString = ListBytesStringMethod()
+    ListGeneric = ListGenericMethod()
+    ListMapping = ListMappingMethod()
+    ListSequence = ListSequenceMethod()
     Range = RangeMethod()
     Reversed = ReversedMethod()
     Super = SuperMethod()
 
     # python class method
+    BytesStringIndex = IndexBytesStringMethod()
     BytesStringIsDigit = IsDigitMethod()
     BytesStringJoin = JoinMethod()
     BytesStringLower = LowerMethod()
     BytesStringStartswith = StartsWithMethod()
     BytesStringStrip = StripMethod()
     BytesStringUpper = UpperMethod()
-    CountSequence = CountSequenceMethod()
+    CountSequenceGeneric = CountSequenceGenericMethod()
+    CountSequencePrimitive = CountSequencePrimitiveMethod()
     CountStr = CountStrMethod()
     Copy = CopyListMethod()
     SequenceAppend = AppendMethod()
@@ -83,9 +91,9 @@ class Builtin:
     SequencePop = PopSequenceMethod()
     SequenceRemove = RemoveMethod()
     SequenceReverse = ReverseMethod()
-    StrIndex = IndexStrMethod()
     DictKeys = MapKeysMethod()
     DictPop = PopDictMethod()
+    DictPopDefault = PopDictDefaultMethod()
     DictValues = MapValuesMethod()
 
     # custom class methods
@@ -102,6 +110,8 @@ class Builtin:
 
     _python_builtins: List[IdentifiedSymbol] = [Abs,
                                                 ByteArray,
+                                                ByteArrayEncoding,
+                                                BytesStringIndex,
                                                 BytesStringIsDigit,
                                                 BytesStringJoin,
                                                 BytesStringLower,
@@ -114,7 +124,8 @@ class Builtin:
                                                 ConvertToInt,
                                                 ConvertToStr,
                                                 Copy,
-                                                CountSequence,
+                                                CountSequenceGeneric,
+                                                CountSequencePrimitive,
                                                 CountStr,
                                                 DictKeys,
                                                 DictValues,
@@ -138,7 +149,6 @@ class Builtin:
                                                 SequenceRemove,
                                                 SequenceReverse,
                                                 StaticMethodDecorator,
-                                                StrIndex,
                                                 StrSplit,
                                                 Sum,
                                                 Super,
@@ -215,6 +225,15 @@ class Builtin:
             return {symbol.identifier: symbol for symbol in cls._boa_symbols[package]}
 
         return cls.boa_symbols()
+
+    @classmethod
+    def builtin_events(cls) -> List[EventSymbol]:
+        lst: List[EventSymbol] = [event for event in cls.boa_builtins if isinstance(event, EventSymbol)]
+
+        for symbols in cls._boa_symbols.values():
+            lst.extend([event for event in symbols if isinstance(event, EventSymbol)])
+
+        return lst
 
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,

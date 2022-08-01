@@ -1071,3 +1071,30 @@ class TestFunction(BoaTest):
     def test_functions_with_duplicated_name(self):
         path = self.get_contract_path('FunctionsWithDuplicatedName.py')
         self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, path)
+
+    def test_function_as_arg(self):
+        path = self.get_contract_path('FunctionAsArg.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main', 123)
+        self.assertEqual(123, result)
+
+    def test_function_with_arg_as_arg(self):
+        path = self.get_contract_path('FunctionWithArgAsArg.py')
+        engine = TestEngine()
+
+        list_int = [123, 456, 789]
+        value = 123
+        result = self.run_smart_contract(engine, path, 'main', list_int, value)
+        self.assertEqual(list_int.index(value), result)
+
+    def test_function_with_args_as_arg(self):
+        path = self.get_contract_path('FunctionWithArgsAsArg.py')
+        engine = TestEngine()
+
+        list_int = [123, 456, 789]
+        value = 123
+        start = 0
+        end = 5
+        result = self.run_smart_contract(engine, path, 'main', list_int, value, start, end)
+        self.assertEqual(list_int.index(value, start, end), result)

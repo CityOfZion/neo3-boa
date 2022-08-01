@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
@@ -11,16 +11,24 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 
 class ByteArrayMethod(IBuiltinMethod):
 
-    def __init__(self, argument_type: IType = None):
-        from boa3.model.type.type import Type
-        if argument_type is None or not self.validate_parameters(argument_type):
-            argument_type = Type.none
-
+    def __init__(self, argument_type: Union[IType, Dict] = None):
         identifier = 'bytearray'
-        args: Dict[str, Variable] = {'object': Variable(argument_type)}
-        object_default = ast.parse(f"{Type.int.default_value}"
-                                   ).body[0].value
-        super().__init__(identifier, args, defaults=[object_default], return_type=Type.bytearray)
+        from boa3.model.type.type import Type
+
+        if isinstance(argument_type, Dict):
+            args = argument_type
+            defaults = []
+        else:
+            from boa3.model.type.type import Type
+            if argument_type is None or not self.validate_parameters(argument_type):
+                argument_type = Type.none
+
+            args: Dict[str, Variable] = {'object': Variable(argument_type)}
+            object_default = ast.parse(f"{Type.int.default_value}"
+                                       ).body[0].value
+            defaults = [object_default]
+
+        super().__init__(identifier, args, defaults=defaults, return_type=Type.bytearray)
 
     @property
     def _arg_object(self) -> Variable:
@@ -31,6 +39,10 @@ class ByteArrayMethod(IBuiltinMethod):
         from boa3.model.type.type import Type
         if self._arg_object.type is Type.none:
             return self._identifier
+
+        if self._args_on_stack == 2:
+            return '-{0}_with_enconding'.format(self._identifier)
+
         return '-{0}_from_{1}'.format(self._identifier, self._arg_object.type._identifier)
 
     def validate_parameters(self, *params: IExpression) -> bool:
@@ -66,9 +78,9 @@ class ByteArrayMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        # TODO: change when building bytearray from string and int iterators are implemented
+        # TODO: change when building bytearray from int iterators are implemented
         from boa3.model.type.type import Type
-        return self._arg_object.type in (Type.bytes, Type.int)
+        return self._arg_object.type in (Type.bytes, Type.str, Type.int)
 
     @property
     def _args_on_stack(self) -> int:
@@ -82,6 +94,10 @@ class ByteArrayMethod(IBuiltinMethod):
         if type(value) == type(self._arg_object.type):
             return self
         if isinstance(value, list):
+            if len(value) == 2:
+                from boa3.model.builtin.method.bytearrayencodingmethod import ByteArrayEncodingMethod
+                return ByteArrayEncodingMethod()
+
             value = value[0] if len(value) > 0 else None
         if self.validate_parameters(value):
             return ByteArrayMethod(value)

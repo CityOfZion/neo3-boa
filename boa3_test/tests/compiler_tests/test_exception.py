@@ -38,7 +38,7 @@ class TestException(BoaTest):
         engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_exception_with_message(self):
@@ -66,7 +66,7 @@ class TestException(BoaTest):
         engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_exception_without_call(self):
@@ -93,7 +93,7 @@ class TestException(BoaTest):
         engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_variable_exception(self):
@@ -122,7 +122,7 @@ class TestException(BoaTest):
         engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_exception_variable_message(self):
@@ -155,7 +155,7 @@ class TestException(BoaTest):
         engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
-        with self.assertRaises(TestExecutionException, msg=message):
+        with self.assertRaisesRegex(TestExecutionException, message):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_specific_exception(self):
@@ -182,7 +182,7 @@ class TestException(BoaTest):
         engine = TestEngine()
         self.run_smart_contract(engine, path, 'test_raise', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.EXCEPTION_EMPTY_MESSAGE):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'test_raise', -10)
 
     def test_raise_mismatched_type(self):

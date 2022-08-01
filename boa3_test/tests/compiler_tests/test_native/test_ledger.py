@@ -285,6 +285,100 @@ class TestLedgerContract(BoaTest):
         path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_get_transaction_signers(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionSigners').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionSigners.py')
+        output, manifest = self.get_output(path)
+        self.assertEqual(expected_output, output)
+
+        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
+        engine = TestEngine()
+
+        example_account = bytes(range(20))
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000, signer_accounts=[example_account])
+
+        txs = engine.get_transactions()
+        self.assertGreater(len(txs), 0)
+        hash_ = txs[0].hash
+
+        result = self.run_smart_contract(engine, path, 'main', hash_)
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
+        self.assertIsInstance(result[0], list)
+        self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
+        self.assertEqual(result[0][1], String.from_bytes(example_account))
+
+    def test_get_transaction_signers_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_get_transaction_vm_state(self):
+        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+        method = String('getTransactionVMState').to_bytes()
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH1
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flags)).to_byte_array()
+            + call_flags
+            + Opcode.PUSHDATA1
+            + Integer(len(method)).to_byte_array()
+            + method
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
+            + constants.LEDGER_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+        path = self.get_contract_path('GetTransactionVMState.py')
+        output, manifest = self.get_output(path)
+        self.assertEqual(expected_output, output)
+
+        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
+        engine = TestEngine()
+
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
+        expected_vm_state = engine.vm_state.value
+
+        txs = engine.get_transactions()
+        self.assertGreater(len(txs), 0)
+        hash_ = txs[0].hash
+        engine.increase_block()
+
+        result = self.run_smart_contract(engine, path, 'main', hash_)
+        self.assertEqual(expected_vm_state, result)
+
+    def test_get_transaction_vm_state_mismatched_type(self):
+        path = self.get_contract_path('GetTransactionVMStateMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_get_current_index(self):
         path = self.get_contract_path('GetCurrentIndex.py')
         engine = TestEngine()

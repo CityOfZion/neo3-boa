@@ -2,6 +2,8 @@ from boa3.constants import IMPORT_WILDCARD
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestMetadata(BoaTest):
@@ -167,7 +169,6 @@ class TestMetadata(BoaTest):
         self.assertGreater(len(manifest['supportedstandards']), 0)
         self.assertIn('NEP-17', manifest['supportedstandards'])
 
-        from boa3_test.tests.test_classes.testengine import TestEngine
         engine = TestEngine()
         # verify using NeoManifestStruct
         nef, manifest = self.get_bytes_output(path)
@@ -180,7 +181,6 @@ class TestMetadata(BoaTest):
         engine.add_contract(path)
 
         result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
-        from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
 
@@ -196,6 +196,53 @@ class TestMetadata(BoaTest):
 
         self.assertIn('name', abi['events'][0])
         self.assertEqual('Transfer', abi['events'][0]['name'])
+
+    def test_metadata_info_supported_standards_filter(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsFilter.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+        # Using a dot is permitted and won't be removed by the filter
+        self.assertIn('NEP-17.1', manifest['supportedstandards'])
+        self.assertIn('NEP-17.1.2', manifest['supportedstandards'])
+        self.assertIn('NEP-17.1.3.5.7.9.11.13', manifest['supportedstandards'])     # possible to use more than 1 dot
+
+        # Every NEP needs to be in uppercase and be separated by a dash
+        self.assertIn('NEP-100', manifest['supportedstandards'])
+        self.assertIn('NEP-101', manifest['supportedstandards'])
+        self.assertIn('NEP-102', manifest['supportedstandards'])
+
+        # Standards that doesn't begin with NEP will not the filtered
+        self.assertIn('not neo standard 1', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_not_explicit(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNotExplicit.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_not_explicit_incomplete_methods(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNotExplicitIncompleteMethods.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertEqual(len(manifest['supportedstandards']), 0)
+
+    def test_metadata_info_supported_standards_not_explicit_incomplete_events(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNotExplicitIncompleteEvents.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertEqual(len(manifest['supportedstandards']), 0)
 
     def test_metadata_info_supported_standards_missing_implementations_nep17(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')
@@ -222,8 +269,38 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['trusts']), 4)
         self.assertIn('0x1234567890123456789012345678901234567890', manifest['trusts'])
         self.assertIn('0x1234567890123456789012345678901234abcdef', manifest['trusts'])
-        self.assertIn('030000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
-        self.assertIn('020000123456789012345678901234567890123456789012345678901234abcdef', manifest['trusts'])
+        self.assertIn('035a928f201639204e06b4368b1a93365462a8ebbff0b8818151b74faab3a2b61a', manifest['trusts'])
+        self.assertIn('03cdb067d930fd5adaa6c68545016044aaddec64ba39e548250eaea551172e535c', manifest['trusts'])
+
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        result_trusts = result[4][6]
+
+        # transform the str values to bytes values
+        manifest_struct_trusts = []
+        for item in manifest_struct[6]:
+            if isinstance(item, str):
+                if len(item) == 42:
+                    from boa3.neo3.core.types import UInt160
+                    item = UInt160.from_string(item).to_array()
+                elif len(item) == 66:
+                    item = bytes.fromhex(item)
+            manifest_struct_trusts.append(item)
+
+        # compare result from GetContract and NeoManifestStruct
+        self.assertEqual(manifest_struct_trusts, result_trusts)
 
     def test_metadata_info_trusts_wildcard(self):
         path = self.get_contract_path('MetadataInfoTrustsWildcard.py')
@@ -233,6 +310,25 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['trusts'], list)
         self.assertEqual(len(manifest['trusts']), 1)
         self.assertIn(IMPORT_WILDCARD, manifest['trusts'])
+
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        result_trusts = result[4][6]
+
+        # TODO: change when TestEngine is updated
+        self.assertEqual([''], result_trusts)
 
     def test_metadata_info_trusts_mismatched_types(self):
         path = self.get_contract_path('MetadataInfoTrustsMismatchedTypes.py')
@@ -309,3 +405,47 @@ class TestMetadata(BoaTest):
     def test_metadata_info_name_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoNameMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_metadata_info_groups(self):
+        path = self.get_contract_path('MetadataInfoGroups.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('groups', manifest)
+        self.assertIsInstance(manifest['groups'], list)
+        self.assertEqual(len(manifest['groups']), 1)
+        self.assertIn({'pubkey': '031f64da8a38e6c1e5423a72ddd6d4fc4a777abe537e5cb5aa0425685cda8e063b',
+                       'signature': 'gC+8ybKTjuQxBgPaFD/R+SrlZlERMK7aDe6+99XUulv/nD2Mco4pEbrESMa6Sc6WtjmSsRiI9ILf7LGRGQCmGA=='}, manifest['groups'])
+
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        result_groups = []
+        for group in result[4][1]:
+            dict_group = {'pubkey': group[0].hex()}
+            import base64
+            # getContract returns the signature without the base64 encoding
+            dict_group['signature'] = base64.b64encode(group[1]).decode('utf-8')
+            result_groups.append(dict_group)
+
+        manifest_struct_groups = manifest_struct[1]
+
+        self.assertEqual(manifest_struct_groups, result_groups)
+
+    def test_metadata_info_groups_default(self):
+        path = self.get_contract_path('MetadataInfoGroupsDefault.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('groups', manifest)
+        self.assertIsInstance(manifest['groups'], list)
+        self.assertEqual(len(manifest['groups']), 0)

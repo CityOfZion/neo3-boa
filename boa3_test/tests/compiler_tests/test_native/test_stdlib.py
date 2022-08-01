@@ -387,16 +387,16 @@ class TestStdlibClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 'ff', 16)
         self.assertEqual(-1, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CANT_PARSE_VALUE_MSG):
             self.run_smart_contract(engine, path, 'main', 'string', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CANT_PARSE_VALUE_MSG):
             self.run_smart_contract(engine, path, 'main', 'string', 16)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CANT_PARSE_VALUE_MSG):
             self.run_smart_contract(engine, path, 'main', 'abc', 10)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'main', '10', 2)
 
     def test_atoi_default(self):
@@ -409,7 +409,7 @@ class TestStdlibClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', '123')
         self.assertEqual(123, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CANT_PARSE_VALUE_MSG):
             self.run_smart_contract(engine, path, 'main', 'string')
 
     def test_atoi_too_few_parameters(self):
@@ -439,7 +439,7 @@ class TestStdlibClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 15, 16)
         self.assertEqual('0f', result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'main', 10, 2)
 
     def test_itoa_default(self):
@@ -497,7 +497,7 @@ class TestStdlibClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', b'aaaaa', b'a', 0, False)
         self.assertEqual(0, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 20, False)
 
     def test_memory_search_backward(self):
@@ -534,7 +534,7 @@ class TestStdlibClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', b'aaaaa', b'a', 5, True)
         self.assertEqual(4, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 20, True)
 
     def test_memory_search_start(self):
@@ -562,7 +562,7 @@ class TestStdlibClass(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', b'aaaaa', b'a', 0)
         self.assertEqual(0, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.VALUE_IS_OUT_OF_RANGE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'main', b'abcde', b'a', 20)
 
     def test_memory_search_default_values(self):

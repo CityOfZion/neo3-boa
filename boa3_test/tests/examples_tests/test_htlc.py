@@ -64,7 +64,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(True, result)
 
         # transfer wil be aborted at onPayment if the transfer is not valid
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, aux_path, 'calling_transfer',
                                     constants.NEO_SCRIPT, aux_address, htlc_address,
                                     transferred_amount_neo - 100, None,
@@ -107,7 +107,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_neo_receiver_before + transferred_amount_neo, balance_neo_receiver_after)
 
         # transfer won't be accepted, because amount is wrong
-        with self.assertRaises(TestExecutionException, msg=self.ABORTED_CONTRACT_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
             self.run_smart_contract(engine, aux_path2, 'calling_transfer',
                                     constants.GAS_SCRIPT, aux_address2, htlc_address,
                                     transferred_amount_gas - 100, None,

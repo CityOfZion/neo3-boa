@@ -53,11 +53,15 @@ class IndexSequenceMethod(IndexMethod):
         return True
 
     @property
+    def exception_message(self) -> str:
+        return "x not in sequence"
+
+    @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
 
         jmp_place_holder = (Opcode.JMP, b'\x01')
-        message = String("x not in sequence").to_bytes()
+        message = String(self.exception_message).to_bytes()
 
         # receives: end, start, x, sequence
         verify_negative_index = [           # verifies if index in a negative value

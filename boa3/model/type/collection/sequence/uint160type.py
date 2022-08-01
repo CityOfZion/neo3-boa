@@ -1,5 +1,6 @@
 from typing import Any, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
@@ -31,7 +32,7 @@ class UInt160Type(BytesType):
 
     @property
     def default_value(self) -> Any:
-        return bytes(20)
+        return bytes(constants.SIZE_OF_INT160)
 
     @classmethod
     def build(cls, value: Any = None) -> IType:
@@ -46,7 +47,7 @@ class UInt160Type(BytesType):
         return super(PythonClass, self).is_instance_opcodes()
 
     def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
-        push_int_opcode, size_data = Opcode.get_push_and_data(20)
+        push_int_opcode, size_data = Opcode.get_push_and_data(constants.SIZE_OF_INT160)
 
         return [
             (Opcode.SIZE, b''),  # return len(value) == 20

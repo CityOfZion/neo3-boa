@@ -19,12 +19,24 @@ from boa3_test.tests.test_classes.transactionattribute import oracleresponse
 class BoaTest(TestCase):
     dirname: str = None
 
-    ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
-    MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
-    VALUE_IS_OUT_OF_RANGE_MSG = 'The value is out of range'
-    STORAGE_VALUE_IS_OUT_OF_RANGE_MSG = 'Specified argument was out of the range of valid values.'
-    CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
     ABORTED_CONTRACT_MSG = 'ABORT is executed'
+    ARGUMENT_OUT_OF_RANGE_MSG_PREFIX = 'Specified argument was out of the range of valid values.'
+    ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
+    CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX = "Cannot call this SYSCALL with the flag"
+    CANT_FIND_METHOD_MSG_PREFIX = "Can't find method"
+    CANT_PARSE_VALUE_MSG = "The value could not be parsed."
+    CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
+    GAS_MUST_BE_POSITIVE_MSG = 'GAS must be positive.'
+    GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX = "The given key '\\S+' was not present in the dictionary."
+    MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
+    MAX_ITEM_SIZE_EXCEED_MSG_PREFIX = 'MaxItemSize exceed'
+    METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX = r'^Method "\S+" with \d+ parameter\(s\) ' \
+                                                       r"doesn't exist in the contract"
+    NULL_POINTER_MSG = 'Object reference not set to an instance of an object.'
+    UNHANDLED_EXCEPTION_MSG_PREFIX = "An unhandled exception was thrown."
+    VALUE_CANNOT_BE_NEGATIVE_MSG = 'value can not be negative'
+    VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG = 'Value does not fall within the expected range.'
+    VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX = r'The value( \S*)? is out of range.$'
 
     default_folder: str = ''
 

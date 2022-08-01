@@ -26,7 +26,7 @@ class TestContractInterop(BoaTest):
 
         engine = TestEngine()
         call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
         engine.add_contract(call_contract_path)
 
@@ -47,7 +47,7 @@ class TestContractInterop(BoaTest):
 
         engine = TestEngine()
         call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
         engine.add_contract(call_contract_path)
 
@@ -65,7 +65,7 @@ class TestContractInterop(BoaTest):
 
         engine = TestEngine()
         call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         engine.add_contract(call_contract_path)
 
@@ -82,19 +82,19 @@ class TestContractInterop(BoaTest):
 
         engine = TestEngine()
         call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         engine.add_contract(call_contract_path)
 
         from boa3.neo3.contracts import CallFlags
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
 
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
         self.assertEqual(0, result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.READ_ONLY)
             self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.NONE)
 
@@ -107,7 +107,7 @@ class TestContractInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
         self.assertEqual(99, result)
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.READ_ONLY)
             self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.STATES)
             self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
@@ -117,7 +117,7 @@ class TestContractInterop(BoaTest):
         self.assertEqual(1, len(notify))
         self.assertEqual('Notify was called', notify[0].arguments[0])
 
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.STATES)
             self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.NONE)
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.ALL)
@@ -185,7 +185,7 @@ class TestContractInterop(BoaTest):
     def test_update_contract(self):
         path = self.get_contract_path('UpdateContract.py')
         engine = TestEngine()
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : new_method'):
             self.run_smart_contract(engine, path, 'new_method')
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
@@ -202,7 +202,7 @@ class TestContractInterop(BoaTest):
     def test_update_contract_data_deploy(self):
         path = self.get_contract_path('UpdateContract.py')
         engine = TestEngine()
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : new_method'):
             self.run_smart_contract(engine, path, 'new_method')
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
@@ -234,7 +234,7 @@ class TestContractInterop(BoaTest):
 
         script_hash = engine.executed_script_hash.to_array()
         call_contract_path = self.get_contract_path('CallScriptHash.py')
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG}'):
             self.run_smart_contract(engine, call_contract_path, 'Main',
                                     script_hash, 'Main', [])
 
@@ -336,7 +336,7 @@ class TestContractInterop(BoaTest):
 
         engine = TestEngine()
         call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaises(TestExecutionException, msg=self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
+        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'main')
         engine.add_contract(call_contract_path)
 

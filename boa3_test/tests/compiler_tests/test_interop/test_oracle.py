@@ -34,7 +34,7 @@ class TestNativeContracts(BoaTest):
         self.assertEqual(request_filter, oracle_requests[0].arguments[3])
 
         request_id = oracle_requests[0].arguments[0]
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX):
             # callback function doesn't exist
             self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
 

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
@@ -891,8 +891,12 @@ class CodeGenerator:
             self.insert_none()
         elif isinstance(value, (bytes, bytearray)):
             self.convert_byte_array(value)
+        elif isinstance(value, Sequence):
+            self.convert_sequence_literal(value)
+        elif isinstance(value, dict):
+            self.convert_dict_literal(value)
         else:
-            # TODO: convert other python literals as they are implemented
+            # it's not a type that is supported by neo-boa
             raise NotImplementedError
         return start_address
 
@@ -942,6 +946,37 @@ class CodeGenerator:
             self.__insert1(OpcodeInfo.PUSH0)
         self._stack_append(Type.int)  # don't add bool to stack directly for optimizations
         self.convert_cast(Type.bool)
+
+    def convert_sequence_literal(self, sequence: Sequence):
+        """
+        Converts a sequence value
+
+        :param sequence: the value to be converted
+        """
+        if isinstance(sequence, tuple):
+            value_type = Type.tuple.build(sequence)
+        else:
+            value_type = Type.list.build(list(sequence))
+
+        for inner_value in reversed(sequence):
+            self.convert_literal(inner_value)
+
+        self.convert_new_array(len(sequence), value_type)
+
+    def convert_dict_literal(self, dictionary: dict):
+        """
+        Converts a dict value
+
+        :param dictionary: the value to be converted
+        """
+        value_type = Type.dict.build(dictionary)
+        self.convert_new_map(value_type)
+
+        for key, value in dictionary.items():
+            self.duplicate_stack_top_item()
+            self.convert_literal(key)
+            value_start = self.convert_literal(value)
+            self.convert_set_item(value_start)
 
     def convert_byte_array(self, array: bytes):
         """
@@ -1207,8 +1242,7 @@ class CodeGenerator:
                 self.swap_reverse_stack_items(2)
                 self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
                 # reverts lower to its correct place
                 self.swap_reverse_stack_items(2)
@@ -1216,8 +1250,7 @@ class CodeGenerator:
                 # upper can not be greater than len(string)
                 self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.duplicate_stack_item(2)
@@ -1229,8 +1262,7 @@ class CodeGenerator:
                 self.convert_builtin_method_call(Builtin.Len)
 
                 # if slice end is greater than the array size, fixes them
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
                 self.convert_get_array_slice(array)
 
@@ -1266,8 +1298,7 @@ class CodeGenerator:
                 # upper can not be greater than len(string)
                 self.duplicate_stack_item(2)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.__insert1(OpcodeInfo.LEFT)
@@ -1282,8 +1313,7 @@ class CodeGenerator:
                 self.convert_builtin_method_call(Builtin.Len)
 
                 # if slice end is greater than the array size, fixes them
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.convert_literal(0)
@@ -1323,8 +1353,7 @@ class CodeGenerator:
                 # lower can not be greater than len(string)
                 self.duplicate_stack_item(3)
                 self.convert_builtin_method_call(Builtin.Len)
-                # TODO: change to convert_builtin_method_call(Builtin.Min) when min(a, b) is implemented
-                self.__insert1(OpcodeInfo.MIN)
+                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
                 self._stack_pop()
 
                 self.convert_operation(BinaryOp.Sub)
@@ -1768,7 +1797,9 @@ class CodeGenerator:
                 self._stack_pop()  # remove call contract 'any' result from the stack
         else:
             from boa3.neo.vm.CallCode import CallCode
-            self.__insert_code(CallCode(function))
+            call_code = CallCode(function)
+            self.__insert_code(call_code)
+            self._update_codes_with_target(call_code)
 
         for arg in range(num_args):
             self._stack_pop()

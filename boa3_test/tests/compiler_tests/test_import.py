@@ -279,7 +279,7 @@ class TestImport(BoaTest):
         path = self.get_contract_path('ImportUserModuleWithNotImportedSymbols.py')
 
         engine = TestEngine()
-        self.run_smart_contract(engine, path, 'main', [], b'')
+        self.run_smart_contract(engine, path, 'main', [], b'00000000000000000000')
         script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
@@ -302,7 +302,7 @@ class TestImport(BoaTest):
         self.assertEqual([], result)
 
         # 'without_param' is a public method, but it isn't imported, so it shouldn't be included in the manifest
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : without_param'):
             self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
 
     def test_import_user_module_with_not_imported_variables(self):

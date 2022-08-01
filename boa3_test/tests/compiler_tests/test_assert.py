@@ -32,7 +32,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', False, 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', True, 20)
 
     def test_assert_binary_boolean_operation(self):
@@ -56,7 +56,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10, 20)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', 20, 20)
 
     def test_assert_with_message(self):
@@ -66,7 +66,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
 
     def test_assert_with_bytes_message(self):
@@ -76,7 +76,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
 
     def test_assert_with_int_message(self):
@@ -98,7 +98,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
 
     def test_assert_with_str_function_message(self):
@@ -108,7 +108,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 10)
         self.assertEqual(10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', -10)
 
     def test_assert_int(self):
@@ -132,7 +132,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', -10)
         self.assertEqual(-10, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', 0)
 
     def test_assert_str(self):
@@ -154,7 +154,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', 'unittest')
         self.assertEqual('unittest', result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', '')
 
     def test_assert_bytes(self):
@@ -176,7 +176,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', b'unittest')
         self.assertEqual(b'unittest', String(result).to_bytes())
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', b'')
 
     def test_assert_list(self):
@@ -200,7 +200,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3])
         self.assertEqual(3, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', [])
 
     def test_assert_dict(self):
@@ -224,7 +224,7 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 5})
         self.assertEqual(2, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'Main', {})
 
     def test_assert_any(self):
@@ -262,5 +262,5 @@ class TestAssert(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 1)
         self.assertEqual(True, result)
 
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'main', 4)

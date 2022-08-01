@@ -1,3 +1,4 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.interop.interop import Interop
@@ -426,20 +427,32 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_notifications(self):
         path = self.get_contract_path('GetNotifications.py')
-
         engine = TestEngine()
+
         result = self.run_smart_contract(engine, path, 'without_param', [])
-        self.assertEqual([], result)
+        self.assertEqual(1, len(result))
+
+        self.assertEqual(3, len(result[0]))
+        # the Deploy parameter should have been the smart contract address, but the deploy method does uses a
+        # ReferenceCounter and the test engine didn't replicate this behavior
+        # new VM.Types.Array(engine.ReferenceCounter) { contract.Hash.ToArray() }
+        event_script, event_name = result[0][:2]
+        self.assertEqual(constants.MANAGEMENT_SCRIPT, event_script)
+        self.assertEqual('Deploy', event_name)
         script = engine.executed_script_hash.to_array()
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
-        expected_result = []
+        expected_result = [
+            [constants.MANAGEMENT_SCRIPT, 'Deploy', script]
+        ]
         for x in [1, 2, 3]:
-            expected_result.append([script,
-                                    'notify',
-                                    [x]])
-        self.assertEqual(expected_result, result)
+            expected_result.append([script, 'notify', [x]])
+
+        self.assertEqual(expected_result[1:], result[1:])
+
+        # it's the same Deploy error
+        self.assertEqual(expected_result[0][:2], result[0][:2])
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'with_param', [], script)
@@ -519,12 +532,12 @@ class TestRuntimeInterop(BoaTest):
         burn_gas_cost = 2460  # 2460 * 10^-8 GAS
 
         # can not burn negative GAS
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.GAS_MUST_BE_POSITIVE_MSG):
             self.run_smart_contract(engine, path, 'main', -10 ** 8)
         self.assertEqual(engine.gas_consumed - burn_gas_cost, 0)
 
         # can not burn no GAS
-        with self.assertRaises(TestExecutionException):
+        with self.assertRaisesRegex(TestExecutionException, self.GAS_MUST_BE_POSITIVE_MSG):
             self.run_smart_contract(engine, path, 'main', 0)
         self.assertEqual(engine.gas_consumed - burn_gas_cost, 0)
 
@@ -643,3 +656,14 @@ class TestRuntimeInterop(BoaTest):
     def test_get_random_too_many_parameters(self):
         path = self.get_contract_path('GetRandomTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_address_version(self):
+        path = self.get_contract_path('AddressVersion.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(53, result)    # current Neo protocol version is 53
+
+    def test_address_version_cant_assign(self):
+        path = self.get_contract_path('AddressVersionCantAssign.py')
+        self.assertCompilerLogs(CompilerWarning.NameShadowing, path)

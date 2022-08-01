@@ -1,5 +1,6 @@
 from typing import Any, Set
 
+from boa3 import constants
 from boa3.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
 from boa3.model.type.itype import IType
 
@@ -21,6 +22,13 @@ class ListType(MutableSequenceType):
     def is_valid_key(self, key_type: IType) -> bool:
         return key_type == self.valid_key
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.model.builtin.builtin import Builtin
+
+        self._instance_methods[constants.INIT_METHOD_ID] = Builtin.ListGeneric
+
     @property
     def valid_key(self) -> IType:
         from boa3.model.type.type import Type
@@ -28,9 +36,8 @@ class ListType(MutableSequenceType):
 
     @classmethod
     def build(cls, value: Any) -> IType:
-        if cls._is_type_of(value):
-            values_types: Set[IType] = cls.get_types(value)
-            return cls(values_types)
+        values_types: Set[IType] = cls.get_types(value)
+        return cls(values_types)
 
     @classmethod
     def _is_type_of(cls, value: Any):

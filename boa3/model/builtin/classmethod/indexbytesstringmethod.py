@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.classmethod.indexmethod import IndexMethod
 from boa3.model.expression import IExpression
+from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.strtype import StrType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
@@ -10,11 +11,11 @@ from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 
 
-class IndexStrMethod(IndexMethod):
+class IndexBytesStringMethod(IndexMethod):
 
     def __init__(self, self_type: Optional[StrType] = None):
         from boa3.model.type.type import Type
-        if not isinstance(self_type, StrType):
+        if not isinstance(self_type, (StrType, BytesType)):
             self_type = Type.str
 
         args: Dict[str, Variable] = {
@@ -40,7 +41,7 @@ class IndexStrMethod(IndexMethod):
         from boa3.model.type.itype import IType
         self_type: IType = params[0].type
 
-        if not isinstance(self_type, StrType):
+        if not isinstance(self_type, (StrType, BytesType)):
             return False
 
         if not self_type.is_type_of(params[1]):
@@ -49,12 +50,16 @@ class IndexStrMethod(IndexMethod):
         return True
 
     @property
+    def error_message(self) -> str:
+        return 'substring not found' if isinstance(self._arg_self.type, StrType) else 'subsequence of bytes not found'
+
+    @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.StackItem import StackItemType
 
         jmp_place_holder = (Opcode.JMP, b'\x01')
-        message = String("substring not found").to_bytes()
+        message = String(self.error_message).to_bytes()
 
         # receives: end, start, substr, str
         verify_negative_index = [           # verifies if index in a negative value

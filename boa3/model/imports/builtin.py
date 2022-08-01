@@ -6,6 +6,7 @@ from boa3 import constants
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.native.nativecontract import NativeContract
+from boa3.model.event import Event
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 from boa3.model.symbol import ISymbol
@@ -13,7 +14,8 @@ from boa3.model.type.math import Math
 from boa3.model.type.typeutils import TypeUtils
 
 __all__ = ['get_package',
-           'get_internal_symbol'
+           'get_internal_symbol',
+           'CompilerBuiltin'
            ]
 
 
@@ -36,14 +38,26 @@ class CompilerBuiltin:
 
     def __init__(self):
         self.packages: List[Package] = []
+        self._events: List[Event] = []
 
         self._generate_builtin_package('typing', TypeUtils.get_types_from_typing_lib())
         self._generate_builtin_package('math', Math.get_methods_from_math_lib())
         self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)
+        self._set_events(Builtin.builtin_events())
         self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols('contract'))
         self._generate_builtin_package('boa3.builtin.interop', Interop.package_symbols)
+        self._set_events(Interop.interop_events())
         self._generate_builtin_package('boa3.builtin.nativecontract', NativeContract.package_symbols)
         self._generate_builtin_package('boa3.builtin.type', Builtin.package_symbols('type'))
+
+    @classmethod
+    def reset(cls):
+        if cls._instance is not None:
+            for event in cls._instance._events:
+                event.reset_calls()
+
+    def _set_events(self, events: List[Event]):
+        self._events.extend(events)
 
     def _generate_builtin_package(self, package_full_path: str,
                                   symbols: Union[Dict[str, ISymbol], List[IdentifiedSymbol]] = None):

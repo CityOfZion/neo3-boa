@@ -1,6 +1,7 @@
 from typing import Any, List, Tuple
 
 from boa3.builtin.contract import NeoAccountState
+from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.type import ECPoint, UInt160
 
 
@@ -133,12 +134,42 @@ class NEO:
         pass
 
     @classmethod
+    def get_all_candidates(cls) -> Iterator:
+        """
+        Gets the registered candidates iterator.
+
+        :return: all registered candidates
+        :rtype: Iterator
+        """
+        pass
+
+    @classmethod
+    def un_vote(cls, account: UInt160) -> bool:
+        """
+        Removes the vote of the candidate voted. It would be the same as calling vote(account, None).
+
+        :param account: the account that is removing the vote
+        :type account: UInt160
+        """
+        pass
+
+    @classmethod
     def get_candidates(cls) -> List[Tuple[ECPoint, int]]:
         """
         Gets the list of all registered candidates.
 
         :return: all registered candidates
         :rtype: List[Tuple[ECPoint, int]]
+        """
+        pass
+
+    @classmethod
+    def get_candidate_vote(cls, pubkey: ECPoint) -> int:
+        """
+        Gets votes from specific candidate.
+
+        :return: Votes or -1 if it was not found.
+        :rtype: int
         """
         pass
 

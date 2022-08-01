@@ -61,9 +61,9 @@ class TestTemplate(BoaTest):
         self.assertEqual(total_supply, result)
 
         # should fail when the script length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(10))
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_ico_kyc_register(self):
@@ -121,15 +121,15 @@ class TestTemplate(BoaTest):
         approved_amount = 100 * 10 ** 8
 
         # should fail when any of the scripts' length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'approve',
                                     self.OWNER_SCRIPT_HASH, bytes(10), approved_amount)
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'approve',
                                     bytes(10), self.OTHER_ACCOUNT_1, approved_amount)
 
         # should fail when the amount is less than 0
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'approve',
                                     self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10)
 
@@ -189,18 +189,18 @@ class TestTemplate(BoaTest):
         transferred_amount = 100 * 10 ** 8
 
         # should fail when any of the scripts' length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OWNER_SCRIPT_HASH, bytes(10), self.OTHER_ACCOUNT_2, transferred_amount, None)
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     bytes(10), self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, transferred_amount, None)
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, bytes(30), transferred_amount, None)
 
         # should fail when the amount is less than 0
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transferFrom',
                                     self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, -10, None)
 
@@ -275,7 +275,7 @@ class TestTemplate(BoaTest):
         engine = TestEngine()
 
         # should fail if amount is a negative number
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'mint', -10 * 10 ** 8)
 
         minted_amount = 10_000 * 10 ** 8
@@ -301,11 +301,11 @@ class TestTemplate(BoaTest):
         transferred_amount = 10_000
 
         # should fail script hash length is not 20
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'refund', bytes(10), transferred_amount, transferred_amount)
 
         # should fail no amount is a positive number
-        with self.assertRaises(TestExecutionException, msg=self.ASSERT_RESULTED_FALSE_MSG):
+        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 0, 0)
 
         # should fail if not signed by the owner

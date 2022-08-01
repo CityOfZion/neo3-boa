@@ -18,8 +18,8 @@ class GetNotificationsMethod(InteropMethod):
         syscall = 'System.Runtime.GetNotifications'
         uint160 = UInt160Type.build()
 
-        args: Dict[str, Variable] = {'script_hash': Variable(uint160)}
-        args_default = set_internal_call(ast.parse("{0}()".format(uint160.raw_identifier)
+        args: Dict[str, Variable] = {'script_hash': Variable(Type.optional.build(uint160))}
+        args_default = set_internal_call(ast.parse("{0}".format(Type.none.default_value)
                                                    ).body[0].value)
 
         super().__init__(identifier, syscall, args, [args_default],
@@ -27,10 +27,16 @@ class GetNotificationsMethod(InteropMethod):
 
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        # TODO: Change when Optional or Union is implemented
         from boa3.neo.vm.type.Integer import Integer
         from boa3.model.type.type import Type
-        opcodes = [
+        jmp_place_holder = (Opcode.JMP, b'\x01')
+
+        verify_arg_is_null = [
+            (Opcode.DUP, b''),
+            (Opcode.JMPIFNOT, jmp_place_holder),
+        ]
+
+        arg_is_not_null = [
             (Opcode.DUP, b''),
             (Opcode.CONVERT, Type.int.stack_item),
             (Opcode.PUSH0, b''),
@@ -39,6 +45,13 @@ class GetNotificationsMethod(InteropMethod):
             (Opcode.DROP, b''),
             (Opcode.PUSHNULL, b'')
         ]
-        opcodes.extend(super().opcode)
 
-        return opcodes
+        from boa3.compiler.codegenerator import get_bytes_count
+        jmp_to_convert = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(arg_is_not_null), True)
+        verify_arg_is_null[-1] = jmp_to_convert
+
+        return (
+            verify_arg_is_null +
+            arg_is_not_null +
+            super().opcode
+        )

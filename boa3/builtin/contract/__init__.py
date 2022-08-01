@@ -71,6 +71,7 @@ class NeoAccountState:
     """
 
     def __init__(self):
+        from boa3 import constants
         self.balance: int = 0
         self.height: int = 0
-        self.vote_to: ECPoint = ECPoint(bytes(33))
+        self.vote_to: ECPoint = ECPoint(bytes(constants.SIZE_OF_ECPOINT))

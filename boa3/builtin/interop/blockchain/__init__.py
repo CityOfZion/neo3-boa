@@ -1,7 +1,9 @@
-from typing import Union
+from typing import List, Union
 
 from boa3.builtin.interop.blockchain.block import Block
+from boa3.builtin.interop.blockchain.signer import Signer
 from boa3.builtin.interop.blockchain.transaction import Transaction
+from boa3.builtin.interop.blockchain.vmstate import VMState
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
 
@@ -63,6 +65,28 @@ def get_transaction_height(hash_: UInt256) -> int:
     :param hash_: hash identifier of the transaction
     :type hash_: UInt256
     :return: height of the transaction
+    """
+    pass
+
+
+def get_transaction_signers(hash_: UInt256) -> List[Signer]:
+    """
+    Gets the VM state of a transaction.
+
+    :param hash_: hash identifier of the transaction
+    :type hash_: UInt256
+    :return: VM state of the transaction
+    """
+    pass
+
+
+def get_transaction_vm_state(hash_: UInt256) -> VMState:
+    """
+    Gets the VM state of a transaction.
+
+    :param hash_: hash identifier of the transaction
+    :type hash_: UInt256
+    :return: VM state of the transaction
     """
     pass
 

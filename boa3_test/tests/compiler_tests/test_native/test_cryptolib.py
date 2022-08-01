@@ -418,3 +418,30 @@ class TestCryptoLibClass(BoaTest):
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
         path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_murmur32(self):
+        function_id = String(Interop.Murmur32._sys_call).to_bytes()
+        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.PUSH2
+            + Opcode.PACK
+            + Opcode.PUSHDATA1
+            + Integer(len(call_flag)).to_byte_array() + call_flag
+            + Opcode.PUSHDATA1
+            + Integer(len(function_id)).to_byte_array() + function_id
+            + Opcode.PUSHDATA1
+            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
+            + Opcode.SYSCALL
+            + Interop.CallContract.interop_method_hash
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Murmur32.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)

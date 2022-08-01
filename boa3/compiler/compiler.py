@@ -35,6 +35,10 @@ class Compiler:
         logging.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
         logging.info(f'Started compiling\t{filename}')
         self._entry_smart_contract = os.path.splitext(filename)[0]
+
+        from boa3.model.imports.builtin import CompilerBuiltin
+        CompilerBuiltin.reset()
+
         self._analyse(fullpath, root_folder, log)
         return self._compile()
 

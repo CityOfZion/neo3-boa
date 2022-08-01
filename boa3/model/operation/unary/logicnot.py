@@ -29,7 +29,7 @@ class LogicNot(UnaryOperation):
 
     def _get_result(self, operand: IType) -> IType:
         if self.validate_type(operand):
-            return operand
+            return Type.int
         else:
             return Type.none
 

@@ -14,6 +14,7 @@ from boa3.model.builtin.interop.role import *
 from boa3.model.builtin.interop.runtime import *
 from boa3.model.builtin.interop.stdlib import *
 from boa3.model.builtin.interop.storage import *
+from boa3.model.event import Event
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 
@@ -44,6 +45,14 @@ class Interop:
             lst.extend(symbols)
         return lst
 
+    @classmethod
+    def interop_events(cls) -> List[Event]:
+        lst: List[Event] = []
+        for symbols in cls._interop_symbols.values():
+            lst.extend([event for event in symbols if isinstance(event, Event)])
+
+        return lst
+
     # region Interops
 
     # Interop Types
@@ -58,10 +67,17 @@ class Interop:
     OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleType.build()
     RoleType = RoleType.build()
+    SignerType = SignerType.build()
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
     TriggerType = TriggerType()
+    VMStateType = VMStateType.build()
+    WitnessCondition = WitnessConditionType.build()
+    WitnessConditionType = WitnessConditionEnumType.build()
+    WitnessRuleAction = WitnessRuleActionType.build()
+    WitnessRule = WitnessRuleType.build()
+    WitnessScope = WitnessScopeType.build()
 
     # Blockchain Interops
     CurrentHash = CurrentHashProperty()
@@ -71,6 +87,8 @@ class Interop:
     GetTransaction = GetTransactionMethod(TransactionType)
     GetTransactionFromBlock = GetTransactionFromBlockMethod(TransactionType)
     GetTransactionHeight = GetTransactionHeightMethod()
+    GetTransactionSigners = GetTransactionSignersMethod(SignerType)
+    GetTransactionVMState = GetTransactionVMStateMethod(VMStateType)
 
     # Contract Interops
     CallContract = CallMethod()
@@ -96,6 +114,7 @@ class Interop:
     CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
+    Murmur32 = Murmur32Method()
     Ripemd160 = Ripemd160Method()
     Sha256 = Sha256Method()
     VerifyWithECDsa = VerifyWithECDsaMethod()
@@ -117,6 +136,7 @@ class Interop:
     GetDesignatedByRole = GetDesignatedByRoleMethod()
 
     # Runtime Interops
+    AddressVersion = AddressVersionProperty()
     BlockTime = BlockTimeProperty()
     BurnGas = BurnGasMethod()
     CallingScriptHash = CallingScriptHashProperty()
@@ -164,13 +184,29 @@ class Interop:
                           types=[BlockType]
                           )
 
+    SignerModule = Package(identifier=SignerType.identifier.lower(),
+                           types=[SignerType,
+                                  WitnessConditionType,
+                                  WitnessCondition,
+                                  WitnessRuleAction,
+                                  WitnessRule,
+                                  WitnessScope
+                                  ]
+                           )
+
     TransactionModule = Package(identifier=TransactionType.identifier.lower(),
                                 types=[TransactionType]
                                 )
 
+    VMStateModule = Package(identifier=VMStateType.identifier.lower(),
+                            types=[VMStateType]
+                            )
+
     BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
                                 types=[BlockType,
-                                       TransactionType
+                                       SignerType,
+                                       TransactionType,
+                                       VMStateType
                                        ],
                                 methods=[CurrentHash,
                                          CurrentIndex,
@@ -178,10 +214,14 @@ class Interop:
                                          GetContract,
                                          GetTransaction,
                                          GetTransactionFromBlock,
-                                         GetTransactionHeight
+                                         GetTransactionHeight,
+                                         GetTransactionSigners,
+                                         GetTransactionVMState
                                          ],
                                 packages=[BlockModule,
-                                          TransactionModule
+                                          SignerModule,
+                                          TransactionModule,
+                                          VMStateModule
                                           ]
                                 )
 
@@ -235,6 +275,7 @@ class Interop:
                                      CheckSig,
                                      Hash160,
                                      Hash256,
+                                     Murmur32,
                                      Ripemd160,
                                      Sha256,
                                      VerifyWithECDsa,
@@ -293,7 +334,8 @@ class Interop:
                              types=[NotificationType,
                                     TriggerType
                                     ],
-                             properties=[BlockTime,
+                             properties=[AddressVersion,
+                                         BlockTime,
                                          CallingScriptHash,
                                          ExecutingScriptHash,
                                          GasLeft,

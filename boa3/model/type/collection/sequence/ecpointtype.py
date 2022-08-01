@@ -1,5 +1,6 @@
 from typing import Any, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.model.method import Method
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
@@ -31,7 +32,7 @@ class ECPointType(BytesType):
 
     @property
     def default_value(self) -> Any:
-        return bytes(20)
+        return bytes(constants.SIZE_OF_ECPOINT)
 
     @classmethod
     def build(cls, value: Any = None) -> IType:

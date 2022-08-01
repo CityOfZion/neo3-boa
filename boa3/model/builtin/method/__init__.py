@@ -2,6 +2,7 @@ __all__ = ['AbsMethod',
            'BoolMethod',
            'IBuiltinMethod',
            'ByteArrayMethod',
+           'ByteArrayEncodingMethod',
            'CreateEventMethod',
            'EventType',
            'ExceptionMethod',
@@ -10,6 +11,10 @@ __all__ = ['AbsMethod',
            'IntIntMethod',
            'IsInstanceMethod',
            'LenMethod',
+           'ListBytesStringMethod',
+           'ListGenericMethod',
+           'ListMappingMethod',
+           'ListSequenceMethod',
            'MaxIntMethod',
            'MaxByteStringMethod',
            'MinByteStringMethod',
@@ -27,6 +32,7 @@ from boa3.model.builtin.method.absmethod import AbsMethod
 from boa3.model.builtin.method.boolmethod import BoolMethod
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.builtin.method.bytearraymethod import ByteArrayMethod
+from boa3.model.builtin.method.bytearrayencodingmethod import ByteArrayEncodingMethod
 from boa3.model.builtin.method.createeventmethod import CreateEventMethod, EventType
 from boa3.model.builtin.method.exceptionmethod import ExceptionMethod
 from boa3.model.builtin.method.exitmethod import ExitMethod
@@ -34,6 +40,10 @@ from boa3.model.builtin.method.intbytestringmethod import IntByteStringMethod
 from boa3.model.builtin.method.intintmethod import IntIntMethod
 from boa3.model.builtin.method.isinstancemethod import IsInstanceMethod
 from boa3.model.builtin.method.lenmethod import LenMethod
+from boa3.model.builtin.method.listbytesstringmethod import ListBytesStringMethod
+from boa3.model.builtin.method.listgenericmethod import ListGenericMethod
+from boa3.model.builtin.method.listmappingmethod import ListMappingMethod
+from boa3.model.builtin.method.listsequencemethod import ListSequenceMethod
 from boa3.model.builtin.method.maxbytestringmethod import MaxByteStringMethod
 from boa3.model.builtin.method.maxintmethod import MaxIntMethod
 from boa3.model.builtin.method.minbytestringmethod import MinByteStringMethod

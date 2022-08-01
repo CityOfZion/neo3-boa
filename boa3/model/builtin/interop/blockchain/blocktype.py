@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from boa3 import constants
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.method import Method
@@ -95,8 +96,8 @@ class BlockMethod(IBuiltinMethod):
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
 
-        uint160_default = Integer(20).to_byte_array() + bytes(20)
-        uint256_default = Integer(32).to_byte_array() + bytes(32)
+        uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
+        uint256_default = Integer(constants.SIZE_OF_INT256).to_byte_array() + bytes(constants.SIZE_OF_INT256)
 
         return [
             (Opcode.PUSH0, b''),  # transaction_count

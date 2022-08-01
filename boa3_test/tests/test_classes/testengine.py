@@ -5,10 +5,13 @@ from boa3 import constants
 from boa3.neo.smart_contract.VoidType import VoidType
 from boa3.neo.smart_contract.notification import Notification
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
+from boa3.neo.vm.type.Integer import Integer
+from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
-from boa3.neo3.vm import VMState
+from boa3.neo3.vm import VMState, vmstate
 from boa3_test.tests.test_classes.block import Block
+from boa3_test.tests.test_classes.contractcollection import ContractCollection
 from boa3_test.tests.test_classes.signer import Signer
 from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.testcontract import TestContract
@@ -43,7 +46,7 @@ class TestEngine:
 
         self._current_tx: Optional[Transaction] = None
         self._accounts: List[Signer] = []
-        self._contract_paths: List[TestContract] = []
+        self._contract_paths: ContractCollection = ContractCollection()
 
         self._error_message: Optional[str] = None
         self._neo_balance_prefix: bytes = b'\x14'
@@ -149,7 +152,10 @@ class TestEngine:
 
     def add_contract(self, contract_nef_path: str):
         if contract_nef_path.endswith('.nef') and contract_nef_path not in self._contract_paths:
-            self._contract_paths.append(TestContract(contract_nef_path))
+            manifest_path = contract_nef_path.replace('.nef', '.manifest.json')
+            if not path.exists(manifest_path):
+                raise FileNotFoundError(manifest_path)
+            self._contract_paths.append(TestContract(contract_nef_path, manifest_path))
 
     def remove_contract(self, contract_index_or_path: Union[int, str]):
         if isinstance(contract_index_or_path, str):
@@ -286,7 +292,7 @@ class TestEngine:
             self._error_message = result['error'] if 'error' in result else None
 
             if 'vmstate' in result:
-                self._vm_state = VMState.get_vm_state(result['vmstate'])
+                self._vm_state = vmstate.get_vm_state(result['vmstate'])
 
             if 'executedscripthash' in result:
                 self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
@@ -342,8 +348,9 @@ class TestEngine:
         except BaseException as e:
             self._error_message = str(e)
 
-        # TODO: convert the result to the return type of the function in the manifest
-        return self._result_stack[-1] if len(self._result_stack) > 0 else VoidType
+        if len(self._result_stack) > 0:
+            return self._filter_result(self._result_stack[0], method, contract_id)
+        return VoidType
 
     def reset_state(self):
         self._vm_state = VMState.NONE
@@ -358,6 +365,36 @@ class TestEngine:
         self.reset_state()
         self._notifications.clear()
         self._storage.clear()
+
+    def _filter_result(self, value: Any, called_method: str, contract_id=None):
+        if contract_id is None:
+            contract_id = self._executed_script_hash
+
+        called_contract = self._contract_paths[contract_id]
+        if not isinstance(called_contract, TestContract):
+            return value
+
+        converted_value = value
+        expected_return_type = called_contract.get_method_return_type(called_method)
+
+        if expected_return_type is StackItemType.Boolean:
+            converted_value = bool(value)
+        elif expected_return_type is StackItemType.Integer:
+            if isinstance(value, str):
+                converted_value = String(value).to_bytes(min_length=1)
+
+            if isinstance(converted_value, bytes):
+                converted_value = Integer.from_bytes(value)
+            else:
+                try:
+                    converted_value = int(value)
+                except BaseException:
+                    converted_value = value
+        elif expected_return_type is StackItemType.ByteString:
+            if isinstance(value, int):
+                converted_value = Integer(value).to_byte_array(min_length=1)
+
+        return converted_value
 
     def to_json(self, contract_id: Union[str, UInt160], method: str, *args: Any) -> Dict[str, Any]:
         json = {

@@ -640,16 +640,21 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._include_symbols_to_scope(last_scope, is_instance_else, intersected_ids)
 
     def _include_symbols_to_scope(self, scope: SymbolScope, other_scope: Dict[str, ISymbol], items_filter: Set[str]):
-        for new_symbol in {key for key in other_scope if key not in items_filter}:
-            new_value_type = self.get_type(other_scope[new_symbol])
-            outer_symbol = self.get_symbol(new_symbol)
+        for new_symbol_id in {key for key in other_scope if key not in items_filter}:
+            new_symbol = other_scope[new_symbol_id]
+            new_value_type = self.get_type(new_symbol)
+            outer_symbol = self.get_symbol(new_symbol_id)
             outer_value_type = outer_symbol.type if isinstance(outer_symbol, IExpression) else Type.none
+
+            if (isinstance(outer_symbol, Variable) and isinstance(new_symbol, Variable)
+                    and not new_symbol.is_reassigned):
+                continue
 
             if isinstance(outer_symbol, IType):
                 new_type = Type.union.build([new_value_type, outer_value_type])
             else:
                 new_type = new_value_type
-            scope.include_symbol(new_symbol, Variable(new_type))
+            scope.include_symbol(new_symbol_id, Variable(new_type))
 
     def visit_IfExp(self, if_node: ast.IfExp):
         """
@@ -1266,7 +1271,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 call_target = Builtin.Exception
 
             callable_target = call_target if call_target is not None else callable_target
-        elif isinstance(callable_target, IBuiltinMethod):
+        if isinstance(callable_target, IBuiltinMethod):
             # verify if it's a variation of the default builtin method
             args = [self.get_type(param, use_metatype=True) for param in call_args]
 

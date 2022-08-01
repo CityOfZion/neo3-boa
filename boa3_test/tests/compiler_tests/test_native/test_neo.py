@@ -155,9 +155,6 @@ class TestNeoClass(BoaTest):
 
         # adding NEO to the account will make NeoAccountState not None
         engine.add_neo(account, n_votes)
-        # it's possible to vote for no one
-        result = self.run_smart_contract(engine, path, 'main', account, None, signer_accounts=[account])
-        self.assertEqual(True, result)
 
         # candidate is not registered yet
         result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
@@ -179,6 +176,61 @@ class TestNeoClass(BoaTest):
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(n_votes, result[0][1])
 
+        # remove votes from candidate
+        result = self.run_smart_contract(engine, path, 'un_vote', account, signer_accounts=[account])
+        self.assertEqual(True, result)
+
+        # candidate has no votes now
+        result = self.run_smart_contract(engine, path_get, 'main')
+        self.assertEqual(1, len(result))
+        self.assertEqual(candidate_pubkey, result[0][0])
+        self.assertEqual(0, result[0][1])
+
+        # voting for candidate again
+        self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
+        result = self.run_smart_contract(engine, path_get, 'main')
+        self.assertEqual(n_votes, result[0][1])
+
+        # it's also possible to remove votes by voting for None instead of using un_vote
+        result = self.run_smart_contract(engine, path, 'main', account, None, signer_accounts=[account])
+        self.assertEqual(True, result)
+
+        # candidate has no votes now again
+        result = self.run_smart_contract(engine, path_get, 'main')
+        self.assertEqual(1, len(result))
+        self.assertEqual(candidate_pubkey, result[0][0])
+        self.assertEqual(0, result[0][1])
+
+    def test_un_vote_too_many_parameters(self):
+        path = self.get_contract_path('UnVoteTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_un_vote_too_few_parameters(self):
+        path = self.get_contract_path('UnVoteTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_get_all_candidates(self):
+        path = self.get_contract_path('GetAllCandidates.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        # no candidate was registered
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(0, len(result))
+
+        path_register = self.get_contract_path('RegisterCandidate.py')
+        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
+        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
+        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
+                                         signer_accounts=[candidate_scripthash])
+        self.assertTrue(result)
+
+        # after registering one
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(1, len(result))
+        self.assertEqual(candidate_pubkey, result[0][0])
+        self.assertEqual(0, result[0][1])
+
     def test_get_candidates(self):
         path = self.get_contract_path('GetCandidates.py')
         engine = TestEngine()
@@ -198,6 +250,33 @@ class TestNeoClass(BoaTest):
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
+
+    def test_get_candidate_vote(self):
+        path = self.get_contract_path('GetCandidateVote.py')
+        engine = TestEngine()
+
+        account = bytes(range(20))
+        n_votes = 100
+        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
+        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
+        # will fail check_witness
+        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
+        self.assertEqual(-1, result)
+
+        engine.add_neo(account, n_votes)
+        path_register = self.get_contract_path('RegisterCandidate.py')
+        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
+                                         signer_accounts=[candidate_scripthash])
+        self.assertTrue(result)
+
+        # candidate was registered
+        path_vote = self.get_contract_path('Vote.py')
+        result = self.run_smart_contract(engine, path_vote, 'main', account, candidate_pubkey,
+                                         signer_accounts=[account])
+        self.assertTrue(result)
+
+        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
+        self.assertEqual(n_votes, result)
 
     def test_get_committee(self):
         path = self.get_contract_path('GetCommittee.py')

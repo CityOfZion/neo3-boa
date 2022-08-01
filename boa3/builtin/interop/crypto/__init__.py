@@ -96,3 +96,17 @@ def verify_with_ecdsa(message: Any, pubkey: ECPoint, signature: ByteString, curv
     :rtype: bool
     """
     pass
+
+
+def murmur32(data: ByteString, seed: int) -> ByteString:
+    """
+    Computes the hash value for the specified byte array using the murmur32 algorithm.
+
+    :param data: the input to compute the hash code for
+    :type data: ByteString
+    :param seed: the seed of the murmur32 hash function
+    :type seed: int
+    :return: the hash value
+    :rtype: ByteString
+    """
+    pass
