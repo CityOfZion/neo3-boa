@@ -388,7 +388,7 @@ class TestEngine:
             else:
                 try:
                     converted_value = int(value)
-                except:
+                except BaseException:
                     converted_value = value
         elif expected_return_type is StackItemType.ByteString:
             if isinstance(value, int):

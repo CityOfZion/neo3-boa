@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.classmethod.countmethod import CountMethod
 from boa3.model.expression import IExpression
@@ -123,15 +123,15 @@ class CountSequenceMethod(CountMethod):
         # endregion
 
         return (
-                repack_array +
-                sequence_initialize +
-                sequence_verify_while +
-                in_depth_verification +
-                sequence_get_element +
-                sequence_equals +
-                sequence_count_inc +
-                list_tuple_count_index_dec +
-                sequence_clean_stack
+            repack_array +
+            sequence_initialize +
+            sequence_verify_while +
+            in_depth_verification +
+            sequence_get_element +
+            sequence_equals +
+            sequence_count_inc +
+            list_tuple_count_index_dec +
+            sequence_clean_stack
         )
 
     def generic_verification(self, inc_statement_bytes=None,

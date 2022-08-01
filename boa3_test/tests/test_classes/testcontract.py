@@ -25,7 +25,7 @@ class TestContract:
             with open(self._manifest_path) as manifest_output:
                 import json
                 manifest = json.loads(manifest_output.read())
-        except:
+        except BaseException:
             manifest = {}
 
         return manifest

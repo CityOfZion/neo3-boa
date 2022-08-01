@@ -1,4 +1,4 @@
-from typing import Any, List, Union, Dict
+from typing import Any, Dict, List, Union
 
 from boa3.builtin import public
 
