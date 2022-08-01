@@ -1,4 +1,4 @@
-from typing import Sequence, Any, List
+from typing import Any, List, Sequence
 
 from boa3.builtin import public
 

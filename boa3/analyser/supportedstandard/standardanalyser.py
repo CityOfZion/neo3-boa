@@ -164,7 +164,7 @@ class StandardAnalyser(IAstAnalyser):
                 found_methods = self.get_methods_by_display_name(method_id)
 
                 methods_implemented = any(
-                     other_standards[standard].match_definition(standard_method, method) for method in found_methods
+                    other_standards[standard].match_definition(standard_method, method) for method in found_methods
                 )
                 index += 1
 

@@ -5,6 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Included Neo 3.2 features
+  - `getAddressVersion` interop
+  - CryptoLib native `murmur32` method
+  - Ledger native `getTransactionVMState` and `getTransactionSigners` methods
+  - Neo native `getCandidateVote`, `getAllCandidates` and `unVote` methods
+- Included manifest `groups` and `trusts` modifiers to `NeoMetadata`
+- Contract standards detection if not explicitly stated in the metadata
+  - Supports NEO-11 and NEO-17
+
+### Changed
+- Changed `print` behavior to log readable results depending on the type of the value
+- Support to `dict.pop` with the `default` argument
+
+### Fixed
+- `isinstance` and `is None` changing the type evaluated by the compiler
+- Calling methods inside another method call failed in runtime
 
 
 ## [0.11.3] - 2022-06-13

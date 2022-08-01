@@ -1,4 +1,3 @@
-import ast
 from typing import Dict, List, Tuple
 
 from boa3.model.builtin.method.listmethod import ListMethod
