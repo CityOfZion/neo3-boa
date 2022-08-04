@@ -306,6 +306,13 @@ class TestRuntimeInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        calling_hash = bytes(range(20))
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         calling_script_hash=calling_hash,
+                                         expected_result_type=bytes)
+        self.assertEqual(calling_hash, result)
+
     def test_calling_script_hash_cant_assign(self):
         expected_output = (
             Opcode.INITSLOT

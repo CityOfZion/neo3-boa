@@ -240,6 +240,7 @@ class BoaTest(TestCase):
                            *arguments: Any, reset_engine: bool = False,
                            fake_storage: Dict[Tuple[str, str], Any] = None,
                            signer_accounts: Iterable[bytes] = (),
+                           calling_script_hash: Optional[bytes] = None,
                            expected_result_type: Type = None,
                            rollback_on_fault: bool = True) -> Any:
 
@@ -253,7 +254,7 @@ class BoaTest(TestCase):
             from boa3.neo3.core.types import UInt160
             smart_contract_path = UInt160(smart_contract_path)
 
-        self._set_fake_data(test_engine, fake_storage, signer_accounts)
+        self._set_fake_data(test_engine, fake_storage, signer_accounts, calling_script_hash)
         result = test_engine.run(smart_contract_path, method, *arguments,
                                  reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
 
@@ -275,10 +276,14 @@ class BoaTest(TestCase):
 
     def _set_fake_data(self, test_engine: TestEngine,
                        fake_storage: Dict[Tuple[str, str], Any],
-                       signer_accounts: Iterable[bytes]):
+                       signer_accounts: Iterable[bytes],
+                       calling_script_hash: Optional[bytes] = None):
 
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)
+
+        if calling_script_hash is not None and len(calling_script_hash) == constants.SIZE_OF_INT160:
+            test_engine.set_calling_script_hash(calling_script_hash)
 
         for account in signer_accounts:
             test_engine.add_signer_account(account)
