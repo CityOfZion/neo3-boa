@@ -36,6 +36,7 @@ class TestEngine:
         self._test_engine_path = engine_path
         self._vm_state: VMState = VMState.NONE
         self._executed_script_hash: Optional[UInt160] = None
+        self._calling_script_hash: Optional[UInt160] = None
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
 
@@ -66,6 +67,10 @@ class TestEngine:
     @property
     def executed_script_hash(self) -> Optional[UInt160]:
         return self._executed_script_hash
+
+    @property
+    def calling_script_hash(self) -> Optional[UInt160]:
+        return self._calling_script_hash
 
     @property
     def result_stack(self) -> List[Any]:
@@ -140,6 +145,20 @@ class TestEngine:
 
     def add_gas(self, script_hash: bytes, amount: int) -> bool:
         return self._storage.add_token(constants.GAS_SCRIPT, script_hash, amount)
+
+    def set_calling_script_hash(self, calling_hash: bytes) -> bool:
+        if len(calling_hash) != constants.SIZE_OF_INT160:
+            return False
+
+        calling_script_hash = UInt160(calling_hash)
+        account = Signer(calling_script_hash, WitnessScope.CalledByEntry)
+        if account in self._accounts:
+            account_index = self._accounts.index(account)
+            if account_index != 0:  # the calling hash should be the first signer
+                account = self._accounts.pop(account_index)
+
+        self._accounts.insert(0, account)
+        self._calling_script_hash = calling_script_hash
 
     def add_signer_account(self, account_address: bytes, account_scope: WitnessScope = WitnessScope.CalledByEntry):
         account = Signer(UInt160(account_address), account_scope)
@@ -297,6 +316,13 @@ class TestEngine:
             if 'executedscripthash' in result:
                 self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
 
+            if 'callingscripthash' in result:
+                try:
+                    calling_script_hash = UInt160.from_string(result['callingscripthash'])
+                except BaseException:
+                    calling_script_hash = None
+                self._calling_script_hash = calling_script_hash
+
             if 'gasconsumed' in result:
                 self._gas_consumed = int(result['gasconsumed'])
 
@@ -355,6 +381,7 @@ class TestEngine:
     def reset_state(self):
         self._vm_state = VMState.NONE
         self._executed_script_hash = None
+        self._calling_script_hash = None
         self._gas_consumed = 0
         self._result_stack = []
         self._accounts = []
@@ -405,6 +432,8 @@ class TestEngine:
             'storage': self._storage.to_json(),
             'contracts': [{'nef': contract_path} for contract_path in self.contracts],
             'signeraccounts': [address.to_json() for address in self._accounts],
+            'callingscripthash': (self._calling_script_hash if self._calling_script_hash is None
+                                  else str(self._calling_script_hash)),
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }
