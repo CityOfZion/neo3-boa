@@ -200,7 +200,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        with self.assertRaisesRegex(TestExecutionException, self.GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX):
+        with self.assertRaisesRegex(TestExecutionException, self.NULL_POINTER_MSG):
             # TODO: TestEngine fails when running contracts with arrays inside arrays args
             self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
 

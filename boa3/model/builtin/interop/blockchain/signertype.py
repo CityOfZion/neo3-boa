@@ -28,7 +28,6 @@ class SignerType(ClassArrayType):
         list_uint160 = Type.list.build([uint160])
 
         self._variables: Dict[str, Variable] = {
-            '-internal_signer': Variable(Type.bytes),
             'account': Variable(uint160),
             'scopes': Variable(WitnessScopeType.build()),
             'allowed_contracts': Variable(list_uint160),

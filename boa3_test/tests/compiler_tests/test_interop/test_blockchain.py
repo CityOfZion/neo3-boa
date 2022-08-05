@@ -395,7 +395,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], list)
         self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
-        self.assertEqual(result[0][1], String.from_bytes(example_account))
+        self.assertEqual(result[0][0], String.from_bytes(example_account))
 
     def test_get_transaction_signers_mismatched_type(self):
         path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
