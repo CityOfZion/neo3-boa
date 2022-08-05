@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import List
+
 import boa3
 from boa3.neo.contracts import NEF, Version
 from boa3.neo.core import BinaryReader, BinaryWriter
+from boa3.neo3.contracts.nef import MethodToken
 
 
 class NefFile:
@@ -12,12 +15,15 @@ class NefFile:
     :ivar _nef: nef serializable object
     """
 
-    def __init__(self, script_bytes: bytes):
+    def __init__(self, script_bytes: bytes,
+                 method_tokens: List[MethodToken] = None):
         """
         :param script_bytes: the script of the smart contract
         """
         compiler: str = f"neo3-boa by COZ-{Version.from_string(boa3.__version__)}"
-        self._nef = NEF(compiler, script_bytes)
+        self._nef = NEF(compiler_name=compiler,
+                        script=script_bytes,
+                        tokens=[] if method_tokens is None else method_tokens)
 
     @property
     def script(self) -> bytes:

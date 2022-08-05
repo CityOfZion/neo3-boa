@@ -50,14 +50,17 @@ class TestFileGeneration(BoaTest):
             compiler = compiler.replace(b'\x00', b'')
 
             nef_output.read(2)  # reserved
-            nef_output.read(1)  # TODO: method tokens
+
+            method_token_count = nef_output.read(1)
+            self.assertEqual(Integer.from_bytes(method_token_count), 0)
+
             nef_output.read(2)  # reserved
 
             script_size = nef_output.read(1)
-            script = nef_output.read(int.from_bytes(script_size, constants.BYTEORDER))
+            script = nef_output.read(Integer.from_bytes(script_size))
             check_sum = Integer.from_bytes(nef_output.read(constants.SIZE_OF_INT32))
 
-        self.assertEqual(int.from_bytes(script_size, constants.BYTEORDER), len(script))
+        self.assertEqual(Integer.from_bytes(script_size), len(script))
 
         nef = NefFile(script)._nef
         self.assertEqual(compiler.decode(constants.ENCODING), nef.compiler)
