@@ -16,9 +16,8 @@ class NefFile:
         """
         :param script_bytes: the script of the smart contract
         """
-        compiler: str = "neo3-boa by COZ"
-        version = Version.from_string(boa3.__version__)
-        self._nef = NEF(compiler, version, script_bytes)
+        compiler: str = f"neo3-boa by COZ-{Version.from_string(boa3.__version__)}"
+        self._nef = NEF(compiler, script_bytes)
 
     @property
     def script(self) -> bytes:
@@ -28,17 +27,6 @@ class NefFile:
     def script_hash(self) -> bytes:
         from boa3.neo.cryptography import hash160
         return hash160(self.script)
-
-    def _set_version(self, version: str):
-        """
-        Updates the NEF file compiler version
-        """
-        try:
-            version = Version.from_string(version)
-            self._nef.version = version
-        except Exception as e:
-            import logging
-            logging.error(str(e))
 
     def serialize(self) -> bytes:
         """

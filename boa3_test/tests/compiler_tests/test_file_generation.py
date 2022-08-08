@@ -11,6 +11,7 @@ from boa3.model.method import Method
 from boa3.model.variable import Variable
 from boa3.neo.contracts.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -45,9 +46,8 @@ class TestFileGeneration(BoaTest):
         self.assertTrue(os.path.exists(expected_nef_output))
         with open(expected_nef_output, 'rb') as nef_output:
             magic = nef_output.read(constants.SIZE_OF_INT32)
-            compiler_with_version = nef_output.read(64)
-            compiler, version = compiler_with_version.rsplit(b'-', maxsplit=1)
-            version = version[:32]
+            compiler = nef_output.read(64)
+            compiler = compiler.replace(b'\x00', b'')
 
             nef_output.read(2)  # reserved
             nef_output.read(1)  # TODO: method tokens
@@ -55,14 +55,13 @@ class TestFileGeneration(BoaTest):
 
             script_size = nef_output.read(1)
             script = nef_output.read(int.from_bytes(script_size, constants.BYTEORDER))
-            check_sum = nef_output.read(constants.SIZE_OF_INT32)
+            check_sum = Integer.from_bytes(nef_output.read(constants.SIZE_OF_INT32))
 
         self.assertEqual(int.from_bytes(script_size, constants.BYTEORDER), len(script))
 
         nef = NefFile(script)._nef
         self.assertEqual(compiler.decode(constants.ENCODING), nef.compiler)
         self.assertEqual(check_sum, nef.checksum)
-        self.assertEqual(version, nef.version.to_array())
 
     def test_generate_manifest_file_with_decorator(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
