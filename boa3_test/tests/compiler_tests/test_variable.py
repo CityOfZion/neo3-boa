@@ -702,3 +702,11 @@ class TestVariable(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test')
         self.assertEqual([10], result)
+
+    def test_inner_object_variable_access(self):
+        path = self.get_contract_path('InnerObjectVariableAccess.py')
+        engine = TestEngine()
+
+        expected_return = 'InnerObjectVariableAccess'
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_return, result)

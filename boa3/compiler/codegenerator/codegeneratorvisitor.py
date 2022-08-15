@@ -971,8 +971,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                     self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
                     return self.build_data(attribute, symbol=attr)
         else:
-            need_to_visit_again = value_data.already_generated
-            self._remove_inserted_opcodes_since(last_address, last_stack)
+            if isinstance(value, ast.Attribute) and value_data.already_generated:
+                need_to_visit_again = False
+            else:
+                need_to_visit_again = value_data.already_generated
+                self._remove_inserted_opcodes_since(last_address, last_stack)
 
         # the verification above only verify variables, this one will should work with literals and constants
         if isinstance(value, (ast.Constant if SYS_VERSION_INFO >= (3, 8) else (ast.Num, ast.Str, ast.Bytes))) \
@@ -987,7 +990,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             index = value_type if isinstance(value_type, Package) else None
             return self.build_data(attribute, symbol_id=attribute_id, symbol=attr, index=index)
 
-        if isinstance(value, ast.Attribute):
+        if isinstance(value, ast.Attribute) and need_to_visit_again:
             value_data = self.visit(value)
         elif hasattr(attribute, 'generate_value') and attribute.generate_value:
             current_bytecode_size = self.generator.bytecode_size
@@ -1001,6 +1004,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if isinstance(result, IExpression):
                     generation_result = result
                     result = result.type
+            elif isinstance(attribute.value, ast.Attribute) and isinstance(value_data.index, int):
+                result = self.get_type(generation_result)
 
             if self.is_implemented_class_type(result):
                 class_attr_id = f'{result.identifier}.{attribute.attr}'
