@@ -171,7 +171,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         outer_symbol.set_is_reassigned()
                     self.__set_source_origin(source_node, is_module_scope)
             else:
-                if not isinstance(source_node, ast.Global):
+                if (not isinstance(source_node, ast.Global) and
+                        (not hasattr(source_node, 'targets') or not isinstance(source_node.targets[x], ast.Subscript))):
                     if outer_symbol is not None:
                         self._log_warning(
                             CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
