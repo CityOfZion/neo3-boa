@@ -41,7 +41,7 @@ jobs:
             sudo apt update && \
               sudo apt-get install -y dotnet-sdk-6.0
 
-            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.3.1
+            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.4.0
             dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
             python -m unittest discover boa3_test
 
