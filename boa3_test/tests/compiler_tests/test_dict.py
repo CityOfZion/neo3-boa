@@ -277,7 +277,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('SetValue.py')
-        output = Boa3.compile(path)
+        output = self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()

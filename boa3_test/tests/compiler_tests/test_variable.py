@@ -643,7 +643,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('AssignLocalWithArgumentShadowingGlobal.py')
-        output = Boa3.compile(path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()

@@ -207,6 +207,7 @@ class TestList(BoaTest):
 
     def test_list_set_value(self):
         path = self.get_contract_path('SetValue.py')
+        self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
@@ -219,6 +220,7 @@ class TestList(BoaTest):
 
     def test_list_set_value_with_negative_index(self):
         path = self.get_contract_path('SetValueNegativeIndex.py')
+        self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
 
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])

@@ -63,7 +63,7 @@ class BoaTest(TestCase):
         return re.sub('\n[ \t]+', '\n' + ' ' * no_spaces, text)
 
     def assertCompilerLogs(self, expected_logged_exception, path) -> Union[bytes, str]:
-        output, error_msg = self.assertCompilerLogsError(expected_logged_exception, path)
+        output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, path)
         if not issubclass(expected_logged_exception, CompilerError):
             return output
         else:
@@ -76,7 +76,19 @@ class BoaTest(TestCase):
             except BaseException:
                 return output
 
-    def assertCompilerLogsError(self, expected_logged_exception, path):
+    def assertCompilerNotLogs(self, expected_logged_exception, path):
+        output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
+        if len(expected_logged) > 0:
+            raise AssertionError(f'{expected_logged_exception.__name__} was logged: "{expected_logged[0].message}"')
+        return output
+
+    def _assert_compiler_logs_error(self, expected_logged_exception, path):
+        output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
+        if len(expected_logged) < 1:
+            raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
+        return output, expected_logged[0].message
+
+    def _get_compiler_log_data(self, expected_logged_exception, path):
         output = None
         with self.assertLogs() as log:
             from boa3.exception.NotLoadedException import NotLoadedException
@@ -93,9 +105,7 @@ class BoaTest(TestCase):
 
         expected_logged = [exception for exception in log.records
                            if isinstance(exception.msg, expected_logged_exception)]
-        if len(expected_logged) < 1:
-            raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
-        return output, expected_logged[0].message
+        return output, expected_logged
 
     def assertIsVoid(self, obj: Any):
         if obj is not VoidType:
