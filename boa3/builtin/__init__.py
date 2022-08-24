@@ -106,6 +106,7 @@ class NeoMetadata:
 
     def __init__(self):
         self.name: str = ''
+        self.source: str = None
         self.supported_standards: List[str] = []
         self._trusts: List[str] = []
         self._permissions: List[dict] = []
@@ -120,6 +121,7 @@ class NeoMetadata:
         """
         # list the variables names that are part of the manifest
         specific_field_names = ['name',
+                                'source',
                                 'supported_standards',
                                 ]
         extra = {}

@@ -28,7 +28,7 @@ class FileGenerator:
         self._entry_file_full_path = analyser.path.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._files: List[str] = [self._entry_file_full_path]
-        self._nef: NefFile = NefFile(bytecode)
+        self._nef: NefFile = NefFile(bytecode, source=self._metadata.source)
 
         self.__all_imports: List[Import] = None
         self._all_methods: Dict[str, Method] = None
