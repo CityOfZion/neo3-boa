@@ -31,7 +31,7 @@ def gm_manifest() -> NeoMetadata:
     meta.description = "Some Description"  # TODO_TEMPLATE
     meta.email = "hello@example.com"  # TODO_TEMPLATE
     meta.supported_standards = ["NEP-11"]
-    meta.source = ["https://github.com/"]  # TODO_TEMPLATE
+    meta.source = "https://github.com/"  # TODO_TEMPLATE
     # meta.add_permission(contract='*', methods=['*'])
     return meta
 
