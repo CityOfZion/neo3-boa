@@ -555,6 +555,7 @@ class TestFunction(BoaTest):
             + Integer(3).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSH10  # 10
             + Opcode.RET  # return
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnIfExpression.py')
@@ -607,6 +608,7 @@ class TestFunction(BoaTest):
             + Opcode.DROP
             + Opcode.PUSH5  # else
             + Opcode.RET  # return 5
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnFor.py')
@@ -660,6 +662,7 @@ class TestFunction(BoaTest):
             + Opcode.DROP
             + Opcode.LDLOC0  # else
             + Opcode.RET  # return x
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnForOnlyOnElse.py')
@@ -700,6 +703,7 @@ class TestFunction(BoaTest):
             + Integer(-9).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0  # else
             + Opcode.RET  # return x
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnWhile.py')
@@ -736,6 +740,7 @@ class TestFunction(BoaTest):
             + Integer(-7).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0  # else
             + Opcode.RET  # return x
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnWhileOnlyOnElse.py')

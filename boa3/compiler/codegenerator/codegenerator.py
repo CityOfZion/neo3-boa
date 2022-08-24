@@ -491,7 +491,7 @@ class CodeGenerator:
                 and self._current_method.init_address in VMCodeMapping.instance().code_map):
             self._current_method.init_bytecode = VMCodeMapping.instance().code_map[self._current_method.init_address]
 
-        if self.last_code.opcode is not Opcode.RET:
+        if self.last_code.opcode is not Opcode.RET or self._check_codes_with_target():
             if self._current_method.is_init:
                 # return the built object if it's a constructor
                 self_id, self_value = list(self._current_method.args.items())[0]
@@ -2015,6 +2015,24 @@ class CodeGenerator:
                     if len(opcodes) == 0:
                         self._missing_target.pop(target_address)
                     break
+
+    def _check_codes_with_target(self) -> bool:
+        """
+        Verifies if there are any instructions targeting positions not included yet.
+        """
+        instance = VMCodeMapping.instance()
+        current_bytecode_size = instance.bytecode_size
+        for target_address, codes in list(self._missing_target.items()):
+            if target_address is not None and target_address >= current_bytecode_size:
+                return True
+
+        if None in self._missing_target:
+            for code in self._missing_target[None]:
+                if code.info.opcode.is_jump and code.target is None:
+                    target = Integer.from_bytes(code.raw_data) + VMCodeMapping.instance().get_start_address(code) + 1
+                    if target >= current_bytecode_size:
+                        return True
+        return False
 
     def _update_codes_with_target(self, vm_code: VMCode):
         """
