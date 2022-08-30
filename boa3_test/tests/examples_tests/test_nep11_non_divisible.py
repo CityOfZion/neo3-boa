@@ -2,7 +2,6 @@ import json
 from typing import Dict, List
 
 from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
 from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
 from boa3_test.tests.boa_test import BoaTest
@@ -15,14 +14,15 @@ class TestNEP11Template(BoaTest):
 
     OWNER_SCRIPT_HASH = to_script_hash(b'NZcuGiwRu1QscpmCyxj5XwQBUf6sk7dJJN')
     OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
-    OTHER_ACCOUNT_2 = bytes(range(20))
+    OTHER_ACCOUNT_2 = to_script_hash(b'NNLi44dJNXtDNSBkofB48aTVYtb1zZrNEs')
 
     TOKEN_META = bytes(
         '{ "name": "NEP11", "description": "Some description", "image": "{some image URI}", "tokenURI": "{some URI}" }',
         'utf-8')
     TOKEN_LOCKED = bytes('lockedContent', 'utf-8')
     ROYALTIES = bytes(
-        '[{"address": "NZcuGiwRu1QscpmCyxj5XwQBUf6sk7dJJN", "value": 2000}, {"address": "NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB", "value": 3000}]',
+        '[{"address": "NZcuGiwRu1QscpmCyxj5XwQBUf6sk7dJJN", "value": 2000}, '
+        '{"address": "NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB", "value": 3000}]',
         'utf-8')
 
     def deploy_contract(self, engine, path):
@@ -189,13 +189,10 @@ class TestNEP11Template(BoaTest):
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
-        aux_path = self.get_contract_path('auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
-        aux_address = hash160(output)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
-        engine.add_gas(aux_address, add_amount)
+        engine.add_gas(self.OTHER_ACCOUNT_1, add_amount)
 
         # pause contract
         result = self.run_smart_contract(engine, path, 'updatePause', True,
@@ -206,8 +203,8 @@ class TestNEP11Template(BoaTest):
         # should fail because contract is paused
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'mint',
-                                    aux_address, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
-                                    signer_accounts=[aux_address])
+                                    self.OTHER_ACCOUNT_1, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1])
 
         # unpause contract
         result = self.run_smart_contract(engine, path, 'updatePause', False,
@@ -217,8 +214,8 @@ class TestNEP11Template(BoaTest):
 
         # mint
         result = self.run_smart_contract(engine, path, 'mint',
-                                         aux_address, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
-                                         signer_accounts=[aux_address])
+                                         self.OTHER_ACCOUNT_1, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual('\x01', result)
 
     def test_nep11_mint(self):
@@ -227,18 +224,15 @@ class TestNEP11Template(BoaTest):
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
-        aux_path = self.get_contract_path('auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
-        aux_address = hash160(output)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
-        engine.add_gas(aux_address, add_amount)
+        engine.add_gas(self.OTHER_ACCOUNT_1, add_amount)
 
         # should succeed now that account has enough fees
         token = self.run_smart_contract(engine, path, 'mint',
-                                        aux_address, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
-                                        signer_accounts=[aux_address])
+                                        self.OTHER_ACCOUNT_1, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
+                                        signer_accounts=[self.OTHER_ACCOUNT_1])
 
         properties = self.run_smart_contract(engine, path, 'properties', token, expected_result_type=Dict[str, str])
         token_property = json.loads(self.TOKEN_META.decode('utf-8').replace("'", "\""))
@@ -253,7 +247,7 @@ class TestNEP11Template(BoaTest):
                                     expected_result_type=str)
 
         # check balances after
-        nep11_balance_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        nep11_balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         nep11_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(1, nep11_balance_after)
         self.assertEqual(1, nep11_supply_after)
@@ -264,37 +258,34 @@ class TestNEP11Template(BoaTest):
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
-        aux_path = self.get_contract_path('auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
-        aux_address = hash160(output)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
-        engine.add_gas(aux_address, add_amount)
+        engine.add_gas(self.OTHER_ACCOUNT_1, add_amount)
 
         # mint
         token = self.run_smart_contract(engine, path, 'mint',
-                                        aux_address, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
-                                        signer_accounts=[aux_address])
+                                        self.OTHER_ACCOUNT_1, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
+                                        signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual('\x01', token)
 
         # check owner before
         nep11_owner_of_before = self.run_smart_contract(engine, path, 'ownerOf', token)
-        self.assertEqual(aux_address, nep11_owner_of_before)
+        self.assertEqual(self.OTHER_ACCOUNT_1, nep11_owner_of_before)
 
         # transfer
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OTHER_ACCOUNT_1, token, None,
-                                         signer_accounts=[aux_address],
+                                         self.OTHER_ACCOUNT_2, token, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1],
                                          expected_result_type=bool)
         self.assertEqual(True, result)
 
         # check owner after
         nep11_owner_of_after = self.run_smart_contract(engine, path, 'ownerOf', token)
-        self.assertEqual(self.OTHER_ACCOUNT_1, nep11_owner_of_after)
+        self.assertEqual(self.OTHER_ACCOUNT_2, nep11_owner_of_after)
 
         # check balances after
-        nep11_balance_after_transfer = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        nep11_balance_after_transfer = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         nep11_supply_after_transfer = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(0, nep11_balance_after_transfer)
         self.assertEqual(1, nep11_supply_after_transfer)
@@ -302,8 +293,8 @@ class TestNEP11Template(BoaTest):
         # try to transfer non existing token id
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'transfer',
-                                    self.OTHER_ACCOUNT_1, bytes('thisisanonexistingtoken', 'utf-8'), None,
-                                    signer_accounts=[aux_address])
+                                    self.OTHER_ACCOUNT_2, bytes('thisisanonexistingtoken', 'utf-8'), None,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1])
 
     def test_nep11_burn(self):
         path = self.get_contract_path('nep11_non_divisible.py')
@@ -311,28 +302,25 @@ class TestNEP11Template(BoaTest):
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
-        aux_path = self.get_contract_path('auxiliary_contracts', 'auxiliary_contract.py')
-        output, manifest = self.compile_and_save(aux_path)
-        aux_address = hash160(output)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
-        engine.add_gas(aux_address, add_amount)
+        engine.add_gas(self.OTHER_ACCOUNT_1, add_amount)
 
         # mint
         token = self.run_smart_contract(engine, path, 'mint',
-                                        aux_address, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
-                                        signer_accounts=[aux_address])
+                                        self.OTHER_ACCOUNT_1, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES,
+                                        signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual('\x01', token)
 
         # burn
         burn = self.run_smart_contract(engine, path, 'burn', token,
-                                       signer_accounts=[aux_address],
+                                       signer_accounts=[self.OTHER_ACCOUNT_1],
                                        expected_result_type=bool)
         self.assertEqual(True, burn)
 
         # check balances after
-        nep11_balance_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        nep11_balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         self.assertEqual(0, nep11_balance_after)
         nep11_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(0, nep11_supply_after)
