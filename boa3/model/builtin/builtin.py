@@ -69,6 +69,9 @@ class Builtin:
     ListSequence = ListSequenceMethod()
     Range = RangeMethod()
     Reversed = ReversedMethod()
+    StrBool = StrBoolMethod()
+    StrByteString = StrByteStringMethod()
+    StrInt = StrIntMethod()
     Super = SuperMethod()
 
     # python class method
