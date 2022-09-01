@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from boa3.neo3.core.types import UInt160
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
@@ -29,17 +29,18 @@ class NeoPermissionsStruct(NeoStruct):
         return value == '*'
 
     @classmethod
-    def get_contract(cls, value: Any) -> Optional[UInt160]:
+    def get_contract(cls, value: Any) -> Optional[Union[UInt160, bytes]]:
         if cls._is_wildcard(value):
             return None
 
-        # TODO: Permissions are not implemented yet
-        return UInt160()
+        if isinstance(value, str):
+            if len(value) == 40 or len(value) == 42:
+                return UInt160.from_string(value)
+            return bytes.fromhex(value)
 
     @classmethod
     def get_methods(cls, value: Any) -> Optional[list]:
         if cls._is_wildcard(value):
             return None
-
-        # TODO: Permissions are not implemented yet
-        return []
+        else:
+            return [method for method in value]
