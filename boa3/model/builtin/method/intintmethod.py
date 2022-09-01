@@ -22,4 +22,4 @@ class IntIntMethod(IntMethod):
     @property
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         # returns the same int
-        return [(Opcode.RET, b'')]
+        return []
