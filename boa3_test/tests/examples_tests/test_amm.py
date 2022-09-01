@@ -93,16 +93,12 @@ class TestTemplate(BoaTest):
         transferred_amount = 10 * 10 ** 8
 
         path = self.get_contract_path('amm.py')
-        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
         engine = TestEngine()
 
         self.run_smart_contract(engine, path, 'symbol')
         amm_address = engine.executed_script_hash.to_array()
-
-        self.run_smart_contract(engine, path_aux, 'get_name')
-        aux_address = engine.executed_script_hash.to_array()
 
         self.run_smart_contract(engine, path_zneo, 'symbol')
         zneo_address = engine.executed_script_hash.to_array()
@@ -121,22 +117,22 @@ class TestTemplate(BoaTest):
 
         # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
         with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
-            self.run_smart_contract(engine, path, 'onNEP17Payment', aux_address, transferred_amount, None,
-                                    signer_accounts=[aux_address])
+            self.run_smart_contract(engine, path, 'onNEP17Payment', self.OTHER_ACCOUNT_1, transferred_amount, None,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1])
 
-        engine.add_neo(aux_address, transferred_amount)
+        engine.add_neo(self.OTHER_ACCOUNT_1, transferred_amount)
 
-        # adding the transferred_amount into the aux_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         constants.NEO_SCRIPT, aux_address, zneo_address, transferred_amount, None,
-                                         signer_accounts=[aux_address])
+        # adding the transferred_amount into OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'transfer',
+                                         self.OTHER_ACCOUNT_1, zneo_address, transferred_amount, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # the AMM will accept this transaction, but there is no reason to send tokens directly to the smart contract.
         # to send tokens to the AMM you should use the add_liquidity function
-        result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         zneo_address, aux_address, amm_address, transferred_amount, None,
-                                         signer_accounts=[aux_address])
+        result = self.run_smart_contract(engine, path_zneo, 'transfer',
+                                         self.OTHER_ACCOUNT_1, amm_address, transferred_amount, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
     def test_amm_add_liquidity(self):
@@ -146,14 +142,10 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         self.run_smart_contract(engine, path, 'symbol')
         amm_address = engine.executed_script_hash.to_array()
-
-        self.run_smart_contract(engine, path_aux, 'get_name')
-        aux_address = engine.executed_script_hash.to_array()
 
         self.run_smart_contract(engine, path_zneo, 'symbol')
         zneo_address = engine.executed_script_hash.to_array()
@@ -170,50 +162,54 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        engine.add_neo(aux_address, 10_000_000 * 10 ** 8)
-        # minting zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         constants.NEO_SCRIPT, aux_address, zneo_address, 10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[aux_address])
+        engine.add_neo(self.OTHER_ACCOUNT_1, 10_000_000 * 10 ** 8)
+        engine.add_gas(self.OTHER_ACCOUNT_1, 10_000_000 * 10 ** 8)
+
+        # minting zNEO to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'transfer',
+                                         self.OTHER_ACCOUNT_1, zneo_address, 10_000_000 * 10 ** 8, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        engine.add_gas(aux_address, 10_000_000 * 10 ** 8)
-        # minting zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_aux, 'calling_transfer',
-                                         constants.GAS_SCRIPT, aux_address, zgas_address, 10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[aux_address])
+        # minting zGAS to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'transfer',
+                                         self.OTHER_ACCOUNT_1, zgas_address, 10_000_000 * 10 ** 8, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # won't work, because the user did not allow the amm to transfer zNEO and zGAS
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'add_liquidity', transferred_amount_zneo, transferred_amount_zgas, 0,
-                                    0, aux_address,
-                                    signer_accounts=[aux_address])
+                                    0, self.OTHER_ACCOUNT_1,
+                                    calling_script_hash=self.OTHER_ACCOUNT_1,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1])
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'approve',
+                                         amm_address, transferred_amount_zneo,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zGAS from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'approve',
+                                         amm_address, transferred_amount_zgas,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
         total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
-        balance_user_amm_before = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        balance_user_amm_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         reserves_before = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
         # adding liquidity to the pool will give you AMM tokens in return
         result = self.run_smart_contract(engine, path, 'add_liquidity',
-                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, aux_address,
-                                         signer_accounts=[aux_address])
+                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         import math
         liquidity = int(math.sqrt(transferred_amount_zneo * transferred_amount_zgas))
         self.assertEqual(3, len(result))
@@ -231,7 +227,7 @@ class TestTemplate(BoaTest):
         if isinstance(receiver, str):
             receiver = String(receiver).to_bytes()
         self.assertEqual(None, sender)
-        self.assertEqual(aux_address, receiver)
+        self.assertEqual(self.OTHER_ACCOUNT_1, receiver)
         self.assertEqual(liquidity, amount)
 
         sync_events = engine.get_events('Sync', origin=amm_address)
@@ -249,16 +245,16 @@ class TestTemplate(BoaTest):
         address, amount_zneo, amount_zgas = mint_events[0].arguments
         if isinstance(address, str):
             address = String(address).to_bytes()
-        self.assertEqual(aux_address, address)
+        self.assertEqual(self.OTHER_ACCOUNT_1, address)
         self.assertEqual(transferred_amount_zneo, amount_zneo)
         self.assertEqual(transferred_amount_zgas, amount_zgas)
 
         # data that will be compared with the previously saved data
         total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
-        balance_user_amm_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        balance_user_amm_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         reserves_after = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
 
@@ -276,30 +272,32 @@ class TestTemplate(BoaTest):
         transferred_amount_zneo = 2 * 10 ** 8
         transferred_amount_zgas = 23 * 10 ** 8
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'approve',
+                                         amm_address, transferred_amount_zneo,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zGAS from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'approve',
+                                         amm_address, transferred_amount_zgas,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
         total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
-        balance_user_before = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        balance_user_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         reserves_before = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
         # adding liquidity to the pool will give you AMM tokens in return
         result = self.run_smart_contract(engine, path, 'add_liquidity',
-                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, aux_address,
-                                         signer_accounts=[aux_address])
+                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         # zGAS will be quoted to keep the same ratio between zNEO and zGAS, the current ratio is 1 NEO to 11 GAS,
         # therefore, if 2 NEO are being added to the AMM, 22 GAS will be added instead of 23
         transferred_amount_zgas_quoted = transferred_amount_zneo * reserves_before[1] // reserves_before[0]
@@ -321,7 +319,7 @@ class TestTemplate(BoaTest):
         if isinstance(receiver, str):
             receiver = String(receiver).to_bytes()
         self.assertEqual(None, sender)
-        self.assertEqual(aux_address, receiver)
+        self.assertEqual(self.OTHER_ACCOUNT_1, receiver)
         self.assertEqual(liquidity, amount)
 
         sync_events = engine.get_events('Sync', origin=amm_address)
@@ -339,16 +337,16 @@ class TestTemplate(BoaTest):
         address, amount_zneo, amount_zgas = mint_events[1].arguments
         if isinstance(address, str):
             address = String(address).to_bytes()
-        self.assertEqual(aux_address, address)
+        self.assertEqual(self.OTHER_ACCOUNT_1, address)
         self.assertEqual(transferred_amount_zneo, amount_zneo)
         self.assertEqual(transferred_amount_zgas_quoted, amount_zgas)
 
         # data that will be compared with the previously saved data
         total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
-        balance_user_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        balance_user_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         reserves_after = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
 
@@ -370,14 +368,10 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         self.run_smart_contract(engine, path, 'symbol')
         amm_address = engine.executed_script_hash.to_array()
-
-        self.run_smart_contract(engine, path_aux, 'get_name')
-        aux_address = engine.executed_script_hash.to_array()
 
         self.run_smart_contract(engine, path_zneo, 'symbol')
         zneo_address = engine.executed_script_hash.to_array()
@@ -396,37 +390,42 @@ class TestTemplate(BoaTest):
 
         # can't remove liquidity, because the user doesn't have any
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'remove_liquidity', 10000, 0, 0, aux_address,
+            self.run_smart_contract(engine, path, 'remove_liquidity', 10000, 0, 0, self.OTHER_ACCOUNT_1,
                                     signer_accounts=[self.OWNER_SCRIPT_HASH])
 
-        # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
-                                         10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        engine.add_neo(self.OTHER_ACCOUNT_1, 10_000_000 * 10 ** 8)
+        engine.add_gas(self.OTHER_ACCOUNT_1, 10_000_000 * 10 ** 8)
+
+        # minting zNEO to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'transfer',
+                                         self.OTHER_ACCOUNT_1, zneo_address, 10_000_000 * 10 ** 8, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # transferring zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
-                                         10_000_000 * 10 ** 8, None,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
+        # minting zGAS to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, constants.GAS_SCRIPT, 'transfer',
+                                         self.OTHER_ACCOUNT_1, zgas_address, 10_000_000 * 10 ** 8, None,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'approve',
+                                         amm_address, transferred_amount_zneo,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zGAS from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'approve',
+                                         amm_address, transferred_amount_zgas,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
         result = self.run_smart_contract(engine, path, 'add_liquidity',
-                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, aux_address,
-                                         signer_accounts=[aux_address])
+                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         import math
         liquidity = int(math.sqrt(transferred_amount_zneo * transferred_amount_zgas))
         self.assertEqual(3, len(result))
@@ -436,15 +435,15 @@ class TestTemplate(BoaTest):
 
         # saving data to demonstrate that the value will change later
         total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
-        balance_user_before = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        balance_user_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         reserves_before = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
         # removing liquidity from the pool will return the equivalent zNEO and zGAS that were used to fund the pool
-        result = self.run_smart_contract(engine, path, 'remove_liquidity', liquidity, 0, 0, aux_address,
-                                         signer_accounts=[aux_address])
+        result = self.run_smart_contract(engine, path, 'remove_liquidity', liquidity, 0, 0, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(2, len(result))
         self.assertEqual(transferred_amount_zneo, result[0])
         self.assertEqual(transferred_amount_zgas, result[1])
@@ -459,7 +458,7 @@ class TestTemplate(BoaTest):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
             receiver = String(receiver).to_bytes()
-        self.assertEqual(aux_address, sender)
+        self.assertEqual(self.OTHER_ACCOUNT_1, sender)
         self.assertEqual(None, receiver)
         self.assertEqual(liquidity, amount)
 
@@ -478,16 +477,16 @@ class TestTemplate(BoaTest):
         address, amount_zneo, amount_zgas = burn_events[0].arguments
         if isinstance(address, str):
             address = String(address).to_bytes()
-        self.assertEqual(aux_address, address)
+        self.assertEqual(self.OTHER_ACCOUNT_1, address)
         self.assertEqual(transferred_amount_zneo, amount_zneo)
         self.assertEqual(transferred_amount_zgas, amount_zgas)
 
         # data that will be compared with the previously saved data
         total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
-        balance_user_after = self.run_smart_contract(engine, path, 'balanceOf', aux_address)
+        balance_user_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
         reserves_after = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
 
@@ -509,14 +508,10 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         self.run_smart_contract(engine, path, 'symbol')
         amm_address = engine.executed_script_hash.to_array()
-
-        self.run_smart_contract(engine, path_aux, 'get_name')
-        aux_address = engine.executed_script_hash.to_array()
 
         self.run_smart_contract(engine, path_zneo, 'symbol')
         zneo_address = engine.executed_script_hash.to_array()
@@ -533,34 +528,36 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
+        # transferring zNEO to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1,
                                          10_000_000 * 10 ** 8, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        # transferring zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
+        # transferring zGAS to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1,
                                          10_000_000 * 10 ** 8, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'approve',
+                                         amm_address, transferred_amount_zneo,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zGAS from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'approve',
+                                         amm_address, transferred_amount_zgas,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
         result = self.run_smart_contract(engine, path, 'add_liquidity',
-                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, aux_address,
-                                         signer_accounts=[aux_address])
+                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         import math
         liquidity = int(math.sqrt(transferred_amount_zneo * transferred_amount_zgas))
         self.assertEqual(3, len(result))
@@ -572,26 +569,27 @@ class TestTemplate(BoaTest):
         # won't work, because user did not enough zNEO tokens
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'swap_tokens',
-                                    swapped_zneo, 0, zneo_address, aux_address,
-                                    signer_accounts=[aux_address])
+                                    swapped_zneo, 0, zneo_address, self.OTHER_ACCOUNT_1,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1])
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zneo_address, amm_address, swapped_zneo,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'approve',
+                                         amm_address, swapped_zneo,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
         total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
         reserves_before = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
         # swapping zneo for zgas
         result = self.run_smart_contract(engine, path, 'swap_tokens',
-                                         swapped_zneo, 0, zneo_address, aux_address,
-                                         signer_accounts=[aux_address], rollback_on_fault=False)
+                                         swapped_zneo, 0, zneo_address, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1], rollback_on_fault=False)
         # there is a 0.3% fee when doing a swap
         swapped_zneo_with_fee = swapped_zneo * (1000 - 3)
         swapped_zgas = swapped_zneo_with_fee * reserves_before[1] // (reserves_before[0] * 1000 + swapped_zneo_with_fee)
@@ -613,7 +611,7 @@ class TestTemplate(BoaTest):
         address, amount_zneo_in, amount_zgas_in, amount_zneo_out, amount_zgas_out = transfer_events[0].arguments
         if isinstance(address, str):
             address = String(address).to_bytes()
-        self.assertEqual(aux_address, address)
+        self.assertEqual(self.OTHER_ACCOUNT_1, address)
         self.assertEqual(swapped_zneo, amount_zneo_in)
         self.assertEqual(0, amount_zgas_in)
         self.assertEqual(0, amount_zneo_out)
@@ -622,8 +620,8 @@ class TestTemplate(BoaTest):
         # data that will be compared with the previously saved data
         total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
         reserves_after = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
 
@@ -646,14 +644,10 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('amm.py')
         path_zneo = self.get_contract_path('wrapped_neo.py')
         path_zgas = self.get_contract_path('wrapped_gas.py')
-        path_aux = self.get_contract_path('examples/auxiliary_contracts', 'auxiliary_contract.py')
         engine = TestEngine()
 
         self.run_smart_contract(engine, path, 'symbol')
         amm_address = engine.executed_script_hash.to_array()
-
-        self.run_smart_contract(engine, path_aux, 'get_name')
-        aux_address = engine.executed_script_hash.to_array()
 
         self.run_smart_contract(engine, path_zneo, 'symbol')
         zneo_address = engine.executed_script_hash.to_array()
@@ -670,34 +664,36 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        # transferring zNEO to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
+        # transferring zNEO to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'transfer', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1,
                                          10_000_000 * 10 ** 8, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        # transferring zGAS to this auxiliary smart contract is needed, because the test engine has some limitations
-        result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, aux_address,
+        # transferring zGAS to OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'transfer', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1,
                                          10_000_000 * 10 ** 8, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zneo_address, amm_address, transferred_amount_zneo,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zneo, 'approve',
+                                         amm_address, transferred_amount_zneo,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zgas_address, amm_address, transferred_amount_zgas,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zGAS from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'approve',
+                                         amm_address, transferred_amount_zgas,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
         result = self.run_smart_contract(engine, path, 'add_liquidity',
-                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, aux_address,
-                                         signer_accounts=[aux_address])
+                                         transferred_amount_zneo, transferred_amount_zgas, 0, 0, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         import math
         liquidity = int(math.sqrt(transferred_amount_zneo * transferred_amount_zgas))
         self.assertEqual(3, len(result))
@@ -709,26 +705,27 @@ class TestTemplate(BoaTest):
         # won't work, because user did not enough zNEO tokens
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
             self.run_smart_contract(engine, path, 'swap_tokens',
-                                    swapped_zgas, 0, zgas_address, aux_address,
-                                    signer_accounts=[aux_address])
+                                    swapped_zgas, 0, zgas_address, self.OTHER_ACCOUNT_1,
+                                    signer_accounts=[self.OTHER_ACCOUNT_1])
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_address
-        result = self.run_smart_contract(engine, path_aux, 'calling_approve',
-                                         zgas_address, amm_address, swapped_zgas,
-                                         signer_accounts=[aux_address])
+        # approving the AMM contract, so that it will be able to transfer zNEO from OTHER_ACCOUNT_1
+        result = self.run_smart_contract(engine, path_zgas, 'approve',
+                                         amm_address, swapped_zgas,
+                                         calling_script_hash=self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
         total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
         reserves_before = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_before = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_before = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
         # swapping zgas for zneo
         result = self.run_smart_contract(engine, path, 'swap_tokens',
-                                         swapped_zgas, 0, zgas_address, aux_address,
-                                         signer_accounts=[aux_address])
+                                         swapped_zgas, 0, zgas_address, self.OTHER_ACCOUNT_1,
+                                         signer_accounts=[self.OTHER_ACCOUNT_1])
         # there is a 0.3% fee when doing a swap
         swapped_zgas_with_fee = swapped_zgas * (1000 - 3)
         swapped_zneo = swapped_zgas_with_fee * reserves_before[0] // (reserves_before[1] * 1000 + swapped_zgas_with_fee)
@@ -750,7 +747,7 @@ class TestTemplate(BoaTest):
         address, amount_zneo_in, amount_zgas_in, amount_zneo_out, amount_zgas_out = transfer_events[0].arguments
         if isinstance(address, str):
             address = String(address).to_bytes()
-        self.assertEqual(aux_address, address)
+        self.assertEqual(self.OTHER_ACCOUNT_1, address)
         self.assertEqual(0, amount_zneo_in)
         self.assertEqual(swapped_zgas, amount_zgas_in)
         self.assertEqual(swapped_zneo, amount_zneo_out)
@@ -759,8 +756,8 @@ class TestTemplate(BoaTest):
         # data that will be compared with the previously saved data
         total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
         reserves_after = self.run_smart_contract(engine, path, 'get_reserves')
-        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', aux_address)
-        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', aux_address)
+        balance_user_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', self.OTHER_ACCOUNT_1)
+        balance_user_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', self.OTHER_ACCOUNT_1)
         balance_amm_zneo_after = self.run_smart_contract(engine, path_zneo, 'balanceOf', amm_address)
         balance_amm_zgas_after = self.run_smart_contract(engine, path_zgas, 'balanceOf', amm_address)
 
