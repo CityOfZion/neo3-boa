@@ -9,9 +9,10 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 class StrByteStringMethod(StrMethod):
 
     def __init__(self):
+        from boa3.model.type.primitive.bytestringtype import ByteStringType
         from boa3.model.type.type import Type
         args: Dict[str, Variable] = {
-            'object': Variable(Type.union.build([Type.str, Type.bytes])),
+            'object': Variable(ByteStringType.build()),
         }
         object_default = ast.parse("'{0}'".format(Type.str.default_value)).body[0].value
 

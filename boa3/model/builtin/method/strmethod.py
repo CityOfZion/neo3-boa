@@ -42,11 +42,12 @@ class StrMethod(IBuiltinMethod):
 
         from boa3.model.type.type import Type
         from boa3.model.builtin.builtin import Builtin
-        if len(value) == 0 or (Type.str.is_type_of(value[0]) or Type.bytes.is_type_of(value[0])):
-            return Builtin.StrByteString
+        if len(value) > 0:
 
-        if Type.bool.is_type_of(value[0]):
-            return Builtin.StrBool
+            if Type.bool.is_type_of(value[0]):
+                return Builtin.StrBool
 
-        if Type.int.is_type_of(value[0]):
-            return Builtin.StrInt
+            if Type.int.is_type_of(value[0]):
+                return Builtin.StrInt
+
+        return Builtin.StrByteString
