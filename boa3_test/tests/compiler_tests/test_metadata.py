@@ -357,6 +357,35 @@ class TestMetadata(BoaTest):
         self.assertIn({"contract": "0x3846a4aa420d9831044396dd3a56011514cd10e3", "methods": ["get_object"]}, manifest['permissions'])
         self.assertIn({"contract": "0333b24ee50a488caa5deec7e021ff515f57b7993b93b45d7df901e23ee3004916", "methods": "*"}, manifest['permissions'])
 
+        engine = TestEngine()
+        # verify using NeoManifestStruct
+        nef, manifest = self.get_bytes_output(path)
+        self.run_smart_contract(engine, path, 'Main')
+        call_hash = engine.executed_script_hash.to_array()
+        path = path.replace('.py', '.nef')
+
+        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
+        engine = TestEngine()
+        engine.add_contract(path)
+
+        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        result_permissions = result[4][5]
+
+        # casting the addresses to bytes values
+        manifest_struct_permissions = []
+        for item in manifest_struct[5]:
+            contract = item[0]
+
+            from boa3.neo3.core.types import UInt160
+            if isinstance(contract, UInt160):
+                contract = contract.to_array()
+            manifest_struct_permissions.append([contract, item[1]])
+
+        # compare result from GetContract and NeoManifestStruct
+        self.assertEqual(manifest_struct_permissions, result_permissions)
+
     def test_metadata_info_permissions_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoPermissionsMismatchedType.py')
         output, manifest = self.compile_and_save(path)
