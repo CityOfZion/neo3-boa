@@ -3,6 +3,7 @@ from typing import List, Tuple
 from boa3.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.model.operation.operator import Operator
 from boa3.model.type.type import IType, Type
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -63,12 +64,12 @@ class Modulo(BinaryOperation):
             jmp_place_holder
         ]
         num_jmp_code = get_bytes_count(if_negative)
-        mod[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, num_jmp_code, True)
+        mod[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, num_jmp_code, True)
 
         else_negative = [
             (Opcode.NIP, b'')
         ]
         num_jmp_code = get_bytes_count(else_negative)
-        if_negative[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        if_negative[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
 
         return mod + if_negative + else_negative

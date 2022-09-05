@@ -5,6 +5,7 @@ from boa3.model import set_internal_call
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -47,7 +48,7 @@ class GetNotificationsMethod(InteropMethod):
         ]
 
         from boa3.compiler.codegenerator import get_bytes_count
-        jmp_to_convert = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(arg_is_not_null), True)
+        jmp_to_convert = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(arg_is_not_null), True)
         verify_arg_is_null[-1] = jmp_to_convert
 
         return (

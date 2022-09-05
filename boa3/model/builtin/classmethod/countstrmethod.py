@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple
 from boa3.model import set_internal_call
 from boa3.model.builtin.classmethod.countmethod import CountMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -50,7 +51,7 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(end_null)
-        jmp_str_end_null_statement = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+        jmp_str_end_null_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
         verify_end_null[-1] = jmp_str_end_null_statement
 
         verify_end_neg = [      # verifies if end is < 0
@@ -75,7 +76,7 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(end_still_neg)
-        jmp_end_still_neg_statement = Opcode.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
+        jmp_end_still_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
         end_neg[-1] = jmp_end_still_neg_statement
 
         skip_end_gt_size = [
@@ -83,7 +84,7 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(end_still_neg + end_neg + skip_end_gt_size)
-        jmp_end_neg_statement = Opcode.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
+        jmp_end_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
         verify_end_neg[-1] = jmp_end_neg_statement
 
         verify_end_gt_size = [  # verifies if end >= len(self)
@@ -102,17 +103,17 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(end_gt_size)
-        jmp_end_gt_size_statement = Opcode.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
+        jmp_end_gt_size_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
         verify_end_gt_size[-1] = jmp_end_gt_size_statement
 
         num_jmp_code = get_bytes_count(end_gt_size + verify_end_gt_size)
-        jmp_whole_end_gt_size_statement = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        jmp_whole_end_gt_size_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
         skip_end_gt_size[-1] = jmp_whole_end_gt_size_statement
 
         num_jmp_code = get_bytes_count(
             end_gt_size + verify_end_gt_size + skip_end_gt_size + end_still_neg + end_neg + verify_end_neg
         )
-        jmp_whole_end_gt_size_statement = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        jmp_whole_end_gt_size_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
         end_null[-1] = jmp_whole_end_gt_size_statement
 
         verify_end = (
@@ -153,7 +154,7 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(start_still_neg)
-        jmp_str_start_still_neg_statement = Opcode.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
+        jmp_str_start_still_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
         start_neg[-1] = jmp_str_start_still_neg_statement
 
         correct_start_position = [  # put start on the correct position
@@ -161,7 +162,7 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(correct_start_position + start_still_neg + start_neg)
-        jmp_str_start_neg_statement = Opcode.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
+        jmp_str_start_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
         verify_start_neg[-1] = jmp_str_start_neg_statement
 
         verify_start = (
@@ -213,7 +214,7 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(count_plusplus)
-        jmp_count_plusplus_statement = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+        jmp_count_plusplus_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
         count_substring[-1] = jmp_count_plusplus_statement
 
         go_back_to_while = [    # go back to while verification
@@ -224,11 +225,11 @@ class CountStrMethod(CountMethod):
         ]
 
         num_jmp_code = -get_bytes_count(go_back_to_while + count_plusplus + count_substring + verify_while)
-        jmp_back_to_while_statement = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code)
+        jmp_back_to_while_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
         go_back_to_while.append(jmp_back_to_while_statement)
 
         num_jmp_code = get_bytes_count(go_back_to_while + count_plusplus + count_substring)
-        jmp_to_clean_stack_statement = Opcode.get_jump_and_data(Opcode.JMPGT, num_jmp_code, True)
+        jmp_to_clean_stack_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, num_jmp_code, True)
         verify_while[-1] = jmp_to_clean_stack_statement
 
         clean_stack = [         # remove auxiliary values

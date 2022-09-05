@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple
 from boa3.model.builtin.method.listmethod import ListMethod
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -93,28 +94,28 @@ class ListGenericMethod(ListMethod):
             ]
 
             num_jmp_code = get_bytes_count(invalid_value)
-            jmp_to_end_from_mapping = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+            jmp_to_end_from_mapping = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
             pre_packing_mapping.append(jmp_to_end_from_mapping)
 
             num_jmp_code = get_bytes_count(pre_packing_mapping)
-            jmp_prepare_mapping = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+            jmp_prepare_mapping = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
             verify_is_mapping.append(jmp_prepare_mapping)
 
             num_jmp_code = get_bytes_count(invalid_value + pre_packing_mapping + verify_is_mapping)
-            jmp_to_end_from_sequence = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+            jmp_to_end_from_sequence = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
             pre_packing_sequence.append(jmp_to_end_from_sequence)
 
             num_jmp_code = get_bytes_count(pre_packing_sequence)
-            jmp_prepare_sequence = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+            jmp_prepare_sequence = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
             verify_is_sequence.append(jmp_prepare_sequence)
 
             num_jmp_code = get_bytes_count(invalid_value + pre_packing_mapping + verify_is_mapping +
                                            pre_packing_sequence + verify_is_sequence)
-            jmp_to_end_from_bytes_string = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+            jmp_to_end_from_bytes_string = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
             pre_packing_bytes_string.append(jmp_to_end_from_bytes_string)
 
             num_jmp_code = get_bytes_count(pre_packing_bytes_string)
-            jmp_prepare_bytes_string = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+            jmp_prepare_bytes_string = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
             verify_is_bytes_string.append(jmp_prepare_bytes_string)
 
             self._prepare_for_packing = (

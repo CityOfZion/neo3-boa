@@ -33,6 +33,7 @@ from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
 from boa3.neo.vm.TryCode import TryCode
 from boa3.neo.vm.VMCode import VMCode
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo, OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
@@ -906,20 +907,20 @@ class CodeGenerator:
 
         :param value: the value to be converted
         """
-        opcode = Opcode.get_literal_push(value)
+        opcode = OpcodeHelper.get_literal_push(value)
         if opcode is not None:
             op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
             self._stack_append(Type.int)
         else:
-            opcode = Opcode.get_literal_push(-value)
+            opcode = OpcodeHelper.get_literal_push(-value)
             if opcode is not None:
                 op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
                 self.__insert1(op_info)
                 self._stack_append(Type.int)
                 self.convert_operation(UnaryOp.Negative)
             else:
-                opcode, data = Opcode.get_push_and_data(value)
+                opcode, data = OpcodeHelper.get_push_and_data(value)
                 op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
                 self.__insert1(op_info, data)
                 self._stack_append(Type.int)
@@ -1566,7 +1567,7 @@ class CodeGenerator:
         """
         index, local, is_arg = self._get_variable_info(var_id)
         if index >= 0:
-            opcode = Opcode.get_load(index, local, is_arg)
+            opcode = OpcodeHelper.get_load(index, local, is_arg)
             op_info = OpcodeInfo.get_info(opcode)
 
             if op_info.data_len > 0:
@@ -1628,7 +1629,7 @@ class CodeGenerator:
             return
 
         if index >= 0:
-            opcode = Opcode.get_store(index, local, is_arg)
+            opcode = OpcodeHelper.get_store(index, local, is_arg)
             if opcode is not None:
                 op_info = OpcodeInfo.get_info(opcode)
 
@@ -1721,8 +1722,8 @@ class CodeGenerator:
         if function.stores_on_slot and 0 < len(function.args) <= len(args_address):
             address = args_address[-len(function.args)]
             load_instr = VMCodeMapping.instance().code_map[address]
-            if load_instr.opcode.is_load_slot:
-                store: Opcode = Opcode.get_store_from_load(load_instr.opcode)
+            if OpcodeHelper.is_load_slot(load_instr.opcode):
+                store: Opcode = OpcodeHelper.get_store_from_load(load_instr.opcode)
                 store_opcode = OpcodeInfo.get_info(store)
                 store_data = load_instr.data
 
@@ -1960,7 +1961,7 @@ class CodeGenerator:
         """
         vm_code = VMCode(op_info, data)
 
-        if op_info.opcode.has_target():
+        if OpcodeHelper.has_target(op_info.opcode):
             data = vm_code.raw_data
             relative_address: int = Integer.from_bytes(data, signed=True)
             actual_address = VMCodeMapping.instance().bytecode_size + relative_address
@@ -1990,7 +1991,7 @@ class CodeGenerator:
         :param target_address: target instruction expected address
         :return:
         """
-        if vmcode.opcode.has_target():
+        if OpcodeHelper.has_target(vmcode.opcode):
             if target_address == VMCodeMapping.instance().bytecode_size:
                 target_address = None
             else:
@@ -2008,7 +2009,7 @@ class CodeGenerator:
         :param vmcode: instruction with incomplete parameter
         :return:
         """
-        if vmcode.opcode.has_target():
+        if OpcodeHelper.has_target(vmcode.opcode):
             for target_address, opcodes in self._missing_target.copy().items():
                 if vmcode in opcodes:
                     opcodes.remove(vmcode)
@@ -2099,7 +2100,7 @@ class CodeGenerator:
         # n = 1 -> duplicates stack top item
         # n = 0 -> value varies in runtime
         if pos >= 0:
-            opcode: Opcode = Opcode.get_dup(pos)
+            opcode: Opcode = OpcodeHelper.get_dup(pos)
             if opcode is Opcode.PICK and pos > 0:
                 self.convert_literal(pos - 1)
                 self._stack_pop()
@@ -2122,7 +2123,7 @@ class CodeGenerator:
         """
         # n = 1 -> removes stack top item
         if pos > 0:
-            opcode: Opcode = Opcode.get_drop(pos)
+            opcode: Opcode = OpcodeHelper.get_drop(pos)
             if opcode is Opcode.XDROP:
                 self.convert_literal(pos - 1)
                 self._stack_pop()
@@ -2134,7 +2135,7 @@ class CodeGenerator:
     def swap_reverse_stack_items(self, no_items: int = 0):
         # n = 0 -> value varies in runtime
         if 0 <= no_items != 1:
-            opcode: Opcode = Opcode.get_reverse(no_items)
+            opcode: Opcode = OpcodeHelper.get_reverse(no_items)
             if opcode is Opcode.REVERSEN and no_items > 0:
                 self.convert_literal(no_items)
             op_info = OpcodeInfo.get_info(opcode)

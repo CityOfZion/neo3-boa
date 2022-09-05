@@ -19,6 +19,7 @@ from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 from boa3.model.type.math import Math
+from boa3.model.type.neo.opcodetype import OpcodeType
 from boa3.model.type.primitive.bytestringtype import ByteStringType
 
 
@@ -26,6 +27,7 @@ class BoaPackage(str, Enum):
     Contract = 'contract'
     Interop = 'interop'
     Type = 'type'
+    VM = 'vm'
 
 
 class Builtin:
@@ -175,6 +177,7 @@ class Builtin:
     UInt256 = UInt256Type.build()
     ECPoint = ECPointType.build()
     NeoAccountState = NeoAccountStateType.build()
+    Opcode = OpcodeType.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -250,7 +253,9 @@ class Builtin:
                           ECPoint,
                           UInt160,
                           UInt256
-                          ]
+                          ],
+        BoaPackage.VM: [Opcode
+                        ]
     }
 
     _internal_methods = [InnerDeployMethod.instance()

@@ -10,6 +10,7 @@ from boa3.model.type.primitive.bytestype import BytesType
 from boa3.model.type.primitive.inttype import IntType
 from boa3.model.type.primitive.strtype import StrType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -105,9 +106,9 @@ class IntToBytesMethod(ToBytesMethod):
             (Opcode.PUSHDATA1, Integer(len(number_zero_to_bytes)).to_byte_array() + number_zero_to_bytes),
         ]
 
-        number_is_not_zero[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(number_is_zero))
+        number_is_not_zero[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(number_is_zero))
 
-        verify_number_is_zero[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(number_is_not_zero))
+        verify_number_is_zero[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(number_is_not_zero))
 
         return (
             verify_number_is_zero +

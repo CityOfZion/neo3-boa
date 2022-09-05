@@ -6,6 +6,7 @@ from boa3.model.expression import IExpression
 from boa3.model.type.collection.sequence.ecpointtype import ECPointType
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -60,14 +61,14 @@ class ECPointMethod(IBuiltinMethod):
             (Opcode.DUP, b''),
             (Opcode.SIZE, b''),
             (Opcode.PUSHINT8, Integer(ECPOINT_SIZE).to_byte_array(signed=True)),
-            Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(throw_if_invalid), jump_through=True),
+            OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(throw_if_invalid), jump_through=True),
         ]
 
         return [
             (Opcode.CONVERT, StackItemType.ByteString),  # convert to ECPoint
             (Opcode.DUP, b''),
             (Opcode.ISNULL, b''),
-            Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(check_bytestr_size), jump_through=True),
+            OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(check_bytestr_size), jump_through=True),
         ] + check_bytestr_size + throw_if_invalid
 
     @property

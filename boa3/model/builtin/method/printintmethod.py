@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from boa3.model.builtin.method.printmethod import PrintMethod
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -19,7 +20,7 @@ class PrintIntMethod(PrintMethod):
             itoa_method = Interop.Itoa
             self._print_value_opcodes = (
                 [
-                    Opcode.get_push_and_data(1),
+                    OpcodeHelper.get_push_and_data(1),
                     (Opcode.PACK, b'')
                 ] +
                 itoa_method.opcode.copy()

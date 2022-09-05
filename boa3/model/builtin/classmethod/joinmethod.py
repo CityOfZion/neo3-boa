@@ -5,6 +5,7 @@ from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -102,11 +103,11 @@ class JoinMethod(IBuiltinMethod):
             # jump back to verify_index
         ]
 
-        jmp_back_to_verify = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_index +
+        jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_index +
                                                                                    concat_strings))
         concat_strings.append(jmp_back_to_verify)
 
-        jmp_concatenation = Opcode.get_jump_and_data(Opcode.JMPLE, get_bytes_count(initialize_string +
+        jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(initialize_string +
                                                                                    verify_index +
                                                                                    concat_strings), True)
         verify_empty_string[-1] = jmp_concatenation
@@ -115,7 +116,7 @@ class JoinMethod(IBuiltinMethod):
             (Opcode.PUSHDATA1, b'\x00')
         ]
 
-        jmp_concatenation = Opcode.get_jump_and_data(Opcode.JMPGE, get_bytes_count(concat_strings +
+        jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(concat_strings +
                                                                                    add_empty_string), True)
         verify_index[-1] = jmp_concatenation
 

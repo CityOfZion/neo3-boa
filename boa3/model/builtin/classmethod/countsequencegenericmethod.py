@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from boa3.model.builtin.classmethod.countsequencemethod import CountSequenceMethod
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -98,40 +99,40 @@ class CountSequenceGenericMethod(CountSequenceMethod):
             ]
 
             num_jmp_code = inc_statement_bytes + get_equals_statement_bytes
-            sequence_compare_sequences_end_is_not_equal[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+            sequence_compare_sequences_end_is_not_equal[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
 
             num_jmp_code = get_bytes_count(sequence_compare_sequences_end_is_not_equal) + get_equals_statement_bytes
-            sequence_compare_sequences_end_is_equal[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+            sequence_compare_sequences_end_is_equal[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
 
             num_jmp_code = -get_bytes_count(sequence_compare_sequences_verify_end + sequence_compare_sequences_start)
-            sequence_compare_sequences_verify_end.append(Opcode.get_jump_and_data(Opcode.JMPGT, num_jmp_code))
+            sequence_compare_sequences_verify_end.append(OpcodeHelper.get_jump_and_data(Opcode.JMPGT, num_jmp_code))
 
             num_jmp_code = get_bytes_count(sequence_compare_sequences_verify_end +
                                            sequence_compare_sequences_end_is_equal)
-            sequence_compare_sequences_start[-1] = Opcode.get_jump_and_data(Opcode.JMPNE, num_jmp_code, True)
+            sequence_compare_sequences_start[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPNE, num_jmp_code, True)
 
             num_jmp_code = get_bytes_count(
                 sequence_compare_sequences_initialize + sequence_compare_sequences_start +
                 sequence_compare_sequences_verify_end + sequence_compare_sequences_end_is_equal +
                 sequence_compare_sequences_end_is_not_equal) + get_equals_statement_bytes + inc_statement_bytes
-            sequence_remove_aux_and_verify_next[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+            sequence_remove_aux_and_verify_next[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
 
             num_jmp_code = get_bytes_count(sequence_remove_aux_and_verify_next)
-            sequence_verify_item_value_is_same_size[-1] = Opcode.get_jump_and_data(Opcode.JMPEQ, num_jmp_code, True)
+            sequence_verify_item_value_is_same_size[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, num_jmp_code, True)
 
             num_jmp_code = get_bytes_count(
                 sequence_verify_item_value_is_same_size + sequence_remove_aux_and_verify_next +
                 sequence_compare_sequences_initialize + sequence_compare_sequences_start +
                 sequence_compare_sequences_verify_end + sequence_compare_sequences_end_is_equal +
                 sequence_compare_sequences_end_is_not_equal) + get_equals_statement_bytes + inc_statement_bytes
-            sequence_verify_item_is_sequence[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+            sequence_verify_item_is_sequence[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
 
             num_jmp_code = get_bytes_count(sequence_verify_item_is_sequence + sequence_verify_item_value_is_same_size +
                                            sequence_remove_aux_and_verify_next + sequence_compare_sequences_initialize +
                                            sequence_compare_sequences_start + sequence_compare_sequences_verify_end +
                                            sequence_compare_sequences_end_is_equal +
                                            sequence_compare_sequences_end_is_not_equal)
-            sequence_verify_value_is_sequence[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+            sequence_verify_value_is_sequence[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
 
             self._generic_verification_opcodes = (
                 sequence_verify_value_is_sequence +

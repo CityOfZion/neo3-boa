@@ -4,6 +4,7 @@ from boa3.constants import NEO_SCRIPT
 from boa3.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -26,7 +27,7 @@ class GetNeoScriptHashMethod(IBuiltinMethod):
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         value = NEO_SCRIPT
         return [
-            Opcode.get_pushdata_and_data(value)
+            OpcodeHelper.get_pushdata_and_data(value)
         ]
 
 

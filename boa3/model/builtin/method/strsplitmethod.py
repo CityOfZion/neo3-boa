@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 
 from boa3.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -76,15 +77,15 @@ class StrSplitMethod(StdLibMethod):
         ]
 
         num_jmp_code = -get_bytes_count(while_verify + concatenate_array)
-        jmp_back_to_while = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code)
+        jmp_back_to_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
         concatenate_array.append(jmp_back_to_while)
 
         num_jmp_code = get_bytes_count(while_verify + concatenate_array)
-        jmp_to_clean_from_verify_maxsplit = Opcode.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
+        jmp_to_clean_from_verify_maxsplit = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
         verify_maxsplit[-1] = jmp_to_clean_from_verify_maxsplit
 
         num_jmp_code = get_bytes_count(concatenate_array)
-        jmp_to_clean_from_while_verify = Opcode.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
+        jmp_to_clean_from_while_verify = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
         while_verify[-1] = jmp_to_clean_from_while_verify
 
         clean_stack = [

@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple
 
 from boa3.model.builtin.classmethod.copymethod import CopyMethod
 from boa3.model.type.itype import IType
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -49,10 +50,10 @@ class CopyDictMethod(CopyMethod):
             # jump back to verify_while_condition
         ]
 
-        jmp_back_to_verify = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(while_loop + verify_while_condition))
+        jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(while_loop + verify_while_condition))
         while_loop.append(jmp_back_to_verify)
 
-        jmp_while_loop = Opcode.get_jump_and_data(Opcode.JMPLT, get_bytes_count(while_loop))
+        jmp_while_loop = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(while_loop))
         verify_while_condition[-1] = jmp_while_loop
 
         clean_stack = [                 # remove all values from stack except the dict_copy

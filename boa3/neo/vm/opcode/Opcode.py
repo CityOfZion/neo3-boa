@@ -1,11 +1,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, Optional, Tuple, Union
-
-from boa3.constants import FOUR_BYTES_MAX_VALUE
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
 
 
 class Opcode(bytes, Enum):
@@ -34,93 +29,6 @@ class Opcode(bytes, Enum):
     PUSHDATA2 = b'\x0D'
     # The next four bytes contain the number of bytes to be pushed onto the stack.
     PUSHDATA4 = b'\x0E'
-
-    @staticmethod
-    def get_pushdata_and_data(bytestring: Union[str, bytes]) -> Tuple[Opcode, bytes]:
-        """
-        Gets the push opcode and data to the respective str ot bytes value
-
-        :param bytestring: value that will be pushed
-        :return: the respective opcode and its required data
-        :rtype: Tuple[Opcode, bytes]
-        """
-        if isinstance(bytestring, str):
-            bytestring = String(bytestring).to_bytes()
-
-        bytes_size = Integer(len(bytestring)).to_byte_array(min_length=1)
-        if len(bytes_size) == 1:
-            opcode = Opcode.PUSHDATA1
-        elif len(bytes_size) == 2:
-            opcode = Opcode.PUSHDATA2
-        else:
-            if len(bytes_size) > 4:
-                bytestring = bytestring[:FOUR_BYTES_MAX_VALUE]
-            bytes_size = Integer(len(bytestring)).to_byte_array(min_length=4)
-            opcode = Opcode.PUSHDATA4
-
-        data = bytes_size + bytestring
-        return opcode, data
-
-    @staticmethod
-    def get_pushdata_and_data_from_size(data_size: int) -> Tuple[Opcode, bytes]:
-        bytes_size = Integer(data_size).to_byte_array(min_length=1)
-        if len(bytes_size) == 1:
-            opcode = Opcode.PUSHDATA1
-        elif len(bytes_size) == 2:
-            opcode = Opcode.PUSHDATA2
-        else:
-            bytes_size = FOUR_BYTES_MAX_VALUE
-            opcode = Opcode.PUSHDATA4
-
-        return opcode, bytes_size
-
-    @staticmethod
-    def get_literal_push(integer: int) -> Optional[Opcode]:
-        """
-        Gets the push opcode to the respective integer
-
-        :param integer: value that will be pushed
-        :return: the respective opcode
-        :rtype: Opcode or None
-        """
-        if -1 <= integer <= 16:
-            opcode_value: int = Integer.from_bytes(Opcode.PUSH0) + integer
-            return Opcode(Integer(opcode_value).to_byte_array())
-        else:
-            return None
-
-    @staticmethod
-    def get_push_and_data(integer: int) -> Tuple[Opcode, bytes]:
-        """
-        Gets the push opcode and data to the respective integer
-
-        :param integer: value that will be pushed
-        :return: the respective opcode and its required data
-        :rtype: Tuple[Opcode, bytes]
-        """
-        opcode = Opcode.get_literal_push(integer)
-        if isinstance(opcode, Opcode):
-            return opcode, b''
-        else:
-            data = Integer(integer).to_byte_array(signed=True, min_length=1)
-            if len(data) == 1:
-                opcode = Opcode.PUSHINT8
-            elif len(data) == 2:
-                opcode = Opcode.PUSHINT16
-            elif len(data) <= 4:
-                data = Integer(integer).to_byte_array(signed=True, min_length=4)
-                opcode = Opcode.PUSHINT32
-            elif len(data) <= 8:
-                data = Integer(integer).to_byte_array(signed=True, min_length=8)
-                opcode = Opcode.PUSHINT64
-            elif len(data) <= 16:
-                data = Integer(integer).to_byte_array(signed=True, min_length=16)
-                opcode = Opcode.PUSHINT128
-            else:
-                data = data[:32]
-                opcode = Opcode.PUSHINT256
-
-            return opcode, data
 
     # The number -1 is pushed onto the stack.
     PUSHM1 = b'\x0F'
@@ -162,47 +70,6 @@ class Opcode(bytes, Enum):
     # endregion
 
     # region Flow control
-
-    def has_larger_opcode(self) -> bool:
-        return self in self.__larger_opcode
-
-    def get_larger_opcode(self):
-        """
-        Gets the large opcode to the standard opcode
-
-        :return: the respective opcode
-        :rtype: Opcode or None
-        """
-        opcode_map = self.__larger_opcode
-        if self in opcode_map:
-            return opcode_map[self]
-        elif self in opcode_map.values():
-            return self
-        else:
-            return None
-
-    @property
-    def __larger_opcode(self) -> Dict[Opcode, Opcode]:
-        """
-        A map of each opcode with its larger equivalent
-
-        :return: a dictionary that maps each opcode to its larger equivalent.
-        """
-        opcodes = {
-            self.JMP: self.JMP_L,
-            self.JMPIF: self.JMPIF_L,
-            self.JMPIFNOT: self.JMPIFNOT_L,
-            self.JMPEQ: self.JMPEQ_L,
-            self.JMPNE: self.JMPNE_L,
-            self.JMPGT: self.JMPGT_L,
-            self.JMPGE: self.JMPGE_L,
-            self.JMPLT: self.JMPLT_L,
-            self.JMPLE: self.JMPLE_L,
-            self.CALL: self.CALL_L,
-            self.TRY: self.TRY_L,
-            self.ENDTRY: self.ENDTRY_L
-        }
-        return opcodes
 
     # The NOP operation does nothing. It is intended to fill in space if opcodes are patched.
     NOP = b'\x21'
@@ -263,44 +130,6 @@ class Opcode(bytes, Enum):
     # target instruction is represented as a 4-bytes signed offset from the beginning of the current instruction.
     JMPLE_L = b'\x33'
 
-    @property
-    def is_jump(self) -> bool:
-        return self.JMP <= self <= self.JMPLE_L
-
-    @staticmethod
-    def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) -> Tuple[Opcode, bytes]:
-        """
-        Gets the jump opcode and data to the respective integer
-
-        :param opcode: which jump will be used
-        :param integer: number of bytes that'll be jumped
-        :param jump_through: whether it should go over the instructions or not
-        :return: the respective opcode and its required data
-        :rtype: Tuple[Opcode, bytes]
-        """
-        if not opcode.is_jump:
-            opcode = Opcode.JMP
-
-        from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
-        opcode_info = OpcodeInfo.get_info(opcode)
-        arg_size = opcode_info.data_len
-        jmp_arg = Integer(arg_size + integer + jump_through).to_byte_array(min_length=arg_size) if integer > 0 \
-            else Integer(integer).to_byte_array(min_length=arg_size)
-
-        if len(jmp_arg) > opcode_info.max_data_len and opcode.has_larger_opcode():
-            opcode = opcode.get_larger_opcode()
-            opcode_info = OpcodeInfo.get_info(opcode)
-            arg_size = opcode_info.data_len
-            jmp_arg = Integer(arg_size + integer + jump_through).to_byte_array(min_length=arg_size) if integer > 0 \
-                else Integer(integer).to_byte_array(min_length=arg_size)
-            jmp_opcode = opcode
-        else:
-            jmp_opcode = opcode
-
-        jmp_arg = jmp_arg[-arg_size:]
-
-        return jmp_opcode, jmp_arg
-
     # Calls the function at the target address which is represented as a 1-byte signed offset from the beginning of
     # the current instruction.
     CALL = b'\x34'
@@ -339,9 +168,6 @@ class Opcode(bytes, Enum):
     # Calls to an interop service.
     SYSCALL = b'\x41'
 
-    def has_target(self) -> bool:
-        return self.JMP <= self <= self.CALL_L or self.TRY <= self < self.ENDFINALLY
-
     # endregion
 
     # region Stack
@@ -357,52 +183,12 @@ class Opcode(bytes, Enum):
     # Clear the stack
     CLEAR = b'\x49'
 
-    @staticmethod
-    def get_drop(position: int) -> Optional[Opcode]:
-        """
-        Gets the opcode to remove the item n back in the stack
-
-        :param position: index of the variable
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        duplicate_item = {
-            1: Opcode.DROP,
-            2: Opcode.NIP
-        }
-
-        if position > 0:
-            if position in duplicate_item:
-                return duplicate_item[position]
-            else:
-                return Opcode.XDROP
-
     # Duplicates the top stack item.
     DUP = b'\x4A'
     # Copies the second-to-top stack item to the top.
     OVER = b'\x4B'
     # The item n back in the stack is copied to the top.
     PICK = b'\x4D'
-
-    @staticmethod
-    def get_dup(position: int) -> Optional[Opcode]:
-        """
-        Gets the opcode to duplicate the item n back in the stack
-
-        :param position: index of the variable
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        duplicate_item = {
-            1: Opcode.DUP,
-            2: Opcode.OVER
-        }
-
-        if position >= 0:
-            if position in duplicate_item:
-                return duplicate_item[position]
-            else:
-                return Opcode.PICK
 
     # The item at the top of the stack is copied and inserted before the second-to-top item.
     TUCK = b'\x4E'
@@ -419,27 +205,6 @@ class Opcode(bytes, Enum):
     # Pop the number N on the stack, and reverse the order of the top N items on the stack.
     REVERSEN = b'\x55'
 
-    @staticmethod
-    def get_reverse(no_stack_items: int) -> Optional[Opcode]:
-        """
-        Gets the opcode to reverse n items on the stack
-
-        :param no_stack_items: index of the variable
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        reverse_stack = {
-            2: Opcode.SWAP,
-            3: Opcode.REVERSE3,
-            4: Opcode.REVERSE4
-        }
-
-        if no_stack_items >= 0:
-            if no_stack_items in reverse_stack:
-                return reverse_stack[no_stack_items]
-            else:
-                return Opcode.REVERSEN
-
     # endregion
 
     # region Slot
@@ -448,86 +213,6 @@ class Opcode(bytes, Enum):
     INITSSLOT = b'\x56'
     # Initialize the argument slot and the local variable list for the current execution context.
     INITSLOT = b'\x57'
-
-    @staticmethod
-    def get_store(index: int, local: bool, is_arg: bool = False) -> Opcode:
-        """
-        Gets the opcode to store the variable
-
-        :param index: index of the variable
-        :param local: identifies if the variable is local or global
-        :param is_arg: identifies if the variable is an argument of a function. False if local is False.
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        if not local:
-            is_arg = False
-
-        if 0 <= index <= 6:
-            if is_arg:
-                opcode_value: int = Integer.from_bytes(Opcode.STARG0) + index
-            elif local:
-                opcode_value: int = Integer.from_bytes(Opcode.STLOC0) + index
-            else:
-                opcode_value: int = Integer.from_bytes(Opcode.STSFLD0) + index
-            return Opcode(Integer(opcode_value).to_byte_array())
-        else:
-            if is_arg:
-                return Opcode.STARG
-            elif local:
-                return Opcode.STLOC
-            else:
-                return Opcode.STSFLD
-
-    @staticmethod
-    def get_load(index: int, local: bool, is_arg: bool = False) -> Opcode:
-        """
-        Gets the opcode to load the variable
-
-        :param index: index of the variable
-        :param local: identifies if the variable is local or global
-        :param is_arg: identifies if the variable is an argument of a function. False if local is False.
-        :return: the respective opcode
-        :rtype: Opcode
-        """
-        if not local:
-            is_arg = False
-
-        if 0 <= index <= 6:
-            if is_arg:
-                opcode_value: int = Integer.from_bytes(Opcode.LDARG0) + index
-            elif local:
-                opcode_value: int = Integer.from_bytes(Opcode.LDLOC0) + index
-            else:
-                opcode_value: int = Integer.from_bytes(Opcode.LDSFLD0) + index
-            return Opcode(Integer(opcode_value).to_byte_array())
-        else:
-            if is_arg:
-                return Opcode.LDARG
-            elif local:
-                return Opcode.LDLOC
-            else:
-                return Opcode.LDSFLD
-
-    @property
-    def is_load_slot(self) -> bool:
-        return (self.LDSFLD0 <= self <= self.LDSFLD
-                or self.LDLOC0 <= self <= self.LDLOC
-                or self.LDARG0 <= self <= self.LDARG)
-
-    @staticmethod
-    def get_store_from_load(load_opcode) -> Optional[Opcode]:
-        """
-        Gets the store slot opcode equivalent to the given load slot opcode.
-
-        :param load_opcode: load opcode
-        :type load_opcode: Opcode
-        :return: equivalent store opcode if the given opcode is a load slot. Otherwise, returns None
-        :rtype: Opcode or None
-        """
-        if load_opcode.is_load_slot:
-            opcode_value: int = Integer.from_bytes(load_opcode) + 8
-            return Opcode(Integer(opcode_value).to_byte_array())
 
     # Loads the static field at index 0 onto the evaluation stack.
     LDSFLD0 = b'\x58'
