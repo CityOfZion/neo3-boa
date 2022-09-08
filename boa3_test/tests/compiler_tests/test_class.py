@@ -502,3 +502,10 @@ class TestClass(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'mix')
         self.assertEqual(0, result)
+
+    def test_user_class_with_deploy_method(self):
+        path = self.get_contract_path('UserClassWithDeployMethod.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_obj')
+        self.assertEqual([1, 2], result)
