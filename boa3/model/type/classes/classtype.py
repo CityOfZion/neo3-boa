@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple
 from boa3.compiler.codegenerator import get_bytes_count
 from boa3.model.symbol import ISymbol
 from boa3.model.type.itype import IType
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
 from boa3.neo.vm.type.Integer import Integer
@@ -191,7 +192,7 @@ class ClassType(IType, ABC):
             final_instructions += (validate_type + final_jmp)
 
             bytes_size = get_bytes_count(final_instructions)
-            jmp_opcode, jmp_arg = Opcode.get_jump_and_data(Opcode.JMPIFNOT, bytes_size + 1)
+            jmp_opcode, jmp_arg = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, bytes_size + 1)
 
             final_instructions = (is_type_opcodes +
                                   [(jmp_opcode, jmp_arg)] +
@@ -210,7 +211,7 @@ class ClassType(IType, ABC):
         variables_count_is_equal = [
             (Opcode.DUP, b''),
             (Opcode.SIZE, b''),
-            Opcode.get_push_and_data(len(self._all_variables)),
+            OpcodeHelper.get_push_and_data(len(self._all_variables)),
             (Opcode.NUMEQUAL, b''),
         ]
 
@@ -223,9 +224,9 @@ class ClassType(IType, ABC):
 
                 # validate primitive types only to avoid recursive code
                 if self.stack_item == StackItemType.Map:
-                    get = Opcode.get_pushdata_and_data(var_id)
+                    get = OpcodeHelper.get_pushdata_and_data(var_id)
                 else:
-                    get = Opcode.get_push_and_data(var_index)
+                    get = OpcodeHelper.get_push_and_data(var_index)
 
                 new_opcodes = [
                     (Opcode.DUP, b''),
@@ -236,14 +237,14 @@ class ClassType(IType, ABC):
                 if len(variables_type_validations) == 0:
                     new_opcodes.append((Opcode.NIP, b''))
                 elif total_size > 0:
-                    new_opcodes.append((Opcode.get_jump_and_data(Opcode.JMPIFNOT, total_size + 1)))
+                    new_opcodes.append((OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, total_size + 1)))
 
                 variables_type_validations = new_opcodes + variables_type_validations
                 total_size += get_bytes_count(new_opcodes)
 
         if total_size > 0:
             if len(variables_type_validations) > 0:
-                final_opcode = (Opcode.get_jump_and_data(Opcode.JMPIFNOT, total_size + 1))
+                final_opcode = (OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, total_size + 1))
             else:
                 final_opcode = (Opcode.NIP, b'')
             variables_count_is_equal.append(final_opcode)

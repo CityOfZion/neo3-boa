@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -79,11 +80,11 @@ class LowerMethod(IBuiltinMethod):
             (Opcode.CONVERT, StackItemType.ByteString),
         ]
 
-        jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
+        jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
                                                                                        swap_upper_to_lower_case), True)
         get_substring_middle[-1] = jmp_to_join_substring
 
-        jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_upper_to_lower_case), True)
+        jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_upper_to_lower_case), True)
         verify_greater_than_z[-1] = jmp_to_join_substring
 
         get_substring_middle.extend(verify_greater_than_z)
@@ -110,7 +111,7 @@ class LowerMethod(IBuiltinMethod):
             # jump back to verify,
         ]
 
-        jmp_to_verify_while = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
+        jmp_to_verify_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
                                                                                     get_substring_left +
                                                                                     get_substring_middle +
                                                                                     get_substring_right +
@@ -129,7 +130,7 @@ class LowerMethod(IBuiltinMethod):
             join_substrings
         )
 
-        jmp_to_clean_stack = Opcode.get_jump_and_data(Opcode.JMPLE, get_bytes_count(while_body), True)
+        jmp_to_clean_stack = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(while_body), True)
         verify_while[-1] = jmp_to_clean_stack
 
         return (

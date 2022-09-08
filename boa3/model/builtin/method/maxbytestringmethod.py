@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from boa3.compiler.codegenerator import get_bytes_count
 from boa3.model.builtin.method.maxmethod import MaxMethod
 from boa3.model.type.itype import IType
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -22,7 +23,7 @@ class MaxByteStringMethod(MaxMethod):
             (Opcode.OVER, b''),
             (Opcode.OVER, b''),
             (Opcode.EQUAL, b''),  # if str1 == str2:
-            Opcode.get_jump_and_data(Opcode.JMPIFNOT, 4),
+            OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, 4),
             (Opcode.PUSH1, b''),
             jmp_place_holder,     # go to final test
         ]
@@ -38,12 +39,12 @@ class MaxByteStringMethod(MaxMethod):
 
         while_body_before_compare = [
             (Opcode.PUSH3, b''),  # value1 = str1[index]
-            (Opcode.get_dup(3), b''),
+            (OpcodeHelper.get_dup(3), b''),
             (Opcode.OVER, b''),
             (Opcode.PICKITEM, b''),
             (Opcode.OVER, b''),
             (Opcode.PUSH4, b''),  # value2 = str2[index]
-            (Opcode.get_dup(4), b''),
+            (OpcodeHelper.get_dup(4), b''),
             (Opcode.SWAP, b''),
             (Opcode.PICKITEM, b''),
         ]
@@ -65,7 +66,7 @@ class MaxByteStringMethod(MaxMethod):
         while_full_body = while_body_before_compare + while_body_compare + while_body_after_compare
         while_bytes_size = get_bytes_count(while_full_body)
         get_limit_index.append(
-            Opcode.get_jump_and_data(Opcode.JMP, while_bytes_size, True)
+            OpcodeHelper.get_jump_and_data(Opcode.JMP, while_bytes_size, True)
         )
 
         while_condition = [
@@ -73,7 +74,7 @@ class MaxByteStringMethod(MaxMethod):
             (Opcode.OVER, b'')
         ]
         while_condition_bytes_size = get_bytes_count(while_condition)
-        while_condition.append(Opcode.get_jump_and_data(Opcode.JMPGT, -while_bytes_size - while_condition_bytes_size))
+        while_condition.append(OpcodeHelper.get_jump_and_data(Opcode.JMPGT, -while_bytes_size - while_condition_bytes_size))
 
         while_else_body = [
             (Opcode.DROP, b''),
@@ -86,14 +87,14 @@ class MaxByteStringMethod(MaxMethod):
         ]
 
         everything_after_while_check = while_body_after_compare + while_condition + while_else_body
-        jmp_while_check = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(everything_after_while_check), True)
+        jmp_while_check = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(everything_after_while_check), True)
         while_body_compare[-1] = jmp_while_check
 
         everything_after_equal_check = (get_limit_index +
                                         while_body_before_compare +
                                         while_body_compare +
                                         everything_after_while_check)
-        jmp_test_equal = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(everything_after_equal_check), True)
+        jmp_test_equal = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(everything_after_equal_check), True)
         test_if_are_equal[-1] = jmp_test_equal
 
         final_test = [

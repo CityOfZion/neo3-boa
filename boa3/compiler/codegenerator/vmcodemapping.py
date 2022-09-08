@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Union
 
 from boa3.neo.vm.VMCode import VMCode
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 
 
@@ -58,7 +59,7 @@ class VMCodeMapping:
         """
         target_maps = {}
         for address, code in self.code_map.items():
-            if code.opcode.has_target() and code.target is not None and code.target is not code:
+            if OpcodeHelper.has_target(code.opcode) and code.target is not None and code.target is not code:
                 target = self.get_start_address(code.target)
                 if target not in target_maps:
                     target_maps[target] = [address]
@@ -194,7 +195,7 @@ class VMCodeMapping:
     def _update_targets(self):
         from boa3.neo.vm.type.Integer import Integer
         for address, code in self.code_map.items():
-            if code.opcode.has_target() and code.target is None:
+            if OpcodeHelper.has_target(code.opcode) and code.target is None:
                 relative = Integer.from_bytes(code.data)
                 absolute = address + relative
                 if absolute in self.code_map:
@@ -205,7 +206,7 @@ class VMCodeMapping:
         Checks if each instruction data fits in its opcode maximum size and updates the opcode from those that don't
         """
         # gets a list with all instructions which its opcode has a larger equivalent, ordered by its address
-        instr_with_small_codes = [code for code in self._codes.values() if code.opcode.has_larger_opcode()]
+        instr_with_small_codes = [code for code in self._codes.values() if OpcodeHelper.has_larger_opcode(code.opcode)]
         instr_with_small_codes.sort(key=lambda code: self.get_start_address(code), reverse=True)
 
         from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
@@ -223,12 +224,12 @@ class VMCodeMapping:
             for code in instr_with_small_codes.copy():  # it's a copy because the list may change during the iteration
                 if len(code.raw_data) > code.info.max_data_len:
                     # gets the shortest opcode equivalent that fits the instruction data
-                    info = OpcodeInfo.get_info(code.opcode.get_larger_opcode())
-                    while len(code.raw_data) > info.max_data_len and info.opcode.has_larger_opcode():
-                        info = OpcodeInfo.get_info(code.opcode.get_larger_opcode())
+                    info = OpcodeInfo.get_info(OpcodeHelper.get_larger_opcode(code.opcode))
+                    while len(code.raw_data) > info.max_data_len and OpcodeHelper.has_larger_opcode(info.opcode):
+                        info = OpcodeInfo.get_info(OpcodeHelper.get_larger_opcode(code.opcode))
 
                     self.update_vm_code(code, info)
-                    if info.opcode == info.opcode.get_larger_opcode():
+                    if info.opcode == OpcodeHelper.get_larger_opcode(info.opcode):
                         # if it's the largest equivalent, it won't be updated anymore
                         instr_with_small_codes.remove(code)
             current_size = self.bytecode_size
@@ -312,7 +313,7 @@ class VMCodeMapping:
         Checks if each instruction that requires a target has one set and remove those that don't
         """
         for code in list(self._codes.values()).copy():
-            if code.opcode.has_target() and (code.target is None or code.target is code):
+            if OpcodeHelper.has_target(code.opcode) and (code.target is None or code.target is code):
                 self._validate_targets(code)
                 index = self.get_start_address(code)
                 self._codes.pop(index)

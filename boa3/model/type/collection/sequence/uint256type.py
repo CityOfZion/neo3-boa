@@ -5,6 +5,7 @@ from boa3.model.method import Method
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.itype import IType
 from boa3.model.type.primitive.bytestype import BytesType
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.AbiType import AbiType
 
@@ -48,7 +49,7 @@ class UInt256Type(BytesType, ClassType):
         return super(PythonClass, self).is_instance_opcodes()
 
     def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
-        push_int_opcode, size_data = Opcode.get_push_and_data(constants.SIZE_OF_INT256)
+        push_int_opcode, size_data = OpcodeHelper.get_push_and_data(constants.SIZE_OF_INT256)
 
         return [
             (Opcode.SIZE, b''),  # return len(value) == 32

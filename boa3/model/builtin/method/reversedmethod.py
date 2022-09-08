@@ -3,6 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -89,10 +90,10 @@ class ReversedMethod(IBuiltinMethod):
             # returns to beginning of the while to verify if it index < limit
         ]
 
-        jmp_back_to_while_statement = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(while_body + while_statement))
+        jmp_back_to_while_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(while_body + while_statement))
         while_body.append(jmp_back_to_while_statement)
 
-        jmp_to_break_body = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(while_body), True)
+        jmp_to_break_body = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(while_body), True)
         while_statement[-1] = jmp_to_break_body
 
         break_opcode = [        # remove auxiliary values from stack after leaving `while`
@@ -107,12 +108,12 @@ class ReversedMethod(IBuiltinMethod):
             (Opcode.PACK, b''),
         ]
 
-        jmp_else_body = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(else_body), True)
+        jmp_else_body = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(else_body), True)
         break_opcode.append(jmp_else_body)
 
         if_true_body = if_true_body + while_statement + while_body + break_opcode
 
-        jmp_if_true_body = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(if_true_body))
+        jmp_if_true_body = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(if_true_body))
         if_statement.append(jmp_if_true_body)
 
         reverse_array = [   # reverse the array

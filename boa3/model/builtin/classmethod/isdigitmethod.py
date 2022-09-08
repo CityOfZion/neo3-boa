@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -56,7 +57,7 @@ class IsDigitMethod(IBuiltinMethod):
             jmp_place_holder,               # jump to return_bool if index >= len(string)
         ]
 
-        jmp_verify_while = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(verify_while), True)
+        jmp_verify_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(verify_while), True)
         skip_first_verify_while[-1] = jmp_verify_while
 
         while_verify_lt_0 = [               # verifies if ord(string[index]) is < ord('0')
@@ -84,13 +85,13 @@ class IsDigitMethod(IBuiltinMethod):
             # jump back to verify_while
         ]
 
-        jmp_back_to_verify = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
+        jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
                                                                                    while_verify_lt_0 +
                                                                                    while_verify_gt_9 +
                                                                                    while_go_to_verify))
         while_go_to_verify.append(jmp_back_to_verify)
 
-        jmp_out_of_while = Opcode.get_jump_and_data(Opcode.JMPLT, get_bytes_count(while_verify_gt_9 +
+        jmp_out_of_while = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(while_verify_gt_9 +
                                                                                   while_go_to_verify), True)
         while_verify_lt_0[-1] = jmp_out_of_while
 
@@ -98,7 +99,7 @@ class IsDigitMethod(IBuiltinMethod):
             (Opcode.DROP, b'')
         ]
 
-        jmp_to_change_to_false = Opcode.get_jump_and_data(Opcode.JMPGT, get_bytes_count(while_go_to_verify +
+        jmp_to_change_to_false = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(while_go_to_verify +
                                                                                         drop_char), True)
         while_verify_gt_9[-1] = jmp_to_change_to_false
 
@@ -107,7 +108,7 @@ class IsDigitMethod(IBuiltinMethod):
             (Opcode.PUSH0, b''),
         ]
 
-        jmp_to_return = Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(skip_first_verify_while +
+        jmp_to_return = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(skip_first_verify_while +
                                                                                verify_while +
                                                                                while_verify_lt_0 +
                                                                                while_verify_gt_9 +
@@ -115,7 +116,7 @@ class IsDigitMethod(IBuiltinMethod):
                                                                                drop_char), True)
         verify_empty_string[-1] = jmp_to_return
 
-        jmp_to_return = Opcode.get_jump_and_data(Opcode.JMPLT, get_bytes_count(while_verify_lt_0 +
+        jmp_to_return = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(while_verify_lt_0 +
                                                                                while_verify_gt_9 +
                                                                                while_go_to_verify +
                                                                                drop_char +

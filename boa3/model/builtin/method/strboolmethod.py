@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple
 
 from boa3.model.builtin.method.strmethod import StrMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -38,10 +39,10 @@ class StrBoolMethod(StrMethod):
             (Opcode.PUSHDATA1, Integer(len(true)).to_byte_array(signed=True, min_length=1) + true),
         ]
 
-        jmp_put_true = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(put_true))
+        jmp_put_true = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(put_true))
         put_false[-1] = jmp_put_true
 
-        jmp_put_false = Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(put_false))
+        jmp_put_false = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(put_false))
         check_is_true[-1] = jmp_put_false
 
         return (

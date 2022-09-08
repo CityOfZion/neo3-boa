@@ -49,6 +49,7 @@ class CompilerBuiltin:
         self._set_events(Interop.interop_events())
         self._generate_builtin_package('boa3.builtin.nativecontract', NativeContract.package_symbols)
         self._generate_builtin_package('boa3.builtin.type', Builtin.package_symbols('type'))
+        self._generate_builtin_package('boa3.builtin.vm', Builtin.package_symbols('vm'))
 
     @classmethod
     def reset(cls):

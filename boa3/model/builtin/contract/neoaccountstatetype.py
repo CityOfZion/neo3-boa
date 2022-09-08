@@ -8,6 +8,7 @@ from boa3.model.method import Method
 from boa3.model.property import Property
 from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -85,7 +86,7 @@ class NeoAccountStateMethod(IBuiltinMethod):
     def opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.collection.sequence.ecpointtype import ECPointType
         return [
-            Opcode.get_pushdata_and_data(ECPointType.build().default_value),  # vote_to
+            OpcodeHelper.get_pushdata_and_data(ECPointType.build().default_value),  # vote_to
             (Opcode.PUSH0, b''),  # height
             (Opcode.PUSH0, b''),  # balance
             (Opcode.PUSH3, b''),

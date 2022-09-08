@@ -6,6 +6,7 @@ from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.collection.sequence.tupletype import TupleType
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -76,10 +77,10 @@ class MinMethod(IBuiltinMethod):
             (Opcode.PUSH2, b'')
         ]
 
-        jmp_n_parameters_eq_2 = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(if_n_parameters_eq_2), True)
+        jmp_n_parameters_eq_2 = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(if_n_parameters_eq_2), True)
         if_n_parameters_gt_2[-1] = jmp_n_parameters_eq_2
 
-        jmp_n_parameters_gt_2 = Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(if_n_parameters_gt_2))
+        jmp_n_parameters_gt_2 = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(if_n_parameters_gt_2))
         verify_number_of_parameters[-1] = jmp_n_parameters_gt_2
 
         repack_array = [  # pack all the arguments in the array
