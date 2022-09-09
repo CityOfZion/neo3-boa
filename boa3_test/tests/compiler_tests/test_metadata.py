@@ -478,3 +478,30 @@ class TestMetadata(BoaTest):
         self.assertIn('groups', manifest)
         self.assertIsInstance(manifest['groups'], list)
         self.assertEqual(len(manifest['groups']), 0)
+
+    def test_metadata_info_source(self):
+        path = self.get_contract_path('MetadataInfoSource.py')
+        self.compile_and_save(path)
+
+        nef_path = path.replace('.py', '.nef')
+        with open(nef_path, mode='rb') as nef:
+            from boa3.neo.contracts.neffile import NefFile
+            generated_source = NefFile.deserialize(nef.read()).source
+
+        self.assertEqual(generated_source, 'https://github.com/CityOfZion/neo3-boa')
+
+    def test_metadata_info_source_default(self):
+        path = self.get_contract_path('MetadataInfoSourceDefault.py')
+        self.compile_and_save(path)
+
+        nef_path = path.replace('.py', '.nef')
+        with open(nef_path, mode='rb') as nef:
+            from boa3.neo.contracts.neffile import NefFile
+            generated_source = NefFile.deserialize(nef.read()).source
+
+        self.assertEqual(generated_source, '')
+
+    def test_metadata_info_source_mismatched_type(self):
+        path = self.get_contract_path('MetadataInfoSourceMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+

@@ -16,14 +16,16 @@ class NefFile:
     """
 
     def __init__(self, script_bytes: bytes,
-                 method_tokens: List[MethodToken] = None):
+                 method_tokens: List[MethodToken] = None,
+                 source: str = None):
         """
         :param script_bytes: the script of the smart contract
         """
         compiler: str = f"neo3-boa by COZ-{Version.from_string(boa3.__version__)}"
         self._nef = NEF(compiler_name=compiler,
                         script=script_bytes,
-                        tokens=[] if method_tokens is None else method_tokens)
+                        tokens=[] if method_tokens is None else method_tokens,
+                        source=source)
 
     @property
     def script(self) -> bytes:
@@ -33,6 +35,10 @@ class NefFile:
     def script_hash(self) -> bytes:
         from boa3.neo.cryptography import hash160
         return hash160(self.script)
+
+    @property
+    def source(self) -> str:
+        return self._nef.source
 
     def serialize(self) -> bytes:
         """
