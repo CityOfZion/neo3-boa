@@ -2029,7 +2029,7 @@ class CodeGenerator:
 
         if None in self._missing_target:
             for code in self._missing_target[None]:
-                if code.info.opcode.is_jump and code.target is None:
+                if OpcodeHelper.is_jump(code.info.opcode) and code.target is None:
                     target = Integer.from_bytes(code.raw_data) + VMCodeMapping.instance().get_start_address(code) + 1
                     if target >= current_bytecode_size:
                         return True
