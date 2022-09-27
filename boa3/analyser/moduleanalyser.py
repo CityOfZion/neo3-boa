@@ -92,6 +92,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
+        self._manifest_symbols: Dict[Tuple[str, int], Callable] = {}
         self.imported_nodes: List[ast.AST] = []
 
         if self.filename:
@@ -222,6 +223,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_error(CompilerError.DuplicatedIdentifier(callable.origin.lineno,
                                                                callable.origin.col_offset,
                                                                callable_id))
+
+        if callable.is_public is not None:
+            # check if the external name + argument number is unique
+            manifest_name = callable.external_name if callable.external_name is not None else callable_id
+            manifest_id = (manifest_name, len(callable.args))
+
+            if manifest_id in self._manifest_symbols:
+                self._log_error(CompilerError.DuplicatedManifestIdentifier(callable.origin.lineno,
+                                                                           callable.origin.col_offset,
+                                                                           manifest_name, len(callable.args)
+                                                                           ))
+            else:
+                self._manifest_symbols[manifest_id] = callable
 
     def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
         """
