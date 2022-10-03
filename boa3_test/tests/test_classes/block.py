@@ -45,11 +45,16 @@ class Block:
             return self._hash.to_array()
 
     def to_json(self) -> Dict[str, Any]:
-        return {
+        json_block = {
             'index': self._index,
             'timestamp': self._timestamp,
             'transactions': [tx.to_json() for tx in self._transactions]
         }
+
+        if self._hash is not None:
+            json_block['hash'] = str(self._hash)
+
+        return json_block
 
     @classmethod
     def from_json(cls, json: Dict[str, Any]) -> Block:

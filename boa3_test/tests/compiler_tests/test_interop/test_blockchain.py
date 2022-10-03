@@ -88,15 +88,15 @@ class TestBlockchainInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', block_hash)
         self.assertIsNone(result)
 
-        from boa3.neo import from_hex_str
-        # TODO: using genesis block hash for testing, change when TestEngine returns blocks hashes
-        block_hash = from_hex_str('0x1f4d1defa46faa5e7b9b8d3f79a06bec777d7c26c4aa5f6f5899a291daa87c15')
+        current_block = engine.current_block
+        self.assertIsNotNone(current_block.hash)
 
-        result = self.run_smart_contract(engine, path, 'Main', block_hash)
+        result = self.run_smart_contract(engine, path, 'Main', current_block.hash)
         self.assertIsInstance(result, list)
         self.assertEqual(10, len(result))
-        self.assertEqual(block_hash, result[0])
-        self.assertEqual(0, result[6])  # genesis block's index is zero
+        self.assertEqual(current_block.hash, result[0])
+        self.assertEqual(current_block.timestamp, result[4])
+        self.assertEqual(current_block.index, result[6])
 
     def test_get_block_mismatched_types(self):
         path = self.get_contract_path('GetBlockMismatchedTypes.py')
