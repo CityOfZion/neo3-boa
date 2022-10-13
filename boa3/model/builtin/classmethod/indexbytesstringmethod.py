@@ -55,7 +55,7 @@ class IndexBytesStringMethod(IndexMethod):
         return 'substring not found' if isinstance(self._arg_self.type, StrType) else 'subsequence of bytes not found'
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.StackItem import StackItemType
 

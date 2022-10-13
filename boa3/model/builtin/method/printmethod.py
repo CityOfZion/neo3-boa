@@ -21,7 +21,6 @@ class PrintMethod(IBuiltinMethod):
         vararg = ('values', Variable(arg_value))
         super().__init__(identifier, args, return_type=Type.none, vararg=vararg)
 
-        self._opcode = None
         self._print_value_opcodes = None
 
     @property
@@ -43,10 +42,7 @@ class PrintMethod(IBuiltinMethod):
         return isinstance(params[0].type, SequenceType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        if self._opcode is not None:
-            return self._opcode
-
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.model.builtin.interop.interop import Interop
         from boa3.neo.vm.type.Integer import Integer
@@ -73,18 +69,17 @@ class PrintMethod(IBuiltinMethod):
         )
         complete_loop.append((Opcode.JMPNE, Integer(-get_bytes_count(complete_loop)).to_byte_array(signed=True)))
 
-        self._opcode = (check_if_arg_is_empty +
-                        [
-                            (Opcode.JMPEQ, Integer(get_bytes_count(copy_list_and_reverse)
-                                                   + 1  # the size of the JMPEQ arg
-                                                   + get_bytes_count(complete_loop)).to_byte_array(signed=True)),
-                        ] +
-                        copy_list_and_reverse +
-                        complete_loop +
-                        [
-                            (Opcode.DROP, b'')
-                        ])
-        return self._opcode
+        return (check_if_arg_is_empty +
+                [
+                    (Opcode.JMPEQ, Integer(get_bytes_count(copy_list_and_reverse)
+                                           + 1  # the size of the JMPEQ arg
+                                           + get_bytes_count(complete_loop)).to_byte_array(signed=True)),
+                ] +
+                copy_list_and_reverse +
+                complete_loop +
+                [
+                    (Opcode.DROP, b'')
+                ])
 
     @property
     def print_value_opcodes(self) -> List[Tuple[Opcode, bytes]]:

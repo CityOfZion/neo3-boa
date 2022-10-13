@@ -64,7 +64,7 @@ class RangeMethod(IBuiltinMethod):
         return all(param is Type.int for param in params_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.String import String
         range_error_msg = String('range() arg 3 must not be zero').to_bytes()

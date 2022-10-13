@@ -23,7 +23,7 @@ class GetNep17ScriptHashMethod(IBuiltinMethod):
         return None
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
 
         value = self.script_hash

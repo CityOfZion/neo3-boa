@@ -29,10 +29,10 @@ class GetIteratorValue(InteropMethod):
         return self.args['self']
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.neo.vm.type.Integer import Integer
-        return super().opcode + [
+        return super()._opcode + [
             (Opcode.DUP, b''),
             (Opcode.ISTYPE, StackItemType.Struct),
             (Opcode.JMPIFNOT, Integer(3).to_byte_array()),

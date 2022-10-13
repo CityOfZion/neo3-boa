@@ -40,7 +40,7 @@ class ScriptHashMethod(IBuiltinMethod):
         return self.args['self'].type is not Type.any
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.constants import SIZE_OF_INT160
         from boa3.model.builtin.interop.stdlib.base58decodemethod import Base58DecodeMethod
         from boa3.model.type.type import Type

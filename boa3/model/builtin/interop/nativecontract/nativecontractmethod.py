@@ -16,7 +16,7 @@ class NativeContractMethod(InteropMethod):
         self.native_contract_script_hash_method = native_contract_script_hash_method
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
         from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer

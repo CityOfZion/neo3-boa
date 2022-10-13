@@ -20,7 +20,7 @@ class UnVoteMethod(NeoContractMethod):
         super().__init__(identifier, native_identifier, args, return_type=Type.bool)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return (
             [
                 (Opcode.UNPACK, b''),
@@ -30,5 +30,5 @@ class UnVoteMethod(NeoContractMethod):
                 (Opcode.PUSH2, b''),
                 (Opcode.PACK, b''),
             ] +
-            super().opcode
+            super()._opcode
         )

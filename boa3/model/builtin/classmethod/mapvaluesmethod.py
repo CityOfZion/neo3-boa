@@ -31,7 +31,7 @@ class MapValuesMethod(IBuiltinMethod):
         return self._arg_self.type.is_type_of(params[0].type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.VALUES, b'')]
 
     def push_self_first(self) -> bool:

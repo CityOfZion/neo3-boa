@@ -112,7 +112,7 @@ class StorageMapMethod(IBuiltinMethod):
         return len(params) == 0
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [
             (Opcode.PUSH2, b''),
             (Opcode.PACK, b'')

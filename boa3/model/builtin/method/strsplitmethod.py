@@ -27,7 +27,7 @@ class StrSplitMethod(StdLibMethod):
                          return_type=Type.list.build_collection(Type.str))
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.model.type.type import Type
 
@@ -43,7 +43,7 @@ class StrSplitMethod(StdLibMethod):
             (Opcode.PACK, b'')
         ]
 
-        neo_strsplit_method = super().opcode
+        neo_strsplit_method = super()._opcode
 
         verify_maxsplit = [     # verifies if there is a maxsplit
             (Opcode.OVER, b''),

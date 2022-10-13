@@ -35,7 +35,7 @@ class ListMethod(IBuiltinMethod):
         return self._identifier
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
 
         pack_values = [(Opcode.PACK, b'')]
 

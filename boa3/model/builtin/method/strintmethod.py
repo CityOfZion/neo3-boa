@@ -17,7 +17,7 @@ class StrIntMethod(StrMethod):
         super().__init__(args)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return (
             [
                 (Opcode.PUSH10, b''),

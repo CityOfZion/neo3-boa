@@ -27,7 +27,7 @@ class GetNotificationsMethod(InteropMethod):
                          return_type=Type.list.build([notification_type]))
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.model.type.type import Type
         jmp_place_holder = (Opcode.JMP, b'\x01')
@@ -54,5 +54,5 @@ class GetNotificationsMethod(InteropMethod):
         return (
             verify_arg_is_null +
             arg_is_not_null +
-            super().opcode
+            super()._opcode
         )

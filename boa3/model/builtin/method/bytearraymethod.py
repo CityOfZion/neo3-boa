@@ -67,7 +67,7 @@ class ByteArrayMethod(IBuiltinMethod):
                      ))
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.model.type.type import Type
 

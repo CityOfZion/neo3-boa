@@ -24,7 +24,7 @@ class PopDictDefaultMethod(PopMethod):
         super().__init__(args, return_type=arg_value.value_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.compiler.codegenerator import get_bytes_count
 

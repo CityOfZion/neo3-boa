@@ -19,5 +19,5 @@ class StrByteStringMethod(StrMethod):
         super().__init__(args, [object_default])
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return []

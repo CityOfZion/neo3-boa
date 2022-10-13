@@ -25,7 +25,7 @@ class PowMethod(IBuiltinMethod):
         arguments[0], arguments[1] = arguments[1], arguments[0]
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.POW, b'')]
 
     @property

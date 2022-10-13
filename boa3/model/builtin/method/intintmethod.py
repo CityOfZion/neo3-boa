@@ -20,6 +20,6 @@ class IntIntMethod(IntMethod):
         super().__init__(args, [value_default])
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         # returns the same int
         return []

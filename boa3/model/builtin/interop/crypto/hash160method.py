@@ -15,7 +15,7 @@ class Hash160Method(CryptoLibMethod):
         super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
         return (Interop.Sha256.opcode
                 + [(Opcode.PUSH1, b''),

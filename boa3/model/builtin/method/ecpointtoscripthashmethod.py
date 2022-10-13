@@ -17,7 +17,7 @@ class ECPointToScriptHashMethod(ScriptHashMethod):
         super().__init__(data_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3 import constants
         from boa3.model.builtin.interop.crypto.checksigmethod import CheckSigMethod
         from boa3.model.builtin.interop.crypto.sha256method import Sha256Method

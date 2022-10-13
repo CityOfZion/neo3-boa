@@ -83,7 +83,7 @@ class NeoAccountStateMethod(IBuiltinMethod):
         return len(params) == 0
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.collection.sequence.ecpointtype import ECPointType
         return [
             OpcodeHelper.get_pushdata_and_data(ECPointType.build().default_value),  # vote_to

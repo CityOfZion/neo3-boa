@@ -46,7 +46,7 @@ class ExtendMethod(IBuiltinMethod):
         return True
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.StackItem import StackItemType
         return [
