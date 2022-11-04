@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Union
 
+from boa3.compiler.codegenerator.methodtokencollection import MethodTokenCollection
+from boa3.compiler.compileroutput import CompilerOutput
+from boa3.model.builtin.method import IBuiltinMethod
 from boa3.neo.vm.VMCode import VMCode
 from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
+from boa3.neo3.contracts.contracttypes import CallFlags
 
 
 class VMCodeMapping:
@@ -24,6 +28,7 @@ class VMCodeMapping:
 
     def __init__(self):
         self._codes: Dict[int, VMCode] = {}
+        self._method_tokens: MethodTokenCollection = MethodTokenCollection()
 
     @classmethod
     def reset(cls):
@@ -32,6 +37,16 @@ class VMCodeMapping:
         """
         if cls._instance is not None:
             cls._instance._codes.clear()
+            cls._instance._method_tokens.clear()
+
+    def add_method_token(self, method: IBuiltinMethod, call_flag: CallFlags) -> Optional[int]:
+        """
+        Creates a new method token if the method call another contract and return its id.
+        Otherwise, returns None
+        """
+        if hasattr(method, 'contract_script_hash'):
+            return self._method_tokens.append(method, call_flag)
+        return None
 
     @property
     def codes(self) -> List[VMCode]:
@@ -82,6 +97,13 @@ class VMCodeMapping:
             if code.data is not None:
                 bytecode += code.data
         return bytes(bytecode)
+
+    def result(self) -> CompilerOutput:
+        """
+        Gets the complete output of the translated code
+        """
+        bytecode = self.bytecode()
+        return CompilerOutput(bytecode, self._method_tokens.to_list())
 
     @property
     def bytecode_size(self) -> int:

@@ -26,9 +26,14 @@ class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
 
         :return: the opcode and its data if exists. None otherwise.
         """
+        # don't need to recalculate for every time this property is called
         if self._generated_opcode is None:
             self._generated_opcode = self._opcode
         return self._generated_opcode
+
+    def reset(self):
+        # reset the opcodes to ensure the correct output when calling consecutive compilations
+        self._generated_opcode = None
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:

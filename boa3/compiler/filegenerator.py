@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
+from boa3.compiler.compileroutput import CompilerOutput
 from boa3.model.event import Event
 from boa3.model.imports.importsymbol import BuiltinImport, Import
 from boa3.model.method import Method
@@ -19,7 +20,7 @@ class FileGenerator:
     This class is responsible for generating the files.
     """
 
-    def __init__(self, bytecode: bytes, analyser: Analyser, entry_file: str):
+    def __init__(self, compiler_result: CompilerOutput, analyser: Analyser, entry_file: str):
         import os
         self._metadata = analyser.metadata
         self._symbols: Dict[str, ISymbol] = analyser.symbol_table.copy()
@@ -28,7 +29,9 @@ class FileGenerator:
         self._entry_file_full_path = analyser.path.replace(os.sep, constants.PATH_SEPARATOR)
 
         self._files: List[str] = [self._entry_file_full_path]
-        self._nef: NefFile = NefFile(bytecode, source=self._metadata.source)
+        self._nef: NefFile = NefFile(compiler_result.bytecode,
+                                     source=self._metadata.source,
+                                     method_tokens=compiler_result.method_tokens)
 
         self.__all_imports: List[Import] = None
         self._all_methods: Dict[str, Method] = None

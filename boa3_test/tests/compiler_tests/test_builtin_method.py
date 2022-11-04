@@ -471,7 +471,7 @@ class TestBuiltinMethod(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(script_hash, result)
 
-    def test_script_hahs_too_many_parameters(self):
+    def test_script_hash_too_many_parameters(self):
         path = self.get_contract_path('ScriptHashTooManyParameters.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 

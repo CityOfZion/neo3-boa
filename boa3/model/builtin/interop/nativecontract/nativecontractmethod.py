@@ -1,19 +1,28 @@
 import ast
 from typing import Dict, List, Tuple
 
+from boa3.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
 from boa3.model.builtin.interop.interopmethod import InteropMethod
-from boa3.model.builtin.method import IBuiltinMethod
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
 
 
 class NativeContractMethod(InteropMethod):
 
-    def __init__(self, native_contract_script_hash_method: IBuiltinMethod, identifier: str, syscall: str,
+    def __init__(self, native_contract_script_hash_method: ContractGetHashMethod, identifier: str, syscall: str,
                  args: Dict[str, Variable] = None, defaults: List[ast.AST] = None, return_type: IType = None):
         super().__init__(identifier, syscall, args, defaults, return_type)
-        self.native_contract_script_hash_method = native_contract_script_hash_method
+        self.script_hash_method = native_contract_script_hash_method
+        from boa3.neo3.contracts.contracttypes import CallFlags
+        self._call_flags_default = CallFlags.ALL
+        self._pack_arguments = None  # defined during compilation
+        self.external_name = self._sys_call
+
+    @property
+    def contract_script_hash(self) -> bytes:
+        return self.script_hash_method.script_hash
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
@@ -21,30 +30,56 @@ class NativeContractMethod(InteropMethod):
         from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.String import String
-        from boa3.neo3.contracts import CallFlags
 
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        flags_opcode = [
-            (Opcode.PUSHDATA1, Integer(len(call_flags)).to_byte_array() + call_flags)
-        ]
-        method = String(self._sys_call).to_bytes()
-        method_opcode = [
-            (Opcode.PUSHDATA1, Integer(len(method)).to_byte_array(min_length=1) + method)
-        ]
-        drop_if_void_opcode = [
-            (Opcode.DROP, b'')
-        ] if self.return_type is Type.none else []
+        call_flag = self._call_flags_default
 
-        return (flags_opcode
-                + method_opcode
-                + self.native_contract_script_hash_method.opcode
-                + Interop.CallContract.opcode
-                + drop_if_void_opcode
-                )
+        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        self_method_token_id = VMCodeMapping.instance().add_method_token(self, call_flag)
+
+        if isinstance(self_method_token_id, int) and self_method_token_id >= 0:
+            if self._pack_arguments is None:
+                self._pack_arguments = False
+            call_opcode = Opcode.CALLT
+            opcode_info = OpcodeInfo.get_info(call_opcode)
+            arg_size = opcode_info.data_len
+
+            call_opcodes = [
+                (call_opcode, Integer(self_method_token_id).to_byte_array(min_length=arg_size))
+            ]
+        else:
+            if self._pack_arguments is None:
+                self._pack_arguments = True
+            call_flags = Integer(call_flag).to_byte_array(signed=True, min_length=1)
+            flags_opcode = [
+                (Opcode.PUSHDATA1, Integer(len(call_flags)).to_byte_array() + call_flags)
+            ]
+
+            method = String(self._sys_call).to_bytes()
+            method_opcode = [
+                (Opcode.PUSHDATA1, Integer(len(method)).to_byte_array(min_length=1) + method)
+            ]
+            
+            drop_if_void_opcode = [
+                (Opcode.DROP, b'')
+            ] if self.return_type is Type.none else []
+
+            call_opcodes = (flags_opcode
+                            + method_opcode
+                            + self.script_hash_method.opcode
+                            + Interop.CallContract.opcode
+                            + drop_if_void_opcode
+                            )
+
+        return call_opcodes
 
     @property
     def pack_arguments(self) -> bool:
-        return True
+        if self._pack_arguments is None:
+            from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+            self_method_token_id = VMCodeMapping.instance().add_method_token(self, self._call_flags_default)
+
+            self._pack_arguments = not isinstance(self_method_token_id, int) or self_method_token_id < 0
+        return self._pack_arguments
 
     @property
     def method_name(self) -> str:

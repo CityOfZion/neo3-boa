@@ -351,11 +351,11 @@ class BinaryReader(object):
         Args:
             obj_type: the object class to deserialize into.
         """
-        obj = obj_type()
+        obj = obj_type._serializable_init()
         obj.deserialize(self)
         return obj
 
-    def read_serializable_list(self, obj_type: Type[ISerializable_T], max: int = None) -> List[ISerializable_T]:
+    def read_serializable_list(self, obj_type: Type[ISerializable_T], max: int = None) -> list[ISerializable_T]:
         """
         Read and deserialize a list of objects of `obj_type` from the stream.
 
@@ -373,10 +373,13 @@ class BinaryReader(object):
         if max and count > max:
             count = max
 
-        for _ in range(count):
-            obj = obj_type()
-            obj.deserialize(self)
-            obj_array.append(obj)
+        try:
+            for _ in range(count):
+                obj = obj_type._serializable_init()
+                obj.deserialize(self)
+                obj_array.append(obj)
+        except Exception as e:
+            raise ValueError(f"Insufficient data - {str(e)}")
         return obj_array
 
     def close(self) -> None:
@@ -431,6 +434,15 @@ class BinaryWriter(object):
         # Seek back to the current position
         io.seek(cur_pos)
         return full_size
+
+    @classmethod
+    def _serializable_init(cls):
+        """
+        If the interface inheritor has mandatory arguments, override this functin and provide dummy values. These values
+        will be overwritten by the read_serializable, read_serializable_list and deserialize_from_bytes methods that
+        rely on this function for class instantiation.
+        """
+        return cls()
 
     def write_bytes(self, value: bytes) -> int:
         """
