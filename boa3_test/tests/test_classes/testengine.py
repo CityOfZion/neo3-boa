@@ -190,16 +190,16 @@ class TestEngine:
             return self._contract_paths.pop(index)
 
     def _get_contract_id(self, contract_path: str) -> int:
-        if path.isfile(contract_path):
+        contracts = self.contracts
+        if path.isfile(contract_path) and contract_path not in contracts:
             with open(contract_path, mode='rb') as nef:
                 from boa3.neo.contracts.neffile import NefFile
                 script_hash = NefFile.deserialize(nef.read()).script_hash
 
             return self._storage.get_contract_id(script_hash)
 
-        contracts = self.contracts
         if contract_path in contracts:
-            return contracts.index(contract_path)
+            return contracts.index(contract_path) + 1
         return -1
 
     @property

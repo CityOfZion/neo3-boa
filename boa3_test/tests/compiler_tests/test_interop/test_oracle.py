@@ -135,18 +135,7 @@ class TestNativeContracts(BoaTest):
         method = String(OracleGetPriceMethod().method_name).to_bytes()
 
         expected_output = (
-            Opcode.NEWARRAY0
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array(min_length=1, signed=True)
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array(min_length=1, signed=True)
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(ORACLE_SCRIPT)).to_byte_array(min_length=1, signed=True)
-            + ORACLE_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 

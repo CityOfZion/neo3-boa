@@ -10,5 +10,7 @@ from boa3.model.variable import Variable
 class NeoContractMethod(NativeContractMethod):
 
     def __init__(self, identifier: str, native_identifier: str, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None):
-        super().__init__(NeoContract.getter, identifier, native_identifier, args, defaults, return_type)
+                 defaults: List[ast.AST] = None, return_type: IType = None,
+                 internal_call_args: int = None):
+        super().__init__(NeoContract.getter, identifier, native_identifier,
+                         args, defaults, return_type, internal_call_args)

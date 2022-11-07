@@ -12,9 +12,18 @@ from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
 class NativeContractMethod(InteropMethod):
 
     def __init__(self, native_contract_script_hash_method: ContractGetHashMethod, identifier: str, syscall: str,
-                 args: Dict[str, Variable] = None, defaults: List[ast.AST] = None, return_type: IType = None):
+                 args: Dict[str, Variable] = None, defaults: List[ast.AST] = None, return_type: IType = None,
+                 internal_call_args: int = None):
         super().__init__(identifier, syscall, args, defaults, return_type)
         self.script_hash_method = native_contract_script_hash_method
+        min_no_args = len(self.args_without_default)
+        if not isinstance(internal_call_args, int):
+            internal_call_args = len(self.args)
+        elif len(self.args_without_default) > internal_call_args:
+            internal_call_args = min_no_args
+
+        self.internal_call_args = internal_call_args
+
         from boa3.neo3.contracts.contracttypes import CallFlags
         self._call_flags_default = CallFlags.ALL
         self._pack_arguments = None  # defined during compilation
@@ -24,6 +33,11 @@ class NativeContractMethod(InteropMethod):
     def contract_script_hash(self) -> bytes:
         return self.script_hash_method.script_hash
 
+    def reset(self):
+        # reset the object state to ensure the correct output when calling consecutive compilations
+        super().reset()
+        self._pack_arguments = None
+
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
@@ -32,13 +46,13 @@ class NativeContractMethod(InteropMethod):
         from boa3.neo.vm.type.String import String
 
         call_flag = self._call_flags_default
+        if self._pack_arguments is None:
+            self._pack_arguments = False
 
         from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
         self_method_token_id = VMCodeMapping.instance().add_method_token(self, call_flag)
 
         if isinstance(self_method_token_id, int) and self_method_token_id >= 0:
-            if self._pack_arguments is None:
-                self._pack_arguments = False
             call_opcode = Opcode.CALLT
             opcode_info = OpcodeInfo.get_info(call_opcode)
             arg_size = opcode_info.data_len
@@ -47,8 +61,15 @@ class NativeContractMethod(InteropMethod):
                 (call_opcode, Integer(self_method_token_id).to_byte_array(min_length=arg_size))
             ]
         else:
-            if self._pack_arguments is None:
-                self._pack_arguments = True
+            if len(self.args) == 0:
+                pack_args = [(Opcode.NEWARRAY0, b'')]
+            else:
+                from boa3.neo.vm.opcode import OpcodeHelper
+                pack_args = [
+                    OpcodeHelper.get_push_and_data(len(self.args)),
+                    (Opcode.PACK, b'')
+                ]
+
             call_flags = Integer(call_flag).to_byte_array(signed=True, min_length=1)
             flags_opcode = [
                 (Opcode.PUSHDATA1, Integer(len(call_flags)).to_byte_array() + call_flags)
@@ -63,7 +84,8 @@ class NativeContractMethod(InteropMethod):
                 (Opcode.DROP, b'')
             ] if self.return_type is Type.none else []
 
-            call_opcodes = (flags_opcode
+            call_opcodes = (pack_args
+                            + flags_opcode
                             + method_opcode
                             + self.script_hash_method.opcode
                             + Interop.CallContract.opcode

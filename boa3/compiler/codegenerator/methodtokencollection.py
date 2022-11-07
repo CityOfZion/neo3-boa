@@ -17,7 +17,9 @@ class MethodTokenCollection:
         if method_token_id is None and hasattr(contract_method, 'contract_script_hash'):
             method_token = MethodToken(hash=types.UInt160(contract_method.contract_script_hash),
                                        method=contract_method.external_name,
-                                       parameters_count=len(contract_method.args),
+                                       parameters_count=(contract_method.internal_call_args
+                                                         if hasattr(contract_method, 'internal_call_args')
+                                                         else len(contract_method.args)),
                                        has_return_value=contract_method.return_type is not Type.none,
                                        call_flags=call_flag)
             method_token_id = len(self._method_tokens)
@@ -38,10 +40,14 @@ class MethodTokenCollection:
         if not hasattr(contract_method, 'contract_script_hash'):
             return None
 
+        parameters_count = (contract_method.internal_call_args
+                            if hasattr(contract_method, 'internal_call_args')
+                            else len(contract_method.args))
+
         method_token_index = next((index for index, token in enumerate(self._method_tokens)
                                    if (token.hash.to_array() == contract_method.contract_script_hash
                                        and token.method == contract_method.external_name
-                                       and token.parameters_count == len(contract_method.args)
+                                       and token.parameters_count == parameters_count
                                        and token.has_return_value == (contract_method.return_type is not Type.none)
                                        and token.call_flags == call_flag)), None)
         return method_token_index

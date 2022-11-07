@@ -9,6 +9,7 @@ class UnVoteMethod(NeoContractMethod):
 
     def __init__(self):
         from boa3.model.type.type import Type
+        from boa3.model.type.collection.sequence.ecpointtype import ECPointType
         from boa3.model.type.collection.sequence.uint160type import UInt160Type
 
         identifier = 'un_vote'
@@ -17,18 +18,20 @@ class UnVoteMethod(NeoContractMethod):
             'account': Variable(UInt160Type.build()),
         }
 
-        super().__init__(identifier, native_identifier, args, return_type=Type.bool)
+        neo_internal_args = {
+            'account': Variable(UInt160Type.build()),
+            'vote_to': Variable(ECPointType.build())
+        }
+
+        super().__init__(identifier, native_identifier, args, return_type=Type.bool,
+                         internal_call_args=len(neo_internal_args))
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return (
             [
-                (Opcode.UNPACK, b''),
-                (Opcode.DROP, b''),
                 (Opcode.PUSHNULL, b''),
                 (Opcode.SWAP, b''),
-                (Opcode.PUSH2, b''),
-                (Opcode.PACK, b''),
             ] +
             super()._opcode
         )

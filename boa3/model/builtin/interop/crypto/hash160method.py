@@ -15,10 +15,14 @@ class Hash160Method(CryptoLibMethod):
         super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
 
     @property
+    def pack_arguments(self) -> bool:
+        if self._pack_arguments is None:
+            from boa3.model.builtin.interop.interop import Interop
+            self._pack_arguments = Interop.Sha256.pack_arguments  # this is the first method called
+        return self._pack_arguments
+
+    @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
         return (Interop.Sha256.opcode
-                + [(Opcode.PUSH1, b''),
-                   (Opcode.PACK, b'')
-                   ]
                 + Interop.Ripemd160.opcode)
