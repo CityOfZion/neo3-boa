@@ -34,6 +34,7 @@ class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
     def reset(self):
         # reset the opcodes to ensure the correct output when calling consecutive compilations
         self._generated_opcode = None
+        self.reset_calls()
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:

@@ -39,10 +39,11 @@ class RoleManagementClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.role import GetDesignatedByRoleMethod
+        from boa3.model.builtin.interop.interop import Interop
+        
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_designated_by_role': GetDesignatedByRoleMethod()
+                'get_designated_by_role': Interop.GetDesignatedByRole
             }
         return self._class_methods
 

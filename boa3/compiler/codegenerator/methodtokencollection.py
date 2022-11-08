@@ -22,10 +22,19 @@ class MethodTokenCollection:
                                                          else len(contract_method.args)),
                                        has_return_value=contract_method.return_type is not Type.none,
                                        call_flags=call_flag)
-            method_token_id = len(self._method_tokens)
-            self._method_tokens.append(method_token)
+
             if contract_method not in self._called_builtins:
                 self._called_builtins.append(contract_method)
+
+            if hasattr(contract_method, 'method_name') and len(contract_method.method_name) == 0:
+                # it's a contract method with a different interface, so it shouldn't have its method token included
+                return None
+
+            method_token_id = len(self._method_tokens)
+            if hasattr(contract_method, '_method_token_id'):
+                contract_method.reset()
+            self._method_tokens.append(method_token)
+
         return method_token_id
 
     def clear(self):

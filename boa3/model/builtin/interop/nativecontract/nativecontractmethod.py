@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from boa3.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
 from boa3.model.builtin.interop.interopmethod import InteropMethod
@@ -26,7 +26,8 @@ class NativeContractMethod(InteropMethod):
 
         from boa3.neo3.contracts.contracttypes import CallFlags
         self._call_flags_default = CallFlags.ALL
-        self._pack_arguments = None  # defined during compilation
+        self._pack_arguments = None   # defined during compilation
+        self._method_token_id = None  # defined during compilation
         self.external_name = self._sys_call
 
     @property
@@ -37,6 +38,7 @@ class NativeContractMethod(InteropMethod):
         # reset the object state to ensure the correct output when calling consecutive compilations
         super().reset()
         self._pack_arguments = None
+        self._method_token_id = None
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
@@ -49,8 +51,7 @@ class NativeContractMethod(InteropMethod):
         if self._pack_arguments is None:
             self._pack_arguments = False
 
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
-        self_method_token_id = VMCodeMapping.instance().add_method_token(self, call_flag)
+        self_method_token_id = self._get_method_token_id(call_flag)
 
         if isinstance(self_method_token_id, int) and self_method_token_id >= 0:
             call_opcode = Opcode.CALLT
@@ -94,11 +95,20 @@ class NativeContractMethod(InteropMethod):
 
         return call_opcodes
 
+    def _get_method_token_id(self, call_flag=None) -> Optional[int]:
+        if self._method_token_id is None:
+            from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+
+            if call_flag is None:
+                call_flag = self._call_flags_default
+            self._method_token_id = VMCodeMapping.instance().add_method_token(self, call_flag)
+        return self._method_token_id
+
     @property
     def pack_arguments(self) -> bool:
         if self._pack_arguments is None:
             from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
-            self_method_token_id = VMCodeMapping.instance().add_method_token(self, self._call_flags_default)
+            self_method_token_id = self._get_method_token_id(self._call_flags_default)
 
             self._pack_arguments = not isinstance(self_method_token_id, int) or self_method_token_id < 0
         return self._pack_arguments

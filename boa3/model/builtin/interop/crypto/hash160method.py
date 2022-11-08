@@ -23,6 +23,8 @@ class Hash160Method(CryptoLibMethod):
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+        # calls the generic implementation to ensure the correct output when calling consecutive compilations
+        default_opcodes = super()._opcode
         from boa3.model.builtin.interop.interop import Interop
         return (Interop.Sha256.opcode
                 + Interop.Ripemd160.opcode)

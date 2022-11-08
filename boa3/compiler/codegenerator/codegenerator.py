@@ -232,8 +232,7 @@ class CodeGenerator:
         self._stack_states.append(value_type, self.last_code)
 
     def _stack_pop(self, index: int = -1) -> IType:
-        if len(self._stack) > 0:
-            return self._stack.pop(index)
+        return self._stack_states.pop(self.last_code, index)
 
     @property
     def last_code_start_address(self) -> int:
@@ -2160,6 +2159,17 @@ class CodeGenerator:
             self.__insert1(op_info)
             if pos > 0 and len(self._stack) > 0:
                 self._stack_pop(-pos)
+
+    def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
+        self._stack_states.restore_state(last_address)
+        if VMCodeMapping.instance().bytecode_size > last_address:
+            # remove opcodes inserted during the evaluation of the symbol
+            VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
+
+        if isinstance(last_stack_size, int) and last_stack_size < self.stack_size:
+            # remove any additional values pushed to the stack during the evalution of the symbol
+            for _ in range(self.stack_size - last_stack_size):
+                self._stack_pop()
 
     def swap_reverse_stack_items(self, no_items: int = 0):
         # n = 0 -> value varies in runtime

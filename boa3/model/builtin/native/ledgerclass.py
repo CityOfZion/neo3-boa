@@ -39,23 +39,17 @@ class LedgerClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.blockchain import (BlockType, GetBlockMethod, GetCurrentIndexMethod,
-                                                           GetTransactionMethod, GetTransactionFromBlockMethod,
-                                                           GetTransactionHeightMethod, GetTransactionSignersMethod,
-                                                           GetTransactionVMStateMethod, TransactionType, SignerType,
-                                                           VMStateType)
+        from boa3.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
-            tx_type = TransactionType.build()
-            signer_type = SignerType.build()
             self._class_methods = {
-                'get_block': GetBlockMethod(BlockType.build()),
-                'get_current_index': GetCurrentIndexMethod(),
-                'get_transaction': GetTransactionMethod(tx_type),
-                'get_transaction_from_block': GetTransactionFromBlockMethod(tx_type),
-                'get_transaction_height': GetTransactionHeightMethod(),
-                'get_transaction_signers': GetTransactionSignersMethod(signer_type),
-                'get_transaction_vm_state': GetTransactionVMStateMethod(VMStateType.build())
+                'get_block': Interop.GetBlock,
+                'get_current_index': Interop.CurrentIndex.getter,
+                'get_transaction': Interop.GetTransaction,
+                'get_transaction_from_block': Interop.GetTransactionFromBlock,
+                'get_transaction_height': Interop.GetTransactionHeight,
+                'get_transaction_signers': Interop.GetTransactionSigners,
+                'get_transaction_vm_state': Interop.GetTransactionVMState
             }
         return self._class_methods
 

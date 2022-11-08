@@ -39,30 +39,24 @@ class StdLibClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.stdlib import (SerializeMethod, DeserializeMethod,
-                                                       Base64DecodeMethod, Base64EncodeMethod,
-                                                       Base58DecodeMethod, Base58EncodeMethod,
-                                                       Base58CheckDecodeMethod, Base58CheckEncodeMethod,
-                                                       ItoaMethod, AtoiMethod,
-                                                       MemoryCompareMethod, MemorySearchMethod)
-        from boa3.model.builtin.interop.json import (JsonDeserializeMethod, JsonSerializeMethod)
+        from boa3.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'serialize': SerializeMethod(),
-                'deserialize': DeserializeMethod(),
-                'json_serialize': JsonSerializeMethod(),
-                'json_deserialize': JsonDeserializeMethod(),
-                'base64_decode': Base64DecodeMethod(),
-                'base64_encode': Base64EncodeMethod(),
-                'base58_decode': Base58DecodeMethod(),
-                'base58_encode': Base58EncodeMethod(),
-                'base58_check_decode': Base58CheckDecodeMethod(),
-                'base58_check_encode': Base58CheckEncodeMethod(),
-                'itoa': ItoaMethod(),
-                'atoi': AtoiMethod(),
-                'memory_compare': MemoryCompareMethod(),
-                'memory_search': MemorySearchMethod(),
+                'serialize': Interop.Serialize,
+                'deserialize': Interop.Deserialize,
+                'json_serialize': Interop.JsonSerialize,
+                'json_deserialize': Interop.JsonDeserialize,
+                'base64_decode': Interop.Base64Decode,
+                'base64_encode': Interop.Base64Encode,
+                'base58_decode': Interop.Base58Decode,
+                'base58_encode': Interop.Base58Encode,
+                'base58_check_decode': Interop.Base58CheckDecode,
+                'base58_check_encode': Interop.Base58CheckEncode,
+                'itoa': Interop.Itoa,
+                'atoi': Interop.Atoi,
+                'memory_compare': Interop.MemoryCompare,
+                'memory_search': Interop.MemorySearch,
             }
         return self._class_methods
 

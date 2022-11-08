@@ -39,15 +39,14 @@ class CryptoLibClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.crypto import (Murmur32Method, Sha256Method, Ripemd160Method,
-                                                       VerifyWithECDsaMethod)
+        from boa3.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'murmur32': Murmur32Method(),
-                'sha256': Sha256Method(),
-                'ripemd160': Ripemd160Method(),
-                'verify_with_ecdsa': VerifyWithECDsaMethod(),
+                'murmur32': Interop.Murmur32,
+                'sha256': Interop.Sha256,
+                'ripemd160': Interop.Ripemd160,
+                'verify_with_ecdsa': Interop.VerifyWithECDsa,
             }
         return self._class_methods
 
