@@ -1,11 +1,7 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from boa3.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.model.builtin.interop.nativecontract.Nep17.getnep17scripthashmethod import GetNep17ScriptHashMethod
-from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
-from boa3.model.variable import Variable
-from boa3.neo.vm.opcode import OpcodeHelper
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class GetNeoScriptHashMethod(GetNep17ScriptHashMethod):

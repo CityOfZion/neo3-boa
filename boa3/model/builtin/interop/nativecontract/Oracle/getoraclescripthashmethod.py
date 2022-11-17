@@ -1,10 +1,8 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
-from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
 
 
 class GetOracleScriptHashMethod(ContractGetHashMethod):
@@ -22,15 +20,6 @@ class GetOracleScriptHashMethod(ContractGetHashMethod):
     @property
     def _body(self) -> Optional[str]:
         return None
-
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.neo.vm.type.Integer import Integer
-
-        value = ORACLE_SCRIPT
-        return [
-            (Opcode.PUSHDATA1, Integer(len(value)).to_byte_array() + value)
-        ]
 
 
 class OracleProperty(IBuiltinProperty):

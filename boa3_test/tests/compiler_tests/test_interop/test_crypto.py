@@ -1,6 +1,5 @@
 import hashlib
 
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop

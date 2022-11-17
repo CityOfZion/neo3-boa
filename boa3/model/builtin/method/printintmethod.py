@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 from boa3.model.builtin.method.printmethod import PrintMethod
-from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 

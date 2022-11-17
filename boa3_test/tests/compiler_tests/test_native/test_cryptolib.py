@@ -1,15 +1,11 @@
 import hashlib
 
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
-from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
