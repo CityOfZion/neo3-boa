@@ -37,7 +37,7 @@ class InteropMethod(IBuiltinMethod, ABC):
         return cryptography.sha256(String(method_name).to_bytes())[:SIZE_OF_INT32]
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.SYSCALL, self.interop_method_hash)]
 
     @property

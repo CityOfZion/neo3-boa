@@ -265,7 +265,6 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_script_hash(self):
         path = self.get_contract_path('ecpoint', 'ECPointScriptHash.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         from boa3.neo import public_key_to_script_hash

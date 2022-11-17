@@ -82,7 +82,7 @@ class IsInstanceMethod(IBuiltinMethod):
         return not any(not isinstance(param, (IExpression, IType)) for param in params)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         if len(self._instances_type) == 0:
             return [
                 (Opcode.ISNULL, b'')

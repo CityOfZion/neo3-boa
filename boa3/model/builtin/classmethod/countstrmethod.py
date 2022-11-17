@@ -27,7 +27,7 @@ class CountStrMethod(CountMethod):
         super().__init__(args, [start_default, end_default])
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.model.type.type import Type
 

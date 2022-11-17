@@ -39,15 +39,14 @@ class PolicyClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.policy import (GetFeePerByteMethod, GetExecFeeFactorMethod,
-                                                       GetStoragePriceMethod, IsBlockedMethod)
+        from boa3.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_fee_per_byte': GetFeePerByteMethod(),
-                'get_exec_fee_factor': GetExecFeeFactorMethod(),
-                'get_storage_price': GetStoragePriceMethod(),
-                'is_blocked': IsBlockedMethod()
+                'get_fee_per_byte': Interop.GetFeePerByte,
+                'get_exec_fee_factor': Interop.GetExecFeeFactor,
+                'get_storage_price': Interop.GetStoragePrice,
+                'is_blocked': Interop.IsBlocked
             }
         return self._class_methods
 

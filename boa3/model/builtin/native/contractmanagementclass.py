@@ -39,18 +39,15 @@ class ContractManagementClass(ClassArrayType):
     @property
     def class_methods(self) -> Dict[str, Method]:
         # avoid recursive import
-        from boa3.model.builtin.interop.blockchain import GetContractMethod
-        from boa3.model.builtin.interop.contract import (CreateMethod, DestroyMethod, GetMinimumDeploymentFeeMethod,
-                                                         UpdateMethod)
         from boa3.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_minimum_deployment_fee': GetMinimumDeploymentFeeMethod(),
-                'get_contract': GetContractMethod(Interop.ContractType),
-                'deploy': CreateMethod(Interop.ContractType),
-                'update': UpdateMethod(),
-                'destroy': DestroyMethod()
+                'get_minimum_deployment_fee': Interop.GetMinimumDeploymentFee,
+                'get_contract': Interop.GetContract,
+                'deploy': Interop.CreateContract,
+                'update': Interop.UpdateContract,
+                'destroy': Interop.DestroyContract
             }
         return self._class_methods
 

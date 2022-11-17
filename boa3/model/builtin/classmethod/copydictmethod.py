@@ -13,7 +13,7 @@ class CopyDictMethod(CopyMethod):
         super().__init__(arg_value if Type.dict.is_type_of(arg_value) else Type.dict)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
 
         jmp_place_holder = (Opcode.JMP, b'\x01')

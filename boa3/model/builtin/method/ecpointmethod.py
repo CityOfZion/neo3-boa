@@ -48,7 +48,7 @@ class ECPointMethod(IBuiltinMethod):
         return Type.bytes.is_type_of(param_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.StackItem import StackItemType
 

@@ -22,7 +22,7 @@ class BoolMethod(IBuiltinMethod):
         return self.args['value']
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.compiler.codegenerator import get_bytes_count
         jmp_place_holder = (Opcode.JMP, b'\x01')

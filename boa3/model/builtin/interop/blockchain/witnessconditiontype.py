@@ -80,7 +80,7 @@ class WitnessConditionMethod(IBuiltinMethod):
         return len(params) == 0
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
 
         return [

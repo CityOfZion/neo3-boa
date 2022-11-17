@@ -1,4 +1,3 @@
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
@@ -131,19 +130,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransaction.py')
@@ -192,19 +179,7 @@ class TestBlockchainInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionFromBlockInt.py')
@@ -251,19 +226,7 @@ class TestBlockchainInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionFromBlockUInt256.py')
@@ -315,19 +278,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionHeight.py')
@@ -360,19 +311,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionSigners.py')
@@ -409,19 +348,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionVMState.py')

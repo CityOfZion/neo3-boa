@@ -29,6 +29,6 @@ class StorageContextCreateMapMethod(IBuiltinMethod):
         return None
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap as StorageMapType
         return StorageMapType.constructor_method().opcode

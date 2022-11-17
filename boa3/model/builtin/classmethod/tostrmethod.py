@@ -31,7 +31,7 @@ class ToStrMethod(IBuiltinMethod, ABC):
         return isinstance(params[0], IExpression) and isinstance(params[0].type, BytesType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.type import Type
         return [
             (Opcode.CONVERT, Type.str.stack_item)

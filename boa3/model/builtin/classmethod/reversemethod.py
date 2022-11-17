@@ -27,7 +27,7 @@ class ReverseMethod(IBuiltinMethod):
         return isinstance(params[0], IExpression) and isinstance(params[0].type, MutableSequenceType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.REVERSEITEMS, b'')]
 
     def push_self_first(self) -> bool:

@@ -29,7 +29,7 @@ class IntByteStringMethod(IntMethod):
         super().__init__(args, [value_default, base_default])
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.StackItem import StackItemType
         jmp_place_holder = (Opcode.JMP, b'\x01')

@@ -81,7 +81,7 @@ class WitnessRuleMethod(IBuiltinMethod):
         return len(params) == 0
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.blockchain.witnessconditiontype import WitnessConditionType
         from boa3.model.builtin.interop.blockchain.witnessruleactiontype import WitnessRuleActionType
 

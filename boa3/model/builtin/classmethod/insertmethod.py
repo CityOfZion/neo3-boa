@@ -46,7 +46,7 @@ class InsertMethod(IBuiltinMethod):
         return [list(self.args).index('__index')]
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         return [
             # insert(pos, index)

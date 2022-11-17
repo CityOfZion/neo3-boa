@@ -17,13 +17,5 @@ class StrIntMethod(StrMethod):
         super().__init__(args)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return (
-            [
-                (Opcode.PUSH10, b''),
-                (Opcode.SWAP, b''),
-                (Opcode.PUSH2, b''),
-                (Opcode.PACK, b''),
-            ] +
-            ItoaMethod().opcode
-        )
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+        return ItoaMethod(internal_call_args=1).opcode

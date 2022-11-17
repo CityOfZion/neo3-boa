@@ -11,6 +11,7 @@ from boa3.model.variable import Variable
 class Nep17Method(NativeContractMethod):
 
     def __init__(self, identifier: str, syscall: str, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None, script_hash: bytes = None):
+                 defaults: List[ast.AST] = None, return_type: IType = None, script_hash: bytes = None,
+                 internal_call_args: int = None):
         contract = Nep17Contract if script_hash is None else GetNep17ScriptHashMethod(script_hash)
-        super().__init__(contract, identifier, syscall, args, defaults, return_type)
+        super().__init__(contract, identifier, syscall, args, defaults, return_type, internal_call_args)

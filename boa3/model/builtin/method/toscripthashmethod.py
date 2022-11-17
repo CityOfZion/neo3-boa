@@ -40,7 +40,7 @@ class ScriptHashMethod(IBuiltinMethod):
         return self.args['self'].type is not Type.any
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.constants import SIZE_OF_INT160
         from boa3.model.builtin.interop.stdlib.base58decodemethod import Base58DecodeMethod
         from boa3.model.type.type import Type
@@ -54,8 +54,6 @@ class ScriptHashMethod(IBuiltinMethod):
             (Opcode.ISTYPE, Type.str.stack_item),
             (Opcode.JMPIF, Integer(4).to_byte_array(min_length=1)),
             (Opcode.CONVERT, Type.str.stack_item),
-            (Opcode.PUSH1, b''),
-            (Opcode.PACK, b'')
         ]
         opcodes.extend(Base58DecodeMethod().opcode)
         script_len = Integer(SIZE_OF_INT160).to_byte_array(min_length=1)

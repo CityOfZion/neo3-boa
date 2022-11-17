@@ -158,14 +158,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         return False
 
     def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
-        if VMCodeMapping.instance().bytecode_size > last_address:
-            # remove opcodes inserted during the evaluation of the symbol
-            VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
-
-        if isinstance(last_stack_size, int) and last_stack_size < self.generator.stack_size:
-            # remove any additional values pushed to the stack during the evalution of the symbol
-            for _ in range(self.generator.stack_size - last_stack_size):
-                self.generator._stack_pop()
+        self.generator._remove_inserted_opcodes_since(last_address, last_stack_size)
 
     def _get_unique_name(self, name_id: str, node: ast.AST) -> str:
         return '{0}{2}{1}'.format(node.__hash__(), name_id, constants.VARIABLE_NAME_SEPARATOR)

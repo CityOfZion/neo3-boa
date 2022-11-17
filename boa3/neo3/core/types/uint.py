@@ -117,6 +117,10 @@ class _UIntBase(serialization.ISerializable):
         """
         return bytes(self._data)
 
+    @classmethod
+    def _serializable_init(cls):
+        return cls(b'\x00' * cls._BYTE_LEN)
+
 
 class UInt160(_UIntBase):
     _BYTE_LEN = 20

@@ -50,6 +50,7 @@ class TestContractManagementContract(BoaTest):
         path = self.get_contract_path('DeployContract.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
+        self.compile_and_save(path)
 
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()

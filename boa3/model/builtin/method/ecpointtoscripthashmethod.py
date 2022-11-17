@@ -17,7 +17,7 @@ class ECPointToScriptHashMethod(ScriptHashMethod):
         super().__init__(data_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3 import constants
         from boa3.model.builtin.interop.crypto.checksigmethod import CheckSigMethod
         from boa3.model.builtin.interop.crypto.sha256method import Sha256Method
@@ -34,14 +34,8 @@ class ECPointToScriptHashMethod(ScriptHashMethod):
             (Opcode.CAT, b''),
         ]
 
-        opcodes.extend([OpcodeHelper.get_push_and_data(1),  # pack argument to call syscall
-                        (Opcode.PACK, b'')
-                        ] + Sha256Method().opcode
-                       )
-        opcodes.extend([OpcodeHelper.get_push_and_data(1),  # pack argument to call syscall
-                        (Opcode.PACK, b'')
-                        ] + Ripemd160Method().opcode
-                       )
+        opcodes.extend(Sha256Method().opcode)
+        opcodes.extend(Ripemd160Method().opcode)
 
         opcodes.extend([
             # limit result to UInt160 length

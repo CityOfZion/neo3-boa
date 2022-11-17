@@ -19,7 +19,7 @@ class SumMethod(IBuiltinMethod):
         super().__init__(identifier, args, defaults=[start_default], return_type=Type.int)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         return [
             (Opcode.PUSH0, b''),    # index = 0

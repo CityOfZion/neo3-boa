@@ -16,6 +16,7 @@ class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
                  defaults: List[ast.AST] = None, return_type: IType = None):
         super().__init__(args, vararg, kwargs, defaults, return_type)
         self._identifier = identifier
+        self._generated_opcode = None
         self.defined_by_entry = False  # every builtin symbol must have this variable set as False
 
     @property
@@ -25,6 +26,18 @@ class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
 
         :return: the opcode and its data if exists. None otherwise.
         """
+        # don't need to recalculate for every time this property is called
+        if self._generated_opcode is None:
+            self._generated_opcode = self._opcode
+        return self._generated_opcode
+
+    def reset(self):
+        # reset the opcodes to ensure the correct output when calling consecutive compilations
+        self._generated_opcode = None
+        self.reset_calls()
+
+    @property
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return []
 
     @property

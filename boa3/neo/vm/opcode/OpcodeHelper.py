@@ -154,7 +154,7 @@ def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) 
         else Integer(integer).to_byte_array(min_length=arg_size)
 
     if len(jmp_arg) > opcode_info.max_data_len and has_larger_opcode(opcode):
-        opcode = opcode.get_larger_opcode()
+        opcode = get_larger_opcode(opcode)
         opcode_info = OpcodeInfo.get_info(opcode)
         arg_size = opcode_info.data_len
         jmp_arg = Integer(arg_size + integer + jump_through).to_byte_array(min_length=arg_size) if integer > 0 \

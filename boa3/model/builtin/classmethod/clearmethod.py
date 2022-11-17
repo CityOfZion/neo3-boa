@@ -31,7 +31,7 @@ class ClearMethod(IBuiltinMethod):
         return isinstance(params[0], IExpression) and isinstance(params[0].type, MutableSequenceType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer
         return [

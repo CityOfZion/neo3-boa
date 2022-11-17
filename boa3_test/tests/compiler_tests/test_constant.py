@@ -184,7 +184,7 @@ class TestConstant(BoaTest):
 
         analyser = Analyser(ast.parse(str(input)))
         analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser)
+        output = CodeGenerator.generate_code(analyser).bytecode
 
         self.assertEqual(expected_output, output)
 

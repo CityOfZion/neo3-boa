@@ -1,15 +1,11 @@
 import hashlib
 
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
-from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.StackItem import StackItemType
-from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -118,8 +114,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -133,17 +127,7 @@ class TestCryptoLibClass(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -156,8 +140,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -170,17 +152,7 @@ class TestCryptoLibClass(BoaTest):
             + self.ecpoint_init
             + Opcode.PUSH0
             + Opcode.CONVERT + StackItemType.Boolean
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -193,8 +165,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -206,17 +176,7 @@ class TestCryptoLibClass(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -230,8 +190,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -245,17 +203,7 @@ class TestCryptoLibClass(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -273,8 +221,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -288,16 +234,7 @@ class TestCryptoLibClass(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -310,8 +247,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -324,16 +259,7 @@ class TestCryptoLibClass(BoaTest):
             + self.ecpoint_init
             + Opcode.PUSH0
             + Opcode.CONVERT + StackItemType.Boolean
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -346,8 +272,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -359,16 +283,7 @@ class TestCryptoLibClass(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -382,8 +297,6 @@ class TestCryptoLibClass(BoaTest):
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -397,16 +310,7 @@ class TestCryptoLibClass(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -420,25 +324,13 @@ class TestCryptoLibClass(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_murmur32(self):
-        function_id = String(Interop.Murmur32._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
             + b'\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 

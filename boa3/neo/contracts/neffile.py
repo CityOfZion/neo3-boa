@@ -40,6 +40,10 @@ class NefFile:
     def source(self) -> str:
         return self._nef.source
 
+    @property
+    def checksum(self) -> int:
+        return self._nef.checksum
+
     def serialize(self) -> bytes:
         """
         Serialize the NefFile object

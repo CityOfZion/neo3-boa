@@ -126,27 +126,14 @@ class TestNativeContracts(BoaTest):
             self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
 
     def test_oracle_get_price(self):
-        from boa3.model.builtin.interop.interop import Interop
         from boa3.neo3.contracts import CallFlags
         from boa3.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
-        from boa3.constants import ORACLE_SCRIPT
 
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         method = String(OracleGetPriceMethod().method_name).to_bytes()
 
         expected_output = (
-            Opcode.NEWARRAY0
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array(min_length=1, signed=True)
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array(min_length=1, signed=True)
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(ORACLE_SCRIPT)).to_byte_array(min_length=1, signed=True)
-            + ORACLE_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 

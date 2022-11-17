@@ -32,11 +32,11 @@ class StorageGetMethod(InteropMethod):
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.bytes)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer
 
-        opcodes = super().opcode
+        opcodes = super()._opcode
         opcodes.extend([
             (Opcode.DUP, b''),
             (Opcode.ISNULL, b''),

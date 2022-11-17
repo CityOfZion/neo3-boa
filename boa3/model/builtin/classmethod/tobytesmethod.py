@@ -34,7 +34,7 @@ class ToBytesMethod(IBuiltinMethod, ABC):
         return isinstance(params[0], IExpression) and isinstance(params[0].type, BytesType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.type.type import Type
         return [
             (Opcode.CONVERT, Type.bytes.stack_item)
@@ -85,7 +85,7 @@ class IntToBytesMethod(ToBytesMethod):
         return super().build(value)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.Integer import Integer
 
@@ -98,7 +98,7 @@ class IntToBytesMethod(ToBytesMethod):
             jmp_place_holder
         ]
 
-        number_is_not_zero = super().opcode.copy()
+        number_is_not_zero = super()._opcode.copy()
         number_is_not_zero.append(jmp_place_holder)
 
         number_is_zero = [
@@ -125,7 +125,7 @@ class StrToBytesMethod(ToBytesMethod):
         super().__init__(self_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         # string and bytes' stack item are the same
         return []
 

@@ -1,6 +1,5 @@
 import hashlib
 
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
@@ -268,17 +267,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -305,17 +294,7 @@ class TestCryptoInterop(BoaTest):
             + self.ecpoint_init
             + Opcode.PUSH0
             + Opcode.CONVERT + StackItemType.Boolean
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -341,17 +320,7 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -380,17 +349,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array(min_length=1)
-            + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -423,16 +382,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -459,16 +409,7 @@ class TestCryptoInterop(BoaTest):
             + self.ecpoint_init
             + Opcode.PUSH0
             + Opcode.CONVERT + StackItemType.Boolean
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -494,16 +435,7 @@ class TestCryptoInterop(BoaTest):
             + byte_input1
             + self.ecpoint_init
             + Opcode.PUSH10
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -532,16 +464,7 @@ class TestCryptoInterop(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
-            + Opcode.PUSH4
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
         )
@@ -578,16 +501,7 @@ class TestCryptoInterop(BoaTest):
             + b'\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flag)).to_byte_array() + call_flag
-            + Opcode.PUSHDATA1
-            + Integer(len(function_id)).to_byte_array() + function_id
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.CRYPTO_SCRIPT)).to_byte_array() + constants.CRYPTO_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 

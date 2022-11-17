@@ -74,7 +74,7 @@ class CastTypeMethod(IBuiltinMethod):
         return origin_type, target_type
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return []
 
     @property

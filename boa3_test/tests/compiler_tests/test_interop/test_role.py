@@ -1,4 +1,3 @@
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
@@ -21,19 +20,7 @@ class TestRoleInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.ROLE_MANAGEMENT)).to_byte_array()
-            + constants.ROLE_MANAGEMENT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 
@@ -58,19 +45,7 @@ class TestRoleInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.ROLE_MANAGEMENT)).to_byte_array()
-            + constants.ROLE_MANAGEMENT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 
@@ -87,19 +62,7 @@ class TestRoleInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.ROLE_MANAGEMENT)).to_byte_array()
-            + constants.ROLE_MANAGEMENT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 
