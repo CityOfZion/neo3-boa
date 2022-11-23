@@ -254,6 +254,20 @@ class TestEvent(BoaTest):
         path = self.get_contract_path('EventWithoutTypes.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
+    def test_event_with_duplicated_name(self):
+        path = self.get_contract_path('EventWithDuplicatedName.py')
+
+        engine = TestEngine()
+        arg = 10
+        event_id = 'example'
+        result = self.run_smart_contract(engine, path, 'example', arg)
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        event_notifications = engine.get_events(event_name=event_id)
+        self.assertEqual(1, len(event_notifications))
+        self.assertEqual((arg,), event_notifications[0].arguments)
+
     def test_event_call_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeCallEvent.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

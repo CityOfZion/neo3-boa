@@ -16,7 +16,7 @@ class Event(Callable, IdentifiedSymbol):
         super().__init__(args, vararg, kwargs, defaults, Type.none, True, origin_node)
 
         self.name: str = event_id
-        self._identifier: str = self.name
+        self._identifier: str = None
 
     @property
     def shadowing_name(self) -> str:
@@ -24,7 +24,10 @@ class Event(Callable, IdentifiedSymbol):
 
     @property
     def identifier(self) -> str:
-        return self.name
+        if self._identifier is None:
+            # internal identifier should not be the name to avoid nonexistent duplicated symbol ids
+            self._identifier = f'-{self.name}-{hex(id(self))}'
+        return self._identifier
 
     @property
     def args_to_generate(self) -> Dict[str, Variable]:

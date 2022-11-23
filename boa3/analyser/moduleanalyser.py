@@ -1166,8 +1166,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return self.get_type(call.func)
 
     def create_new_event(self, create_call: ast.Call) -> Event:
-        event = Event('')
         event_args = create_call.args
+        args = {}
+        name = Builtin.Event.identifier
 
         if len(event_args) < 0:
             self._log_error(
@@ -1211,7 +1212,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         arg_type = (self.get_symbol(value.elts[1].id)
                                     if isinstance(value.elts[1], ast.Name)
                                     else self.visit(value.elts[1]))
-                        event.args[arg_name] = Variable(arg_type)
+                        args[arg_name] = Variable(arg_type)
 
             if len(event_args) > 1:
                 if not isinstance(event_args[1], ast.Str):
@@ -1221,8 +1222,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                   expected_type_id=Type.str.identifier,
                                                   actual_type_id=name_type.identifier)
                 else:
-                    event.name = event_args[1].s
+                    name = event_args[1].s
 
+        event = Event(name, args)
+        event._origin_node = create_call
         return event
 
     def visit_Attribute(self, attribute: ast.Attribute) -> Union[ISymbol, str]:
