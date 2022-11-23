@@ -1168,7 +1168,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     def create_new_event(self, create_call: ast.Call) -> Event:
         event_args = create_call.args
         args = {}
-        name = ''
+        name = Builtin.Event.identifier
 
         if len(event_args) < 0:
             self._log_error(
