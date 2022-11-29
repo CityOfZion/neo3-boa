@@ -149,3 +149,11 @@ class TestTyping(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual('body', result)
+
+    def test_cast_persisted_in_scope(self):
+        path = self.get_contract_path('CastPersistedInScope.py')
+        engine = TestEngine()
+
+        test_address = bytes(20)
+        result = self.run_smart_contract(engine, path, 'main', test_address, 10, None)
+        self.assertIsVoid(result)

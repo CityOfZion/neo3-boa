@@ -407,15 +407,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 else:
                     if self._current_method is not None and node.id in self._current_method.symbols:
-                        can_change_target_type = self._current_method.symbols[node.id].type is UndefinedType
+                        can_change_target_type = (self._current_method.symbols[node.id].type is UndefinedType
+                                                  or node.id in self._current_method.args)
+                        can_change_original = node.id not in self._current_method.args
                     else:
                         can_change_target_type = True
+                        can_change_original = True
 
                     if can_change_target_type:
                         if (not target_type.is_type_of(value_type) and
                                 value != target_type.default_value):
                             target_type = value_type
-                        self._current_scope.include_symbol(node.id, Variable(value_type))
+                        self._current_scope.include_symbol(node.id, Variable(value_type),
+                                                           reassign_original=can_change_original)
 
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
             if not implicit_cast:
