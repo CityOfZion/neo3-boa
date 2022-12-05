@@ -313,12 +313,15 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
+
         with self.assertRaisesRegex(TestExecutionException, self.NULL_POINTER_MSG):
-            # TODO: TestEngine fails when running contracts with arrays inside arrays args
+            # TODO: TestEngine error, on TestNet and PrivateNet the vm_state is 'HALT' instead of 'FAULT'
             self.run_smart_contract(engine, path, 'Main', [[1, 2], [3, 4]])
 
-        result = engine.run(nef_path, 'Main', [[1, 2], [3, 4]])
-        self.assertEqual(1, result)
+        engine.run(nef_path, 'Main', [[1, 2], [3, 4]])
+        self.assertIsNotNone(engine.error)
+        from boa3.neo3.vm import VMState
+        self.assertEqual(engine.vm_state, VMState.FAULT)
 
         engine.run(nef_path, 'Main', [])
         self.assertIsNotNone(engine.error)
