@@ -8,6 +8,8 @@ class GAS:
     A class used to represent the GAS native contract
     """
 
+    hash: UInt160
+
     @classmethod
     def symbol(cls) -> str:
         """

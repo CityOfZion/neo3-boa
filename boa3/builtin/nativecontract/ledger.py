@@ -1,13 +1,15 @@
 from typing import List, Union
 
 from boa3.builtin.interop.blockchain import Block, Signer, Transaction, VMState
-from boa3.builtin.type import UInt256
+from boa3.builtin.type import UInt256, UInt160
 
 
 class Ledger:
     """
     A class used to represent the Ledger native contract
     """
+
+    hash: UInt160
 
     @classmethod
     def get_block(cls, index_or_hash: Union[int, UInt256]) -> Block:

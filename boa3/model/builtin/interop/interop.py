@@ -101,8 +101,8 @@ class Interop:
     UpdateContract = UpdateMethod()
 
     # Native Contracts
-    GasScriptHash = GasProperty()
-    NeoScriptHash = NeoProperty()
+    GasScriptHash = GasToken
+    NeoScriptHash = NeoToken
     ContractManagementScriptHash = ContractManagement
     CryptoLibScriptHash = CryptoLibContract
     LedgerScriptHash = LedgerContract

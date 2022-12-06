@@ -9,7 +9,6 @@ class GetNeoScriptHashMethod(GetNep17ScriptHashMethod):
     def __init__(self):
         from boa3.constants import NEO_SCRIPT
         identifier = '-get_neo'
-        args: Dict[str, Variable] = {}
         super().__init__(NEO_SCRIPT, identifier)
 
     @property
@@ -26,3 +25,6 @@ class NeoProperty(IBuiltinProperty):
         identifier = 'NEO'
         getter = GetNeoScriptHashMethod()
         super().__init__(identifier, getter)
+
+
+NeoToken = NeoProperty()

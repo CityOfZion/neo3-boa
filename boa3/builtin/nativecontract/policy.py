@@ -6,6 +6,8 @@ class Policy:
     A class used to represent the Policy native contract
     """
 
+    hash: UInt160
+
     @classmethod
     def get_fee_per_byte(cls) -> int:
         """

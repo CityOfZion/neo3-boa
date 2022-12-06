@@ -1,5 +1,6 @@
 import json
 
+from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.type.String import String
@@ -11,6 +12,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestContractManagementContract(BoaTest):
     default_folder: str = 'test_sc/native_test/contractmanagement'
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.MANAGEMENT_SCRIPT, result)
 
     def test_get_minimum_deployment_fee(self):
         path = self.get_contract_path('GetMinimumDeploymentFee.py')
