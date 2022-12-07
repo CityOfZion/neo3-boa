@@ -33,6 +33,10 @@ def manifest_metadata() -> NeoMetadata:
     meta.description = "Update Contract Example. This contract represents the updated smart contract to be deployed " \
                        "on the blockchain, with the method now working properly"
     meta.email = "contact@coz.io"
+
+    # requires access to ContractManagement methods
+    meta.add_permission(contract='0xfffdc93764dbaddd97c48f252a53ea4643faa3fd',
+                        methods=['update'])
     return meta
 
 
@@ -55,7 +59,7 @@ on_transfer = CreateNewEvent(
 # Methods
 # -------------------------------------------
 
-@public(safe=True)
+@public
 def update_sc(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the smart contract. In this example there is a bugged method, so, the smart contract will be updated to fix
