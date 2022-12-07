@@ -1,5 +1,6 @@
 import hashlib
 
+from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.type.type import Type
@@ -24,6 +25,13 @@ class TestCryptoLibClass(BoaTest):
         + Opcode.JMPEQ + Integer(3).to_byte_array()
         + Opcode.THROW
     )
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.CRYPTO_SCRIPT, result)
 
     def test_ripemd160_str(self):
         path = self.get_contract_path('Ripemd160Str.py')

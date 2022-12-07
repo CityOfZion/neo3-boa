@@ -9,6 +9,8 @@ class ContractManagement:
     A class used to represent the ContractManagement native contract
     """
 
+    hash: UInt160
+
     @classmethod
     def get_minimum_deployment_fee(cls) -> int:
         """

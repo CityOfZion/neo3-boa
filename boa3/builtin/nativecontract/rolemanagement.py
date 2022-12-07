@@ -1,11 +1,13 @@
 from boa3.builtin.interop.role.roletype import Role
-from boa3.builtin.type import ECPoint
+from boa3.builtin.type import ECPoint, UInt160
 
 
 class RoleManagement:
     """
     A class used to represent the RoleManagement native contract
     """
+
+    hash: UInt160
 
     @classmethod
     def get_designated_by_role(cls, role: Role, index: int) -> ECPoint:

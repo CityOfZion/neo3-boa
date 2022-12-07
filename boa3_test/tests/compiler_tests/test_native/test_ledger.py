@@ -1,3 +1,4 @@
+from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
@@ -12,6 +13,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestLedgerContract(BoaTest):
     default_folder: str = 'test_sc/native_test/ledger'
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.LEDGER_SCRIPT, result)
 
     def test_get_block_by_hash(self):
         path = self.get_contract_path('GetBlockByHash.py')

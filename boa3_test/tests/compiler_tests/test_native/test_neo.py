@@ -1,3 +1,4 @@
+from boa3 import constants
 from boa3.exception import CompilerError
 from boa3.neo import from_hex_str
 from boa3_test.tests.boa_test import BoaTest
@@ -6,6 +7,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestNeoClass(BoaTest):
     default_folder: str = 'test_sc/native_test/neo'
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.NEO_SCRIPT, result)
 
     def test_symbol(self):
         path = self.get_contract_path('Symbol.py')

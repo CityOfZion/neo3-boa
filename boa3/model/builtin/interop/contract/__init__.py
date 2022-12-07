@@ -5,10 +5,10 @@ __all__ = ['CallFlagsType',
            'CreateMultisigAccountMethod',
            'CreateStandardAccountMethod',
            'DestroyMethod',
-           'GasProperty',
+           'GasToken',
            'GetCallFlagsMethod',
            'GetMinimumDeploymentFeeMethod',
-           'NeoProperty',
+           'NeoToken',
            'UpdateMethod'
            ]
 
@@ -20,7 +20,7 @@ from boa3.model.builtin.interop.contract.createmultisigaccountmethod import Crea
 from boa3.model.builtin.interop.contract.createstandardaccountmethod import CreateStandardAccountMethod
 from boa3.model.builtin.interop.contract.destroymethod import DestroyMethod
 from boa3.model.builtin.interop.contract.getcallflagsmethod import GetCallFlagsMethod
-from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasProperty
+from boa3.model.builtin.interop.contract.getgasscripthashmethod import GasToken
 from boa3.model.builtin.interop.contract.getminimumdeploymentfeemethod import GetMinimumDeploymentFeeMethod
-from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoProperty
+from boa3.model.builtin.interop.contract.getneoscripthashmethod import NeoToken
 from boa3.model.builtin.interop.contract.updatemethod import UpdateMethod

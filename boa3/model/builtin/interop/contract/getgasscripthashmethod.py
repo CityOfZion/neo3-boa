@@ -9,7 +9,6 @@ class GetGasScriptHashMethod(GetNep17ScriptHashMethod):
     def __init__(self):
         from boa3.constants import GAS_SCRIPT
         identifier = '-get_gas'
-        args: Dict[str, Variable] = {}
         super().__init__(GAS_SCRIPT, identifier)
 
     @property
@@ -26,3 +25,6 @@ class GasProperty(IBuiltinProperty):
         identifier = 'GAS'
         getter = GetGasScriptHashMethod()
         super().__init__(identifier, getter)
+
+
+GasToken = GasProperty()
