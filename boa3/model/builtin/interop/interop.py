@@ -65,7 +65,7 @@ class Interop:
     NamedCurveType = NamedCurveType()
     NotificationType = NotificationType.build()
     OracleResponseCode = OracleResponseCodeType.build()
-    OracleType = OracleType.build()
+    OracleType = OracleClass.build()
     RoleType = RoleType.build()
     SignerType = SignerType.build()
     StorageContextType = StorageContextType.build()

@@ -10,7 +10,14 @@ from boa3_test.tests.test_classes.transactionattribute.oracleresponse import Ora
 
 
 class TestNativeContracts(BoaTest):
-    default_folder: str = 'test_sc/interop_test/oracle'
+    default_folder: str = 'test_sc/native_test/oracle'
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.ORACLE_SCRIPT, result)
 
     def test_oracle_request(self):
         path = self.get_contract_path('OracleRequestCall.py')

@@ -1,6 +1,6 @@
 __all__ = ['OracleResponseCodeType',
-           'OracleType',
+           'OracleClass',
            ]
 
 from boa3.model.builtin.interop.oracle.oracleresponsecodetype import OracleResponseCodeType
-from boa3.model.builtin.interop.oracle.oracletype import OracleType
+from boa3.model.builtin.native.oracleclass import OracleClass

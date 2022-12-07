@@ -1,7 +1,8 @@
 from typing import Any, Union
 
 from boa3.builtin import public
-from boa3.builtin.interop.oracle import Oracle, OracleResponseCode
+from boa3.builtin.interop.oracle import OracleResponseCode
+from boa3.builtin.nativecontract.oracle import Oracle
 
 
 @public

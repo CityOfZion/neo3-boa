@@ -13,7 +13,7 @@ class CryptoLibClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('CryptoLib', CryptoLibContract.getter)
+        super().__init__('CryptoLib', CryptoLibContract)
 
     @property
     def class_methods(self) -> Dict[str, Method]:
