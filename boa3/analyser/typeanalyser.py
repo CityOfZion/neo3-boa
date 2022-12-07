@@ -1600,8 +1600,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_from_class_name = isinstance(origin, ast.Name) and isinstance(self.get_symbol(origin.id), UserClass)
         is_instance_variable_from_class = (isinstance(symbol, UserClass)
                                            and attribute.attr in symbol.instance_variables)
-        is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables
-        is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties
+        is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables and not symbol.is_interface
+        is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties and not symbol.is_interface
 
         if ((attr_symbol is None and hasattr(symbol, 'symbols'))
                 or is_invalid_method
