@@ -56,7 +56,10 @@ def contract(script_hash: type.ByteString):
     :param script_hash: Script hash of the interfaced contract
     :type script_hash: str or bytes
     """
-    pass
+    def decorator_wrapper(cls, *args, **kwargs):
+        cls.hash = script_hash
+        return cls
+    return decorator_wrapper
 
 
 def display_name(name: str):

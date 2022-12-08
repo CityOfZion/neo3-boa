@@ -181,3 +181,12 @@ class TestContractInterface(BoaTest):
         nep17_result = self.run_smart_contract(engine, nep17_path, 'symbol')
         result = self.run_smart_contract(engine, path, 'nep17_symbol')
         self.assertEqual(nep17_result, result)
+
+    def test_get_hash(self):
+        path = self.get_contract_path('ContractInterfaceGetHash.py')
+        engine = TestEngine()
+
+        contract_script_bytes = bytes(reversed(range(20)))
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(contract_script_bytes, result)
