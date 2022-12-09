@@ -1812,10 +1812,10 @@ class CodeGenerator:
             self.__insert_code(call_code)
             self._update_codes_with_target(call_code)
 
-        for arg in range(num_args):
-            self._stack_pop()
-        if function.is_init:
-            self._stack_pop()  # pop duplicated result if it's init
+            for arg in range(num_args):
+                self._stack_pop()
+            if function.is_init:
+                self._stack_pop()  # pop duplicated result if it's init
 
         if function.return_type is not Type.none:
             self._stack_append(function.return_type)
