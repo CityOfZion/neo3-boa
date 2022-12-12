@@ -263,8 +263,10 @@ class TestLedgerContract(BoaTest):
         path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
         engine = TestEngine()
 
-        example_account = bytes(range(20))
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000, signer_accounts=[example_account])
+        example_account_1 = bytes(range(20))
+        example_account_2 = bytes(20)
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000,
+                                signer_accounts=[example_account_1, example_account_2])
 
         txs = engine.get_transactions()
         self.assertGreater(len(txs), 0)
@@ -276,7 +278,7 @@ class TestLedgerContract(BoaTest):
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], list)
         self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
-        self.assertEqual(result[0][0], String.from_bytes(example_account))
+        self.assertEqual(result[0][0], String.from_bytes(example_account_1))
 
     def test_get_transaction_signers_mismatched_type(self):
         path = self.get_contract_path('GetTransactionSignersMismatchedType.py')

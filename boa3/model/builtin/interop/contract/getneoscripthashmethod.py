@@ -1,8 +1,7 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from boa3.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.model.builtin.interop.nativecontract.Nep17.getnep17scripthashmethod import GetNep17ScriptHashMethod
-from boa3.model.variable import Variable
 
 
 class GetNeoScriptHashMethod(GetNep17ScriptHashMethod):
