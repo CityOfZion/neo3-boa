@@ -28,6 +28,33 @@ class TestRuntimeInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', account)
         self.assertEqual(True, result)
 
+    def test_contract_with_check_witness(self):
+        path = self.get_contract_path('test_sc/interop_test/contract', 'CallScriptHash.py')
+        call_contract_path = self.get_contract_path('CheckWitness.py')
+        account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+
+        engine = TestEngine()
+        contract_method = 'Main'
+        contract_args = [account]
+        result = self.run_smart_contract(engine, call_contract_path, contract_method, *contract_args)
+        contract_hash = engine.executed_script_hash.to_array()
+        self.assertEqual(False, result)
+
+        engine.add_signer_account(account)
+        result = self.run_smart_contract(engine, call_contract_path, contract_method, *contract_args)
+        self.assertEqual(True, result)
+
+        engine.add_signer_account(account)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         contract_hash, contract_method, contract_args)
+        self.assertEqual(False, result)  # fail because the signer have CalledByEntry scope
+
+        from boa3_test.tests.test_classes.witnessscope import WitnessScope
+        engine.add_signer_account(account, WitnessScope.Global)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         contract_hash, contract_method, contract_args)
+        self.assertEqual(True, result)
+
     def test_check_witness_imported_as(self):
         path = self.get_contract_path('CheckWitnessImportedAs.py')
         account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
