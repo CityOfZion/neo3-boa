@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from boa3.model.builtin.interop.nativecontract import OracleContract
 from boa3.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.model.method import Method
-from boa3.model.property import Property
-from boa3.model.type.classes.classarraytype import ClassArrayType
-from boa3.model.variable import Variable
 
 
 class OracleClass(INativeContractClass):

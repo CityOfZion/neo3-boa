@@ -156,12 +156,18 @@ class TestEngine:
             account_index = self._accounts.index(account)
             if account_index != 0:  # the calling hash should be the first signer
                 account = self._accounts.pop(account_index)
+                account.add_scope(WitnessScope.CalledByEntry)
 
         self._accounts.insert(0, account)
         self._calling_script_hash = calling_script_hash
 
-    def add_signer_account(self, account_address: bytes, account_scope: WitnessScope = WitnessScope.CalledByEntry):
+    def add_signer_account(self, account_address: bytes, account_scope: WitnessScope = WitnessScope.CalledByEntry,
+                           permissions: list = None):
         account = Signer(UInt160(account_address), account_scope)
+        if permissions is None:
+            permissions = []
+
+        account.set_permissions(permissions)
         if account not in self._accounts:
             self._accounts.append(account)
 

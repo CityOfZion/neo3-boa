@@ -295,8 +295,9 @@ class BoaTest(TestCase):
         if calling_script_hash is not None and len(calling_script_hash) == constants.SIZE_OF_INT160:
             test_engine.set_calling_script_hash(calling_script_hash)
 
+        from boa3_test.tests.test_classes.witnessscope import WitnessScope
         for account in signer_accounts:
-            test_engine.add_signer_account(account)
+            test_engine.add_signer_account(account, WitnessScope.Global)
 
     def _filter_result(self, test_engine, expected_result_type, result) -> Any:
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
