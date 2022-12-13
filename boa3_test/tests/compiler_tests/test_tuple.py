@@ -195,23 +195,18 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('TupleOfTuple.py')
-        nef_path = path.replace('.py', '.nef')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        with self.assertRaisesRegex(TestExecutionException, self.NULL_POINTER_MSG):
-            # TODO: TestEngine fails when running contracts with arrays inside arrays args
-            self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        self.assertEqual(result, 1)
 
-        result = engine.run(nef_path, 'Main', ((1, 2), (3, 4)))
-        self.assertEqual(1, result)
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
+            self.run_smart_contract(engine, path, 'Main', ())
 
-        engine.run(nef_path, 'Main', ())
-        self.assertIsNotNone(engine.error)
-
-        engine.run(nef_path, 'Main', ((), (1, 2), (3, 4)))
-        self.assertIsNotNone(engine.error)
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
+            self.run_smart_contract(engine, path, 'Main', ((), (1, 2), (3, 4)))
 
     def test_nep5_main(self):
         expected_output = (

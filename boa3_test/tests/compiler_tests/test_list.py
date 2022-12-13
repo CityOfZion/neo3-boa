@@ -308,26 +308,18 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('ListOfList.py')
-        nef_path = path.replace('.py', '.nef')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main', [[1, 2], [3, 4]])
+        self.assertEqual(result, 1)
 
-        with self.assertRaisesRegex(TestExecutionException, self.NULL_POINTER_MSG):
-            # TODO: TestEngine error, on TestNet and PrivateNet the vm_state is 'HALT' instead of 'FAULT'
-            self.run_smart_contract(engine, path, 'Main', [[1, 2], [3, 4]])
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
+            self.run_smart_contract(engine, path, 'Main', [])
 
-        engine.run(nef_path, 'Main', [[1, 2], [3, 4]])
-        self.assertIsNotNone(engine.error)
-        from boa3.neo3.vm import VMState
-        self.assertEqual(engine.vm_state, VMState.FAULT)
-
-        engine.run(nef_path, 'Main', [])
-        self.assertIsNotNone(engine.error)
-
-        engine.run(nef_path, 'Main', [[], [1, 2], [3, 4]])
-        self.assertIsNotNone(engine.error)
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
+            self.run_smart_contract(engine, path, 'Main', [[], [1, 2], [3, 4]])
 
     def test_nep5_main(self):
         expected_output = (
