@@ -418,6 +418,10 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('MismatchedTypeAugAssign.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_invalid_type_format_mismatched_type(self):
+        path = self.get_contract_path('MismatchedTypeInvalidTypeFormat.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_global_declaration_with_assignment(self):
         expected_output = (
             Opcode.LDSFLD0

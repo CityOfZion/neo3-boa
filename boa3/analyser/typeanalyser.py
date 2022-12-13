@@ -170,6 +170,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param function: the python ast function definition node
         """
         self.visit(function.args)
+
         symbols = self.symbols if self._current_class is None else self._current_class.symbols
         method = symbols[function.name]
 

@@ -31,6 +31,7 @@ from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.classes.classscope import ClassScope
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.contractinterfaceclass import ContractInterfaceClass
+from boa3.model.type.classes.pythonclass import PythonClass
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -282,6 +283,37 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 return found_symbol
 
         return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
+
+    def get_annotation(self, value: Any, use_metatype: bool = False, accept_none: bool = False) -> Optional[IType]:
+        if not isinstance(value, ast.AST):
+            return None
+
+        annotation_type = self.get_type(value, use_metatype)
+        if not isinstance(annotation_type, PythonClass):
+            return annotation_type
+        if hasattr(value, 'value') and value.value is None and annotation_type is Type.none:
+            return annotation_type
+
+        if isinstance(value, (ast.Constant, ast.NameConstant, ast.List, ast.Tuple, ast.Dict, ast.Set)):
+            # annotated types should only accept types
+            return None
+        return annotation_type
+
+    def _check_annotation_type(self, node: ast.AST, origin_node: Optional[ast.AST] = None):
+        if node is None:
+            return
+
+        if origin_node is None:
+            origin_node = node
+
+        if self.get_annotation(node) is None:
+            actual_type = self.get_type(node)
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    origin_node.lineno, origin_node.col_offset,
+                    expected_type_id=type.__name__,
+                    actual_type_id=actual_type.identifier
+                ))
 
     # region Log
 
@@ -711,7 +743,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 valid_decorators.append(Builtin.ClassMethodDecorator)
 
         fun_args: FunctionArguments = self.visit(function.args)
-        fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
+        if function.returns is not None:
+            fun_rtype_symbol = self.visit(function.returns)
+            self._check_annotation_type(function.returns)
+        else:
+            fun_rtype_symbol = Type.none
 
         # TODO: remove when dictionary unpacking operator is implemented
         if function.args.kwarg is not None:
@@ -882,6 +918,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             var_symbol: ISymbol = self.get_symbol(arg.annotation.id, origin_node=arg)
             var_type = self.get_type(var_symbol)
 
+        self._check_annotation_type(arg.annotation, origin_node=arg)
+
         return var_id, Variable(var_type)
 
     def visit_Return(self, ret: ast.Return):
@@ -996,6 +1034,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_type: IType = self.visit_type(ann_assign.annotation)
         if var_type is Builtin.Event:
             self.visit(ann_assign.value)
+
+        self._check_annotation_type(ann_assign.annotation, ann_assign)
 
         # TODO: check if the annotated type and the value type are the same
         return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
