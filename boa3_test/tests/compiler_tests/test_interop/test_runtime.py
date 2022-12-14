@@ -379,6 +379,13 @@ class TestRuntimeInterop(BoaTest):
         output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
+    def test_get_executing_script_hash_on_deploy(self):
+        path = self.get_contract_path('ExecutingScriptHashOnDeploy.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'get_script')
+        self.assertEqual(engine.executed_script_hash.to_array(), result)
+
     def test_get_block_time(self):
         expected_output = (
             Opcode.SYSCALL
