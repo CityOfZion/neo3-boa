@@ -23,10 +23,17 @@ class TestContract:
             from boa3.neo.vm.opcode.Opcode import Opcode
             from boa3.neo.vm.opcode import OpcodeHelper
 
+            from boa3.neo3.core.types import UInt160
+            push_sender, sender = OpcodeHelper.get_pushdata_and_data(
+                UInt160.from_string("0x469cc2649dd10365ffd1e5e25af67b22042fa59c").to_array()  # mocked sender
+            )
             push_checksum, checksum = OpcodeHelper.get_push_and_data(NefFile.deserialize(file).checksum)
             push_name, contract_name = OpcodeHelper.get_pushdata_and_data(self._manifest['name'])
 
-            script = Opcode.ABORT + push_checksum + checksum + push_name + contract_name
+            script = (Opcode.ABORT
+                      + push_sender + sender
+                      + push_checksum + checksum
+                      + push_name + contract_name)
             return to_script_hash(script)
 
     def _read_manifest(self) -> dict:

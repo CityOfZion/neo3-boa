@@ -93,10 +93,10 @@ class TestTemplate(BoaTest):
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(2, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[1].arguments))
 
-        sender, receiver, amount = transfer_events[0].arguments
+        sender, receiver, amount = transfer_events[1].arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
@@ -451,8 +451,8 @@ class TestTemplate(BoaTest):
         self.assertEqual(minted_amount, amount)
 
         transfer_events = engine.get_events('Transfer', origin=wrapped_neo_address)
-        self.assertEqual(1, len(transfer_events))
-        wrapped_token_transfer_event = transfer_events[0]
+        self.assertEqual(2, len(transfer_events))
+        wrapped_token_transfer_event = transfer_events[1]
         self.assertEqual(3, len(wrapped_token_transfer_event.arguments))
 
         sender, receiver, amount = wrapped_token_transfer_event.arguments
