@@ -5,7 +5,7 @@
 
 from typing import Any
 
-from boa3.builtin import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep5TransferEvent
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.type import UInt160

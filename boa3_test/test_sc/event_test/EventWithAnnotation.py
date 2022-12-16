@@ -1,4 +1,5 @@
-from boa3.builtin import CreateNewEvent, Event, public
+from boa3.builtin.compile_time import public, CreateNewEvent
+from boa3.builtin.type import Event
 
 on_example: Event = CreateNewEvent(
     [

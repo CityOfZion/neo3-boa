@@ -1,4 +1,4 @@
-from boa3.builtin import metadata
+from boa3.builtin.compile_time import metadata
 
 
 def Main() -> int:

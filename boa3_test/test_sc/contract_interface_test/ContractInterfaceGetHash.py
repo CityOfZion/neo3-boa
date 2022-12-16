@@ -1,4 +1,4 @@
-from boa3.builtin import contract, public
+from boa3.builtin.compile_time import contract, public
 from boa3.builtin.type import UInt160
 
 

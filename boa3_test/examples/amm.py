@@ -1,6 +1,6 @@
 from typing import Any, List, Union
 
-from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import call_contract

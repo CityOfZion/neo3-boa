@@ -1,6 +1,6 @@
 from typing import cast
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import executing_script_hash, notify
 from boa3.builtin.interop.storage import find, get, get_context, put

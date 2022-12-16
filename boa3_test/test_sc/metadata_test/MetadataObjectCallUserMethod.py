@@ -1,4 +1,4 @@
-from boa3.builtin import NeoMetadata
+from boa3.builtin.compile_time import NeoMetadata
 
 
 def Main() -> int:

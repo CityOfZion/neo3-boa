@@ -1,4 +1,4 @@
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.neo import to_script_hash  # should not be imported
 
 

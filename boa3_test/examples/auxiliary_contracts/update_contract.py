@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.interop import storage
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement

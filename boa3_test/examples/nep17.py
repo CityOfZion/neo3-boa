@@ -1,6 +1,6 @@
 from typing import Any, Union, cast
 
-from boa3.builtin import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract

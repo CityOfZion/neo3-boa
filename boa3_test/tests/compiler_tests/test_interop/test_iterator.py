@@ -55,7 +55,6 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_implicit_typing(self):
         path = self.get_contract_path('IteratorImplicitTyping.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         prefix = 'test_iterator_'
@@ -73,7 +72,6 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_value_access(self):
         path = self.get_contract_path('IteratorValueAccess.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         prefix = 'test_iterator_'

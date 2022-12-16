@@ -1,4 +1,4 @@
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.role import Role
 from boa3.builtin.nativecontract.rolemanagement import RoleManagement
 from boa3.builtin.type import ECPoint
