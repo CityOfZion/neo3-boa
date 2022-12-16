@@ -1,8 +1,7 @@
 from typing import Any, Dict
 
 import FromImportAll as imported_module
-
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 
 
 @public

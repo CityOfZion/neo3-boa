@@ -1,4 +1,4 @@
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.type import ECPoint
 

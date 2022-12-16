@@ -1,6 +1,6 @@
 from typing import List
 
-from boa3.builtin import public, contract
+from boa3.builtin.compile_time import public, contract
 
 
 @public

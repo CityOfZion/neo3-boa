@@ -1,9 +1,8 @@
 from typing import Any, cast, Union
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop import runtime
 from boa3.builtin.type import UInt160
-
 
 TEST_AMOUNT_1 = 10
 TEST_AMOUNT_2 = 2

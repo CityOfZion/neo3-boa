@@ -10,7 +10,7 @@ from boa3.analyser.constructanalyser import ConstructAnalyser
 from boa3.analyser.moduleanalyser import ModuleAnalyser
 from boa3.analyser.supportedstandard.standardanalyser import StandardAnalyser
 from boa3.analyser.typeanalyser import TypeAnalyser
-from boa3.builtin import NeoMetadata
+from boa3.builtin.compile_time import NeoMetadata
 from boa3.exception.CompilerError import CompilerError
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.symbol import ISymbol

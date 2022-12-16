@@ -1,6 +1,7 @@
 from typing import Any
 
-from boa3.builtin import interop, public, type
+from boa3.builtin import interop, type
+from boa3.builtin.compile_time import public
 
 
 @public

@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.runtime import Notification, get_notifications, notify
 from boa3.builtin.type import UInt160
 

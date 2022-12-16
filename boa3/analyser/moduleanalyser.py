@@ -10,7 +10,7 @@ from boa3.analyser.model.ManifestSymbol import ManifestSymbol
 from boa3.analyser.model.functionarguments import FunctionArguments
 from boa3.analyser.model.optimizer import UndefinedType
 from boa3.analyser.model.symbolscope import SymbolScope
-from boa3.builtin import NeoMetadata
+from boa3.builtin.compile_time import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.decorator import ContractDecorator

@@ -4,12 +4,12 @@ from typing import Dict, List, Optional, Tuple, Union
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.classmethod import *
 from boa3.model.builtin.contract import *
+from boa3.model.builtin.compile_time import *
 from boa3.model.builtin.decorator import *
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.math import *
 from boa3.model.builtin.method import *
-from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.event import Event as EventSymbol
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -28,6 +28,7 @@ class BoaPackage(str, Enum):
     Interop = 'interop'
     Type = 'type'
     VM = 'vm'
+    CompileTime = 'compile_time'
 
 
 class Builtin:
@@ -201,15 +202,7 @@ class Builtin:
 
     # endregion
 
-    boa_builtins: List[IdentifiedSymbol] = [ContractInterface,
-                                            ContractMethodDisplayName,
-                                            Event,
-                                            Metadata,
-                                            NeoMetadataType,
-                                            NewEvent,
-                                            Public,
-                                            ScriptHash
-                                            ] + _modules
+    boa_builtins: List[IdentifiedSymbol] = _modules
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
         'name': str,
@@ -248,15 +241,24 @@ class Builtin:
                               Nep11Transfer,
                               Nep17Transfer,
                               Nep5Transfer,
+                              ScriptHash
                               ],
         BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: [ByteString,
                           ECPoint,
                           UInt160,
-                          UInt256
+                          UInt256,
+                          Event
                           ],
         BoaPackage.VM: [Opcode
-                        ]
+                        ],
+        BoaPackage.CompileTime: [ContractInterface,
+                                 ContractMethodDisplayName,
+                                 Metadata,
+                                 NeoMetadataType,
+                                 Public,
+                                 NewEvent
+                                 ]
     }
 
     _internal_methods = [InnerDeployMethod.instance()

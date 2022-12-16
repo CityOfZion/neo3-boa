@@ -1,4 +1,4 @@
-from boa3.builtin import contract, display_name
+from boa3.builtin.compile_time import contract, display_name
 
 bar = 'someMethod'
 
