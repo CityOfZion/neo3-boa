@@ -482,7 +482,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual('Deploy', event_name)
         script = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
         expected_result = [
             [constants.MANAGEMENT_SCRIPT, 'Deploy', script]
@@ -495,11 +495,11 @@ class TestRuntimeInterop(BoaTest):
         # it's the same Deploy error
         self.assertEqual(expected_result[0][:2], result[0][:2])
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'with_param', [], script)
         self.assertEqual([], result)
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], script)
         expected_result = []
         for x in [1, 2, 3]:
@@ -508,7 +508,7 @@ class TestRuntimeInterop(BoaTest):
                                     [x]])
         self.assertEqual(expected_result, result)
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
         self.assertEqual([], result)
 

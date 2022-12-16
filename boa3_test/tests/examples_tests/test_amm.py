@@ -30,7 +30,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path_zgas, 'symbol')
         zgas_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
 
@@ -106,7 +106,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path_zgas, 'symbol')
         zgas_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
@@ -153,7 +153,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path_zgas, 'symbol')
         zgas_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
@@ -379,7 +379,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path_zgas, 'symbol')
         zgas_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
@@ -519,7 +519,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path_zgas, 'symbol')
         zgas_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))
@@ -655,7 +655,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path_zgas, 'symbol')
         zgas_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         engine.add_contract(path_zneo.replace('.py', '.nef'))
         engine.add_contract(path_zgas.replace('.py', '.nef'))

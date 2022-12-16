@@ -48,7 +48,7 @@ class TestBlockchainInterop(BoaTest):
         nef, manifest = self.get_bytes_output(call_contract_path)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)

@@ -43,7 +43,7 @@ class TestHTLCTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'refund')
         htlc_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_neo(self.OTHER_ACCOUNT_1, transferred_amount_neo)
         engine.add_gas(self.OTHER_ACCOUNT_2, transferred_amount_gas)
 
@@ -154,7 +154,7 @@ class TestHTLCTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'refund')
         htlc_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_neo(self.OTHER_ACCOUNT_1, transferred_amount_neo)
         engine.add_gas(self.OTHER_ACCOUNT_2, transferred_amount_gas)
 
@@ -267,7 +267,7 @@ class TestHTLCTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'refund')
         htlc_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_neo(self.OTHER_ACCOUNT_1, transferred_amount_neo)
         engine.add_gas(self.OTHER_ACCOUNT_2, transferred_amount_gas)
 

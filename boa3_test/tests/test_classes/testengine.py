@@ -398,6 +398,7 @@ class TestEngine:
         self.reset_state()
         self._notifications.clear()
         self._storage.clear()
+        self._contract_paths.clear()
 
     def _filter_result(self, value: Any, called_method: str, contract_id=None):
         if contract_id is None:
