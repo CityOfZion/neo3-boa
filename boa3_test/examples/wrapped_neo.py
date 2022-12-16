@@ -21,8 +21,6 @@ def manifest_metadata() -> NeoMetadata:
     meta = NeoMetadata()
     meta.supported_standards = ['NEP-17']
     meta.add_permission(methods=['onNEP17Payment'])
-    # this contract needs to call NEO methods
-    meta.add_permission(contract='0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5')
 
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "Wrapped NEO Example"

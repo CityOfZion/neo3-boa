@@ -40,8 +40,10 @@ class Compiler:
         logging.info(f'Started compiling\t{filename}')
         self._entry_smart_contract = os.path.splitext(filename)[0]
 
+        from boa3.compiler.compiledmetadata import CompiledMetadata
         from boa3.model.imports.builtin import CompilerBuiltin
         CompilerBuiltin.reset()
+        CompiledMetadata.reset()
 
         self._analyse(fullpath, root_folder, log)
         return self._compile()

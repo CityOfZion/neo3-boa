@@ -22,8 +22,6 @@ def manifest_metadata() -> NeoMetadata:
     meta = NeoMetadata()
     meta.supported_standards = ['NEP-17']
     meta.add_permission(methods=['onNEP17Payment'])
-    # this contract needs to call GAS methods
-    meta.add_permission(contract='0xd2a4cff31913016155e38e474a2c06d08be276cf')
 
     meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
     meta.description = "Wrapped GAS Example"

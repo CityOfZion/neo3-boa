@@ -33,10 +33,6 @@ def manifest_metadata() -> NeoMetadata:
     meta.description = "Update Contract Example. This contract represents the updated smart contract to be deployed " \
                        "on the blockchain, with the method now working properly"
     meta.email = "contact@coz.io"
-
-    # requires access to ContractManagement methods
-    meta.add_permission(contract='0xfffdc93764dbaddd97c48f252a53ea4643faa3fd',
-                        methods=['update'])
     return meta
 
 
