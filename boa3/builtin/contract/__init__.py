@@ -1,7 +1,8 @@
-from typing import Union
+from typing import Union, Any
 
-from boa3.builtin import CreateNewEvent, Event
-from boa3.builtin.type import ByteString, ECPoint, UInt160
+from boa3.builtin.compile_time import CreateNewEvent
+from boa3.builtin.type import ByteString, ECPoint, UInt160, Event
+
 
 Nep5TransferEvent: Event = CreateNewEvent(
     [
@@ -75,3 +76,15 @@ class NeoAccountState:
         self.balance: int = 0
         self.height: int = 0
         self.vote_to: ECPoint = ECPoint(bytes(constants.SIZE_OF_ECPOINT))
+
+
+def to_script_hash(data_bytes: Any) -> bytes:
+    """
+    Converts a data to a script hash.
+
+    :param data_bytes: data to hash
+    :type data_bytes: Any
+    :return: the script hash of the data
+    :rtype: bytes
+    """
+    pass
