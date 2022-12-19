@@ -159,7 +159,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'symbol')
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_neo(wrapped_neo_address, 10_000_000 * 10 ** 8)
         burned_amount = 100 * 10 ** 8
 
@@ -224,7 +224,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'symbol')
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         allowed_amount = 10 * 10 ** 8
 
@@ -267,7 +267,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'symbol')
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         allowed_amount = 10 * 10 ** 8
 
@@ -301,7 +301,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'symbol')
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         allowed_amount = 10 * 10 ** 8
 
@@ -417,7 +417,7 @@ class TestTemplate(BoaTest):
         self.run_smart_contract(engine, path, 'symbol')
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
         minted_amount = 10 * 10 ** 8
         engine.add_neo(self.OTHER_ACCOUNT_1, minted_amount)

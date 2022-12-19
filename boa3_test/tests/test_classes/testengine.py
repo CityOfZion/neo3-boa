@@ -121,7 +121,7 @@ class TestEngine:
             self._storage[storage_key] = value
 
     def set_storage(self, storage: Dict[Tuple[Union[str, bytes], str], Any]):
-        self._storage.clear()
+        self._storage.clear(delete_deploy_data=False)
         for (key, contract_path), value in storage.items():
             self.storage_put(key, value, contract_path)
 
@@ -398,6 +398,7 @@ class TestEngine:
         self.reset_state()
         self._notifications.clear()
         self._storage.clear()
+        self._contract_paths.clear()
 
     def _filter_result(self, value: Any, called_method: str, contract_id=None):
         if contract_id is None:
