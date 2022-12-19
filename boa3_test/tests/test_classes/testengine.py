@@ -121,7 +121,7 @@ class TestEngine:
             self._storage[storage_key] = value
 
     def set_storage(self, storage: Dict[Tuple[Union[str, bytes], str], Any]):
-        self._storage.clear()
+        self._storage.clear(delete_deploy_data=False)
         for (key, contract_path), value in storage.items():
             self.storage_put(key, value, contract_path)
 

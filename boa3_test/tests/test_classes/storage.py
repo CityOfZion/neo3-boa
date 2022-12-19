@@ -18,11 +18,14 @@ class Storage:
         storage_key = StorageKey(key)
         return self._dict.pop(storage_key)
 
-    def clear(self):
+    def clear(self, delete_deploy_data: bool = True):
         prefix, native_id = get_native_contract_data(constants.MANAGEMENT_SCRIPT)
         for key in list(self._dict.keys()):
             should_delete = (key._ID > 0  # it's a deployd contract
-                             or key._ID == native_id and key._key.startswith(prefix)  # it's a deployed contract register
+                             or (delete_deploy_data
+                                 and key._ID == native_id
+                                 and key._key.startswith(prefix)  # it's a deployed contract register
+                                 )
                              )
             if should_delete:
                 # keep native contracts storage
