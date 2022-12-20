@@ -1,6 +1,8 @@
+from boa3 import constants
 from boa3.constants import IMPORT_WILDCARD
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.neo3.core.types import UInt160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -404,7 +406,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
 
-    def test_metadata_info_permissions_Wildcard(self):
+    def test_metadata_info_permissions_wildcard(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
         output, manifest = self.compile_and_save(path)
 
@@ -412,6 +414,19 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['permissions'], list)
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    def test_metadata_info_permissions_native_contract(self):
+        path = self.get_contract_path('MetadataInfoPermissionsNativeContract.py')
+        output, manifest = self.compile_and_save(path)
+
+        expected_permission = {
+            'contract': str(UInt160(constants.MANAGEMENT_SCRIPT)),
+            'methods': ['update', 'destroy']
+        }
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn(expected_permission, manifest['permissions'])
 
     def test_metadata_info_name(self):
         path = self.get_contract_path('MetadataInfoName.py')

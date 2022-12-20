@@ -19,6 +19,7 @@ def manifest_metadata() -> NeoMetadata:
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
+    meta.add_permission(methods=['transfer'])
     return meta
 
 

@@ -1,6 +1,7 @@
 import ast
 from typing import Dict, List, Tuple, Optional
 
+from boa3.compiler.compiledmetadata import CompiledMetadata
 from boa3.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
 from boa3.model.builtin.interop.interopmethod import InteropMethod
 from boa3.model.type.itype import IType
@@ -51,6 +52,7 @@ class NativeContractMethod(InteropMethod):
         if self._pack_arguments is None:
             self._pack_arguments = False
 
+        CompiledMetadata.instance().add_contract_permission(self.contract_script_hash, self._sys_call)
         self_method_token_id = self._get_method_token_id(call_flag)
 
         if isinstance(self_method_token_id, int) and self_method_token_id >= 0:
