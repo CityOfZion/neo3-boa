@@ -2138,7 +2138,8 @@ class CodeGenerator:
 
     def clear_stack(self, clear_if_in_loop: bool = False):
         if not clear_if_in_loop or len(self._current_for) > 0:
-            self.__insert1(OpcodeInfo.CLEAR)
+            for _ in range(self.stack_size):
+                self.__insert1(OpcodeInfo.DROP)
 
     def remove_stack_top_item(self):
         self.remove_stack_item(1)
