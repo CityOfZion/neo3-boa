@@ -54,6 +54,22 @@ class TestContractManagementContract(BoaTest):
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
 
+    def test_has_method(self):
+        path = self.get_contract_path('HasMethod.py')
+        engine = TestEngine()
+
+        test_method = 'add'
+        test_parameter_count = 2
+        result = self.run_smart_contract(engine, path, 'main', bytes(20), test_method, test_parameter_count)
+        self.assertEqual(False, result)
+
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
+
+        result = self.run_smart_contract(engine, path, 'main', call_hash, test_method, test_parameter_count)
+        self.assertEqual(True, result)
+
     def test_deploy_contract(self):
         path = self.get_contract_path('DeployContract.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')

@@ -21,9 +21,12 @@ class ContractManagementClass(INativeContractClass):
         from boa3.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
+            from boa3.model.builtin.native.contract_management import HasMethod
+
             self._class_methods = {
                 'get_minimum_deployment_fee': Interop.GetMinimumDeploymentFee,
                 'get_contract': Interop.GetContract,
+                'has_method': HasMethod(),
                 'deploy': Interop.CreateContract,
                 'update': Interop.UpdateContract,
                 'destroy': Interop.DestroyContract
