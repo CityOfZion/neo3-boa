@@ -1,8 +1,9 @@
-from typing import Any, List, Union
+from typing import Any, List, Union, Sequence
 
+from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
-from boa3.builtin.type import ECPoint, UInt160
+from boa3.builtin.type import ECPoint, UInt160, ByteString
 
 
 def check_witness(hash_or_pubkey: Union[UInt160, ECPoint]) -> bool:
@@ -90,6 +91,13 @@ def get_random() -> int:
 
     :return: the next random number
     :rtype: int
+    """
+    pass
+
+
+def load_script(script: ByteString, args: Sequence = (), flags: CallFlags = CallFlags.NONE) -> Any:
+    """
+    Loads a script at runtime.
     """
     pass
 

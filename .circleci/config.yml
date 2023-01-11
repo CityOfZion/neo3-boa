@@ -38,7 +38,7 @@ jobs:
 
             git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.4.0
             cd ./neo-devpack-dotnet
-            git checkout 138176b47accdc09ec5c757ab60080f0f4e2e3b4
+            git checkout 57bedc2a394cb6b94f60561f7bf5b6825d1f1c0e
             cd ..
             dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
 

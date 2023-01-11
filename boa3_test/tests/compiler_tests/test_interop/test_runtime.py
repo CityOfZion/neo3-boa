@@ -708,3 +708,20 @@ class TestRuntimeInterop(BoaTest):
     def test_address_version_cant_assign(self):
         path = self.get_contract_path('AddressVersionCantAssign.py')
         self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+
+    def test_load_script(self):
+        path = self.get_contract_path('LoadScriptDynamicCall.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        operand_1 = 1
+        operand_2 = 2
+        expected_result = operand_1 + operand_2
+        result = self.run_smart_contract(engine, path, 'dynamic_sum',
+                                         operand_1, operand_2)
+        self.assertEqual(expected_result, result)
+
+        from boa3.neo3.contracts import CallFlags
+        result = self.run_smart_contract(engine, path, 'dynamic_sum_with_flags',
+                                         operand_1, operand_2, CallFlags.READ_ONLY)
+        self.assertEqual(expected_result, result)
