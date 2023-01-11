@@ -8,6 +8,9 @@ class VMCodeMap:
         self._vm_code_list: List[VMCode] = []
         self._vm_code_addresses: List[int] = []
 
+        # optimization so it's not needed to iterate over everything in search of targets
+        self._vm_code_with_target: List[VMCode] = []
+
     def __len__(self) -> int:
         return min(len(self._vm_code_list), len(self._vm_code_addresses))
 
@@ -22,16 +25,22 @@ class VMCodeMap:
     def get_code_list(self) -> List[VMCode]:
         return self._vm_code_list
 
+    def get_code_with_target_list(self) -> List[VMCode]:
+        return self._vm_code_with_target
+
     def get_bytecode_size(self) -> int:
         if len(self) < 1:
             return 0
 
         return self._vm_code_addresses[-1] + self._vm_code_list[-1].size
 
-    def insert_code(self, vm_code: VMCode):
+    def insert_code(self, vm_code: VMCode, has_target: bool = False):
         if vm_code not in self._vm_code_list:
             self._vm_code_addresses.append(self.get_bytecode_size())
             self._vm_code_list.append(vm_code)
+
+            if has_target:
+                self._vm_code_with_target.append(vm_code)
 
     def get_code(self, address: int) -> Optional[VMCode]:
         try:
@@ -133,14 +142,14 @@ class VMCodeMap:
 
                 next_address += self._vm_code_list[index].size
 
-    def move_to_end(self, first_code_address: int, last_code_address: int) -> int:
+    def move_to_end(self, first_code_address: int, last_code_address: int) -> Optional[int]:
         if last_code_address < first_code_address:
             return
 
         if (len(self._vm_code_addresses) > 0 and
                 last_code_address == self._vm_code_addresses[-1]):
             # there's nothing to change if it's moving the all the codes
-            return self.get_bytecode_size()
+            return
 
         first_index = -1
         last_index = 0
@@ -169,8 +178,10 @@ class VMCodeMap:
         for code_address in sorted(addresses, reverse=True):
             try:
                 index = self._vm_code_addresses.index(code_address)
-                self._vm_code_list.pop(index)
+                code = self._vm_code_list.pop(index)
+
                 was_changed = True
+                self._vm_code_with_target.remove(code)
             except ValueError:
                 # don't stop the loop if an address is not found
                 continue

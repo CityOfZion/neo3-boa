@@ -28,7 +28,6 @@ class VMCodeMapping:
         return cls._instance
 
     def __init__(self):
-        # self._codes: Dict[int, VMCode] = {}
         self._code_map: VMCodeMap = VMCodeMap()
         self._method_tokens: MethodTokenCollection = MethodTokenCollection()
 
@@ -38,7 +37,6 @@ class VMCodeMapping:
         Resets the map to the first state
         """
         if cls._instance is not None:
-            # cls._instance._codes.clear()
             cls._instance._code_map.clear()
             cls._instance._method_tokens.clear()
 
@@ -76,8 +74,9 @@ class VMCodeMapping:
         :return: a dictionary that maps the targeted instructions to its source.
         """
         target_maps = {}
-        for address, code in self.code_map.items():
-            if OpcodeHelper.has_target(code.opcode) and code.target is not None and code.target is not code:
+        for code in self._code_map.get_code_with_target_list():
+            if code.target is not None and code.target is not code:
+                address = self.get_start_address(code)
                 target = self.get_start_address(code.target)
                 if target not in target_maps:
                     target_maps[target] = [address]
@@ -113,7 +112,7 @@ class VMCodeMapping:
         return self._code_map.get_bytecode_size()
 
     def insert_code(self, vm_code: VMCode):
-        return self._code_map.insert_code(vm_code)
+        return self._code_map.insert_code(vm_code, has_target=OpcodeHelper.has_target(vm_code.opcode))
 
     def get_code(self, address: int) -> Optional[VMCode]:
         """
@@ -173,10 +172,10 @@ class VMCodeMapping:
 
     def _update_targets(self):
         from boa3.neo.vm.type.Integer import Integer
-        for address, code in self.code_map.items():
-            if OpcodeHelper.has_target(code.opcode) and code.target is None:
+        for code in self._code_map.get_code_with_target_list():
+            if code.target is None:
                 relative = Integer.from_bytes(code.data)
-                absolute = address + relative
+                absolute = self._code_map.get_start_address(code) + relative
                 if absolute in self.code_map:
                     code.set_target(self.code_map[absolute])
 
@@ -238,6 +237,9 @@ class VMCodeMapping:
         :param last_code_address: last instruction end address
         """
         result = self._code_map.move_to_end(first_code_address, last_code_address)
+        if not isinstance(result, int):
+            return self.bytecode_size
+
         self._update_targets()
         return result
 
@@ -258,8 +260,8 @@ class VMCodeMapping:
         Checks if each instruction that requires a target has one set and remove those that don't
         """
         addresses_to_remove = []
-        for code in self._code_map.get_code_list():
-            if OpcodeHelper.has_target(code.opcode) and (code.target is None or code.target is code):
+        for code in self._code_map.get_code_with_target_list():
+            if code.target is None or code.target is code:
                 address = self.get_start_address(code)
                 self._validate_targets(address)
                 addresses_to_remove.append(address)
