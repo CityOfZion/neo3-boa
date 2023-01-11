@@ -12,6 +12,7 @@ class LoadScriptMethod(InteropMethod):
         from boa3.model.builtin.interop.contract.callflagstype import CallFlagsType
         from boa3.model.type.type import Type
         from boa3.model.type.primitive.bytestringtype import ByteStringType
+        from boa3.neo3.contracts import CallFlags
 
         identifier = 'load_script'
         syscall = 'System.Runtime.LoadScript'
@@ -26,7 +27,7 @@ class LoadScriptMethod(InteropMethod):
         args_default = ast.parse("{0}".format(Type.sequence.default_value)
                                  ).body[0].value
         call_flags_default = set_internal_call(ast.parse("{0}.{1}".format(call_flags.identifier,
-                                                                          call_flags.get_value("NONE").name)
+                                                                          CallFlags.NONE.name)
                                                          ).body[0].value)
 
         super().__init__(identifier, syscall, args, defaults=[args_default, call_flags_default], return_type=Type.any)
