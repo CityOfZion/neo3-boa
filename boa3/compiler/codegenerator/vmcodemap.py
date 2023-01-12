@@ -12,11 +12,11 @@ class VMCodeMap:
         self._vm_code_with_target: List[VMCode] = []
 
     def __len__(self) -> int:
-        return min(len(self._vm_code_list), len(self._vm_code_addresses))
+        return self._vm_code_list.__len__()
 
     def clear(self):
         self._vm_code_addresses.clear()
-        return self._vm_code_list.clear()
+        self._vm_code_list.clear()
 
     def get_code_map(self) -> Dict[int, VMCode]:
         size = len(self)
