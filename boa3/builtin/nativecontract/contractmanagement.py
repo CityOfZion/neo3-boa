@@ -35,6 +35,24 @@ class ContractManagement:
         pass
 
     @classmethod
+    def has_method(cls, hash: UInt160, method: str, parameter_count: int) -> bool:
+        """
+        Check if a method exists in a contract.
+
+        :param hash: The hash of the deployed contract
+        :type hash: UInt160
+        :param method: The name of the method
+        :type method: str
+        :param parameter_count: The number of parameters
+        :type parameter_count: int
+        :return: whether the method exists or not
+        :rtype: bool
+
+        :raise Exception: raised if hash length isn't 20 bytes or if the parameter_count is less than 0.
+        """
+        pass
+
+    @classmethod
     def deploy(cls, nef_file: bytes, manifest: bytes, data: Any = None) -> Contract:
         """
         Creates a smart contract given the script and the manifest.
