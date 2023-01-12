@@ -10,6 +10,7 @@ __all__ = ['AddressVersionProperty',
            'GetNotificationsMethod',
            'GetRandomMethod',
            'InvocationCounterProperty',
+           'LoadScriptMethod',
            'LogMethod',
            'NotificationType',
            'NotifyMethod',
@@ -33,6 +34,7 @@ from boa3.model.builtin.interop.runtime.getnotificationsmethod import GetNotific
 from boa3.model.builtin.interop.runtime.getplatformmethod import PlatformProperty
 from boa3.model.builtin.interop.runtime.getrandommethod import GetRandomMethod
 from boa3.model.builtin.interop.runtime.gettriggermethod import GetTriggerMethod
+from boa3.model.builtin.interop.runtime.loadscriptmethod import LoadScriptMethod
 from boa3.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.model.builtin.interop.runtime.notifymethod import NotifyMethod

@@ -18,6 +18,10 @@ from boa3.model.event import Event
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 
+__all__ = ['Interop',
+           'InteropPackage'
+           ]
+
 
 class InteropPackage(str, Enum):
     Blockchain = 'blockchain'
@@ -149,6 +153,7 @@ class Interop:
     GetRandom = GetRandomMethod()
     GetTrigger = GetTriggerMethod(TriggerType)
     InvocationCounter = InvocationCounterProperty()
+    LoadScript = LoadScriptMethod()
     Log = LogMethod()
     Notify = NotifyMethod()
     Platform = PlatformProperty()
@@ -350,6 +355,7 @@ class Interop:
                                       GetNotifications,
                                       GetRandom,
                                       GetTrigger,
+                                      LoadScript,
                                       Log,
                                       Notify
                                       ],
