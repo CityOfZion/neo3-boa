@@ -28,6 +28,10 @@ class OpcodeInfo:
     PUSHINT128 = OpcodeInformation(Opcode.PUSHINT128, 16)
     PUSHINT256 = OpcodeInformation(Opcode.PUSHINT256, 32)
 
+    # Pushes the boolean value True onto the stack.
+    PUSHT = OpcodeInformation(Opcode.PUSHT)
+    # Pushes the boolean value False onto the stack.
+    PUSHF = OpcodeInformation(Opcode.PUSHF)
     # Convert the next four bytes to an address, and push the address onto the stack.
     PUSHA = OpcodeInformation(Opcode.PUSHA, 4)
     # The item null is pushed onto the stack.

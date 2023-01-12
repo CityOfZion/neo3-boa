@@ -2,7 +2,6 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -17,8 +16,7 @@ class TestIf(BoaTest):
             + b'\x00'
             + Opcode.PUSH0      # a = 0
             + Opcode.STLOC0
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.JMPIFNOT   # if True
             + Integer(4).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSH2     # a = a + 2

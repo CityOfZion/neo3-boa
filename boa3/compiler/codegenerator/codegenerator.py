@@ -654,7 +654,7 @@ class CodeGenerator:
             if not has_else:
                 self._opcodes_to_remove.extend(is_loop_insertions)
             else:
-                min_break_addresses = 5 if is_for else 4
+                min_break_addresses = 4 if is_for else 3
                 if (start_address in self._jumps_to_loop_break
                         and len(self._jumps_to_loop_break[start_address]) < 2
                         and len(is_loop_insertions) < min_break_addresses):
@@ -952,11 +952,10 @@ class CodeGenerator:
         :param value: the value to be converted
         """
         if value:
-            self.__insert1(OpcodeInfo.PUSH1)
+            self.__insert1(OpcodeInfo.PUSHT)
         else:
-            self.__insert1(OpcodeInfo.PUSH0)
-        self._stack_append(Type.int)  # don't add bool to stack directly for optimizations
-        self.convert_cast(Type.bool)
+            self.__insert1(OpcodeInfo.PUSHF)
+        self._stack_append(Type.bool)
 
     def convert_sequence_literal(self, sequence: Sequence):
         """
