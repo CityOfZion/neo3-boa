@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Union
 
 from boa3.compiler.codegenerator.methodtokencollection import MethodTokenCollection
+from boa3.compiler.codegenerator.vmcodemap import VMCodeMap
 from boa3.compiler.compileroutput import CompilerOutput
 from boa3.model.builtin.method import IBuiltinMethod
 from boa3.neo.vm.VMCode import VMCode
@@ -27,7 +28,7 @@ class VMCodeMapping:
         return cls._instance
 
     def __init__(self):
-        self._codes: Dict[int, VMCode] = {}
+        self._code_map: VMCodeMap = VMCodeMap()
         self._method_tokens: MethodTokenCollection = MethodTokenCollection()
 
     @classmethod
@@ -36,7 +37,7 @@ class VMCodeMapping:
         Resets the map to the first state
         """
         if cls._instance is not None:
-            cls._instance._codes.clear()
+            cls._instance._code_map.clear()
             cls._instance._method_tokens.clear()
 
     def add_method_token(self, method: IBuiltinMethod, call_flag: CallFlags) -> Optional[int]:
@@ -55,7 +56,7 @@ class VMCodeMapping:
 
         :return: a list of vm codes ordered by its address in the bytecode
         """
-        return list(self.code_map.values())
+        return self._code_map.get_code_list()
 
     @property
     def code_map(self) -> Dict[int, VMCode]:
@@ -64,7 +65,7 @@ class VMCodeMapping:
 
         :return: a dictionary that maps each instruction with its address. The keys are ordered by the address.
         """
-        return {key: self._codes[key] for key in sorted(self._codes)}
+        return self._code_map.get_code_map()
 
     def targeted_address(self) -> Dict[int, List[int]]:
         """
@@ -73,8 +74,9 @@ class VMCodeMapping:
         :return: a dictionary that maps the targeted instructions to its source.
         """
         target_maps = {}
-        for address, code in self.code_map.items():
-            if OpcodeHelper.has_target(code.opcode) and code.target is not None and code.target is not code:
+        for code in self._code_map.get_code_with_target_list():
+            if code.target is not None and code.target is not code:
+                address = self.get_start_address(code)
                 target = self.get_start_address(code.target)
                 if target not in target_maps:
                     target_maps[target] = [address]
@@ -107,15 +109,10 @@ class VMCodeMapping:
 
     @property
     def bytecode_size(self) -> int:
-        if len(self._codes) < 1:
-            return 0
-
-        last_key = list(self.code_map)[-1]
-        return last_key + self._codes[last_key].size
+        return self._code_map.get_bytecode_size()
 
     def insert_code(self, vm_code: VMCode):
-        if vm_code not in self._codes.values():
-            self._codes[self.bytecode_size] = vm_code
+        return self._code_map.insert_code(vm_code, has_target=OpcodeHelper.has_target(vm_code.opcode))
 
     def get_code(self, address: int) -> Optional[VMCode]:
         """
@@ -125,29 +122,10 @@ class VMCodeMapping:
         :return: the opcode if it exists. None otherwise
         :rtype: VMCode or None
         """
-        if address in self._codes:
-            return self._codes[address]
-        elif address >= self.bytecode_size:
-            # the address is not in the bytecode
-            return None
-        else:
-            # if the address is not the start of a instruction, gets the last instruction before given address
-            code_address = 0
-            for addr in self._codes:
-                if addr > address:
-                    break
-                code_address = addr
-            return self._codes[code_address]
+        return self._code_map.get_code(address)
 
     def get_addresses(self, start_address: int, end_address: int) -> List[int]:
-        if start_address > end_address:
-            start_address, end_address = end_address, start_address
-
-        addresses = []
-        for address in range(start_address, end_address + 1):
-            if address in self._codes:
-                addresses.append(address)
-        return addresses
+        return self._code_map.get_addresses(start_address, end_address)
 
     def get_start_address(self, vm_code: VMCode) -> int:
         """
@@ -156,9 +134,7 @@ class VMCodeMapping:
         :param vm_code: the instruction to get the address
         :return: the vm code's address if it's in the map. Otherwise, return's zero.
         """
-        if vm_code not in self._codes.values():
-            return 0
-        return next(key for key, value in self._codes.items() if value == vm_code)
+        return self._code_map.get_start_address(vm_code)
 
     def get_end_address(self, vm_code: VMCode) -> int:
         """
@@ -167,17 +143,10 @@ class VMCodeMapping:
         :param vm_code: the instruction to get the address
         :return: the vm code's last address if it's in the map. Otherwise, return's zero.
         """
-        if vm_code not in self._codes.values():
-            return 0
-        return self.get_start_address(vm_code) + vm_code.size - 1  # start + size returns next opcode address
+        return self._code_map.get_end_address(vm_code)
 
     def get_opcodes(self, addresses: List[int]) -> List[VMCode]:
-        codes = []
-        for index in sorted(addresses):
-            if index in self._codes:
-                codes.append(self._codes[index])
-
-        return codes
+        return self._code_map.get_opcodes(addresses)
 
     def update_vm_code(self, vm_code: VMCode, opcode: OpcodeInformation, data: bytes = bytes()):
         """
@@ -199,27 +168,14 @@ class VMCodeMapping:
 
         :param start_address: the address from the changed opcode
         """
-        new_address = -1
-        last_code: VMCode = None
-        updated_codes: Dict[int, VMCode] = {}
-
-        for address, code in list(self.code_map.items()):
-            if address >= start_address:
-                if new_address < 0:
-                    new_address = self.get_start_address(last_code) if last_code is not None else 0
-
-                new_address += last_code.size if last_code is not None else 0
-                if new_address != address:
-                    updated_codes[new_address] = self._codes.pop(address)
-            last_code = code
-        self._codes.update(updated_codes)
+        return self._code_map.update_addresses(start_address)
 
     def _update_targets(self):
         from boa3.neo.vm.type.Integer import Integer
-        for address, code in self.code_map.items():
-            if OpcodeHelper.has_target(code.opcode) and code.target is None:
+        for code in self._code_map.get_code_with_target_list():
+            if code.target is None:
                 relative = Integer.from_bytes(code.data)
-                absolute = address + relative
+                absolute = self._code_map.get_start_address(code) + relative
                 if absolute in self.code_map:
                     code.set_target(self.code_map[absolute])
 
@@ -228,7 +184,7 @@ class VMCodeMapping:
         Checks if each instruction data fits in its opcode maximum size and updates the opcode from those that don't
         """
         # gets a list with all instructions which its opcode has a larger equivalent, ordered by its address
-        instr_with_small_codes = [code for code in self._codes.values() if OpcodeHelper.has_larger_opcode(code.opcode)]
+        instr_with_small_codes = [code for code in self._code_map.get_code_list() if OpcodeHelper.has_larger_opcode(code.opcode)]
         instr_with_small_codes.sort(key=lambda code: self.get_start_address(code), reverse=True)
 
         from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
@@ -269,74 +225,46 @@ class VMCodeMapping:
         if address in targeted_addresses:
             next_address = self.get_end_address(code) + 1
             if next_address < self.bytecode_size:
-                next_code = self._codes[next_address]
+                next_code = self._code_map.get_code(next_address)
                 for source in targeted_addresses[address]:
-                    self._codes[source].set_target(next_code)
+                    self._code_map.get_code(source).set_target(next_code)
 
-    def move_to_end(self, first_code_address: int, last_code_address: int):
+    def move_to_end(self, first_code_address: int, last_code_address: int) -> int:
         """
         Moves a set of instructions to the end of the current bytecode
 
         :param first_code_address: first instruction start address
         :param last_code_address: last instruction end address
         """
-        if last_code_address < first_code_address:
-            return
+        result = self._code_map.move_to_end(first_code_address, last_code_address)
+        if not isinstance(result, int):
+            return self.bytecode_size
 
-        moved_codes: List[VMCode] = []
-        for address in list(self.code_map):
-            if first_code_address <= address <= last_code_address:
-                moved_codes.append(self._codes.pop(address))
-            elif address > last_code_address:
-                break
-
-        self._update_addresses(first_code_address)
-        index = self.bytecode_size
-
-        for code in moved_codes:
-            self.insert_code(code)
         self._update_targets()
-        return index
+        return result
 
     def remove_opcodes(self, first_code_address: int, last_code_address: int):
-        if last_code_address < first_code_address:
-            first_code_address, last_code_address = last_code_address, first_code_address
-
-        map_codes = self._codes.copy()
-        for index in sorted(map_codes):
-            if first_code_address <= index <= last_code_address:
-                self._validate_targets(index)
-                self._codes.pop(index)
-
-        self._update_addresses()
-
-    def remove_opcodes_by_addresses(self, addresses: List[int]):
-        for index in sorted(self._codes).copy():
-            if index in addresses:
-                self._validate_targets(index)
-                self._codes.pop(index)
-
-        self._update_addresses()
+        addresses_to_remove = self._code_map.get_addresses(first_code_address, last_code_address)
+        for address in addresses_to_remove:
+            self._validate_targets(address)
+        return self._code_map.remove_opcodes_by_addresses(addresses_to_remove)
 
     def remove_opcodes_by_code(self, codes: List[VMCode]):
-        code_map = self.code_map
-        addresses = list(code_map.keys()).copy()
-        code_list = list(code_map.values()).copy()
-
-        for code in codes:
-            if code in code_list:
-                self._validate_targets(code)
-                self._codes.pop(addresses[code_list.index(code)])
-
-        self._update_addresses()
+        addresses_to_remove = self._code_map.get_addresses_from_codes(codes)
+        for address in addresses_to_remove:
+            self._validate_targets(address)
+        return self._code_map.remove_opcodes_by_addresses(addresses_to_remove)
 
     def _remove_empty_targets(self):
         """
         Checks if each instruction that requires a target has one set and remove those that don't
         """
-        for code in list(self._codes.values()).copy():
-            if OpcodeHelper.has_target(code.opcode) and (code.target is None or code.target is code):
-                self._validate_targets(code)
-                index = self.get_start_address(code)
-                self._codes.pop(index)
-                self._update_addresses(index)
+        addresses_to_remove = []
+        for code in self._code_map.get_code_with_target_list():
+            if code.target is None or code.target is code:
+                address = self.get_start_address(code)
+                self._validate_targets(address)
+                addresses_to_remove.append(address)
+
+        if len(addresses_to_remove) > 0:
+            self._code_map.remove_opcodes_by_addresses(addresses_to_remove)
