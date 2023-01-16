@@ -96,7 +96,7 @@ class TestContractInterface(BoaTest):
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = UInt160.from_string('0c368af001e4f4023ff5bcacef4b4412178ebcf0').to_array()
+        contract_script_bytes = UInt160.from_string('c03e26a749b7f1f3ecc33e549fe3731d60e72813').to_array()
 
         expected_output = (
             Opcode.NEWARRAY0    # arguments list
@@ -132,7 +132,7 @@ class TestContractInterface(BoaTest):
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = UInt160.from_string('0c368af001e4f4023ff5bcacef4b4412178ebcf0').to_array()
+        contract_script_bytes = UInt160.from_string('c03e26a749b7f1f3ecc33e549fe3731d60e72813').to_array()
 
         expected_output = (
             # start public method

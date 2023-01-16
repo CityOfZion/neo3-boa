@@ -6,7 +6,6 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.model.type.type import Type
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
@@ -292,8 +291,7 @@ class TestCryptoInterop(BoaTest):
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
             + self.ecpoint_init
-            + Opcode.PUSH0
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHF
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET
@@ -407,8 +405,7 @@ class TestCryptoInterop(BoaTest):
             + Integer(len(byte_input1)).to_byte_array(min_length=1)
             + byte_input1
             + self.ecpoint_init
-            + Opcode.PUSH0
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHF
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.DROP
             + Opcode.RET

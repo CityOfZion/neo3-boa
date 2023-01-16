@@ -5,7 +5,6 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.neo import to_script_hash
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import TriggerType
 from boa3_test.tests.boa_test import BoaTest
@@ -137,8 +136,7 @@ class TestRuntimeInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.PUSH1
             + Opcode.PACK
             + Opcode.SWAP

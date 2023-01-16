@@ -19,6 +19,10 @@ class Opcode(bytes, Enum):
     # Pushes a 32-byte signed integer onto the stack.
     PUSHINT256 = b'\x05'
 
+    # Pushes the boolean value True onto the stack.
+    PUSHT = b'\x08'
+    # Pushes the boolean value False onto the stack.
+    PUSHF = b'\x09'
     # Converts the 4-bytes offset to a Pointer, and pushes it onto the stack.
     PUSHA = b'\x0A'
     # The item null is pushed onto the stack.

@@ -2,7 +2,6 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -84,8 +83,7 @@ class TestDict(BoaTest):
             + Opcode.NEWMAP  # a = {1: True, 2: 4, 3: 'nine'}
             + Opcode.DUP
             + Opcode.PUSH1      # map[1] = True
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.SETITEM
             + Opcode.DUP
             + Opcode.PUSH2      # map[2] = 4
@@ -116,18 +114,15 @@ class TestDict(BoaTest):
             + Opcode.NEWMAP
             + Opcode.DUP
             + Opcode.PUSH14
-            + Opcode.PUSH0
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHF
             + Opcode.SETITEM
             + Opcode.DUP
             + Opcode.PUSH12
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.SETITEM
             + Opcode.DUP
             + Opcode.PUSH5
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.DUP
@@ -135,13 +130,11 @@ class TestDict(BoaTest):
             + Opcode.NEWMAP
             + Opcode.DUP
             + Opcode.PUSH0
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.SETITEM
             + Opcode.DUP
             + Opcode.PUSH6
-            + Opcode.PUSH0
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHF
             + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.DUP
@@ -149,8 +142,7 @@ class TestDict(BoaTest):
             + Opcode.NEWMAP
             + Opcode.DUP
             + Opcode.PUSH11
-            + Opcode.PUSH0
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHF
             + Opcode.SETITEM
             + Opcode.SETITEM
             + Opcode.STLOC0
