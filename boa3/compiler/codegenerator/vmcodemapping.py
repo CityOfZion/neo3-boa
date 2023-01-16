@@ -243,7 +243,9 @@ class VMCodeMapping:
         self._update_targets()
         return result
 
-    def remove_opcodes(self, first_code_address: int, last_code_address: int):
+    def remove_opcodes(self, first_code_address: int, last_code_address: int = None):
+        if not isinstance(last_code_address, int):
+            last_code_address = self.bytecode_size
         addresses_to_remove = self._code_map.get_addresses(first_code_address, last_code_address)
         for address in addresses_to_remove:
             self._validate_targets(address)

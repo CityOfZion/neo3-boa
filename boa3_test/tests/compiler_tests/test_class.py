@@ -237,6 +237,10 @@ class TestClass(BoaTest):
         path = self.get_contract_path('UserClassUpdateClassVariable.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
+    def test_user_class_update_instance_variable_on_init(self):
+        path = self.get_contract_path('UserClassUpdateClassVariableOnInit.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
     def test_user_class_with_class_variable_and_class_method(self):
         path = self.get_contract_path('UserClassWithClassVariableAndClassMethod.py')
         engine = TestEngine()
