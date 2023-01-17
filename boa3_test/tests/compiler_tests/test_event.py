@@ -5,6 +5,7 @@ from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
+from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -271,6 +272,30 @@ class TestEvent(BoaTest):
     def test_event_call_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeCallEvent.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_with_abort(self):
+        path = self.get_contract_path('EventWithAbort.py')
+        self.compile_and_save(path)
+
+        engine = TestEngine()
+
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
+            self.run_smart_contract(engine, path, 'send_event_with_abort')
+        self.assertEqual(0, len(engine.notifications))
+
+        result = self.run_smart_contract(engine, path, 'send_event')
+        self.assertIsVoid(result)
+        self.assertGreater(len(engine.notifications), 0)
+
+        previous_notification_count = len(engine.notifications)
+        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
+            """
+            Notifications on a fault execution aren't logged into the blockchain
+            Even with rollback_on_fault set as False, TestEngine doesn't return it because that's the expected behavior
+            """
+            self.run_smart_contract(engine, path, 'send_event_with_abort', rollback_on_fault=False)
+
+        self.assertEqual(previous_notification_count, len(engine.notifications))
 
     def test_boa2_event_test(self):
         path = self.get_contract_path('EventBoa2Test.py')
