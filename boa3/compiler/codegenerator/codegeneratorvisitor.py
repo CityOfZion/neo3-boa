@@ -70,6 +70,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                    symbol: Optional[ISymbol] = None,
                    result_type: Optional[IType] = None,
                    index: Optional[int] = None,
+                   origin_object_type: Optional[ISymbol] = None,
                    already_generated: bool = False) -> GeneratorData:
 
         if isinstance(symbol, IType) and result_type is None:
@@ -89,7 +90,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             if found_symbol is not None:
                 symbol = found_symbol
 
-        return GeneratorData(origin_node, symbol_id, symbol, result_type, index, already_generated)
+        return GeneratorData(origin_node, symbol_id, symbol, result_type, index, origin_object_type, already_generated)
 
     def visit(self, node: ast.AST) -> GeneratorData:
         result = super().visit(node)
@@ -439,6 +440,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param aug_assign: the python ast augmented assignment node
         """
+        start_address = self.generator.bytecode_size
         var_data = self.visit(aug_assign.target)
         var_id = var_data.symbol_id
         # filter to find the imported variables
@@ -449,12 +451,15 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if isinstance(var_data.type, UserClass):
             self.generator.duplicate_stack_top_item()
+        elif hasattr(var_data.origin_object_type, 'identifier') and var_data.already_generated:
+            VMCodeMapping.instance().remove_opcodes(start_address)
+            self.generator.convert_load_symbol(var_data.origin_object_type.identifier)
 
-        self.generator.convert_load_symbol(var_id)
+        self.generator.convert_load_symbol(var_id, class_type=var_data.origin_object_type)
         value_address = self.generator.bytecode_size
         self.visit_to_generate(aug_assign.value)
         self.generator.convert_operation(aug_assign.op)
-        self.generator.convert_store_variable(var_id, value_address)
+        self.generator.convert_store_variable(var_id, value_address, user_class=var_data.origin_object_type)
         return self.build_data(aug_assign)
 
     def visit_Subscript(self, subscript: ast.Subscript) -> GeneratorData:
@@ -934,7 +939,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         last_address = VMCodeMapping.instance().bytecode_size
         last_stack = self.generator.stack_size
 
-        _, attr = self.generator.get_symbol(attribute.attr)
+        _attr, attr = self.generator.get_symbol(attribute.attr)
         value = attribute.value
         value_symbol = None
         value_type = None
@@ -960,9 +965,15 @@ class VisitorCodeGenerator(IAstAnalyser):
                     need_to_visit_again = False
 
                 if isinstance(attr, Variable):
+                    cur_bytesize = self.generator.bytecode_size
                     self.visit_to_generate(attribute.value)
                     self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
-                    return self.build_data(attribute, symbol=attr)
+
+                    symbol_id = _attr if isinstance(_attr, str) else None
+                    return self.build_data(attribute,
+                                           already_generated=self.generator.bytecode_size > cur_bytesize,
+                                           symbol=attr, symbol_id=symbol_id,
+                                           origin_object_type=value_symbol)
         else:
             if isinstance(value, ast.Attribute) and value_data.already_generated:
                 need_to_visit_again = False

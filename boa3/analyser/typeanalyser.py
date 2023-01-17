@@ -1616,7 +1616,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 
-        if not is_from_class_name and is_class_variable_from_class and isinstance(attribute.ctx, ast.Store):
+        if is_class_variable_from_class and isinstance(attribute.ctx, ast.Store):
             # reassign class variables in objects is not supported yet
             self._log_error(
                 CompilerError.NotSupportedOperation(
