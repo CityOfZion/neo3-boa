@@ -72,4 +72,3 @@ class CompiledMetadata:
             self._metadata.add_permission(contract=contract_hex_script,
                                           methods=([method_string] if method_string != constants.IMPORT_WILDCARD
                                                    else method_string))
-

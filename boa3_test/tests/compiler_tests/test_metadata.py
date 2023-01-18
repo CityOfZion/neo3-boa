@@ -519,4 +519,3 @@ class TestMetadata(BoaTest):
     def test_metadata_info_source_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoSourceMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
-

@@ -104,12 +104,12 @@ class JoinMethod(IBuiltinMethod):
         ]
 
         jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_index +
-                                                                                   concat_strings))
+                                                                                         concat_strings))
         concat_strings.append(jmp_back_to_verify)
 
         jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(initialize_string +
-                                                                                   verify_index +
-                                                                                   concat_strings), True)
+                                                                                         verify_index +
+                                                                                         concat_strings), True)
         verify_empty_string[-1] = jmp_concatenation
 
         add_empty_string = [            # add a empty string at the top of the stack
@@ -117,7 +117,7 @@ class JoinMethod(IBuiltinMethod):
         ]
 
         jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(concat_strings +
-                                                                                   add_empty_string), True)
+                                                                                         add_empty_string), True)
         verify_index[-1] = jmp_concatenation
 
         remove_extra_values = [         # remove all values from stack except the joined string

@@ -3,7 +3,6 @@ from typing import Union, Any
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.type import ByteString, ECPoint, UInt160, Event
 
-
 Nep5TransferEvent: Event = CreateNewEvent(
     [
         ('from', bytes),

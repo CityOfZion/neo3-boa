@@ -150,7 +150,7 @@ class IntByteStringMethod(IntMethod):
         )
 
         verify_code_literal_first_char_is_0[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPNE_L,
-                                                                           get_bytes_count(jump_instructions), True)
+                                                                                 get_bytes_count(jump_instructions), True)
 
         # endregion
 
@@ -298,7 +298,7 @@ class IntByteStringMethod(IntMethod):
         )
 
         ascii_to_int_verify_az_upper[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP,
-                                                                    get_bytes_count(jump_instructions), True)
+                                                                          get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_verify_az_upper_gt +
@@ -306,7 +306,7 @@ class IntByteStringMethod(IntMethod):
         )
 
         ascii_to_int_verify_az_upper_lt[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPLT,
-                                                                       get_bytes_count(jump_instructions), True)
+                                                                             get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_verify_az_upper_lt +
@@ -318,7 +318,7 @@ class IntByteStringMethod(IntMethod):
         )
 
         ascii_to_int_verify_az_lower[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP,
-                                                                    get_bytes_count(jump_instructions), True)
+                                                                          get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_verify_az_lower_gt +
@@ -326,7 +326,7 @@ class IntByteStringMethod(IntMethod):
         )
 
         ascii_to_int_verify_az_lower_lt[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPLT,
-                                                                       get_bytes_count(jump_instructions), True)
+                                                                             get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_while +
@@ -343,7 +343,7 @@ class IntByteStringMethod(IntMethod):
         )
 
         ascii_to_int_verify_while.append(OpcodeHelper.get_jump_and_data(Opcode.JMPGE,
-                                                                  -get_bytes_count(jump_instructions), True))
+                                                                        -get_bytes_count(jump_instructions), True))
 
         # endregion
 

@@ -82,7 +82,7 @@ class NativeContractMethod(InteropMethod):
             method_opcode = [
                 (Opcode.PUSHDATA1, Integer(len(method)).to_byte_array(min_length=1) + method)
             ]
-            
+
             drop_if_void_opcode = [
                 (Opcode.DROP, b'')
             ] if self.return_type is Type.none else []
