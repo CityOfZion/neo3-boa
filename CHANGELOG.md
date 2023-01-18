@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.12.0] - 2023-01
+### Added
+- Support to Neo features up to Neo 3.5
+  - `loadScript` interop
+  - Contract Management native `hasMethod` method
+- Included the enum `Opcode` in the available builtin types
+- Included nef `source` modifier to `NeoMetadata`
+- Added `hash` property to native smart contract interfaces
+- Added `hash` property to smart contract interfaces using the `@contract` decorator
+- Native smart contract methods called the interfaces are now included in the manifest permissions  
+- Support to `str` constructor
+
+### Changed
+- Moved the following items from `boa3.buitin`:
+  - `to_script_hash` method to `boa3.builtin.contract`
+  - `CreateNewEvent` method to `boa3.builtin.compile_time`
+  - `NeoMetadata` class to `boa3.builtin.compile_time`
+  - `public` decorator to `boa3.builtin.compile_time`
+  - `metadata` decorator to `boa3.builtin.compile_time`
+  - `contract` decorator to `boa3.builtin.compile_time`
+  - `display_name` decorator to `boa3.builtin.compile_time`
+- Native contract method calls are now called using method tokens added to the contract NEF file
+- Persist the cast type of variable after the casting
+- Only types or class names can be used as type annotations
+  - i.e. `[int]` will fail on compilation, use `List[int]` instead
+
+
+### Fixed
+- Inner object variable access caused an exception to be thrown
+- Invalid script was generated when compiling a smart contract with classes and `_deploy` method
+- Smart contracts with methods with duplicated manifest identifiers was compiled even though the generated manifest was invalid.
+- Events with the same name of some method weren't allowed by the compiler
+- Internal compiler error raised when evaluating smart contract interfaces inside loops
+
+
 ## [0.11.4] - 2022-08-02
 ### Added
 - Included Neo 3.2 features
@@ -373,6 +408,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.12.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.0
 [0.11.4]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.4
 [0.11.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.3
 [0.11.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.2
