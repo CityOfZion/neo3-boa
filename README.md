@@ -193,7 +193,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 
 ```shell
 $ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.5.0
-$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
+$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o {path-to-folder}/Neo.TestEngine
 ```
 
 #### Updating
@@ -201,7 +201,7 @@ $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 Go into the neo-devpack-dotnet, pull and recompile.
 ```shell
 ${path-to-folder}/neo-devpack-dotnet git pull
-${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj
+${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj -o {path-to-folder}/Neo.TestEngine
 ```
 
 #### Testing
@@ -216,15 +216,36 @@ Your Python Script should look something like this:
 from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3.neo.smart_contract.VoidType import VoidType
 
+
 def test_hello_world_main():
     root_folder = '{path-to-test-engine-folder}'
-    path = '%s/boa3_test/examples/HelloWorld.nef' % root_folder
+    project_root_folder = '{path-to-project-root-folder}'
+    path = f'{project_root_folder}/boa3_test/examples/hello_world.nef'
     engine = TestEngine(root_folder)
 
     result = engine.run(path, 'Main')
     assert result is VoidType
 ```
 
+Alternatively you can change the value of `boa3.env.TEST_ENGINE_DIRECTORY` to the path of your TestEngine:
+> Note: If you intend to run neo3-boa unit tests, this is a requirement
+
+```python
+from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3 import env
+from boa3.neo.smart_contract.VoidType import VoidType
+
+env.TEST_ENGINE_DIRECTORY = '{path-to-test-engine-folder}' 
+
+
+def test_hello_world_main():
+    root_folder = '{path-to-project-root-folder}'
+    path = f'{root_folder}/boa3_test/examples/hello_world.nef'
+    engine = TestEngine()  # the default path to the TestEngine is the one on env.TEST_ENGINE_DIRECTORY
+
+    result = engine.run(path, 'Main')
+    assert result is VoidType
+```
 
 ## Docs
 You can [read the docs here](https://docs.coz.io/neo3/boa/index.html). Please check our examples for reference.
