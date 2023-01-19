@@ -192,7 +192,7 @@ Clone neo-devpack-dotnet project and compile the TestEngine.
 > Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.2.1
+$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.5.0
 $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
 ```
 

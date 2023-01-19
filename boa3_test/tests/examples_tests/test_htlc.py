@@ -57,7 +57,7 @@ class TestHTLCTemplate(BoaTest):
 
         # transfer wil be aborted at onPayment if the transfer is not valid
         with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
-            self.run_smart_contract(engine, constants.NEO_SCRIPT,  'transfer',
+            self.run_smart_contract(engine, constants.NEO_SCRIPT, 'transfer',
                                     self.OTHER_ACCOUNT_1, htlc_address,
                                     transferred_amount_neo - 100, None,
                                     signer_accounts=[self.OTHER_ACCOUNT_1])

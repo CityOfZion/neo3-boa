@@ -88,7 +88,7 @@ class IndexSequenceMethod(IndexMethod):
         ]
 
         jmp_fix_negative_index = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_negative_end +
-                                                                                        fix_still_negative_index), True)
+                                                                                              fix_still_negative_index), True)
         verify_negative_index[-1] = jmp_fix_negative_index
 
         verify_big_end = [                  # verify if end is bigger then len(sequence)
@@ -107,8 +107,8 @@ class IndexSequenceMethod(IndexMethod):
         ]
 
         jmp_other_verifies = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_still_negative_index +
-                                                                                    verify_big_end +
-                                                                                    fix_big_end), True)
+                                                                                          verify_big_end +
+                                                                                          fix_big_end), True)
         fix_negative_end[-1] = jmp_other_verifies
 
         jmp_fix_big_index = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(fix_big_end), True)
@@ -155,12 +155,12 @@ class IndexSequenceMethod(IndexMethod):
         ]
 
         jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
-                                                                                   compare_item +
-                                                                                   not_found), True)
+                                                                                         compare_item +
+                                                                                         not_found), True)
         not_found.append(jmp_back_to_verify)
 
         jmp_to_error = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(compare_item +
-                                                                              not_found), True)
+                                                                                    not_found), True)
         verify_while[-1] = jmp_to_error
 
         not_inside_sequence = [             # send error message saying that x is not in sequence
@@ -169,7 +169,7 @@ class IndexSequenceMethod(IndexMethod):
         ]
 
         jmp_to_return_index = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(not_found +
-                                                                                     not_inside_sequence), True)
+                                                                                           not_inside_sequence), True)
         compare_item[-1] = jmp_to_return_index
 
         return_index = [                    # removes all values in the stack but the index

@@ -66,7 +66,7 @@ class StartsWithMethod(IBuiltinMethod):
         ]
 
         jmp_fix_negative_index = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_negative_end +
-                                                                                        fix_still_negative_index), True)
+                                                                                              fix_still_negative_index), True)
         verify_negative_index[-1] = jmp_fix_negative_index
 
         verify_big_end = [                  # verify if end is greater or equals to len(string)
@@ -85,8 +85,8 @@ class StartsWithMethod(IBuiltinMethod):
         ]
 
         jmp_other_verifies = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_still_negative_index +
-                                                                                    verify_big_end +
-                                                                                    fix_big_end), True)
+                                                                                          verify_big_end +
+                                                                                          fix_big_end), True)
         fix_negative_end[-1] = jmp_other_verifies
 
         jmp_fix_big_index = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(fix_big_end), True)
@@ -116,7 +116,7 @@ class StartsWithMethod(IBuiltinMethod):
         ]
 
         jmp_other_verifies = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_still_negative_index +
-                                                                                    verify_big_start), True)
+                                                                                          verify_big_start), True)
         fix_negative_end[-1] = jmp_other_verifies
 
         verify_size = [                     # verify if len(string[start:end]) > len(substring)
@@ -149,7 +149,7 @@ class StartsWithMethod(IBuiltinMethod):
         verify_size[-1] = jmp_compare_starts
 
         jmp_to_false = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(verify_size +
-                                                                              compare_starts), True)
+                                                                                    compare_starts), True)
         verify_big_start[-1] = jmp_to_false
 
         verify_and_fix_start.extend(verify_negative_index)

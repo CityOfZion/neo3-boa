@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.classmethod import *
-from boa3.model.builtin.contract import *
 from boa3.model.builtin.compile_time import *
+from boa3.model.builtin.contract import *
 from boa3.model.builtin.decorator import *
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop

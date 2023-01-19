@@ -82,7 +82,7 @@ class UpperMethod(IBuiltinMethod):
         ]
 
         jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
-                                                                                       swap_lower_to_upper_case), True)
+                                                                                             swap_lower_to_upper_case), True)
         get_substring_middle[-1] = jmp_to_join_substring
 
         jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_lower_to_upper_case), True)
@@ -113,10 +113,10 @@ class UpperMethod(IBuiltinMethod):
         ]
 
         jmp_to_verify_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
-                                                                                    get_substring_left +
-                                                                                    get_substring_middle +
-                                                                                    get_substring_right +
-                                                                                    join_substrings))
+                                                                                          get_substring_left +
+                                                                                          get_substring_middle +
+                                                                                          get_substring_right +
+                                                                                          join_substrings))
         join_substrings.append(jmp_to_verify_while)
 
         clean_stack = [                     # removes all auxiliary values
