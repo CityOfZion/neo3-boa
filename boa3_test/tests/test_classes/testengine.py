@@ -320,7 +320,10 @@ class TestEngine:
                 self._vm_state = vmstate.get_vm_state(result['vmstate'])
 
             if 'executedscripthash' in result:
-                self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
+                try:
+                    self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
+                except BaseException:
+                    self._executed_script_hash = None
 
             if 'callingscripthash' in result:
                 try:
