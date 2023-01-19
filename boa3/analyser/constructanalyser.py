@@ -1,6 +1,7 @@
 import ast
 
 from boa3.analyser.astanalyser import IAstAnalyser
+from boa3.model import set_internal_call
 
 
 class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
@@ -32,7 +33,7 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
         """
         if isinstance(call.func, ast.Attribute):
             from boa3.model.builtin.builtin import Builtin
-            if call.func.attr == Builtin.ScriptHash.identifier:
+            if call.func.attr == Builtin.ScriptHashMethod_.identifier:
                 from boa3.constants import SYS_VERSION_INFO
                 from boa3.model.type.type import Type
                 types = {
@@ -66,6 +67,6 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
                 elif isinstance(value, str):
                     from boa3.neo.vm.type.String import String
                     value = String(value).to_bytes()
-                return self.parse_to_node(str(to_script_hash(value)), call)
+                return set_internal_call(self.parse_to_node(f"UInt160({str(to_script_hash(value))})", call))
 
         return call
