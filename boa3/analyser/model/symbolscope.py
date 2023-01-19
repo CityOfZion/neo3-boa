@@ -16,15 +16,24 @@ class SymbolScope:
     def copy(self) -> SymbolScope:
         return SymbolScope(self._symbols)
 
-    def include_symbol(self, symbol_id: str, symbol: ISymbol):
+    def include_symbol(self, symbol_id: str, symbol: ISymbol, reassign_original: bool = True):
         """
         Includes a symbols into the scope
 
         :param symbol_id: symbol identifier
         :param symbol: symbol to be included
         """
-        if symbol_id in self._symbols and hasattr(symbol, 'set_is_reassigned'):
-            symbol.set_is_reassigned()
+
+        if symbol_id in self._symbols:
+            if not reassign_original:
+                if hasattr(symbol, 'copy'):
+                    symbol = symbol.copy()
+                else:
+                    return
+
+            if hasattr(symbol, 'set_is_reassigned'):
+                symbol.set_is_reassigned()
+
         self._symbols[symbol_id] = symbol
 
     def remove_symbol(self, symbol_id: str):

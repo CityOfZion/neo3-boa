@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 
 from boa3.model.builtin.method.intmethod import IntMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -28,7 +29,7 @@ class IntByteStringMethod(IntMethod):
         super().__init__(args, [value_default, base_default])
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.StackItem import StackItemType
         jmp_place_holder = (Opcode.JMP, b'\x01')
@@ -40,7 +41,7 @@ class IntByteStringMethod(IntMethod):
 
         verify_base_ge37 = [    # verifies if base >= 37, base greater than 36 shouldn't be accepted
             (Opcode.OVER, b''),
-            Opcode.get_push_and_data(37),
+            OpcodeHelper.get_push_and_data(37),
             jmp_place_holder,   # jumps to an assertion error
         ]
 
@@ -68,16 +69,16 @@ class IntByteStringMethod(IntMethod):
         # region verify_base jump logic
 
         jump_instructions = verify_base_error
-        verify_base_jump_error[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
+        verify_base_jump_error[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 
         jump_instructions = verify_base_jump_error
-        verify_base_le_minus1[-1] = Opcode.get_jump_and_data(Opcode.JMPLE, get_bytes_count(jump_instructions), True)
+        verify_base_le_minus1[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(jump_instructions), True)
 
         jump_instructions = verify_base_jump_error + verify_base_le_minus1
-        verify_base_equal1[-1] = Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
+        verify_base_equal1[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
 
         jump_instructions = verify_base_jump_error + verify_base_le_minus1 + verify_base_equal1
-        verify_base_ge37[-1] = Opcode.get_jump_and_data(Opcode.JMPGE, get_bytes_count(jump_instructions), True)
+        verify_base_ge37[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(jump_instructions), True)
 
         # endregion
 
@@ -99,7 +100,7 @@ class IntByteStringMethod(IntMethod):
             (Opcode.PUSH1, b''),
             (Opcode.SUBSTR, b''),
             (Opcode.CONVERT, StackItemType.ByteString),
-            Opcode.get_pushdata_and_data('0'),
+            OpcodeHelper.get_pushdata_and_data('0'),
             jmp_place_holder,                       # if first char is not 0, skip all verify_code_literal methods
         ]
 
@@ -148,8 +149,8 @@ class IntByteStringMethod(IntMethod):
             verify_code_literal_drop_aux
         )
 
-        verify_code_literal_first_char_is_0[-1] = Opcode.get_jump_and_data(Opcode.JMPNE_L,
-                                                                           get_bytes_count(jump_instructions), True)
+        verify_code_literal_first_char_is_0[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPNE_L,
+                                                                                 get_bytes_count(jump_instructions), True)
 
         # endregion
 
@@ -190,7 +191,7 @@ class IntByteStringMethod(IntMethod):
 
         ascii_to_int_verify_az_lower_lt = [     # verifies ord(char) is less than ord('a')
             (Opcode.DUP, b''),                  # if ord(char) is indeed less, go to verify with ord('A')
-            Opcode.get_push_and_data(a_lower),
+            OpcodeHelper.get_push_and_data(a_lower),
             jmp_place_holder                    # jump to ascii_to_int_verify_az_upper_lt
         ]
 
@@ -198,14 +199,14 @@ class IntByteStringMethod(IntMethod):
             (Opcode.DUP, b''),                  # the minimum base that accepts letters is base 11, that's why it's
             (Opcode.PUSH6, b''),                # adding 86
             (Opcode.PICK, b''),                 # if ord(char) is greater than base + 86, the char is invalid
-            Opcode.get_push_and_data(86),
+            OpcodeHelper.get_push_and_data(86),
             (Opcode.ADD, b''),
             (Opcode.LE, b''),
             (Opcode.ASSERT, b''),               # if assert is False, then the char was indeed invalid
         ]
 
         ascii_to_int_verify_az_lower = [        # the char was in between 'a' and 'z',
-            Opcode.get_push_and_data(87),       # so it will be converted to the respective base 10 number
+            OpcodeHelper.get_push_and_data(87),       # so it will be converted to the respective base 10 number
             (Opcode.SUB, b''),
             (Opcode.OVER, b''),
             (Opcode.MUL, b''),
@@ -219,7 +220,7 @@ class IntByteStringMethod(IntMethod):
 
         ascii_to_int_verify_az_upper_lt = [     # verifies ord(char) is less than ord('A')
             (Opcode.DUP, b''),                  # if ord(char) is indeed less, go to verify with ord('0')
-            Opcode.get_push_and_data(a_upper),
+            OpcodeHelper.get_push_and_data(a_upper),
             jmp_place_holder                    # jump to ascii_to_int_verify_09_lt
         ]
 
@@ -227,14 +228,14 @@ class IntByteStringMethod(IntMethod):
             (Opcode.DUP, b''),                  # the minimum base that accepts letters is base 11, that's why it's
             (Opcode.PUSH6, b''),                # adding 54
             (Opcode.PICK, b''),                 # if ord(char) is greater than base + 54, the char is invalid
-            Opcode.get_push_and_data(54),
+            OpcodeHelper.get_push_and_data(54),
             (Opcode.ADD, b''),
             (Opcode.LE, b''),
             (Opcode.ASSERT, b''),               # if assert is False, then the char was indeed invalid
         ]
 
         ascii_to_int_verify_az_upper = [        # the char was in between 'A' and 'Z',
-            Opcode.get_push_and_data(55),       # so it will be converted to the respective base 10 number
+            OpcodeHelper.get_push_and_data(55),       # so it will be converted to the respective base 10 number
             (Opcode.SUB, b''),
             (Opcode.OVER, b''),
             (Opcode.MUL, b''),
@@ -248,7 +249,7 @@ class IntByteStringMethod(IntMethod):
 
         ascii_to_int_verify_09_lt = [           # verifies ord(char) is less than ord('0')
             (Opcode.DUP, b''),                  # if ord(char) is indeed less, the char is invalid
-            Opcode.get_push_and_data(zero),
+            OpcodeHelper.get_push_and_data(zero),
             (Opcode.GE, b''),
             (Opcode.ASSERT, b''),               # if assert is False, then the char was indeed invalid
         ]
@@ -257,14 +258,14 @@ class IntByteStringMethod(IntMethod):
             (Opcode.DUP, b''),                  # if ord(char) is greater than base + ord('0'), the char is invalid
             (Opcode.PUSH6, b''),
             (Opcode.PICK, b''),
-            Opcode.get_push_and_data(zero),
+            OpcodeHelper.get_push_and_data(zero),
             (Opcode.ADD, b''),
             (Opcode.LE, b''),
             (Opcode.ASSERT, b''),               # if assert is False, then the char was indeed invalid
         ]
 
         ascii_to_int_verify_09 = [              # the char was in between '0' and '9',
-            Opcode.get_push_and_data(zero),     # so it will be converted to the respective base 10 number
+            OpcodeHelper.get_push_and_data(zero),     # so it will be converted to the respective base 10 number
             (Opcode.SUB, b''),
             (Opcode.OVER, b''),
             (Opcode.MUL, b''),
@@ -296,16 +297,16 @@ class IntByteStringMethod(IntMethod):
             ascii_to_int_verify_09
         )
 
-        ascii_to_int_verify_az_upper[-1] = Opcode.get_jump_and_data(Opcode.JMP,
-                                                                    get_bytes_count(jump_instructions), True)
+        ascii_to_int_verify_az_upper[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP,
+                                                                          get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_verify_az_upper_gt +
             ascii_to_int_verify_az_upper
         )
 
-        ascii_to_int_verify_az_upper_lt[-1] = Opcode.get_jump_and_data(Opcode.JMPLT,
-                                                                       get_bytes_count(jump_instructions), True)
+        ascii_to_int_verify_az_upper_lt[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPLT,
+                                                                             get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_verify_az_upper_lt +
@@ -316,16 +317,16 @@ class IntByteStringMethod(IntMethod):
             ascii_to_int_verify_09
         )
 
-        ascii_to_int_verify_az_lower[-1] = Opcode.get_jump_and_data(Opcode.JMP,
-                                                                    get_bytes_count(jump_instructions), True)
+        ascii_to_int_verify_az_lower[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP,
+                                                                          get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_verify_az_lower_gt +
             ascii_to_int_verify_az_lower
         )
 
-        ascii_to_int_verify_az_lower_lt[-1] = Opcode.get_jump_and_data(Opcode.JMPLT,
-                                                                       get_bytes_count(jump_instructions), True)
+        ascii_to_int_verify_az_lower_lt[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPLT,
+                                                                             get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             ascii_to_int_while +
@@ -341,8 +342,8 @@ class IntByteStringMethod(IntMethod):
             ascii_to_int_verify_while
         )
 
-        ascii_to_int_verify_while.append(Opcode.get_jump_and_data(Opcode.JMPGE,
-                                                                  -get_bytes_count(jump_instructions), True))
+        ascii_to_int_verify_while.append(OpcodeHelper.get_jump_and_data(Opcode.JMPGE,
+                                                                        -get_bytes_count(jump_instructions), True))
 
         # endregion
 
@@ -397,7 +398,7 @@ class IntByteStringMethod(IntMethod):
 
         compare_char = [            # compares the char with b, B, o, O, x, or X
             (Opcode.DUP, b''),
-            Opcode.get_pushdata_and_data(char),
+            OpcodeHelper.get_pushdata_and_data(char),
             jmp_place_holder
         ]
 
@@ -410,7 +411,7 @@ class IntByteStringMethod(IntMethod):
         verify_base_is_the_same = [     # verify if the equivalent base is the same as current base
             (Opcode.PUSH2, b''),
             (Opcode.PICK, b''),
-            Opcode.get_push_and_data(base),
+            OpcodeHelper.get_push_and_data(base),
             jmp_place_holder            # jump to remove_base_char if equivalent base is the same as current base
         ]
 
@@ -424,7 +425,7 @@ class IntByteStringMethod(IntMethod):
         change_base = [                 # if base was 0, then change it to the equivalent base
             (Opcode.REVERSE3, b''),
             (Opcode.DROP, b''),
-            Opcode.get_push_and_data(base),
+            OpcodeHelper.get_push_and_data(base),
             (Opcode.REVERSE3, b''),
         ]
 
@@ -446,16 +447,16 @@ class IntByteStringMethod(IntMethod):
         # region jmp logic
 
         jump_instructions = change_base + remove_base_char
-        verify_base_is_0[-1] = Opcode.get_jump_and_data(Opcode.JMPNE, get_bytes_count(jump_instructions), True)
+        verify_base_is_0[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPNE, get_bytes_count(jump_instructions), True)
 
         jump_instructions = change_base + verify_base_is_0
-        verify_base_is_the_same[-1] = Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
+        verify_base_is_the_same[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
 
         jump_instructions = change_base + remove_base_char + put_true_in_stack + verify_base_is_0 + verify_base_is_the_same
-        char_not_equal[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
+        char_not_equal[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 
         jump_instructions = char_not_equal
-        compare_char[-1] = Opcode.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
+        compare_char[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             compare_char +
@@ -466,10 +467,10 @@ class IntByteStringMethod(IntMethod):
             verify_base_is_0 +
             remove_base_char
         )
-        top_stack_is_true[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
+        top_stack_is_true[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 
         jump_instructions = top_stack_is_true
-        verify_top_stack[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(jump_instructions), True)
+        verify_top_stack[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(jump_instructions), True)
 
         # endregion
 

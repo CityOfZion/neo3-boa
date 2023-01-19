@@ -237,6 +237,10 @@ class TestClass(BoaTest):
         path = self.get_contract_path('UserClassUpdateClassVariable.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
+    def test_user_class_update_instance_variable_on_init(self):
+        path = self.get_contract_path('UserClassUpdateClassVariableOnInit.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
     def test_user_class_with_class_variable_and_class_method(self):
         path = self.get_contract_path('UserClassWithClassVariableAndClassMethod.py')
         engine = TestEngine()
@@ -502,3 +506,10 @@ class TestClass(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'mix')
         self.assertEqual(0, result)
+
+    def test_user_class_with_deploy_method(self):
+        path = self.get_contract_path('UserClassWithDeployMethod.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'get_obj')
+        self.assertEqual([1, 2], result)

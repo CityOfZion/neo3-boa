@@ -5,6 +5,7 @@ from boa3.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -45,7 +46,7 @@ class JoinMethod(IBuiltinMethod):
         return self.args['iterable']
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
 
         jmp_place_holder = (Opcode.JMP, b'\x01')
@@ -102,21 +103,21 @@ class JoinMethod(IBuiltinMethod):
             # jump back to verify_index
         ]
 
-        jmp_back_to_verify = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_index +
-                                                                                   concat_strings))
+        jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_index +
+                                                                                         concat_strings))
         concat_strings.append(jmp_back_to_verify)
 
-        jmp_concatenation = Opcode.get_jump_and_data(Opcode.JMPLE, get_bytes_count(initialize_string +
-                                                                                   verify_index +
-                                                                                   concat_strings), True)
+        jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(initialize_string +
+                                                                                         verify_index +
+                                                                                         concat_strings), True)
         verify_empty_string[-1] = jmp_concatenation
 
         add_empty_string = [            # add a empty string at the top of the stack
             (Opcode.PUSHDATA1, b'\x00')
         ]
 
-        jmp_concatenation = Opcode.get_jump_and_data(Opcode.JMPGE, get_bytes_count(concat_strings +
-                                                                                   add_empty_string), True)
+        jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(concat_strings +
+                                                                                         add_empty_string), True)
         verify_index[-1] = jmp_concatenation
 
         remove_extra_values = [         # remove all values from stack except the joined string

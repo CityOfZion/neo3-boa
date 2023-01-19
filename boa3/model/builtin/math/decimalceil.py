@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -19,7 +20,7 @@ class DecimalCeilingMethod(IBuiltinMethod):
         return "decimals cannot be negative"
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.Integer import Integer
         from boa3.neo.vm.type.String import String
@@ -34,11 +35,11 @@ class DecimalCeilingMethod(IBuiltinMethod):
         decimals_unit = [
             (Opcode.OVER, b''),
             (Opcode.PUSH0, b''),
-            Opcode.get_jump_and_data(Opcode.JMPGE, get_bytes_count(if_negative_decimal), True),
+            OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(if_negative_decimal), True),
         ] + if_negative_decimal + [
             (Opcode.DUP, b''),
             (Opcode.REVERSE3, b''),
-            Opcode.get_push_and_data(10),
+            OpcodeHelper.get_push_and_data(10),
             (Opcode.SWAP, b''),
             (Opcode.POW, b''),
             (Opcode.SWAP, b''),
@@ -55,13 +56,13 @@ class DecimalCeilingMethod(IBuiltinMethod):
             (Opcode.NIP, b'')
         ]
         num_jmp_code = get_bytes_count(else_negative_mod)
-        if_negative_mod[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        if_negative_mod[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
 
         num_jmp_code = get_bytes_count(if_negative_mod)
         floor_computation = [
             (Opcode.DUP, b''),
             (Opcode.PUSH0, b''),
-            Opcode.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True),
+            OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True),
         ] + if_negative_mod + else_negative_mod + [
             (Opcode.ADD, b'')
         ]

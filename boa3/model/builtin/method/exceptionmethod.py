@@ -49,7 +49,7 @@ class ExceptionMethod(IBuiltinMethod):
         return isinstance(param_type, PrimitiveType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return []
 
     @property

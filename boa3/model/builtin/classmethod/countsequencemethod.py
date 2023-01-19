@@ -5,6 +5,7 @@ from boa3.model.expression import IExpression
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -45,7 +46,7 @@ class CountSequenceMethod(CountMethod):
         return True
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
 
         jmp_place_holder = (Opcode.JMP, b'\x01')
@@ -92,7 +93,7 @@ class CountSequenceMethod(CountMethod):
         ]
 
         num_jmp_code = get_bytes_count(sequence_count_inc)
-        jmp_to_dec_statement = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+        jmp_to_dec_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
         sequence_equals[-1] = jmp_to_dec_statement
 
         list_tuple_count_index_dec = [  # decreases the index
@@ -105,12 +106,12 @@ class CountSequenceMethod(CountMethod):
 
         num_jmp_code = -get_bytes_count(list_tuple_count_index_dec + sequence_count_inc + sequence_equals +
                                         sequence_get_element + sequence_verify_while + in_depth_verification)
-        jmp_back_to_while_verify_statement = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code)
+        jmp_back_to_while_verify_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
         list_tuple_count_index_dec.append(jmp_back_to_while_verify_statement)
 
         num_jmp_code = get_bytes_count(sequence_get_element + sequence_equals +
                                        sequence_count_inc + list_tuple_count_index_dec + in_depth_verification)
-        jmp_to_clean_statement = Opcode.get_jump_and_data(Opcode.JMPLT, num_jmp_code, True)
+        jmp_to_clean_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, num_jmp_code, True)
         sequence_verify_while[-1] = jmp_to_clean_statement
 
         sequence_clean_stack = [

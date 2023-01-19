@@ -10,6 +10,8 @@ class NEO:
     A class used to represent the NEO native contract
     """
 
+    hash: UInt160
+
     @classmethod
     def symbol(cls) -> str:
         """

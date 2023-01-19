@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.interop import storage
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
@@ -55,7 +55,7 @@ on_transfer = CreateNewEvent(
 # Methods
 # -------------------------------------------
 
-@public(safe=True)
+@public
 def update_sc(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the smart contract. In this example there is a bugged method, so, the smart contract will be updated to fix

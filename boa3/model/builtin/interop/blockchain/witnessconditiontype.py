@@ -8,6 +8,7 @@ from boa3.model.method import Method
 from boa3.model.property import Property
 from boa3.model.type.classes.classarraytype import ClassArrayType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -79,11 +80,11 @@ class WitnessConditionMethod(IBuiltinMethod):
         return len(params) == 0
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
 
         return [
-            Opcode.get_push_and_data(WitnessConditionEnum.build().default_value),  # type
+            OpcodeHelper.get_push_and_data(WitnessConditionEnum.build().default_value),  # type
             (Opcode.PUSH1, b''),
             (Opcode.PACK, b'')
         ]

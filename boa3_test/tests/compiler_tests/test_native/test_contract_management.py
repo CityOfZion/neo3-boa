@@ -1,5 +1,6 @@
 import json
 
+from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.type.String import String
@@ -11,6 +12,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestContractManagementContract(BoaTest):
     default_folder: str = 'test_sc/native_test/contractmanagement'
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.MANAGEMENT_SCRIPT, result)
 
     def test_get_minimum_deployment_fee(self):
         path = self.get_contract_path('GetMinimumDeploymentFee.py')
@@ -46,10 +54,27 @@ class TestContractManagementContract(BoaTest):
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
 
+    def test_has_method(self):
+        path = self.get_contract_path('HasMethod.py')
+        engine = TestEngine()
+
+        test_method = 'add'
+        test_parameter_count = 2
+        result = self.run_smart_contract(engine, path, 'main', bytes(20), test_method, test_parameter_count)
+        self.assertEqual(False, result)
+
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
+        call_hash = engine.executed_script_hash.to_array()
+
+        result = self.run_smart_contract(engine, path, 'main', call_hash, test_method, test_parameter_count)
+        self.assertEqual(True, result)
+
     def test_deploy_contract(self):
         path = self.get_contract_path('DeployContract.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
         Boa3.compile_and_save(call_contract_path)
+        self.compile_and_save(path)
 
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()

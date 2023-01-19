@@ -40,7 +40,7 @@ class RemoveMethod(IBuiltinMethod):
         return sequence_type.value_type.is_type_of(value_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         return [
             (Opcode.PUSH0, b''),  # need to find the index to use REMOVE opcode

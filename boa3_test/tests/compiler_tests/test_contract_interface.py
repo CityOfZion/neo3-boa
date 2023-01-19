@@ -96,7 +96,7 @@ class TestContractInterface(BoaTest):
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = UInt160.from_string('21f19f84e144f91abe755efb21a6798ac95c2e70').to_array()
+        contract_script_bytes = UInt160.from_string('c03e26a749b7f1f3ecc33e549fe3731d60e72813').to_array()
 
         expected_output = (
             Opcode.NEWARRAY0    # arguments list
@@ -132,7 +132,7 @@ class TestContractInterface(BoaTest):
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = UInt160.from_string('21f19f84e144f91abe755efb21a6798ac95c2e70').to_array()
+        contract_script_bytes = UInt160.from_string('c03e26a749b7f1f3ecc33e549fe3731d60e72813').to_array()
 
         expected_output = (
             # start public method
@@ -181,3 +181,12 @@ class TestContractInterface(BoaTest):
         nep17_result = self.run_smart_contract(engine, nep17_path, 'symbol')
         result = self.run_smart_contract(engine, path, 'nep17_symbol')
         self.assertEqual(nep17_result, result)
+
+    def test_get_hash(self):
+        path = self.get_contract_path('ContractInterfaceGetHash.py')
+        engine = TestEngine()
+
+        contract_script_bytes = bytes(reversed(range(20)))
+        result = self.run_smart_contract(engine, path, 'main',
+                                         expected_result_type=bytes)
+        self.assertEqual(contract_script_bytes, result)

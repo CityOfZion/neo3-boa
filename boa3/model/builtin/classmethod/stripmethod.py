@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -40,7 +41,7 @@ class StripMethod(IBuiltinMethod):
         return self.args['self']
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.StackItem import StackItemType
 
@@ -96,9 +97,9 @@ class StripMethod(IBuiltinMethod):
             # jump back to verify_if_index_gt_len_chars if not equal
         ]
 
-        jmp_back_to_verify_index = Opcode.get_jump_and_data(Opcode.JMPIFNOT,
-                                                            -get_bytes_count(verify_if_char_in_chars +
-                                                                             verify_if_index_gt_len_chars))
+        jmp_back_to_verify_index = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT,
+                                                                  -get_bytes_count(verify_if_char_in_chars +
+                                                                                   verify_if_index_gt_len_chars))
         verify_if_char_in_chars.append(jmp_back_to_verify_index)
 
         leading_char_found = [               # char is in chars, so go back to verify_leading_chars
@@ -108,17 +109,17 @@ class StripMethod(IBuiltinMethod):
             # jump back to verify_leading_chars
         ]
 
-        jmp_back_to_verify_leading_chars = Opcode.get_jump_and_data(Opcode.JMP,
-                                                                    -get_bytes_count(verify_leading_chars +
-                                                                                     get_leading_char_at_index +
-                                                                                     verify_if_index_gt_len_chars +
-                                                                                     verify_if_char_in_chars +
-                                                                                     leading_char_found))
+        jmp_back_to_verify_leading_chars = OpcodeHelper.get_jump_and_data(Opcode.JMP,
+                                                                          -get_bytes_count(verify_leading_chars +
+                                                                                           get_leading_char_at_index +
+                                                                                           verify_if_index_gt_len_chars +
+                                                                                           verify_if_char_in_chars +
+                                                                                           leading_char_found))
 
         leading_char_found.append(jmp_back_to_verify_leading_chars)
 
-        jmp_to_leading_chars = Opcode.get_jump_and_data(Opcode.JMPGE, get_bytes_count(verify_if_char_in_chars +
-                                                                                      leading_char_found), True)
+        jmp_to_leading_chars = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(verify_if_char_in_chars +
+                                                                                            leading_char_found), True)
         verify_if_index_gt_len_chars[-1] = jmp_to_leading_chars
 
         remove_extras = [                   # remove opcodes that won't be used anymore
@@ -126,11 +127,11 @@ class StripMethod(IBuiltinMethod):
             (Opcode.DROP, b''),
         ]
 
-        jmp_to_leading_chars = Opcode.get_jump_and_data(Opcode.JMPGE, get_bytes_count(get_leading_char_at_index +
-                                                                                      verify_if_index_gt_len_chars +
-                                                                                      verify_if_char_in_chars +
-                                                                                      leading_char_found +
-                                                                                      remove_extras), True)
+        jmp_to_leading_chars = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(get_leading_char_at_index +
+                                                                                            verify_if_index_gt_len_chars +
+                                                                                            verify_if_char_in_chars +
+                                                                                            leading_char_found +
+                                                                                            remove_extras), True)
         verify_leading_chars[-1] = jmp_to_leading_chars
 
         get_number_of_leading_chars = (
@@ -175,9 +176,9 @@ class StripMethod(IBuiltinMethod):
             # jump back to get_trailing_char_at_index
         ]
 
-        jmp_back_to_verify_trailing_chars = Opcode.get_jump_and_data(Opcode.JMP,
-                                                                     -get_bytes_count(get_trailing_char_at_index +
-                                                                                      trailing_char_found))
+        jmp_back_to_verify_trailing_chars = OpcodeHelper.get_jump_and_data(Opcode.JMP,
+                                                                           -get_bytes_count(get_trailing_char_at_index +
+                                                                                            trailing_char_found))
 
         trailing_char_found.append(jmp_back_to_verify_trailing_chars)
 
@@ -186,9 +187,9 @@ class StripMethod(IBuiltinMethod):
             (Opcode.DROP, b''),
         ]
 
-        jmp_to_strip_string = Opcode.get_jump_and_data(Opcode.JMPLE, get_bytes_count(get_trailing_char_at_index +
-                                                                                     trailing_char_found +
-                                                                                     remove_extras), True)
+        jmp_to_strip_string = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(get_trailing_char_at_index +
+                                                                                           trailing_char_found +
+                                                                                           remove_extras), True)
         verify_trailing_chars[-1] = jmp_to_strip_string
 
         get_number_of_trailing_chars = (

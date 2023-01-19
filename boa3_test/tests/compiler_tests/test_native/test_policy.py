@@ -1,3 +1,4 @@
+from boa3 import constants
 from boa3.exception import CompilerError
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -5,6 +6,13 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 
 class TestPolicyContract(BoaTest):
     default_folder: str = 'test_sc/native_test/policy'
+
+    def test_get_hash(self):
+        path = self.get_contract_path('GetHash.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(constants.POLICY_SCRIPT, result)
 
     def test_get_exec_fee_factor(self):
         path = self.get_contract_path('GetExecFeeFactor.py')

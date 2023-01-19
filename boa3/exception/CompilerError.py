@@ -67,6 +67,21 @@ class DuplicatedIdentifier(CompilerError):
         return f"Duplicate identifier: '{self._duplicated_id}'"
 
 
+class DuplicatedManifestIdentifier(CompilerError):
+    """
+    An error raised when more than one symbol uses the same identifier in the manifest.
+    """
+
+    def __init__(self, line: int, col: int, duplicated_id: str = None, duplicated_arg_count: int = None):
+        self._duplicated_id = duplicated_id
+        self._arg_count = duplicated_arg_count
+        super().__init__(line, col)
+
+    @property
+    def _error_message(self) -> Optional[str]:
+        return f"Duplicate manifest identifier: '{self._duplicated_id}' with {self._arg_count} argument(s)"
+
+
 class IncorrectNumberOfOperands(CompilerError):
     """
     An error raised when an operation is used with the wrong number of operands
@@ -263,10 +278,9 @@ class MissingStandardDefinition(CompilerError):
 
     @property
     def _error_message(self) -> Optional[str]:
-        return "'{0}': Missing '{1}' {2} definition '{3}'".format(self.standard,
-                                                                  self.symbol_id,
-                                                                  self.symbol.shadowing_name,
-                                                                  self.symbol)
+        safe_symbol_prefix = 'safe ' if self.symbol.is_safe else ''
+        return f"'{self.standard}': Missing '{self.symbol_id}' {self.symbol.shadowing_name} definition " \
+               f"'{safe_symbol_prefix}{self.symbol}'"
 
     @property
     def message(self) -> str:

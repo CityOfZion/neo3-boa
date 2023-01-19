@@ -28,7 +28,6 @@ class SignerType(ClassArrayType):
         list_uint160 = Type.list.build([uint160])
 
         self._variables: Dict[str, Variable] = {
-            '-internal_signer': Variable(Type.bytes),
             'account': Variable(uint160),
             'scopes': Variable(WitnessScopeType.build()),
             'allowed_contracts': Variable(list_uint160),
@@ -91,7 +90,7 @@ class SignerMethod(IBuiltinMethod):
         return len(params) == 0
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
 
         uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)

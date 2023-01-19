@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 from boa3.model.builtin.method.listmethod import ListMethod
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -62,7 +63,7 @@ class ListBytesStringMethod(ListMethod):
             ]
 
             num_jmp_code = -get_bytes_count(verify_loop_end + loop_for_char_or_byte)
-            jmp_to_dec_statement = Opcode.get_jump_and_data(Opcode.JMPGE, num_jmp_code)
+            jmp_to_dec_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code)
             verify_loop_end.append(jmp_to_dec_statement)
 
             self._prepare_for_packing = (

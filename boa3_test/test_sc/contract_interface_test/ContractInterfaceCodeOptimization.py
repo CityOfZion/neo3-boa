@@ -1,10 +1,10 @@
 from typing import Any
 
-from boa3.builtin import contract, display_name, public
+from boa3.builtin.compile_time import contract, display_name, public
 from boa3.builtin.type import UInt160
 
 
-@contract('0x21f19f84e144f91abe755efb21a6798ac95c2e70')
+@contract('0xc03e26a749b7f1f3ecc33e549fe3731d60e72813')
 class Nep17:
 
     @staticmethod

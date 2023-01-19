@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from boa3.model.builtin.method.printmethod import PrintMethod
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -17,17 +18,17 @@ class PrintBoolMethod(PrintMethod):
         if self._print_value_opcodes is None:
             from boa3.compiler.codegenerator import get_bytes_count
             if_value_is_true = [
-                Opcode.get_pushdata_and_data('True')
+                OpcodeHelper.get_pushdata_and_data('True')
             ]
             if_value_is_false = [
-                Opcode.get_pushdata_and_data('False'),
-                Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(if_value_is_true), jump_through=True)
+                OpcodeHelper.get_pushdata_and_data('False'),
+                OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(if_value_is_true), jump_through=True)
             ]
 
             self._print_value_opcodes = (
                 [
                     (Opcode.NZ, b''),
-                    Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(if_value_is_false), jump_through=True),
+                    OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(if_value_is_false), jump_through=True),
                 ] + if_value_is_false
                 + if_value_is_true
             )

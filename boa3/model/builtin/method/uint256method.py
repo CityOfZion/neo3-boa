@@ -70,7 +70,7 @@ class UInt256Method(IBuiltinMethod):
         return super().evaluate_literal(*args)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.model.type.type import Type
 

@@ -28,7 +28,7 @@ class LenMethod(IBuiltinMethod):
         return isinstance(params[0].type, SequenceType)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.SIZE, b'')]
 
     @property

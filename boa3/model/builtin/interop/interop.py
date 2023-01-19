@@ -18,6 +18,10 @@ from boa3.model.event import Event
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 
+__all__ = ['Interop',
+           'InteropPackage'
+           ]
+
 
 class InteropPackage(str, Enum):
     Blockchain = 'blockchain'
@@ -65,7 +69,7 @@ class Interop:
     NamedCurveType = NamedCurveType()
     NotificationType = NotificationType.build()
     OracleResponseCode = OracleResponseCodeType.build()
-    OracleType = OracleType.build()
+    OracleType = OracleClass.build()
     RoleType = RoleType.build()
     SignerType = SignerType.build()
     StorageContextType = StorageContextType.build()
@@ -101,8 +105,8 @@ class Interop:
     UpdateContract = UpdateMethod()
 
     # Native Contracts
-    GasScriptHash = GasProperty()
-    NeoScriptHash = NeoProperty()
+    GasScriptHash = GasToken
+    NeoScriptHash = NeoToken
     ContractManagementScriptHash = ContractManagement
     CryptoLibScriptHash = CryptoLibContract
     LedgerScriptHash = LedgerContract
@@ -149,6 +153,7 @@ class Interop:
     GetRandom = GetRandomMethod()
     GetTrigger = GetTriggerMethod(TriggerType)
     InvocationCounter = InvocationCounterProperty()
+    LoadScript = LoadScriptMethod()
     Log = LogMethod()
     Notify = NotifyMethod()
     Platform = PlatformProperty()
@@ -350,6 +355,7 @@ class Interop:
                                       GetNotifications,
                                       GetRandom,
                                       GetTrigger,
+                                      LoadScript,
                                       Log,
                                       Notify
                                       ],

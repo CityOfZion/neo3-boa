@@ -14,7 +14,7 @@ class AbsMethod(IBuiltinMethod):
         super().__init__(identifier, args, return_type=Type.int)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.ABS, b'')]
 
     @property

@@ -32,7 +32,7 @@ class StorageMapPutMethod(IBuiltinMethod):
         return None
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.model.builtin.interop.interop import Interop
         return [
             (Opcode.SWAP, b''),

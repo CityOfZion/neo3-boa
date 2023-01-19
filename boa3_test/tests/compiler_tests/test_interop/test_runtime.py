@@ -5,7 +5,6 @@ from boa3.model.builtin.interop.interop import Interop
 from boa3.neo import to_script_hash
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import TriggerType
 from boa3_test.tests.boa_test import BoaTest
@@ -26,6 +25,33 @@ class TestRuntimeInterop(BoaTest):
 
         engine.add_signer_account(account)
         result = self.run_smart_contract(engine, path, 'Main', account)
+        self.assertEqual(True, result)
+
+    def test_contract_with_check_witness(self):
+        path = self.get_contract_path('test_sc/interop_test/contract', 'CallScriptHash.py')
+        call_contract_path = self.get_contract_path('CheckWitness.py')
+        account = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+
+        engine = TestEngine()
+        contract_method = 'Main'
+        contract_args = [account]
+        result = self.run_smart_contract(engine, call_contract_path, contract_method, *contract_args)
+        contract_hash = engine.executed_script_hash.to_array()
+        self.assertEqual(False, result)
+
+        engine.add_signer_account(account)
+        result = self.run_smart_contract(engine, call_contract_path, contract_method, *contract_args)
+        self.assertEqual(True, result)
+
+        engine.add_signer_account(account)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         contract_hash, contract_method, contract_args)
+        self.assertEqual(False, result)  # fail because the signer have CalledByEntry scope
+
+        from boa3_test.tests.test_classes.witnessscope import WitnessScope
+        engine.add_signer_account(account, WitnessScope.Global)
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         contract_hash, contract_method, contract_args)
         self.assertEqual(True, result)
 
     def test_check_witness_imported_as(self):
@@ -110,8 +136,7 @@ class TestRuntimeInterop(BoaTest):
             Opcode.PUSHDATA1
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT
             + Opcode.PUSH1
             + Opcode.PACK
             + Opcode.SWAP
@@ -306,6 +331,13 @@ class TestRuntimeInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+        calling_hash = bytes(range(20))
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'Main',
+                                         calling_script_hash=calling_hash,
+                                         expected_result_type=bytes)
+        self.assertEqual(calling_hash, result)
+
     def test_calling_script_hash_cant_assign(self):
         expected_output = (
             Opcode.INITSLOT
@@ -344,6 +376,13 @@ class TestRuntimeInterop(BoaTest):
         path = self.get_contract_path('ExecutingScriptHashCantAssign.py')
         output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
+
+    def test_get_executing_script_hash_on_deploy(self):
+        path = self.get_contract_path('ExecutingScriptHashOnDeploy.py')
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'get_script')
+        self.assertEqual(engine.executed_script_hash.to_array(), result)
 
     def test_get_block_time(self):
         expected_output = (
@@ -441,7 +480,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual('Deploy', event_name)
         script = engine.executed_script_hash.to_array()
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
         expected_result = [
             [constants.MANAGEMENT_SCRIPT, 'Deploy', script]
@@ -454,11 +493,11 @@ class TestRuntimeInterop(BoaTest):
         # it's the same Deploy error
         self.assertEqual(expected_result[0][:2], result[0][:2])
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'with_param', [], script)
         self.assertEqual([], result)
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], script)
         expected_result = []
         for x in [1, 2, 3]:
@@ -467,7 +506,7 @@ class TestRuntimeInterop(BoaTest):
                                     [x]])
         self.assertEqual(expected_result, result)
 
-        engine = TestEngine()
+        engine.reset_engine()
         result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
         self.assertEqual([], result)
 
@@ -667,3 +706,20 @@ class TestRuntimeInterop(BoaTest):
     def test_address_version_cant_assign(self):
         path = self.get_contract_path('AddressVersionCantAssign.py')
         self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+
+    def test_load_script(self):
+        path = self.get_contract_path('LoadScriptDynamicCall.py')
+        self.compile_and_save(path)
+        engine = TestEngine()
+
+        operand_1 = 1
+        operand_2 = 2
+        expected_result = operand_1 + operand_2
+        result = self.run_smart_contract(engine, path, 'dynamic_sum',
+                                         operand_1, operand_2)
+        self.assertEqual(expected_result, result)
+
+        from boa3.neo3.contracts import CallFlags
+        result = self.run_smart_contract(engine, path, 'dynamic_sum_with_flags',
+                                         operand_1, operand_2, CallFlags.READ_ONLY)
+        self.assertEqual(expected_result, result)

@@ -3,7 +3,6 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -50,8 +49,7 @@ class TestFunction(BoaTest):
     def test_bool_function(self):
         expected_output = (
             # functions without arguments and local variables don't need initslot
-            Opcode.PUSH1  # body
-            + Opcode.CONVERT + StackItemType.Boolean
+            Opcode.PUSHT  # body
             + Opcode.RET  # return
         )
 
@@ -190,13 +188,12 @@ class TestFunction(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_call_void_function_without_args(self):
-        called_function_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.CALL  # TestFunction()
             + called_function_address
-            + Opcode.PUSH1  # return True
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT  # return True
             + Opcode.RET
             + Opcode.INITSLOT  # TestFunction
             + b'\x01'
@@ -239,15 +236,14 @@ class TestFunction(BoaTest):
         self.assertEqual(1, result)
 
     def test_call_void_function_with_literal_args(self):
-        called_function_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.PUSH2  # TestAdd(1, 2)
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
-            + Opcode.PUSH1  # return True
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT  # return True
             + Opcode.RET
             + Opcode.INITSLOT  # TestFunction
             + b'\x01'
@@ -299,7 +295,7 @@ class TestFunction(BoaTest):
         self.assertEqual(3, result)
 
     def test_call_void_function_with_variable_args(self):
-        called_function_address = Integer(6).to_byte_array(min_length=1, signed=True)
+        called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
             Opcode.INITSLOT  # Main
@@ -313,8 +309,7 @@ class TestFunction(BoaTest):
             + Opcode.PUSH1
             + Opcode.CALL
             + called_function_address
-            + Opcode.PUSH1  # return True
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT  # return True
             + Opcode.RET
             + Opcode.INITSLOT  # TestFunction
             + b'\x01'
@@ -555,6 +550,7 @@ class TestFunction(BoaTest):
             + Integer(3).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSH10  # 10
             + Opcode.RET  # return
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnIfExpression.py')
@@ -579,7 +575,7 @@ class TestFunction(BoaTest):
             + Opcode.LDARG0  # for_sequence = arg0
             + Opcode.PUSH0  # for_index = 0
             + Opcode.JMP  # begin for
-            + Integer(18).to_byte_array(min_length=1, signed=True)
+            + Integer(19).to_byte_array(min_length=1, signed=True)
             + Opcode.OVER  # value = for_sequence[for_index]
             + Opcode.OVER
             + Opcode.DUP
@@ -592,7 +588,8 @@ class TestFunction(BoaTest):
             + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.STLOC0
-            + Opcode.CLEAR
+            + Opcode.DROP
+            + Opcode.DROP
             + Opcode.LDLOC0  # return value
             + Opcode.RET
             + Opcode.INC  # for_index = for_index + 1
@@ -602,11 +599,12 @@ class TestFunction(BoaTest):
             + Opcode.SIZE
             + Opcode.LT
             + Opcode.JMPIF
-            + Integer(-21).to_byte_array(min_length=1, signed=True)
+            + Integer(-22).to_byte_array(min_length=1, signed=True)
             + Opcode.DROP
             + Opcode.DROP
             + Opcode.PUSH5  # else
             + Opcode.RET  # return 5
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnFor.py')
@@ -660,6 +658,7 @@ class TestFunction(BoaTest):
             + Opcode.DROP
             + Opcode.LDLOC0  # else
             + Opcode.RET  # return x
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnForOnlyOnElse.py')
@@ -700,6 +699,7 @@ class TestFunction(BoaTest):
             + Integer(-9).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0  # else
             + Opcode.RET  # return x
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnWhile.py')
@@ -736,6 +736,7 @@ class TestFunction(BoaTest):
             + Integer(-7).to_byte_array(min_length=1, signed=True)
             + Opcode.LDLOC0  # else
             + Opcode.RET  # return x
+            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnWhileOnlyOnElse.py')

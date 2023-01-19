@@ -265,7 +265,6 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_script_hash(self):
         path = self.get_contract_path('ecpoint', 'ECPointScriptHash.py')
-        self.compile_and_save(path)
         engine = TestEngine()
 
         from boa3.neo import public_key_to_script_hash
@@ -473,6 +472,82 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(b'aaaa', result)
         result = self.run_smart_contract(engine, path, 'bytestring_mult', 'unit', 50)
         self.assertEqual('unit' * 50, result)
+
+    # endregion
+
+    # region Opcode
+
+    def test_opcode_manifest_generation(self):
+        path = self.get_contract_path('opcode', 'ConcatWithBytes.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.get_output(path)
+
+        import os
+        from boa3.neo.vm.type.AbiType import AbiType
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(1, len(abi['methods']))
+
+        method = abi['methods'][0]
+
+        self.assertIn('parameters', method)
+        self.assertEqual(1, len(method['parameters']))
+        self.assertIn('type', method['parameters'][0])
+        self.assertEqual(AbiType.ByteArray, method['parameters'][0]['type'])
+
+    def test_opcode_concat(self):
+        from boa3.neo.vm.opcode.Opcode import Opcode
+        path = self.get_contract_path('opcode', 'ConcatWithOpcode.py')
+
+        engine = TestEngine()
+        expected_result = Opcode.LDARG0 + Opcode.LDARG1 + Opcode.ADD
+        result = self.run_smart_contract(engine, path, 'concat')
+        self.assertEqual(expected_result, result)
+
+    def test_opcode_concat_with_bytes(self):
+        from boa3.neo.vm.opcode.Opcode import Opcode
+        path = self.get_contract_path('opcode', 'ConcatWithBytes.py')
+
+        engine = TestEngine()
+        concat_bytes = b'12345'
+        arg = Opcode.LDARG0
+        result = self.run_smart_contract(engine, path, 'concat', arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(concat_bytes + arg, result)
+
+        arg = Opcode.LDLOC1
+        result = self.run_smart_contract(engine, path, 'concat', arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(concat_bytes + arg, result)
+
+        arg = Opcode.NOP
+        result = self.run_smart_contract(engine, path, 'concat', arg,
+                                         expected_result_type=bytes)
+        self.assertEqual(concat_bytes + arg, result)
+
+    def test_opcode_concat_mismatched_type(self):
+        path = self.get_contract_path('opcode', 'ConcatMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_opcode_multiplication(self):
+        from boa3.neo.vm.opcode.Opcode import Opcode
+        path = self.get_contract_path('opcode', 'OpcodeMultiplication.py')
+
+        engine = TestEngine()
+
+        multiplier = 4
+        result = self.run_smart_contract(engine, path, 'opcode_mult', multiplier,
+                                         expected_result_type=bytes)
+        self.assertEqual(Opcode.NOP * multiplier, result)
+
+        multiplier = 50
+        result = self.run_smart_contract(engine, path, 'opcode_mult', multiplier,
+                                         expected_result_type=bytes)
+        self.assertEqual(Opcode.NOP * multiplier, result)
 
     # endregion
 

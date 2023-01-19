@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 
 from boa3.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -22,27 +23,42 @@ class StrSplitMethod(StdLibMethod):
         maxsplit_default = ast.parse("-1").body[0].value.operand
         maxsplit_default.n = -1
 
+        neo_internal_args = {
+            'str': Variable(Type.str),
+            'separator': Variable(Type.str),
+            # TODO: include removeEmptyEntries
+        }
+
         super().__init__(identifier, syscall, args, defaults=[separator_default, maxsplit_default],
-                         return_type=Type.list.build_collection(Type.str))
+                         return_type=Type.list.build_collection(Type.str),
+                         internal_call_args=len(neo_internal_args))
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generation_order(self) -> List[int]:
+        # the original string must be the top value in the stack
+        indexes = list(range(len(self.args)))
+        str_index = list(self.args).index('self')
+
+        if indexes[-1] != str_index:
+            # context must be the last generated argument
+            indexes.remove(str_index)
+            indexes.append(str_index)
+        return indexes
+
+    @property
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.model.type.type import Type
 
         jmp_place_holder = (Opcode.JMP, b'\x01')
 
         preserver_args_from_array = [   # copies split and maxsplit args on the stack
-            (Opcode.DUP, b''),
-            (Opcode.PUSH1, b''),
-            (Opcode.PICKITEM, b''),
+            OpcodeHelper.get_push_and_data(2),
+            (Opcode.PICK, b''),
             (Opcode.SWAP, b''),
-            (Opcode.UNPACK, b''),
-            (Opcode.DEC, b''),
-            (Opcode.PACK, b'')
         ]
 
-        neo_strsplit_method = super().opcode
+        neo_strsplit_method = super()._opcode
 
         verify_maxsplit = [     # verifies if there is a maxsplit
             (Opcode.OVER, b''),
@@ -76,15 +92,15 @@ class StrSplitMethod(StdLibMethod):
         ]
 
         num_jmp_code = -get_bytes_count(while_verify + concatenate_array)
-        jmp_back_to_while = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code)
+        jmp_back_to_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
         concatenate_array.append(jmp_back_to_while)
 
         num_jmp_code = get_bytes_count(while_verify + concatenate_array)
-        jmp_to_clean_from_verify_maxsplit = Opcode.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
+        jmp_to_clean_from_verify_maxsplit = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
         verify_maxsplit[-1] = jmp_to_clean_from_verify_maxsplit
 
         num_jmp_code = get_bytes_count(concatenate_array)
-        jmp_to_clean_from_while_verify = Opcode.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
+        jmp_to_clean_from_while_verify = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
         while_verify[-1] = jmp_to_clean_from_while_verify
 
         clean_stack = [

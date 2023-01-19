@@ -3,20 +3,22 @@ from typing import List
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.native import *
+from boa3.model.builtin.native.oracleclass import OracleClass
 from boa3.model.identifiedsymbol import IdentifiedSymbol
 from boa3.model.imports.package import Package
 
 
 class NativeContract:
     # Class Interfaces
-    ContractManagement = ContractManagementClass()
-    CryptoLib = CryptoLibClass()
-    GAS = GasClass()
-    Ledger = LedgerClass()
-    NEO = NeoClass()
-    Policy = PolicyClass()
-    RoleManagement = RoleManagementClass()
-    StdLib = StdLibClass()
+    ContractManagement = ContractManagementClass.build()
+    CryptoLib = CryptoLibClass.build()
+    GAS = GasClass.build()
+    Ledger = LedgerClass.build()
+    NEO = NeoClass.build()
+    Oracle = OracleClass.build()
+    Policy = PolicyClass.build()
+    RoleManagement = RoleManagementClass.build()
+    StdLib = StdLibClass.build()
 
     # region Packages
 
@@ -43,6 +45,10 @@ class NativeContract:
                         types=[NEO]
                         )
 
+    OracleModule = Package(identifier=Oracle.identifier.lower(),
+                           types=[Oracle]
+                           )
+
     PolicyModule = Package(identifier=Policy.identifier.lower(),
                            types=[Policy]
                            )
@@ -64,6 +70,7 @@ class NativeContract:
         GasModule,
         LedgerModule,
         NeoModule,
+        OracleModule,
         PolicyModule,
         RoleManagementModule,
         StdLibModule

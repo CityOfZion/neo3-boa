@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -23,7 +24,7 @@ class UpperMethod(IBuiltinMethod):
         return self.args['self']
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.compiler.codegenerator import get_bytes_count
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.neo.vm.type.Integer import Integer
@@ -80,11 +81,11 @@ class UpperMethod(IBuiltinMethod):
             (Opcode.CONVERT, StackItemType.ByteString),
         ]
 
-        jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
-                                                                                       swap_lower_to_upper_case), True)
+        jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
+                                                                                             swap_lower_to_upper_case), True)
         get_substring_middle[-1] = jmp_to_join_substring
 
-        jmp_to_join_substring = Opcode.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_lower_to_upper_case), True)
+        jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_lower_to_upper_case), True)
         verify_greater_than_z[-1] = jmp_to_join_substring
 
         get_substring_middle.extend(verify_greater_than_z)
@@ -111,11 +112,11 @@ class UpperMethod(IBuiltinMethod):
             # jump back to verify,
         ]
 
-        jmp_to_verify_while = Opcode.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
-                                                                                    get_substring_left +
-                                                                                    get_substring_middle +
-                                                                                    get_substring_right +
-                                                                                    join_substrings))
+        jmp_to_verify_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
+                                                                                          get_substring_left +
+                                                                                          get_substring_middle +
+                                                                                          get_substring_right +
+                                                                                          join_substrings))
         join_substrings.append(jmp_to_verify_while)
 
         clean_stack = [                     # removes all auxiliary values
@@ -130,7 +131,7 @@ class UpperMethod(IBuiltinMethod):
             join_substrings
         )
 
-        jmp_to_clean_stack = Opcode.get_jump_and_data(Opcode.JMPLE, get_bytes_count(while_body), True)
+        jmp_to_clean_stack = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(while_body), True)
         verify_while[-1] = jmp_to_clean_stack
 
         return (

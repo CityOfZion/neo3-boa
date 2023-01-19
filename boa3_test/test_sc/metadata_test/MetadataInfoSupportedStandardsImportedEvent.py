@@ -1,7 +1,7 @@
 from typing import Any
 
 import boa3_test.examples.nep17 as nep17
-from boa3.builtin import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.type import UInt160
 
 

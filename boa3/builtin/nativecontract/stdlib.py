@@ -1,12 +1,14 @@
 from typing import Any
 
-from boa3.builtin.type import ByteString
+from boa3.builtin.type import ByteString, UInt160
 
 
 class StdLib:
     """
     A class used to represent StdLib native contract
     """
+
+    hash: UInt160
 
     @classmethod
     def serialize(cls, item: Any) -> bytes:

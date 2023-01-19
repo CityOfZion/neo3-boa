@@ -8,7 +8,6 @@ from boa3.model.symbol import ISymbol
 from boa3.model.variable import Variable
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -104,8 +103,7 @@ class TestVariable(BoaTest):
             Opcode.INITSLOT     # function signature
             + b'\x03'
             + b'\x00'
-            + Opcode.PUSH1      # a = b = c = True
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT      # a = b = c = True
             + Opcode.DUP            # c = True
             + Opcode.STLOC2
             + Opcode.DUP            # b = True
@@ -198,8 +196,7 @@ class TestVariable(BoaTest):
             + Integer(len(string)).to_byte_array(min_length=1)
             + string
             + Opcode.STLOC0
-            + Opcode.PUSH1      # a = b = c = True
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHT      # a = b = c = True
             + Opcode.DUP            # c = True
             + Opcode.STLOC0
             + Opcode.DUP            # b = True
@@ -416,6 +413,10 @@ class TestVariable(BoaTest):
 
     def test_aug_assign_mismatched_type(self):
         path = self.get_contract_path('MismatchedTypeAugAssign.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_invalid_type_format_mismatched_type(self):
+        path = self.get_contract_path('MismatchedTypeInvalidTypeFormat.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_global_declaration_with_assignment(self):
@@ -643,7 +644,7 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('AssignLocalWithArgumentShadowingGlobal.py')
-        output = Boa3.compile(path)
+        output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
@@ -702,3 +703,11 @@ class TestVariable(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'test')
         self.assertEqual([10], result)
+
+    def test_inner_object_variable_access(self):
+        path = self.get_contract_path('InnerObjectVariableAccess.py')
+        engine = TestEngine()
+
+        expected_return = 'InnerObjectVariableAccess'
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_return, result)

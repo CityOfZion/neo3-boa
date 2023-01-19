@@ -1,6 +1,6 @@
 from typing import Any, cast
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.storage import get, put
 from boa3.builtin.nativecontract.stdlib import StdLib
 

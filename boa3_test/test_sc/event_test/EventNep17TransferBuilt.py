@@ -1,6 +1,6 @@
 from typing import Union
 
-from boa3.builtin import CreateNewEvent, public
+from boa3.builtin.compile_time import public, CreateNewEvent
 from boa3.builtin.type import UInt160
 
 transfer = CreateNewEvent(

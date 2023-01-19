@@ -36,6 +36,7 @@ class TestEngine:
         self._test_engine_path = engine_path
         self._vm_state: VMState = VMState.NONE
         self._executed_script_hash: Optional[UInt160] = None
+        self._calling_script_hash: Optional[UInt160] = None
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
 
@@ -66,6 +67,10 @@ class TestEngine:
     @property
     def executed_script_hash(self) -> Optional[UInt160]:
         return self._executed_script_hash
+
+    @property
+    def calling_script_hash(self) -> Optional[UInt160]:
+        return self._calling_script_hash
 
     @property
     def result_stack(self) -> List[Any]:
@@ -116,7 +121,7 @@ class TestEngine:
             self._storage[storage_key] = value
 
     def set_storage(self, storage: Dict[Tuple[Union[str, bytes], str], Any]):
-        self._storage.clear()
+        self._storage.clear(delete_deploy_data=False)
         for (key, contract_path), value in storage.items():
             self.storage_put(key, value, contract_path)
 
@@ -141,8 +146,28 @@ class TestEngine:
     def add_gas(self, script_hash: bytes, amount: int) -> bool:
         return self._storage.add_token(constants.GAS_SCRIPT, script_hash, amount)
 
-    def add_signer_account(self, account_address: bytes, account_scope: WitnessScope = WitnessScope.CalledByEntry):
+    def set_calling_script_hash(self, calling_hash: bytes) -> bool:
+        if len(calling_hash) != constants.SIZE_OF_INT160:
+            return False
+
+        calling_script_hash = UInt160(calling_hash)
+        account = Signer(calling_script_hash, WitnessScope.CalledByEntry)
+        if account in self._accounts:
+            account_index = self._accounts.index(account)
+            if account_index != 0:  # the calling hash should be the first signer
+                account = self._accounts.pop(account_index)
+                account.add_scope(WitnessScope.CalledByEntry)
+
+        self._accounts.insert(0, account)
+        self._calling_script_hash = calling_script_hash
+
+    def add_signer_account(self, account_address: bytes, account_scope: WitnessScope = WitnessScope.CalledByEntry,
+                           permissions: list = None):
         account = Signer(UInt160(account_address), account_scope)
+        if permissions is None:
+            permissions = []
+
+        account.set_permissions(permissions)
         if account not in self._accounts:
             self._accounts.append(account)
 
@@ -171,16 +196,16 @@ class TestEngine:
             return self._contract_paths.pop(index)
 
     def _get_contract_id(self, contract_path: str) -> int:
-        if path.isfile(contract_path):
+        contracts = self.contracts
+        if path.isfile(contract_path) and contract_path not in contracts:
             with open(contract_path, mode='rb') as nef:
                 from boa3.neo.contracts.neffile import NefFile
                 script_hash = NefFile.deserialize(nef.read()).script_hash
 
             return self._storage.get_contract_id(script_hash)
 
-        contracts = self.contracts
         if contract_path in contracts:
-            return contracts.index(contract_path)
+            return contracts.index(contract_path) + 1
         return -1
 
     @property
@@ -297,6 +322,13 @@ class TestEngine:
             if 'executedscripthash' in result:
                 self._executed_script_hash = UInt160.from_string(result['executedscripthash'])
 
+            if 'callingscripthash' in result:
+                try:
+                    calling_script_hash = UInt160.from_string(result['callingscripthash'])
+                except BaseException:
+                    calling_script_hash = None
+                self._calling_script_hash = calling_script_hash
+
             if 'gasconsumed' in result:
                 self._gas_consumed = int(result['gasconsumed'])
 
@@ -355,6 +387,7 @@ class TestEngine:
     def reset_state(self):
         self._vm_state = VMState.NONE
         self._executed_script_hash = None
+        self._calling_script_hash = None
         self._gas_consumed = 0
         self._result_stack = []
         self._accounts = []
@@ -365,6 +398,7 @@ class TestEngine:
         self.reset_state()
         self._notifications.clear()
         self._storage.clear()
+        self._contract_paths.clear()
 
     def _filter_result(self, value: Any, called_method: str, contract_id=None):
         if contract_id is None:
@@ -405,6 +439,8 @@ class TestEngine:
             'storage': self._storage.to_json(),
             'contracts': [{'nef': contract_path} for contract_path in self.contracts],
             'signeraccounts': [address.to_json() for address in self._accounts],
+            'callingscripthash': (self._calling_script_hash if self._calling_script_hash is None
+                                  else str(self._calling_script_hash)),
             'height': self.height,
             'blocks': [block.to_json() for block in self.blocks]
         }

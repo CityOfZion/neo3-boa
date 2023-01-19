@@ -1,5 +1,5 @@
 import boa3_test.test_sc.import_test.variable_import.GenerateImportedVariable as OtherModule
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 
 
 @public

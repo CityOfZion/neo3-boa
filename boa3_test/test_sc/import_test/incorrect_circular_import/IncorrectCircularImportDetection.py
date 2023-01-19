@@ -1,7 +1,7 @@
 import module1
 import module2
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 
 
 @public

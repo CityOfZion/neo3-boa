@@ -170,6 +170,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param function: the python ast function definition node
         """
         self.visit(function.args)
+
         symbols = self.symbols if self._current_class is None else self._current_class.symbols
         method = symbols[function.name]
 
@@ -407,15 +408,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
                 else:
                     if self._current_method is not None and node.id in self._current_method.symbols:
-                        can_change_target_type = self._current_method.symbols[node.id].type is UndefinedType
+                        can_change_target_type = (self._current_method.symbols[node.id].type is UndefinedType
+                                                  or node.id in self._current_method.args)
+                        can_change_original = node.id not in self._current_method.args
                     else:
                         can_change_target_type = True
+                        can_change_original = True
 
                     if can_change_target_type:
                         if (not target_type.is_type_of(value_type) and
                                 value != target_type.default_value):
                             target_type = value_type
-                        self._current_scope.include_symbol(node.id, Variable(value_type))
+                        self._current_scope.include_symbol(node.id, Variable(value_type),
+                                                           reassign_original=can_change_original)
 
         if not target_type.is_type_of(value_type) and value != target_type.default_value:
             if not implicit_cast:
@@ -1596,8 +1601,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         is_from_class_name = isinstance(origin, ast.Name) and isinstance(self.get_symbol(origin.id), UserClass)
         is_instance_variable_from_class = (isinstance(symbol, UserClass)
                                            and attribute.attr in symbol.instance_variables)
-        is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables
-        is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties
+        is_class_variable_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.class_variables and not symbol.is_interface
+        is_property_from_class = isinstance(symbol, UserClass) and attribute.attr in symbol.properties and not symbol.is_interface
 
         if ((attr_symbol is None and hasattr(symbol, 'symbols'))
                 or is_invalid_method
@@ -1611,7 +1616,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 
-        if not is_from_class_name and is_class_variable_from_class and isinstance(attribute.ctx, ast.Store):
+        if is_class_variable_from_class and isinstance(attribute.ctx, ast.Store):
             # reassign class variables in objects is not supported yet
             self._log_error(
                 CompilerError.NotSupportedOperation(

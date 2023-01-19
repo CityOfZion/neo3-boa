@@ -4,6 +4,7 @@ import os
 from boa3 import constants
 from boa3.analyser.analyser import Analyser
 from boa3.compiler.codegenerator.codegenerator import CodeGenerator
+from boa3.compiler.compileroutput import CompilerOutput
 from boa3.compiler.filegenerator import FileGenerator
 from boa3.exception.NotLoadedException import NotLoadedException
 
@@ -12,11 +13,11 @@ class Compiler:
     """
     The main compiler class.
 
-    :ivar bytecode: the compiled file as a byte array. Empty by default.
+    :ivar result: the compiled file as a byte array. Empty by default.
     """
 
     def __init__(self):
-        self.bytecode: bytearray = bytearray()
+        self.result: CompilerOutput = CompilerOutput(bytearray())
         self._analyser: Analyser = None
         self._entry_smart_contract: str = ''
 
@@ -29,6 +30,9 @@ class Compiler:
         :param log: if compiler errors should be logged.
         :return: the bytecode of the compiled .nef file
         """
+        return self._internal_compile(path, root_folder, log).bytecode
+
+    def _internal_compile(self, path: str, root_folder: str = None, log: bool = True) -> CompilerOutput:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
@@ -36,8 +40,10 @@ class Compiler:
         logging.info(f'Started compiling\t{filename}')
         self._entry_smart_contract = os.path.splitext(filename)[0]
 
+        from boa3.compiler.compiledmetadata import CompiledMetadata
         from boa3.model.imports.builtin import CompilerBuiltin
         CompilerBuiltin.reset()
+        CompiledMetadata.reset()
 
         self._analyse(fullpath, root_folder, log)
         return self._compile()
@@ -52,7 +58,7 @@ class Compiler:
         :param log: if compiler errors should be logged.
         :param debug: if nefdbgnfo file should be generated.
         """
-        self.bytecode = self.compile(path, root_folder, log)
+        self.result = self._internal_compile(path, root_folder, log)
         self._save(output_path, debug)
 
     def _analyse(self, path: str, root_folder: str = None, log: bool = True):
@@ -65,7 +71,7 @@ class Compiler:
         """
         self._analyser = Analyser.analyse(path, log=log, root=root_folder)
 
-    def _compile(self) -> bytes:
+    def _compile(self) -> CompilerOutput:
         """
         Compile the analysed Python file.
 
@@ -76,7 +82,7 @@ class Compiler:
             raise NotLoadedException
         analyser = self._analyser.copy()
         result = CodeGenerator.generate_code(analyser)
-        if len(result) == 0:
+        if len(result.bytecode) == 0:
             raise NotLoadedException(empty_script=True)
 
         if constants.INITIALIZE_METHOD_ID in analyser.symbol_table:
@@ -94,13 +100,13 @@ class Compiler:
         :raise NotLoadedException: raised if no file were compiled
         :param debug: if nefdbgnfo file should be generated.
         """
-        is_bytecode_empty = len(self.bytecode) == 0
+        is_bytecode_empty = len(self.result.bytecode) == 0
         if (self._analyser is None
                 or not self._analyser.is_analysed
                 or is_bytecode_empty):
             raise NotLoadedException(empty_script=is_bytecode_empty)
 
-        generator = FileGenerator(self.bytecode, self._analyser, self._entry_smart_contract)
+        generator = FileGenerator(self.result, self._analyser, self._entry_smart_contract)
         with open(output_path, 'wb+') as nef_file:
             nef_bytes = generator.generate_nef_file()
             nef_file.write(nef_bytes)

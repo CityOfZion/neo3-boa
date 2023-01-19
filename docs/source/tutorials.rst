@@ -16,7 +16,7 @@ All of the examples presented here can be found in the `examples folder of the N
 
 ::
 
-    from boa3.builtin import NeoMetadata, metadata, public
+    from boa3.builtin.compile_time import NeoMetadata, metadata, public
     from boa3.builtin.interop import storage
 
 
@@ -47,7 +47,7 @@ All of the examples presented here can be found in the `examples folder of the N
 
     from typing import Any, Union
 
-    from boa3.builtin import NeoMetadata, metadata, public
+    from boa3.builtin.compile_time import NeoMetadata, metadata, public
     from boa3.builtin.contract import Nep17TransferEvent, abort
     from boa3.builtin.interop import runtime, storage
     from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
@@ -327,7 +327,7 @@ All of the examples presented here can be found in the `examples folder of the N
 
     from typing import Any
 
-    from boa3.builtin import NeoMetadata, metadata, public
+    from boa3.builtin.compile_time import NeoMetadata, metadata, public
     from boa3.builtin.contract import abort
     from boa3.builtin.interop import runtime, storage
     from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
@@ -571,7 +571,7 @@ All of the examples presented here can be found in the `examples folder of the N
 
     from typing import Any, List, Union
 
-    from boa3.builtin import NeoMetadata, metadata, public
+    from boa3.builtin.compile_time import NeoMetadata, metadata, public
     from boa3.builtin.contract import Nep17TransferEvent
     from boa3.builtin.interop import runtime, storage
     from boa3.builtin.interop.contract import call_contract
@@ -1054,7 +1054,7 @@ All of the examples presented here can be found in the `examples folder of the N
 
     from typing import Any, Union
 
-    from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+    from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, metadata, public
     from boa3.builtin.contract import Nep17TransferEvent, abort
     from boa3.builtin.interop import runtime, storage
     from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract

@@ -3,6 +3,13 @@ from __future__ import annotations
 from typing import Sequence, Union
 
 
+class Event:
+    """
+    Describes an action that happened in the blockchain.
+    """
+    pass
+
+
 class UInt160(bytes):
     """
     Represents a 160-bit unsigned integer.

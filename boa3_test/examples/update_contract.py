@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.interop import storage
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
@@ -34,6 +34,10 @@ def manifest_metadata() -> NeoMetadata:
     meta.description = "Update Contract Example. This contract represents the first smart contract deployed on the" \
                        "blockchain, with a buggy method."
     meta.email = "contact@coz.io"
+
+    # requires access to ContractManagement methods
+    meta.add_permission(contract='0xfffdc93764dbaddd97c48f252a53ea4643faa3fd',
+                        methods=['update'])
     return meta
 
 
@@ -57,7 +61,7 @@ on_transfer = CreateNewEvent(
 # -------------------------------------------
 
 
-@public(safe=True)
+@public
 def update_sc(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the smart contract. In this example there is a bugged method, so, the smart contract will be updated to fix

@@ -11,6 +11,7 @@ from boa3.model.method import Method
 from boa3.model.variable import Variable
 from boa3.neo.contracts.neffile import NefFile
 from boa3.neo.vm.type.AbiType import AbiType
+from boa3.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -45,24 +46,25 @@ class TestFileGeneration(BoaTest):
         self.assertTrue(os.path.exists(expected_nef_output))
         with open(expected_nef_output, 'rb') as nef_output:
             magic = nef_output.read(constants.SIZE_OF_INT32)
-            compiler_with_version = nef_output.read(64)
-            compiler, version = compiler_with_version.rsplit(b'-', maxsplit=1)
-            version = version[:32]
+            compiler = nef_output.read(64)
+            compiler = compiler.replace(b'\x00', b'')
 
             nef_output.read(2)  # reserved
-            nef_output.read(1)  # TODO: method tokens
+
+            method_token_count = nef_output.read(1)
+            self.assertEqual(Integer.from_bytes(method_token_count), 0)
+
             nef_output.read(2)  # reserved
 
             script_size = nef_output.read(1)
-            script = nef_output.read(int.from_bytes(script_size, constants.BYTEORDER))
-            check_sum = nef_output.read(constants.SIZE_OF_INT32)
+            script = nef_output.read(Integer.from_bytes(script_size))
+            check_sum = Integer.from_bytes(nef_output.read(constants.SIZE_OF_INT32))
 
-        self.assertEqual(int.from_bytes(script_size, constants.BYTEORDER), len(script))
+        self.assertEqual(Integer.from_bytes(script_size), len(script))
 
         nef = NefFile(script)._nef
         self.assertEqual(compiler.decode(constants.ENCODING), nef.compiler)
         self.assertEqual(check_sum, nef.checksum)
-        self.assertEqual(version, nef.version.to_array())
 
     def test_generate_manifest_file_with_decorator(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
@@ -273,6 +275,36 @@ class TestFileGeneration(BoaTest):
     def test_metadata_abi_method_name_mismatched_type(self):
         path = self.get_contract_path('MetadataMethodNameMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_metadata_abi_method_with_duplicated_name_but_different_args(self):
+        path = self.get_contract_path('MetadataMethodDuplicatedNameDifferentArgs.py')
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+        self.assertEqual(3, len(abi['methods']))
+
+        # method Inc named as Add
+        method0 = abi['methods'][0]
+        self.assertIn('name', method0)
+        self.assertEqual('Add', method0['name'])
+        self.assertIn('parameters', method0)
+        self.assertEqual(1, len(method0['parameters']))
+
+        # method Add also named as Add, but with different arg count
+        method1 = abi['methods'][1]
+        self.assertIn('name', method1)
+        self.assertEqual('Add', method1['name'])
+        self.assertIn('parameters', method1)
+        self.assertEqual(2, len(method1['parameters']))
+
+    def test_metadata_abi_method_with_duplicated_name_and_args(self):
+        path = self.get_contract_path('MetadataMethodDuplicatedNameAndArgs.py')
+        self.assertCompilerLogs(CompilerError.DuplicatedManifestIdentifier, path)
 
     def test_generate_manifest_file_with_public_safe_decorator_kwarg(self):
         path = self.get_contract_path('MetadataMethodSafe.py')

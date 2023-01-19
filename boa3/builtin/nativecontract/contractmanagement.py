@@ -9,6 +9,8 @@ class ContractManagement:
     A class used to represent the ContractManagement native contract
     """
 
+    hash: UInt160
+
     @classmethod
     def get_minimum_deployment_fee(cls) -> int:
         """
@@ -29,6 +31,24 @@ class ContractManagement:
         :rtype: Contract
 
         :raise Exception: raised if hash length isn't 20 bytes.
+        """
+        pass
+
+    @classmethod
+    def has_method(cls, hash: UInt160, method: str, parameter_count: int) -> bool:
+        """
+        Check if a method exists in a contract.
+
+        :param hash: The hash of the deployed contract
+        :type hash: UInt160
+        :param method: The name of the method
+        :type method: str
+        :param parameter_count: The number of parameters
+        :type parameter_count: int
+        :return: whether the method exists or not
+        :rtype: bool
+
+        :raise Exception: raised if hash length isn't 20 bytes or if the parameter_count is less than 0.
         """
         pass
 

@@ -3,13 +3,13 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.model.builtin.builtincallable import IBuiltinCallable
 from boa3.model.builtin.classmethod import *
+from boa3.model.builtin.compile_time import *
 from boa3.model.builtin.contract import *
 from boa3.model.builtin.decorator import *
 from boa3.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.math import *
 from boa3.model.builtin.method import *
-from boa3.model.builtin.neometadatatype import MetadataTypeSingleton as NeoMetadataType
 from boa3.model.callable import Callable
 from boa3.model.event import Event as EventSymbol
 from boa3.model.identifiedsymbol import IdentifiedSymbol
@@ -19,6 +19,7 @@ from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 from boa3.model.type.math import Math
+from boa3.model.type.neo.opcodetype import OpcodeType
 from boa3.model.type.primitive.bytestringtype import ByteStringType
 
 
@@ -26,6 +27,8 @@ class BoaPackage(str, Enum):
     Contract = 'contract'
     Interop = 'interop'
     Type = 'type'
+    VM = 'vm'
+    CompileTime = 'compile_time'
 
 
 class Builtin:
@@ -69,6 +72,9 @@ class Builtin:
     ListSequence = ListSequenceMethod()
     Range = RangeMethod()
     Reversed = ReversedMethod()
+    StrBool = StrBoolMethod()
+    StrByteString = StrByteStringMethod()
+    StrInt = StrIntMethod()
     Super = SuperMethod()
 
     # python class method
@@ -172,6 +178,7 @@ class Builtin:
     UInt256 = UInt256Type.build()
     ECPoint = ECPointType.build()
     NeoAccountState = NeoAccountStateType.build()
+    Opcode = OpcodeType.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -195,18 +202,11 @@ class Builtin:
 
     # endregion
 
-    boa_builtins: List[IdentifiedSymbol] = [ContractInterface,
-                                            ContractMethodDisplayName,
-                                            Event,
-                                            Metadata,
-                                            NeoMetadataType,
-                                            NewEvent,
-                                            Public,
-                                            ScriptHash
-                                            ] + _modules
+    boa_builtins: List[IdentifiedSymbol] = _modules
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
         'name': str,
+        'source': (str, type(None)),
         'supported_standards': list,
         'trusts': list,
         'author': (str, type(None)),
@@ -241,13 +241,24 @@ class Builtin:
                               Nep11Transfer,
                               Nep17Transfer,
                               Nep5Transfer,
+                              ScriptHash
                               ],
         BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: [ByteString,
                           ECPoint,
                           UInt160,
-                          UInt256
-                          ]
+                          UInt256,
+                          Event
+                          ],
+        BoaPackage.VM: [Opcode
+                        ],
+        BoaPackage.CompileTime: [ContractInterface,
+                                 ContractMethodDisplayName,
+                                 Metadata,
+                                 NeoMetadataType,
+                                 Public,
+                                 NewEvent
+                                 ]
     }
 
     _internal_methods = [InnerDeployMethod.instance()

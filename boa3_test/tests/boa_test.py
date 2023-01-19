@@ -55,7 +55,7 @@ class BoaTest(TestCase):
 
     def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
         from boa3.compiler.filegenerator import FileGenerator
-        generator = FileGenerator(compiler.bytecode, compiler._analyser, compiler._entry_smart_contract)
+        generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
         return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
     def indent_text(self, text: str, no_spaces: int = 4) -> str:
@@ -63,7 +63,7 @@ class BoaTest(TestCase):
         return re.sub('\n[ \t]+', '\n' + ' ' * no_spaces, text)
 
     def assertCompilerLogs(self, expected_logged_exception, path) -> Union[bytes, str]:
-        output, error_msg = self.assertCompilerLogsError(expected_logged_exception, path)
+        output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, path)
         if not issubclass(expected_logged_exception, CompilerError):
             return output
         else:
@@ -76,7 +76,19 @@ class BoaTest(TestCase):
             except BaseException:
                 return output
 
-    def assertCompilerLogsError(self, expected_logged_exception, path):
+    def assertCompilerNotLogs(self, expected_logged_exception, path):
+        output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
+        if len(expected_logged) > 0:
+            raise AssertionError(f'{expected_logged_exception.__name__} was logged: "{expected_logged[0].message}"')
+        return output
+
+    def _assert_compiler_logs_error(self, expected_logged_exception, path):
+        output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
+        if len(expected_logged) < 1:
+            raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
+        return output, expected_logged[0].message
+
+    def _get_compiler_log_data(self, expected_logged_exception, path):
         output = None
         with self.assertLogs() as log:
             from boa3.exception.NotLoadedException import NotLoadedException
@@ -93,9 +105,7 @@ class BoaTest(TestCase):
 
         expected_logged = [exception for exception in log.records
                            if isinstance(exception.msg, expected_logged_exception)]
-        if len(expected_logged) < 1:
-            raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
-        return output, expected_logged[0].message
+        return output, expected_logged
 
     def assertIsVoid(self, obj: Any):
         if obj is not VoidType:
@@ -240,6 +250,7 @@ class BoaTest(TestCase):
                            *arguments: Any, reset_engine: bool = False,
                            fake_storage: Dict[Tuple[str, str], Any] = None,
                            signer_accounts: Iterable[bytes] = (),
+                           calling_script_hash: Optional[bytes] = None,
                            expected_result_type: Type = None,
                            rollback_on_fault: bool = True) -> Any:
 
@@ -253,7 +264,7 @@ class BoaTest(TestCase):
             from boa3.neo3.core.types import UInt160
             smart_contract_path = UInt160(smart_contract_path)
 
-        self._set_fake_data(test_engine, fake_storage, signer_accounts)
+        self._set_fake_data(test_engine, fake_storage, signer_accounts, calling_script_hash)
         result = test_engine.run(smart_contract_path, method, *arguments,
                                  reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
 
@@ -275,13 +286,18 @@ class BoaTest(TestCase):
 
     def _set_fake_data(self, test_engine: TestEngine,
                        fake_storage: Dict[Tuple[str, str], Any],
-                       signer_accounts: Iterable[bytes]):
+                       signer_accounts: Iterable[bytes],
+                       calling_script_hash: Optional[bytes] = None):
 
         if isinstance(fake_storage, dict):
             test_engine.set_storage(fake_storage)
 
+        if calling_script_hash is not None and len(calling_script_hash) == constants.SIZE_OF_INT160:
+            test_engine.set_calling_script_hash(calling_script_hash)
+
+        from boa3_test.tests.test_classes.witnessscope import WitnessScope
         for account in signer_accounts:
-            test_engine.add_signer_account(account)
+            test_engine.add_signer_account(account, WitnessScope.Global)
 
     def _filter_result(self, test_engine, expected_result_type, result) -> Any:
         if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:

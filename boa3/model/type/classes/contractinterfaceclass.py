@@ -2,6 +2,7 @@ from typing import List
 
 from boa3.model.callable import Callable
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.classes.contractinterfacehash import ContractHashProperty
 from boa3.model.type.classes.userclass import UserClass
 from boa3.neo3.core.types import UInt160
 
@@ -18,6 +19,9 @@ class ContractInterfaceClass(UserClass):
 
         super().__init__(identifier, decorators, bases)
         self.contract_hash = contract_hash
+
+        contract_hash_property = ContractHashProperty(f'-{identifier}_hash', contract_hash.to_array())
+        self.include_property('hash', contract_hash_property)
 
     @property
     def is_interface(self) -> bool:

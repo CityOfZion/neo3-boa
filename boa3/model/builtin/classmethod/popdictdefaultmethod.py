@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Tuple
 from boa3.model.builtin.classmethod.popmethod import PopMethod
 from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -23,7 +24,7 @@ class PopDictDefaultMethod(PopMethod):
         super().__init__(args, return_type=arg_value.value_type)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.Integer import Integer
         from boa3.compiler.codegenerator import get_bytes_count
 
@@ -72,10 +73,10 @@ class PopDictDefaultMethod(PopMethod):
         ]
 
         num_jmp_code = get_bytes_count(return_default)
-        pop_from_dict[-1] = Opcode.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        pop_from_dict[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
 
         num_jmp_code = get_bytes_count(pick_from_dict + pop_from_dict)
-        verify_has_key[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+        verify_has_key[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
 
         return (
             put_default_at_bottom +

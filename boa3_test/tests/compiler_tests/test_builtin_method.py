@@ -471,7 +471,7 @@ class TestBuiltinMethod(BoaTest):
                                          expected_result_type=bytes)
         self.assertEqual(script_hash, result)
 
-    def test_script_hahs_too_many_parameters(self):
+    def test_script_hash_too_many_parameters(self):
         path = self.get_contract_path('ScriptHashTooManyParameters.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
@@ -1886,5 +1886,53 @@ class TestBuiltinMethod(BoaTest):
         val = b'unit test'
         result = self.run_smart_contract(engine, path, 'main', val)
         self.assertEqual(list(val), result)
+
+    # endregion
+
+    # region str test
+
+    def test_str_bytes_str(self):
+        path = self.get_contract_path('StrByteString.py')
+        engine = TestEngine()
+
+        value = 'test'
+        result = self.run_smart_contract(engine, path, 'str_parameter', value)
+        self.assertEqual(str(value), result)
+
+        value = b'test'
+        result = self.run_smart_contract(engine, path, 'bytes_parameter', value)
+        # since bytes and string is the same thing internally it will return 'test' instead of the "b'test'"
+        self.assertEqual('test', result)
+
+        result = self.run_smart_contract(engine, path, 'empty_parameter')
+        self.assertEqual(str(), result)
+
+    def test_str_int(self):
+        path = self.get_contract_path('StrInt.py')
+        engine = TestEngine()
+
+        value = 1234567890
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(str(value), result)
+
+        value = -1234567890
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(str(value), result)
+
+    def test_str_bool(self):
+        path = self.get_contract_path('StrBool.py')
+        engine = TestEngine()
+
+        value = True
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(str(value), result)
+
+        value = False
+        result = self.run_smart_contract(engine, path, 'main', value)
+        self.assertEqual(str(value), result)
+
+    def test_str_too_many_parameters(self):
+        path = self.get_contract_path('StrTooManyParameters.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     # endregion

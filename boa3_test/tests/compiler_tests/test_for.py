@@ -314,3 +314,12 @@ class TestFor(BoaTest):
 
         result = self.run_smart_contract(engine, path, 'main')
         self.assertIsVoid(result)
+
+    def test_for_range(self):
+        path = self.get_contract_path('ForWithContractInterface.py')
+        path_contract_called = self.get_contract_path('ForWithContractInterfaceCalled.py')
+        engine = TestEngine()
+        self.run_smart_contract(engine, path_contract_called, 'return_zero')
+
+        result = self.run_smart_contract(engine, path, 'main', 3)
+        self.assertEqual([0, 0, 0], result)

@@ -35,6 +35,8 @@ class WitnessScope(IntFlag):
             flags.append("CustomContracts")
         if self.CUSTOM_GROUPS in self:
             flags.append("CustomGroups")
+        if self.WITNESS_RULES in self:
+            flags.append("WitnessRules")
         if self.GLOBAL in self:
             flags.append("Global")
         return ", ".join(flags)
@@ -51,6 +53,8 @@ class WitnessScope(IntFlag):
             c |= c.CUSTOM_CONTRACTS
         if "CustomGroups" in csharp_name:
             c |= c.CUSTOM_GROUPS
+        if "WitnessRules" in csharp_name:
+            c |= c.WITNESS_RULES
         if "Global" in csharp_name:
             c |= c.GLOBAL
         return c

@@ -1,4 +1,3 @@
-from boa3 import constants
 from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.model.builtin.interop.interop import Interop
@@ -49,7 +48,7 @@ class TestBlockchainInterop(BoaTest):
         nef, manifest = self.get_bytes_output(call_contract_path)
         call_contract_path = call_contract_path.replace('.py', '.nef')
 
-        engine = TestEngine()
+        engine.reset_engine()
         engine.add_contract(call_contract_path)
 
         result = self.run_smart_contract(engine, path, 'main', call_hash)
@@ -88,15 +87,15 @@ class TestBlockchainInterop(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', block_hash)
         self.assertIsNone(result)
 
-        from boa3.neo import from_hex_str
-        # TODO: using genesis block hash for testing, change when TestEngine returns blocks hashes
-        block_hash = from_hex_str('0x1f4d1defa46faa5e7b9b8d3f79a06bec777d7c26c4aa5f6f5899a291daa87c15')
+        current_block = engine.current_block
+        self.assertIsNotNone(current_block.hash)
 
-        result = self.run_smart_contract(engine, path, 'Main', block_hash)
+        result = self.run_smart_contract(engine, path, 'Main', current_block.hash)
         self.assertIsInstance(result, list)
         self.assertEqual(10, len(result))
-        self.assertEqual(block_hash, result[0])
-        self.assertEqual(0, result[6])  # genesis block's index is zero
+        self.assertEqual(current_block.hash, result[0])
+        self.assertEqual(current_block.timestamp, result[4])
+        self.assertEqual(current_block.index, result[6])
 
     def test_get_block_mismatched_types(self):
         path = self.get_contract_path('GetBlockMismatchedTypes.py')
@@ -131,19 +130,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransaction.py')
@@ -192,19 +179,7 @@ class TestBlockchainInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionFromBlockInt.py')
@@ -251,19 +226,7 @@ class TestBlockchainInterop(BoaTest):
             + b'\x00\x02'
             + Opcode.LDARG1
             + Opcode.LDARG0
-            + Opcode.PUSH2
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionFromBlockUInt256.py')
@@ -315,19 +278,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionHeight.py')
@@ -360,19 +311,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionSigners.py')
@@ -382,8 +321,10 @@ class TestBlockchainInterop(BoaTest):
         path_burn_gas = self.get_contract_path('../runtime', 'BurnGas.py')
         engine = TestEngine()
 
-        example_account = bytes(range(20))
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000, signer_accounts=[example_account])
+        example_account_1 = bytes(range(20))
+        example_account_2 = bytes(20)
+        self.run_smart_contract(engine, path_burn_gas, 'main', 1000,
+                                signer_accounts=[example_account_1, example_account_2])
 
         txs = engine.get_transactions()
         self.assertGreater(len(txs), 0)
@@ -395,7 +336,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], list)
         self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
-        self.assertEqual(result[0][1], String.from_bytes(example_account))
+        self.assertEqual(result[0][0], String.from_bytes(example_account_1))
 
     def test_get_transaction_signers_mismatched_type(self):
         path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
@@ -409,19 +350,7 @@ class TestBlockchainInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.PUSH1
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(call_flags)).to_byte_array()
-            + call_flags
-            + Opcode.PUSHDATA1
-            + Integer(len(method)).to_byte_array()
-            + method
-            + Opcode.PUSHDATA1
-            + Integer(len(constants.LEDGER_SCRIPT)).to_byte_array()
-            + constants.LEDGER_SCRIPT
-            + Opcode.SYSCALL
-            + Interop.CallContract.interop_method_hash
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionVMState.py')

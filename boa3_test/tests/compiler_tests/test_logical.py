@@ -534,6 +534,13 @@ class TestLogical(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main', True, True, True)
         self.assertEqual(False, result)
 
+    def test_logic_operation_with_return_and_stack_filled(self):
+        path = self.get_contract_path('LogicOperationWithReturnAndStackFilled.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(True, result)
+
     # endregion
 
     # region RightShift

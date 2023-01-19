@@ -5,7 +5,7 @@
 
 from typing import Any, Dict, List, Union, cast
 
-from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.contract import abort
 from boa3.builtin.interop.blockchain import Transaction, get_contract
 from boa3.builtin.interop.contract import call_contract, destroy_contract, update_contract
@@ -31,7 +31,7 @@ def gm_manifest() -> NeoMetadata:
     meta.description = "Some Description"  # TODO_TEMPLATE
     meta.email = "hello@example.com"  # TODO_TEMPLATE
     meta.supported_standards = ["NEP-11"]
-    meta.source = ["https://github.com/"]  # TODO_TEMPLATE
+    meta.source = "https://github.com/"  # TODO_TEMPLATE
     # meta.add_permission(contract='*', methods=['*'])
     return meta
 

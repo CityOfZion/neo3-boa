@@ -14,7 +14,7 @@ class ExitMethod(IBuiltinMethod):
         super().__init__(identifier, args, return_type=Type.none)
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.ABORT, b'')]
 
     @property

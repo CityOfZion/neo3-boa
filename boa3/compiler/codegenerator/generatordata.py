@@ -16,6 +16,7 @@ class GeneratorData:
                  symbol: Optional[ISymbol] = None,
                  result_type: Optional[IType] = None,
                  index: Optional[int] = None,
+                 origin_object_type: Optional[IType] = None,
                  already_generated: bool = False):
 
         if symbol_id is None and isinstance(symbol, IdentifiedSymbol):
@@ -28,6 +29,7 @@ class GeneratorData:
         self.symbol_id: Optional[str] = symbol_id
         self.type: Optional[IType] = result_type
         self.index: Optional[int] = index
+        self.origin_object_type: Optional[ISymbol] = origin_object_type
         self.already_generated: bool = already_generated
 
     def copy(self, new_origin: Optional[ast.AST] = None) -> GeneratorData:

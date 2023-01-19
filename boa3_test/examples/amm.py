@@ -1,6 +1,6 @@
 from typing import Any, List, Union
 
-from boa3.builtin import CreateNewEvent, NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import call_contract
@@ -317,12 +317,7 @@ def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amou
     :raise AssertionError: raised if the best value of a token is less than the minimum amount desired, if the user
     didn't allow enough money, or if the one calling this function is not the user_address
     """
-    # this verification exists thanks to a limitation in the TestEngine, it's returning None when using calling_script_hash
-    # using just `user_address = calling_script hash` should be enough
-    if runtime.calling_script_hash is not None:     # TODO: remove the verification when the TestEngine starts sending a calling script hash
-        user_address = runtime.calling_script_hash
-    else:
-        assert runtime.check_witness(user_address)
+    assert runtime.check_witness(user_address)
 
     reserve_token_a = storage.get(SUPPLY_KEY + TOKEN_A).to_int()
     reserve_token_b = storage.get(SUPPLY_KEY + TOKEN_B).to_int()
@@ -461,13 +456,6 @@ def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min
     burning the liquidity is not greater than the minimum amount that the user wanted, or if the one calling this
     function is not the user_address
     """
-    # this verification exists thanks to a limitation in the TestEngine, it's returning None when using calling_script_hash
-    # using just `user_address = calling_script hash` should be enough
-    if runtime.calling_script_hash is not None:     # TODO: remove the verification when the TestEngine starts sending a calling script hash
-        user_address = runtime.calling_script_hash
-    else:
-        assert runtime.check_witness(user_address)
-
     assert runtime.check_witness(user_address)
     assert liquidity <= balance_of(user_address)
     amount = burn(liquidity, user_address)
@@ -616,12 +604,7 @@ def swap_tokens(amount_in: int, amount_out_min: int, token_in: UInt160, user_add
     :return: the amount of tokens that the user received from the swap
     :rtype: int
     """
-    # this verification exists thanks to a limitation in the TestEngine, it's returning None when using calling_script_hash
-    # using just `user_address = calling_script hash` should be enough
-    if runtime.calling_script_hash is not None:     # TODO: remove the verification when the TestEngine starts sending a calling script hash
-        user_address = runtime.calling_script_hash
-    else:
-        assert runtime.check_witness(user_address)
+    assert runtime.check_witness(user_address)
 
     assert runtime.check_witness(user_address)
     assert token_in == UInt160(storage.get(TOKEN_A)) or token_in == UInt160(storage.get(TOKEN_B))

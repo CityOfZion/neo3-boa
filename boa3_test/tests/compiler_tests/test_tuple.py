@@ -2,7 +2,6 @@ from boa3.boa3 import Boa3
 from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
 from boa3.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
@@ -63,12 +62,9 @@ class TestTuple(BoaTest):
             Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
-            + Opcode.PUSH0      # a = (True, True, False)
-            + Opcode.CONVERT + StackItemType.Boolean
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
-            + Opcode.PUSH1
-            + Opcode.CONVERT + StackItemType.Boolean
+            + Opcode.PUSHF      # a = (True, True, False)
+            + Opcode.PUSHT
+            + Opcode.PUSHT
             + Opcode.PUSH3      # tuple length
             + Opcode.PACK
             + Opcode.STLOC0
@@ -195,23 +191,18 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('TupleOfTuple.py')
-        nef_path = path.replace('.py', '.nef')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
         engine = TestEngine()
-        with self.assertRaisesRegex(TestExecutionException, self.GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX):
-            # TODO: TestEngine fails when running contracts with arrays inside arrays args
-            self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
+        self.assertEqual(result, 1)
 
-        result = engine.run(nef_path, 'Main', ((1, 2), (3, 4)))
-        self.assertEqual(1, result)
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
+            self.run_smart_contract(engine, path, 'Main', ())
 
-        engine.run(nef_path, 'Main', ())
-        self.assertIsNotNone(engine.error)
-
-        engine.run(nef_path, 'Main', ((), (1, 2), (3, 4)))
-        self.assertIsNotNone(engine.error)
+        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
+            self.run_smart_contract(engine, path, 'Main', ((), (1, 2), (3, 4)))
 
     def test_nep5_main(self):
         expected_output = (

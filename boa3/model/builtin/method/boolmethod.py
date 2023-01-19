@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Tuple
 
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -21,7 +22,7 @@ class BoolMethod(IBuiltinMethod):
         return self.args['value']
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.neo.vm.type.StackItem import StackItemType
         from boa3.compiler.codegenerator import get_bytes_count
         jmp_place_holder = (Opcode.JMP, b'\x01')
@@ -79,19 +80,19 @@ class BoolMethod(IBuiltinMethod):
         # region jump logic
 
         jump_instructions = collection_non_zero + non_zero
-        put_true[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
+        put_true[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 
         jump_instructions = collection_non_zero + put_true
-        verify_is_bytestring[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
+        verify_is_bytestring[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
 
         jump_instructions = collection_non_zero + put_true + verify_is_bytestring
-        verify_is_int[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
+        verify_is_int[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
 
         jump_instructions = put_true + verify_is_int + verify_is_bytestring
-        verify_is_map[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
+        verify_is_map[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
 
         jump_instructions = verify_is_map + verify_is_int + verify_is_bytestring + put_true
-        verify_is_array[-1] = Opcode.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
+        verify_is_array[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(jump_instructions), True)
 
         jump_instructions = (
             verify_is_array +
@@ -102,10 +103,10 @@ class BoolMethod(IBuiltinMethod):
             collection_non_zero +
             non_zero
         )
-        value_is_none[-1] = Opcode.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
+        value_is_none[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(jump_instructions), True)
 
         jump_instructions = value_is_none
-        verify_is_none[-1] = Opcode.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(jump_instructions), True)
+        verify_is_none[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(jump_instructions), True)
 
         # endregion
 

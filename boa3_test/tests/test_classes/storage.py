@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Union
 
+from boa3 import constants
 from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
@@ -17,9 +18,16 @@ class Storage:
         storage_key = StorageKey(key)
         return self._dict.pop(storage_key)
 
-    def clear(self):
+    def clear(self, delete_deploy_data: bool = True):
+        prefix, native_id = get_native_contract_data(constants.MANAGEMENT_SCRIPT)
         for key in list(self._dict.keys()):
-            if key._ID > 0:
+            should_delete = (key._ID > 0  # it's a deployd contract
+                             or (delete_deploy_data
+                                 and key._ID == native_id
+                                 and key._key.startswith(prefix)  # it's a deployed contract register
+                                 )
+                             )
+            if should_delete:
                 # keep native contracts storage
                 self._dict.pop(key)
 
@@ -73,7 +81,6 @@ class Storage:
         return True
 
     def has_contract(self, script_hash: bytes) -> bool:
-        from boa3 import constants
         prefix, native_id = get_native_contract_data(constants.MANAGEMENT_SCRIPT)
         if prefix is None or native_id is None:
             return False
@@ -82,7 +89,6 @@ class Storage:
         return storage_key in self
 
     def get_contract_id(self, script_hash: bytes) -> int:
-        from boa3 import constants
         prefix, native_id = get_native_contract_data(constants.MANAGEMENT_SCRIPT)
         if prefix is None or native_id is None:
             return False

@@ -6,10 +6,11 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from boa3 import constants
 from boa3.analyser.astanalyser import IAstAnalyser
 from boa3.analyser.importanalyser import ImportAnalyser
+from boa3.analyser.model.ManifestSymbol import ManifestSymbol
 from boa3.analyser.model.functionarguments import FunctionArguments
 from boa3.analyser.model.optimizer import UndefinedType
 from boa3.analyser.model.symbolscope import SymbolScope
-from boa3.builtin import NeoMetadata
+from boa3.builtin.compile_time import NeoMetadata
 from boa3.exception import CompilerError, CompilerWarning
 from boa3.model.builtin.builtin import Builtin
 from boa3.model.builtin.decorator import ContractDecorator
@@ -30,6 +31,7 @@ from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.classes.classscope import ClassScope
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.contractinterfaceclass import ContractInterfaceClass
+from boa3.model.type.classes.pythonclass import PythonClass
 from boa3.model.type.classes.userclass import UserClass
 from boa3.model.type.collection.icollection import ICollectionType as Collection
 from boa3.model.type.collection.sequence.sequencetype import SequenceType
@@ -92,6 +94,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
+        self._manifest_symbols: Dict[Tuple[ManifestSymbol, str, int], Callable] = {}
         self.imported_nodes: List[ast.AST] = []
 
         if self.filename:
@@ -171,7 +174,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         outer_symbol.set_is_reassigned()
                     self.__set_source_origin(source_node, is_module_scope)
             else:
-                if not isinstance(source_node, ast.Global):
+                if (not isinstance(source_node, ast.Global) and
+                        (not hasattr(source_node, 'targets') or not isinstance(source_node.targets[x], ast.Subscript))):
                     if outer_symbol is not None:
                         self._log_warning(
                             CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
@@ -222,6 +226,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                                callable.origin.col_offset,
                                                                callable_id))
 
+        if callable.is_public:
+            # check if the external name + argument number is unique
+            manifest_name = callable.external_name if callable.external_name is not None else callable_id
+            manifest_id = (ManifestSymbol.get_manifest_symbol(callable), manifest_name, len(callable.args))
+
+            if manifest_id in self._manifest_symbols:
+                self._log_error(CompilerError.DuplicatedManifestIdentifier(callable.origin.lineno,
+                                                                           callable.origin.col_offset,
+                                                                           manifest_name, len(callable.args)
+                                                                           ))
+            else:
+                self._manifest_symbols[manifest_id] = callable
+
     def __include_class_variable(self, cl_var_id: str, cl_var: Variable):
         """
         Includes the class variable in the current class
@@ -266,6 +283,37 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 return found_symbol
 
         return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
+
+    def get_annotation(self, value: Any, use_metatype: bool = False, accept_none: bool = False) -> Optional[IType]:
+        if not isinstance(value, ast.AST):
+            return None
+
+        annotation_type = self.get_type(value, use_metatype)
+        if not isinstance(annotation_type, PythonClass):
+            return annotation_type
+        if hasattr(value, 'value') and value.value is None and annotation_type is Type.none:
+            return annotation_type
+
+        if isinstance(value, (ast.Constant, ast.NameConstant, ast.List, ast.Tuple, ast.Dict, ast.Set)):
+            # annotated types should only accept types
+            return None
+        return annotation_type
+
+    def _check_annotation_type(self, node: ast.AST, origin_node: Optional[ast.AST] = None):
+        if node is None:
+            return
+
+        if origin_node is None:
+            origin_node = node
+
+        if self.get_annotation(node) is None:
+            actual_type = self.get_type(node)
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    origin_node.lineno, origin_node.col_offset,
+                    expected_type_id=type.__name__,
+                    actual_type_id=actual_type.identifier
+                ))
 
     # region Log
 
@@ -695,7 +743,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 valid_decorators.append(Builtin.ClassMethodDecorator)
 
         fun_args: FunctionArguments = self.visit(function.args)
-        fun_rtype_symbol = self.visit(function.returns) if function.returns is not None else Type.none
+        if function.returns is not None:
+            fun_rtype_symbol = self.visit(function.returns)
+            self._check_annotation_type(function.returns)
+        else:
+            fun_rtype_symbol = Type.none
 
         # TODO: remove when dictionary unpacking operator is implemented
         if function.args.kwarg is not None:
@@ -866,6 +918,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             var_symbol: ISymbol = self.get_symbol(arg.annotation.id, origin_node=arg)
             var_type = self.get_type(var_symbol)
 
+        self._check_annotation_type(arg.annotation, origin_node=arg)
+
         return var_id, Variable(var_type)
 
     def visit_Return(self, ret: ast.Return):
@@ -980,6 +1034,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         var_type: IType = self.visit_type(ann_assign.annotation)
         if var_type is Builtin.Event:
             self.visit(ann_assign.value)
+
+        self._check_annotation_type(ann_assign.annotation, ann_assign)
 
         # TODO: check if the annotated type and the value type are the same
         return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
@@ -1150,8 +1206,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return self.get_type(call.func)
 
     def create_new_event(self, create_call: ast.Call) -> Event:
-        event = Event('')
         event_args = create_call.args
+        args = {}
+        name = Builtin.Event.identifier
 
         if len(event_args) < 0:
             self._log_error(
@@ -1195,7 +1252,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         arg_type = (self.get_symbol(value.elts[1].id)
                                     if isinstance(value.elts[1], ast.Name)
                                     else self.visit(value.elts[1]))
-                        event.args[arg_name] = Variable(arg_type)
+                        args[arg_name] = Variable(arg_type)
 
             if len(event_args) > 1:
                 if not isinstance(event_args[1], ast.Str):
@@ -1205,8 +1262,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                   expected_type_id=Type.str.identifier,
                                                   actual_type_id=name_type.identifier)
                 else:
-                    event.name = event_args[1].s
+                    name = event_args[1].s
 
+        event = Event(name, args)
+        event._origin_node = create_call
         return event
 
     def visit_Attribute(self, attribute: ast.Attribute) -> Union[ISymbol, str]:

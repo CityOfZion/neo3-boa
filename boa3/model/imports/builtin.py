@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Tuple, Union
 
 from boa3 import constants
-from boa3.model.builtin.builtin import Builtin
+from boa3.model.builtin.builtin import Builtin, BoaPackage
 from boa3.model.builtin.interop.interop import Interop
 from boa3.model.builtin.native.nativecontract import NativeContract
 from boa3.model.event import Event
@@ -44,11 +44,13 @@ class CompilerBuiltin:
         self._generate_builtin_package('math', Math.get_methods_from_math_lib())
         self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)
         self._set_events(Builtin.builtin_events())
-        self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols('contract'))
+        self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols(BoaPackage.Contract))
+        self._generate_builtin_package('boa3.builtin.compile_time', Builtin.package_symbols(BoaPackage.CompileTime))
         self._generate_builtin_package('boa3.builtin.interop', Interop.package_symbols)
         self._set_events(Interop.interop_events())
         self._generate_builtin_package('boa3.builtin.nativecontract', NativeContract.package_symbols)
-        self._generate_builtin_package('boa3.builtin.type', Builtin.package_symbols('type'))
+        self._generate_builtin_package('boa3.builtin.type', Builtin.package_symbols(BoaPackage.Type))
+        self._generate_builtin_package('boa3.builtin.vm', Builtin.package_symbols(BoaPackage.VM))
 
     @classmethod
     def reset(cls):

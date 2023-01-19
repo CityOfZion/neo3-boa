@@ -70,6 +70,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                    symbol: Optional[ISymbol] = None,
                    result_type: Optional[IType] = None,
                    index: Optional[int] = None,
+                   origin_object_type: Optional[ISymbol] = None,
                    already_generated: bool = False) -> GeneratorData:
 
         if isinstance(symbol, IType) and result_type is None:
@@ -89,7 +90,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             if found_symbol is not None:
                 symbol = found_symbol
 
-        return GeneratorData(origin_node, symbol_id, symbol, result_type, index, already_generated)
+        return GeneratorData(origin_node, symbol_id, symbol, result_type, index, origin_object_type, already_generated)
 
     def visit(self, node: ast.AST) -> GeneratorData:
         result = super().visit(node)
@@ -158,14 +159,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         return False
 
     def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
-        if VMCodeMapping.instance().bytecode_size > last_address:
-            # remove opcodes inserted during the evaluation of the symbol
-            VMCodeMapping.instance().remove_opcodes(last_address, VMCodeMapping.instance().bytecode_size)
-
-        if isinstance(last_stack_size, int) and last_stack_size < self.generator.stack_size:
-            # remove any additional values pushed to the stack during the evalution of the symbol
-            for _ in range(self.generator.stack_size - last_stack_size):
-                self.generator._stack_pop()
+        self.generator._remove_inserted_opcodes_since(last_address, last_stack_size)
 
     def _get_unique_name(self, name_id: str, node: ast.AST) -> str:
         return '{0}{2}{1}'.format(node.__hash__(), name_id, constants.VARIABLE_NAME_SEPARATOR)
@@ -446,6 +440,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param aug_assign: the python ast augmented assignment node
         """
+        start_address = self.generator.bytecode_size
         var_data = self.visit(aug_assign.target)
         var_id = var_data.symbol_id
         # filter to find the imported variables
@@ -456,12 +451,15 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         if isinstance(var_data.type, UserClass):
             self.generator.duplicate_stack_top_item()
+        elif hasattr(var_data.origin_object_type, 'identifier') and var_data.already_generated:
+            VMCodeMapping.instance().remove_opcodes(start_address)
+            self.generator.convert_load_symbol(var_data.origin_object_type.identifier)
 
-        self.generator.convert_load_symbol(var_id)
+        self.generator.convert_load_symbol(var_id, class_type=var_data.origin_object_type)
         value_address = self.generator.bytecode_size
         self.visit_to_generate(aug_assign.value)
         self.generator.convert_operation(aug_assign.op)
-        self.generator.convert_store_variable(var_id, value_address)
+        self.generator.convert_store_variable(var_id, value_address, user_class=var_data.origin_object_type)
         return self.build_data(aug_assign)
 
     def visit_Subscript(self, subscript: ast.Subscript) -> GeneratorData:
@@ -941,7 +939,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         last_address = VMCodeMapping.instance().bytecode_size
         last_stack = self.generator.stack_size
 
-        _, attr = self.generator.get_symbol(attribute.attr)
+        _attr, attr = self.generator.get_symbol(attribute.attr)
         value = attribute.value
         value_symbol = None
         value_type = None
@@ -967,12 +965,21 @@ class VisitorCodeGenerator(IAstAnalyser):
                     need_to_visit_again = False
 
                 if isinstance(attr, Variable):
+                    cur_bytesize = self.generator.bytecode_size
                     self.visit_to_generate(attribute.value)
                     self.generator.convert_load_symbol(attribute.attr, class_type=value_symbol)
-                    return self.build_data(attribute, symbol=attr)
+
+                    symbol_id = _attr if isinstance(_attr, str) else None
+                    return self.build_data(attribute,
+                                           already_generated=self.generator.bytecode_size > cur_bytesize,
+                                           symbol=attr, symbol_id=symbol_id,
+                                           origin_object_type=value_symbol)
         else:
-            need_to_visit_again = value_data.already_generated
-            self._remove_inserted_opcodes_since(last_address, last_stack)
+            if isinstance(value, ast.Attribute) and value_data.already_generated:
+                need_to_visit_again = False
+            else:
+                need_to_visit_again = value_data.already_generated
+                self._remove_inserted_opcodes_since(last_address, last_stack)
 
         # the verification above only verify variables, this one will should work with literals and constants
         if isinstance(value, (ast.Constant if SYS_VERSION_INFO >= (3, 8) else (ast.Num, ast.Str, ast.Bytes))) \
@@ -987,7 +994,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             index = value_type if isinstance(value_type, Package) else None
             return self.build_data(attribute, symbol_id=attribute_id, symbol=attr, index=index)
 
-        if isinstance(value, ast.Attribute):
+        if isinstance(value, ast.Attribute) and need_to_visit_again:
             value_data = self.visit(value)
         elif hasattr(attribute, 'generate_value') and attribute.generate_value:
             current_bytecode_size = self.generator.bytecode_size
@@ -1001,6 +1008,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if isinstance(result, IExpression):
                     generation_result = result
                     result = result.type
+            elif isinstance(attribute.value, ast.Attribute) and isinstance(value_data.index, int):
+                result = self.get_type(generation_result)
 
             if self.is_implemented_class_type(result):
                 class_attr_id = f'{result.identifier}.{attribute.attr}'

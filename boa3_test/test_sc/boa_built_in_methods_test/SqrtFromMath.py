@@ -1,4 +1,5 @@
-from boa3.builtin import math, public
+from boa3.builtin import math
+from boa3.builtin.compile_time import public
 
 
 @public

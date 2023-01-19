@@ -7,7 +7,7 @@ from boa3.model.variable import Variable
 
 class ItoaMethod(StdLibMethod):
 
-    def __init__(self):
+    def __init__(self, internal_call_args: int = None):
         from boa3.model.type.type import Type
         identifier = 'itoa'
         syscall = 'itoa'
@@ -17,4 +17,5 @@ class ItoaMethod(StdLibMethod):
         }
         args_default = ast.parse("{0}".format(10)).body[0].value
 
-        super().__init__(identifier, syscall, args, defaults=[args_default], return_type=Type.str)
+        super().__init__(identifier, syscall, args, defaults=[args_default], return_type=Type.str,
+                         internal_call_args=internal_call_args)

@@ -1,13 +1,15 @@
 from typing import Any
 
 from boa3.builtin.interop.crypto import NamedCurve
-from boa3.builtin.type import ByteString, ECPoint
+from boa3.builtin.type import ByteString, ECPoint, UInt160
 
 
 class CryptoLib:
     """
     A class used to represent the CryptoLib native contract
     """
+
+    hash: UInt160
 
     @classmethod
     def murmur32(cls, data: ByteString, seed: int) -> ByteString:

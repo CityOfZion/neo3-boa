@@ -1,6 +1,6 @@
 from typing import List
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.storage.findoptions import FindOptions
 
 

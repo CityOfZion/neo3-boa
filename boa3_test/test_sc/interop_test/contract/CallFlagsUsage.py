@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import NEO, call_contract
 from boa3.builtin.interop.runtime import executing_script_hash, notify
 from boa3.builtin.interop.storage import get, put

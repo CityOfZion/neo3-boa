@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 from boa3.neo.vm.type.Integer import Integer
@@ -93,7 +94,7 @@ class VMCode:
         :return: the target code if this is a control code. None otherwise
         :rtype: VMCode
         """
-        return self._target if self.opcode.has_target() else None
+        return self._target if OpcodeHelper.has_target(self.opcode) else None
 
     def set_target(self, target_code):
         """
@@ -102,11 +103,8 @@ class VMCode:
         :param target_code: the target code of this instruction
         :type target_code: VMCode
         """
-        if self.opcode.has_target():
+        if OpcodeHelper.has_target(self.opcode):
             self._target = target_code
 
     def __str__(self) -> str:
         return self.opcode.name + ' ' + self.data.hex()
-
-    def __repr__(self) -> str:
-        return str(self)

@@ -1,12 +1,12 @@
 from typing import Any, cast
 
-from boa3.builtin import public
+from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.type import UInt160
 
 
 class Nep17:
-    _hash = UInt160(b'\x70\x2e\x5c\xc9\x8a\x79\xa6\x21\xfb\x5e\x75\xbe\x1a\xf9\x44\xe1\x84\x9f\xf1\x21')
+    _hash = UInt160(b'\x13\x28\xe7\x60\x1d\x73\xe3\x9f\x54\x3e\xc3\xec\xf3\xf1\xb7\x49\xa7\x26\x3e\xc0')
 
     @classmethod
     def symbol(cls) -> str:

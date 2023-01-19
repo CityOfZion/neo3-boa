@@ -19,6 +19,9 @@ class WitnessScope(enum.IntEnum):
     # Custom pubkey for group members.
     CustomGroups = 32
 
+    # Indicates that the current context must satisfy the specified rules.
+    WitnessRules = 64
+
     # This allows the witness in all contexts (default Neo2 behavior).
     Global = 128
 

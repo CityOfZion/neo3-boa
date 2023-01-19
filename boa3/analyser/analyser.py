@@ -10,7 +10,8 @@ from boa3.analyser.constructanalyser import ConstructAnalyser
 from boa3.analyser.moduleanalyser import ModuleAnalyser
 from boa3.analyser.supportedstandard.standardanalyser import StandardAnalyser
 from boa3.analyser.typeanalyser import TypeAnalyser
-from boa3.builtin import NeoMetadata
+from boa3.builtin.compile_time import NeoMetadata
+from boa3.compiler.compiledmetadata import CompiledMetadata
 from boa3.exception.CompilerError import CompilerError
 from boa3.exception.CompilerWarning import CompilerWarning
 from boa3.model.symbol import ISymbol
@@ -75,6 +76,7 @@ class Analyser:
             ast_tree = ast.parse(source.read())
 
         analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, log)
+        CompiledMetadata.set_current_metadata(analyser.metadata)
         analyser.__pre_execute()
 
         # fill symbol table
@@ -136,6 +138,7 @@ class Analyser:
 
         :return: a boolean value that represents if the analysis was successful
         """
+        current_metadata = self.metadata
         module_analyser = ModuleAnalyser(self, self.symbol_table,
                                          log=self._log,
                                          filename=self.filename,
@@ -146,6 +149,10 @@ class Analyser:
         self.ast_tree.body.extend(module_analyser.imported_nodes)
         self.__update_logs(module_analyser)
         self._imported_files = module_analyser.analysed_files.copy()
+
+        if self.metadata != current_metadata:
+            CompiledMetadata.set_current_metadata(self.metadata)
+
         return not module_analyser.has_errors
 
     def __check_standards(self) -> bool:
