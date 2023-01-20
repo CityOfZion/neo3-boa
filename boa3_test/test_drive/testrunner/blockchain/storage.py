@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
-from test_runner.blockchain.contract import TestRunnerContract
-from test_runner.blockchain.contractcollection import ContractCollection
+from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
+from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContract
 
 
 class TestRunnerStorage:

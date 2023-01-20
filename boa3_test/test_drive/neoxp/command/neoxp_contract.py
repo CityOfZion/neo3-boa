@@ -1,5 +1,5 @@
+from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
 from boa3_test.tests.test_classes.witnessscope import WitnessScope
-from test_runner.neoxp.command.neoexpresscommand import NeoExpressCommand
 
 
 def deploy(nef_path: str, account: str, witness_scope: WitnessScope = None,

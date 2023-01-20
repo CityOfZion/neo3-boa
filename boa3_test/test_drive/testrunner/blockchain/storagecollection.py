@@ -1,6 +1,6 @@
 from typing import List
 
-from test_runner.blockchain.storage import TestRunnerStorage
+from boa3_test.test_drive.testrunner.blockchain.storage import TestRunnerStorage
 
 
 class StorageCollection:

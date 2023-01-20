@@ -1,4 +1,4 @@
-from test_runner.neoxp.command.neoexpresscommand import NeoExpressCommand
+from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
 
 
 def create_checkpoint(checkpoint_path: str, force: bool = False) -> NeoExpressCommand:
@@ -7,6 +7,11 @@ def create_checkpoint(checkpoint_path: str, force: bool = False) -> NeoExpressCo
         options['--force'] = ''
 
     return NeoExpressCommand('checkpoint create', [checkpoint_path], options)
+
+
+def reset() -> NeoExpressCommand:
+    options = {'--force': ''}
+    return NeoExpressCommand('reset', options=options)
 
 
 def fastfwd(block_count: int) -> NeoExpressCommand:

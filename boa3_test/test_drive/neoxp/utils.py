@@ -1,8 +1,8 @@
 import re
 import subprocess
-from typing import Tuple
+from typing import Tuple, List
 
-from test_runner.blockchain import Contract
+from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContract as Contract
 
 
 def create_neo_express_instance(neoxp_path: str):
@@ -17,17 +17,24 @@ def reset_neo_express_instance(neoxp_path: str):
                                          '--force')
 
 
-def get_last_deployed_contract(neoxp_path: str) -> Contract:
+def get_deployed_contracts(neoxp_path: str) -> List[Contract]:
     stdout, stderr = run_neo_express_cli('contract', 'list',
                                          '--input', neoxp_path)
-    last_line = stdout.splitlines()[-1]
-    begin, contract_name, contract_hash, end = re.split(r'(.*?) \((0x\w+)\)', last_line)
-    return Contract(contract_name, contract_hash)
+    contracts = []
+    for line in stdout.splitlines():
+        begin, contract_name, contract_hash, end = re.split(r'(.*?) \((0x\w+)\)', line)
+        found_contract = Contract(contract_name, contract_hash)
+        contracts.append(found_contract)
+    return contracts
 
 
-def run_batch(neoxp_path: str, batch_path: str):
+def run_batch(neoxp_path: str, batch_path: str, reset: bool = False):
+    options = ['--input', neoxp_path]
+    if reset:
+        options.append('--reset')
+
     stdout, stderr = run_neo_express_cli('batch',
-                                         '--input', neoxp_path,
+                                         *options,
                                          batch_path)
 
 

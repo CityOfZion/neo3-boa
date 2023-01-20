@@ -23,5 +23,24 @@ class NeoExpressCommand:
 
         return ' '.join(command)
 
+    def is_command(self, command: str) -> bool:
+        if not isinstance(command, str) or len(command) == 0:
+            return True
+
+        sep = ' '
+        args = command.split(sep)
+        command_id_split_size = len(self._command_id.split(sep))
+        command_id = sep.join(args[:command_id_split_size])
+        if command_id != self._command_id:
+            return False
+
+        args = args[command_id_split_size:]
+        args_compare_size = len(args)
+        if args_compare_size == 0:
+            return True
+        if args_compare_size > len(self._args):
+            return False
+        return self._args[:args_compare_size] == args
+
     def __str__(self) -> str:
         return self._command_id
