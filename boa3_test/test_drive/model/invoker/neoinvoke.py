@@ -1,7 +1,7 @@
 from typing import Any, Dict, Tuple, Union
 
 from boa3.internal.neo3.core.types import UInt160
-from test_runner import utils
+from boa3_test.test_drive.testrunner import utils
 
 
 class NeoInvoke:
@@ -34,3 +34,6 @@ class NeoInvoke:
             'operation': self._operation,
             'args': list(self._args)
         }
+
+    def __repr__(self):
+        return f'{self._contract_id}.{self._operation}{self._args}'

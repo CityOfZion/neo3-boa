@@ -90,7 +90,7 @@ setup(
         exclude=('boa3_test.tests.*_tests*',),
         include=('boa3', 'boa3.*',
                  'boa3_test.tests', 'boa3_test.tests.*',
-                 'test_runner', 'test_runner.*'),
+                 'boa3_test.test_drive', 'boa3_test.test_drive.*'),
     ),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment

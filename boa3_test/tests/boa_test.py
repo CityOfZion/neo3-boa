@@ -170,6 +170,14 @@ class BoaTest(TestCase):
             raise FileNotFoundError(path)
         return path
 
+    def get_deploy_file_paths(self, *args: str) -> Tuple[str, str]:
+        contract_path = self.get_contract_path(*args)
+        if isinstance(contract_path, str):
+            file_path_without_ext, _ = os.path.splitext(contract_path)
+            return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
+
+        return contract_path, contract_path
+
     def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         manifest_output = path.replace('.py', '.manifest.json')
