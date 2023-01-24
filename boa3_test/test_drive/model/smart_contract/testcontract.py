@@ -50,3 +50,8 @@ class TestContract:
 
     def __repr__(self) -> str:
         return str(self)
+
+    def get_identifier(self) -> str:
+        if self.name.isspace() and self._script_hash is not None:
+            return to_hex_str(self._script_hash)
+        return self.name if ' ' not in self.name else f'"{self.name}"'

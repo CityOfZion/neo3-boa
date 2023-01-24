@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
-from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContract
+from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 
 
 class TestRunnerStorage:
@@ -16,13 +16,13 @@ class TestRunnerStorage:
     _storage_key_key = 'key'
     _storage_item_key = 'value'
 
-    def __init__(self, contract: TestRunnerContract, values: Dict[StorageKey, StorageItem]):
-        self._contract: TestRunnerContract = contract
+    def __init__(self, contract: TestContract, values: Dict[StorageKey, StorageItem]):
+        self._contract: TestContract = contract
         self._values: Dict[StorageKey, StorageItem] = values
 
     @property
-    def contract(self) -> Optional[TestRunnerContract]:
-        if isinstance(self._contract, TestRunnerContract):
+    def contract(self) -> Optional[TestContract]:
+        if isinstance(self._contract, TestContract):
             return self._contract
         return None
 
@@ -40,10 +40,10 @@ class TestRunnerStorage:
 
         contract_name = json[cls._storage_contract_name_key]
         contract_hash = json[cls._storage_contract_hash_key]
-        if contract_hash in contracts:
-            contract = contracts[contract_hash]
-        elif contract_name in contracts:
+        if contract_name in contracts:
             contract = contracts[contract_name]
+        elif contract_hash in contracts:
+            contract = contracts[contract_hash]
         else:
             contract = None
 
@@ -61,7 +61,7 @@ class TestRunnerStorage:
         return cls(contract, storage)
 
     def is_valid_identifier(self, item: str) -> bool:
-        if isinstance(self._contract, TestRunnerContract):
+        if isinstance(self._contract, TestContract):
             return self._contract.is_valid_identifier(item)
 
         return False

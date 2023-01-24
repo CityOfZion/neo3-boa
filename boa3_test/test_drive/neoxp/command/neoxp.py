@@ -1,3 +1,5 @@
+from typing import Any
+
 from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
 
 
@@ -20,3 +22,12 @@ def fastfwd(block_count: int) -> NeoExpressCommand:
 
     options = {}
     return NeoExpressCommand('fastfwd', [str(block_count)], options)
+
+
+def transfer(sender: str, receiver: str, quantity: int, asset: str, data: Any = None) -> NeoExpressCommand:
+    options = {}
+    if data is not None:
+        import json
+        options['--data'] = json.dumps(data)
+
+    return NeoExpressCommand('transfer', [str(quantity), asset, sender, receiver], options)

@@ -11,7 +11,7 @@ class ContractCollection:
 
     def append(self, new_contract: TestContract):
         if not isinstance(new_contract, TestContract):
-            return 
+            return
         if new_contract.name not in self._contract_names:
             self._contract_names.append(new_contract.name)
             self._contract_paths.append(new_contract.path)
@@ -93,4 +93,3 @@ class ContractCollection:
             self._contract_names.pop(removed_index)
             self._contract_paths.pop(removed_index)
             self._internal_list.pop(removed_index)
-
