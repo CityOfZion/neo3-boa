@@ -11,11 +11,13 @@ from boa3_test.test_drive.model.invoker.neoinvokecollection import NeoInvokeColl
 from boa3_test.test_drive.model.invoker.neoinvokeresult import NeoInvokeResult
 from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
+from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils as neoxp_utils
 from boa3_test.test_drive.neoxp.batch import NeoExpressBatch
 from boa3_test.test_drive.testrunner.blockchain.log import TestRunnerLog as Log
 from boa3_test.test_drive.testrunner.blockchain.notification import TestRunnerNotification as Notification
 from boa3_test.test_drive.testrunner.blockchain.storage import TestRunnerStorage as Storage
+from boa3_test.test_drive.testrunner.blockchain.storagecollection import StorageCollection
 
 
 class NeoTestRunner:
@@ -25,15 +27,20 @@ class NeoTestRunner:
     _BATCH_FILE = f'{_FOLDER_NAME}.batch'
     _CHECKPOINT_FILE = f'{_FOLDER_NAME}.neoxp-checkpoint'
 
+    _DEFAULT_ACCOUNT = neoxp_utils.get_account_by_name('genesis')
+
     def __init__(self, neoxp_path: str = None):
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
         self._error_message: Optional[str] = None
+        self._last_cli_log: Optional[str] = None
+        self._cli_log: str = ''
 
+        self._calling_account: Optional[Account] = None
         self._notifications: List[Notification] = []
         self._logs: List[Log] = []
-        # self._storages: StorageCollection = StorageCollection()
+        self._storages: StorageCollection = StorageCollection()
 
         if not isinstance(neoxp_path, str):
             neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
@@ -63,6 +70,10 @@ class NeoTestRunner:
         return self._error_message
 
     @property
+    def cli_log(self) -> str:
+        return self._cli_log
+
+    @property
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
@@ -74,9 +85,9 @@ class NeoTestRunner:
     def contracts(self) -> ContractCollection:
         return self._contracts
 
-    # @property
-    # def storages(self) -> StorageCollection:
-    #     return self._storages
+    @property
+    def storages(self) -> StorageCollection:
+        return self._storages
 
     @property
     def _root(self) -> str:
@@ -89,12 +100,30 @@ class NeoTestRunner:
             root = os.path.abspath(value) + sep + self._FOLDER_NAME
             self._ROOT_FOLDER = root
 
-    def deploy_contract(self, nef_path: str) -> TestContract:
+    def _update_cli_log(self, log_to_append: str):
+        if self._last_cli_log is None:
+            log_connector = '\n' if len(self._cli_log) > 0 and len(log_to_append) > 0 else ''
+            self._cli_log += f'{log_connector}{log_to_append}'
+        else:
+            self._last_cli_log = self._cli_log
+            self._cli_log = log_to_append
+
+    def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
+        address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
+        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
+                                    quantity=amount, asset='NEO')
+
+    def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
+        address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
+        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
+                                    quantity=amount, asset='GAS')
+
+    def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
             raise ValueError('Requires a .nef file to deploy a contract')
 
         if nef_path not in self._contracts:
-            contract = self._batch.deploy_contract(nef_path)
+            contract = self._batch.deploy_contract(nef_path, account)
             if contract.name in self._contracts:
                 raise ValueError('Contract with duplicated name')
             self._contracts.append(contract)
@@ -118,14 +147,15 @@ class NeoTestRunner:
         batch_file_path = self.get_full_path(self._BATCH_FILE)
 
         if self._batch_size_since_last_update < cur_batch_size:
-            self._batch.execute(self._neoxp_abs_path, batch_file_path, reset=True)
+            log = self._batch.execute(self._neoxp_abs_path, batch_file_path, reset=True)
+            self._update_cli_log(log)
 
             if self._batch.has_new_deploys_since(self._batch_size_since_last_update):
                 deployed_contracts = neoxp_utils.get_deployed_contracts(self._neoxp_abs_path)
                 self._contracts.replace(deployed_contracts)
             self._batch_size_since_last_update = cur_batch_size
 
-    def execute(self, get_storage: bool = False):
+    def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None):
         self._generate_files()
         cli_args = ['neo-test-runner', self.get_full_path(self._INVOKE_FILE)
                     ]
@@ -133,8 +163,16 @@ class NeoTestRunner:
         if self._batch_size_since_last_checkpoint > 0:
             cli_args.extend(['--checkpoint', self.get_full_path(self._CHECKPOINT_FILE)])
 
-        # if get_storage:
-        #     cli_args.extend(['--storages', calling_contract.name])
+        if isinstance(account, Account):
+            cli_args.extend(['--account', account.get_identifier()])
+        elif account is not None:
+            account = None
+        self._calling_account = account
+
+        if isinstance(get_storage_from, TestContract):
+            get_storage_from = get_storage_from.get_identifier()
+        if isinstance(get_storage_from, str):
+            cli_args.extend(['--storages', get_storage_from])
         stdout, stderr = self._run_command_line(cli_args)
 
         try:
@@ -154,13 +192,14 @@ class NeoTestRunner:
         self._gas_consumed = 0
         self._result_stack = []
         self._last_execution_results = []
+        self._storages.clear()
+        self._last_cli_log = None
         self._error_message = None
 
     def reset(self):
         self.reset_state()
         self._notifications.clear()
         self._logs.clear()
-        # self._storages.clear()
 
         self._batch.clear()
         self._batch_size_since_last_update = -1
@@ -172,6 +211,7 @@ class NeoTestRunner:
         self.reset_state()
         self._error_message = result['exception'] if 'exception' in result else None
 
+        self._last_cli_log = self._cli_log
         if 'state' in result:
             self._vm_state = vmstate.get_vm_state(result['state'])
 
@@ -185,7 +225,8 @@ class NeoTestRunner:
             else:
                 new_result_stack = [neo_utils.stack_item_from_json(result_stack)]
 
-            self._last_execution_results = self._invokes.set_results(new_result_stack)
+            self._last_execution_results = self._invokes.set_results(new_result_stack,
+                                                                     calling_account=self._calling_account)
             self._result_stack = new_result_stack
 
         if 'notifications' in result:
@@ -217,12 +258,10 @@ class NeoTestRunner:
             if not isinstance(json_storages, list):
                 json_storages = [json_storages]
 
-            storages = []
             for s in json_storages:
                 new = Storage.from_json(s, self._contracts)
                 if new is not None:
-                    storages.append(new)
-            self._storages = storages
+                    self._storages.append(new)
 
     def _generate_root_folder(self):
         if not os.path.exists(self._root):

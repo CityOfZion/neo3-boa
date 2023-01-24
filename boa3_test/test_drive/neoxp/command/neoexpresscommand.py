@@ -19,7 +19,10 @@ class NeoExpressCommand:
         for o in self._options.items():
             command.extend(o)
 
-        command.extend(self._args)
+        for arg in self._args:
+            if ' ' in arg:
+                arg = f'"{arg}"'
+            command.append(arg)
 
         return ' '.join(command)
 
