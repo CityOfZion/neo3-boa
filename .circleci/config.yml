@@ -46,6 +46,9 @@ jobs:
       - run:
           name: Test
           command: |
+            export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
+            export PATH="$PATH:$DOTNET_TOOL_PATH"
+            
             python -m unittest discover boa3_test
 
   unit-test-38:
