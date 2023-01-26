@@ -18,7 +18,8 @@ class ScriptHashMethod(IBuiltinMethod):
 
         identifier = 'to_script_hash'
         args: Dict[str, Variable] = {'self': Variable(data_type)}
-        super().__init__(identifier, args, return_type=Type.bytes)
+        from boa3.model.type.collection.sequence.uint160type import UInt160Type
+        super().__init__(identifier, args, return_type=UInt160Type.build())
 
     @property
     def identifier(self) -> str:

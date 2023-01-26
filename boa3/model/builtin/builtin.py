@@ -19,7 +19,7 @@ from boa3.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.model.type.itype import IType
 from boa3.model.type.math import Math
-from boa3.model.type.neo.opcodetype import OpcodeType
+from boa3.model.type.neo import *
 from boa3.model.type.primitive.bytestringtype import ByteStringType
 
 
@@ -55,7 +55,7 @@ class Builtin:
     Max = MaxIntMethod()
     Min = MinIntMethod()
     Print = PrintMethod()
-    ScriptHash = ScriptHashMethod()
+    ScriptHashMethod_ = ScriptHashMethod()
     StrSplit = StrSplitMethod()
     Sum = SumMethod()
 
@@ -145,7 +145,7 @@ class Builtin:
                                                 PropertyDecorator,
                                                 Range,
                                                 Reversed,
-                                                ScriptHash,
+                                                ScriptHashMethod_,
                                                 SequenceAppend,
                                                 SequenceClear,
                                                 SequenceExtend,
@@ -179,6 +179,12 @@ class Builtin:
     ECPoint = ECPointType.build()
     NeoAccountState = NeoAccountStateType.build()
     Opcode = OpcodeType.build()
+    Address = AddressType.build()
+    BlockHash = BlockHashType.build()
+    PublicKey = PublicKeyType.build()
+    ScriptHashType_ = ScriptHashType.build()
+    ScriptHashLittleEndian = ScriptHashLittleEndianType.build()
+    TransactionId = TransactionIdType.build()
 
     # boa events
     Nep5Transfer = Nep5TransferEvent()
@@ -241,14 +247,20 @@ class Builtin:
                               Nep11Transfer,
                               Nep17Transfer,
                               Nep5Transfer,
-                              ScriptHash
+                              ScriptHashMethod_
                               ],
         BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: [ByteString,
                           ECPoint,
                           UInt160,
                           UInt256,
-                          Event
+                          Event,
+                          Address,
+                          BlockHash,
+                          PublicKey,
+                          ScriptHashType_,
+                          ScriptHashLittleEndian,
+                          TransactionId,
                           ],
         BoaPackage.VM: [Opcode
                         ],

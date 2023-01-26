@@ -10,6 +10,7 @@ from boa3.model.imports.importsymbol import BuiltinImport, Import
 from boa3.model.method import Method
 from boa3.model.symbol import ISymbol
 from boa3.model.type.classes.classtype import ClassType
+from boa3.model.type.itype import IType
 from boa3.model.variable import Variable
 from boa3.neo import to_hex_str
 from boa3.neo.contracts.neffile import NefFile
@@ -293,19 +294,97 @@ class FileGenerator:
         abi_method_name = method.external_name if isinstance(method.external_name, str) else method_id
         logging.info(f"'{abi_method_name}' method included in the manifest")
 
-        return {
+        method_abi = {
             "name": abi_method_name,
             "offset": (VMCodeMapping.instance().get_start_address(method.start_bytecode)
                        if method.start_bytecode is not None else 0),
             "parameters": [
-                {
-                    "name": arg_id,
-                    "type": arg.type.abi_type
-                } for arg_id, arg in method.args.items()
+                self._construct_abi_type_hint(arg.type, arg_id) for arg_id, arg in method.args.items()
             ],
-            "returntype": method.type.abi_type,
-            "safe": method.is_safe
+            "safe": method.is_safe,
         }
+
+        return_type_extension = self._construct_abi_type_hint(method.type, is_return_type=True)
+        for return_type_name, return_type in return_type_extension.items():
+            method_abi[return_type_name] = return_type
+
+        return method_abi
+
+    @staticmethod
+    def _construct_abi_type_hint(var_type: IType, var_id: Optional[str] = None, is_return_type: bool = False) -> Optional[Dict[str, Any]]:
+        """
+        A recursive function that adds more details to some types on the manifest:
+        - Arrays and Maps now have new keys to indicate the type of the items ('generic', 'generickey' and 'genericitem');
+        - A String could have a 'hint' that it is an Address;
+        - A Hash160 could have a 'hint' that it is a Scripthash or ScripthashLittleEndian;
+        - A Hash256 could have a 'hint' that it is a BlockHash or TransactionId;
+        - A StorageContext could have a 'hint' that it is a StorageContext or InteropInterface;
+        - If the parameter or return is Optional, then the 'nullable' key will be added;
+        - If the parameter or return is an Union, then the 'union' key will be added, with a list of types as value.
+        """
+        return_prefix = "return" if is_return_type else ""
+
+        extended_type = {
+            return_prefix + "type": var_type.abi_type
+        }
+
+        from boa3.model.builtin.interop.interopinterfacetype import InteropInterfaceType
+        from boa3.model.type.annotation.uniontype import UnionType
+        from boa3.model.type.collection.sequence.mutable.listtype import ListType
+        from boa3.model.type.collection.sequence.uint160type import UInt160Type
+        from boa3.model.type.collection.sequence.uint256type import UInt256Type
+        from boa3.model.type.collection.mapping.mutable.dicttype import DictType
+        from boa3.model.type.type import Type
+
+        if isinstance(var_type, InteropInterfaceType):
+            # Iterator or StorageContext is added as hint
+            extended_type[return_prefix + "hint"] = var_type.raw_identifier
+
+        # if it is a str, UInt160 or UInt256, then a type hint might be added
+        elif any(
+                isinstance(var_type, type(possible_type_hint)) and var_type.raw_identifier != possible_type_hint.raw_identifier
+                for possible_type_hint in [Type.str, UInt160Type.build(), UInt256Type.build()]
+        ):
+            # Address, BlockHash, PublicKey, ScriptHash, ScriptHashLittleEndian or TransactionId is added as hint
+            extended_type[return_prefix + "hint"] = var_type.raw_identifier
+
+        # Calls itself to discover the types inside the Union/Optional
+        elif isinstance(var_type, UnionType):
+
+            from boa3.model.type.annotation.optionaltype import OptionalType
+            if isinstance(var_type, OptionalType):
+
+                # if Optional is being used only with one type, e.g., Optional[Str], then don't consider it an Union
+                if len(var_type.optional_types) == 1:
+                    extended_type = FileGenerator._construct_abi_type_hint(var_type.optional_types[0],
+                                                                           is_return_type=is_return_type)
+
+                else:
+                    extended_type[return_prefix + "union"] = [
+                        FileGenerator._construct_abi_type_hint(union_type) for union_type in
+                        var_type.optional_types
+                    ]
+
+                extended_type[return_prefix + "nullable"] = True
+
+            else:
+                extended_type[return_prefix + "union"] = [
+                    FileGenerator._construct_abi_type_hint(union_type) for union_type in var_type.union_types
+                ]
+
+        # Calls itself to discover the types inside the List
+        elif isinstance(var_type, ListType):
+            extended_type[return_prefix + "generic"] = FileGenerator._construct_abi_type_hint(var_type.item_type)
+
+        # Calls itself to discover the types inside the Dict
+        elif isinstance(var_type, DictType):
+            extended_type[return_prefix + "generickey"] = FileGenerator._construct_abi_type_hint(var_type.key_type)
+            extended_type[return_prefix + "genericitem"] = FileGenerator._construct_abi_type_hint(var_type.item_type)
+
+        if var_id is not None:
+            extended_type[return_prefix + "name"] = var_id
+
+        return extended_type
 
     def _get_abi_events(self) -> List[Dict[str, Any]]:
         """

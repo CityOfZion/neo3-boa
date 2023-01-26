@@ -152,3 +152,52 @@ class ByteString:
         Return value*self.
         """
         pass
+
+
+class Address(str):
+    """
+    A class used only to indicate that a parameter or return on the manifest should be treated as an Address.
+    It's a subclass of str and it doesn't implement new properties or methods.
+    """
+    pass
+
+
+class BlockHash(UInt256):
+    """
+    A class used only to indicate that a parameter or return on the manifest should be treated as a BlockHash.
+    It's a subclass of UInt256 and it doesn't implement new properties or methods.
+    """
+    pass
+
+
+class PublicKey(ECPoint):
+    """
+    A class used only to indicate that a parameter or return on the manifest should be treated as a PublicKey.
+    It's a subclass of ECPoint and it doesn't implement new properties or methods.
+    """
+    pass
+
+
+class ScriptHash(UInt160):
+    """
+    A class used only to indicate that a parameter or return on the manifest should be treated as a ScriptHash.
+    It's a subclass of UInt160 and it doesn't implement new properties or methods.
+    """
+    pass
+
+
+class ScriptHashLittleEndian(UInt160):
+    """
+    A class used only to indicate that a parameter or return on the manifest should be treated as a
+    ScriptHashLittleEndian.
+    It's a subclass of UInt160 and it doesn't implement new properties or methods.
+    """
+    pass
+
+
+class TransactionId(UInt256):
+    """
+    A class used only to indicate that a parameter or return on the manifest should be treated as a TransactionId.
+    It's a subclass of UInt256 and it doesn't implement new properties or methods.
+    """
+    pass

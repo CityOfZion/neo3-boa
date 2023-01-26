@@ -48,7 +48,7 @@ class ECPointType(BytesType):
 
         from boa3.model.builtin.builtin import Builtin
 
-        instance_methods = [Builtin.ScriptHash,
+        instance_methods = [Builtin.ScriptHashMethod_,
                             ]
 
         for instance_method in instance_methods:
