@@ -39,8 +39,9 @@ jobs:
             git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.5.0
             dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
             
-            dotnet tool install Neo.Test.Runner --version 3.5.17 -g
+            sudo apt install libsnappy-dev libc6-dev librocksdb-dev -y
             dotnet tool install Neo.Express --version 3.5.20 -g
+            dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 
       - python/save-cache
       - run:
