@@ -1,10 +1,12 @@
 from typing import Any, Dict, List, Optional, Sized, Tuple
 
+from boa3.compiler.codegenerator import get_bytes_count
 from boa3.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.model.expression import IExpression
 from boa3.model.type.primitive.primitivetype import PrimitiveType
 from boa3.model.type.type import IType, Type
 from boa3.model.variable import Variable
+from boa3.neo.vm.opcode import OpcodeHelper
 from boa3.neo.vm.opcode.Opcode import Opcode
 
 
@@ -43,39 +45,59 @@ class ScriptHashMethod(IBuiltinMethod):
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.constants import SIZE_OF_INT160
+        from boa3.model.builtin.interop.crypto import Sha256Method
+        from boa3.model.builtin.interop.crypto import Ripemd160Method
         from boa3.model.builtin.interop.stdlib.base58decodemethod import Base58DecodeMethod
         from boa3.model.type.type import Type
         from boa3.neo.vm.type.Integer import Integer
 
-        opcodes = [
-            (Opcode.DUP, b''),      # convert value to string
-            (Opcode.SIZE, b''),
-            (Opcode.JMPIFNOT, Integer(36).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DUP, b''),      # convert value to string
+        raise_exception_if_size_is_wrong = [
+            (Opcode.JMP, b''),
+            (Opcode.DROP, b''),
+            (Opcode.DROP, b''),
+            (Opcode.THROW, b''),
+        ]
+        raise_exception_if_size_is_wrong[0] = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(raise_exception_if_size_is_wrong))
+
+        except_use_hash_160 = Sha256Method().opcode + Ripemd160Method().opcode
+        end_try = [
+            (Opcode.ENDTRY, b'')
+        ]
+        end_try[-1] = OpcodeHelper.get_jump_and_data(Opcode.ENDTRY, get_bytes_count(end_try))
+
+        try_to_decode_with_base58 = [
+            (Opcode.DUP, b''),
             (Opcode.ISTYPE, Type.str.stack_item),
             (Opcode.JMPIF, Integer(4).to_byte_array(min_length=1)),
             (Opcode.CONVERT, Type.str.stack_item),
-        ]
-        opcodes.extend(Base58DecodeMethod().opcode)
-        script_len = Integer(SIZE_OF_INT160).to_byte_array(min_length=1)
-        opcodes.extend([
-            (Opcode.DUP, b''),      # if len(result) > SIZE_OF_INT160, truncates the result
-            (Opcode.SIZE, b''),
-            (Opcode.PUSHDATA1, Integer(len(script_len)).to_byte_array(min_length=1) + script_len),
-            (Opcode.CONVERT, Type.int.stack_item),
-            (Opcode.JMPGT, Integer(8).to_byte_array(min_length=1, signed=True)),
             (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),     # first byte identifies address version
+        ] + Base58DecodeMethod().opcode + [
+            (Opcode.DUP, b''),  # check if size is UInt160 + 1  // first position will be ignored
+            (Opcode.SIZE, b''),
+            OpcodeHelper.get_push_and_data(SIZE_OF_INT160 + 1),
+            (Opcode.SWAP, b''),
+            (Opcode.OVER, b''),
+        ] + raise_exception_if_size_is_wrong + [
             (Opcode.DEC, b''),
-            (Opcode.RIGHT, b''),
-            (Opcode.JMP, Integer(9).to_byte_array(min_length=1, signed=True)),
-            (Opcode.PUSH1, b''),
-            (Opcode.PUSHDATA1, Integer(len(script_len)).to_byte_array(min_length=1) + script_len),
-            (Opcode.CONVERT, Type.int.stack_item),
+            OpcodeHelper.get_push_and_data(1),
+            (Opcode.SWAP, b''),
             (Opcode.SUBSTR, b''),
-            (Opcode.CONVERT, Type.bytes.stack_item)
-        ])
-        return opcodes
+            (Opcode.CONVERT, Type.str.stack_item),
+            (Opcode.NIP, b''),
+            OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(except_use_hash_160)),
+        ]
+
+        try_code = OpcodeHelper.get_try_and_data(get_bytes_count(try_to_decode_with_base58), jump_through=True)
+        begin_try = (
+                [
+                    try_code
+                ]
+                + try_to_decode_with_base58
+                + except_use_hash_160
+                + end_try
+        )
+
+        return begin_try
 
     @property
     def _args_on_stack(self) -> int:
