@@ -134,6 +134,28 @@ def is_jump(opcode: Opcode) -> bool:
     return Opcode.JMP <= opcode <= Opcode.JMPLE_L
 
 
+def get_try_and_data(except_target: int, finally_target: int = 0, jump_through: bool = False) -> Tuple[Opcode, bytes]:
+    """
+    Gets the try opcode and data to the respective targets
+    """
+    jmp_placeholder = Opcode.JMP
+    jmp_to_except_placeholder = get_jump_and_data(jmp_placeholder, except_target + jump_through, jump_through)
+    jmp_to_finally_placeholder = get_jump_and_data(jmp_placeholder, finally_target, jump_through and finally_target > 0)
+
+    if jmp_to_except_placeholder[0] == jmp_placeholder and jmp_to_finally_placeholder[0] == jmp_placeholder:
+        opcode = Opcode.TRY
+    else:
+        opcode = Opcode.TRY_L
+
+    from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
+    opcode_info = OpcodeInfo.get_info(opcode)
+    each_arg_len = opcode_info.data_len // 2
+
+    return (opcode,
+            jmp_to_except_placeholder[1].rjust(each_arg_len, b'\x00')
+            + jmp_to_finally_placeholder[1].rjust(each_arg_len, b'\x00'))
+
+
 def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) -> Tuple[Opcode, bytes]:
     """
     Gets the jump opcode and data to the respective integer
@@ -144,7 +166,7 @@ def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) 
     :return: the respective opcode and its required data
     :rtype: Tuple[Opcode, bytes]
     """
-    if not is_jump(opcode):
+    if not has_target(opcode):
         opcode = Opcode.JMP
 
     from boa3.neo.vm.opcode.OpcodeInfo import OpcodeInfo
