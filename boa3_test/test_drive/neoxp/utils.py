@@ -61,9 +61,15 @@ def get_deployed_contracts(neoxp_path: str) -> List[Contract]:
                                          '--input', neoxp_path)
     contracts = []
     for line in stdout.splitlines():
-        begin, contract_name, contract_hash, end = re.split(r'(.*?) \((0x\w+)\)', line)
-        found_contract = Contract(contract_name, contract_hash)
-        contracts.append(found_contract)
+        try:
+            groups = re.match(r'(?P<name>.*?) \((?P<scripthash>0x\w+)\)', line).groupdict()
+            contract_name = groups['name']
+            contract_hash = groups['scripthash']
+            found_contract = Contract(contract_name, contract_hash)
+            contracts.append(found_contract)
+        except:
+            # don't break if some line doesn't match the regex
+            continue
     return contracts
 
 
