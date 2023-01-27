@@ -1,8 +1,7 @@
 from typing import Optional
 
-from boa3.neo import to_hex_str
 from boa3.neo3.core.types import UInt160
-from boa3_test.tests.test_classes.testcontract import TestContract
+from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 
 
 class TestRunnerContract(TestContract):
@@ -10,7 +9,8 @@ class TestRunnerContract(TestContract):
         self._name: str = contract_name
         self._contract_hash: str = contract_hex_hash
 
-        super().__init__(None)
+        super().__init__(None, None)
+        self._script_hash = self._get_script_hash()
 
     @property
     def name(self) -> str:
@@ -23,11 +23,6 @@ class TestRunnerContract(TestContract):
     @path.setter
     def path(self, value: str):
         self._nef_path = value
-
-    def __str__(self) -> str:
-        if not isinstance(self._name, str) or len(self._name) == 0:
-            return super().__str__()
-        return f'[{to_hex_str(self._script_hash)}] {self._name}'
 
     def _get_script_hash(self) -> Optional[bytes]:
         try:
