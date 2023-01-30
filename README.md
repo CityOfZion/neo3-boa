@@ -9,7 +9,7 @@
   <br/> Made by <b>COZ.IO</b>
 </p>
 
-<p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo3-python">neo-mamba</a>  </p>
+<p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo-mamba">neo-mamba</a>  </p>
 
 <p align="center">
   <a href="https://circleci.com/gh/CityOfZion/neo3-boa/tree/master">
