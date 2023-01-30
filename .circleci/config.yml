@@ -28,7 +28,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            pip install -r requirements.txt
+            pip install -r requirements_dev.txt
             sudo apt update
             sudo apt-get install -y apt-transport-https
             wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
