@@ -1,7 +1,8 @@
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.contracts import FindOptions
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestPythonOperation(BoaTest):
@@ -10,295 +11,515 @@ class TestPythonOperation(BoaTest):
     # region Membership
 
     def test_in_bytes(self):
-        path = self.get_contract_path('BytesIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('BytesIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', b'123', b'1234')
-        self.assertEqual(b'123' in b'1234', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', b'42', b'1234')
-        self.assertEqual(b'42' in b'1234', result)
+        invokes.append(runner.call_contract(path, 'main', b'123', b'1234'))
+        expected_results.append(b'123' in b'1234')
 
-        result = self.run_smart_contract(engine, path, 'main', b'34', b'1234')
-        self.assertEqual(b'34' in b'1234', result)
+        invokes.append(runner.call_contract(path, 'main', b'42', b'1234'))
+        expected_results.append(b'42' in b'1234')
+
+        invokes.append(runner.call_contract(path, 'main', b'34', b'1234'))
+        expected_results.append(b'34' in b'1234')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bytes_membership_mismatched_type(self):
         path = self.get_contract_path('BytesMembershipMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_int_in_bytes(self):
-        path = self.get_contract_path('BytesMembershipWithInt.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, b'1234')
-        self.assertEqual(1 in b'1234', result)
+        path, _ = self.get_deploy_file_paths('BytesMembershipWithInt.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 50, b'1234')
-        self.assertEqual(50 in b'1234', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, b'1234'))
+        expected_results.append(1 in b'1234')
+
+        invokes.append(runner.call_contract(path, 'main', 50, b'1234'))
+        expected_results.append(50 in b'1234')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_in_dict(self):
-        path = self.get_contract_path('DictIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', '4': 8})
-        self.assertEqual(1 in {1: '2', '4': 8}, result)
+        path, _ = self.get_deploy_file_paths('DictIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', '1', {1: '2', '4': 8})
-        self.assertEqual('1' in {1: '2', '4': 8}, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', 8, {1: '2', '4': 8})
-        self.assertEqual(8 in {1: '2', '4': 8}, result)
+        invokes.append(runner.call_contract(path, 'main', 1, {1: '2', '4': 8}))
+        expected_results.append(1 in {1: '2', '4': 8})
 
-        result = self.run_smart_contract(engine, path, 'main', '4', {1: '2', '4': 8})
-        self.assertEqual('4' in {1: '2', '4': 8}, result)
+        invokes.append(runner.call_contract(path, 'main', '1', {1: '2', '4': 8}))
+        expected_results.append('1' in {1: '2', '4': 8})
+
+        invokes.append(runner.call_contract(path, 'main', 8, {1: '2', '4': 8}))
+        expected_results.append(8 in {1: '2', '4': 8})
+
+        invokes.append(runner.call_contract(path, 'main', '4', {1: '2', '4': 8}))
+        expected_results.append('4' in {1: '2', '4': 8})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_dict_membership_mismatched_type(self):
         path = self.get_contract_path('DictMembershipMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_list(self):
-        path = self.get_contract_path('ListIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, '3', '4'])
-        self.assertEqual(1 in [1, 2, '3', '4'], result)
+        path, _ = self.get_deploy_file_paths('ListIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 3, [1, 2, '3', '4'])
-        self.assertEqual(3 in [1, 2, '3', '4'], result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', '4', [1, 2, '3', '4'])
-        self.assertEqual('4' in [1, 2, '3', '4'], result)
+        invokes.append(runner.call_contract(path, 'main', 1, [1, 2, '3', '4']))
+        expected_results.append(1 in [1, 2, '3', '4'])
+
+        invokes.append(runner.call_contract(path, 'main', 3, [1, 2, '3', '4']))
+        expected_results.append(3 in [1, 2, '3', '4'])
+
+        invokes.append(runner.call_contract(path, 'main', '4', [1, 2, '3', '4']))
+        expected_results.append('4' in [1, 2, '3', '4'])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_membership_mismatched_type(self):
         path = self.get_contract_path('ListMembershipMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_str(self):
-        path = self.get_contract_path('StringIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', '123', '1234')
-        self.assertEqual('123' in '1234', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', '42', '1234')
-        self.assertEqual('42' in '1234', result)
+        invokes.append(runner.call_contract(path, 'main', '123', '1234'))
+        expected_results.append('123' in '1234')
+
+        invokes.append(runner.call_contract(path, 'main', '42', '1234'))
+        expected_results.append('42' in '1234')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_str_membership_mismatched_type(self):
         path = self.get_contract_path('StringMembershipMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_tuple(self):
-        path = self.get_contract_path('TupleIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, '3', '4'))
-        self.assertEqual(1 in (1, 2, '3', '4'), result)
+        path, _ = self.get_deploy_file_paths('TupleIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 3, (1, 2, '3', '4'))
-        self.assertEqual(3 in (1, 2, '3', '4'), result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', '4', (1, 2, '3', '4'))
-        self.assertEqual('4' in (1, 2, '3', '4'), result)
+        invokes.append(runner.call_contract(path, 'main', 1, (1, 2, '3', '4')))
+        expected_results.append(1 in (1, 2, '3', '4'))
+
+        invokes.append(runner.call_contract(path, 'main', 3, (1, 2, '3', '4')))
+        expected_results.append(3 in (1, 2, '3', '4'))
+
+        invokes.append(runner.call_contract(path, 'main', '4', (1, 2, '3', '4')))
+        expected_results.append('4' in (1, 2, '3', '4'))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_membership_mismatched_type(self):
         path = self.get_contract_path('TupleMembershipMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_in_typed_dict_builtin_type(self):
-        path = self.get_contract_path('TypedDictBuiltinTypeIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TypedDictBuiltinTypeIn.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         element = FindOptions.VALUES_ONLY
         dict_ = {FindOptions.NONE: 'FindOptions.NONE', FindOptions.DESERIALIZE_VALUES: 'FindOptions.DESERIALIZE_VALUES'}
-        result = self.run_smart_contract(engine, path, 'main', element, dict_)
-        self.assertEqual(element in dict_, result)
+        invokes.append(runner.call_contract(path, 'main', element, dict_))
+        expected_results.append(element in dict_)
 
         element = FindOptions.PICK_FIELD_0
         dict_ = {FindOptions.NONE: 'FindOptions.NONE', FindOptions.DESERIALIZE_VALUES: 'FindOptions.DESERIALIZE_VALUES'}
-        result = self.run_smart_contract(engine, path, 'main', element, dict_)
-        self.assertEqual(element in dict_, result)
+        invokes.append(runner.call_contract(path, 'main', element, dict_))
+        expected_results.append(element in dict_)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_in_typed_dict(self):
-        path = self.get_contract_path('TypedDictIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', 4: '8'})
-        self.assertEqual(1 in {1: '2', 4: '8'}, result)
+        path, _ = self.get_deploy_file_paths('TypedDictIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 3, {1: '2', 4: '8'})
-        self.assertEqual(3 in {1: '2', 4: '8'}, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, {1: '2', 4: '8'}))
+        expected_results.append(1 in {1: '2', 4: '8'})
+
+        invokes.append(runner.call_contract(path, 'main', 3, {1: '2', 4: '8'}))
+        expected_results.append(3 in {1: '2', 4: '8'})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_in_typed_list_builtin_type(self):
-        path = self.get_contract_path('TypedListBuiltinTypeIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TypedListBuiltinTypeIn.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         element = FindOptions.VALUES_ONLY
         list_ = [FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY]
-        result = self.run_smart_contract(engine, path, 'main', element, list_)
-        self.assertEqual(element in list_, result)
+        invokes.append(runner.call_contract(path, 'main', element, list_))
+        expected_results.append(element in list_)
 
         element = FindOptions.PICK_FIELD_0
         list_ = [FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY]
-        result = self.run_smart_contract(engine, path, 'main', element, list_)
-        self.assertEqual(element in list_, result)
+        invokes.append(runner.call_contract(path, 'main', element, list_))
+        expected_results.append(element in list_)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_in_typed_list(self):
-        path = self.get_contract_path('TypedListIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, 3, 4])
-        self.assertEqual(1 in [1, 2, 3, 4], result)
+        path, _ = self.get_deploy_file_paths('TypedListIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 6, [1, 2, 3, 4])
-        self.assertEqual(6 in [1, 2, 3, 4], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, [1, 2, 3, 4]))
+        expected_results.append(1 in [1, 2, 3, 4])
+
+        invokes.append(runner.call_contract(path, 'main', 6, [1, 2, 3, 4]))
+        expected_results.append(6 in [1, 2, 3, 4])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_in_typed_tuple_builtin_type(self):
-        path = self.get_contract_path('TypedTupleBuiltinTypeIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TypedTupleBuiltinTypeIn.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         element = FindOptions.VALUES_ONLY
         tuple_ = (FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY)
-        result = self.run_smart_contract(engine, path, 'main', element, tuple_)
-        self.assertEqual(element in tuple_, result)
+        invokes.append(runner.call_contract(path, 'main', element, tuple_))
+        expected_results.append(element in tuple_)
 
         element = FindOptions.PICK_FIELD_0
         tuple_ = (FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY)
-        result = self.run_smart_contract(engine, path, 'main', element, tuple_)
-        self.assertEqual(element in tuple_, result)
+        invokes.append(runner.call_contract(path, 'main', element, tuple_))
+        expected_results.append(element in tuple_)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_in_typed_tuple(self):
-        path = self.get_contract_path('TypedTupleIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, 3, 4))
-        self.assertEqual(1 in (1, 2, 3, 4), result)
+        path, _ = self.get_deploy_file_paths('TypedTupleIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 6, (1, 2, 3, 4))
-        self.assertEqual(6 in (1, 2, 3, 4), result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, (1, 2, 3, 4)))
+        expected_results.append(1 in (1, 2, 3, 4))
+
+        invokes.append(runner.call_contract(path, 'main', 6, (1, 2, 3, 4)))
+        expected_results.append(6 in (1, 2, 3, 4))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
 
     # region NotMembership
 
     def test_not_in_bytes(self):
-        path = self.get_contract_path('BytesNotIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('BytesNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', b'123', b'1234')
-        self.assertEqual(b'123' not in b'1234', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', b'42', b'1234')
-        self.assertEqual(b'42' not in b'1234', result)
+        invokes.append(runner.call_contract(path, 'main', b'123', b'1234'))
+        expected_results.append(b'123' not in b'1234')
+
+        invokes.append(runner.call_contract(path, 'main', b'42', b'1234'))
+        expected_results.append(b'42' not in b'1234')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_dict(self):
-        path = self.get_contract_path('DictNotIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', '4': 8})
-        self.assertEqual(1 not in {1: '2', '4': 8}, result)
+        path, _ = self.get_deploy_file_paths('DictNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', '1', {1: '2', '4': 8})
-        self.assertEqual('1' not in {1: '2', '4': 8}, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', 8, {1: '2', '4': 8})
-        self.assertEqual(8 not in {1: '2', '4': 8}, result)
+        invokes.append(runner.call_contract(path, 'main', 1, {1: '2', '4': 8}))
+        expected_results.append(1 not in {1: '2', '4': 8})
 
-        result = self.run_smart_contract(engine, path, 'main', '4', {1: '2', '4': 8})
-        self.assertEqual('4' not in {1: '2', '4': 8}, result)
+        invokes.append(runner.call_contract(path, 'main', '1', {1: '2', '4': 8}))
+        expected_results.append('1' not in {1: '2', '4': 8})
+
+        invokes.append(runner.call_contract(path, 'main', 8, {1: '2', '4': 8}))
+        expected_results.append(8 not in {1: '2', '4': 8})
+
+        invokes.append(runner.call_contract(path, 'main', '4', {1: '2', '4': 8}))
+        expected_results.append('4' not in {1: '2', '4': 8})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_list(self):
-        path = self.get_contract_path('ListNotIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, '3', '4'])
-        self.assertEqual(1 not in [1, 2, '3', '4'], result)
+        path, _ = self.get_deploy_file_paths('ListNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 3, [1, 2, '3', '4'])
-        self.assertEqual(3 not in [1, 2, '3', '4'], result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', '4', [1, 2, '3', '4'])
-        self.assertEqual('4' not in [1, 2, '3', '4'], result)
+        invokes.append(runner.call_contract(path, 'main', 1, [1, 2, '3', '4']))
+        expected_results.append(1 not in [1, 2, '3', '4'])
+
+        invokes.append(runner.call_contract(path, 'main', 3, [1, 2, '3', '4']))
+        expected_results.append(3 not in [1, 2, '3', '4'])
+
+        invokes.append(runner.call_contract(path, 'main', '4', [1, 2, '3', '4']))
+        expected_results.append('4' not in [1, 2, '3', '4'])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_str(self):
-        path = self.get_contract_path('StringNotIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', '123', '1234')
-        self.assertEqual('123' not in '1234', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', '42', '1234')
-        self.assertEqual('42' not in '1234', result)
+        invokes.append(runner.call_contract(path, 'main', '123', '1234'))
+        expected_results.append('123' not in '1234')
+
+        invokes.append(runner.call_contract(path, 'main', '42', '1234'))
+        expected_results.append('42' not in '1234')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_tuple(self):
-        path = self.get_contract_path('TupleNotIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, '3', '4'))
-        self.assertEqual(1 not in (1, 2, '3', '4'), result)
+        path, _ = self.get_deploy_file_paths('TupleNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 3, (1, 2, '3', '4'))
-        self.assertEqual(3 not in (1, 2, '3', '4'), result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', '4', (1, 2, '3', '4'))
-        self.assertEqual('4' not in (1, 2, '3', '4'), result)
+        invokes.append(runner.call_contract(path, 'main', 1, (1, 2, '3', '4')))
+        expected_results.append(1 not in (1, 2, '3', '4'))
+
+        invokes.append(runner.call_contract(path, 'main', 3, (1, 2, '3', '4')))
+        expected_results.append(3 not in (1, 2, '3', '4'))
+
+        invokes.append(runner.call_contract(path, 'main', '4', (1, 2, '3', '4')))
+        expected_results.append('4' not in (1, 2, '3', '4'))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_typed_dict_builtin_type(self):
-        path = self.get_contract_path('TypedDictBuiltinTypeNotIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TypedDictBuiltinTypeNotIn.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         element = FindOptions.VALUES_ONLY
         dict_ = {FindOptions.NONE: 'FindOptions.NONE', FindOptions.DESERIALIZE_VALUES: 'FindOptions.DESERIALIZE_VALUES'}
-        result = self.run_smart_contract(engine, path, 'main', element, dict_)
-        self.assertEqual(element not in dict_, result)
+        invokes.append(runner.call_contract(path, 'main', element, dict_))
+        expected_results.append(element not in dict_)
 
         element = FindOptions.PICK_FIELD_0
         dict_ = {FindOptions.NONE: 'FindOptions.NONE', FindOptions.DESERIALIZE_VALUES: 'FindOptions.DESERIALIZE_VALUES'}
-        result = self.run_smart_contract(engine, path, 'main', element, dict_)
-        self.assertEqual(element not in dict_, result)
+        invokes.append(runner.call_contract(path, 'main', element, dict_))
+        expected_results.append(element not in dict_)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_typed_dict(self):
-        path = self.get_contract_path('TypedDictNotIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, {1: '2', 4: '8'})
-        self.assertEqual(1 not in {1: '2', 4: '8'}, result)
+        path, _ = self.get_deploy_file_paths('TypedDictNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 3, {1: '2', 4: '8'})
-        self.assertEqual(3 not in {1: '2', 4: '8'}, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, {1: '2', 4: '8'}))
+        expected_results.append(1 not in {1: '2', 4: '8'})
+
+        invokes.append(runner.call_contract(path, 'main', 3, {1: '2', 4: '8'}))
+        expected_results.append(3 not in {1: '2', 4: '8'})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_typed_list_builtin_type(self):
-        path = self.get_contract_path('TypedListBuiltinTypeNotIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TypedListBuiltinTypeNotIn.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         element = FindOptions.VALUES_ONLY
         list_ = [FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY]
-        result = self.run_smart_contract(engine, path, 'main', element, list_)
-        self.assertEqual(element not in list_, result)
+        invokes.append(runner.call_contract(path, 'main', element, list_))
+        expected_results.append(element not in list_)
 
         element = FindOptions.PICK_FIELD_0
         list_ = [FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY]
-        result = self.run_smart_contract(engine, path, 'main', element, list_)
-        self.assertEqual(element not in list_, result)
+        invokes.append(runner.call_contract(path, 'main', element, list_))
+        expected_results.append(element not in list_)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_typed_list(self):
-        path = self.get_contract_path('TypedListNotIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, [1, 2, 3, 4])
-        self.assertEqual(1 not in [1, 2, 3, 4], result)
+        path, _ = self.get_deploy_file_paths('TypedListNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 6, [1, 2, 3, 4])
-        self.assertEqual(6 not in [1, 2, 3, 4], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, [1, 2, 3, 4]))
+        expected_results.append(1 not in [1, 2, 3, 4])
+
+        invokes.append(runner.call_contract(path, 'main', 6, [1, 2, 3, 4]))
+        expected_results.append(6 not in [1, 2, 3, 4])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_typed_tuple_builtin_type(self):
-        path = self.get_contract_path('TypedTupleBuiltinTypeNotIn.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TypedTupleBuiltinTypeNotIn.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         element = FindOptions.VALUES_ONLY
         tuple_ = (FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY)
-        result = self.run_smart_contract(engine, path, 'main', element, tuple_)
-        self.assertEqual(element not in tuple_, result)
+        invokes.append(runner.call_contract(path, 'main', element, tuple_))
+        expected_results.append(element not in tuple_)
 
         element = FindOptions.PICK_FIELD_0
         tuple_ = (FindOptions.NONE, FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES, FindOptions.KEYS_ONLY)
-        result = self.run_smart_contract(engine, path, 'main', element, tuple_)
-        self.assertEqual(element not in tuple_, result)
+        invokes.append(runner.call_contract(path, 'main', element, tuple_))
+        expected_results.append(element not in tuple_)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_in_typed_tuple(self):
-        path = self.get_contract_path('TypedTupleNotIn.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 1, (1, 2, 3, 4))
-        self.assertEqual(1 not in (1, 2, 3, 4), result)
+        path, _ = self.get_deploy_file_paths('TypedTupleNotIn.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 6, (1, 2, 3, 4))
-        self.assertEqual(6 not in (1, 2, 3, 4), result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 1, (1, 2, 3, 4)))
+        expected_results.append(1 not in (1, 2, 3, 4))
+
+        invokes.append(runner.call_contract(path, 'main', 6, (1, 2, 3, 4)))
+        expected_results.append(6 not in (1, 2, 3, 4))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion

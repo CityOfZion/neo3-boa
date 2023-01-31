@@ -27,6 +27,10 @@ def get_account_by_identifier(account_identifier: str) -> Account:
                 None)
 
 
+def get_address_version() -> int:
+    return _NEOXP_CONFIG.version
+
+
 def get_account_identifier_from_script_hash_or_name(script_hash_or_address: Union[bytes, str]) -> str:
     if isinstance(script_hash_or_address, bytes):
         address = wallet_utils.address_from_script_hash(script_hash_or_address, _NEOXP_CONFIG.version)

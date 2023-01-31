@@ -140,6 +140,8 @@ class BoaTest(TestCase):
             raise TypeError(type_error_message.format(2, num_args + 1))
         if num_args > 3:
             raise TypeError(type_error_message.format(4, num_args + 1))
+        if os.path.isabs(args[0]):
+            return args[0]
 
         values = [None, self.default_test_folder, env.PROJECT_ROOT_DIRECTORY]
         for index, value in enumerate(reversed(args)):
@@ -174,7 +176,11 @@ class BoaTest(TestCase):
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
             file_path_without_ext, _ = os.path.splitext(contract_path)
-            return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
+            nef_path, manifest_path = f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
+            if not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
+                # both .nef and .manifest.json are required to execute the smart contract
+                self.compile_and_save(contract_path, log=False)
+            return nef_path, manifest_path
 
         return contract_path, contract_path
 
