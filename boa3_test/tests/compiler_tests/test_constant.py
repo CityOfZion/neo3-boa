@@ -426,8 +426,8 @@ class TestConstant(BoaTest):
         import base58
         from boa3.neo import to_script_hash
 
-        input = String('123').to_bytes()
-        expected_output = base58.b58decode(input)[1:]
+        input = String('NUnLWXALK2G6gYa7RadPLRiQYunZHnncxg').to_bytes()
+        expected_output = base58.b58decode(input)[1:21]
         output = to_script_hash(input)
 
         self.assertEqual(expected_output, output)
