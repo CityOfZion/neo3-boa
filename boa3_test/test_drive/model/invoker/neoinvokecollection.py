@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 from boa3_test.test_drive.model.invoker.neoinvokeresult import NeoInvokeResult
@@ -12,10 +12,11 @@ class NeoInvokeCollection:
         self._invoke_results: List[NeoInvokeResult] = []
         self._pending_results: List[NeoInvokeResult] = []
 
-    def append_contract_invoke(self, contract: TestContract, operation: str, *args: Any) -> NeoInvokeResult:
+    def append_contract_invoke(self, contract: TestContract, operation: str, *args: Any,
+                               expected_result_type: Type = None) -> NeoInvokeResult:
         invoker = NeoInvoke(contract.name, operation, *args)
         invoker._contract = contract
-        invoke_result = NeoInvokeResult(invoker)
+        invoke_result = NeoInvokeResult(invoker, expected_result_type=expected_result_type)
         self._internal_list.append(invoker)
         self._invoke_results.append(invoke_result)
         self._pending_results.append(invoke_result)

@@ -2,8 +2,9 @@ from boa3.boa3 import Boa3
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestMultipleExpressions(BoaTest):
@@ -30,11 +31,22 @@ class TestMultipleExpressions(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 1, 2)
-        self.assertEqual(3, result)
-        result = self.run_smart_contract(engine, path, 'Main', 5, -7)
-        self.assertEqual(-2, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 1, 2))
+        expected_results.append(3)
+        invokes.append(runner.call_contract(path, 'Main', 5, -7))
+        expected_results.append(-2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_multiple_relational_expressions(self):
         expected_output = (
@@ -62,13 +74,24 @@ class TestMultipleExpressions(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 1, 2)
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'Main', 5, -7)
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'Main', -4, -4)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 1, 2))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'Main', 5, -7))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'Main', -4, -4))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_multiple_logic_expressions(self):
         expected_output = (
@@ -100,15 +123,26 @@ class TestMultipleExpressions(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', True, False, False)
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', False, True, False)
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', False, False, False)
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'Main', True, True, False)
-        self.assertEqual(True, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', True, False, False))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'Main', False, True, False))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'Main', False, False, False))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'Main', True, True, False))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_multiple_tuple_expressions(self):
         a = String('a').to_bytes()
@@ -156,11 +190,22 @@ class TestMultipleExpressions(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', [1, 2])
-        self.assertEqual(5, result)
-        result = self.run_smart_contract(engine, path, 'Main', [-5, -7])
-        self.assertEqual(-1, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', [1, 2]))
+        expected_results.append(5)
+        invokes.append(runner.call_contract(path, 'Main', [-5, -7]))
+        expected_results.append(-1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_multiple_list_expressions(self):
         one = String('1').to_bytes()
@@ -205,8 +250,19 @@ class TestMultipleExpressions(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', [2, 1])
-        self.assertEqual(7, result)
-        result = self.run_smart_contract(engine, path, 'Main', [-7, 5])
-        self.assertEqual(-2, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', [2, 1]))
+        expected_results.append(7)
+        invokes.append(runner.call_contract(path, 'Main', [-7, 5]))
+        expected_results.append(-2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
