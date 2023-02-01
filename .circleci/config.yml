@@ -28,7 +28,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            pip install -r requirements.txt
+            pip install -r requirements_dev.txt
             sudo apt update
             sudo apt-get install -y apt-transport-https
             wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
@@ -50,7 +50,9 @@ jobs:
             export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
             export PATH="$PATH:$DOTNET_TOOL_PATH"
             
-            python -m unittest discover boa3_test
+            coverage run -m unittest discover boa3_test
+            pip install coveralls
+            coveralls --service=circleci
 
   unit-test-38:
     <<: *unit-test

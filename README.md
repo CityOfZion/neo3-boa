@@ -9,11 +9,14 @@
   <br/> Made by <b>COZ.IO</b>
 </p>
 
-<p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo3-python">neo-mamba</a>  </p>
+<p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo-mamba">neo-mamba</a>  </p>
 
 <p align="center">
   <a href="https://circleci.com/gh/CityOfZion/neo3-boa/tree/master">
     <img src="https://circleci.com/gh/CityOfZion/neo3-boa.svg?style=shield" alt="CircleCI.">
+  </a>
+  <a href='https://coveralls.io/github/CityOfZion/neo3-boa?branch=master'>
+    <img src='https://coveralls.io/repos/github/CityOfZion/neo3-boa/badge.svg?branch=master' alt='Coverage Status' />
   </a>
   <a href="https://pypi.org/project/neo3-boa/">
     <img src="https://img.shields.io/pypi/v/neo3-boa.svg" alt="PyPI.">
