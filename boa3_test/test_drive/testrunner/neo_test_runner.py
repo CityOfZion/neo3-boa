@@ -1,7 +1,7 @@
 import json
 import os.path
 import subprocess
-from typing import Any, List, Tuple, Dict, Optional, Union
+from typing import Any, List, Tuple, Dict, Optional, Union, Type
 
 from boa3 import env, constants
 from boa3.neo import utils as neo_utils
@@ -131,13 +131,15 @@ class NeoTestRunner:
             contract = self._contracts[nef_path]
         return contract
 
-    def call_contract(self, nef_path: str, method: str, *arguments: Any) -> NeoInvokeResult:
+    def call_contract(self, nef_path: str, method: str, *arguments: Any,
+                      expected_result_type: Type = None) -> NeoInvokeResult:
         if nef_path not in self._contracts:
             contract = self.deploy_contract(nef_path)
         else:
             contract = self._contracts[nef_path]
 
-        return self._invokes.append_contract_invoke(contract, method, *arguments)
+        return self._invokes.append_contract_invoke(contract, method, *arguments,
+                                                    expected_result_type=expected_result_type)
 
     def get_contract(self, contract_id: Union[str, bytes]) -> TestContract:
         return self._contracts[contract_id]
@@ -297,3 +299,6 @@ class NeoTestRunner:
                                    stderr=subprocess.STDOUT,
                                    text=True)
         return process.communicate()
+
+    def increase_block(self, new_height: int = None):
+        self._batch.mint_block(new_height)
