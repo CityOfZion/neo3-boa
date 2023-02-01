@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.testrunner.blockchain.storage import TestRunnerStorage, StorageKey
@@ -21,9 +21,13 @@ class StorageCollection:
         except BaseException as e:
             raise e  # try except just to ensure that the value will be removed from both lists
 
-    def get(self, storage_contract: TestContract, key: bytes):
+    def get(self, storage_contract: TestContract, key: Union[bytes, str]):
         if isinstance(key, str):
-            key = bytes(key)
+            try:
+                key = bytes(key)
+            except TypeError:
+                from boa3 import constants
+                key = key.encode(encoding=constants.ENCODING)
 
         index = self._storage_contracts.index(storage_contract)
         try:

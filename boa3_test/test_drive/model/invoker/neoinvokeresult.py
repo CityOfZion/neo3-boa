@@ -28,14 +28,15 @@ class NeoInvokeResult:
                 from boa3.neo.vm.type.String import String
                 result = String(result).to_bytes()
 
-            if self._expected_result_type is bool:
+            if self._expected_result_type in (bool, int):
                 if isinstance(result, bytes):
                     from boa3.neo.vm.type.Integer import Integer
                     result = Integer.from_bytes(result, signed=True)
-                if isinstance(result, int) and result in (False, True):
+
+                if self._expected_result_type is bool and isinstance(result, int) and result in (False, True):
                     result = bool(result)
 
-            if self._expected_result_type is bytearray and isinstance(result, bytes):
+            elif self._expected_result_type is bytearray and isinstance(result, bytes):
                 result = bytearray(result)
 
         return result

@@ -111,6 +111,10 @@ class BoaTest(TestCase):
         if obj is not VoidType:
             self.fail('{0} is not Void'.format(obj))
 
+    def assertStartsWith(self, first: Any, second: Any):
+        if not (hasattr(first, 'startswith') and first.startswith(second)):
+            self.fail(f'{first} != {second}')
+
     def get_dir_path(self, *args: str) -> str:
         type_error_message = 'get_contract_path() takes {0} positional argument but {1} were given'
         num_args = len(args)
