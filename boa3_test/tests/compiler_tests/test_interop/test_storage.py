@@ -6,8 +6,9 @@ from boa3.neo.core.types.InteropInterface import InteropInterface
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -37,7 +38,7 @@ class TestStorageInterop(BoaTest):
         )
 
         path = self.get_contract_path('StorageGetBytesKey.py')
-        output, manifest = self.compile_and_save(path)
+        output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_storage_get_str_key(self):
@@ -64,56 +65,80 @@ class TestStorageInterop(BoaTest):
 
         path = self.get_contract_path('StorageGetStrKey.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertStartsWith(output, expected_output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'example',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'', result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        storage = {('example', path): 23}
-        result = self.run_smart_contract(engine, path, 'Main', 'example',
-                                         fake_storage=storage,
-                                         expected_result_type=bytes)
-        self.assertEqual(Integer(23).to_byte_array(), result)
+        invokes = []
+        expected_results = []
 
-        storage = {('test1', path): 23, ('test2', path): 42}
-        result = self.run_smart_contract(engine, path, 'Main', 'test2',
-                                         fake_storage=storage,
-                                         expected_result_type=bytes)
-        self.assertEqual(Integer(42).to_byte_array(), result)
+        not_existing_key = 'unknown_key'
+        invokes.append(runner.call_contract(path, 'Main', not_existing_key,
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
+
+        storage_key_1 = 'example'
+        storage_key_2 = 'test'
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1,
+                                            expected_result_type=bytes))
+        expected_results.append(Integer(23).to_byte_array())
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2,
+                                            expected_result_type=bytes))
+        expected_results.append(Integer(42).to_byte_array())
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(expected_results[1], storage_result_1.as_bytes())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(expected_results[2], storage_result_2.as_bytes())
 
     def test_storage_get_mismatched_type(self):
         path = self.get_contract_path('StorageGetMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_put_bytes_key_bytes_value(self):
-        path = self.get_contract_path('StoragePutBytesKeyBytesValue.py')
+        path, _ = self.get_deploy_file_paths('StoragePutBytesKeyBytesValue.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
+        storage_key_1 = b'test1'
+        storage_key_2 = b'test2'
         stored_value = b'\x01\x02\x03'
-        result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_bytes())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_bytes())
 
     def test_storage_put_bytes_key_int_value(self):
         value = Integer(123).to_byte_array()
@@ -136,30 +161,37 @@ class TestStorageInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        stored_value = Integer(123).to_byte_array()
-        result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        storage_key_1 = b'test1'
+        storage_key_2 = b'test2'
+        stored_value = 123
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_int())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_int())
 
     def test_storage_put_bytes_key_str_value(self):
         value = String('123').to_bytes()
@@ -186,58 +218,70 @@ class TestStorageInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        stored_value = String('123').to_bytes()
-        result = self.run_smart_contract(engine, path, 'Main', 'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main', 'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        storage_key_1 = b'test1'
+        storage_key_2 = b'test2'
+        stored_value = '123'
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_str())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_str())
 
     def test_storage_put_str_key_bytes_value(self):
-        path = self.get_contract_path('StoragePutStrKeyBytesValue.py')
+        path, _ = self.get_deploy_file_paths('StoragePutStrKeyBytesValue.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
+        storage_key_1 = 'test1'
+        storage_key_2 = 'test2'
         stored_value = b'\x01\x02\x03'
-        result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_bytes())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_bytes())
 
     def test_storage_put_str_key_int_value(self):
         value = Integer(123).to_byte_array()
@@ -260,30 +304,37 @@ class TestStorageInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        stored_value = Integer(123).to_byte_array()
-        result = self.run_smart_contract(engine, path, 'Main', 'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main', 'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        storage_key_1 = 'test1'
+        storage_key_2 = 'test2'
+        stored_value = 123
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_int())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_int())
 
     def test_storage_put_str_key_str_value(self):
         value = String('123').to_bytes()
@@ -310,30 +361,37 @@ class TestStorageInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        stored_value = String('123').to_bytes()
-        result = self.run_smart_contract(engine, path, 'Main', 'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main', 'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'Main', 'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        storage_key_1 = 'test1'
+        storage_key_2 = 'test2'
+        stored_value = '123'
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_str())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_str())
 
     def test_storage_put_mismatched_type_key(self):
         path = self.get_contract_path('StoragePutMismatchedTypeKey.py')
@@ -358,18 +416,41 @@ class TestStorageInterop(BoaTest):
 
         path = self.get_contract_path('StorageDeleteBytesKey.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertStartsWith(output, expected_output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'example')
-        self.assertIsVoid(result)
-        self.assertIsNone(engine.storage_get(b'example', path))
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        storage = {('example', path): 23}
-        result = self.run_smart_contract(engine, path, 'Main', b'example', fake_storage=storage)
-        self.assertIsVoid(result)
-        self.assertIsNone(engine.storage_get('example', path))
-        self.assertIsNone(engine.storage_get(b'example', path))
+        invokes = []
+        expected_results = []
+
+        not_existing_key = b'unknown_key'
+        storage_key = b'example'
+
+        invokes.append(runner.call_contract(path, 'has_key', not_existing_key))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(path, 'has_key', storage_key))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'Main', not_existing_key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'has_key', storage_key))
+        expected_results.append(False)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
+        self.assertIsNone(runner.storages.get(storage_contract, storage_key))
 
     def test_storage_delete_str_key(self):
         expected_output = (
@@ -386,18 +467,41 @@ class TestStorageInterop(BoaTest):
 
         path = self.get_contract_path('StorageDeleteStrKey.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertStartsWith(output, expected_output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'example')
-        self.assertIsVoid(result)
-        self.assertIsNone(engine.storage_get(b'example', path))
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        storage = {('example', path): 23}
-        result = self.run_smart_contract(engine, path, 'Main', 'example', fake_storage=storage)
-        self.assertIsVoid(result)
-        self.assertIsNone(engine.storage_get('example', path))
-        self.assertIsNone(engine.storage_get(b'example', path))
+        invokes = []
+        expected_results = []
+
+        not_existing_key = 'unknown_key'
+        storage_key = 'example'
+
+        invokes.append(runner.call_contract(path, 'has_key', not_existing_key))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(path, 'has_key', storage_key))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'Main', not_existing_key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'has_key', storage_key))
+        expected_results.append(False)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
+        self.assertIsNone(runner.storages.get(storage_contract, storage_key))
 
     def test_storage_delete_mismatched_type(self):
         path = self.get_contract_path('StorageDeleteMismatchedType.py')
@@ -445,9 +549,20 @@ class TestStorageInterop(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(InteropInterface)  # returns an interop interface
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_storage_get_read_only_context(self):
         expected_output = (
@@ -459,66 +574,100 @@ class TestStorageInterop(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(InteropInterface, result)  # returns an interop interface
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(InteropInterface)  # returns an interop interface
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_storage_get_with_context(self):
-        path = self.get_contract_path('StorageGetWithContext.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'example',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'', result)
+        path, _ = self.get_deploy_file_paths('StorageGetWithContext.py')
+        runner = NeoTestRunner()
 
-        storage = {('example', path): 23}
-        result = self.run_smart_contract(engine, path, 'Main', 'example',
-                                         fake_storage=storage,
-                                         expected_result_type=bytes)
-        self.assertEqual(Integer(23).to_byte_array(), result)
+        invokes = []
+        expected_results = []
 
-        storage = {('test1', path): 23, ('test2', path): 42}
-        result = self.run_smart_contract(engine, path, 'Main', 'test2',
-                                         fake_storage=storage,
-                                         expected_result_type=bytes)
-        self.assertEqual(Integer(42).to_byte_array(), result)
+        not_existing_key = 'unknown_key'
+        invokes.append(runner.call_contract(path, 'Main', not_existing_key,
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
+
+        storage_key_1 = 'example'
+        storage_key_2 = 'test'
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1,
+                                            expected_result_type=bytes))
+        expected_results.append(Integer(23).to_byte_array())
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2,
+                                            expected_result_type=bytes))
+        expected_results.append(Integer(42).to_byte_array())
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(expected_results[1], storage_result_1.as_bytes())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(expected_results[2], storage_result_2.as_bytes())
 
     def test_storage_put_with_context(self):
-        path = self.get_contract_path('StoragePutWithContext.py')
+        path, _ = self.get_deploy_file_paths('StoragePutWithContext.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
+        storage_key_1 = 'test1'
+        storage_key_2 = 'test2'
         stored_value = b'\x01\x02\x03'
-        result = self.run_smart_contract(engine, path, 'Main', b'test1')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2')
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'Main', b'test2', fake_storage={})
-        self.assertIsVoid(result)
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(b'test2', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
+        expected_results.append(None)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
+        self.assertEqual(stored_value, storage_result_1.as_bytes())
+
+        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
+        self.assertEqual(stored_value, storage_result_2.as_bytes())
 
     def test_storage_delete_with_context(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x01'
             + b'\x01'
-            + Opcode.SYSCALL    # context = get_context()
+            + Opcode.SYSCALL  # context = get_context()
             + Interop.StorageGetContext.interop_method_hash
             + Opcode.STLOC0
-            + Opcode.LDARG0     # delete(key, context)
+            + Opcode.LDARG0  # delete(key, context)
             + Opcode.LDLOC0
             + Opcode.SYSCALL
             + Interop.StorageDelete.interop_method_hash
@@ -527,18 +676,41 @@ class TestStorageInterop(BoaTest):
 
         path = self.get_contract_path('StorageDeleteWithContext.py')
         output = Boa3.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertStartsWith(output, expected_output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'example')
-        self.assertIsVoid(result)
-        self.assertIsNone(engine.storage_get(b'example', path))
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        storage = {('example', path): 23}
-        result = self.run_smart_contract(engine, path, 'Main', 'example', fake_storage=storage)
-        self.assertIsVoid(result)
-        self.assertIsNone(engine.storage_get('example', path))
-        self.assertIsNone(engine.storage_get(b'example', path))
+        invokes = []
+        expected_results = []
+
+        not_existing_key = 'unknown_key'
+        storage_key = 'example'
+
+        invokes.append(runner.call_contract(path, 'has_key', not_existing_key))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(path, 'has_key', storage_key))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'Main', not_existing_key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', storage_key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'has_key', storage_key))
+        expected_results.append(False)
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
+        self.assertIsNone(runner.storages.get(storage_contract, storage_key))
 
     def test_storage_find_with_context(self):
         path = self.get_contract_path('StorageFindWithContext.py')
@@ -573,106 +745,147 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_boa2_storage_test(self):
-        path = self.get_contract_path('StorageBoa2Test.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StorageBoa2Test.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 'sget', 'something', 'blah')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
-        self.assertEqual(b'', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', 'sput', 'something', 'blah')
-        self.assertEqual(True, result)
+        storage_key = 'something'
+        invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 'blah',
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
 
-        result = self.run_smart_contract(engine, path, 'main', 'sget', 'something', 'blah')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
-        self.assertEqual(b'blah', result)
+        invokes.append(runner.call_contract(path, 'main', 'sput', storage_key, 'blah'))
+        expected_results.append(True)
 
-        result = self.run_smart_contract(engine, path, 'main', 'sdel', 'something', 'blah')
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 'blah',
+                                            expected_result_type=bytes))
+        expected_results.append(b'blah')
 
-        result = self.run_smart_contract(engine, path, 'main', 'sget', 'something', 'blah')
-        if isinstance(result, str):
-            result = String(result).to_bytes()
-        self.assertEqual(b'', result)
+        invokes.append(runner.call_contract(path, 'main', 'sdel', storage_key, 'blah'))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 'blah',
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, storage_key))
 
     def test_boa2_storage_test2(self):
-        path = self.get_contract_path('StorageBoa2Test.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StorageBoa2Test.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 'sget', 100, 10000000000)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
-        self.assertEqual(b'', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', 'sput', 100, 10000000000)
-        self.assertEqual(True, result)
+        storage_key = Integer(100)
+        invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 10000000000,
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
 
-        result = self.run_smart_contract(engine, path, 'main', 'sget', 100, 10000000000)
-        if isinstance(result, bytes):
-            result = Integer.from_bytes(result)
-        self.assertEqual(10000000000, result)
+        invokes.append(runner.call_contract(path, 'main', 'sput', storage_key, 10000000000))
+        expected_results.append(True)
 
-        result = self.run_smart_contract(engine, path, 'main', 'sdel', 100, 10000000000)
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 10000000000,
+                                            expected_result_type=int))
+        expected_results.append(10000000000)
 
-        result = self.run_smart_contract(engine, path, 'main', 'sget', 100, 10000000000)
-        if isinstance(result, str):
-            result = String(result).to_bytes()
-        self.assertEqual(b'', result)
+        invokes.append(runner.call_contract(path, 'main', 'sdel', storage_key, 10000000000))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 10000000000,
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
+
+        storage_contract = invokes[0].invoke.contract
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(storage_contract, storage_key.to_byte_array()))
 
     def test_storage_between_contracts(self):
-        path1 = self.get_contract_path('StorageGetAndPut1.py')
-        path2 = self.get_contract_path('StorageGetAndPut2.py')
+        path1, _ = self.get_deploy_file_paths('StorageGetAndPut1.py')
+        path2, _ = self.get_deploy_file_paths('StorageGetAndPut2.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         key = 'example_key'
         value = 42
-        engine = TestEngine()
 
-        result = self.run_smart_contract(engine, path1, 'put_value', key, value)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path1, 'put_value', key, value))
+        expected_results.append(None)
+        contract_1 = invokes[-1].invoke.contract
 
-        storage_value = engine.storage_get(key, path1)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(value, Integer.from_bytes(storage_value))
+        invokes.append(runner.call_contract(path2, 'get_value', key))
+        expected_results.append(0)
 
-        result = self.run_smart_contract(engine, path2, 'get_value', key)
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path1, 'get_value', key))
+        expected_results.append(value)
 
-        result = self.run_smart_contract(engine, path1, 'get_value', key)
-        self.assertEqual(value, result)
+        runner.execute(get_storage_from=contract_1)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_result = runner.storages.get(contract_1, key)
+        self.assertEqual(value, storage_result.as_int())
 
     def test_create_map(self):
-        path = self.get_contract_path('StorageCreateMap.py')
+        path, _ = self.get_deploy_file_paths('StorageCreateMap.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         map_key = b'example_'
-        engine = TestEngine()
-
-        result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'', result)
-
+        storage_key = b'test1'
         stored_value = b'123'
-        result = self.run_smart_contract(engine, path, 'insert_to_map', 'test1', stored_value)
-        self.assertIsVoid(result)
 
-        storage_value = engine.storage_get(b'test1', path)
-        self.assertIsNone(storage_value)
-        storage_value = engine.storage_get(map_key + b'test1', path)
-        self.assertIsNotNone(storage_value)
-        self.assertEqual(stored_value, storage_value)
+        invokes.append(runner.call_contract(path, 'get_from_map', storage_key,
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
+        storage_contract = invokes[-1].invoke.contract
 
-        result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',
-                                         expected_result_type=bytes)
-        self.assertEqual(stored_value, result)
+        invokes.append(runner.call_contract(path, 'insert_to_map', storage_key, stored_value))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'delete_from_map', 'test1')
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'get_from_map', 'test1',
+                                            expected_result_type=bytes))
+        expected_results.append(stored_value)
 
-        result = self.run_smart_contract(engine, path, 'get_from_map', 'test1',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'', result)
+        runner.execute(get_storage_from=storage_contract)
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        self.assertIsNone(runner.storages.get(storage_contract, storage_key))
+        storage_result = runner.storages.get(storage_contract, map_key + storage_key)
+        self.assertEqual(stored_value, storage_result.as_bytes())
+
+        invokes.append(runner.call_contract(path, 'delete_from_map', 'test1'))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'get_from_map', 'test1',
+                                            expected_result_type=bytes))
+        expected_results.append(b'')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_storage(self):
         path = self.get_contract_path('ImportStorage.py')
@@ -745,29 +958,40 @@ class TestStorageInterop(BoaTest):
         self.assertEqual([], result)
 
     def test_as_read_only(self):
-        path = self.get_contract_path('StorageAsReadOnly.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StorageAsReadOnly.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         key = 'key'
         value_old = 'old value'
         value_new = 'new value'
 
         # Putting old value in the storage
-        result = self.run_smart_contract(engine, path, 'put_value_in_storage', key, value_old)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'put_value_in_storage', key, value_old))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'get_value_in_storage_read_only', key)
-        self.assertEqual(value_old, result)
+        invokes.append(runner.call_contract(path, 'get_value_in_storage_read_only', key))
+        expected_results.append(value_old)
 
-        result = self.run_smart_contract(engine, path, 'get_value_in_storage', key)
-        self.assertEqual(value_old, result)
+        invokes.append(runner.call_contract(path, 'get_value_in_storage', key))
+        expected_results.append(value_old)
+
+        invokes.append(runner.call_contract(path, 'get_value_in_storage_read_only', key))
+        expected_results.append(value_old)
+
+        invokes.append(runner.call_contract(path, 'get_value_in_storage', key))
+        expected_results.append(value_old)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
         # Trying to put a new value in the storage using read_only won't work
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG):
-            self.run_smart_contract(engine, path, 'put_value_in_storage_read_only', key, value_new)
-
-        result = self.run_smart_contract(engine, path, 'get_value_in_storage_read_only', key)
-        self.assertEqual(value_old, result)
-
-        result = self.run_smart_contract(engine, path, 'get_value_in_storage', key)
-        self.assertEqual(value_old, result)
+        runner.call_contract(path, 'put_value_in_storage_read_only', key, value_new)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG)
