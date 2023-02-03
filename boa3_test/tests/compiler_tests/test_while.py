@@ -4,8 +4,9 @@ from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestWhile(BoaTest):
@@ -38,9 +39,20 @@ class TestWhile(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(0, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(0)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_variable_condition(self):
         jmpif_address = Integer(12).to_byte_array(min_length=1, signed=True)
@@ -79,13 +91,24 @@ class TestWhile(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', -2)
-        self.assertEqual(0, result)
-        result = self.run_smart_contract(engine, path, 'Main', 5)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'Main', 8)
-        self.assertEqual(16, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', -2))
+        expected_results.append(0)
+        invokes.append(runner.call_contract(path, 'Main', 5))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'Main', 8))
+        expected_results.append(16)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_mismatched_type_condition(self):
         path = self.get_contract_path('MismatchedTypeCondition.py')
@@ -93,16 +116,24 @@ class TestWhile(BoaTest):
 
     def test_while_no_condition(self):
         path = self.get_contract_path('NoCondition.py')
-
         with self.assertRaises(SyntaxError):
             output = Boa3.compile(path)
 
     def test_nested_while(self):
-        path = self.get_contract_path('NestedWhile.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('NestedWhile.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(8, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(8)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_else(self):
         jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
@@ -135,9 +166,20 @@ class TestWhile(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(1, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_relational_condition(self):
         jmpif_address = Integer(10).to_byte_array(min_length=1, signed=True)
@@ -174,9 +216,20 @@ class TestWhile(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(20, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(20)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_multiple_relational_condition(self):
         jmpif_address = Integer(10).to_byte_array(min_length=1, signed=True)
@@ -217,58 +270,128 @@ class TestWhile(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', '', 1)
-        self.assertEqual(0, result)
-        result = self.run_smart_contract(engine, path, 'Main', '', 10)
-        self.assertEqual(0, result)
-        result = self.run_smart_contract(engine, path, 'Main', '', 100)
-        self.assertEqual(20, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', '', 1))
+        expected_results.append(0)
+        invokes.append(runner.call_contract(path, 'Main', '', 10))
+        expected_results.append(0)
+        invokes.append(runner.call_contract(path, 'Main', '', 100))
+        expected_results.append(20)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_continue(self):
-        path = self.get_contract_path('WhileContinue.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('WhileContinue.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(20, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(20)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_break(self):
-        path = self.get_contract_path('WhileBreak.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('WhileBreak.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(6, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(6)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_while_test(self):
-        path = self.get_contract_path('WhileBoa2Test.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(24, result)
+        path, _ = self.get_deploy_file_paths('WhileBoa2Test.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(24)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_while_test1(self):
-        path = self.get_contract_path('WhileBoa2Test1.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(6, result)
+        path, _ = self.get_deploy_file_paths('WhileBoa2Test1.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(6)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_while_test2(self):
-        path = self.get_contract_path('WhileBoa2Test2.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(6, result)
+        path, _ = self.get_deploy_file_paths('WhileBoa2Test2.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(6)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_while_interop_condition(self):
-        path = self.get_contract_path('WhileWithInteropCondition.py')
+        path, _ = self.get_deploy_file_paths('WhileWithInteropCondition.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'deploy')
-        self.assertEqual(True, result)
-        contract_hash = engine.executed_script_hash.to_array()
-        result = self.run_smart_contract(engine, path, 'test_end_while_jump')
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'deploy'))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'test_end_while_jump'))
+        expected_results.append(True)
+
+        contract = invokes[0].invoke.contract
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
         # test notifications inserted into the code for validating if the code flow is correct
-        notifications = engine.get_events('notify', origin=contract_hash)
+        notifications = runner.get_events('notify', origin=contract)
+        contract_hash = contract.script_hash
         self.assertEqual(2, len(notifications))
 
         self.assertEqual(1, len(notifications[0].arguments))

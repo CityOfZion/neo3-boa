@@ -4,9 +4,9 @@ from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestException(BoaTest):
@@ -35,11 +35,17 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'test_raise', 10)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'test_raise', -10)
+        runner.call_contract(path, 'test_raise', 10)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        runner.call_contract(path, 'test_raise', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_raise_exception_with_message(self):
         exception_message = String('raised an exception').to_bytes()
@@ -63,11 +69,17 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'test_raise', 10)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'test_raise', -10)
+        runner.call_contract(path, 'test_raise', 10)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        runner.call_contract(path, 'test_raise', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_raise_exception_without_call(self):
         expected_output = (
@@ -90,11 +102,17 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'test_raise', 10)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'test_raise', -10)
+        runner.call_contract(path, 'test_raise', 10)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        runner.call_contract(path, 'test_raise', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_raise_variable_exception(self):
         expected_output = (
@@ -119,11 +137,17 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'test_raise', 10)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'test_raise', -10)
+        runner.call_contract(path, 'test_raise', 10)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        runner.call_contract(path, 'test_raise', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_raise_exception_variable_message(self):
         message = 'raised an exception'
@@ -152,11 +176,17 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'test_raise', 10)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, message):
-            self.run_smart_contract(engine, path, 'test_raise', -10)
+        runner.call_contract(path, 'test_raise', 10)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        runner.call_contract(path, 'test_raise', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, message)
 
     def test_raise_specific_exception(self):
         expected_output = (
@@ -179,11 +209,17 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'test_raise', 10)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'test_raise', -10)
+        runner.call_contract(path, 'test_raise', 10)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        runner.call_contract(path, 'test_raise', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_raise_mismatched_type(self):
         path = self.get_contract_path('RaiseMismatchedType.py')
@@ -214,11 +250,22 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
-        self.assertEqual(-110, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test_try_except', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'test_try_except', -110))
+        expected_results.append(-110)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_try_except_base_exception(self):
         expected_output = (
@@ -245,11 +292,22 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
-        self.assertEqual(-110, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test_try_except', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'test_try_except', -110))
+        expected_results.append(-110)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_try_except_specific_exception(self):
         expected_output = (
@@ -276,11 +334,22 @@ class TestException(BoaTest):
         output = self.assertCompilerLogs(CompilerWarning.UsingSpecificException, path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
-        self.assertEqual(-110, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test_try_except', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'test_try_except', -110))
+        expected_results.append(-110)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_try_except_with_name(self):
         path = self.get_contract_path('TryExceptWithName.py')
@@ -323,11 +392,22 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
-        self.assertEqual(24, result)
-        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
-        self.assertEqual(-274, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test_try_except', 10))
+        expected_results.append(24)
+        invokes.append(runner.call_contract(path, 'test_try_except', -110))
+        expected_results.append(-274)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_try_except_else(self):
         expected_output = (
@@ -359,11 +439,22 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
-        self.assertEqual(-10, result)
-        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
-        self.assertEqual(110, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test_try_except', 10))
+        expected_results.append(-10)
+        invokes.append(runner.call_contract(path, 'test_try_except', -110))
+        expected_results.append(110)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_try_except_else_finally(self):
         expected_output = (
@@ -408,8 +499,19 @@ class TestException(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test_try_except', 10)
-        self.assertEqual(44, result)
-        result = self.run_smart_contract(engine, path, 'test_try_except', -110)
-        self.assertEqual(-494, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test_try_except', 10))
+        expected_results.append(44)
+        invokes.append(runner.call_contract(path, 'test_try_except', -110))
+        expected_results.append(-494)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
