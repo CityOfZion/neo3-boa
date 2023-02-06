@@ -59,6 +59,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._super_calls: List[IBuiltinMethod] = []
         self.visit(self._tree)
 
+    def visit(self, node: ast.AST, get_literal_value: bool = False):
+        if get_literal_value:
+            node.get_literal_value = True
+
+        result = super().visit(node)
+
+        if hasattr(node, 'get_literal_value'):
+            delattr(node, 'get_literal_value')
+
+        return result
+
     @property
     def _current_method_id(self) -> str:
         """
@@ -247,7 +258,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param ret: the python ast return node
         """
-        ret_value: Any = self.visit(ret.value) if ret.value is not None else None
+        ret_value: Any = (self.visit(ret.value, get_literal_value=True)
+                          if ret.value is not None
+                          else None)
         if ret.value is not None and self.get_type(ret.value) is not Type.none:
             # multiple returns are not allowed
             if isinstance(ret.value, ast.Tuple):
@@ -422,7 +435,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._current_scope.include_symbol(node.id, Variable(value_type),
                                                            reassign_original=can_change_original)
 
-        if not target_type.is_type_of(value_type) and value != target_type.default_value:
+        if not target_type.is_type_of(value_type) and not self._has_only_default_values(value, target_type):
             if not implicit_cast:
                 self._log_error(
                     CompilerError.MismatchedTypes(
@@ -441,6 +454,35 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
 
         return True
+
+    def _has_only_default_values(self, value: Any, target_type: Optional[IType] = None) -> bool:
+        has_only_default_values = False
+        if not isinstance(target_type, IType):
+            target_type = self.get_type(value)
+
+        if value == target_type.default_value:
+            has_only_default_values = True
+
+        elif isinstance(target_type, Collection) and hasattr(value, '__len__'):
+            has_only_default_values = True
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    if not self._has_only_default_values(key):
+                        has_only_default_values = False
+                        break
+
+                    if not self._has_only_default_values(item):
+                        has_only_default_values = False
+                        break
+            else:
+                for item in value:
+                    if not self._has_only_default_values(item):
+                        has_only_default_values = False
+                        break
+        else:
+            has_only_default_values = value == target_type.default_value
+
+        return has_only_default_values
 
     def visit_Subscript(self, subscript: ast.Subscript) -> IType:
         """
@@ -1706,7 +1748,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param tup_node: the python ast tuple node
         :return: the value of the tuple
         """
-        return tuple(self.get_type(value) for value in tup_node.elts)
+        get_literal_values = hasattr(tup_node, 'get_literal_value') and tup_node.get_literal_value
+        result = []
+        for value in tup_node.elts:
+            if get_literal_values:
+                item = self.visit(value, get_literal_value=True)
+                if item is None or isinstance(item, ast.AST):
+                    item = self.get_type(value)
+            else:
+                item = self.get_type(value)
+
+            result.append(item)
+
+        return tuple(result)
 
     def visit_List(self, list_node: ast.List) -> List[Any]:
         """
@@ -1715,7 +1769,19 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param list_node: the python ast list node
         :return: the value of the list
         """
-        return [self.get_type(value) for value in list_node.elts]
+        get_literal_values = hasattr(list_node, 'get_literal_value') and list_node.get_literal_value
+        result = []
+        for value in list_node.elts:
+            if get_literal_values:
+                item = self.visit(value, get_literal_value=True)
+                if item is None or isinstance(item, ast.AST):
+                    item = self.get_type(value)
+            else:
+                item = self.get_type(value)
+
+            result.append(item)
+
+        return result
 
     def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
         """
@@ -1724,11 +1790,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param dict_node: the python ast dict node
         :return: a list with each key and value type
         """
+        get_literal_values = hasattr(dict_node, 'get_literal_value') and dict_node.get_literal_value
         dictionary = {}
         size = min(len(dict_node.keys), len(dict_node.values))
         for index in range(size):
-            key = self.get_type(dict_node.keys[index])
-            value = self.get_type(dict_node.values[index])
+            if get_literal_values:
+                key = self.visit(dict_node.keys[index], get_literal_value=True)
+                if key is None or isinstance(key, ast.AST):
+                    key = self.get_type(dict_node.keys[index])
+
+                value = self.visit(dict_node.values[index], get_literal_value=True)
+                if value is None or isinstance(value, ast.AST):
+                    value = self.get_type(dict_node.values[index])
+            else:
+                key = self.get_type(dict_node.keys[index])
+                value = self.get_type(dict_node.values[index])
+
             if key in dictionary and dictionary[key] != value:
                 dictionary[key] = Type.get_generic_type(dictionary[key], value)
             else:
