@@ -77,6 +77,20 @@ class NeoTestRunner:
     def notifications(self) -> List[Notification]:
         return self._notifications.copy()
 
+    def get_events(self, event_name: str = None, origin: TestContract = None) -> List[Notification]:
+        if origin is None:
+            return [n for n in self._notifications if n.name == event_name or event_name is None]
+        else:
+            if hasattr(origin, 'script_hash'):
+                origin_bytes = origin.script_hash
+            elif hasattr(origin, 'to_array'):
+                origin_bytes = origin.to_array()
+            else:
+                origin_bytes = bytes(origin)
+
+            return [n for n in self._notifications if ((n.name == event_name or event_name is None)
+                                                       and n.origin == origin_bytes)]
+
     @property
     def logs(self) -> List[Log]:
         return self._logs.copy()

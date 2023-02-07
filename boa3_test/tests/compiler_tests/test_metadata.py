@@ -458,7 +458,7 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['groups'], list)
         self.assertEqual(len(manifest['groups']), 1)
         self.assertIn({'pubkey': '031f64da8a38e6c1e5423a72ddd6d4fc4a777abe537e5cb5aa0425685cda8e063b',
-                       'signature': '2p4uEy4pE3yj8jjmkhNrH3e0jI/w4WJCy3tTqlomSvCekM60tQ0zpmFfke+YOXa3tq/MlXLavqGUpNq/Pq3h5Q=='}, manifest['groups'])
+                       'signature': 'hp9pxTJDAWQV2OQORpLz2pMe12zGTTEo5gR2gqPolF4W11YtOXt7nuCClQPrBToZ60pXw00jExPuqQ7zVXOmJg=='}, manifest['groups'])
 
         engine = TestEngine()
         # verify using NeoManifestStruct
