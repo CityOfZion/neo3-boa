@@ -3,9 +3,10 @@ from boa3.internal.constants import IMPORT_WILDCARD
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.core.types import UInt160
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestMetadata(BoaTest):
@@ -171,20 +172,22 @@ class TestMetadata(BoaTest):
         self.assertGreater(len(manifest['supportedstandards']), 0)
         self.assertIn('NEP-17', manifest['supportedstandards'])
 
-        engine = TestEngine()
-        # verify using NeoManifestStruct
         nef, manifest = self.get_bytes_output(path)
-        self.run_smart_contract(engine, path, 'Main')
-        call_hash = engine.executed_script_hash.to_array()
-        path = path.replace('.py', '.nef')
+        path, _ = self.get_deploy_file_paths(path)
+        get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
-        engine = TestEngine()
-        engine.add_contract(path)
+        runner = NeoTestRunner()
+        # verify using NeoManifestStruct
+        contract = runner.deploy_contract(path)
+        runner.update_contracts()
+        call_hash = contract.script_hash
 
-        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
-        self.assertEqual(manifest_struct, result[4])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(manifest_struct, invoke.result[4])
 
     def test_metadata_info_supported_standards_with_imported_event(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsImportedEvent.py')
@@ -274,21 +277,22 @@ class TestMetadata(BoaTest):
         self.assertIn('035a928f201639204e06b4368b1a93365462a8ebbff0b8818151b74faab3a2b61a', manifest['trusts'])
         self.assertIn('03cdb067d930fd5adaa6c68545016044aaddec64ba39e548250eaea551172e535c', manifest['trusts'])
 
-        engine = TestEngine()
-        # verify using NeoManifestStruct
         nef, manifest = self.get_bytes_output(path)
-        self.run_smart_contract(engine, path, 'Main')
-        call_hash = engine.executed_script_hash.to_array()
-        path = path.replace('.py', '.nef')
+        path, _ = self.get_deploy_file_paths(path)
+        get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
-        engine = TestEngine()
-        engine.add_contract(path)
+        runner = NeoTestRunner()
+        # verify using NeoManifestStruct
+        contract = runner.deploy_contract(path)
+        runner.update_contracts()
+        call_hash = contract.script_hash
 
-        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
-        result_trusts = result[4][6]
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+        result_trusts = invoke.result[4][6]
 
         # transform the str values to bytes values
         manifest_struct_trusts = []
@@ -309,28 +313,24 @@ class TestMetadata(BoaTest):
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('trusts', manifest)
-        self.assertIsInstance(manifest['trusts'], list)
-        self.assertEqual(len(manifest['trusts']), 1)
-        self.assertIn(IMPORT_WILDCARD, manifest['trusts'])
+        self.assertIsInstance(manifest['trusts'], str)
+        self.assertEqual(IMPORT_WILDCARD, manifest['trusts'])
 
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
+
+        runner = NeoTestRunner()
         # verify using NeoManifestStruct
-        nef, manifest = self.get_bytes_output(path)
-        self.run_smart_contract(engine, path, 'Main')
-        call_hash = engine.executed_script_hash.to_array()
-        path = path.replace('.py', '.nef')
+        contract = runner.deploy_contract(path)
+        runner.update_contracts()
+        call_hash = contract.script_hash
 
-        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
-        engine = TestEngine()
-        engine.add_contract(path)
+        invoke = runner.call_contract(get_contract_path, 'main', call_hash)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
 
-        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
-        manifest_struct = NeoManifestStruct.from_json(manifest)
-
-        result_trusts = result[4][6]
-
-        # TODO: change when TestEngine is updated
-        self.assertEqual([''], result_trusts)
+        result_trusts = invoke.result[4][6]
+        self.assertEqual(None, result_trusts)
 
     def test_metadata_info_trusts_mismatched_types(self):
         path = self.get_contract_path('MetadataInfoTrustsMismatchedTypes.py')
@@ -359,21 +359,22 @@ class TestMetadata(BoaTest):
         self.assertIn({"contract": "0x3846a4aa420d9831044396dd3a56011514cd10e3", "methods": ["get_object"]}, manifest['permissions'])
         self.assertIn({"contract": "0333b24ee50a488caa5deec7e021ff515f57b7993b93b45d7df901e23ee3004916", "methods": "*"}, manifest['permissions'])
 
-        engine = TestEngine()
-        # verify using NeoManifestStruct
         nef, manifest = self.get_bytes_output(path)
-        self.run_smart_contract(engine, path, 'Main')
-        call_hash = engine.executed_script_hash.to_array()
-        path = path.replace('.py', '.nef')
+        path, _ = self.get_deploy_file_paths(path)
+        get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
-        engine = TestEngine()
-        engine.add_contract(path)
+        runner = NeoTestRunner()
+        # verify using NeoManifestStruct
+        contract = runner.deploy_contract(path)
+        runner.update_contracts()
+        call_hash = contract.script_hash
 
-        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
-        result_permissions = result[4][5]
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+        result_permissions = invoke.result[4][5]
 
         # casting the addresses to bytes values
         manifest_struct_permissions = []
@@ -458,24 +459,27 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['groups'], list)
         self.assertEqual(len(manifest['groups']), 1)
         self.assertIn({'pubkey': '031f64da8a38e6c1e5423a72ddd6d4fc4a777abe537e5cb5aa0425685cda8e063b',
-                       'signature': 'hp9pxTJDAWQV2OQORpLz2pMe12zGTTEo5gR2gqPolF4W11YtOXt7nuCClQPrBToZ60pXw00jExPuqQ7zVXOmJg=='}, manifest['groups'])
+                       'signature': 'fhsOJNF3N5Pm3oV1b7wYTx0QVelYNu7whwXMi8GsNGFKUnu3ZG8z7oWLfzzEz9pbnzwQe8WFCALEiZhLD1jG/w=='}, manifest['groups'])
 
-        engine = TestEngine()
-        # verify using NeoManifestStruct
         nef, manifest = self.get_bytes_output(path)
-        self.run_smart_contract(engine, path, 'main')
-        call_hash = engine.executed_script_hash.to_array()
-        path = path.replace('.py', '.nef')
+        path, _ = self.get_deploy_file_paths(path)
+        get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        get_contract_path = self.get_contract_path('test_sc/native_test/contractmanagement', 'GetContract.py')
-        engine = TestEngine()
-        engine.add_contract(path)
+        runner = NeoTestRunner()
+        # verify using NeoManifestStruct
+        contract_call = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
 
-        result = self.run_smart_contract(engine, get_contract_path, 'main', call_hash)
+        call_hash = contract_call.invoke.contract.script_hash
+        invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
         result_groups = []
-        for group in result[4][1]:
+        for group in invoke.result[4][1]:
             dict_group = {'pubkey': group[0].hex()}
             import base64
             # getContract returns the signature without the base64 encoding

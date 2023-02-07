@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Iterable
 
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 
@@ -38,6 +38,8 @@ class NeoInvokeResult:
 
             elif self._expected_result_type is bytearray and isinstance(result, bytes):
                 result = bytearray(result)
+            elif self._expected_result_type is tuple and isinstance(result, Iterable):
+                result = tuple(result)
 
         return result
 
