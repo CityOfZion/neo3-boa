@@ -2,7 +2,7 @@ import os
 import platform
 import sys
 
-from boa3 import __version__ as boa_version
+from boa3 import __version__ as _actual_boa_version
 from boa3.neo import from_hex_str
 
 ENCODING = 'utf-8'
@@ -15,7 +15,8 @@ IMPORT_WILDCARD = '*'
 
 SYS_VERSION_INFO = sys.version_info
 SYS_VERSION = platform.python_version()
-BOA_VERSION = boa_version
+BOA_VERSION = _actual_boa_version  # for logging only
+COMPILER_VERSION = BOA_VERSION
 BOA_PACKAGE_PATH = os.path.abspath(f'{__file__}/..')
 
 ONE_BYTE_MAX_VALUE = 255
