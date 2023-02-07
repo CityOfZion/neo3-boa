@@ -456,14 +456,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return True
 
     def _has_only_default_values(self, value: Any, target_type: Optional[IType] = None) -> bool:
-        has_only_default_values = False
         if not isinstance(target_type, IType):
             target_type = self.get_type(value)
 
-        if value == target_type.default_value:
-            has_only_default_values = True
-
-        elif isinstance(target_type, Collection) and hasattr(value, '__len__'):
+        has_only_default_values = value == target_type.default_value
+        if not has_only_default_values and isinstance(target_type, Collection) and hasattr(value, '__len__'):
             has_only_default_values = True
             if isinstance(value, dict):
                 for key, item in value.items():
@@ -479,8 +476,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     if not self._has_only_default_values(item):
                         has_only_default_values = False
                         break
-        else:
-            has_only_default_values = value == target_type.default_value
 
         return has_only_default_values
 
@@ -1741,6 +1736,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return bts.s
 
+    def _visit_literal(self, node: ast.expr, get_literal_values: bool = False) -> Any:
+        if get_literal_values:
+            item = self.visit(node, get_literal_value=True)
+            if item is None or isinstance(item, ast.AST):
+                item = self.get_type(node)
+        else:
+            item = self.get_type(node)
+
+        return item
+
     def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
         """
         Visitor of literal tuple node
@@ -1751,14 +1756,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         get_literal_values = hasattr(tup_node, 'get_literal_value') and tup_node.get_literal_value
         result = []
         for value in tup_node.elts:
-            if get_literal_values:
-                item = self.visit(value, get_literal_value=True)
-                if item is None or isinstance(item, ast.AST):
-                    item = self.get_type(value)
-            else:
-                item = self.get_type(value)
-
-            result.append(item)
+            result.append(self._visit_literal(value, get_literal_values))
 
         return tuple(result)
 
@@ -1772,14 +1770,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         get_literal_values = hasattr(list_node, 'get_literal_value') and list_node.get_literal_value
         result = []
         for value in list_node.elts:
-            if get_literal_values:
-                item = self.visit(value, get_literal_value=True)
-                if item is None or isinstance(item, ast.AST):
-                    item = self.get_type(value)
-            else:
-                item = self.get_type(value)
-
-            result.append(item)
+            result.append(self._visit_literal(value, get_literal_values))
 
         return result
 
@@ -1794,17 +1785,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         dictionary = {}
         size = min(len(dict_node.keys), len(dict_node.values))
         for index in range(size):
-            if get_literal_values:
-                key = self.visit(dict_node.keys[index], get_literal_value=True)
-                if key is None or isinstance(key, ast.AST):
-                    key = self.get_type(dict_node.keys[index])
-
-                value = self.visit(dict_node.values[index], get_literal_value=True)
-                if value is None or isinstance(value, ast.AST):
-                    value = self.get_type(dict_node.values[index])
-            else:
-                key = self.get_type(dict_node.keys[index])
-                value = self.get_type(dict_node.values[index])
+            key = self._visit_literal(dict_node.keys[index], get_literal_values)
+            value = self._visit_literal(dict_node.values[index], get_literal_values)
 
             if key in dictionary and dictionary[key] != value:
                 dictionary[key] = Type.get_generic_type(dictionary[key], value)
