@@ -120,6 +120,9 @@ class NeoMetadata:
 
     @property
     def trusts(self) -> List[str]:
+        from boa3.constants import IMPORT_WILDCARD
+        if self._trusts == [IMPORT_WILDCARD]:
+            return IMPORT_WILDCARD
         return self._trusts.copy()
 
     @property

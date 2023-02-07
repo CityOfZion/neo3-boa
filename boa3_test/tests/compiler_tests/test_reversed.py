@@ -1,95 +1,182 @@
 from boa3.exception import CompilerError
 from boa3.neo.vm.type.String import String
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestReversed(BoaTest):
     default_folder: str = 'test_sc/reversed_test'
 
     def test_reversed_list_bool(self):
-        path = self.get_contract_path('ReversedListBool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedListBool.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         list_bool = [True, True, False]
-        result = self.run_smart_contract(engine, path, 'main')
-        reversed_list = [element for element in reversed(list_bool)]
-        self.assertEqual(reversed_list, result)
+        invokes.append(runner.call_contract(path, 'main'))
+
+        reversed_list = list(reversed(list_bool))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_list_bytes(self):
-        path = self.get_contract_path('ReversedListBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedListBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         list_bytes = [b'1', b'2', b'3']
-        reversed_list = [element for element in reversed(list_bytes)]
-        result = self.run_smart_contract(engine, path, 'main')
-        if isinstance(result, list):
-            for k in range(len(result)):
-                if isinstance(result[k], str):
-                    result[k] = String(result[k]).to_bytes()
-        self.assertEqual(reversed_list, result)
+        reversed_list = [String.from_bytes(element) for element in reversed(list_bytes)]
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_list_int(self):
-        path = self.get_contract_path('ReversedListInt.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedListInt.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         list_int = [1, 2, 3]
-        result = self.run_smart_contract(engine, path, 'main')
-        reversed_list = [element for element in reversed(list_int)]
-        self.assertEqual(reversed_list, result)
+        invokes.append(runner.call_contract(path, 'main'))
+
+        reversed_list = list(reversed(list_int))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_list_str(self):
-        path = self.get_contract_path('ReversedListStr.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedListStr.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         list_str = ['neo3-boa', 'unit', 'test']
-        result = self.run_smart_contract(engine, path, 'main')
-        reversed_list = [element for element in reversed(list_str)]
-        self.assertEqual(reversed_list, result)
+        invokes.append(runner.call_contract(path, 'main'))
+
+        reversed_list = list(reversed(list_str))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_list(self):
-        path = self.get_contract_path('ReversedList.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedList.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         list_any = [1, 'string', False]
-        result = self.run_smart_contract(engine, path, 'main', list_any)
-        reversed_list = [element for element in reversed(list_any)]
-        self.assertEqual(reversed_list, result)
+        invokes.append(runner.call_contract(path, 'main', list_any))
+
+        reversed_list = list(reversed(list_any))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_string(self):
-        path = self.get_contract_path('ReversedString.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedString.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit_test'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        reversed_list = [element for element in reversed(string)]
-        self.assertEqual(reversed_list, result)
+        invokes.append(runner.call_contract(path, 'main', string))
+
+        reversed_list = list(reversed(string))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_bytes(self):
-        path = self.get_contract_path('ReversedBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         bytes_value = b'unit_test'
-        reversed_list = [element for element in reversed(bytes_value)]
-        result = self.run_smart_contract(engine, path, 'main', bytes_value)
-        self.assertEqual(reversed_list, result)
+        reversed_list = list(reversed(bytes_value))
+
+        invokes.append(runner.call_contract(path, 'main', bytes_value))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_range(self):
-        path = self.get_contract_path('ReversedRange.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedRange.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main')
-        reversed_list = [element for element in reversed(range(3))]
-        self.assertEqual(reversed_list, result)
+        invokes = []
+        expected_results = []
+
+        reversed_list = list(reversed(range(3)))
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_reversed_tuple(self):
-        path = self.get_contract_path('ReversedTuple.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ReversedTuple.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         tuple_value = (1, 2, 3)
-        result = self.run_smart_contract(engine, path, 'main', tuple_value)
-        reversed_list = [element for element in reversed(tuple_value)]
-        self.assertEqual(reversed_list, result)
+        reversed_list = list(reversed(tuple_value))
+
+        invokes.append(runner.call_contract(path, 'main', tuple_value))
+        expected_results.append(reversed_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_mismatched_type(self):
         path = self.get_contract_path('ReversedParameterMismatchedType')
