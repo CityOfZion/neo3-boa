@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
-import boa3
-from boa3.neo.contracts import NEF, Version
+from boa3 import constants
+from boa3.neo.contracts import NEF
 from boa3.neo.core import BinaryReader, BinaryWriter
 from boa3.neo3.contracts.nef import MethodToken
 
@@ -21,7 +21,7 @@ class NefFile:
         """
         :param script_bytes: the script of the smart contract
         """
-        compiler: str = f"neo3-boa by COZ-{Version.from_string(boa3.__version__)}"
+        compiler: str = f"neo3-boa by COZ-{constants.COMPILER_VERSION}"
         self._nef = NEF(compiler_name=compiler,
                         script=script_bytes,
                         tokens=[] if method_tokens is None else method_tokens,

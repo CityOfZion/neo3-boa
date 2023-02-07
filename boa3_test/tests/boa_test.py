@@ -49,6 +49,7 @@ class BoaTest(TestCase):
                                    if len(cls.default_folder) else cls.test_root_dir)
 
         super(BoaTest, cls).setUpClass()
+        constants.COMPILER_VERSION = '_unit_tests_'  # to not change test contract script hashes in different versions
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
