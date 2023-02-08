@@ -22,7 +22,7 @@ class OptionalType(UnionType):
 
         super().__init__(union_types)
         self._identifier = 'Optional'
-        self._optional_type = optional_types
+        self._optional_type = optional_types if optional_types is not None else set()
 
     @property
     def identifier(self) -> str:
@@ -34,7 +34,7 @@ class OptionalType(UnionType):
         return list(self._optional_type)
 
     def _is_type_of(self, value: Any) -> bool:
-        if not isinstance(self._optional_type, Iterable):
+        if not isinstance(self._optional_type, Iterable) or len(self._optional_type) == 0:
             return False
         if isinstance(value, UnionType):
             return all(self._is_type_of(x) for x in value._union_types)
