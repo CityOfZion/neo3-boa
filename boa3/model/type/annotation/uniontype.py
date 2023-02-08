@@ -13,7 +13,7 @@ class UnionType(IType):
     def __init__(self, union_types: Set[IType] = None):
         identifier: str = 'Union'
         super().__init__(identifier)
-        self._union_types: Set[IType] = union_types
+        self._union_types: Set[IType] = union_types if union_types is not None else set()
 
         # variables to not reevaluate everytime we need to access
         self._abi_type: AbiType = None
@@ -41,7 +41,7 @@ class UnionType(IType):
         return self._stack_item
 
     def _is_type_of(self, value: Any) -> bool:
-        if not isinstance(self._union_types, Iterable):
+        if not isinstance(self._union_types, Iterable) or len(self._union_types) == 0:
             return False
         if isinstance(value, UnionType):
             return all(self._is_type_of(x) for x in value._union_types)
