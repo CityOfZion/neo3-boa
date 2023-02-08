@@ -1,7 +1,7 @@
 from boa3.exception import CompilerError
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestMath(BoaTest):
@@ -15,93 +15,136 @@ class TestMath(BoaTest):
     # region pow test
 
     def test_pow_method(self):
-        path = self.get_contract_path('Pow.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Pow.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         import math
 
         base = 1
         exponent = 4
-        result = self.run_smart_contract(engine, path, 'main', base, exponent)
-        self.assertEqual(math.pow(base, exponent), result)
+        invokes.append(runner.call_contract(path, 'main', base, exponent))
+        expected_results.append(math.pow(base, exponent))
 
         base = 5
         exponent = 2
-        result = self.run_smart_contract(engine, path, 'main', base, exponent)
-        self.assertEqual(math.pow(base, exponent), result)
+        invokes.append(runner.call_contract(path, 'main', base, exponent))
+        expected_results.append(math.pow(base, exponent))
 
         base = -2
         exponent = 2
-        result = self.run_smart_contract(engine, path, 'main', base, exponent)
-        self.assertEqual(math.pow(base, exponent), result)
+        invokes.append(runner.call_contract(path, 'main', base, exponent))
+        expected_results.append(math.pow(base, exponent))
 
         base = -2
         exponent = 3
-        result = self.run_smart_contract(engine, path, 'main', base, exponent)
-        self.assertEqual(math.pow(base, exponent), result)
+        invokes.append(runner.call_contract(path, 'main', base, exponent))
+        expected_results.append(math.pow(base, exponent))
 
         base = 2
         exponent = 0
-        result = self.run_smart_contract(engine, path, 'main', base, exponent)
-        self.assertEqual(math.pow(base, exponent), result)
+        invokes.append(runner.call_contract(path, 'main', base, exponent))
+        expected_results.append(math.pow(base, exponent))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_pow_method_from_math(self):
-        path = self.get_contract_path('PowFromMath.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('PowFromMath.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         from math import pow
 
         base = 2
         exponent = 3
-        result = self.run_smart_contract(engine, path, 'main', base, exponent)
-        self.assertEqual(pow(base, exponent), result)
+        invokes.append(runner.call_contract(path, 'main', base, exponent))
+        expected_results.append(pow(base, exponent))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
 
     # region sqrt test
 
     def test_sqrt_method(self):
-        path = self.get_contract_path('Sqrt.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sqrt.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         from math import sqrt
 
         expected_result = int(sqrt(0))
-        result = self.run_smart_contract(engine, path, 'main', 0)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(1))
-        result = self.run_smart_contract(engine, path, 'main', 1)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(3))
-        result = self.run_smart_contract(engine, path, 'main', 3)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(4))
-        result = self.run_smart_contract(engine, path, 'main', 4)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(8))
-        result = self.run_smart_contract(engine, path, 'main', 8)
-        self.assertEqual(expected_result, result)
-        expected_result = int(sqrt(10))
-        result = self.run_smart_contract(engine, path, 'main', 10)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', 0))
+        expected_results.append(expected_result)
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_CANNOT_BE_NEGATIVE_MSG):
-            self.run_smart_contract(engine, path, 'main', -1)
+        expected_result = int(sqrt(1))
+        invokes.append(runner.call_contract(path, 'main', 1))
+        expected_results.append(expected_result)
+
+        expected_result = int(sqrt(3))
+        invokes.append(runner.call_contract(path, 'main', 3))
+        expected_results.append(expected_result)
+
+        expected_result = int(sqrt(4))
+        invokes.append(runner.call_contract(path, 'main', 4))
+        expected_results.append(expected_result)
+
+        expected_result = int(sqrt(8))
+        invokes.append(runner.call_contract(path, 'main', 8))
+        expected_results.append(expected_result)
+
+        expected_result = int(sqrt(10))
+        invokes.append(runner.call_contract(path, 'main', 10))
+        expected_results.append(expected_result)
 
         val = 25
         expected_result = int(sqrt(val))
-        result = self.run_smart_contract(engine, path, 'main', val)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', val))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'main', -1)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_CANNOT_BE_NEGATIVE_MSG)
 
     def test_sqrt_method_from_math(self):
-        path = self.get_contract_path('SqrtFromMath.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         from math import sqrt
 
         val = 25
         expected_result = int(sqrt(val))
-        result = self.run_smart_contract(engine, path, 'main', val)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', val))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
