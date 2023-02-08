@@ -101,6 +101,18 @@ class TestList(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_list_empty_dict(self):
+        expected_output = (
+            Opcode.NEWMAP      # return [{}]
+            + Opcode.PUSH1      # array length
+            + Opcode.PACK
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('ListWithEmptyTypedDict.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
     def test_non_sequence_get_value(self):
         path = self.get_contract_path('MismatchedTypeGetValue.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
