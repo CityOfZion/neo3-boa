@@ -25,6 +25,7 @@ from boa3.model.operation.unaryop import UnaryOp
 from boa3.model.property import Property
 from boa3.model.symbol import ISymbol
 from boa3.model.type.annotation.metatype import MetaType
+from boa3.model.type.annotation.uniontype import UnionType
 from boa3.model.type.classes.classtype import ClassType
 from boa3.model.type.classes.pythonclass import PythonClass
 from boa3.model.type.classes.userclass import UserClass
@@ -515,6 +516,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(value, IType) and all(isinstance(i, IType) for i in index):
             if isinstance(value, Collection):
                 value = value.build_collection(*index)
+            elif isinstance(value, UnionType):
+                value = value.build(index)
 
             value_to_be_built = index if isinstance(value, MetaType) else value
             if not isinstance(value_to_be_built, tuple):
