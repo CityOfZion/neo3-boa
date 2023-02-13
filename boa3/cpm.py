@@ -29,6 +29,9 @@ def chmod_plus_x(path):
     )
 
 def main():
+    if not sys.maxsize > 2**32:
+        print("CPM is not supported on 32-bit platforms")
+
     r = requests.get("https://api.github.com/repos/CityOfZion/cpm/releases")
 
     for release in r.json():
