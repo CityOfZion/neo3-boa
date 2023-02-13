@@ -4,6 +4,10 @@ import requests
 import platform
 import os
 import stat
+import logging
+
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 def get_umask():
     umask = os.umask(0)
