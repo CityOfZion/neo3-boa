@@ -133,6 +133,7 @@ setup(
     entry_points={
        'console_scripts': [
            'neo3-boa=boa3.cli:main',
+           'install_cpm=boa3.cpm:main',
        ],
     },
 )
