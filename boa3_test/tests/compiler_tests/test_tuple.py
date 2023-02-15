@@ -3,9 +3,9 @@ from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestTuple(BoaTest):
@@ -136,14 +136,28 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
-        self.assertEqual(1, result)
-        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
-        self.assertEqual(5, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', [])
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3, 4]))
+        expected_results.append(1)
+        invokes.append(runner.call_contract(path, 'Main', [5, 3, 2]))
+        expected_results.append(5)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', [])
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_non_sequence_get_value(self):
         path = self.get_contract_path('MismatchedTypeGetValue.py')
@@ -194,15 +208,32 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', ((1, 2), (3, 4)))
-        self.assertEqual(result, 1)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', ())
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', ((), (1, 2), (3, 4)))
+        invokes.append(runner.call_contract(path, 'Main', ((1, 2), (3, 4))))
+        expected_results.append(1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', ())
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+
+        runner.call_contract(path, 'Main', ((), (1, 2), (3, 4)))
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_nep5_main(self):
         expected_output = (
@@ -227,56 +258,124 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'op', (1, 2, 3, 4))
-        self.assertEqual(1, result)
-        result = self.run_smart_contract(engine, path, 'Main', 'op', ('a', False))
-        self.assertEqual('a', result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', 'op', ())
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 'op', (1, 2, 3, 4)))
+        expected_results.append(1)
+        invokes.append(runner.call_contract(path, 'Main', 'op', ('a', False)))
+        expected_results.append('a')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', 'op', ())
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_tuple_slicing(self):
-        path = self.get_contract_path('TupleSlicingLiteralValues.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingLiteralValues.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_start_larger_than_ending(self):
-        path = self.get_contract_path('TupleSlicingStartLargerThanEnding.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingStartLargerThanEnding.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_with_variables(self):
-        path = self.get_contract_path('TupleSlicingVariableValues.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingVariableValues.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_negative_start(self):
-        path = self.get_contract_path('TupleSlicingNegativeStart.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingNegativeStart.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2, 3, 4, 5], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2, 3, 4, 5])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_negative_end(self):
-        path = self.get_contract_path('TupleSlicingNegativeEnd.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingNegativeEnd.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_start_omitted(self):
-        path = self.get_contract_path('TupleSlicingStartOmitted.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingStartOmitted.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1, 2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1, 2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_omitted(self):
         expected_output = (
@@ -301,298 +400,434 @@ class TestTuple(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1, 2, 3, 4, 5], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1, 2, 3, 4, 5])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_end_omitted(self):
-        path = self.get_contract_path('TupleSlicingEndOmitted.py')
+        path, _ = self.get_deploy_file_paths('TupleSlicingEndOmitted.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2, 3, 4, 5], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2, 3, 4, 5])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_with_stride(self):
-        path = self.get_contract_path('TupleSlicingWithStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TupleSlicingWithStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2:5:2]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'literal_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:5:2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:5:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:5:2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_with_negative_stride(self):
-        path = self.get_contract_path('TupleSlicingWithNegativeStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TupleSlicingWithNegativeStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2:5:-1]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'literal_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:5:-1]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-1:-1]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:-1:-1]
-        result = self.run_smart_contract(engine, path, 'negative_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:5:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-999:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:-999:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:5:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:999:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:999:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_omitted_with_stride(self):
-        path = self.get_contract_path('TupleSlicingOmittedWithStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[::2]
-        result = self.run_smart_contract(engine, path, 'omitted_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'omitted_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:5:2]
-        result = self.run_smart_contract(engine, path, 'omitted_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'omitted_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2::2]
-        result = self.run_smart_contract(engine, path, 'omitted_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'omitted_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6::2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999::2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999::2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_omitted_with_negative_stride(self):
-        path = self.get_contract_path('TupleSlicingOmittedWithNegativeStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithNegativeStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[::-2]
-        result = self.run_smart_contract(engine, path, 'omitted_values')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'omitted_values',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:5:-2]
-        result = self.run_smart_contract(engine, path, 'omitted_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'omitted_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2::-2]
-        result = self.run_smart_contract(engine, path, 'omitted_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'omitted_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6::-2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-1:-2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999::-2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-999:-2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'negative_really_low_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999::-2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_start',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:999:-2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, tuple(result))
+        invokes.append(runner.call_contract(path, 'really_high_end',
+                                            expected_result_type=tuple))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_index(self):
-        path = self.get_contract_path('IndexTuple.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IndexTuple.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 0
         end = 4
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
-        self.assertEqual(tuple_.index(value, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
+        expected_results.append(tuple_.index(value, start, end))
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 2
         end = 4
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
-        self.assertEqual(tuple_.index(value, start, end), result)
-
-        from boa3.internal.model.builtin.builtin import Builtin
-        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
-            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 3, 4)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
-            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 4, -1)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
-            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 0, -99)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
+        expected_results.append(tuple_.index(value, start, end))
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 0
         end = -1
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
-        self.assertEqual(tuple_.index(value, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
+        expected_results.append(tuple_.index(value, start, end))
 
         tuple_ = (1, 2, 3, 4)
         value = 2
         start = 0
         end = 99
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
-        self.assertEqual(tuple_.index(value, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
+        expected_results.append(tuple_.index(value, start, end))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        from boa3.internal.model.builtin.builtin import Builtin
+        runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 3, 4)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
+
+        runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 4, -1)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
+
+        runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 0, -99)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
     def test_tuple_index_end_default(self):
-        path = self.get_contract_path('IndexTupleEndDefault.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IndexTupleEndDefault.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 0
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start)
-        self.assertEqual(tuple_.index(value, start), result)
-
-        from boa3.internal.model.builtin.builtin import Builtin
-        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
-            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 2, 99)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
-            self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 4, -1)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value, start))
+        expected_results.append(tuple_.index(value, start))
 
         tuple_ = (1, 2, 3, 4)
         value = 2
         start = -10
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value, start)
-        self.assertEqual(tuple_.index(value, start), result)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value, start))
+        expected_results.append(tuple_.index(value, start))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        from boa3.internal.model.builtin.builtin import Builtin
+        runner.call_contract(path, 'main', (1, 2, 3, 4), 2, 99)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
+
+        runner.call_contract(path, 'main', (1, 2, 3, 4), 4, -1)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
     def test_tuple_index_defaults(self):
-        path = self.get_contract_path('IndexTupleDefaults.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IndexTupleDefaults.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         tuple_ = (1, 2, 3, 4)
         value = 3
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value)
-        self.assertEqual(tuple_.index(value), result)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value))
+        expected_results.append(tuple_.index(value))
 
         tuple_ = (1, 2, 3, 4)
         value = 1
-        result = self.run_smart_contract(engine, path, 'main', tuple_, value)
-        self.assertEqual(tuple_.index(value), result)
+        invokes.append(runner.call_contract(path, 'main', tuple_, value))
+        expected_results.append(tuple_.index(value))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
