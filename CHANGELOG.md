@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.12.1] - 2023-02-15
+### Added
+- [CPM](https://github.com/CityOfZion/cpm) installer
+
+
 ## [0.12.0] - 2023-01-19
 ### Added
 - Support to Neo features up to Neo 3.5
@@ -408,6 +413,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.12.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.1
 [0.12.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.0
 [0.11.4]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.4
 [0.11.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.3
