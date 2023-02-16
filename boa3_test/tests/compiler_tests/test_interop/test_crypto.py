@@ -9,8 +9,9 @@ from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts.contracttypes import CallFlags
 from boa3.neo3.contracts.namedcurve import NamedCurve
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestCryptoInterop(BoaTest):
@@ -28,36 +29,76 @@ class TestCryptoInterop(BoaTest):
     )
 
     def test_ripemd160_str(self):
-        path = self.get_contract_path('Ripemd160Str.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', 'unit test'))
+        expected_results.append(expected_result.digest())
 
         expected_result = hashlib.new('ripemd160', b'')
-        result = self.run_smart_contract(engine, path, 'Main', '')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', ''))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_int(self):
-        path = self.get_contract_path('Ripemd160Int.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_bool(self):
-        path = self.get_contract_path('Ripemd160Bool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_bytes(self):
-        path = self.get_contract_path('Ripemd160Bytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_too_many_parameters(self):
         path = self.get_contract_path('Ripemd160TooManyArguments.py')
@@ -68,64 +109,144 @@ class TestCryptoInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_hash160_str(self):
-        path = self.get_contract_path('Hash160Str.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash160Str.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main', 'unit test'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_hash160_int(self):
-        path = self.get_contract_path('Hash160Int.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash160Int.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(10).to_byte_array()).digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_hash160_bool(self):
-        path = self.get_contract_path('Hash160Bool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash160Bool.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(Integer(1).to_byte_array()).digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_hash160_bytes(self):
-        path = self.get_contract_path('Hash160Bytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash160Bytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_str(self):
-        path = self.get_contract_path('Sha256Str.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Str.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', 'unit test'))
+        expected_results.append(expected_result.digest())
 
         expected_result = hashlib.sha256(b'')
-        result = self.run_smart_contract(engine, path, 'Main', '')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', ''))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_int(self):
-        path = self.get_contract_path('Sha256Int.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Int.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(Integer(10).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_bool(self):
-        path = self.get_contract_path('Sha256Bool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Bool.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(Integer(1).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_bytes(self):
-        path = self.get_contract_path('Sha256Bytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Bytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_too_many_parameters(self):
         path = self.get_contract_path('Sha256TooManyArguments.py')
@@ -136,32 +257,72 @@ class TestCryptoInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_hash256_str(self):
-        path = self.get_contract_path('Hash256Str.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash256Str.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main', 'unit test'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_hash256_int(self):
-        path = self.get_contract_path('Hash256Int.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash256Int.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(hashlib.sha256(Integer(10).to_byte_array()).digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_hash256_bool(self):
-        path = self.get_contract_path('Hash256Bool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash256Bool.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(hashlib.sha256(Integer(1).to_byte_array()).digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_hash256_bytes(self):
-        path = self.get_contract_path('Hash256Bytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Hash256Bytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(hashlib.sha256(b'unit test').digest()).digest()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_check_sig(self):
         byte_input0 = b'\x03\x5a\x92\x8f\x20\x16\x39\x20\x4e\x06\xb4\x36\x8b\x1a\x93\x36\x54\x62\xa8\xeb\xbf\xf0\xb8\x81\x81\x51\xb7\x4f\xaa\xb3\xa2\xb6\x1a'
@@ -193,9 +354,20 @@ class TestCryptoInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_check_multisig(self):
         byte_input0 = b'\x03\xcd\xb0g\xd90\xfdZ\xda\xa6\xc6\x85E\x01`D\xaa\xdd\xecd\xba9\xe5H%\x0e\xae\xa5Q\x17.S\\'
@@ -238,9 +410,20 @@ class TestCryptoInterop(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_verify_with_ecdsa(self):
         path = self.get_contract_path('VerifyWithECDsa.py')
@@ -475,18 +658,38 @@ class TestCryptoInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_crypto(self):
-        path = self.get_contract_path('ImportCrypto.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportCrypto.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'main', 'unit test')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', 'unit test'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_interop_crypto(self):
-        path = self.get_contract_path('ImportInteropCrypto.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportInteropCrypto.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
-        result = self.run_smart_contract(engine, path, 'main', 'unit test')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', 'unit test'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_murmur32(self):
         function_id = String(Interop.Murmur32._sys_call).to_bytes()
