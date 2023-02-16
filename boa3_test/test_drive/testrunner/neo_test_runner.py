@@ -171,7 +171,8 @@ class NeoTestRunner:
                 self._contracts.replace(deployed_contracts)
             self._batch_size_since_last_update = cur_batch_size
 
-    def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None):
+    def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None,
+                clear_invokes: bool = True):
         self._generate_files()
         cli_args = ['neo-test-runner', self.get_full_path(self._INVOKE_FILE)
                     ]
@@ -181,6 +182,7 @@ class NeoTestRunner:
 
         if isinstance(account, Account):
             cli_args.extend(['--account', account.get_identifier()])
+            cli_args.extend(['--express', self._neoxp_abs_path])
         elif account is not None:
             account = None
         self._calling_account = account
@@ -194,7 +196,8 @@ class NeoTestRunner:
         try:
             result = json.loads(stdout)
             self._update_runner(result)
-            self._invokes.clear()
+            if clear_invokes:
+                self._invokes.clear()
         except BaseException:
             self._error_message = stdout
 

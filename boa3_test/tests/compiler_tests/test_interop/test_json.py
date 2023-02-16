@@ -1,95 +1,168 @@
 import json
 
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestJsonInterop(BoaTest):
     default_folder: str = 'test_sc/interop_test/json'
 
     def test_json_serialize(self):
-        path = self.get_contract_path('JsonSerialize.py')
+        path, _ = self.get_deploy_file_paths('JsonSerialize.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         test_input = {"one": 1, "two": 2, "three": 3}
         expected_result = json.dumps(test_input, separators=(',', ':'))
-        result = self.run_smart_contract(engine, path, 'main', test_input)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', test_input))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_json_serialize_int(self):
-        path = self.get_contract_path('JsonSerializeInt.py')
+        path, _ = self.get_deploy_file_paths('JsonSerializeInt.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         expected_result = json.dumps(10)
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_json_serialize_bool(self):
-        path = self.get_contract_path('JsonSerializeBool.py')
+        path, _ = self.get_deploy_file_paths('JsonSerializeBool.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         expected_result = json.dumps(True)
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_json_serialize_str(self):
-        path = self.get_contract_path('JsonSerializeStr.py')
+        path, _ = self.get_deploy_file_paths('JsonSerializeStr.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         expected_result = json.dumps('unit test')
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_json_serialize_bytes(self):
-        path = self.get_contract_path('JsonSerializeBytes.py')
+        path, _ = self.get_deploy_file_paths('JsonSerializeBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         # Python does not accept bytes as parameter for json.dumps() method, since string and bytes ends up being the
         # same on Neo, it's being converted to string, before using dumps
         expected_result = json.dumps(String().from_bytes(b'unit test'))
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_json_deserialize(self):
-        path = self.get_contract_path('JsonDeserialize.py')
+        path, _ = self.get_deploy_file_paths('JsonDeserialize.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         test_input = json.dumps(12345)
         expected_result = json.loads(test_input)
-        result = self.run_smart_contract(engine, path, 'main', test_input)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', test_input))
+        expected_results.append(expected_result)
 
         test_input = json.dumps('unit test')
         expected_result = json.loads(test_input)
-        result = self.run_smart_contract(engine, path, 'main', test_input)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', test_input))
+        expected_results.append(expected_result)
 
         test_input = json.dumps(True)
         expected_result = json.loads(test_input)
-        result = self.run_smart_contract(engine, path, 'main', test_input)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'main', test_input))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_json(self):
-        path = self.get_contract_path('ImportJson.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportJson.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         value = 123
-        result = self.run_smart_contract(engine, path, 'main', value)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'main', value))
+        expected_results.append(value)
 
         value = 'string'
-        result = self.run_smart_contract(engine, path, 'main', value)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'main', value))
+        expected_results.append(value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_interop_json(self):
-        path = self.get_contract_path('ImportInteropJson.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportInteropJson.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         value = 123
-        result = self.run_smart_contract(engine, path, 'main', value)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'main', value))
+        expected_results.append(value)
 
         value = 'string'
-        result = self.run_smart_contract(engine, path, 'main', value)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'main', value))
+        expected_results.append(value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
