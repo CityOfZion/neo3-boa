@@ -13,7 +13,7 @@ class TestPolicyInterop(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertIsInstance(invoke.result, int)
 
     def test_get_exec_fee_too_many_parameters(self):
@@ -26,7 +26,7 @@ class TestPolicyInterop(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertIsInstance(invoke.result, int)
 
     def test_get_fee_per_byte_too_many_parameters(self):
@@ -39,7 +39,7 @@ class TestPolicyInterop(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertIsInstance(invoke.result, int)
 
     def test_get_storage_price_too_many_parameters(self):
@@ -57,7 +57,7 @@ class TestPolicyInterop(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -86,7 +86,7 @@ class TestPolicyInterop(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertIsInstance(invoke.result, int)
 
     def test_import_interop_policy(self):
@@ -95,5 +95,5 @@ class TestPolicyInterop(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertIsInstance(invoke.result, int)

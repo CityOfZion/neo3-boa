@@ -45,6 +45,7 @@ class NeoTestRunner:
         if not isinstance(neoxp_path, str):
             neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
+        self._file_name = self._FOLDER_NAME
 
         self._batch = NeoExpressBatch()
         self._batch_size_since_last_update = -1
@@ -52,6 +53,18 @@ class NeoTestRunner:
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
         self._last_execution_results: List[NeoInvokeResult] = []
+
+    @property
+    def file_name(self) -> str:
+        return self._file_name
+
+    @file_name.setter
+    def file_name(self, value: str):
+        if isinstance(value, str) and not value.isspace():
+            self._file_name = value
+            self._INVOKE_FILE = f'{value}.neo-invoke.json'
+            self._BATCH_FILE = f'{value}.batch'
+            self._CHECKPOINT_FILE = f'{value}.neoxp-checkpoint'
 
     @property
     def vm_state(self) -> VMState:

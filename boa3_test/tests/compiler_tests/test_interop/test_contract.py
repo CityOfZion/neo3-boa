@@ -26,7 +26,7 @@ class TestContractInterop(BoaTest):
 
         contract_call = runner.call_contract(call_contract_path, 'add', 1, 2)
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         expected_output = contract_call.result
         call_hash = contract_call.invoke.contract.script_hash
 
@@ -38,7 +38,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(-18)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -65,7 +65,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -86,7 +86,7 @@ class TestContractInterop(BoaTest):
 
         contract_call = runner.call_contract(call_contract_path, 'Main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         expected_output = contract_call.result
         call_hash = contract_call.invoke.contract.script_hash
 
@@ -94,7 +94,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(expected_output)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -144,7 +144,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -202,7 +202,7 @@ class TestContractInterop(BoaTest):
         invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         result = invoke.result
         self.assertEqual(5, len(result))
@@ -218,12 +218,13 @@ class TestContractInterop(BoaTest):
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
         runner = NeoTestRunner()
+        runner.file_name = 'test_create_contract'
 
         data = 'some sort of data'
         invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, data)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         result = invoke.result
         self.assertEqual(5, len(result))
@@ -247,6 +248,7 @@ class TestContractInterop(BoaTest):
     def test_update_contract(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
         runner = NeoTestRunner()
+        runner.file_name = 'test_update_contract'
 
         invokes = []
         expected_results = []
@@ -267,7 +269,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(42)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -293,7 +295,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -323,7 +325,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(None)
 
         runner.execute(clear_invokes=False)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         script_hash = call.invoke.contract.script_hash
 
         for x in range(len(invokes)):
@@ -363,7 +365,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -405,7 +407,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -449,7 +451,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -486,7 +488,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(CallFlags.ALLOW_NOTIFY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -507,7 +509,7 @@ class TestContractInterop(BoaTest):
 
         contract_call = runner.call_contract(call_contract_path, 'add', 1, 2)
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         call_hash = contract_call.invoke.contract.script_hash
         expected_output = contract_call.result
@@ -520,7 +522,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(CallFlags.ALL)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -535,7 +537,7 @@ class TestContractInterop(BoaTest):
 
         contract_call = runner.call_contract(call_contract_path, 'add', 1, 2)
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         call_hash = contract_call.invoke.contract.script_hash
         expected_output = contract_call.result
@@ -548,7 +550,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(CallFlags.ALL)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -600,7 +602,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(minimum_cost)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
