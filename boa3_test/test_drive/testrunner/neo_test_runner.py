@@ -45,6 +45,7 @@ class NeoTestRunner:
         if not isinstance(neoxp_path, str):
             neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
+        self._file_name = self._FOLDER_NAME
 
         self._batch = NeoExpressBatch()
         self._batch_size_since_last_update = -1
@@ -52,6 +53,18 @@ class NeoTestRunner:
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
         self._last_execution_results: List[NeoInvokeResult] = []
+
+    @property
+    def file_name(self) -> str:
+        return self._file_name
+
+    @file_name.setter
+    def file_name(self, value: str):
+        if isinstance(value, str) and not value.isspace():
+            self._file_name = value
+            self._INVOKE_FILE = f'{value}.neo-invoke.json'
+            self._BATCH_FILE = f'{value}.batch'
+            self._CHECKPOINT_FILE = f'{value}.neoxp-checkpoint'
 
     @property
     def vm_state(self) -> VMState:
@@ -171,7 +184,8 @@ class NeoTestRunner:
                 self._contracts.replace(deployed_contracts)
             self._batch_size_since_last_update = cur_batch_size
 
-    def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None):
+    def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None,
+                clear_invokes: bool = True):
         self._generate_files()
         cli_args = ['neo-test-runner', self.get_full_path(self._INVOKE_FILE)
                     ]
@@ -181,6 +195,7 @@ class NeoTestRunner:
 
         if isinstance(account, Account):
             cli_args.extend(['--account', account.get_identifier()])
+            cli_args.extend(['--express', self._neoxp_abs_path])
         elif account is not None:
             account = None
         self._calling_account = account
@@ -194,7 +209,8 @@ class NeoTestRunner:
         try:
             result = json.loads(stdout)
             self._update_runner(result)
-            self._invokes.clear()
+            if clear_invokes:
+                self._invokes.clear()
         except BaseException:
             self._error_message = stdout
 

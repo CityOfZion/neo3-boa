@@ -30,8 +30,9 @@ class BoaTest(TestCase):
     GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX = "The given key '\\S+' was not present in the dictionary."
     MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
     MAX_ITEM_SIZE_EXCEED_MSG_PREFIX = 'MaxItemSize exceed'
-    METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX = r'^Method "\S+" with \d+ parameter\(s\) ' \
-                                                       r"doesn't exist in the contract"
+    FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX = r'^Method "{0}" with \d+ parameter\(s\) ' \
+                                                              r"doesn't exist in the contract"
+    METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX = FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format(r'\S+')
     NULL_POINTER_MSG = 'Object reference not set to an instance of an object.'
     UNHANDLED_EXCEPTION_MSG_PREFIX = "An unhandled exception was thrown."
     VALUE_CANNOT_BE_NEGATIVE_MSG = 'value can not be negative'
