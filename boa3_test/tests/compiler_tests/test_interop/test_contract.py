@@ -214,6 +214,7 @@ class TestContractInterop(BoaTest):
         path, _ = self.get_deploy_file_paths('CreateContract.py')
         call_contract_path = self.get_contract_path('NewContract.py')
 
+        self.compile_and_save(call_contract_path)
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
@@ -259,6 +260,7 @@ class TestContractInterop(BoaTest):
         self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('new_method'))
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
+        self.compile_and_save(new_path)
         new_nef, new_manifest = self.get_bytes_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
