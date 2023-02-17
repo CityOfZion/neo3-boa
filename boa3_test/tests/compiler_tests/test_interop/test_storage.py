@@ -90,7 +90,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -129,7 +129,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -182,7 +182,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -239,7 +239,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -272,7 +272,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -325,7 +325,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -382,7 +382,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -444,7 +444,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -495,7 +495,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -559,7 +559,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(InteropInterface)  # returns an interop interface
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -584,7 +584,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(InteropInterface)  # returns an interop interface
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -613,7 +613,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -648,7 +648,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -704,7 +704,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -772,7 +772,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -807,7 +807,7 @@ class TestStorageInterop(BoaTest):
 
         storage_contract = invokes[0].invoke.contract
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -836,7 +836,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(value)
 
         runner.execute(get_storage_from=contract_1)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -868,7 +868,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(stored_value)
 
         runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         self.assertIsNone(runner.storages.get(storage_contract, storage_key))
         storage_result = runner.storages.get(storage_contract, map_key + storage_key)
@@ -882,7 +882,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(b'')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -985,7 +985,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(value_old)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
