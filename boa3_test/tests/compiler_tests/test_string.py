@@ -3,9 +3,9 @@ from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestString(BoaTest):
@@ -14,77 +14,154 @@ class TestString(BoaTest):
     SUBSTRING_NOT_FOUND_MSG = 'substring not found'
 
     def test_string_get_value(self):
-        path = self.get_contract_path('GetValue.py')
-        output = Boa3.compile(path)
+        path, _ = self.get_deploy_file_paths('GetValue.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'unit')
-        self.assertEqual('u', result)
-        result = self.run_smart_contract(engine, path, 'Main', '123')
-        self.assertEqual('1', result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', '')
+        invokes.append(runner.call_contract(path, 'Main', 'unit'))
+        expected_results.append('u')
+        invokes.append(runner.call_contract(path, 'Main', '123'))
+        expected_results.append('1')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', '')
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_string_get_value_to_variable(self):
-        path = self.get_contract_path('GetValueToVariable.py')
-        output = Boa3.compile(path)
+        path, _ = self.get_deploy_file_paths('GetValueToVariable.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'unit')
-        self.assertEqual('u', result)
-        result = self.run_smart_contract(engine, path, 'Main', '123')
-        self.assertEqual('1', result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', '')
+        invokes.append(runner.call_contract(path, 'Main', 'unit'))
+        expected_results.append('u')
+        invokes.append(runner.call_contract(path, 'Main', '123'))
+        expected_results.append('1')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', '')
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_string_set_value(self):
         path = self.get_contract_path('SetValue.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_string_slicing(self):
-        path = self.get_contract_path('StringSlicingLiteralValues.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingLiteralValues.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual('i', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append('i')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_start_larger_than_ending(self):
-        path = self.get_contract_path('StringSlicingStartLargerThanEnding.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual('', result)
+        path, _ = self.get_deploy_file_paths('StringSlicingStartLargerThanEnding.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append('')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_with_variables(self):
-        path = self.get_contract_path('StringSlicingVariableValues.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingVariableValues.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual('i', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append('i')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_negative_start(self):
-        path = self.get_contract_path('StringSlicingNegativeStart.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingNegativeStart.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'unit_', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main',
+                                            expected_result_type=bytes))
+        expected_results.append(b'unit_')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_negative_end_omitted(self):
-        path = self.get_contract_path('StringSlicingNegativeEndOmitted.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingNegativeEndOmitted.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual('test', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append('test')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_start_omitted(self):
-        path = self.get_contract_path('StringSlicingStartOmitted.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingStartOmitted.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'uni', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main',
+                                            expected_result_type=bytes))
+        expected_results.append(b'uni')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_omitted(self):
         string_value = 'unit_test'
@@ -107,655 +184,878 @@ class TestString(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual('unit_test', result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append('unit_test')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_end_omitted(self):
-        path = self.get_contract_path('StringSlicingEndOmitted.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingEndOmitted.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'it_test', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main',
+                                            expected_result_type=bytes))
+        expected_results.append(b'it_test')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_with_stride(self):
-        path = self.get_contract_path('StringSlicingWithStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringSlicingWithStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = 'unit_test'
         expected_result = a[2:5:2]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'literal_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-6:5:2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[0:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-6:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-999:5:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[0:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-999:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[999:5:2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[0:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[999:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_values'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_with_negative_stride(self):
-        path = self.get_contract_path('StringSlicingWithNegativeStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringSlicingWithNegativeStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = 'unit_test'
         expected_result = a[2:5:-1]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'literal_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-6:5:-1]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[0:-1:-1]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-6:-1:-1]
-        result = self.run_smart_contract(engine, path, 'negative_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-999:5:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[0:-999:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-999:-999:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[999:5:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[0:999:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[999:999:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_values'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_omitted_with_stride(self):
-        path = self.get_contract_path('StringSlicingOmittedWithStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringSlicingOmittedWithStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = 'unit_test'
         expected_result = a[::2]
-        result = self.run_smart_contract(engine, path, 'omitted_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'omitted_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:5:2]
-        result = self.run_smart_contract(engine, path, 'omitted_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'omitted_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[2::2]
-        result = self.run_smart_contract(engine, path, 'omitted_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'omitted_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-6::2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-999::2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[999::2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_omitted_with_negative_stride(self):
-        path = self.get_contract_path('StringSlicingOmittedWithNegativeStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringSlicingOmittedWithNegativeStride.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         a = 'unit_test'
         expected_result = a[::-2]
-        result = self.run_smart_contract(engine, path, 'omitted_values')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'omitted_values'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:5:-2]
-        result = self.run_smart_contract(engine, path, 'omitted_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'omitted_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[2::-2]
-        result = self.run_smart_contract(engine, path, 'omitted_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'omitted_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-6::-2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:-1:-2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[-999::-2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:-999:-2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[999::-2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(expected_result)
 
         a = 'unit_test'
         expected_result = a[:999:-2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_simple_concat(self):
-        path = self.get_contract_path('StringSimpleConcat.py')
+        path, _ = self.get_deploy_file_paths('StringSimpleConcat.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual('bye worldhi', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append('bye worldhi')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_string_concat_test(self):
-        path = self.get_contract_path('ConcatBoa2Test.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual('helloworld', result)
+        path, _ = self.get_deploy_file_paths('ConcatBoa2Test.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append('helloworld')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_string_concat_test2(self):
-        path = self.get_contract_path('ConcatBoa2Test2.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ConcatBoa2Test2.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main', 'concat', ['hello', 'world'])
-        self.assertEqual('helloworld', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', 'blah', ['hello', 'world'])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', 'concat', ['hello', 'world']))
+        expected_results.append('helloworld')
 
-        result = self.run_smart_contract(engine, path, 'main', 'concat', ['blah'])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', 'blah', ['hello', 'world']))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'main', 'concat', ['hello', 'world', 'third'])
-        self.assertEqual('helloworld', result)
+        invokes.append(runner.call_contract(path, 'main', 'concat', ['blah']))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'main', 'concat', ['1', 'neo'])
-        self.assertEqual('1neo', result)
+        invokes.append(runner.call_contract(path, 'main', 'concat', ['hello', 'world', 'third']))
+        expected_results.append('helloworld')
 
-        result = self.run_smart_contract(engine, path, 'main', 'concat', ['', 'neo'])
-        self.assertEqual('neo', result)
+        invokes.append(runner.call_contract(path, 'main', 'concat', ['1', 'neo']))
+        expected_results.append('1neo')
+
+        invokes.append(runner.call_contract(path, 'main', 'concat', ['', 'neo']))
+        expected_results.append('neo')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_with_double_quotes(self):
-        path = self.get_contract_path('StringWithDoubleQuotes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StringWithDoubleQuotes.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'string_test', 'hello', 'world')
-        self.assertEqual('"hell"test_symbol":world}"', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'string_test', '1', 'neo')
-        self.assertEqual('""test_symbol":neo}"', result)
+        invokes.append(runner.call_contract(path, 'string_test', 'hello', 'world'))
+        expected_results.append('"hell"test_symbol":world}"')
 
-        result = self.run_smart_contract(engine, path, 'string_test', 'neo', '')
-        self.assertEqual('"ne"test_symbol":}"', result)
+        invokes.append(runner.call_contract(path, 'string_test', '1', 'neo'))
+        expected_results.append('""test_symbol":neo}"')
+
+        invokes.append(runner.call_contract(path, 'string_test', 'neo', ''))
+        expected_results.append('"ne"test_symbol":}"')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_upper(self):
-        path = self.get_contract_path('UpperStringMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UpperStringMethod.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'abcdefghijklmnopqrstuvwxyz'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.upper(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.upper())
 
         string = 'a1b123y3z'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.upper(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.upper())
 
         string = '!@#$%123*-/'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.upper(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.upper())
 
         string = 'áõèñ'
-        result = self.run_smart_contract(engine, path, 'main', string)
+        not_as_expected = runner.call_contract(path, 'main', string)
 
-        with self.assertRaises(AssertionError):
-            # TODO: upper was implemented for ASCII characters only
-            self.assertEqual(string.upper(), result)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        # TODO: upper was implemented for ASCII characters only
+        self.assertNotEqual(string.upper(), not_as_expected.result)
 
     def test_string_lower(self):
-        path = self.get_contract_path('LowerStringMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('LowerStringMethod.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.lower(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.lower())
 
         string = 'A1B123Y3Z'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.lower(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.lower())
 
         string = '!@#$%123*-/'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.lower(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.lower())
 
         string = 'ÁÕÈÑ'
-        result = self.run_smart_contract(engine, path, 'main', string)
+        not_as_expected = runner.call_contract(path, 'main', string)
 
-        with self.assertRaises(AssertionError):
-            # TODO: lower was implemented for ASCII characters only
-            self.assertEqual(string.lower(), result)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        # TODO: lower was implemented for ASCII characters only
+        self.assertNotEqual(string.lower(), not_as_expected.result)
 
     def test_string_startswith_method(self):
-        path = self.get_contract_path('StartswithStringMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StartswithStringMethod.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit_test'
         substring = 'unit'
         start = 0
         end = len(string)
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = 'unit'
         start = 2
         end = 6
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = 'it'
         start = 2
         end = 6
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = 'it'
         start = 2
         end = 3
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = 'unit_tes'
         start = -99
         end = -1
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = ''
         start = 0
         end = 0
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = 'unit_test'
         start = 0
         end = 99
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
 
         string = 'unit_test'
         substring = 'unit_test'
         start = 100
         end = 99
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.startswith(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.startswith(substring, start, end))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_startswith_method_default_end(self):
-        path = self.get_contract_path('StartswithStringMethodDefaultEnd.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StartswithStringMethodDefaultEnd.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit_test'
         substring = 'unit'
         start = 0
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = 'unit'
         start = 2
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = 'it'
         start = 2
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = 'it'
         start = 3
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = 'unit_tes'
         start = -99
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = ''
         start = 0
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = ''
         start = 99
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
 
         string = 'unit_test'
         substring = 'unit_test'
         start = 0
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.startswith(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.startswith(substring, start))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_startswith_method_defaults(self):
-        path = self.get_contract_path('StartswithStringMethodDefaults.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StartswithStringMethodDefaults.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit_test'
         substring = 'unit'
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.startswith(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.startswith(substring))
 
         string = 'unit_test'
         substring = 'unit_test'
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.startswith(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.startswith(substring))
 
         string = 'unit_test'
         substring = ''
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.startswith(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.startswith(substring))
 
         string = 'unit_test'
         substring = '12345'
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.startswith(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.startswith(substring))
 
         string = 'unit_test'
         substring = 'bigger substring'
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.startswith(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.startswith(substring))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_strip(self):
-        path = self.get_contract_path('StripStringMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StripStringMethod.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'abcdefghijklmnopqrstuvwxyz'
         chars = 'abcxyz'
-        result = self.run_smart_contract(engine, path, 'main', string, chars)
-        self.assertEqual(string.strip(chars), result)
+        invokes.append(runner.call_contract(path, 'main', string, chars))
+        expected_results.append(string.strip(chars))
 
         string = 'abcdefghijklmnopqrsvwxyz unit test abcdefghijklmnopqrsvwxyz'
         chars = 'abcdefghijklmnopqrsvwxyz '
-        result = self.run_smart_contract(engine, path, 'main', string, chars)
-        self.assertEqual(string.strip(chars), result)
+        invokes.append(runner.call_contract(path, 'main', string, chars))
+        expected_results.append(string.strip(chars))
 
         string = '0123456789hello world987654310'
         chars = '0987654321'
-        result = self.run_smart_contract(engine, path, 'main', string, chars)
-        self.assertEqual(string.strip(chars), result)
+        invokes.append(runner.call_contract(path, 'main', string, chars))
+        expected_results.append(string.strip(chars))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_strip_default(self):
-        path = self.get_contract_path('StripStringMethodDefault.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StripStringMethodDefault.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = '     unit test    '
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.strip(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.strip())
 
         string = 'unit test    '
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.strip(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.strip())
 
         string = '    unit test'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.strip(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.strip())
 
         string = ' \t\n\r\f\vunit test \t\n\r\f\v'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.strip(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.strip())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_isdigit_method(self):
-        path = self.get_contract_path('IsdigitMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IsdigitMethod.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = '0123456789'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.isdigit(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.isdigit())
 
         string = '23mixed01'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.isdigit(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.isdigit())
 
         string = 'no digits here'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.isdigit(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.isdigit())
 
         string = ''
-        result = self.run_smart_contract(engine, path, 'main', string)
-        self.assertEqual(string.isdigit(), result)
+        invokes.append(runner.call_contract(path, 'main', string))
+        expected_results.append(string.isdigit())
 
         string = '¹²³'
-        result = self.run_smart_contract(engine, path, 'main', string)
-        with self.assertRaises(AssertionError):
-            # neo3-boas isdigit implementation does not verify values that are not from the ASCII
-            self.assertEqual(string.isdigit(), result)
+        not_as_expected = runner.call_contract(path, 'main', string)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        # neo3-boas isdigit implementation does not verify values that are not from the ASCII
+        self.assertNotEqual(string.isdigit(), not_as_expected.result)
 
     def test_string_join_with_sequence(self):
-        path = self.get_contract_path('JoinStringMethodWithSequence.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('JoinStringMethodWithSequence.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = ' '
         sequence = ["Unit", "Test", "Neo3-boa"]
-        result = self.run_smart_contract(engine, path, 'main', string, sequence)
-        self.assertEqual(string.join(sequence), result)
+        invokes.append(runner.call_contract(path, 'main', string, sequence))
+        expected_results.append(string.join(sequence))
 
         string = ' '
         sequence = []
-        result = self.run_smart_contract(engine, path, 'main', string, sequence)
-        self.assertEqual(string.join(sequence), result)
+        invokes.append(runner.call_contract(path, 'main', string, sequence))
+        expected_results.append(string.join(sequence))
 
         string = ' '
         sequence = ["UnitTest"]
-        result = self.run_smart_contract(engine, path, 'main', string, sequence)
-        self.assertEqual(string.join(sequence), result)
+        invokes.append(runner.call_contract(path, 'main', string, sequence))
+        expected_results.append(string.join(sequence))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_join_with_dictionary(self):
-        path = self.get_contract_path('JoinStringMethodWithDictionary.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('JoinStringMethodWithDictionary.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = ' '
         dictionary = {"Unit": 1, "Test": 2, "Neo3-boa": 3}
-        result = self.run_smart_contract(engine, path, 'main', string, dictionary)
-        self.assertEqual(string.join(dictionary), result)
+        invokes.append(runner.call_contract(path, 'main', string, dictionary))
+        expected_results.append(string.join(dictionary))
 
         string = ' '
         dictionary = {}
-        result = self.run_smart_contract(engine, path, 'main', string, dictionary)
-        self.assertEqual(string.join(dictionary), result)
+        invokes.append(runner.call_contract(path, 'main', string, dictionary))
+        expected_results.append(string.join(dictionary))
 
         string = ' '
         dictionary = {"UnitTest": 1}
-        result = self.run_smart_contract(engine, path, 'main', string, dictionary)
-        self.assertEqual(string.join(dictionary), result)
+        invokes.append(runner.call_contract(path, 'main', string, dictionary))
+        expected_results.append(string.join(dictionary))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_index(self):
-        path = self.get_contract_path('IndexString.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IndexString.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit test'
         substring = 'i'
         start = 0
         end = 4
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.index(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.index(substring, start, end))
 
         string = 'unit test'
         substring = 'i'
         start = 2
         end = 4
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.index(substring, start, end), result)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
-            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 3, 4)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
-            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 4, -1)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
-            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 0, -99)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.index(substring, start, end))
 
         string = 'unit test'
         substring = 'i'
         start = 0
         end = -1
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.index(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.index(substring, start, end))
 
         string = 'unit test'
         substring = 'n'
         start = 0
         end = 99
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start, end)
-        self.assertEqual(string.index(substring, start, end), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
+        expected_results.append(string.index(substring, start, end))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'main', 'unit test', 'i', 3, 4)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+
+        runner.call_contract(path, 'main', 'unit test', 'i', 4, -1)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+
+        runner.call_contract(path, 'main', 'unit test', 'i', 0, -99)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
 
     def test_string_index_end_default(self):
-        path = self.get_contract_path('IndexStringEndDefault.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IndexStringEndDefault.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit test'
         substring = 't'
         start = 0
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.index(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.index(substring, start))
 
         string = 'unit test'
         substring = 't'
         start = 4
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.index(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.index(substring, start))
 
         string = 'unit test'
         substring = 't'
         start = 6
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.index(substring, start), result)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
-            self.run_smart_contract(engine, path, 'main', 'unit test', 'i', 99)
-
-        with self.assertRaisesRegex(TestExecutionException, f'{self.SUBSTRING_NOT_FOUND_MSG}$'):
-            self.run_smart_contract(engine, path, 'main', 'unit test', 't', -1)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.index(substring, start))
 
         string = 'unit test'
         substring = 'i'
         start = -10
-        result = self.run_smart_contract(engine, path, 'main', string, substring, start)
-        self.assertEqual(string.index(substring, start), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring, start))
+        expected_results.append(string.index(substring, start))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'main', 'unit test', 'i', 99)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+
+        runner.call_contract(path, 'main', 'unit test', 't', -1)
+        runner.execute()
+
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
 
     def test_string_index_defaults(self):
-        path = self.get_contract_path('IndexStringDefaults.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IndexStringDefaults.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         string = 'unit test'
         substring = 'u'
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.index(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.index(substring))
 
         string = 'unit test'
         substring = 't'
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.index(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.index(substring))
 
         string = 'unit test'
         substring = ' '
-        result = self.run_smart_contract(engine, path, 'main', string, substring)
-        self.assertEqual(string.index(substring), result)
+        invokes.append(runner.call_contract(path, 'main', string, substring))
+        expected_results.append(string.index(substring))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_index_mismatched_type(self):
         path = self.get_contract_path('IndexStringMismatchedType.py')
