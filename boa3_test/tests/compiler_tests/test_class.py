@@ -2,82 +2,116 @@ from boa3.boa3 import Boa3
 from boa3.internal.exception import CompilerError
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestClass(BoaTest):
     default_folder: str = 'test_sc/class_test'
 
     def test_notification_get_variables(self):
-        path = self.get_contract_path('NotificationGetVariables.py')
-        output, manifest = self.compile_and_save(path)
+        path, _ = self.get_deploy_file_paths('NotificationGetVariables.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'script_hash', [],
-                                         expected_result_type=bytes)
-        script = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
-        self.assertEqual(len(contract_notifications), 0)
-        self.assertEqual(bytes(20), result)
+        contract_invoke = runner.call_contract(path, 'script_hash', [],
+                                               expected_result_type=bytes)
+        invokes.append(contract_invoke)
+        expected_results.append(bytes(20))
 
-        result = self.run_smart_contract(engine, path, 'event_name', [])
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
-        self.assertEqual(len(contract_notifications), 0)
-        self.assertEqual('', result)
+        runner.update_contracts()
+        script = contract_invoke.invoke.contract.script_hash
 
-        result = self.run_smart_contract(engine, path, 'state', [])
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
-        self.assertEqual(len(contract_notifications), 0)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'event_name', []))
+        expected_results.append('')
 
-        result = self.run_smart_contract(engine, path, 'script_hash', [1])
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
+        invokes.append(runner.call_contract(path, 'state', []))
+        expected_results.append([])
+
+        invokes.append(runner.call_contract(path, 'script_hash', [1]))
+        expected_results.append(script)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        contract_notifications = runner.get_events(origin=script)
         self.assertEqual(len(contract_notifications), 1)
-        self.assertEqual(script, result)
 
-        engine.reset_engine()
-        result = self.run_smart_contract(engine, path, 'event_name', [1])
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
-        self.assertEqual(len(contract_notifications), 1)
-        self.assertEqual('notify', result)
+        invokes.append(runner.call_contract(path, 'event_name', [1]))
+        expected_results.append('notify')
 
-        engine.reset_engine()
-        result = self.run_smart_contract(engine, path, 'state', [1])
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
-        self.assertEqual(len(contract_notifications), 1)
-        self.assertEqual([1], result)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        engine.reset_engine()
-        result = self.run_smart_contract(engine, path, 'state', ['1'])
-        contract_notifications = engine.get_events(origin=engine.executed_script_hash)
+        contract_notifications = runner.get_events(origin=script)
         self.assertEqual(len(contract_notifications), 1)
-        self.assertEqual(['1'], result)
+
+        invokes.append(runner.call_contract(path, 'state', [1]))
+        expected_results.append([1])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        contract_notifications = runner.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 1)
+
+        invokes.append(runner.call_contract(path, 'state', ['1']))
+        expected_results.append(['1'])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        contract_notifications = runner.get_events(origin=script)
+        self.assertEqual(len(contract_notifications), 1)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_notification_set_variables(self):
-        path = self.get_contract_path('NotificationSetVariables.py')
+        path, _ = self.get_deploy_file_paths('NotificationSetVariables.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'script_hash', b'',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'', result)
-        script = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'script_hash', script,
-                                         expected_result_type=bytes)
-        self.assertEqual(script, result)
+        contract_invoke = runner.call_contract(path, 'script_hash', b'',
+                                               expected_result_type=bytes)
+        invokes.append(contract_invoke)
+        expected_results.append(b'')
 
-        result = self.run_smart_contract(engine, path, 'event_name', 'unit test')
-        self.assertEqual('unit test', result)
+        runner.update_contracts()
+        script = contract_invoke.invoke.contract.script_hash
 
-        result = self.run_smart_contract(engine, path, 'state', (1, 2, 3))
-        self.assertEqual([1, 2, 3], result)
+        invokes.append(runner.call_contract(path, 'script_hash', script,
+                                            expected_result_type=bytes))
+        expected_results.append(script)
+
+        invokes.append(runner.call_contract(path, 'event_name', 'unit test'))
+        expected_results.append('unit test')
+
+        invokes.append(runner.call_contract(path, 'state', (1, 2, 3)))
+        expected_results.append([1, 2, 3])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_contract_constructor(self):
-        path = self.get_contract_path('ContractConstructor.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'new_contract')
+        path, _ = self.get_deploy_file_paths('ContractConstructor.py')
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invoke = runner.call_contract(path, 'new_contract')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
         self.assertEqual(5, len(result))
 
         if isinstance(result[2], str):
@@ -102,136 +136,253 @@ class TestClass(BoaTest):
         self.assertTrue(e.exception.empty_script)
 
     def test_user_class_with_static_method_from_class(self):
-        path = self.get_contract_path('UserClassWithStaticMethodFromClass.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodFromClass.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_static_method_from_class_with_same_method_name(self):
-        path = self.get_contract_path('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_static_method_from_object(self):
         path = self.get_contract_path('UserClassWithStaticMethodFromObject.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_user_class_with_static_method_with_args(self):
-        path = self.get_contract_path('UserClassWithStaticMethodWithArgs.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodWithArgs.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', 10, 10)
-        self.assertEqual(30, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', 30, -30)
-        self.assertEqual(10, result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', 10, 10))
+        expected_results.append(30)
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', -5, -10)
-        self.assertEqual(-5, result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', 30, -30))
+        expected_results.append(10)
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name', -5, -10))
+        expected_results.append(-5)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_static_method_with_vararg(self):
-        path = self.get_contract_path('UserClassWithStaticMethodWithVararg.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodWithVararg.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', [])
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name', []))
+        expected_results.append(42)
 
         args = [1, 2, 3]
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
-        self.assertEqual(args[0], result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
+        expected_results.append(args[0])
 
         args = [4, 3, 2, 1]
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
-        self.assertEqual(args[0], result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
+        expected_results.append(args[0])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_static_method_not_class_method(self):
-        path = self.get_contract_path('UserClassWithStaticMethodNotClassMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodNotClassMethod.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', 42)
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name', 42))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_method_called_from_class_name(self):
-        path = self.get_contract_path('UserClassWithClassMethodFromClass.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromClass.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_method_called_from_object(self):
-        path = self.get_contract_path('UserClassWithClassMethodFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_method_called_from_variable(self):
-        path = self.get_contract_path('UserClassWithClassMethodFromVariable.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromVariable.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_method_with_args(self):
-        path = self.get_contract_path('UserClassWithClassMethodWithArgs.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodWithArgs.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', 42)
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', 1)
-        self.assertEqual(1, result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', 42))
+        expected_results.append(42)
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', -10)
-        self.assertEqual(-10, result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', 1))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name', -10))
+        expected_results.append(-10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_method_with_vararg(self):
-        path = self.get_contract_path('UserClassWithClassMethodWithVararg.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodWithVararg.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', [])
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name', []))
+        expected_results.append(42)
 
         args = [1, 2, 3]
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
-        self.assertEqual(args[0], result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
+        expected_results.append(args[0])
 
         args = [4, 3, 2, 1]
-        result = self.run_smart_contract(engine, path, 'call_by_class_name', args)
-        self.assertEqual(args[0], result)
+        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
+        expected_results.append(args[0])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_variable_from_class(self):
-        path = self.get_contract_path('UserClassWithClassVariableFromClass.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromClass.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val2')
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_val2'))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_variable_from_object(self):
-        path = self.get_contract_path('UserClassWithClassVariableFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val2')
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_val2'))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_class_variable_from_variable(self):
-        path = self.get_contract_path('UserClassWithClassVariableFromVariable.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromVariable.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val2')
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_val2'))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_update_class_variable(self):
         path = self.get_contract_path('UserClassUpdateClassVariable.py')
@@ -242,188 +393,341 @@ class TestClass(BoaTest):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_user_class_with_class_variable_and_class_method(self):
-        path = self.get_contract_path('UserClassWithClassVariableAndClassMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableAndClassMethod.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_foo')
-        self.assertEqual(42, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_foo'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_init(self):
-        path = self.get_contract_path('UserClassWithInit.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithInit.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'build_example_object')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'build_example_object'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_init_with_args(self):
-        path = self.get_contract_path('UserClassWithInitWithArgs.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithInitWithArgs.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'build_example_object')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'build_example_object'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_instance_method(self):
-        path = self.get_contract_path('UserClassWithInstanceMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithInstanceMethod.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_instance_method_from_variable(self):
-        path = self.get_contract_path('UserClassWithInstanceMethodFromVariable.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithInstanceMethodFromVariable.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_by_class_name')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_by_class_name'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_instance_variable_from_class(self):
         path = self.get_contract_path('UserClassWithInstanceVariableFromClass.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_user_class_with_instance_variable_from_object(self):
-        path = self.get_contract_path('UserClassWithInstanceVariableFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithInstanceVariableFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val2')
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_val2'))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_instance_variable_from_variable(self):
-        path = self.get_contract_path('UserClassWithInstanceVariableFromVariable.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithInstanceVariableFromVariable.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val2')
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_val2'))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_update_instance_variable(self):
-        path = self.get_contract_path('UserClassUpdateInstanceVariable.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassUpdateInstanceVariable.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val', 10)
-        self.assertEqual([10, 10, 2], result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val', 40)
-        self.assertEqual([10, 40, 2], result)
+        invokes.append(runner.call_contract(path, 'get_val', 10))
+        expected_results.append([10, 10, 2])
+
+        invokes.append(runner.call_contract(path, 'get_val', 40))
+        expected_results.append([10, 40, 2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_access_variable_on_init(self):
-        path = self.get_contract_path('UserClassAccessInstanceVariableOnInit.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassAccessInstanceVariableOnInit.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_obj')
-        self.assertEqual([2, 4], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'get_obj'))
+        expected_results.append([2, 4])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_access_variable_on_method(self):
-        path = self.get_contract_path('UserClassAccessInstanceVariableOnMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassAccessInstanceVariableOnMethod.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_val1')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_val2')
-        self.assertEqual(4, result)
+        invokes.append(runner.call_contract(path, 'get_val1'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'get_val2'))
+        expected_results.append(4)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_base(self):
         path = self.get_contract_path('UserClassWithBuiltinBase.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_user_class_with_created_base(self):
-        path = self.get_contract_path('UserClassWithCreatedBase.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBase.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'implemented_method')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'inherited_method')
-        self.assertEqual(42, result)
+        invokes.append(runner.call_contract(path, 'implemented_method'))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'inherited_method'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_cascated_created_base(self):
-        path = self.get_contract_path('UserClassWithCascadeCreatedBase.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCascadeCreatedBase.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'implemented_method')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'inherited_method')
-        self.assertEqual(42, result)
+        invokes.append(runner.call_contract(path, 'implemented_method'))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'inherited_method'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_created_base_with_variable(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithVariables.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithVariables.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'implemented_variable')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'inherited_variable')
-        self.assertEqual(42, result)
+        invokes.append(runner.call_contract(path, 'implemented_variable'))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'inherited_variable'))
+        expected_results.append(42)
 
         new_value = 10
-        result = self.run_smart_contract(engine, path, 'update_variable', new_value)
-        self.assertEqual(new_value, result)
+        invokes.append(runner.call_contract(path, 'update_variable', new_value))
+        expected_results.append(new_value)
 
         new_value = -10
-        result = self.run_smart_contract(engine, path, 'update_variable', new_value)
-        self.assertEqual(new_value, result)
+        invokes.append(runner.call_contract(path, 'update_variable', new_value))
+        expected_results.append(new_value)
 
         new_value = 10_000_000
-        result = self.run_smart_contract(engine, path, 'update_variable', new_value)
-        self.assertEqual(new_value, result)
+        invokes.append(runner.call_contract(path, 'update_variable', new_value))
+        expected_results.append(new_value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_created_base_with_args(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithArgs.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithArgs.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         init_value = 42
-        result = self.run_smart_contract(engine, path, 'implemented_var', init_value)
-        self.assertEqual(init_value, result)
+        invokes.append(runner.call_contract(path, 'implemented_var', init_value))
+        expected_results.append(init_value)
 
-        result = self.run_smart_contract(engine, path, 'inherited_var', init_value)
-        self.assertEqual(init_value, result)
+        invokes.append(runner.call_contract(path, 'inherited_var', init_value))
+        expected_results.append(init_value)
 
         init_value = -42
-        result = self.run_smart_contract(engine, path, 'implemented_var', init_value)
-        self.assertEqual(init_value, result)
+        invokes.append(runner.call_contract(path, 'implemented_var', init_value))
+        expected_results.append(init_value)
 
-        result = self.run_smart_contract(engine, path, 'inherited_var', init_value)
-        self.assertEqual(init_value, result)
+        invokes.append(runner.call_contract(path, 'inherited_var', init_value))
+        expected_results.append(init_value)
 
         init_value = 10_000_000
-        result = self.run_smart_contract(engine, path, 'implemented_var', init_value)
-        self.assertEqual(init_value, result)
+        invokes.append(runner.call_contract(path, 'implemented_var', init_value))
+        expected_results.append(init_value)
 
-        result = self.run_smart_contract(engine, path, 'inherited_var', init_value)
-        self.assertEqual(init_value, result)
+        invokes.append(runner.call_contract(path, 'inherited_var', init_value))
+        expected_results.append(init_value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_created_base_with_init(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithInit.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithInit.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         expected_result = 42
-        result = self.run_smart_contract(engine, path, 'inherited_var')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'inherited_var'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_created_base_with_init_with_args(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithInitWithArgs.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithInitWithArgs.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         expected_result = -10
-        result = self.run_smart_contract(engine, path, 'inherited_var')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'inherited_var'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_created_base_with_more_variables(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithMoreVariables.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithMoreVariables.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         expected_result = [42, 10, 20]
-        result = self.run_smart_contract(engine, path, 'get_full_object')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'get_full_object'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_created_base_with_more_variables_without_super_init(self):
         path = self.get_contract_path('UserClassWithCreatedBaseWithMoreVariablesWithoutSuperInit.py')
@@ -442,32 +746,68 @@ class TestClass(BoaTest):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_user_class_with_property_from_object(self):
-        path = self.get_contract_path('UserClassWithPropertyFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithPropertyFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_property')
-        self.assertEqual(1, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'get_property'))
+        expected_results.append(1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_property_using_instance_variables_from_object(self):
-        path = self.get_contract_path('UserClassWithPropertyUsingInstanceVariablesFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingInstanceVariablesFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_property')
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'get_property'))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_property_using_class_variables_from_object(self):
-        path = self.get_contract_path('UserClassWithPropertyUsingClassVariablesFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingClassVariablesFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_property')
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'get_property'))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_property_using_variables_from_object(self):
-        path = self.get_contract_path('UserClassWithPropertyUsingVariablesFromObject.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingVariablesFromObject.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_property')
-        self.assertEqual(47, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'get_property'))
+        expected_results.append(47)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_property_from_class(self):
         path = self.get_contract_path('UserClassWithPropertyFromClass.py')
@@ -486,30 +826,48 @@ class TestClass(BoaTest):
         self.assertCompilerLogs(CompilerError.SelfArgumentError, path)
 
     def test_user_class_with_augmented_assignment_operator_with_variable(self):
-        path = self.get_contract_path('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'add')
-        self.assertEqual(2, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'sub')
-        self.assertEqual(-2, result)
+        invokes.append(runner.call_contract(path, 'add'))
+        expected_results.append(2)
 
-        result = self.run_smart_contract(engine, path, 'mult')
-        self.assertEqual(16, result)
+        invokes.append(runner.call_contract(path, 'sub'))
+        expected_results.append(-2)
 
-        result = self.run_smart_contract(engine, path, 'div')
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'mult'))
+        expected_results.append(16)
 
-        result = self.run_smart_contract(engine, path, 'mod')
-        self.assertEqual(1, result)
+        invokes.append(runner.call_contract(path, 'div'))
+        expected_results.append(2)
 
-        result = self.run_smart_contract(engine, path, 'mix')
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path, 'mod'))
+        expected_results.append(1)
+
+        invokes.append(runner.call_contract(path, 'mix'))
+        expected_results.append(0)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_user_class_with_deploy_method(self):
-        path = self.get_contract_path('UserClassWithDeployMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UserClassWithDeployMethod.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_obj')
-        self.assertEqual([1, 2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'get_obj'))
+        expected_results.append([1, 2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
