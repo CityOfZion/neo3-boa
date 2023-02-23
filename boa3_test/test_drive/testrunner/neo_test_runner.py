@@ -224,14 +224,14 @@ class NeoTestRunner:
         self._gas_consumed = 0
         self._result_stack = []
         self._last_execution_results = []
+        self._notifications.clear()
+        self._logs.clear()
         self._storages.clear()
         self._last_cli_log = None
         self._error_message = None
 
     def reset(self):
         self.reset_state()
-        self._notifications.clear()
-        self._logs.clear()
 
         self._batch.clear()
         self._batch_size_since_last_update = -1
@@ -271,7 +271,7 @@ class NeoTestRunner:
                 new = Notification.from_json(n)
                 if new is not None:
                     notifications.append(new)
-            self._notifications = notifications
+            self._notifications.extend(notifications)
 
         if 'logs' in result:
             json_logs = result['logs']
@@ -283,7 +283,7 @@ class NeoTestRunner:
                 new = Log.from_json(l)
                 if new is not None:
                     logs.append(new)
-            self._logs = logs
+            self._logs.extend(logs)
 
         if 'storages' in result:
             json_storages = result['storages']

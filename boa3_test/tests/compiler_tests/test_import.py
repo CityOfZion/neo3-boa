@@ -2,9 +2,9 @@ from boa3.boa3 import Boa3
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestImport(BoaTest):
@@ -53,9 +53,20 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_user_module_with_alias(self):
         expected_output = (
@@ -74,9 +85,20 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_user_module_with_global_variables(self):
         expected_output = (
@@ -97,9 +119,20 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_variable(self):
         expected_output = (
@@ -117,29 +150,58 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variable_from_imported_module(self):
-        path = self.get_contract_path('variable_import', 'VariableFromImportedModule.py')
+        path, _ = self.get_deploy_file_paths('variable_import', 'VariableFromImportedModule.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'get_foo', expected_result_type=bytes)
-        self.assertEqual(b'Foo', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_bar')
-        self.assertEqual('bar', result)
+        invokes.append(runner.call_contract(path, 'get_foo', expected_result_type=bytes))
+        expected_results.append(b'Foo')
+
+        invokes.append(runner.call_contract(path, 'get_bar'))
+        expected_results.append('bar')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variable_access_from_imported_module(self):
-        path = self.get_contract_path('variable_import', 'VariableAccessFromImportedModule.py')
+        path, _ = self.get_deploy_file_paths('variable_import', 'VariableAccessFromImportedModule.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'get_foo', expected_result_type=bytes)
-        self.assertEqual(b'Foo', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_bar')
-        self.assertEqual('bar', result)
+        invokes.append(runner.call_contract(path, 'get_foo', expected_result_type=bytes))
+        expected_results.append(b'Foo')
+
+        invokes.append(runner.call_contract(path, 'get_bar'))
+        expected_results.append('bar')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_typing_python_library(self):
         path = self.get_contract_path('ImportPythonLib.py')
@@ -197,12 +259,23 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'call_imported_method')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_imported_variable')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_imported_method'))
+        expected_results.append([])
+
+        invokes.append(runner.call_contract(path, 'call_imported_variable'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_from_import_user_module(self):
         expected_output = (
@@ -226,9 +299,20 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_from_import_user_module_with_alias(self):
         expected_output = (
@@ -252,31 +336,61 @@ class TestImport(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_from_import_user_module_from_root_and_file_directories(self):
         path = self.get_contract_path('FromImportUserModuleFromRootAndFileDir.py')
         self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'call_imported_from_root')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'call_imported_from_file_dir')
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'call_imported_from_root'))
+        expected_results.append([])
+
+        invokes.append(runner.call_contract(path, 'call_imported_from_file_dir'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_non_existent_package(self):
         path = self.get_contract_path('ImportNonExistentPackage.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_import_interop_with_alias(self):
-        path = self.get_contract_path('ImportInteropWithAlias.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportInteropWithAlias.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_user_module_recursive_import(self):
         path = self.get_contract_path('ImportUserModuleRecursiveImport.py')
@@ -287,34 +401,45 @@ class TestImport(BoaTest):
         self.assertCompilerLogs(CompilerError.CircularImport, path)
 
     def test_import_user_module_with_not_imported_symbols(self):
-        path = self.get_contract_path('ImportUserModuleWithNotImportedSymbols.py')
+        path, _ = self.get_deploy_file_paths('ImportUserModuleWithNotImportedSymbols.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, path, 'main', [], b'00000000000000000000')
-        script = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', [], script)
-        self.assertEqual([], result)
+        contract = runner.deploy_contract(path)
+        runner.update_contracts()
+        script = contract.script_hash
 
-        result = self.run_smart_contract(engine, path, 'main', [1, 2, 3], script)
+        invokes.append(runner.call_contract(path, 'main', [], script))
+        expected_results.append([])
+
+        invokes.append(runner.call_contract(path, 'main', [1, 2, 3], script))
         expected_result = []
         for x in [1, 2, 3]:
             expected_result.append([script,
                                     'notify',
                                     [x]])
-        self.assertEqual(expected_result, result)
+        expected_results.append(expected_result)
 
-        result = self.run_smart_contract(engine, path, 'main', [1, 2, 3], b'\x01' * 20)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'main', [1, 2, 3], b'\x01' * 20))
+        expected_results.append([])
 
         # 'with_param' is a public method, so it should be included in the manifest when imported
-        result = self.run_smart_contract(engine, path, 'with_param', [1, 2, 3], b'\x01' * 20)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'with_param', [1, 2, 3], b'\x01' * 20))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
         # 'without_param' is a public method, but it isn't imported, so it shouldn't be included in the manifest
-        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : without_param'):
-            self.run_smart_contract(engine, path, 'without_param', [1, 2, 3])
+        runner.call_contract(path, 'without_param', [1, 2, 3])
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('without_param'))
 
     def test_import_user_module_with_not_imported_variables(self):
         expected_output = (
@@ -339,9 +464,20 @@ class TestImport(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(5, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(5)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_not_imported_builtin_public(self):
         path = self.get_contract_path('NotImportedBuiltinPublic.py')
@@ -361,43 +497,78 @@ class TestImport(BoaTest):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_incorrect_circular_import(self):
-        path = self.get_contract_path('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(3, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(3)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_module_with_init(self):
-        path = self.get_contract_path('ImportModuleWithInit.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportModuleWithInit.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_imported_method')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'call_imported_variable')
-        self.assertEqual(42, result)
+        invokes.append(runner.call_contract(path, 'call_imported_method'))
+        expected_results.append([])
+
+        invokes.append(runner.call_contract(path, 'call_imported_variable'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_module_without_init(self):
-        path = self.get_contract_path('ImportModuleWithoutInit.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportModuleWithoutInit.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'call_imported_method')
-        self.assertEqual({}, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'call_imported_variable')
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'call_imported_method'))
+        expected_results.append({})
+
+        invokes.append(runner.call_contract(path, 'call_imported_variable'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_user_class_inner_files(self):
-        inner_path = self.get_contract_path('class_import', 'ImportUserClass.py')
-        path = self.get_contract_path('ImportUserClassInnerFiles.py')
+        inner_path, _ = self.get_deploy_file_paths('class_import', 'ImportUserClass.py')
+        path, _ = self.get_deploy_file_paths('ImportUserClassInnerFiles.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, inner_path, 'build_example_object')
-        self.assertEqual([42, '42'], result)
+        invokes.append(runner.call_contract(inner_path, 'build_example_object'))
+        expected_results.append([42, '42'])
 
-        result = self.run_smart_contract(engine, path, 'build_example_object')
-        self.assertEqual('42', result)
+        invokes.append(runner.call_contract(path, 'build_example_object'))
+        expected_results.append('42')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_from_import_not_existing_method(self):
         path = self.get_contract_path('FromImportNotExistingMethod.py')

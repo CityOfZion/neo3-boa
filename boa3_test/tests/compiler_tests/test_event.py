@@ -4,9 +4,9 @@ from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestEvent(BoaTest):
@@ -29,12 +29,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main')
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((), event_notifications[0].arguments)
 
@@ -57,12 +61,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main')
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((10,), event_notifications[0].arguments)
 
@@ -85,12 +93,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main')
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((10,), event_notifications[0].arguments)
 
@@ -113,12 +125,16 @@ class TestEvent(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main')
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((10,), event_notifications[0].arguments)
 
@@ -145,12 +161,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
 
@@ -177,12 +197,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
 
@@ -209,12 +233,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10)
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
 
@@ -242,12 +270,16 @@ class TestEvent(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'1', b'2', 10, b'someToken')
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10, b'someToken')
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10, 'someToken'), event_notifications[0].arguments)
 
@@ -256,16 +288,19 @@ class TestEvent(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_event_with_duplicated_name(self):
-        path = self.get_contract_path('EventWithDuplicatedName.py')
+        path, _ = self.get_deploy_file_paths('EventWithDuplicatedName.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
         arg = 10
         event_id = 'example'
-        result = self.run_smart_contract(engine, path, 'example', arg)
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
+        invoke = runner.call_contract(path, 'example', arg)
 
-        event_notifications = engine.get_events(event_name=event_id)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
+
+        event_notifications = runner.get_events(event_name=event_id)
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((arg,), event_notifications[0].arguments)
 
@@ -276,34 +311,34 @@ class TestEvent(BoaTest):
     def test_event_with_abort(self):
         path = self.get_contract_path('EventWithAbort.py')
         self.compile_and_save(path)
+        path, _ = self.get_deploy_file_paths(path)
 
-        engine = TestEngine()
+        runner = NeoTestRunner()
+        runner.call_contract(path, 'send_event_with_abort')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
+        self.assertGreater(len(runner.notifications), 0)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
-            self.run_smart_contract(engine, path, 'send_event_with_abort')
-        self.assertEqual(0, len(engine.notifications))
-
-        result = self.run_smart_contract(engine, path, 'send_event')
-        self.assertIsVoid(result)
-        self.assertGreater(len(engine.notifications), 0)
-
-        previous_notification_count = len(engine.notifications)
-        with self.assertRaisesRegex(TestExecutionException, self.ABORTED_CONTRACT_MSG):
-            """
-            Notifications on a fault execution aren't logged into the blockchain
-            Even with rollback_on_fault set as False, TestEngine doesn't return it because that's the expected behavior
-            """
-            self.run_smart_contract(engine, path, 'send_event_with_abort', rollback_on_fault=False)
-
-        self.assertEqual(previous_notification_count, len(engine.notifications))
+        invoke = runner.call_contract(path, 'send_event')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(invoke.result)
+        self.assertGreater(len(runner.notifications), 0)
 
     def test_boa2_event_test(self):
-        path = self.get_contract_path('EventBoa2Test.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
+        path, _ = self.get_deploy_file_paths('EventBoa2Test.py')
+        runner = NeoTestRunner()
+        invoke = runner.call_contract(path, 'main')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
+        self.assertIsNotNone(result)
         self.assertEqual(7, result)
 
-        event_notifications1 = engine.get_events('transfer_test')
+        event_notifications1 = runner.get_events('transfer_test')
         self.assertEqual(1, len(event_notifications1))
         self.assertEqual(3, len(event_notifications1[0].arguments))
         from_address, to_address, amount = event_notifications1[0].arguments
@@ -311,7 +346,7 @@ class TestEvent(BoaTest):
         self.assertEqual(5, to_address)
         self.assertEqual(7, amount)
 
-        event_notifications2 = engine.get_events('refund')
+        event_notifications2 = runner.get_events('refund')
         self.assertEqual(1, len(event_notifications2))
         self.assertEqual(2, len(event_notifications2[0].arguments))
         to_address, amount = event_notifications2[0].arguments

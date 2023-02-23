@@ -1,9 +1,9 @@
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestNeoTypes(BoaTest):
@@ -12,89 +12,148 @@ class TestNeoTypes(BoaTest):
     # region UInt160
 
     def test_uint160_call_bytes(self):
-        path = self.get_contract_path('uint160', 'UInt160CallBytes.py')
+        path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         value = bytes(20)
-        result = self.run_smart_contract(engine, path, 'uint160', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint160', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
         value = bytes(range(20))
-        result = self.run_smart_contract(engine, path, 'uint160', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint160', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(10),
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'uint160', bytes(10),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'uint160', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_uint160_call_int(self):
-        path = self.get_contract_path('uint160', 'UInt160CallInt.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'uint160', 0,
-                                         expected_result_type=bytes)
-        self.assertEqual(bytes(20), result)
+        path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallInt.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'uint160', 0,
+                                            expected_result_type=bytes))
+        expected_results.append(bytes(20))
 
         value = Integer(1_000_000_000).to_byte_array(min_length=20)
-        result = self.run_smart_contract(engine, path, 'uint160', 1_000_000_000,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint160', 1_000_000_000,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', -50,
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'uint160', -50,
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'uint160', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_uint160_call_without_args(self):
-        path = self.get_contract_path('uint160', 'UInt160CallWithoutArgs.py')
+        path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallWithoutArgs.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'uint160',
-                                         expected_result_type=bytes)
-        self.assertEqual(bytes(20), result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'uint160',
+                                            expected_result_type=bytes))
+        expected_results.append(bytes(20))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_uint160_return_bytes(self):
-        path = self.get_contract_path('uint160', 'UInt160ReturnBytes.py')
+        path, _ = self.get_deploy_file_paths('uint160', 'UInt160ReturnBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         value = bytes(20)
-        result = self.run_smart_contract(engine, path, 'uint160', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint160', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
         value = bytes(range(20))
-        result = self.run_smart_contract(engine, path, 'uint160', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint160', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(10),
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint160', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'uint160', bytes(10),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'uint160', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_uint160_concat_with_bytes(self):
-        path = self.get_contract_path('uint160', 'UInt160ConcatWithBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('uint160', 'UInt160ConcatWithBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         value = bytes(20)
-        result = self.run_smart_contract(engine, path, 'uint160_method', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value + b'123', result)
+        invokes.append(runner.call_contract(path, 'uint160_method', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value + b'123')
 
         value = bytes(range(20))
-        result = self.run_smart_contract(engine, path, 'uint160_method', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value + b'123', result)
+        invokes.append(runner.call_contract(path, 'uint160_method', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value + b'123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_uint160_mismatched_type(self):
         path = self.get_contract_path('uint160', 'UInt160CallMismatchedType.py')
@@ -105,89 +164,148 @@ class TestNeoTypes(BoaTest):
     # region UInt256
 
     def test_uint256_call_bytes(self):
-        path = self.get_contract_path('uint256', 'UInt256CallBytes.py')
+        path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         value = bytes(32)
-        result = self.run_smart_contract(engine, path, 'uint256', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint256', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
         value = bytes(range(32))
-        result = self.run_smart_contract(engine, path, 'uint256', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint256', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint256', bytes(20),
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint256', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'uint256', bytes(20),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'uint256', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_uint256_call_int(self):
-        path = self.get_contract_path('uint256', 'UInt256CallInt.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'uint256', 0,
-                                         expected_result_type=bytes)
-        self.assertEqual(bytes(32), result)
+        path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallInt.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'uint256', 0,
+                                            expected_result_type=bytes))
+        expected_results.append(bytes(32))
 
         value = Integer(1_000_000_000).to_byte_array(min_length=32)
-        result = self.run_smart_contract(engine, path, 'uint256', 1_000_000_000,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint256', 1_000_000_000,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint256', -50,
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint256', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'uint256', -50,
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'uint256', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_uint256_call_without_args(self):
-        path = self.get_contract_path('uint256', 'UInt256CallWithoutArgs.py')
+        path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallWithoutArgs.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'uint256',
-                                         expected_result_type=bytes)
-        self.assertEqual(bytes(32), result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'uint256',
+                                            expected_result_type=bytes))
+        expected_results.append(bytes(32))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_uint256_return_bytes(self):
-        path = self.get_contract_path('uint256', 'UInt256ReturnBytes.py')
+        path, _ = self.get_deploy_file_paths('uint256', 'UInt256ReturnBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         value = bytes(32)
-        result = self.run_smart_contract(engine, path, 'uint256', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint256', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
         value = bytes(range(32))
-        result = self.run_smart_contract(engine, path, 'uint256', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'uint256', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint256', bytes(10),
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'uint256', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'uint256', bytes(10),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'uint256', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_uint256_concat_with_bytes(self):
-        path = self.get_contract_path('uint256', 'UInt256ConcatWithBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('uint256', 'UInt256ConcatWithBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
         value = bytes(32)
-        result = self.run_smart_contract(engine, path, 'uint256_method', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value + b'123', result)
+        invokes.append(runner.call_contract(path, 'uint256_method', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value + b'123')
 
         value = bytes(range(32))
-        result = self.run_smart_contract(engine, path, 'uint256_method', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value + b'123', result)
+        invokes.append(runner.call_contract(path, 'uint256_method', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value + b'123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_uint256_mismatched_type(self):
         path = self.get_contract_path('uint256', 'UInt256CallMismatchedType.py')
@@ -198,92 +316,145 @@ class TestNeoTypes(BoaTest):
     # region ECPoint
 
     def test_ecpoint_call_bytes(self):
-        path = self.get_contract_path('ecpoint', 'ECPointCallBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointCallBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         value = bytes(33)
-        result = self.run_smart_contract(engine, path, 'ecpoint', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'ecpoint', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
         value = bytes(range(33))
-        result = self.run_smart_contract(engine, path, 'ecpoint', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'ecpoint', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'ecpoint', bytes(20),
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'ecpoint', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'ecpoint', bytes(20),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+
+        runner.call_contract(path, 'ecpoint', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_ecpoint_call_without_args(self):
         path = self.get_contract_path('ecpoint', 'ECPointCallWithoutArgs.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_ecpoint_return_bytes(self):
-        path = self.get_contract_path('ecpoint', 'ECPointReturnBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointReturnBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         value = bytes(33)
-        result = self.run_smart_contract(engine, path, 'ecpoint', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'ecpoint', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
         value = bytes(range(33))
-        result = self.run_smart_contract(engine, path, 'ecpoint', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'ecpoint', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'ecpoint', bytes(10),
-                                    expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'ecpoint', bytes(30),
-                                    expected_result_type=bytes)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'ecpoint', bytes(10),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+
+        runner.call_contract(path, 'ecpoint', bytes(30),
+                             expected_result_type=bytes)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
 
     def test_ecpoint_concat_with_bytes(self):
-        path = self.get_contract_path('ecpoint', 'ECPointConcatWithBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointConcatWithBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         value = bytes(33)
-        result = self.run_smart_contract(engine, path, 'ecpoint_method', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value + b'123', result)
+        invokes.append(runner.call_contract(path, 'ecpoint_method', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value + b'123')
 
         value = bytes(range(33))
-        result = self.run_smart_contract(engine, path, 'ecpoint_method', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value + b'123', result)
+        invokes.append(runner.call_contract(path, 'ecpoint_method', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value + b'123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ecpoint_mismatched_type(self):
         path = self.get_contract_path('ecpoint', 'ECPointCallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_ecpoint_script_hash(self):
-        path = self.get_contract_path('ecpoint', 'ECPointScriptHash.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHash.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         from boa3.internal.neo import public_key_to_script_hash
         value = bytes(range(33))
         script_hash = public_key_to_script_hash(value)
 
-        result = self.run_smart_contract(engine, path, 'Main', value)
-        self.assertEqual(script_hash, result)
+        invokes.append(runner.call_contract(path, 'Main', value))
+        expected_results.append(script_hash)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ecpoint_script_hash_from_builtin(self):
-        path = self.get_contract_path('ecpoint', 'ECPointScriptHashBuiltinCall.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHashBuiltinCall.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         from boa3.internal.neo import public_key_to_script_hash
         value = bytes(range(33))
         script_hash = public_key_to_script_hash(value)
 
-        result = self.run_smart_contract(engine, path, 'Main', value)
-        self.assertEqual(script_hash, result)
+        invokes.append(runner.call_contract(path, 'Main', value))
+        expected_results.append(script_hash)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
 
@@ -312,166 +483,274 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(AbiType.ByteArray, method['parameters'][0]['type'])
 
     def test_byte_string_to_bool(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBool.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_bool', b'\x00')
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'to_bool', '\x00')
-        self.assertEqual(False, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'to_bool', b'\x01')
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'to_bool', '\x01')
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'to_bool', b'\x00'))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'to_bool', '\x00'))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'to_bool', b'\x02')
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'to_bool', '\x02')
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'to_bool', b'\x01'))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'to_bool', '\x01'))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'to_bool', b'\x02'))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'to_bool', '\x02'))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_bool_with_builtin(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToBoolWithBuiltin.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBoolWithBuiltin.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_bool', b'\x00')
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'to_bool', '\x00')
-        self.assertEqual(False, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'to_bool', b'\x01')
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'to_bool', '\x01')
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'to_bool', b'\x00'))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'to_bool', '\x00'))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'to_bool', b'\x02')
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'to_bool', '\x02')
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'to_bool', b'\x01'))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'to_bool', '\x01'))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'to_bool', b'\x02'))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'to_bool', '\x02'))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_int(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToInt.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToInt.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_int', b'\x01\x02')
-        self.assertEqual(513, result)
-        result = self.run_smart_contract(engine, path, 'to_int', '\x01\x02')
-        self.assertEqual(513, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'to_int', b'\x01\x02'))
+        expected_results.append(513)
+        invokes.append(runner.call_contract(path, 'to_int', '\x01\x02'))
+        expected_results.append(513)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_int_with_builtin(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToIntWithBuiltin.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToIntWithBuiltin.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_int', b'\x01\x02')
-        self.assertEqual(513, result)
-        result = self.run_smart_contract(engine, path, 'to_int', '\x01\x02')
-        self.assertEqual(513, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'to_int', b'\x01\x02'))
+        expected_results.append(513)
+        invokes.append(runner.call_contract(path, 'to_int', '\x01\x02'))
+        expected_results.append(513)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_str(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToStr.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToStr.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_str', b'abc')
-        self.assertEqual('abc', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'to_str', b'123')
-        self.assertEqual('123', result)
+        invokes.append(runner.call_contract(path, 'to_str', b'abc'))
+        expected_results.append('abc')
+
+        invokes.append(runner.call_contract(path, 'to_str', b'123'))
+        expected_results.append('123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_str_with_builtin(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToStrWithBuiltin.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToStrWithBuiltin.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_str', b'abc')
-        self.assertEqual('abc', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'to_str', b'123')
-        self.assertEqual('123', result)
+        invokes.append(runner.call_contract(path, 'to_str', b'abc'))
+        expected_results.append('abc')
+
+        invokes.append(runner.call_contract(path, 'to_str', b'123'))
+        expected_results.append('123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_bytes(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToBytes.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_bytes', 'abc',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'abc', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'to_bytes', '123',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'123', result)
+        invokes.append(runner.call_contract(path, 'to_bytes', 'abc',
+                                            expected_result_type=bytes))
+        expected_results.append(b'abc')
+
+        invokes.append(runner.call_contract(path, 'to_bytes', '123',
+                                            expected_result_type=bytes))
+        expected_results.append(b'123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_string_to_bytes_with_builtin(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToBytesWithBuiltin.py')
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBytesWithBuiltin.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'to_bytes', 'abc',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'abc', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'to_bytes', '123',
-                                         expected_result_type=bytes)
-        self.assertEqual(b'123', result)
+        invokes.append(runner.call_contract(path, 'to_bytes', 'abc',
+                                            expected_result_type=bytes))
+        expected_results.append(b'abc')
+
+        invokes.append(runner.call_contract(path, 'to_bytes', '123',
+                                            expected_result_type=bytes))
+        expected_results.append(b'123')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_concat_with_bytes(self):
-        path = self.get_contract_path('bytestring', 'ConcatWithBytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('bytestring', 'ConcatWithBytes.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         prefix = b'12345'
         arg = b'a'
-        result = self.run_smart_contract(engine, path, 'concat', arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(prefix + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', arg,
+                                            expected_result_type=bytes))
+        expected_results.append(prefix + arg)
 
         arg = '6789'
-        result = self.run_smart_contract(engine, path, 'concat', arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(prefix + String(arg).to_bytes(), result)
+        invokes.append(runner.call_contract(path, 'concat', arg,
+                                            expected_result_type=bytes))
+        expected_results.append(prefix + String(arg).to_bytes())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_concat_with_str(self):
-        path = self.get_contract_path('bytestring', 'ConcatWithStr.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('bytestring', 'ConcatWithStr.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         prefix = '12345'
         arg = 'a'
-        result = self.run_smart_contract(engine, path, 'concat', arg)
-        self.assertEqual(prefix + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', arg))
+        expected_results.append(prefix + arg)
 
         arg = b'6789'
-        result = self.run_smart_contract(engine, path, 'concat', arg)
-        self.assertEqual(prefix + String.from_bytes(arg), result)
+        invokes.append(runner.call_contract(path, 'concat', arg))
+        expected_results.append(prefix + String.from_bytes(arg))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_concat_with_bytestring(self):
-        path = self.get_contract_path('bytestring', 'ConcatWithByteString.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('bytestring', 'ConcatWithByteString.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         prefix = '12345'
         arg = 'a'
-        result = self.run_smart_contract(engine, path, 'concat', prefix, arg)
-        self.assertEqual(prefix + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', prefix, arg))
+        expected_results.append(prefix + arg)
 
         arg = b'a'
-        result = self.run_smart_contract(engine, path, 'concat', prefix, arg)
-        self.assertEqual(prefix + String.from_bytes(arg), result)
+        invokes.append(runner.call_contract(path, 'concat', prefix, arg))
+        expected_results.append(prefix + String.from_bytes(arg))
 
         prefix = b'12345'
         arg = b'6789'
-        result = self.run_smart_contract(engine, path, 'concat', prefix, arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(prefix + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', prefix, arg,
+                                            expected_result_type=bytes))
+        expected_results.append(prefix + arg)
 
         arg = '6789'
-        result = self.run_smart_contract(engine, path, 'concat', prefix, arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(prefix + String(arg).to_bytes(), result)
+        invokes.append(runner.call_contract(path, 'concat', prefix, arg,
+                                            expected_result_type=bytes))
+        expected_results.append(prefix + String(arg).to_bytes())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bytestring_multiplication(self):
-        path = self.get_contract_path('bytestring', 'ByteStringMultiplication.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringMultiplication.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'bytestring_mult', b'a', 4,
-                                         expected_result_type=bytes)
-        self.assertEqual(b'aaaa', result)
-        result = self.run_smart_contract(engine, path, 'bytestring_mult', 'unit', 50)
-        self.assertEqual('unit' * 50, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'bytestring_mult', b'a', 4,
+                                            expected_result_type=bytes))
+        expected_results.append(b'aaaa')
+        invokes.append(runner.call_contract(path, 'bytestring_mult', 'unit', 50))
+        expected_results.append('unit' * 50)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
 
@@ -501,33 +780,51 @@ class TestNeoTypes(BoaTest):
 
     def test_opcode_concat(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        path = self.get_contract_path('opcode', 'ConcatWithOpcode.py')
+        path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithOpcode.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         expected_result = Opcode.LDARG0 + Opcode.LDARG1 + Opcode.ADD
-        result = self.run_smart_contract(engine, path, 'concat')
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'concat'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_opcode_concat_with_bytes(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        path = self.get_contract_path('opcode', 'ConcatWithBytes.py')
+        path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithBytes.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
+
         concat_bytes = b'12345'
         arg = Opcode.LDARG0
-        result = self.run_smart_contract(engine, path, 'concat', arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(concat_bytes + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', arg,
+                                            expected_result_type=bytes))
+        expected_results.append(concat_bytes + arg)
 
         arg = Opcode.LDLOC1
-        result = self.run_smart_contract(engine, path, 'concat', arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(concat_bytes + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', arg,
+                                            expected_result_type=bytes))
+        expected_results.append(concat_bytes + arg)
 
         arg = Opcode.NOP
-        result = self.run_smart_contract(engine, path, 'concat', arg,
-                                         expected_result_type=bytes)
-        self.assertEqual(concat_bytes + arg, result)
+        invokes.append(runner.call_contract(path, 'concat', arg,
+                                            expected_result_type=bytes))
+        expected_results.append(concat_bytes + arg)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_opcode_concat_mismatched_type(self):
         path = self.get_contract_path('opcode', 'ConcatMismatchedType.py')
@@ -535,54 +832,81 @@ class TestNeoTypes(BoaTest):
 
     def test_opcode_multiplication(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        path = self.get_contract_path('opcode', 'OpcodeMultiplication.py')
+        path, _ = self.get_deploy_file_paths('opcode', 'OpcodeMultiplication.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
 
         multiplier = 4
-        result = self.run_smart_contract(engine, path, 'opcode_mult', multiplier,
-                                         expected_result_type=bytes)
-        self.assertEqual(Opcode.NOP * multiplier, result)
+        invokes.append(runner.call_contract(path, 'opcode_mult', multiplier,
+                                            expected_result_type=bytes))
+        expected_results.append(Opcode.NOP * multiplier)
 
         multiplier = 50
-        result = self.run_smart_contract(engine, path, 'opcode_mult', multiplier,
-                                         expected_result_type=bytes)
-        self.assertEqual(Opcode.NOP * multiplier, result)
+        invokes.append(runner.call_contract(path, 'opcode_mult', multiplier,
+                                            expected_result_type=bytes))
+        expected_results.append(Opcode.NOP * multiplier)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
 
     # region IsInstance Neo Types
 
     def test_isinstance_contract(self):
-        path = self.get_contract_path('IsInstanceContract.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_contract', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_contract', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_contract', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_contract', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceContract.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'is_get_contract_a_contract')
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_contract', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_contract', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_contract', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_contract', 42))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        invokes.append(runner.call_contract(path, 'is_get_contract_a_contract'))
+        expected_results.append(True)
 
     def test_isinstance_block(self):
-        path = self.get_contract_path('IsInstanceBlock.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_block', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_block', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_block', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_block', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceBlock.py')
+        runner = NeoTestRunner()
 
-        engine.increase_block(10)
-        result = self.run_smart_contract(engine, path, 'get_block_is_block', 5)
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_block', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_block', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_block', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_block', 42))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(path, 'get_block_is_block', 0))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_transaction_cast_and_get_hash(self):
         path = self.get_contract_path('CastTransactionGetHash.py')
@@ -597,95 +921,151 @@ class TestNeoTypes(BoaTest):
         self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
 
     def test_isinstance_transaction(self):
-        path = self.get_contract_path('IsInstanceTransaction.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_tx', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_tx', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_tx', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_tx', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceTransaction.py')
+        runner = NeoTestRunner()
 
-        txs = engine.current_block.get_transactions()
-        self.assertGreater(len(txs), 0)
-        tx_hash = txs[-1].hash
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_transaction_is_tx', tx_hash)
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'is_tx', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_tx', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_tx', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_tx', 42))
+        expected_results.append(False)
+
+        # TODO: refactor on #864dzuvjt to test with tx hash
+        # txs = engine.current_block.get_transactions()
+        # self.assertGreater(len(txs), 0)
+        # tx_hash = txs[-1].hash
+
+        # invokes.append(runner.call_contract(path, 'get_transaction_is_tx', tx_hash))
+        # expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_isinstance_notification(self):
-        path = self.get_contract_path('IsInstanceNotification.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_notification', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_notification', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_notification', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_notification', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceNotification.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_notifications_is_notification')
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_notification', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_notification', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_notification', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_notification', 42))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'get_notifications_is_notification'))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_isinstance_storage_context(self):
-        path = self.get_contract_path('IsInstanceStorageContext.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_context', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_context', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_context', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_context', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceStorageContext.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'get_context_is_context')
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_context', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_context', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_context', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_context', 42))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'get_context_is_context'))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_isinstance_storage_map(self):
-        path = self.get_contract_path('IsInstanceStorageMap.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_storage_map', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_storage_map', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_storage_map', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_storage_map', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceStorageMap.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'create_map_is_storage_map')
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_storage_map', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_storage_map', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_storage_map', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_storage_map', 42))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'create_map_is_storage_map'))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_isinstance_iterator(self):
-        path = self.get_contract_path('IsInstanceIterator.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'is_iterator', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_iterator', [1, 2, 3])
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_iterator', "test_with_string")
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_iterator', 42)
-        self.assertEqual(False, result)
+        path, _ = self.get_deploy_file_paths('IsInstanceIterator.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'storage_find_is_context')
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_iterator', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_iterator', [1, 2, 3]))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_iterator', "test_with_string"))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_iterator', 42))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'storage_find_is_context'))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_isinstance_ecpoint(self):
-        path = self.get_contract_path('IsInstanceECPoint.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IsInstanceECPoint.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(10))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(33))
-        self.assertEqual(True, result)
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', bytes(30))
-        self.assertEqual(False, result)
-        result = self.run_smart_contract(engine, path, 'is_ecpoint', 42)
-        self.assertEqual(False, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'is_ecpoint', bytes(10)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_ecpoint', bytes(33)))
+        expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'is_ecpoint', bytes(30)))
+        expected_results.append(False)
+        invokes.append(runner.call_contract(path, 'is_ecpoint', 42))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
