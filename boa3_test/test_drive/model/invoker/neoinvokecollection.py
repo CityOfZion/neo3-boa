@@ -12,6 +12,11 @@ class NeoInvokeCollection:
         self._invoke_results: List[NeoInvokeResult] = []
         self._pending_results: List[NeoInvokeResult] = []
 
+    def create_contract_invoke(self, contract: TestContract, operation: str, *args: Any) -> NeoInvoke:
+        invoker = NeoInvoke(contract.name, operation, *args)
+        invoker._contract = contract
+        return invoker
+
     def append_contract_invoke(self, contract: TestContract, operation: str, *args: Any,
                                expected_result_type: Type = None) -> NeoInvokeResult:
         invoker = NeoInvoke(contract.name, operation, *args)

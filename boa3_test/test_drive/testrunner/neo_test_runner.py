@@ -7,6 +7,7 @@ from boa3 import env, constants
 from boa3.neo import utils as neo_utils
 from boa3.neo.vm.type.String import String
 from boa3.neo3.vm import vmstate, VMState
+from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvokecollection import NeoInvokeCollection
 from boa3_test.test_drive.model.invoker.neoinvokeresult import NeoInvokeResult
 from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
@@ -138,12 +139,14 @@ class NeoTestRunner:
     def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
         address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
-                                    quantity=amount, asset='NEO')
+                                    quantity=amount,
+                                    asset='NEO')
 
     def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
         address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
-                                    quantity=amount, asset='GAS')
+                                    quantity=f'{(amount / (10 ** 8)):.8f}'.replace('.', ','),
+                                    asset='GAS')
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
@@ -167,6 +170,20 @@ class NeoTestRunner:
 
         return self._invokes.append_contract_invoke(contract, method, *arguments,
                                                     expected_result_type=expected_result_type)
+
+    def run_contract(self, nef_path: str, method: str, *arguments: Any,
+                     account: Account = None,
+                     expected_result_type: Type = None) -> NeoBatchInvoke:
+        if nef_path not in self._contracts:
+            contract = self.deploy_contract(nef_path)
+        else:
+            contract = self._contracts[nef_path]
+
+        invoke = self._invokes.create_contract_invoke(contract, method, *arguments)
+        if isinstance(account, Account):
+            invoke._invoker = account
+        return self._batch.run_contract(invoke,
+                                        expected_result_type=expected_result_type)
 
     def get_contract(self, contract_id: Union[str, bytes]) -> TestContract:
         return self._contracts[contract_id]

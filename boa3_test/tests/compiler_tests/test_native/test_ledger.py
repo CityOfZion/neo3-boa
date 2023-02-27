@@ -7,6 +7,8 @@ from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import CallFlags
 from boa3.neo3.core.types import UInt160, UInt256
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -15,11 +17,20 @@ class TestLedgerContract(BoaTest):
     default_folder: str = 'test_sc/native_test/ledger'
 
     def test_get_hash(self):
-        path = self.get_contract_path('GetHash.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetHash.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(constants.LEDGER_SCRIPT, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(constants.LEDGER_SCRIPT)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_get_block_by_hash(self):
         path = self.get_contract_path('GetBlockByHash.py')
@@ -318,8 +329,17 @@ class TestLedgerContract(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_get_current_index(self):
-        path = self.get_contract_path('GetCurrentIndex.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetCurrentIndex.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(engine.height, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

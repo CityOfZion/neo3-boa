@@ -3,66 +3,77 @@ from boa3.exception import CompilerError
 from boa3.neo.vm.opcode.Opcode import Opcode
 from boa3.neo.vm.type.Integer import Integer
 from boa3.neo.vm.type.String import String
+from boa3.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3_test.tests.test_classes.transactionattribute.oracleresponse import OracleResponseCode
 
 
 class TestNativeContracts(BoaTest):
     default_folder: str = 'test_sc/native_test/oracle'
+    ORACLE_CONTRACT_NAME = 'OracleContract'
 
     def test_get_hash(self):
-        path = self.get_contract_path('GetHash.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetHash.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(constants.ORACLE_SCRIPT, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(constants.ORACLE_SCRIPT)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_oracle_request(self):
-        path = self.get_contract_path('OracleRequestCall.py')
+        path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
 
         test_url = 'abc'
         request_filter = 'ABC'
         callback = '123'
         gas_for_response = 1_0000000
-        result = self.run_smart_contract(engine, path, 'oracle_call',
-                                         test_url, request_filter, callback, None, gas_for_response)
-        self.assertIsVoid(result)
-        contract_script = engine.executed_script_hash.to_array()
 
-        oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
+        oracle_invoke = runner.call_contract(path, 'oracle_call',
+                                             test_url, request_filter, callback, None, gas_for_response)
+        invokes.append(oracle_invoke)
+        expected_results.append(None)
+
+        runner.execute(clear_invokes=False)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        contract_script = oracle_invoke.invoke.contract.script_hash
+
+        oracle_requests = runner.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(1, len(oracle_requests))
         self.assertEqual(4, len(oracle_requests[0].arguments))
         self.assertEqual(contract_script, oracle_requests[0].arguments[1])
         self.assertEqual(test_url, oracle_requests[0].arguments[2])
         self.assertEqual(request_filter, oracle_requests[0].arguments[3])
 
-        request_id = oracle_requests[0].arguments[0]
-        with self.assertRaisesRegex(TestExecutionException, self.METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX):
-            # callback function doesn't exist
-            self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
-
         test_url = 'abc'
         request_filter = 'ABC'
         callback = 'test_callback'
         gas_for_response = 1_0000000
-        result = self.run_smart_contract(engine, path, 'oracle_call',
-                                         test_url, request_filter, callback, None, gas_for_response)
-        self.assertIsVoid(result)
 
-        oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
+        invokes.append(runner.call_contract(path, 'oracle_call',
+                                            test_url, request_filter, callback, None, gas_for_response))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        oracle_requests = runner.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(2, len(oracle_requests))
         self.assertEqual(4, len(oracle_requests[1].arguments))
 
-        request_id = oracle_requests[1].arguments[0]
-
-        with self.assertRaises(TestExecutionException) as engine_exception:
-            # TODO: remove this assertRaises when calling the native OracleContract is fixed
-            result = self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
-            self.assertIsVoid(result)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_oracle_request_url_mismatched_type(self):
         path = self.get_contract_path('OracleRequestUrlMismatchedType.py')
@@ -81,56 +92,66 @@ class TestNativeContracts(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_interop_oracle(self):
-        path = self.get_contract_path('ImportOracle.py')
+        path, _ = self.get_deploy_file_paths('ImportOracle.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
 
         test_url = 'abc'
         request_filter = 'ABC'
         callback = '123'
         gas_for_response = 1_0000000
-        result = self.run_smart_contract(engine, path, 'oracle_call',
-                                         test_url, request_filter, callback, None, gas_for_response)
-        self.assertIsVoid(result)
-        contract_script = engine.executed_script_hash.to_array()
 
-        oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
+        oracle_invoke = runner.call_contract(path, 'oracle_call',
+                                             test_url, request_filter, callback, None, gas_for_response)
+        invokes.append(oracle_invoke)
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        contract_script = oracle_invoke.invoke.contract.script_hash
+
+        oracle_requests = runner.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(1, len(oracle_requests))
         self.assertEqual(4, len(oracle_requests[0].arguments))
         self.assertEqual(contract_script, oracle_requests[0].arguments[1])
         self.assertEqual(test_url, oracle_requests[0].arguments[2])
         self.assertEqual(request_filter, oracle_requests[0].arguments[3])
 
-        request_id = oracle_requests[0].arguments[0]
-        with self.assertRaises(TestExecutionException):
-            # callback function doesn't exist
-            self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_interop_oracle_package(self):
-        path = self.get_contract_path('ImportInteropOracle.py')
+        path, _ = self.get_deploy_file_paths('ImportInteropOracle.py')
+        runner = NeoTestRunner()
 
-        engine = TestEngine()
+        invokes = []
+        expected_results = []
 
         test_url = 'abc'
         request_filter = 'ABC'
         callback = '123'
         gas_for_response = 1_0000000
-        result = self.run_smart_contract(engine, path, 'oracle_call',
-                                         test_url, request_filter, callback, None, gas_for_response)
-        self.assertIsVoid(result)
-        contract_script = engine.executed_script_hash.to_array()
 
-        oracle_requests = engine.get_events('OracleRequest', constants.ORACLE_SCRIPT)
+        oracle_invoke = runner.call_contract(path, 'oracle_call',
+                                             test_url, request_filter, callback, None, gas_for_response)
+        invokes.append(oracle_invoke)
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        contract_script = oracle_invoke.invoke.contract.script_hash
+
+        oracle_requests = runner.get_events('OracleRequest', constants.ORACLE_SCRIPT)
         self.assertEqual(1, len(oracle_requests))
         self.assertEqual(4, len(oracle_requests[0].arguments))
         self.assertEqual(contract_script, oracle_requests[0].arguments[1])
         self.assertEqual(test_url, oracle_requests[0].arguments[2])
         self.assertEqual(request_filter, oracle_requests[0].arguments[3])
 
-        request_id = oracle_requests[0].arguments[0]
-        with self.assertRaises(TestExecutionException):
-            # callback function doesn't exist
-            self.run_oracle_response(engine, request_id, OracleResponseCode.Success, b'12345')
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_oracle_get_price(self):
         from boa3.neo3.contracts import CallFlags
@@ -148,6 +169,10 @@ class TestNativeContracts(BoaTest):
         output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)
