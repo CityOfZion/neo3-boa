@@ -2,13 +2,12 @@ from boa3.boa3 import Boa3
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.interop.interop import Interop
-from boa3.internal.neo import to_script_hash
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.contracts import TriggerType
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.neoxp import utils as neoxp_utils
+from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -18,7 +17,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_check_witness(self):
         path, _ = self.get_deploy_file_paths('CheckWitness.py')
-        account = neoxp_utils.get_account_by_name('testAccount1')
+        account = neoxp.utils.get_account_by_name('testAccount1')
         account_hash = account.script_hash.to_array()
         runner = NeoTestRunner()
 
@@ -43,7 +42,7 @@ class TestRuntimeInterop(BoaTest):
     def test_contract_with_check_witness(self):
         path, _ = self.get_deploy_file_paths('test_sc/interop_test/contract', 'CallScriptHash.py')
         call_contract_path, _ = self.get_deploy_file_paths('CheckWitness.py')
-        account = neoxp_utils.get_account_by_name('testAccount1')
+        account = neoxp.utils.get_account_by_name('testAccount1')
         account_hash = account.script_hash.to_array()
         runner = NeoTestRunner()
 
@@ -75,7 +74,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_check_witness_imported_as(self):
         path, _ = self.get_deploy_file_paths('CheckWitnessImportedAs.py')
-        account = neoxp_utils.get_account_by_name('testAccount1')
+        account = neoxp.utils.get_account_by_name('testAccount1')
         account_hash = account.script_hash.to_array()
         runner = NeoTestRunner()
 
@@ -761,7 +760,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_boa2_runtime_test(self):
         path, _ = self.get_deploy_file_paths('RuntimeBoa2Test.py')
-        account = neoxp_utils.get_account_by_name('testAccount1').script_hash.to_array()
+        account = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
         runner = NeoTestRunner()
 
         invokes = []
@@ -864,7 +863,7 @@ class TestRuntimeInterop(BoaTest):
         expected_results = []
 
         invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(neoxp_utils.get_magic())
+        expected_results.append(neoxp.utils.get_magic())
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
