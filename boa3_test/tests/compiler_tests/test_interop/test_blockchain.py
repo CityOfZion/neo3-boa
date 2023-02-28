@@ -38,7 +38,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(0, result[9])  # transaction_count
 
     def test_get_contract(self):
-        path = self.get_contract_path('GetContract.py')
+        path, _ = self.get_deploy_file_paths('GetContract.py')
         runner = NeoTestRunner()
 
         invokes = []
