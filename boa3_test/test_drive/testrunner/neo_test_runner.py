@@ -145,7 +145,7 @@ class NeoTestRunner:
     def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
         address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
-                                    quantity=f'{(amount / (10 ** 8)):.8f}'.replace('.', ','),
+                                    quantity=f'{(amount / (10 ** 8)):.8f}'.replace('.', constants.SYS_LOCALE_DECIMAL_POINT),
                                     asset='GAS')
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:

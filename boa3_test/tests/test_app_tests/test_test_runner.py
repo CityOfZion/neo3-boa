@@ -1,7 +1,7 @@
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.model.invoker import neoinvokeresult
+from boa3_test.test_drive.model.invoker import invokeresult
 from boa3_test.test_drive.testrunner import utils
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
@@ -14,7 +14,7 @@ class TestTestRunner(BoaTest):
         runner = NeoTestRunner()
 
         invoke_result = runner.call_contract(path, 'Sub', 50, 20)
-        self.assertEqual(neoinvokeresult.NOT_EXECUTED, invoke_result.result)
+        self.assertEqual(invokeresult.NOT_EXECUTED, invoke_result.result)
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state)
