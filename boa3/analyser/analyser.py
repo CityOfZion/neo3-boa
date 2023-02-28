@@ -127,7 +127,7 @@ class Analyser:
         :return: a boolean value that represents if the analysis was successful
         """
         type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log)
-        self.__update_logs(type_analyser)
+        self._update_logs(type_analyser)
         return not type_analyser.has_errors
 
     def __analyse_modules(self,
@@ -147,7 +147,7 @@ class Analyser:
                                          import_stack=import_stack)
         self.symbol_table.update(module_analyser.global_symbols)
         self.ast_tree.body.extend(module_analyser.imported_nodes)
-        self.__update_logs(module_analyser)
+        self._update_logs(module_analyser)
         self._imported_files = module_analyser.analysed_files.copy()
 
         if self.metadata != current_metadata:
@@ -162,10 +162,10 @@ class Analyser:
         :return: a boolean value that represents if the analysis was successful
         """
         standards_analyser = StandardAnalyser(self, self.symbol_table, log=self._log)
-        self.__update_logs(standards_analyser)
+        self._update_logs(standards_analyser)
         return not standards_analyser.has_errors
 
-    def __update_logs(self, analyser: IAstAnalyser):
+    def _update_logs(self, analyser: IAstAnalyser):
         self._errors.extend(analyser.errors)
         self._warnings.extend(analyser.warnings)
 
@@ -180,7 +180,7 @@ class Analyser:
         Tries to optimize the ast after validations
         """
         optimizer = AstOptimizer(self, log=self._log)
-        self.__update_logs(optimizer)
+        self._update_logs(optimizer)
 
     def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
         for symbol_id, symbol in symbol_table.items():
