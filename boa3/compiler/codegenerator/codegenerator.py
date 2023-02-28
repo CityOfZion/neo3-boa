@@ -73,7 +73,7 @@ class CodeGenerator:
 
         visitor = VisitorCodeGenerator(generator, analyser.filename)
         visitor._root_module = analyser.ast_tree
-        visitor.visit(analyser.ast_tree)
+        visitor.visit_and_update_analyser(analyser.ast_tree, analyser)
 
         analyser.update_symbol_table(generator.symbol_table)
         generator.symbol_table.clear()
@@ -87,7 +87,7 @@ class CodeGenerator:
                 deploy_origin_module = symbol.ast
 
             visitor.set_filename(symbol.origin)
-            visitor.visit(symbol.ast)
+            visitor.visit_and_update_analyser(symbol.ast, analyser)
 
             analyser.update_symbol_table(symbol.all_symbols)
             generator.symbol_table.clear()
@@ -115,7 +115,7 @@ class CodeGenerator:
             generator.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
             analyser.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
             visitor._tree = deploy_origin_module
-            visitor.visit(deploy_ast)
+            visitor.visit_and_update_analyser(deploy_ast, analyser)
 
             generator.symbol_table.clear()
             generator.symbol_table.update(analyser.symbol_table.copy())
@@ -125,7 +125,7 @@ class CodeGenerator:
         if len(visitor.global_stmts) > 0:
             global_ast = ast.parse("")
             global_ast.body = visitor.global_stmts
-            visitor.visit(global_ast)
+            visitor.visit_and_update_analyser(global_ast, analyser)
             generator.initialized_static_fields = True
 
         analyser.update_symbol_table(generator.symbol_table)
