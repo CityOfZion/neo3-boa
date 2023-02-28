@@ -2,8 +2,8 @@ import re
 import subprocess
 from typing import Tuple, List, Union
 
-from boa3 import env
-from boa3.neo3.core.types import UInt256
+from boa3.internal import env
+from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.wallet import utils as wallet_utils
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
@@ -65,7 +65,7 @@ def get_account_from_script_hash_or_id(script_hash_or_address: Union[bytes, str]
         raise TypeError(f"Invalid data type {type(script_hash_or_address)}. Expecting str or bytes")
 
     if not isinstance(account, Account):
-        from boa3.neo3.core.types import UInt160
+        from boa3.internal.neo3.core.types import UInt160
         from boa3_test.test_drive.neoxp.model.neoxpaccount import NeoExpressAccount
         account = NeoExpressAccount(UInt160(script_hash), get_address_version())
 

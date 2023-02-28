@@ -4,7 +4,7 @@ import base64
 import enum
 from typing import Any, Dict
 
-from boa3.neo.vm.type.String import String
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.test_classes.transactionattribute import TransactionAttribute, TransactionAttributeType
 
 

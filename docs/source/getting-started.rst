@@ -165,7 +165,7 @@ Your Python Script should look something like this:
 ::
     
     from boa3_test.tests.test_classes.testengine import TestEngine
-    from boa3.neo.smart_contract.VoidType import VoidType
+    from boa3.internal.neo.smart_contract.VoidType import VoidType
 
     def test_hello_world_main():
         root_folder = '{path-to-test-engine-folder}'

@@ -1,9 +1,9 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -943,8 +943,8 @@ class TestBytes(BoaTest):
         path = self.get_contract_path('BytearrayFromListOfInt.py')
         compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
-        from boa3.model.builtin.builtin import Builtin
-        from boa3.model.type.type import Type
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.type.type import Type
         arg_type = Type.list.build([Type.int])
         expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({arg_type.identifier})')
         self.assertEqual(expected_error._error_message, compiler_error_message)

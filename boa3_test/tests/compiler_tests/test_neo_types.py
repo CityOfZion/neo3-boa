@@ -1,7 +1,7 @@
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -423,7 +423,7 @@ class TestNeoTypes(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import public_key_to_script_hash
+        from boa3.internal.neo import public_key_to_script_hash
         value = bytes(range(33))
         script_hash = public_key_to_script_hash(value)
 
@@ -443,7 +443,7 @@ class TestNeoTypes(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import public_key_to_script_hash
+        from boa3.internal.neo import public_key_to_script_hash
         value = bytes(range(33))
         script_hash = public_key_to_script_hash(value)
 
@@ -466,7 +466,7 @@ class TestNeoTypes(BoaTest):
         output, manifest = self.get_output(path)
 
         import os
-        from boa3.neo.vm.type.AbiType import AbiType
+        from boa3.internal.neo.vm.type.AbiType import AbiType
 
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
@@ -762,7 +762,7 @@ class TestNeoTypes(BoaTest):
         output, manifest = self.get_output(path)
 
         import os
-        from boa3.neo.vm.type.AbiType import AbiType
+        from boa3.internal.neo.vm.type.AbiType import AbiType
 
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
@@ -779,7 +779,7 @@ class TestNeoTypes(BoaTest):
         self.assertEqual(AbiType.ByteArray, method['parameters'][0]['type'])
 
     def test_opcode_concat(self):
-        from boa3.neo.vm.opcode.Opcode import Opcode
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
         path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithOpcode.py')
         runner = NeoTestRunner()
 
@@ -797,7 +797,7 @@ class TestNeoTypes(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_opcode_concat_with_bytes(self):
-        from boa3.neo.vm.opcode.Opcode import Opcode
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
         path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithBytes.py')
         runner = NeoTestRunner()
 
@@ -831,7 +831,7 @@ class TestNeoTypes(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_opcode_multiplication(self):
-        from boa3.neo.vm.opcode.Opcode import Opcode
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
         path, _ = self.get_deploy_file_paths('opcode', 'OpcodeMultiplication.py')
         runner = NeoTestRunner()
 

@@ -1,5 +1,5 @@
-from boa3.exception import CompilerError
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -167,7 +167,7 @@ class TestBuiltinMethod(BoaTest):
         runner.call_contract(path, 'main', integer_value, -1)
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state)
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         self.assertRegex(runner.error, f'{Builtin.BuiltinMathFloor.exception_message}$')
 
     def test_decimal_ceil_method(self):
@@ -214,7 +214,7 @@ class TestBuiltinMethod(BoaTest):
         runner.call_contract(path, 'main', integer_value, -1)
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state)
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         self.assertRegex(runner.error, f'{Builtin.BuiltinMathCeil.exception_message}$')
 
     # endregion

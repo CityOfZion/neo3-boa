@@ -26,7 +26,7 @@ class StorageCollection:
             try:
                 key = bytes(key)
             except TypeError:
-                from boa3 import constants
+                from boa3.internal import constants
                 key = key.encode(encoding=constants.ENCODING)
 
         index = self._storage_contracts.index(storage_contract)

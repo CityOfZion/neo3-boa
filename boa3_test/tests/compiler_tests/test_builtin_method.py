@@ -1,12 +1,12 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError
-from boa3.model.type.type import Type
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError
+from boa3.internal.model.type.type import Type
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -513,7 +513,7 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
         invokes.append(runner.call_contract(path, 'Main'))
@@ -532,7 +532,7 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
         invokes.append(runner.call_contract(path, 'Main'))
@@ -551,7 +551,7 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         expected_result = to_script_hash(String('NUnLWXALK2G6gYa7RadPLRiQYunZHnncxg').to_bytes())
         invokes.append(runner.call_contract(path, 'Main',
                                             expected_result_type=bytes))
@@ -575,7 +575,7 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
 
         invokes.append(runner.call_contract(path, 'Main',
@@ -595,7 +595,7 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         from base58 import b58encode
         value = b58encode(Integer(123).to_byte_array())
         if isinstance(value, int):
@@ -624,7 +624,7 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         from base58 import b58encode
 
         script_hash = to_script_hash(String('123').to_bytes())

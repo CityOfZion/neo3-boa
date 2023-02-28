@@ -26,12 +26,12 @@ class NeoInvokeResult:
 
         if self._expected_result_type is not None:
             if self._expected_result_type is not str and isinstance(result, str):
-                from boa3.neo.vm.type.String import String
+                from boa3.internal.neo.vm.type.String import String
                 result = String(result).to_bytes()
 
             if self._expected_result_type in (bool, int):
                 if isinstance(result, bytes):
-                    from boa3.neo.vm.type.Integer import Integer
+                    from boa3.internal.neo.vm.type.Integer import Integer
                     result = Integer.from_bytes(result, signed=True)
 
                 if self._expected_result_type is bool and isinstance(result, int) and result in (False, True):

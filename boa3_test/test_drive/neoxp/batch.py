@@ -1,7 +1,7 @@
 from typing import List, Union, Any, Type
 
-from boa3.neo.vm.type.String import String
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke

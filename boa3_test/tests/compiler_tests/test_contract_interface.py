@@ -1,6 +1,6 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -109,11 +109,11 @@ class TestContractInterface(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_contract_interface_code_optimization(self):
-        from boa3.model.builtin.interop.interop import Interop
-        from boa3.neo.vm.opcode.Opcode import Opcode
-        from boa3.neo.vm.type.Integer import Integer
-        from boa3.neo.vm.type.String import String
-        from boa3.neo3.core.types import UInt160
+        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
+        from boa3.internal.neo.vm.type.Integer import Integer
+        from boa3.internal.neo.vm.type.String import String
+        from boa3.internal.neo3.core.types import UInt160
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
@@ -157,11 +157,11 @@ class TestContractInterface(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_contract_manual_interface_code_optimization(self):
-        from boa3.model.builtin.interop.interop import Interop
-        from boa3.neo.vm.opcode.Opcode import Opcode
-        from boa3.neo.vm.type.Integer import Integer
-        from boa3.neo.vm.type.String import String
-        from boa3.neo3.core.types import UInt160
+        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
+        from boa3.internal.neo.vm.type.Integer import Integer
+        from boa3.internal.neo.vm.type.String import String
+        from boa3.internal.neo3.core.types import UInt160
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()

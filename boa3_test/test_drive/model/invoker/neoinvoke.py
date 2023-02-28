@@ -1,6 +1,6 @@
 from typing import Any, Dict, Tuple, Union
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.testrunner import utils

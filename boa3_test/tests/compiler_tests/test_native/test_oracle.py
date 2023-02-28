@@ -1,9 +1,9 @@
-from boa3 import constants
-from boa3.exception import CompilerError
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal import constants
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -154,8 +154,8 @@ class TestNativeContracts(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_oracle_get_price(self):
-        from boa3.neo3.contracts import CallFlags
-        from boa3.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
+        from boa3.internal.neo3.contracts import CallFlags
+        from boa3.internal.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
 
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
         method = String(OracleGetPriceMethod().method_name).to_bytes()

@@ -1,12 +1,12 @@
-from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.model.builtin.interop.interop import Interop
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts import TriggerType
-from boa3.neo3.vm import VMState
+from boa3.internal import constants
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.contracts import TriggerType
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
@@ -940,7 +940,7 @@ class TestRuntimeInterop(BoaTest):
                                             operand_1, operand_2))
         expected_results.append(expected_result)
 
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         invokes.append(runner.call_contract(path, 'dynamic_sum_with_flags',
                                             operand_1, operand_2, CallFlags.READ_ONLY))
         expected_results.append(expected_result)

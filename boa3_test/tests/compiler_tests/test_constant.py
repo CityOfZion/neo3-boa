@@ -1,18 +1,18 @@
 import ast
 
-from boa3.analyser.analyser import Analyser
-from boa3.compiler.codegenerator.codegenerator import CodeGenerator
-from boa3.model.type.type import Type
-from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
+from boa3.internal.analyser.analyser import Analyser
+from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
+from boa3.internal.model.type.type import Type
+from boa3.internal.model.variable import Variable
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 
 
 class TestConstant(BoaTest):
     def build_code_generator(self) -> CodeGenerator:
-        from boa3.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
         VMCodeMapping.reset()
         return CodeGenerator({})
 
@@ -414,7 +414,7 @@ class TestConstant(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_integer_script_hash(self):
-        from boa3.neo import cryptography, to_script_hash
+        from boa3.internal.neo import cryptography, to_script_hash
 
         input = Integer(123).to_byte_array()
         expected_output = cryptography.hash160(input)
@@ -424,7 +424,7 @@ class TestConstant(BoaTest):
 
     def test_string_script_hash(self):
         import base58
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
 
         input = String('NUnLWXALK2G6gYa7RadPLRiQYunZHnncxg').to_bytes()
         expected_output = base58.b58decode(input)[1:21]
@@ -433,7 +433,7 @@ class TestConstant(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_bytes_script_hash(self):
-        from boa3.neo import cryptography, to_script_hash
+        from boa3.internal.neo import cryptography, to_script_hash
 
         input = b'\x01\x02\x03'
         expected_output = cryptography.hash160(input)
@@ -443,7 +443,7 @@ class TestConstant(BoaTest):
 
     def test_address_script_hash(self):
         from base58 import b58decode
-        from boa3.neo import cryptography, to_script_hash
+        from boa3.internal.neo import cryptography, to_script_hash
 
         input = String('Nd7eAuHsKvvzHzSPyuJQALcYCcUrcwvm5W').to_bytes()
         expected_output = b58decode(input)[1:21]

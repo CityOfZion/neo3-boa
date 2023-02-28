@@ -1,7 +1,7 @@
 from typing import Optional
 
-from boa3 import constants
-from boa3.neo import to_hex_str
+from boa3.internal import constants
+from boa3.internal.neo import to_hex_str
 from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 
 

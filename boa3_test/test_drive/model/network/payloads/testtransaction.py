@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import List, Dict, Any, Union, Optional
 
-from boa3.neo import from_hex_str, utils
-from boa3.neo.smart_contract.notification import Notification
-from boa3.neo3.core.types import UInt256
-from boa3.neo3.vm import VMState
+from boa3.internal.neo import from_hex_str, utils
+from boa3.internal.neo.smart_contract.notification import Notification
+from boa3.internal.neo3.core.types import UInt256
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.model.network.payloads.signer import Signer
 from boa3_test.test_drive.model.network.payloads.witness import Witness
 from boa3_test.test_drive.model.smart_contract.triggertype import TriggerType
@@ -32,7 +32,7 @@ class TestTransaction:
 
     def to_json(self) -> Dict[str, Any]:
         import base64
-        from boa3.neo.vm.type.String import String
+        from boa3.internal.neo.vm.type.String import String
         return {
             'hash': str(self._hash),
             'signers': [signer.to_json() for signer in self._signers],

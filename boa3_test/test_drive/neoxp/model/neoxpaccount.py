@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.wallet import utils
 from boa3_test.test_drive.model.wallet.account import Account
 

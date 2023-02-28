@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from boa3.neo3.vm import VMState, vmstate
+from boa3.internal.neo3.vm import VMState, vmstate
 from boa3_test.test_drive.model.network.payloads.testtransaction import TestTransaction
 from boa3_test.tests.test_classes import transactionattribute as tx_attribute
 from boa3_test.tests.test_classes.signer import Signer
