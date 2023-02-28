@@ -190,7 +190,7 @@ class BoaTest(TestCase):
 
         return contract_path, contract_path
 
-    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
+    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         manifest_output = path.replace('.py', '.manifest.json')
 
@@ -198,9 +198,13 @@ class BoaTest(TestCase):
         from boa3.internal.neo.contracts.neffile import NefFile
         Boa3.compile_and_save(path, root_folder=root_folder, show_errors=log, debug=debug)
 
+        get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
-            output = NefFile.deserialize(file).script
+            if get_raw_nef:
+                output = file
+            else:
+                output = NefFile.deserialize(file).script
 
         with open(manifest_output) as manifest_output:
             import json
@@ -248,7 +252,7 @@ class BoaTest(TestCase):
     def get_bytes_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         if not os.path.isfile(nef_output):
-            return self.compile_and_save(path)
+            return self.compile_and_save(path, get_raw_nef=True)
 
         manifest_output = path.replace('.py', '.manifest.json')
 
