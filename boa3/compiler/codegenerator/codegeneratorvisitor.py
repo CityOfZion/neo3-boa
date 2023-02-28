@@ -92,6 +92,12 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return GeneratorData(origin_node, symbol_id, symbol, result_type, index, origin_object_type, already_generated)
 
+    def visit_and_update_analyser(self, node: ast.AST, target_analyser) -> GeneratorData:
+        result = self.visit(node)
+        if hasattr(target_analyser, '_update_logs'):
+            target_analyser._update_logs(self)
+        return result
+
     def visit(self, node: ast.AST) -> GeneratorData:
         result = super().visit(node)
         if not isinstance(result, GeneratorData):

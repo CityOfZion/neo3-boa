@@ -82,6 +82,10 @@ class Compiler:
             raise NotLoadedException
         analyser = self._analyser.copy()
         result = CodeGenerator.generate_code(analyser)
+
+        if len(analyser.errors) > 0:
+            # should not succeed if there are unexpected internal errors during code generation
+            raise NotLoadedException
         if len(result.bytecode) == 0:
             raise NotLoadedException(empty_script=True)
 
