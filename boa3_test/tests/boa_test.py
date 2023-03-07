@@ -28,6 +28,7 @@ class BoaTest(TestCase):
     CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
     GAS_MUST_BE_POSITIVE_MSG = 'GAS must be positive.'
     GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX = "The given key '\\S+' was not present in the dictionary."
+    INSUFFICIENT_GAS = 'Insufficient GAS.'
     MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
     MAX_ITEM_SIZE_EXCEED_MSG_PREFIX = 'MaxItemSize exceed'
     FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX = r'^Method "{0}" with \d+ parameter\(s\) ' \

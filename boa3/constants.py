@@ -1,3 +1,4 @@
+import locale
 import os
 import platform
 import sys
@@ -18,6 +19,10 @@ SYS_VERSION = platform.python_version()
 BOA_VERSION = _actual_boa_version  # for logging only
 COMPILER_VERSION = BOA_VERSION
 BOA_PACKAGE_PATH = os.path.abspath(f'{__file__}/..')
+
+locale.setlocale(locale.LC_ALL, '')
+SYS_LOCALE = locale.localeconv()
+SYS_LOCALE_DECIMAL_POINT = SYS_LOCALE['decimal_point'] if 'decimal_point' in SYS_LOCALE else '.'
 
 ONE_BYTE_MAX_VALUE = 255
 TWO_BYTES_MAX_VALUE = 256 ** 2 - 1
