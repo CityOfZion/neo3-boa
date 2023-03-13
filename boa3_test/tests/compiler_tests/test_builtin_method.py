@@ -47,7 +47,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -83,7 +83,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -119,7 +119,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(11)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -135,7 +135,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -206,7 +206,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([1, 2, 3, 4])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -253,7 +253,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([1, 2, 3, 4])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -319,7 +319,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -369,7 +369,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -420,7 +420,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([3, 2, 1])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -437,7 +437,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(b'\x03\x02\x01')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -473,7 +473,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([1, 2, 3, 4, 5, 6])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -489,7 +489,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append([1, 2, 3, 4, 5, 6])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -520,7 +520,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(script_hash)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -539,7 +539,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(script_hash)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -563,7 +563,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -583,7 +583,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(script_hash)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -608,7 +608,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(script_hash)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -642,7 +642,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(script_hash)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -680,7 +680,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -698,7 +698,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -716,7 +716,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -734,7 +734,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -763,7 +763,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -792,7 +792,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -816,10 +816,14 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(1, len(invoke_logs))
+        self.assertEqual('42', invoke_logs[0].message)
 
     def test_print_str(self):
         path, _ = self.get_deploy_file_paths('PrintStr.py')
@@ -832,10 +836,14 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(1, len(invoke_logs))
+        self.assertEqual('str', invoke_logs[0].message)
 
     def test_print_bytes(self):
         path, _ = self.get_deploy_file_paths('PrintBytes.py')
@@ -848,10 +856,14 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(1, len(invoke_logs))
+        self.assertEqual('\x01\x02\x03', invoke_logs[0].message)
 
     def test_print_bool(self):
         path, _ = self.get_deploy_file_paths('PrintBool.py')
@@ -864,10 +876,14 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(1, len(invoke_logs))
+        self.assertEqual('true', invoke_logs[0].message)
 
     def test_print_list(self):
         path, _ = self.get_deploy_file_paths('PrintList.py')
@@ -876,6 +892,9 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
+        import json
+        expected_print = json.dumps([1, 2, 3, 4], separators=(',', ':'))
+
         invokes.append(runner.call_contract(path, 'Main'))
         expected_results.append(None)
 
@@ -884,6 +903,10 @@ class TestBuiltinMethod(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(1, len(invoke_logs))
+        self.assertEqual(expected_print, invoke_logs[0].message)
 
     def test_print_user_class(self):
         path, _ = self.get_deploy_file_paths('PrintClass.py')
@@ -892,6 +915,12 @@ class TestBuiltinMethod(BoaTest):
         invokes = []
         expected_results = []
 
+        import json
+        expected_print = json.dumps({
+            'val1': 1,
+            'val2': 2
+        }, separators=(',', ':'))
+
         invokes.append(runner.call_contract(path, 'Main'))
         expected_results.append(None)
 
@@ -900,6 +929,10 @@ class TestBuiltinMethod(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(1, len(invoke_logs))
+        self.assertEqual(expected_print, invoke_logs[0].message)
 
     def test_print_many_values(self):
         path, _ = self.get_deploy_file_paths('PrintManyValues.py')
@@ -912,10 +945,15 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(4, len(invoke_logs))
+        for index in range(4):
+            self.assertEqual(str(index + 1), invoke_logs[index].message)
 
     def test_print_no_args(self):
         path, _ = self.get_deploy_file_paths('PrintNoArgs.py')
@@ -928,10 +966,13 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_logs = runner.get_logs()
+        self.assertEqual(0, len(invoke_logs))
 
     def test_print_missing_outer_function_return(self):
         path = self.get_contract_path('PrintIntMissingFunctionReturn.py')
@@ -952,7 +993,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -974,7 +1015,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -990,7 +1031,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1012,7 +1053,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1028,7 +1069,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1050,7 +1091,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1066,7 +1107,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1082,7 +1123,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1107,7 +1148,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1132,7 +1173,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1168,7 +1209,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1193,7 +1234,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1218,7 +1259,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1238,7 +1279,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(123)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1266,7 +1307,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1284,7 +1325,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1317,7 +1358,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1335,7 +1376,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1368,7 +1409,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1386,7 +1427,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1417,7 +1458,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1435,7 +1476,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1468,7 +1509,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1486,7 +1527,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1519,7 +1560,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1537,7 +1578,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1575,7 +1616,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1618,7 +1659,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1641,7 +1682,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1698,7 +1739,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1723,7 +1764,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1741,7 +1782,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1763,7 +1804,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1781,7 +1822,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1799,7 +1840,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1818,7 +1859,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1842,7 +1883,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1866,7 +1907,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1884,7 +1925,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1902,7 +1943,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1920,7 +1961,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1938,7 +1979,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1957,7 +1998,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1980,7 +2021,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1998,7 +2039,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2015,7 +2056,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2108,7 +2149,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2149,7 +2190,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2174,7 +2215,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2217,7 +2258,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(super_method_expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2314,7 +2355,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(int(value, base))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2423,7 +2464,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(int(value, base))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2460,7 +2501,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(int(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2480,7 +2521,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(int())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2517,7 +2558,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2538,7 +2579,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2559,7 +2600,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(Example()))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2580,7 +2621,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2605,7 +2646,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2626,7 +2667,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2645,7 +2686,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(range(10)))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2666,7 +2707,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(bool(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2699,7 +2740,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(list(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2720,7 +2761,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(list())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2751,7 +2792,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(new_list)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2790,7 +2831,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(list(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2811,7 +2852,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(list(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2832,7 +2873,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(list(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2858,7 +2899,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(list(val))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2887,7 +2928,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(str())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2908,7 +2949,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(str(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -2929,7 +2970,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(str(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

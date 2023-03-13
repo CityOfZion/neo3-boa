@@ -178,12 +178,12 @@ class BoaTest(TestCase):
             raise FileNotFoundError(path)
         return path
 
-    def get_deploy_file_paths(self, *args: str) -> Tuple[str, str]:
+    def get_deploy_file_paths(self, *args: str, compile_if_found: bool = False) -> Tuple[str, str]:
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
             file_path_without_ext, _ = os.path.splitext(contract_path)
             nef_path, manifest_path = f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
-            if not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
+            if compile_if_found or not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
                 # both .nef and .manifest.json are required to execute the smart contract
                 self.compile_and_save(contract_path, log=False)
             return nef_path, manifest_path
