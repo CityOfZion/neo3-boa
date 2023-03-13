@@ -607,7 +607,17 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_list(self):
         path = self.get_contract_path('PrintList.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
+
+    def test_print_user_class(self):
+        path = self.get_contract_path('PrintClass.py')
+        engine = TestEngine()
+
+        result = self.run_smart_contract(engine, path, 'Main')
+        self.assertIsVoid(result)
 
     def test_print_many_values(self):
         path = self.get_contract_path('PrintManyValues.py')

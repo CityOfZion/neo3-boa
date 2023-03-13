@@ -151,3 +151,6 @@ class UserClass(ClassArrayType):
     @classmethod
     def build(cls, value: Any) -> IType:
         return cls()
+
+
+_EMPTY_CLASS = UserClass('-internal_use')

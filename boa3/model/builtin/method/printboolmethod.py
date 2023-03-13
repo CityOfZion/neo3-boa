@@ -16,21 +16,11 @@ class PrintBoolMethod(PrintMethod):
     @property
     def print_value_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         if self._print_value_opcodes is None:
-            from boa3.compiler.codegenerator import get_bytes_count
-            if_value_is_true = [
-                OpcodeHelper.get_pushdata_and_data('True')
-            ]
-            if_value_is_false = [
-                OpcodeHelper.get_pushdata_and_data('False'),
-                OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(if_value_is_true), jump_through=True)
-            ]
-
+            from boa3.model.builtin.interop.interop import Interop
             self._print_value_opcodes = (
                 [
                     (Opcode.NZ, b''),
-                    OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(if_value_is_false), jump_through=True),
-                ] + if_value_is_false
-                + if_value_is_true
+                ] + Interop.JsonSerialize.opcode
             )
 
         return super().print_value_opcodes

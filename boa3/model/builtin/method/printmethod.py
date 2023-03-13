@@ -105,6 +105,7 @@ class PrintMethod(IBuiltinMethod):
             return self
 
         from boa3.model.builtin.method.printbytestringmethod import PrintByteStringMethod
+        from boa3.model.type.classes.userclass import UserClass
         from boa3.model.type.type import Type
         from boa3.model.type.primitive.bytestringtype import ByteStringType
 
@@ -118,6 +119,10 @@ class PrintMethod(IBuiltinMethod):
 
         elif ByteStringType.build().is_type_of(value):
             return PrintByteStringMethod(value)
+
+        elif isinstance(value, UserClass):
+            from boa3.model.builtin.method.printclassmethod import PrintClassMethod
+            return PrintClassMethod(value)
 
         elif Type.sequence.is_type_of(value):
             from boa3.model.builtin.method.printsequencemethod import PrintSequenceMethod
