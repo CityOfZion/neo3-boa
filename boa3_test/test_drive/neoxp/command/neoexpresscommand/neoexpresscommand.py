@@ -1,3 +1,4 @@
+import abc
 from typing import Dict, List
 
 
@@ -7,11 +8,21 @@ class NeoExpressCommand:
             args = []
 
         if not isinstance(options, dict):
-            options = {}
+            options = self._get_options()
 
         self._command_id = command_id
         self._args = args
         self._options = options
+
+    @abc.abstractmethod
+    def _get_options(self) -> Dict[str, str]:
+        import os.path
+        options = {}
+
+        if hasattr(self, 'input') and isinstance(self.input, str) and os.path.isfile(self.input):
+            options['--input'] = self.input
+
+        return options
 
     def cli_command(self) -> str:
         command = [self._command_id]

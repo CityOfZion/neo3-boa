@@ -28,7 +28,7 @@ class NeoTestRunner:
     _BATCH_FILE = f'{_FOLDER_NAME}.batch'
     _CHECKPOINT_FILE = f'{_FOLDER_NAME}.neoxp-checkpoint'
 
-    _DEFAULT_ACCOUNT = neoxp_utils.get_account_by_name('genesis')
+    _DEFAULT_ACCOUNT = neoxp_utils.get_default_account()
 
     def __init__(self, neoxp_path: str = None):
         self._vm_state: VMState = VMState.NONE
@@ -148,16 +148,17 @@ class NeoTestRunner:
             self._cli_log = log_to_append
 
     def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
-        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
+        address = neoxp_utils.get_account_from_script_hash_or_name(script_hash_or_address)
+        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     quantity=amount,
                                     asset='NEO')
 
     def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_identifier_from_script_hash_or_name(script_hash_or_address)
-        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT.name, receiver=address,
-                                    quantity=f'{(amount / (10 ** 8)):.8f}'.replace('.', constants.SYS_LOCALE_DECIMAL_POINT),
-                                    asset='GAS')
+        address = neoxp_utils.get_account_from_script_hash_or_name(script_hash_or_address)
+        gas_decimals = 8
+        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
+                                    asset='GAS', decimals=gas_decimals,
+                                    quantity=(amount / (10 ** gas_decimals)))
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
