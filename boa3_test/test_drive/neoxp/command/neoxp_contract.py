@@ -1,31 +1,19 @@
+from boa3_test.test_drive.model.wallet.account import Account
+from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
 from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
 from boa3_test.tests.test_classes.witnessscope import WitnessScope
 
 
-def deploy(nef_path: str, account: str, witness_scope: WitnessScope = None,
+def deploy(nef_path: str, account: Account, witness_scope: WitnessScope = None,
            force: bool = False, trace: bool = False) -> NeoExpressCommand:
-    options = {}
-    if isinstance(witness_scope, WitnessScope):
-        options['--witness-scope'] = witness_scope.name
-    if trace:
-        options['--trace'] = ''
-    if force:
-        options['--force'] = ''
-
-    return NeoExpressCommand('contract deploy', [nef_path, account], options)
+    return neoxp.contract.ContractDeployCommand(nef_path, account,
+                                                witness_scope=witness_scope,
+                                                force=force, trace=trace)
 
 
-def run(contract_id: str, method: str, *args: str, account: str,
+def run(contract_id: str, method: str, *args: str, account: Account,
         witness_scope: WitnessScope = None, trace: bool = False) -> NeoExpressCommand:
-    options = {}
-    if isinstance(witness_scope, WitnessScope):
-        options['--witness-scope'] = witness_scope.name
-    if isinstance(account, str):
-        options['--account'] = account
-    if trace:
-        options['--trace'] = ''
-
-    arguments = [contract_id, method]
-    arguments.extend(args)
-
-    return NeoExpressCommand('contract run', arguments, options)
+    return neoxp.contract.ContractRunCommand(contract_id, method, *args,
+                                             account=account,
+                                             witness_scope=witness_scope,
+                                             trace=trace)
