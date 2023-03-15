@@ -316,7 +316,7 @@ class BoaTest(TestCase):
         if calling_script_hash is not None and len(calling_script_hash) == constants.SIZE_OF_INT160:
             test_engine.set_calling_script_hash(calling_script_hash)
 
-        from boa3_test.tests.test_classes.witnessscope import WitnessScope
+        from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
         for account in signer_accounts:
             test_engine.add_signer_account(account, WitnessScope.Global)
 
