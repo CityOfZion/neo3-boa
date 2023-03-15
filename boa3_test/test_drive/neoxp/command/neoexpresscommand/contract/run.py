@@ -1,10 +1,10 @@
 from typing import Any, Dict, Union
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import utils
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.contract.icontractcommand import IContractCommand
-from boa3_test.tests.test_classes.witnessscope import WitnessScope
 
 
 class ContractRunCommand(IContractCommand):

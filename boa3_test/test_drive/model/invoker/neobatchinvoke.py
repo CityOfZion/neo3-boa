@@ -1,16 +1,15 @@
 from typing import Type, Iterable
 
-from boa3.internal.neo3.core.types import UInt256
+from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.invoker import invokeresult
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 
 
-class NeoBatchInvoke:
+class NeoBatchInvoke(ITransactionObject):
     def __init__(self, invoke: NeoInvoke, tx_pos: int, expected_result_type: Type = None):
+        super().__init__()
         self._invoke: NeoInvoke = invoke
         self._tx_pos: int = tx_pos
-        self._log: str = ''
-        self._tx_id: UInt256 = None
         self._result = invokeresult.NOT_EXECUTED
 
         if not isinstance(expected_result_type, type):
@@ -47,19 +46,6 @@ class NeoBatchInvoke:
                 result = tuple(result)
 
         return result
-
-    @property
-    def tx_id(self) -> UInt256:
-        if not isinstance(self._tx_id, UInt256) and not self._log.isspace():
-            try:
-                import re
-                groups = re.match(r'.*?(?P<txhash>0x\w+) submitted$', self._log).groupdict()
-                tx_hash = groups['txhash']
-                self._tx_id = UInt256.from_string(tx_hash)
-            except:
-                pass
-
-        return self._tx_id
 
     def __repr__(self):
         return f'{self._invoke.__repr__()} -> {self.tx_id.__repr__()}'

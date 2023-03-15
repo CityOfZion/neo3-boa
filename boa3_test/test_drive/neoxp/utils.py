@@ -3,11 +3,14 @@ import subprocess
 from typing import Tuple, List, Union
 
 from boa3.internal import env
+from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.wallet import utils as wallet_utils
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
 from boa3_test.test_drive.neoxp.model.neoxpconfig import NeoExpressConfig
 from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContract as Contract
+from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTransaction as Transaction
+from boa3_test.test_drive.testrunner.blockchain.transactionlog import TestRunnerTransactionLog as TransactionLog
 
 _NEOXP_CONFIG = NeoExpressConfig(f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}/default.neo-express')
 
@@ -40,7 +43,7 @@ def get_magic() -> int:
     return _NEOXP_CONFIG.magic
 
 
-def get_account_from_script_hash_or_name(script_hash_or_address: Union[bytes, str]) -> Account:
+def get_account_from_script_hash_or_id(script_hash_or_address: Union[bytes, str]) -> Account:
     if isinstance(script_hash_or_address, bytes):
         script_hash = script_hash_or_address
         address = wallet_utils.address_from_script_hash(script_hash, get_address_version())
@@ -52,7 +55,7 @@ def get_account_from_script_hash_or_name(script_hash_or_address: Union[bytes, st
         raise TypeError(f"Invalid data type {type(script_hash_or_address)}. Expecting str or bytes")
 
     if not isinstance(account, Account):
-        from boa3.neo3.core.types import UInt160
+        from boa3.internal.neo3.core.types import UInt160
         from boa3_test.test_drive.neoxp.model.neoxpaccount import NeoExpressAccount
         account = NeoExpressAccount(UInt160(script_hash), get_address_version())
 
@@ -90,6 +93,41 @@ def get_deployed_contracts(neoxp_path: str) -> List[Contract]:
             # don't break if some line doesn't match the regex
             continue
     return contracts
+
+
+def _get_transaction_raw(neoxp_path: str, tx_hash: UInt256) -> str:
+    command = neoxp.show.ShowTransactionCommand(tx_hash.to_array(), neo_express_data_file=neoxp_path)
+    stdout, stderr = run_neo_express_cli(command)
+    return stdout
+
+
+def get_transaction(neoxp_path: str, tx_hash: UInt256) -> Transaction:
+    raw_result = _get_transaction_raw(neoxp_path, tx_hash)
+
+    tx: Transaction
+    try:
+        import json
+        result_json = json.loads(raw_result)
+        tx = Transaction.from_json(result_json['transaction'])
+    except:
+        tx = None
+
+    return tx
+
+
+def get_transaction_log(neoxp_path: str, tx_hash: UInt256) -> TransactionLog:
+    raw_result = _get_transaction_raw(neoxp_path, tx_hash)
+
+    tx_log: TransactionLog
+    try:
+        import json
+        result_json = json.loads(raw_result)
+        tx_log = TransactionLog.from_json(result_json['application-log'])
+        tx_log._tx_id = tx_hash
+    except:
+        tx_log = None
+
+    return tx_log
 
 
 def run_batch(neoxp_path: str, batch_path: str, reset: bool = False) -> str:

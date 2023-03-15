@@ -2,10 +2,12 @@ from typing import Optional
 
 from boa3.internal import constants
 from boa3.internal.neo import to_hex_str
+from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 
 
-class TestContract:
+class TestContract(ITransactionObject):
     def __init__(self, file_path: str, manifest_path: str):
+        super().__init__()
         self._nef_path: str = file_path
         self._manifest_path: str = manifest_path
         self._manifest: dict = self._read_manifest()

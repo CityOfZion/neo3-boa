@@ -927,6 +927,10 @@ class TestNeoTypes(BoaTest):
         invokes = []
         expected_results = []
 
+        contract_deploy = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
+        tx_hash = contract_deploy.tx_id.to_array()
+
         invokes.append(runner.call_contract(path, 'is_tx', bytes(10)))
         expected_results.append(False)
         invokes.append(runner.call_contract(path, 'is_tx', [1, 2, 3]))
@@ -935,14 +939,8 @@ class TestNeoTypes(BoaTest):
         expected_results.append(False)
         invokes.append(runner.call_contract(path, 'is_tx', 42))
         expected_results.append(False)
-
-        # TODO: refactor on #864dzuvjt to test with tx hash
-        # txs = engine.current_block.get_transactions()
-        # self.assertGreater(len(txs), 0)
-        # tx_hash = txs[-1].hash
-
-        # invokes.append(runner.call_contract(path, 'get_transaction_is_tx', tx_hash))
-        # expected_results.append(True)
+        invokes.append(runner.call_contract(path, 'get_transaction_is_tx', tx_hash))
+        expected_results.append(True)
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)

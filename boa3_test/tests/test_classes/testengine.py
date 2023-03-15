@@ -10,6 +10,7 @@ from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt160
 from boa3.internal.neo3.vm import VMState, vmstate
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.contractcollection import ContractCollection
 from boa3_test.tests.test_classes.signer import Signer
@@ -17,7 +18,6 @@ from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.testcontract import TestContract
 from boa3_test.tests.test_classes.transaction import Transaction
 from boa3_test.tests.test_classes.transactionattribute import oracleresponse
-from boa3_test.tests.test_classes.witnessscope import WitnessScope
 
 
 class TestEngine:

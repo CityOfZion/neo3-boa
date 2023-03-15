@@ -247,9 +247,8 @@ class TestNeoClass(BoaTest):
         # cannot test it with a Test Invoke
         runner.call_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey)
         # expected_results.append(True)
-
-        # TODO: check tx result on #864dzuvjt
-        runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey)
+        invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                     account=candidate)
 
         runner.execute(account=candidate)
         self.assertEqual(VMState.FAULT, runner.vm_state)
@@ -257,6 +256,12 @@ class TestNeoClass(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
 
     def test_unregister_candidate(self):
         path, _ = self.get_deploy_file_paths('UnregisterCandidate.py')
@@ -336,9 +341,8 @@ class TestNeoClass(BoaTest):
         runner.execute(account=account)
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        # TODO: check tx result on #864dzuvjt
-        runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
-                            account=candidate)
+        invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                     account=candidate)
 
         # candidate was registered
         # TestRunner doesn't have WitnessScope modifier
@@ -368,6 +372,12 @@ class TestNeoClass(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
 
         result = get_candidates_call_1.result
         self.assertEqual(1, len(result))
@@ -429,9 +439,8 @@ class TestNeoClass(BoaTest):
         register_gas_price = 1_000
         runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
 
-        # TODO: check tx result on #864dzuvjt
-        runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
-                            account=candidate)
+        register_invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                              account=candidate)
 
         # after registering one
         invoke = runner.call_contract(path, 'main')
@@ -441,6 +450,12 @@ class TestNeoClass(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(register_invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
 
         result = invoke.result
         self.assertEqual(1, len(result))
@@ -474,9 +489,8 @@ class TestNeoClass(BoaTest):
 
         runner.add_neo(account_script_hash, n_votes)
 
-        # TODO: check tx result on #864dzuvjt
-        runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
-                            account=candidate)
+        invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                     account=candidate)
 
         # candidate was registered
         invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'vote', account_script_hash, candidate_pubkey))
@@ -490,6 +504,12 @@ class TestNeoClass(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
 
     def test_get_committee(self):
         path, _ = self.get_deploy_file_paths('GetCommittee.py')

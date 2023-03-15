@@ -1,7 +1,7 @@
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
 from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
-from boa3_test.tests.test_classes.witnessscope import WitnessScope
 
 
 def deploy(nef_path: str, account: Account, witness_scope: WitnessScope = None,
