@@ -1,6 +1,7 @@
 from typing import Union
 
 from boa3 import constants as __boa_constants
+from boa3.neo import to_hex_str
 
 GAS_DECIMALS = __boa_constants.GAS_DECIMALS
 NEO_DECIMALS = __boa_constants.NEO_DECIMALS

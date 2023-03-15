@@ -2,6 +2,7 @@ from typing import List, Union, Any, Type
 
 from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
+from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
@@ -17,8 +18,8 @@ class NeoExpressBatch:
         self._transaction_submissions: List[int] = []
         self._transaction_logs: List[str] = []
 
-        self._contract_invokes: List[NeoBatchInvoke] = []
-        self._contract_invokes_pos: List[int] = []
+        self._tx_invokes: List[ITransactionObject] = []
+        self._tx_invokes_pos: List[int] = []
 
     def is_empty(self) -> bool:
         return len(self._instructions) == 0
@@ -36,10 +37,15 @@ class NeoExpressBatch:
             deployer_id = utils.get_default_account()  # neo express default account
 
         tx_pos = len(self._instructions)
+        deployed_contract = TestContract(nef_path, nef_path.replace('.nef', '.manifest.json'))
+
         self._instructions.append(neoxp.contract.deploy(nef_path, deployer_id))
         self._transaction_submissions.append(tx_pos)
 
-        return TestContract(nef_path, nef_path.replace('.nef', '.manifest.json'))
+        self._tx_invokes.append(deployed_contract)
+        self._tx_invokes_pos.append(tx_pos)
+
+        return deployed_contract
 
     def run_contract(self, invoke: NeoInvoke,
                      expected_result_type: Type = None) -> NeoBatchInvoke:
@@ -55,8 +61,8 @@ class NeoExpressBatch:
                                                      account=invoker_id))
         self._transaction_submissions.append(tx_pos)
 
-        self._contract_invokes.append(batch_invoke)
-        self._contract_invokes_pos.append(tx_pos)
+        self._tx_invokes.append(batch_invoke)
+        self._tx_invokes_pos.append(tx_pos)
 
         return batch_invoke
 
@@ -116,9 +122,9 @@ class NeoExpressBatch:
         for lineno, line in enumerate(log.splitlines()[-len(self._instructions):]):
             if lineno in self._transaction_submissions:
                 tx_logs.append(line)
-            if lineno in self._contract_invokes_pos:
-                index = self._contract_invokes_pos.index(lineno)
-                self._contract_invokes[index]._log = line
+            if lineno in self._tx_invokes_pos:
+                index = self._tx_invokes_pos.index(lineno)
+                self._tx_invokes[index]._log = line
         self._transaction_logs = tx_logs
 
     def has_new_deploys_since(self, last_verified_command: int = -1):

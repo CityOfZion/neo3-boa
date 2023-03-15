@@ -6,6 +6,7 @@ from typing import Any, List, Tuple, Dict, Optional, Union, Type
 from boa3 import env, constants
 from boa3.neo import utils as neo_utils
 from boa3.neo.vm.type.String import String
+from boa3.neo3.core.types import UInt256
 from boa3.neo3.vm import vmstate, VMState
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvokecollection import NeoInvokeCollection
@@ -19,6 +20,8 @@ from boa3_test.test_drive.testrunner.blockchain.log import TestRunnerLog as Log
 from boa3_test.test_drive.testrunner.blockchain.notification import TestRunnerNotification as Notification
 from boa3_test.test_drive.testrunner.blockchain.storage import TestRunnerStorage as Storage
 from boa3_test.test_drive.testrunner.blockchain.storagecollection import StorageCollection
+from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTransaction as Transaction
+from boa3_test.test_drive.testrunner.blockchain.transactionlog import TestRunnerTransactionLog as TransactionLog
 
 
 class NeoTestRunner:
@@ -148,17 +151,23 @@ class NeoTestRunner:
             self._cli_log = log_to_append
 
     def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_name(script_hash_or_address)
+        address = neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     quantity=amount,
                                     asset='NEO')
 
     def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_name(script_hash_or_address)
+        address = neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
         gas_decimals = 8
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     asset='GAS', decimals=gas_decimals,
                                     quantity=(amount / (10 ** gas_decimals)))
+
+    def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
+        return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash)
+
+    def get_transaction_result(self, tx_hash: Union[UInt256, bytes]) -> Optional[TransactionLog]:
+        return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash)
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
@@ -200,7 +209,14 @@ class NeoTestRunner:
     def get_contract(self, contract_id: Union[str, bytes]) -> TestContract:
         return self._contracts[contract_id]
 
-    def update_contracts(self):
+    def update_contracts(self, export_checkpoint: bool = False):
+        self._generate_root_folder()
+        if export_checkpoint:
+            self._create_checkpoint_from_batch()
+        else:
+            self._update_contracts()
+
+    def _update_contracts(self):
         cur_batch_size = self._batch.cur_size()
         batch_file_path = self.get_full_path(self._BATCH_FILE)
 
@@ -341,7 +357,7 @@ class NeoTestRunner:
                                                       overwrite=True)
             self._batch_size_since_last_checkpoint = self._batch.cur_size()
         # update list of contracts
-        self.update_contracts()
+        self._update_contracts()
 
     def _generate_invoke_file(self):
         invoke_file_content = self._invokes.to_json()

@@ -1,9 +1,9 @@
 import json
 from typing import Any, Dict
 
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.contract.icontractcommand import IContractCommand
-from boa3_test.tests.test_classes.witnessscope import WitnessScope
 
 
 class ContractDeployCommand(IContractCommand):
