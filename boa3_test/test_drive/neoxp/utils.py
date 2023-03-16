@@ -8,6 +8,7 @@ from boa3_test.test_drive.model.wallet import utils as wallet_utils
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
 from boa3_test.test_drive.neoxp.model.neoxpconfig import NeoExpressConfig
+from boa3_test.test_drive.testrunner.blockchain.block import TestRunnerBlock as Block
 from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContract as Contract
 from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTransaction as Transaction
 from boa3_test.test_drive.testrunner.blockchain.transactionlog import TestRunnerTransactionLog as TransactionLog
@@ -41,6 +42,15 @@ def get_address_version() -> int:
 
 def get_magic() -> int:
     return _NEOXP_CONFIG.magic
+
+
+def get_genesis_block() -> Block:
+    return _NEOXP_CONFIG.genesis_block
+
+
+def _set_genesis_block(found_block: Block):
+    if _NEOXP_CONFIG.genesis_block is None:  # avoid overwrite
+        _NEOXP_CONFIG._genesis_block = found_block
 
 
 def get_account_from_script_hash_or_id(script_hash_or_address: Union[bytes, str]) -> Account:
@@ -128,6 +138,36 @@ def get_transaction_log(neoxp_path: str, tx_hash: UInt256) -> TransactionLog:
         tx_log = None
 
     return tx_log
+
+
+def get_latest_block(neoxp_path: str) -> Block:
+    return get_block(neoxp_path)
+
+
+def get_block(neoxp_path: str, block_hash_or_index: Union[UInt256, int] = None) -> Block:
+    if isinstance(block_hash_or_index, (UInt256, int)):
+        if isinstance(block_hash_or_index, int):
+            if block_hash_or_index < 0:
+                block_hash_or_index = 0
+        else:
+            block_hash_or_index = block_hash_or_index.to_array()
+
+        command = neoxp.show.ShowBlockCommand(block_hash_or_index,
+                                              neo_express_data_file=neoxp_path)
+    else:
+        command = neoxp.show.ShowBlockCommand(neo_express_data_file=neoxp_path)
+
+    stdout, stderr = run_neo_express_cli(command)
+
+    block: Block
+    try:
+        import json
+        result_json = json.loads(stdout)
+        block = Block.from_json(result_json)
+    except:
+        block = None
+
+    return block
 
 
 def run_batch(neoxp_path: str, batch_path: str, reset: bool = False) -> str:

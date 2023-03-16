@@ -16,6 +16,7 @@ from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils as neoxp_utils
 from boa3_test.test_drive.neoxp.batch import NeoExpressBatch
+from boa3_test.test_drive.testrunner.blockchain.block import TestRunnerBlock as Block
 from boa3_test.test_drive.testrunner.blockchain.log import TestRunnerLog as Log
 from boa3_test.test_drive.testrunner.blockchain.notification import TestRunnerNotification as Notification
 from boa3_test.test_drive.testrunner.blockchain.storage import TestRunnerStorage as Storage
@@ -162,6 +163,24 @@ class NeoTestRunner:
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     asset='GAS', decimals=gas_decimals,
                                     quantity=(amount / (10 ** gas_decimals)))
+
+    def get_genesis_block(self) -> Block:
+        return self.get_block(0)
+
+    def get_latest_block(self) -> Block:
+        return self.get_block(None)
+
+    def get_block(self, block_hash_or_index: Union[UInt256, bytes, int]) -> Optional[Block]:
+        genesis = neoxp_utils.get_genesis_block()
+        if isinstance(genesis, Block) and block_hash_or_index in (genesis.hash, genesis.index):
+            # genesis block doesn't change between neo express resets
+            return genesis
+
+        block = neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index)
+
+        if not isinstance(genesis, Block) and isinstance(block, Block) and block.index == 0:
+            neoxp_utils._set_genesis_block(block)  # optimization for consecutive executions
+        return block
 
     def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
         return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash)
@@ -375,5 +394,5 @@ class NeoTestRunner:
                                    text=True)
         return process.communicate()
 
-    def increase_block(self, new_height: int = None):
-        self._batch.mint_block(new_height)
+    def increase_block(self, block_to_mint: int = None):
+        self._batch.mint_block(block_to_mint)
