@@ -2,12 +2,13 @@ from typing import List, Union, Any, Type
 
 from boa3.neo.vm.type.String import String
 from boa3.neo3.core.types import UInt160
+from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils
-from boa3_test.test_drive.neoxp.command import neoxp, neoxp_contract
+from boa3_test.test_drive.neoxp.command import neoxp
 from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
 
 
@@ -17,8 +18,8 @@ class NeoExpressBatch:
         self._transaction_submissions: List[int] = []
         self._transaction_logs: List[str] = []
 
-        self._contract_invokes: List[NeoBatchInvoke] = []
-        self._contract_invokes_pos: List[int] = []
+        self._tx_invokes: List[ITransactionObject] = []
+        self._tx_invokes_pos: List[int] = []
 
     def is_empty(self) -> bool:
         return len(self._instructions) == 0
@@ -31,42 +32,49 @@ class NeoExpressBatch:
 
     def deploy_contract(self, nef_path: str, deployer: Account = None) -> TestContract:
         if hasattr(deployer, 'name') and isinstance(deployer.name, str):
-            deployer_id = deployer.name
+            deployer_id = deployer
         else:
-            deployer_id = 'genesis'  # neo express default account
+            deployer_id = utils.get_default_account()  # neo express default account
 
         tx_pos = len(self._instructions)
-        self._instructions.append(neoxp_contract.deploy(nef_path, deployer_id))
+        deployed_contract = TestContract(nef_path, nef_path.replace('.nef', '.manifest.json'))
+
+        self._instructions.append(neoxp.contract.deploy(nef_path, deployer_id))
         self._transaction_submissions.append(tx_pos)
 
-        return TestContract(nef_path, nef_path.replace('.nef', '.manifest.json'))
+        self._tx_invokes.append(deployed_contract)
+        self._tx_invokes_pos.append(tx_pos)
+
+        return deployed_contract
 
     def run_contract(self, invoke: NeoInvoke,
                      expected_result_type: Type = None) -> NeoBatchInvoke:
         if hasattr(invoke.invoker, 'name') and isinstance(invoke.invoker.name, str):
-            invoker_id = invoke.invoker.name
+            invoker_id = invoke.invoker
         else:
-            invoker_id = 'genesis'  # neo express default account
+            invoker_id = utils.get_default_account()  # neo express default account
 
         tx_pos = len(self._instructions)
         batch_invoke = NeoBatchInvoke(invoke, tx_pos, expected_result_type=expected_result_type)
 
-        self._instructions.append(neoxp_contract.run(invoke.contract_id, invoke.operation, *invoke.args,
+        self._instructions.append(neoxp.contract.run(invoke.contract_id, invoke.operation, *invoke.args,
                                                      account=invoker_id))
         self._transaction_submissions.append(tx_pos)
 
-        self._contract_invokes.append(batch_invoke)
-        self._contract_invokes_pos.append(tx_pos)
+        self._tx_invokes.append(batch_invoke)
+        self._tx_invokes_pos.append(tx_pos)
 
         return batch_invoke
 
-    def transfer_assets(self, sender: str, receiver: str,
-                        quantity: Union[int, str], asset: Union[str, UInt160], data: Any = None):
+    def transfer_assets(self, sender: Account, receiver: Account, asset: Union[str, UInt160],
+                        quantity: Union[int, float], decimals: int = 0, data: Any = None):
         if isinstance(asset, UInt160):
             asset = asset.__str__()
 
-        self._instructions.append(neoxp.transfer(sender, receiver,
-                                                 quantity, asset, data))
+        self._instructions.append(neoxp.transfer(sender, receiver, asset,
+                                                 quantity, decimals=decimals,
+                                                 data=data)
+                                  )
 
     def mint_block(self, block_count: int):
         self._instructions.append(neoxp.fastfwd(block_count))
@@ -114,9 +122,9 @@ class NeoExpressBatch:
         for lineno, line in enumerate(log.splitlines()[-len(self._instructions):]):
             if lineno in self._transaction_submissions:
                 tx_logs.append(line)
-            if lineno in self._contract_invokes_pos:
-                index = self._contract_invokes_pos.index(lineno)
-                self._contract_invokes[index]._log = line
+            if lineno in self._tx_invokes_pos:
+                index = self._tx_invokes_pos.index(lineno)
+                self._tx_invokes[index]._log = line
         self._transaction_logs = tx_logs
 
     def has_new_deploys_since(self, last_verified_command: int = -1):

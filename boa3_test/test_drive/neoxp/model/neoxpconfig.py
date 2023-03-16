@@ -3,9 +3,10 @@ import os.path
 from typing import List
 
 from boa3_test.test_drive.model.wallet.account import Account
+from boa3_test.test_drive.neoxp.command import utils
 from boa3_test.test_drive.neoxp.model.neoxpaccount import NeoExpressAccount
 
-_VERSION = 53  # default Neo account version
+_VERSION = utils.DEFAULT_ACCOUNT_VERSION  # default Neo account version
 
 
 class NeoExpressConfig:
@@ -25,6 +26,7 @@ class NeoExpressConfig:
 
         NeoExpressConfig._VERSION = self._version  # avoid circular import to set accounts
 
+        genesis_account = None
         if len(config_json['consensus-nodes']) > 0:
             node1_accounts = _wallet_accounts_from_json(config_json['consensus-nodes'][0]['wallet'])
             genesis_account = next((account for account in node1_accounts if account.name is None),
@@ -41,6 +43,9 @@ class NeoExpressConfig:
         for custom_wallet in config_json['wallets']:
             accounts.extend(_wallet_accounts_from_json(custom_wallet))
         self._accounts = accounts
+        self._default_account = (genesis_account
+                                 if genesis_account is not None or len(accounts) == 0
+                                 else accounts[0])
 
     @property
     def magic(self):
@@ -53,6 +58,10 @@ class NeoExpressConfig:
     @property
     def accounts(self):
         return self._accounts.copy()
+
+    @property
+    def default_account(self):
+        return self._default_account
 
 
 def _wallet_accounts_from_json(wallet_json: dict) -> List[Account]:

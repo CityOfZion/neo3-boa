@@ -8,6 +8,7 @@ from boa3.neo.vm.type.String import String
 from boa3.neo3.contracts import CallFlags
 from boa3.neo3.core.types import UInt160, UInt256
 from boa3.neo3.vm import VMState
+from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -90,34 +91,35 @@ class TestLedgerContract(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        engine.increase_block()
-        sender = bytes(range(20))
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000, signer_accounts=[sender])
+        sender = neoxp.utils.get_default_account()
+        contract_deploy = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
 
-        txs = engine.get_transactions()
-        self.assertGreater(len(txs), 0)
-        hash_ = txs[0].hash
-        script = txs[0]._script
+        hash_ = contract_deploy.tx_id
+        self.assertIsInstance(hash_, UInt256, msg=runner.cli_log)
 
-        result = self.run_smart_contract(engine, path, 'main', hash_)
+        tx = runner.get_transaction(hash_)
+        self.assertIsNotNone(tx)
+
+        invoke = runner.call_contract(path, 'main', hash_.to_array())
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
+        self.assertIsInstance(result, list)
         self.assertEqual(8, len(result))
-        if isinstance(result[0], str):
-            result[0] = String(result[0]).to_bytes()
-        self.assertEqual(UInt256(hash_), UInt256(result[0]))  # hash
-        self.assertIsInstance(result[1], int)  # version
-        self.assertIsInstance(result[2], int)  # nonce
-        if isinstance(result[3], str):
-            result[3] = String(result[3]).to_bytes()
-        self.assertEqual(UInt160(sender), UInt160(result[3]))  # sender
-        self.assertIsInstance(result[4], int)  # system_fee
-        self.assertIsInstance(result[5], int)  # network_fee
-        self.assertIsInstance(result[6], int)  # valid_until_block
-        if isinstance(result[7], str):
-            result[7] = String(result[7]).to_bytes()
-        self.assertEqual(script, result[7])  # script
+
+        self.assertEqual(hash_, UInt256(result[0]))  # hash
+        self.assertEqual(tx.version, result[1])  # version
+        self.assertEqual(tx.nonce, result[2])  # nonce
+        self.assertEqual(sender.script_hash, UInt160(result[3]))  # sender
+        self.assertEqual(tx.system_fee, result[4])  # system_fee
+        self.assertEqual(tx.network_fee, result[5])  # network_fee
+        self.assertEqual(tx.valid_until_block, result[6])  # valid_until_block
+        self.assertEqual(tx.script, result[7])  # script
 
     def test_get_transaction_mismatched_type(self):
         path = self.get_contract_path('GetTransactionMismatchedType.py')
@@ -139,36 +141,40 @@ class TestLedgerContract(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        engine.increase_block(10)
-        sender = bytes(range(20))
-        self.run_smart_contract(engine, path_burn_gas, 'main', 100, signer_accounts=[sender])
+        sender = neoxp.utils.get_default_account()
+        expected_block_index = 10
+        blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
 
-        block_10 = engine.current_block
-        txs = block_10.get_transactions()
-        hash_ = txs[0].hash
-        script = txs[0]._script
+        runner.increase_block(blocks_to_mint)
 
-        engine.increase_block()
+        contract_deploy = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
 
-        result = self.run_smart_contract(engine, path, 'main', 10, 0)
+        hash_ = contract_deploy.tx_id
+        self.assertIsInstance(hash_, UInt256)
+
+        tx = runner.get_transaction(hash_)
+        self.assertIsNotNone(tx)
+
+        invoke = runner.call_contract(path, 'main', expected_block_index, 0)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
+        self.assertIsInstance(result, list)
         self.assertEqual(8, len(result))
-        if isinstance(result[0], str):
-            result[0] = String(result[0]).to_bytes()
-        self.assertEqual(UInt256(hash_), UInt256(result[0]))  # hash
-        self.assertIsInstance(result[1], int)  # version
-        self.assertIsInstance(result[2], int)  # nonce
-        if isinstance(result[3], str):
-            result[3] = String(result[3]).to_bytes()
-        self.assertEqual(UInt160(sender), UInt160(result[3]))  # sender
-        self.assertIsInstance(result[4], int)  # system_fee
-        self.assertIsInstance(result[5], int)  # network_fee
-        self.assertIsInstance(result[6], int)  # valid_until_block
-        if isinstance(result[7], str):
-            result[7] = String(result[7]).to_bytes()
-        self.assertEqual(script, result[7])  # script
+
+        self.assertEqual(hash_, UInt256(result[0]))  # hash
+        self.assertEqual(tx.version, result[1])  # version
+        self.assertEqual(tx.nonce, result[2])  # nonce
+        self.assertEqual(sender.script_hash, UInt160(result[3]))  # sender
+        self.assertEqual(tx.system_fee, result[4])  # system_fee
+        self.assertEqual(tx.network_fee, result[5])  # network_fee
+        self.assertEqual(tx.valid_until_block, result[6])  # valid_until_block
+        self.assertEqual(tx.script, result[7])  # script
 
     def test_get_transaction_from_block_uint256(self):
         call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
@@ -238,19 +244,30 @@ class TestLedgerContract(BoaTest):
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
 
-        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         expected_block_index = 10
-        engine.increase_block(expected_block_index)
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
+        blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
 
-        txs = engine.get_transactions()
-        self.assertGreater(len(txs), 0)
-        hash_ = txs[0].hash
+        runner.increase_block(blocks_to_mint)
+        contract_deploy = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
 
-        result = self.run_smart_contract(engine, path, 'main', hash_)
-        self.assertEqual(expected_block_index, result)
+        hash_ = contract_deploy.tx_id
+        self.assertIsInstance(hash_, UInt256)
+
+        invokes.append(runner.call_contract(path, 'main', hash_.to_array()))
+        expected_results.append(expected_block_index)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_get_transaction_height_mismatched_type(self):
         path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
@@ -271,25 +288,34 @@ class TestLedgerContract(BoaTest):
         output, manifest = self.get_output(path)
         self.assertEqual(expected_output, output)
 
-        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        example_account_1 = bytes(range(20))
-        example_account_2 = bytes(20)
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000,
-                                signer_accounts=[example_account_1, example_account_2])
+        expected_block_index = 10
+        blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
 
-        txs = engine.get_transactions()
-        self.assertGreater(len(txs), 0)
-        hash_ = txs[0].hash
+        runner.increase_block(blocks_to_mint)
 
-        result = self.run_smart_contract(engine, path, 'main', hash_)
+        contract_deploy = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
 
+        hash_ = contract_deploy.tx_id
+        self.assertIsInstance(hash_, UInt256)
+
+        tx = runner.get_transaction(hash_)
+        self.assertIsNotNone(tx)
+
+        invoke = runner.call_contract(path, 'main', hash_.to_array())
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
         self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), len(tx.signers))
+
         self.assertIsInstance(result[0], list)
         self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
-        self.assertEqual(result[0][0], String.from_bytes(example_account_1))
+        self.assertEqual(result[0][0], tx.signers[0].account.to_array())
 
     def test_get_transaction_signers_mismatched_type(self):
         path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
@@ -310,19 +336,20 @@ class TestLedgerContract(BoaTest):
         output, manifest = self.get_output(path)
         self.assertEqual(expected_output, output)
 
-        path_burn_gas = self.get_contract_path('../../interop_test/runtime', 'BurnGas.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
-        self.run_smart_contract(engine, path_burn_gas, 'main', 1000)
-        expected_vm_state = engine.vm_state.value
+        contract_deploy = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
 
-        txs = engine.get_transactions()
-        self.assertGreater(len(txs), 0)
-        hash_ = txs[0].hash
-        engine.increase_block()
+        hash_ = contract_deploy.tx_id
+        self.assertIsInstance(hash_, UInt256)
 
-        result = self.run_smart_contract(engine, path, 'main', hash_)
-        self.assertEqual(expected_vm_state, result)
+        native_invoke = runner.call_contract(constants.LEDGER_SCRIPT, 'getTransactionVMState', hash_.to_array())
+        contract_invoke = runner.call_contract(path, 'main', hash_.to_array())
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(native_invoke.result, contract_invoke.result)
 
     def test_get_transaction_vm_state_mismatched_type(self):
         path = self.get_contract_path('GetTransactionVMStateMismatchedType.py')

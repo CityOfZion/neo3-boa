@@ -3,10 +3,14 @@ import subprocess
 from typing import Tuple, List, Union
 
 from boa3 import env
+from boa3.neo3.core.types import UInt256
 from boa3_test.test_drive.model.wallet import utils as wallet_utils
 from boa3_test.test_drive.model.wallet.account import Account
+from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
 from boa3_test.test_drive.neoxp.model.neoxpconfig import NeoExpressConfig
 from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContract as Contract
+from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTransaction as Transaction
+from boa3_test.test_drive.testrunner.blockchain.transactionlog import TestRunnerTransactionLog as TransactionLog
 
 _NEOXP_CONFIG = NeoExpressConfig(f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}/default.neo-express')
 
@@ -27,6 +31,10 @@ def get_account_by_identifier(account_identifier: str) -> Account:
                 None)
 
 
+def get_default_account() -> Account:
+    return _NEOXP_CONFIG.default_account
+
+
 def get_address_version() -> int:
     return _NEOXP_CONFIG.version
 
@@ -35,38 +43,44 @@ def get_magic() -> int:
     return _NEOXP_CONFIG.magic
 
 
-def get_account_identifier_from_script_hash_or_name(script_hash_or_address: Union[bytes, str]) -> str:
+def get_account_from_script_hash_or_id(script_hash_or_address: Union[bytes, str]) -> Account:
     if isinstance(script_hash_or_address, bytes):
-        address = wallet_utils.address_from_script_hash(script_hash_or_address, _NEOXP_CONFIG.version)
+        script_hash = script_hash_or_address
+        address = wallet_utils.address_from_script_hash(script_hash, get_address_version())
+        account = get_account_by_address(address)
     elif isinstance(script_hash_or_address, str):
         account = get_account_by_identifier(script_hash_or_address)
-        if hasattr(account, 'get_identifier'):
-            address = account.get_identifier()
-        else:
-            address = script_hash_or_address
+        script_hash = wallet_utils.address_to_script_hash(script_hash_or_address, get_address_version())
     else:
         raise TypeError(f"Invalid data type {type(script_hash_or_address)}. Expecting str or bytes")
 
-    return address
+    if not isinstance(account, Account):
+        from boa3.neo3.core.types import UInt160
+        from boa3_test.test_drive.neoxp.model.neoxpaccount import NeoExpressAccount
+        account = NeoExpressAccount(UInt160(script_hash), get_address_version())
+
+    return account
 
 
 def create_neo_express_instance(neoxp_path: str) -> str:
-    stdout, stderr = run_neo_express_cli('create', neoxp_path,
-                                         '--count', '1',
-                                         '--force')
+    command = neoxp.create.CreateCommand(config_output=neoxp_path,
+                                         node_count=1,
+                                         force=True)
+    stdout, stderr = run_neo_express_cli(command)
     return stdout
 
 
 def reset_neo_express_instance(neoxp_path: str) -> str:
-    stdout, stderr = run_neo_express_cli('reset',
-                                         '--input', neoxp_path,
-                                         '--force')
+    command = neoxp.reset.ResetCommand(neo_express_data_file=neoxp_path,
+                                       force=True)
+    stdout, stderr = run_neo_express_cli(command)
     return stdout
 
 
 def get_deployed_contracts(neoxp_path: str) -> List[Contract]:
-    stdout, stderr = run_neo_express_cli('contract', 'list',
-                                         '--input', neoxp_path)
+    command = neoxp.contract.ContractListCommand(neo_express_data_file=neoxp_path)
+    stdout, stderr = run_neo_express_cli(command)
+
     contracts = []
     for line in stdout.splitlines():
         try:
@@ -81,20 +95,53 @@ def get_deployed_contracts(neoxp_path: str) -> List[Contract]:
     return contracts
 
 
-def run_batch(neoxp_path: str, batch_path: str, reset: bool = False) -> str:
-    options = ['--input', neoxp_path]
-    if reset:
-        options.append('--reset')
-
-    stdout, stderr = run_neo_express_cli('batch',
-                                         *options,
-                                         batch_path)
+def _get_transaction_raw(neoxp_path: str, tx_hash: UInt256) -> str:
+    command = neoxp.show.ShowTransactionCommand(tx_hash.to_array(), neo_express_data_file=neoxp_path)
+    stdout, stderr = run_neo_express_cli(command)
     return stdout
 
 
-def run_neo_express_cli(*args: str) -> Tuple[str, str]:
+def get_transaction(neoxp_path: str, tx_hash: UInt256) -> Transaction:
+    raw_result = _get_transaction_raw(neoxp_path, tx_hash)
+
+    tx: Transaction
+    try:
+        import json
+        result_json = json.loads(raw_result)
+        tx = Transaction.from_json(result_json['transaction'])
+    except:
+        tx = None
+
+    return tx
+
+
+def get_transaction_log(neoxp_path: str, tx_hash: UInt256) -> TransactionLog:
+    raw_result = _get_transaction_raw(neoxp_path, tx_hash)
+
+    tx_log: TransactionLog
+    try:
+        import json
+        result_json = json.loads(raw_result)
+        tx_log = TransactionLog.from_json(result_json['application-log'])
+        tx_log._tx_id = tx_hash
+    except:
+        tx_log = None
+
+    return tx_log
+
+
+def run_batch(neoxp_path: str, batch_path: str, reset: bool = False) -> str:
+    command = neoxp.batch.BatchCommand(batch_path,
+                                       neo_express_data_file=neoxp_path,
+                                       reset=reset)
+    stdout, stderr = run_neo_express_cli(command)
+    return stdout
+
+
+def run_neo_express_cli(command: neoxp.NeoExpressCommand) -> Tuple[str, str]:
     neoxp_args = ['neoxp']
-    neoxp_args.extend(args)
+    neoxp_args.extend(command.cli_command().split())
+
     process = subprocess.Popen(neoxp_args,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT,
