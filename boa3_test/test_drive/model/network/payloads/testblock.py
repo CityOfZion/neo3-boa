@@ -22,15 +22,6 @@ class TestBlock:
     def timestamp(self) -> int:
         return self._timestamp
 
-    def get_transactions(self) -> List[TestTransaction]:
-        """
-        Gets a list of the block transactions. Changes in those transactions don't affect the ones inside the block.
-
-        :return: the block transactions
-        :rtype: List[Transaction]
-        """
-        return self._transactions.copy()
-
     def to_json(self) -> Dict[str, Any]:
         json_block = {
             'index': self._index,

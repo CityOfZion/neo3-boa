@@ -8,13 +8,13 @@ from boa3_test.tests.test_classes.transaction import Transaction
 
 class Block(TestBlock):
     def __init__(self, index: int):
+        self._transactions: List[Transaction] = []
         super().__init__()
+
         import time
         # time() returns timestamp in nanoseconds and Neo uses timestamp in milliseconds
         self._timestamp: int = int(time.time_ns() / 1_000_000)
         self._index: int = index
-
-        self._transactions: List[Transaction] = []
 
     def get_transactions(self) -> List[Transaction]:
         """
