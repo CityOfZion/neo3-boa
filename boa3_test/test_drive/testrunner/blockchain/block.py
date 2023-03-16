@@ -12,6 +12,7 @@ from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTra
 
 class TestRunnerBlock(TestBlock):
     def __init__(self):
+        self._transactions: List[TestRunnerTransaction] = []
         super().__init__()
         self._hash: UInt256 = UInt256.zero()
         self._size = 0
@@ -61,15 +62,20 @@ class TestRunnerBlock(TestBlock):
 
     @property
     def transactions(self) -> List[TestRunnerTransaction]:
-        return self.get_transactions()
+        return self._transactions.copy()
 
-    def get_transactions(self) -> List[TestRunnerTransaction]:
-        return super().get_transactions()
+    def to_json(self) -> Dict[str, Any]:
+        json_block = super().to_json()
+
+        # timestamp in this implementation is exported as time
+        time = json_block.pop('timestamp')
+        json_block['time'] = time
+
+        return json_block
 
     @classmethod
     def from_json(cls, json: Dict[str, Any]) -> TestRunnerBlock:
         from boa3.internal.neo import from_hex_str
-        from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTransaction
 
         block: TestRunnerBlock = super().from_json(json)
 
