@@ -46,6 +46,7 @@ class NeoExpressConfig:
         self._default_account = (genesis_account
                                  if genesis_account is not None or len(accounts) == 0
                                  else accounts[0])
+        self._genesis_block = None
 
     @property
     def magic(self):
@@ -62,6 +63,10 @@ class NeoExpressConfig:
     @property
     def default_account(self):
         return self._default_account
+
+    @property
+    def genesis_block(self):
+        return self._genesis_block
 
 
 def _wallet_accounts_from_json(wallet_json: dict) -> List[Account]:
