@@ -1,6 +1,6 @@
 from typing import Optional
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 
 

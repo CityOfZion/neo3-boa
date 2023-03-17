@@ -1,17 +1,17 @@
 import os
 from typing import Dict, Tuple
 
-from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.compiler.compiler import Compiler
-from boa3.exception import CompilerError
-from boa3.exception.NotLoadedException import NotLoadedException
-from boa3.model.event import Event
-from boa3.model.method import Method
-from boa3.model.variable import Variable
-from boa3.neo.contracts.neffile import NefFile
-from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.Integer import Integer
+from boa3.internal import constants
+from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.exception import CompilerError
+from boa3.internal.exception.NotLoadedException import NotLoadedException
+from boa3.internal.model.event import Event
+from boa3.internal.model.method import Method
+from boa3.internal.model.variable import Variable
+from boa3.internal.neo.contracts.neffile import NefFile
+from boa3.internal.neo.vm.type.AbiType import AbiType
+from boa3.internal.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -373,7 +373,7 @@ class TestFileGeneration(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_generate_nefdbgnfo_file(self):
-        from boa3.model.type.itype import IType
+        from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithDecorator.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
@@ -495,7 +495,7 @@ class TestFileGeneration(BoaTest):
             self.assertEqual(var_type, variables[var_inner_id].type.abi_type)
 
     def test_generate_nefdbgnfo_file_with_user_module_import(self):
-        from boa3.model.type.itype import IType
+        from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithUserModuleImportsDupNames.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
@@ -871,7 +871,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import AddressType
+        from boa3.internal.model.type.neo import AddressType
         self.assertIsInstance(method_main.return_type, AddressType)
 
         abi_method_main = abi_methods[0]
@@ -885,7 +885,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import AddressType
+        from boa3.internal.model.type.neo import AddressType
         self.assertIsInstance(method_main.return_type, AddressType)
 
     def test_generate_manifest_file_with_type_hint_blockhash(self):
@@ -894,7 +894,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import BlockHashType
+        from boa3.internal.model.type.neo import BlockHashType
         self.assertIsInstance(method_main.return_type, BlockHashType)
 
         abi_method_main = abi_methods[0]
@@ -908,7 +908,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import BlockHashType
+        from boa3.internal.model.type.neo import BlockHashType
         self.assertIsInstance(method_main.return_type, BlockHashType)
 
     def test_generate_manifest_file_with_type_hint_publickey(self):
@@ -917,7 +917,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import PublicKeyType
+        from boa3.internal.model.type.neo import PublicKeyType
         self.assertIsInstance(method_main.return_type, PublicKeyType)
 
         abi_method_main = abi_methods[0]
@@ -931,7 +931,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import PublicKeyType
+        from boa3.internal.model.type.neo import PublicKeyType
         self.assertIsInstance(method_main.return_type, PublicKeyType)
 
     def test_generate_manifest_file_with_type_hint_scripthash(self):
@@ -940,7 +940,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import ScriptHashType
+        from boa3.internal.model.type.neo import ScriptHashType
         self.assertIsInstance(method_main.return_type, ScriptHashType)
 
         abi_method_main = abi_methods[0]
@@ -954,7 +954,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import ScriptHashType
+        from boa3.internal.model.type.neo import ScriptHashType
         self.assertIsInstance(method_main.return_type, ScriptHashType)
 
     def test_generate_manifest_file_with_type_hint_scripthashlittleendian(self):
@@ -963,7 +963,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import ScriptHashLittleEndianType
+        from boa3.internal.model.type.neo import ScriptHashLittleEndianType
         self.assertIsInstance(method_main.return_type, ScriptHashLittleEndianType)
 
         abi_method_main = abi_methods[0]
@@ -977,7 +977,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import ScriptHashLittleEndianType
+        from boa3.internal.model.type.neo import ScriptHashLittleEndianType
         self.assertIsInstance(method_main.return_type, ScriptHashLittleEndianType)
 
     def test_generate_manifest_file_with_type_hint_transactionid(self):
@@ -986,7 +986,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import TransactionIdType
+        from boa3.internal.model.type.neo import TransactionIdType
         self.assertIsInstance(method_main.return_type, TransactionIdType)
 
         abi_method_main = abi_methods[0]
@@ -1000,7 +1000,7 @@ class TestFileGeneration(BoaTest):
 
         method_main: Method = methods[abi_methods[0]['name']]
 
-        from boa3.model.type.neo import TransactionIdType
+        from boa3.internal.model.type.neo import TransactionIdType
         self.assertIsInstance(method_main.return_type, TransactionIdType)
 
     def test_generate_manifest_file_with_type_hint_any(self):

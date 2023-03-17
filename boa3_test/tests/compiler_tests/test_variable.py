@@ -1,15 +1,15 @@
 from typing import Dict
 
 from boa3.boa3 import Boa3
-from boa3.compiler.compiler import Compiler
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.model.method import Method
-from boa3.model.symbol import ISymbol
-from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.method import Method
+from boa3.internal.model.symbol import ISymbol
+from boa3.internal.model.variable import Variable
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -255,7 +255,7 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('ReturnArgument.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
-        
+
         path, _ = self.get_deploy_file_paths(path)
         runner = NeoTestRunner()
 
@@ -325,7 +325,7 @@ class TestVariable(BoaTest):
 
         invokes = []
         expected_results = []
-        
+
         invokes.append(runner.call_contract(path, 'Main', 10))
         expected_results.append(10)
         invokes.append(runner.call_contract(path, 'Main', -140))
@@ -829,7 +829,7 @@ class TestVariable(BoaTest):
 
         invokes = []
         expected_results = []
-        
+
         invokes.append(runner.call_contract(path, 'Main'))
         expected_results.append(None)
 

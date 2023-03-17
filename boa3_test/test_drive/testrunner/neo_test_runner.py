@@ -3,11 +3,11 @@ import os.path
 import subprocess
 from typing import Any, List, Tuple, Dict, Optional, Union, Type
 
-from boa3 import env, constants
-from boa3.neo import utils as neo_utils
-from boa3.neo.vm.type.String import String
-from boa3.neo3.core.types import UInt256
-from boa3.neo3.vm import vmstate, VMState
+from boa3.internal import env, constants
+from boa3.internal.neo import utils as neo_utils
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.core.types import UInt256
+from boa3.internal.neo3.vm import vmstate, VMState
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvokecollection import NeoInvokeCollection
 from boa3_test.test_drive.model.invoker.neoinvokeresult import NeoInvokeResult

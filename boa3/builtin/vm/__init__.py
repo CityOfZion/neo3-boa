@@ -1,3 +1,3 @@
-from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 __all__ = ['Opcode']

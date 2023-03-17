@@ -1,7 +1,7 @@
 from typing import Any
 
-from boa3.neo.vm.type import StackItem
-from boa3.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo.vm.type import StackItem
+from boa3.internal.neo.vm.type.StackItem import StackItemType
 
 
 class NativeAccountState:

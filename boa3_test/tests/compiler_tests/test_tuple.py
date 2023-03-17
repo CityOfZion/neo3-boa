@@ -1,9 +1,9 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -752,7 +752,7 @@ class TestTuple(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 3, 4)
         runner.execute()
 
@@ -796,7 +796,7 @@ class TestTuple(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         runner.call_contract(path, 'main', (1, 2, 3, 4), 2, 99)
         runner.execute()
 

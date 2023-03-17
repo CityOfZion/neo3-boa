@@ -1,6 +1,6 @@
 import abc
 
-from boa3.neo3.core.types import UInt256
+from boa3.internal.neo3.core.types import UInt256
 
 
 class ITransactionObject(abc.ABC):

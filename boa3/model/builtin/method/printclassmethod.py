@@ -1,17 +1,17 @@
 from typing import List, Tuple
 
-from boa3.model.builtin.method.printmethod import PrintMethod
-from boa3.model.type.classes.userclass import UserClass
-from boa3.model.type.itype import IType
-from boa3.neo.vm.opcode import OpcodeHelper
-from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.model.builtin.method.printmethod import PrintMethod
+from boa3.internal.model.type.classes.userclass import UserClass
+from boa3.internal.model.type.itype import IType
+from boa3.internal.neo.vm.opcode import OpcodeHelper
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class PrintClassMethod(PrintMethod):
 
     def __init__(self, arg_value: IType):
         if not isinstance(arg_value, UserClass):
-            from boa3.model.type.classes import userclass
+            from boa3.internal.model.type.classes import userclass
             arg_value = userclass._EMPTY_CLASS
 
         super().__init__(arg_value)
@@ -34,7 +34,7 @@ class PrintClassMethod(PrintMethod):
                     (Opcode.SETITEM, b'')
                 ])
 
-            from boa3.model.builtin.interop.interop import Interop
+            from boa3.internal.model.builtin.interop.interop import Interop
             self._print_value_opcodes = (
                 class_to_dict
                 + Interop.JsonSerialize.opcode

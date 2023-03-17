@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Union
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
 
 

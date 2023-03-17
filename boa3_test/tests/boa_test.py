@@ -2,15 +2,15 @@ import os
 from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
-from boa3 import constants, env
-from boa3.analyser.analyser import Analyser
-from boa3.compiler.compiler import Compiler
-from boa3.exception.CompilerError import CompilerError
-from boa3.model.method import Method
-from boa3.neo.smart_contract.VoidType import VoidType
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal import constants, env
+from boa3.internal.analyser.analyser import Analyser
+from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.exception.CompilerError import CompilerError
+from boa3.internal.model.method import Method
+from boa3.internal.neo.smart_contract.VoidType import VoidType
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3_test.tests.test_classes.transactionattribute import oracleresponse
@@ -57,7 +57,7 @@ class BoaTest(TestCase):
         return compiler._analyser
 
     def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
-        from boa3.compiler.filegenerator import FileGenerator
+        from boa3.internal.compiler.filegenerator import FileGenerator
         generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
         return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
@@ -94,7 +94,7 @@ class BoaTest(TestCase):
     def _get_compiler_log_data(self, expected_logged_exception, path):
         output = None
         with self.assertLogs() as log:
-            from boa3.exception.NotLoadedException import NotLoadedException
+            from boa3.internal.exception.NotLoadedException import NotLoadedException
             try:
                 from boa3.boa3 import Boa3
                 output = Boa3.compile(path)
@@ -190,17 +190,21 @@ class BoaTest(TestCase):
 
         return contract_path, contract_path
 
-    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True) -> Tuple[bytes, Dict[str, Any]]:
+    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         manifest_output = path.replace('.py', '.manifest.json')
 
         from boa3.boa3 import Boa3
-        from boa3.neo.contracts.neffile import NefFile
+        from boa3.internal.neo.contracts.neffile import NefFile
         Boa3.compile_and_save(path, root_folder=root_folder, show_errors=log, debug=debug)
 
+        get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
-            output = NefFile.deserialize(file).script
+            if get_raw_nef:
+                output = file
+            else:
+                output = NefFile.deserialize(file).script
 
         with open(manifest_output) as manifest_output:
             import json
@@ -227,7 +231,7 @@ class BoaTest(TestCase):
 
         manifest_output = path.replace('.py', '.manifest.json')
 
-        from boa3.neo.contracts.neffile import NefFile
+        from boa3.internal.neo.contracts.neffile import NefFile
 
         if not os.path.isfile(nef_output):
             output = bytes()
@@ -248,7 +252,7 @@ class BoaTest(TestCase):
     def get_bytes_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
         if not os.path.isfile(nef_output):
-            return self.compile_and_save(path)
+            return self.compile_and_save(path, get_raw_nef=True)
 
         manifest_output = path.replace('.py', '.manifest.json')
 
@@ -282,7 +286,7 @@ class BoaTest(TestCase):
                 self.compile_and_save(smart_contract_path, log=False)
             smart_contract_path = smart_contract_path.replace('.py', '.nef')
         elif isinstance(smart_contract_path, bytes):
-            from boa3.neo3.core.types import UInt160
+            from boa3.internal.neo3.core.types import UInt160
             smart_contract_path = UInt160(smart_contract_path)
 
         self._set_fake_data(test_engine, fake_storage, signer_accounts, calling_script_hash)

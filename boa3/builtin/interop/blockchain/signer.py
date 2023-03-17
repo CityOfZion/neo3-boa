@@ -1,7 +1,7 @@
 from typing import List
 
 from boa3.builtin.type import UInt160
-from boa3.neo3.network.payloads.verification import WitnessConditionType, WitnessRuleAction, WitnessScope
+from boa3.internal.neo3.network.payloads.verification import WitnessConditionType, WitnessRuleAction, WitnessScope
 
 
 class Signer:

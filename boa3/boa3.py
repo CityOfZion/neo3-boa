@@ -1,5 +1,5 @@
-from boa3.compiler.compiler import Compiler
-from boa3.exception.InvalidPathException import InvalidPathException
+from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.exception.InvalidPathException import InvalidPathException
 
 
 class Boa3:

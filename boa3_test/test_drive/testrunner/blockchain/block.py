@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Dict, Any
 
-from boa3.neo3.core.types import UInt256
+from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.network.payloads.testblock import TestBlock
 from boa3_test.test_drive.model.network.payloads.witness import Witness
 from boa3_test.test_drive.model.wallet.account import Account
@@ -75,7 +75,7 @@ class TestRunnerBlock(TestBlock):
 
     @classmethod
     def from_json(cls, json: Dict[str, Any]) -> TestRunnerBlock:
-        from boa3.neo import from_hex_str
+        from boa3.internal.neo import from_hex_str
 
         block: TestRunnerBlock = super().from_json(json)
 

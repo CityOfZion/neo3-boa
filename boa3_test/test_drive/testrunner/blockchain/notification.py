@@ -1,5 +1,5 @@
-from boa3.neo.smart_contract.notification import Notification
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo.smart_contract.notification import Notification
+from boa3.internal.neo3.core.types import UInt160
 
 
 class TestRunnerNotification(Notification):

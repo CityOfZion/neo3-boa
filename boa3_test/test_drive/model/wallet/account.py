@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import Any, Dict, Optional
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.wallet import utils
 
 

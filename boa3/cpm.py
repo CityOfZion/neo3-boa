@@ -1,13 +1,14 @@
-import sys
-import requests
-import platform
-import os
-import stat
 import logging
+import os
+import platform
+import stat
+import sys
 
+import requests
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 def get_umask():
     umask = os.umask(0)
@@ -20,12 +21,12 @@ def chmod_plus_x(path):
         path,
         os.stat(path).st_mode |
         (
-                (
-                        stat.S_IXUSR |
-                        stat.S_IXGRP |
-                        stat.S_IXOTH
-                )
-                & ~get_umask()
+            (
+                stat.S_IXUSR |
+                stat.S_IXGRP |
+                stat.S_IXOTH
+            )
+            & ~get_umask()
         )
     )
 

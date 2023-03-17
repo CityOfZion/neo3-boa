@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from boa3.neo.vm.type.ContractParameterType import ContractParameterType
+from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
 
 

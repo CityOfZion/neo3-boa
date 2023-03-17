@@ -1,8 +1,8 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerWarning
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -735,8 +735,8 @@ class TestIf(BoaTest):
         invokes.append(runner.call_contract(path, 'main', 'omax', 16, 0))
         expected_results.append(16)
 
-        from boa3.neo.cryptography import sha256, hash160
-        from boa3.neo.vm.type.String import String
+        from boa3.internal.neo.cryptography import sha256, hash160
+        from boa3.internal.neo.vm.type.String import String
         invokes.append(runner.call_contract(path, 'main', 'sha256', 'abc', 4))
         expected_results.append(sha256(String('abc').to_bytes()))
 

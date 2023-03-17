@@ -1,11 +1,11 @@
 import ast
 
-from boa3.analyser.analyser import Analyser
-from boa3.analyser.typeanalyser import TypeAnalyser
-from boa3.model.type.annotation.uniontype import UnionType
-from boa3.model.type.collection.sequence.mutable.listtype import ListType
-from boa3.model.type.collection.sequence.tupletype import TupleType
-from boa3.model.type.type import Type
+from boa3.internal.analyser.analyser import Analyser
+from boa3.internal.analyser.typeanalyser import TypeAnalyser
+from boa3.internal.model.type.annotation.uniontype import UnionType
+from boa3.internal.model.type.collection.sequence.mutable.listtype import ListType
+from boa3.internal.model.type.collection.sequence.tupletype import TupleType
+from boa3.internal.model.type.type import Type
 from boa3_test.tests.boa_test import BoaTest
 
 

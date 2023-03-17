@@ -1,13 +1,13 @@
 import json
 
-from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.model.builtin.interop.interop import Interop
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.vm import VMState
+from boa3.internal import constants
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
@@ -117,7 +117,7 @@ class TestContractInterop(BoaTest):
         runner.update_contracts()
         call_hash = contract.script_hash
 
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
 
         invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
         expected_results.append(0)
@@ -470,7 +470,7 @@ class TestContractInterop(BoaTest):
         runner.update_contracts()
         call_hash = contract.script_hash
 
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
 
         invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.ALL))
         expected_results.append(CallFlags.ALL)
@@ -520,7 +520,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(expected_output)
 
         invokes.append(runner.call_contract(path, 'call_flags_all'))
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         expected_results.append(CallFlags.ALL)
 
         runner.execute()
@@ -548,7 +548,7 @@ class TestContractInterop(BoaTest):
         expected_results.append(expected_output)
 
         invokes.append(runner.call_contract(path, 'call_flags_all'))
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         expected_results.append(CallFlags.ALL)
 
         runner.execute()
@@ -558,7 +558,7 @@ class TestContractInterop(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_create_standard_account(self):
-        from boa3.neo.vm.type.StackItem import StackItemType
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Dict, Any, Union
 
-from boa3.neo3.core.types import UInt256
+from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.network.payloads.signer import Signer
 from boa3_test.test_drive.model.network.payloads.testtransaction import TestTransaction
 from boa3_test.test_drive.model.network.payloads.witness import Witness

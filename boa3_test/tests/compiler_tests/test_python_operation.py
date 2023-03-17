@@ -1,6 +1,6 @@
-from boa3.exception import CompilerError
-from boa3.neo3.contracts import FindOptions
-from boa3.neo3.vm import VMState
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo3.contracts import FindOptions
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
 
@@ -188,7 +188,7 @@ class TestPythonOperation(BoaTest):
 
         invokes = []
         expected_results = []
-        
+
         invokes.append(runner.call_contract(path, 'main', 1, {1: '2', 4: '8'}))
         expected_results.append(1 in {1: '2', 4: '8'})
 
@@ -230,7 +230,7 @@ class TestPythonOperation(BoaTest):
 
         invokes = []
         expected_results = []
-        
+
         invokes.append(runner.call_contract(path, 'main', 1, [1, 2, 3, 4]))
         expected_results.append(1 in [1, 2, 3, 4])
 
@@ -272,7 +272,7 @@ class TestPythonOperation(BoaTest):
 
         invokes = []
         expected_results = []
-        
+
         invokes.append(runner.call_contract(path, 'main', 1, (1, 2, 3, 4)))
         expected_results.append(1 in (1, 2, 3, 4))
 
