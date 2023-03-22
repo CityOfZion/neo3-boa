@@ -1,8 +1,9 @@
 import ast
 import os.path
 from inspect import isclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
+from boa3.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
@@ -145,7 +146,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     elif isinstance(result.index, Package):
                         class_type = None
 
-                    self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type)
+                    self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type if self.current_method is None else None)
 
                 result.already_generated = True
 
@@ -352,7 +353,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return self.build_data(ret)
 
-    def store_variable(self, *var_ids: Tuple[str, Optional[ast.AST], int], value: ast.AST):
+    def store_variable(self, *var_ids: VariableGenerationData, value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
             if len(var_ids) == 1:
@@ -364,7 +365,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
                     if result_data.type is Type.none and not self.generator.is_none_inserted():
                         self.generator.convert_literal(None)
-                    self.generator.convert_store_variable(var_id, address, self.current_class)
+                    self.generator.convert_store_variable(var_id, address, self.current_class if self.current_method is None else None)
                 else:
                     # if not, it is an array assignment
                     self.generator.convert_load_symbol(var_id)
@@ -413,7 +414,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 and hasattr(ann_assign, 'origin')
                 and isinstance(ann_assign.origin, ast.AST)):
             var_id = self._get_unique_name(var_id, ann_assign.origin)
-        self.store_variable((var_id, None, var_value_address), value=ann_assign.value)
+        self.store_variable(VariableGenerationData(var_id, None, var_value_address), value=ann_assign.value)
         return self.build_data(ann_assign)
 
     def visit_Assign(self, assign: ast.Assign) -> GeneratorData:
@@ -422,7 +423,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param assign: the python ast variable assignment node
         """
-        vars_ids: List[Tuple[str, Optional[ast.AST], int]] = []
+        vars_ids: List[VariableGenerationData] = []
         for target in assign.targets:
             var_value_address = self.generator.bytecode_size
             target_data: GeneratorData = self.visit(target)
@@ -435,7 +436,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                     and hasattr(assign, 'origin')
                     and isinstance(assign.origin, ast.AST)):
                 var_id = self._get_unique_name(var_id, assign.origin)
-            vars_ids.append((var_id, var_index, var_value_address))
+
+            vars_ids.append(VariableGenerationData(var_id, var_index, var_value_address))
 
         self.store_variable(*vars_ids, value=assign.value)
         return self.build_data(assign)
@@ -1023,8 +1025,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                 symbol = None
                 result_type = None
                 symbol_index = None
+                is_load_context_instance_variable = isinstance(attribute.ctx, ast.Load) and isinstance(attr, Variable) and value_data.symbol_id == 'self'
 
-                if self.generator.bytecode_size > current_bytecode_size and isinstance(result, UserClass):
+                if self.generator.bytecode_size > current_bytecode_size and isinstance(result, UserClass) and not is_load_context_instance_variable:
                     # it was generated already, don't convert again
                     generated = False
                     symbol_id = attribute.attr if isinstance(generation_result, Variable) else class_attr_id
