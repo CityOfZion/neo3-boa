@@ -1025,9 +1025,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                 symbol = None
                 result_type = None
                 symbol_index = None
-                is_load_context_instance_variable = isinstance(attribute.ctx, ast.Load) and isinstance(attr, Variable) and value_data.symbol_id == 'self'
+                is_load_context_variable_from_class = (isinstance(attribute.ctx, ast.Load) and
+                                                       isinstance(attr, Variable) and
+                                                       isinstance(result, UserClass))
 
-                if self.generator.bytecode_size > current_bytecode_size and isinstance(result, UserClass) and not is_load_context_instance_variable:
+                if self.generator.bytecode_size > current_bytecode_size and isinstance(result, UserClass) and not is_load_context_variable_from_class:
                     # it was generated already, don't convert again
                     generated = False
                     symbol_id = attribute.attr if isinstance(generation_result, Variable) else class_attr_id

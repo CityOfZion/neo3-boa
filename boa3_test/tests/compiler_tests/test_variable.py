@@ -712,6 +712,14 @@ class TestVariable(BoaTest):
         result = self.run_smart_contract(engine, path, 'main')
         self.assertEqual(expected_return, result)
 
+    def test_variables_with_same_name_class_variable_and_local(self):
+        path = self.get_contract_path('VariablesWithSameNameClassVariableAndLocal.py')
+        engine = TestEngine()
+
+        expected_return = 'example'
+        result = self.run_smart_contract(engine, path, 'main')
+        self.assertEqual(expected_return, result)
+
     def test_variables_with_same_name_instance_and_local(self):
         path = self.get_contract_path('VariablesWithSameNameInstanceAndLocal.py')
         engine = TestEngine()

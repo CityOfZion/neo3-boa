@@ -1899,7 +1899,7 @@ class CodeGenerator:
 
             if load:
                 self.convert_literal(index)
-                self.convert_get_item()
+                self.convert_get_item(index_inserted_internally=True)
 
             return index
 
