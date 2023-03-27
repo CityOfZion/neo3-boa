@@ -908,6 +908,23 @@ class TestVariable(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    def test_variables_with_same_name_class_variable_and_local(self):
+        path, _ = self.get_deploy_file_paths('VariablesWithSameNameClassVariableAndLocal.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        expected_return = 'example'
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_return)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
     def test_variables_with_same_name_instance_and_local(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameNameInstanceAndLocal.py')
         runner = NeoTestRunner()
