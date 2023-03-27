@@ -1,41 +1,23 @@
-import argparse
-import logging
-import os
-import sys
+from argparse import ArgumentParser
 
-from boa3.boa3 import Boa3
-from boa3.internal.exception.NotLoadedException import NotLoadedException
+from boa3.cli_commands import commands
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input", help=".py smart contract to compile")
-    parser.add_argument("-db", "--debug", action='store_true', help="generates a .nefdbgnfo file")
-    parser.add_argument("--project-path", help="Project root path. Path of the contract by default.", type=str)
-    args = parser.parse_args()
+    n3boa = ArgumentParser()
 
-    if not args.input.endswith(".py") or not os.path.isfile(args.input):
-        logging.error("Input file is not .py")
-        sys.exit(1)
+    n3_subparser = n3boa.add_subparsers(title='Commands')
 
-    fullpath = os.path.realpath(args.input)
-    path, filename = os.path.split(fullpath)
+    # Initialize all commands on cli_commands
+    for command in commands:
+        command(n3_subparser).add_arguments_and_callback()
 
-    if not args.project_path:
-        args.project_path = os.path.dirname(path)
+    # read command line and get the correct command requested
+    args = n3boa.parse_args()
 
-    try:
-        Boa3.compile_and_save(args.input, debug=args.debug, root_folder=args.project_path)
-        logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
-    except NotLoadedException as e:
-        error_message = e.message
-        log_error = 'Could not compile'
-        if len(error_message) > 0:
-            log_error += f': {error_message}'
-
-        logging.error(log_error)
-    except Exception as e:
-        logging.exception(e)
+    # execute command
+    if hasattr(args, 'func'):
+        args.func(vars(args))
 
 
 if __name__ == "__main__":
