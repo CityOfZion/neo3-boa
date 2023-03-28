@@ -58,3 +58,10 @@ class FindOptions(IntFlag):
 
     :meta hide-value:
     """
+
+    BACKWARDS = 1 << 7
+    """
+    Indicates that results should be returned in backwards (descending) order.
+
+    :meta hide-value:
+    """

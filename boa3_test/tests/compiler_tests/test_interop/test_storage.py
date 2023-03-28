@@ -6,6 +6,7 @@ from boa3.internal.neo.core.types.InteropInterface import InteropInterface
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
@@ -822,3 +823,44 @@ class TestStorageInterop(BoaTest):
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG)
+
+    def test_find_options_values(self):
+        path, _ = self.get_deploy_file_paths('FindOptionsValues.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', FindOptions.KEYS_ONLY))
+        expected_results.append(FindOptions.KEYS_ONLY)
+
+        invokes.append(runner.call_contract(path, 'option_keys_only'))
+        expected_results.append(FindOptions.KEYS_ONLY)
+
+        invokes.append(runner.call_contract(path, 'option_remove_prefix'))
+        expected_results.append(FindOptions.REMOVE_PREFIX)
+
+        invokes.append(runner.call_contract(path, 'option_values_only'))
+        expected_results.append(FindOptions.VALUES_ONLY)
+
+        invokes.append(runner.call_contract(path, 'option_deserialize_values'))
+        expected_results.append(FindOptions.DESERIALIZE_VALUES)
+
+        invokes.append(runner.call_contract(path, 'option_pick_field_0'))
+        expected_results.append(FindOptions.PICK_FIELD_0)
+
+        invokes.append(runner.call_contract(path, 'option_pick_field_1'))
+        expected_results.append(FindOptions.PICK_FIELD_1)
+
+        invokes.append(runner.call_contract(path, 'option_backwards'))
+        expected_results.append(FindOptions.BACKWARDS)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_find_options_mismatched_type(self):
+        path = self.get_contract_path('FindOptionsMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
