@@ -304,8 +304,52 @@ class TestEvent(BoaTest):
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((arg,), event_notifications[0].arguments)
 
-    def test_event_call_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeCallEvent.py')
+    def test_event_call_too_many_arguments(self):
+        path = self.get_contract_path('TooManyArgumentsCallEvent.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_event_call_too_few_arguments(self):
+        path = self.get_contract_path('TooFewArgumentsCallEvent.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_event_call_mismatched_type_integer(self):
+        path = self.get_contract_path('MismatchedTypeCallEventInteger.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_boolean(self):
+        path = self.get_contract_path('MismatchedTypeCallEventBoolean.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_hash160(self):
+        path = self.get_contract_path('MismatchedTypeCallEventHash160.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_hash256(self):
+        path = self.get_contract_path('MismatchedTypeCallEventHash256.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_bytearray(self):
+        path = self.get_contract_path('MismatchedTypeCallEventByteArray.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_public_key(self):
+        path = self.get_contract_path('MismatchedTypeCallEventPublicKey.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_string(self):
+        path = self.get_contract_path('MismatchedTypeCallEventString.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_array(self):
+        path = self.get_contract_path('MismatchedTypeCallEventArray.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_map(self):
+        path = self.get_contract_path('MismatchedTypeCallEventMap.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_event_call_mismatched_type_interop_interface(self):
+        path = self.get_contract_path('MismatchedTypeCallEventInteropInterface.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_event_with_abort(self):
