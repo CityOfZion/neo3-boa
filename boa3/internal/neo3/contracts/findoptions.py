@@ -10,3 +10,4 @@ class FindOptions(IntFlag):
     DESERIALIZE_VALUES = 1 << 3
     PICK_FIELD_0 = 1 << 4
     PICK_FIELD_1 = 1 << 5
+    BACKWARDS = 1 << 7
