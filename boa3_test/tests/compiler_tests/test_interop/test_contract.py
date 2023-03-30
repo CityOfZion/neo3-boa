@@ -1,7 +1,7 @@
 import json
 
-from boa3.internal import constants
 from boa3.boa3 import Boa3
+from boa3.internal import constants
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
