@@ -1,3 +1,3 @@
-from boa3.neo3.contracts import TriggerType
+from boa3.internal.neo3.contracts import TriggerType
 
 __all__ = ['TriggerType']

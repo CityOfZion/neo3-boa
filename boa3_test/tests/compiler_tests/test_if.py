@@ -1,7 +1,7 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerWarning
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
+from boa3.internal.exception import CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -543,8 +543,8 @@ class TestIf(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', 'omax', 16, 0)
         self.assertEqual(16, result)
 
-        from boa3.neo.cryptography import sha256, hash160
-        from boa3.neo.vm.type.String import String
+        from boa3.internal.neo.cryptography import sha256, hash160
+        from boa3.internal.neo.vm.type.String import String
         result = self.run_smart_contract(engine, path, 'main', 'sha256', 'abc', 4)
         self.assertEqual(sha256(String('abc').to_bytes()), result)
 

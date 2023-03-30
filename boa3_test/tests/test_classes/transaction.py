@@ -3,9 +3,9 @@ from __future__ import annotations
 import base64
 from typing import Any, Dict, List, Optional
 
-from boa3.neo import from_hex_str
-from boa3.neo3.core.types import UInt256
-from boa3.neo3.vm import VMState, vmstate
+from boa3.internal.neo import from_hex_str
+from boa3.internal.neo3.core.types import UInt256
+from boa3.internal.neo3.vm import VMState, vmstate
 from boa3_test.tests.test_classes import transactionattribute as tx_attribute
 from boa3_test.tests.test_classes.signer import Signer
 from boa3_test.tests.test_classes.witness import Witness
@@ -36,7 +36,7 @@ class Transaction:
         return self._state
 
     def to_json(self) -> Dict[str, Any]:
-        from boa3.neo.vm.type.String import String
+        from boa3.internal.neo.vm.type.String import String
         return {
             'signers': [signer.to_json() for signer in self._signers],
             'witnesses': [witness.to_json() for witness in self._witnesses],

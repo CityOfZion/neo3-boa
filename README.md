@@ -217,7 +217,7 @@ Your Python Script should look something like this:
 
 ```python
 from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3.neo.smart_contract.VoidType import VoidType
+from boa3.internal.neo.smart_contract.VoidType import VoidType
 
 
 def test_hello_world_main():
@@ -235,10 +235,10 @@ Alternatively you can change the value of `boa3.env.TEST_ENGINE_DIRECTORY` to th
 
 ```python
 from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3 import env
-from boa3.neo.smart_contract.VoidType import VoidType
+from boa3.internal import env
+from boa3.internal.neo.smart_contract.VoidType import VoidType
 
-env.TEST_ENGINE_DIRECTORY = '{path-to-test-engine-folder}' 
+env.TEST_ENGINE_DIRECTORY = '{path-to-test-engine-folder}'
 
 
 def test_hello_world_main():
@@ -263,7 +263,7 @@ For an extensive collection of examples:
 
 Install [`neo3-boa`](#installation) and the [`TestEngine`](#testengine) and run the following command
 
-> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/boa3/env.py)
+> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/boa3/internal/env.py)
 
 ```
 python -m unittest discover boa3_test

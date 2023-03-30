@@ -1,11 +1,11 @@
 from typing import List
 
-from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.neo import to_script_hash
-from boa3.neo.cryptography import hash160
-from boa3.neo.smart_contract.notification import Notification
-from boa3.neo.vm.type.String import String
+from boa3.internal import constants
+from boa3.internal.neo import to_script_hash
+from boa3.internal.neo.cryptography import hash160
+from boa3.internal.neo.smart_contract.notification import Notification
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine

@@ -1,5 +1,5 @@
-from boa3.exception import CompilerError
-from boa3.neo3.contracts import FindOptions
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo3.contracts import FindOptions
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 

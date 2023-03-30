@@ -1,14 +1,14 @@
 from typing import Dict
 
 from boa3.boa3 import Boa3
-from boa3.compiler.compiler import Compiler
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.model.method import Method
-from boa3.model.symbol import ISymbol
-from boa3.model.variable import Variable
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
+from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.method import Method
+from boa3.internal.model.symbol import ISymbol
+from boa3.internal.model.variable import Variable
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 

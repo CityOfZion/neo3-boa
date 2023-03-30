@@ -26,7 +26,7 @@ class NeoStruct(list, ABC):
         cls._validate_json(json, required_fields)
 
         name = json[_name]
-        from boa3.neo.vm.type.ContractParameterType import ContractParameterType
+        from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
         try:
             param_type = ContractParameterType._get_by_name(json[_type])
         except BaseException:

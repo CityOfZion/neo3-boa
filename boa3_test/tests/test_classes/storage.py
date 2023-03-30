@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Union
 
-from boa3 import constants
-from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.core.serialization import BinaryReader
+from boa3.internal import constants
+from boa3.internal.neo.utils import contract_parameter_to_json, stack_item_from_json
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.core.serialization import BinaryReader
 from boa3_test.tests.test_classes.nativecontractprefix import get_native_contract_data
 
 
@@ -111,7 +111,7 @@ class Storage:
         return self._dict[item].value
 
     def __setitem__(self, key: StorageKey, value: Any):
-        from boa3.neo.vm.type import StackItem
+        from boa3.internal.neo.vm.type import StackItem
         if isinstance(value, int):
             storage_value = Integer(value).to_byte_array()
         elif isinstance(value, str):
@@ -139,7 +139,7 @@ class StorageKey:
     def from_json(cls, json: Dict[str, Any]) -> StorageKey:
         k = stack_item_from_json(json['key'])
         if isinstance(k, str):
-            from boa3.neo.vm.type.String import String
+            from boa3.internal.neo.vm.type.String import String
             k = String(k).to_bytes()
 
         key = StorageKey(k)
@@ -174,7 +174,7 @@ class StorageItem:
     def from_json(cls, json: Dict[str, Any]) -> StorageItem:
         value = stack_item_from_json(json['value'])
         if isinstance(value, str):
-            from boa3.neo.vm.type.String import String
+            from boa3.internal.neo.vm.type.String import String
             value = String(value).to_bytes()
 
         item = StorageItem(value, json['isconstant'])

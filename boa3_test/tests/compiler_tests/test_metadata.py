@@ -1,8 +1,8 @@
-from boa3 import constants
-from boa3.constants import IMPORT_WILDCARD
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo3.core.types import UInt160
+from boa3.internal import constants
+from boa3.internal.constants import IMPORT_WILDCARD
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -295,7 +295,7 @@ class TestMetadata(BoaTest):
         for item in manifest_struct[6]:
             if isinstance(item, str):
                 if len(item) == 42:
-                    from boa3.neo3.core.types import UInt160
+                    from boa3.internal.neo3.core.types import UInt160
                     item = UInt160.from_string(item).to_array()
                 elif len(item) == 66:
                     item = bytes.fromhex(item)
@@ -380,7 +380,7 @@ class TestMetadata(BoaTest):
         for item in manifest_struct[5]:
             contract = item[0]
 
-            from boa3.neo3.core.types import UInt160
+            from boa3.internal.neo3.core.types import UInt160
             if isinstance(contract, UInt160):
                 contract = contract.to_array()
             manifest_struct_permissions.append([contract, item[1]])
@@ -500,7 +500,7 @@ class TestMetadata(BoaTest):
 
         nef_path = path.replace('.py', '.nef')
         with open(nef_path, mode='rb') as nef:
-            from boa3.neo.contracts.neffile import NefFile
+            from boa3.internal.neo.contracts.neffile import NefFile
             generated_source = NefFile.deserialize(nef.read()).source
 
         self.assertEqual(generated_source, 'https://github.com/CityOfZion/neo3-boa')
@@ -511,7 +511,7 @@ class TestMetadata(BoaTest):
 
         nef_path = path.replace('.py', '.nef')
         with open(nef_path, mode='rb') as nef:
-            from boa3.neo.contracts.neffile import NefFile
+            from boa3.internal.neo.contracts.neffile import NefFile
             generated_source = NefFile.deserialize(nef.read()).source
 
         self.assertEqual(generated_source, '')

@@ -1,6 +1,6 @@
 from typing import List
 
-from boa3 import constants
+from boa3.internal import constants
 from boa3_test.tests.test_classes.testcontract import TestContract
 
 
@@ -32,7 +32,7 @@ class ContractCollection:
         return any(contract.is_valid_identifier(item) for contract in self._internal_list)
 
     def __getitem__(self, item) -> TestContract:
-        from boa3.neo3.core.types import UInt160
+        from boa3.internal.neo3.core.types import UInt160
         if isinstance(item, UInt160):
             item = str(item)
         elif isinstance(item, bytes) and len(item) == constants.SIZE_OF_INT160:

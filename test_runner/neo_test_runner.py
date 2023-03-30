@@ -3,12 +3,12 @@ import os.path
 import subprocess
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from boa3 import constants
-from boa3.neo import utils as neo_utils
-from boa3.neo.smart_contract.VoidType import VoidType
-from boa3.neo.vm.type.String import String
-from boa3.neo3.core.types import UInt160
-from boa3.neo3.vm import VMState, vmstate
+from boa3.internal import constants
+from boa3.internal.neo import utils as neo_utils
+from boa3.internal.neo.smart_contract.VoidType import VoidType
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.core.types import UInt160
+from boa3.internal.neo3.vm import VMState, vmstate
 from test_runner import neoxp_utils
 from test_runner.blockchain import *
 from test_runner.blockchain.contractcollection import ContractCollection

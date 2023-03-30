@@ -1,11 +1,11 @@
 import unittest
 
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError
-from boa3.model.type.type import Type
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
+from boa3.internal.exception import CompilerError
+from boa3.internal.model.type.type import Type
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -392,7 +392,7 @@ class TestBuiltinMethod(BoaTest):
     # region to_script_hash test
 
     def test_script_hash_int(self):
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
         path = self.get_contract_path('ScriptHashInt.py')
@@ -402,7 +402,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(script_hash, result)
 
     def test_script_hash_int_with_builtin(self):
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         script_hash = to_script_hash(Integer(123).to_byte_array())
 
         path = self.get_contract_path('ScriptHashIntBuiltinCall.py')
@@ -412,7 +412,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(script_hash, result)
 
     def test_script_hash_str(self):
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
 
         path = self.get_contract_path('ScriptHashStr.py')
         engine = TestEngine()
@@ -428,7 +428,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(expected_result, result)
 
     def test_script_hash_str_with_builtin(self):
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         script_hash = to_script_hash(String('123').to_bytes())
 
         path = self.get_contract_path('ScriptHashStrBuiltinCall.py')
@@ -444,7 +444,7 @@ class TestBuiltinMethod(BoaTest):
         with self.assertRaises(TestExecutionException):
             self.run_smart_contract(engine, path, 'Main', 123)
 
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         from base58 import b58encode
         value = b58encode(Integer(123).to_byte_array())
         if isinstance(value, int):
@@ -458,7 +458,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_variable_with_builtin(self):
         path = self.get_contract_path('ScriptHashVariableBuiltinCall.py')
-        from boa3.neo import to_script_hash
+        from boa3.internal.neo import to_script_hash
         from base58 import b58encode
         engine = TestEngine()
 
@@ -529,7 +529,7 @@ class TestBuiltinMethod(BoaTest):
 
         self.run_smart_contract(engine, path, 'int_to_bytes', 1111,
                                 expected_result_type=bytes)
-        from boa3.neo3.vm import VMState
+        from boa3.internal.neo3.vm import VMState
         # return is Void, checking to see if there is no error
         self.assertEqual(engine.vm_state, VMState.HALT)
 

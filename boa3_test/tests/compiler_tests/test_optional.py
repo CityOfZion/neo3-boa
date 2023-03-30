@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 

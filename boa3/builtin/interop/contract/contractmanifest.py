@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from boa3.builtin.type import ECPoint, UInt160
-from boa3.neo.vm.type.ContractParameterType import ContractParameterType
+from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 
 
 class ContractManifest:

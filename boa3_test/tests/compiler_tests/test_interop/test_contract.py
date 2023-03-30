@@ -1,12 +1,12 @@
 import json
 
-from boa3 import constants
+from boa3.internal import constants
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.model.builtin.interop.interop import Interop
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
@@ -86,7 +86,7 @@ class TestContractInterop(BoaTest):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
         engine.add_contract(call_contract_path)
 
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
 
         with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
@@ -340,7 +340,7 @@ class TestContractInterop(BoaTest):
             self.run_smart_contract(engine, path, 'Main', call_hash, 'main')
         engine.add_contract(call_contract_path)
 
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
 
         result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALL)
         self.assertEqual(CallFlags.ALL, result)
@@ -375,7 +375,7 @@ class TestContractInterop(BoaTest):
         self.assertEqual(expected_output, result)
 
         result = self.run_smart_contract(engine, path, 'call_flags_all')
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         self.assertEqual(CallFlags.ALL, result)
 
     def test_import_interop_contract(self):
@@ -394,11 +394,11 @@ class TestContractInterop(BoaTest):
         self.assertEqual(expected_output, result)
 
         result = self.run_smart_contract(engine, path, 'call_flags_all')
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         self.assertEqual(CallFlags.ALL, result)
 
     def test_create_standard_account(self):
-        from boa3.neo.vm.type.StackItem import StackItemType
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'

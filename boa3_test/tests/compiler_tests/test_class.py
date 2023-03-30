@@ -1,7 +1,7 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError
-from boa3.exception.NotLoadedException import NotLoadedException
-from boa3.neo.vm.type.String import String
+from boa3.internal.exception import CompilerError
+from boa3.internal.exception.NotLoadedException import NotLoadedException
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 

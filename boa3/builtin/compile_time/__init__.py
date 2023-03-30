@@ -84,7 +84,7 @@ class NeoMetadata:
     :ivar description: the smart contract description. None by default;
     :vartype description: str or None
     """
-    from boa3.constants import IMPORT_WILDCARD
+    from boa3.internal.constants import IMPORT_WILDCARD
 
     def __init__(self):
         self.name: str = ''
@@ -140,7 +140,7 @@ class NeoMetadata:
         if not isinstance(hash_or_address, str):
             return
 
-        from boa3.constants import IMPORT_WILDCARD
+        from boa3.internal.constants import IMPORT_WILDCARD
         if self._trusts == [IMPORT_WILDCARD]:
             return
 
@@ -198,7 +198,7 @@ class NeoMetadata:
         if not isinstance(methods, (str, list)):
             return
 
-        from boa3.constants import IMPORT_WILDCARD
+        from boa3.internal.constants import IMPORT_WILDCARD
         # verifies if contract is a valid value
         if (not self._verify_is_valid_contract_hash(contract) and
                 not self._verify_is_valid_public_key(contract) and
@@ -231,7 +231,7 @@ class NeoMetadata:
         """
         if public_key.startswith('03') or public_key.startswith('02'):
             try:
-                from boa3 import constants
+                from boa3.internal import constants
                 if len(bytes.fromhex(public_key)) == constants.SIZE_OF_ECPOINT:
                     return True
             except ValueError:
@@ -247,7 +247,7 @@ class NeoMetadata:
         """
         if contract_hash.startswith('0x'):
             try:
-                from boa3.neo3.core.types import UInt160
+                from boa3.internal.neo3.core.types import UInt160
                 # if contract_hash is not a valid UInt160, it will raise a ValueError
                 UInt160.from_string(contract_hash[2:])
                 return True

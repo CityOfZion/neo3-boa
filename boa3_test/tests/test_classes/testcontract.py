@@ -1,8 +1,8 @@
 import os
 from typing import Optional
 
-from boa3.neo import to_hex_str
-from boa3.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo import to_hex_str
+from boa3.internal.neo.vm.type.StackItem import StackItemType
 
 
 class TestContract:
@@ -18,12 +18,12 @@ class TestContract:
             with open(file_path, mode='rb') as nef:
                 file = nef.read()
 
-            from boa3.neo import to_script_hash
-            from boa3.neo.contracts.neffile import NefFile
-            from boa3.neo.vm.opcode.Opcode import Opcode
-            from boa3.neo.vm.opcode import OpcodeHelper
+            from boa3.internal.neo import to_script_hash
+            from boa3.internal.neo.contracts.neffile import NefFile
+            from boa3.internal.neo.vm.opcode.Opcode import Opcode
+            from boa3.internal.neo.vm.opcode import OpcodeHelper
 
-            from boa3.neo3.core.types import UInt160
+            from boa3.internal.neo3.core.types import UInt160
             push_sender, sender = OpcodeHelper.get_pushdata_and_data(
                 UInt160.from_string("0x469cc2649dd10365ffd1e5e25af67b22042fa59c").to_array()  # mocked sender
             )
