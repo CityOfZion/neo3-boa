@@ -1,9 +1,9 @@
 import json
 from typing import Dict, List
 
-from boa3.neo import to_script_hash
-from boa3.neo.vm.type.String import String
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo import to_script_hash
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine

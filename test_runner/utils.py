@@ -1,6 +1,6 @@
 from typing import Any, Sequence
 
-from boa3.neo.vm.type.AbiType import AbiType
+from boa3.internal.neo.vm.type.AbiType import AbiType
 
 
 def value_to_parameter(value: Any) -> Any:

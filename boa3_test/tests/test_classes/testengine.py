@@ -1,15 +1,15 @@
 from os import path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from boa3 import constants
-from boa3.neo.smart_contract.VoidType import VoidType
-from boa3.neo.smart_contract.notification import Notification
-from boa3.neo.utils import contract_parameter_to_json, stack_item_from_json
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
-from boa3.neo.vm.type.String import String
-from boa3.neo3.core.types import UInt160
-from boa3.neo3.vm import VMState, vmstate
+from boa3.internal import constants
+from boa3.internal.neo.smart_contract.VoidType import VoidType
+from boa3.internal.neo.smart_contract.notification import Notification
+from boa3.internal.neo.utils import contract_parameter_to_json, stack_item_from_json
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.core.types import UInt160
+from boa3.internal.neo3.vm import VMState, vmstate
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.contractcollection import ContractCollection
 from boa3_test.tests.test_classes.signer import Signer
@@ -23,7 +23,7 @@ from boa3_test.tests.test_classes.witnessscope import WitnessScope
 class TestEngine:
     def __init__(self, root_path: Optional[str] = None):
         if root_path is None:
-            from boa3 import env
+            from boa3.internal import env
             root_path = env.TEST_ENGINE_DIRECTORY
 
         engine_path = '{0}/Neo.TestEngine.dll'.format(root_path)
@@ -199,7 +199,7 @@ class TestEngine:
         contracts = self.contracts
         if path.isfile(contract_path) and contract_path not in contracts:
             with open(contract_path, mode='rb') as nef:
-                from boa3.neo.contracts.neffile import NefFile
+                from boa3.internal.neo.contracts.neffile import NefFile
                 script_hash = NefFile.deserialize(nef.read()).script_hash
 
             return self._storage.get_contract_id(script_hash)

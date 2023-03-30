@@ -1,4 +1,4 @@
-from boa3.exception import CompilerError
+from boa3.internal.exception import CompilerError
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -110,7 +110,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(value_floor, result)
 
         # negative decimals will raise an exception
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         with self.assertRaisesRegex(TestExecutionException, f'{Builtin.BuiltinMathFloor.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', integer_value, -1)
 
@@ -146,7 +146,7 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(value_ceiling, result)
 
         # negative decimals will raise an exception
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         with self.assertRaisesRegex(TestExecutionException, f'{Builtin.BuiltinMathCeil.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', integer_value, -1)
 

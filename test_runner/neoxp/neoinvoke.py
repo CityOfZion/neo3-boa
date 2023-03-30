@@ -1,6 +1,6 @@
 from typing import Any, Dict, Tuple, Union
 
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo3.core.types import UInt160
 from test_runner import utils
 
 

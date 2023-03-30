@@ -1,8 +1,8 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
+from boa3.internal.exception import CompilerError
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -536,7 +536,7 @@ class TestTuple(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', tuple_, value, start, end)
         self.assertEqual(tuple_.index(value, start, end), result)
 
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 3, 3, 4)
 
@@ -570,7 +570,7 @@ class TestTuple(BoaTest):
         result = self.run_smart_contract(engine, path, 'main', tuple_, value, start)
         self.assertEqual(tuple_.index(value, start), result)
 
-        from boa3.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.builtin import Builtin
         with self.assertRaisesRegex(TestExecutionException, f'{Builtin.SequenceIndex.exception_message}$'):
             self.run_smart_contract(engine, path, 'main', (1, 2, 3, 4), 2, 99)
 

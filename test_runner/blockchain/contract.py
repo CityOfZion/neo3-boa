@@ -1,7 +1,7 @@
 from typing import Optional
 
-from boa3.neo import to_hex_str
-from boa3.neo3.core.types import UInt160
+from boa3.internal.neo import to_hex_str
+from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests.test_classes.testcontract import TestContract
 
 

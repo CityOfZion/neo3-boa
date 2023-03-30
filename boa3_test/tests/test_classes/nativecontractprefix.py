@@ -1,8 +1,8 @@
 from enum import IntEnum
 from typing import Optional, Tuple
 
-from boa3 import constants
-from boa3.neo.vm.type.Integer import Integer
+from boa3.internal import constants
+from boa3.internal.neo.vm.type.Integer import Integer
 
 
 def get_native_contract_data(token_script: bytes) -> Tuple[Optional[bytes], Optional[int]]:

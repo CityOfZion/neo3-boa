@@ -1,8 +1,8 @@
 from typing import Any
 
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
-from boa3.neo3.core.serialization import BinaryReader
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo3.core.serialization import BinaryReader
 
 
 def deserialize_binary(reader: BinaryReader) -> Any:

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.12.2] - 2023-03-30
+### Added
+- Included extra data to manifest and new types to better interface with manifest
+  - `Address`, `BlockHash`, `PublicKey`, `ScriptHash`, `ScriptHashLittleEndian` and `TransactionId` interfaces were included in the `boa3.builtin.type` package
+
+
+### Changed
+- Improving of log messages for classes, `list`s and `dict`s
+- Moved compiler internal packages that are not meant to be accessed from smart contracts to `boa3.internal`
+
+
+### Fixed
+- Fixed incorrect behaviour when using variables with the same identifier in different scopes
+- Don't generate files when internal errors are raised
+- Incorrect output of `to_script_hash` when the input is a string that not represents an account address
+- Type hinting didn't accept sequences with `Optional` or `Union` defining its items type
+  - i.e. `List[Optional[str]]` didn't work properly
+
+
 ## [0.12.1] - 2023-02-15
 ### Added
 - [CPM](https://github.com/CityOfZion/cpm) installer
@@ -413,6 +432,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.12.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.2
 [0.12.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.1
 [0.12.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.0
 [0.11.4]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.11.4

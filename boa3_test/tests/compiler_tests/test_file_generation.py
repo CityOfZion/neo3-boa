@@ -1,17 +1,17 @@
 import os
-from typing import Dict
+from typing import Dict, Tuple
 
-from boa3 import constants
 from boa3.boa3 import Boa3
-from boa3.compiler.compiler import Compiler
-from boa3.exception import CompilerError
-from boa3.exception.NotLoadedException import NotLoadedException
-from boa3.model.event import Event
-from boa3.model.method import Method
-from boa3.model.variable import Variable
-from boa3.neo.contracts.neffile import NefFile
-from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.Integer import Integer
+from boa3.internal import constants
+from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.exception import CompilerError
+from boa3.internal.exception.NotLoadedException import NotLoadedException
+from boa3.internal.model.event import Event
+from boa3.internal.model.method import Method
+from boa3.internal.model.variable import Variable
+from boa3.internal.neo.contracts.neffile import NefFile
+from boa3.internal.neo.vm.type.AbiType import AbiType
+from boa3.internal.neo.vm.type.Integer import Integer
 from boa3_test.tests.boa_test import BoaTest
 
 
@@ -373,7 +373,7 @@ class TestFileGeneration(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_generate_nefdbgnfo_file(self):
-        from boa3.model.type.itype import IType
+        from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithDecorator.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
@@ -495,7 +495,7 @@ class TestFileGeneration(BoaTest):
             self.assertEqual(var_type, variables[var_inner_id].type.abi_type)
 
     def test_generate_nefdbgnfo_file_with_user_module_import(self):
-        from boa3.model.type.itype import IType
+        from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithUserModuleImportsDupNames.py')
 
         expected_nef_output = path.replace('.py', '.nefdbgnfo')
@@ -776,3 +776,321 @@ class TestFileGeneration(BoaTest):
         if f <= 1:
             return 1
         return f * self.fact(f - 1)
+
+    def test_generate_manifest_file_with_type_hint_list(self):
+        path = self.get_contract_path('test_sc/list_test', 'CopyBool.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertIn('returngeneric', abi_method_main)
+        self.assertIn('type', abi_method_main['returngeneric'])
+        self.assertEqual('Array', abi_method_main['returngeneric']['type'])
+        self.assertIn('generic', abi_method_main['returngeneric'])
+        self.assertIn('type', abi_method_main['returngeneric']['generic'])
+
+        abi_method_main_parameters = abi_method_main['parameters']
+        self.assertIn('generic', abi_method_main_parameters[0])
+        self.assertIn('type', abi_method_main_parameters[0]['generic'])
+
+    def test_generate_manifest_file_with_type_hint_dict(self):
+        path = self.get_contract_path('test_sc/dict_test', 'SetValue.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual('Map', abi_method_main['returntype'])
+        self.assertIn('returngenerickey', abi_method_main)
+        self.assertIn('type', abi_method_main['returngenerickey'])
+        self.assertIn('returngenericitem', abi_method_main)
+        self.assertIn('type', abi_method_main['returngenericitem'])
+
+        abi_method_main_parameters = abi_method_main['parameters']
+        self.assertIn('generickey', abi_method_main_parameters[0])
+        self.assertIn('type', abi_method_main_parameters[0]['generickey'])
+        self.assertIn('genericitem', abi_method_main_parameters[0])
+        self.assertIn('type', abi_method_main_parameters[0]['genericitem'])
+
+    def test_generate_manifest_file_with_type_hint_union_return(self):
+        path = self.get_contract_path('test_sc/union_test', 'UnionReturn.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual('Any', abi_method_main['returntype'])
+        self.assertIn('returnunion', abi_method_main)
+        self.assertIsInstance(abi_method_main['returnunion'], list)
+        for union_type in abi_method_main['returnunion']:
+            self.assertIn('type', union_type)
+
+    def test_generate_manifest_file_with_type_hint_union_args(self):
+        path = self.get_contract_path('test_sc/union_test', 'UnionIsInstanceValidation.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        abi_method_main_parameters = abi_method_main['parameters']
+        self.assertIn('union', abi_method_main_parameters[0])
+        self.assertIsInstance(abi_method_main_parameters[0]['union'], list)
+        for union_type in abi_method_main_parameters[0]['union']:
+            self.assertIn('type', union_type)
+
+    def test_generate_manifest_file_with_type_hint_optional(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintOptional.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual('Integer', abi_method_main['returntype'])
+        self.assertIn('returnnullable', abi_method_main)
+
+        abi_method_main_parameters = abi_method_main['parameters']
+        self.assertIn('nullable', abi_method_main_parameters[0])
+        self.assertIn('union', abi_method_main_parameters[0])
+        self.assertIsInstance(abi_method_main_parameters[0]['union'], list)
+        for union_type in abi_method_main_parameters[0]['union']:
+            self.assertIn('type', union_type)
+
+    def test_generate_manifest_file_with_type_hint_storage_context(self):
+        path = self.get_contract_path('test_sc/interop_test/storage', 'StorageGetContext.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual('InteropInterface', abi_method_main['returntype'])
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'StorageContext')
+
+    def test_generate_manifest_file_with_type_hint_iterator(self):
+        path = self.get_contract_path('test_sc/interop_test/iterator', 'ImportIterator.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual('InteropInterface', abi_method_main['returntype'])
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'Iterator')
+
+    def test_generate_manifest_file_with_type_hint_address(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintAddress.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import AddressType
+        self.assertIsInstance(method_main.return_type, AddressType)
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'String')
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'Address')
+
+    def test_generate_manifest_file_with_type_hint_str_to_address(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintFromStrToAddress.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import AddressType
+        self.assertIsInstance(method_main.return_type, AddressType)
+
+    def test_generate_manifest_file_with_type_hint_blockhash(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintBlockHash.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import BlockHashType
+        self.assertIsInstance(method_main.return_type, BlockHashType)
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'Hash256')
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'BlockHash')
+
+    def test_generate_manifest_file_with_type_hint_uint256_to_blockhash(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintFromUInt256ToBlockHash.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import BlockHashType
+        self.assertIsInstance(method_main.return_type, BlockHashType)
+
+    def test_generate_manifest_file_with_type_hint_publickey(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintPublicKey.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import PublicKeyType
+        self.assertIsInstance(method_main.return_type, PublicKeyType)
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'PublicKey')
+        # 'PublicKey' already is a abi type, so there is no need to use a 'returnhint'
+        self.assertNotIn('returnhint', abi_method_main)
+
+    def test_generate_manifest_file_with_type_hint_ecpoint_to_publickey(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintFromECPointToPublicKey.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)  # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import PublicKeyType
+        self.assertIsInstance(method_main.return_type, PublicKeyType)
+
+    def test_generate_manifest_file_with_type_hint_scripthash(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintScriptHash.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import ScriptHashType
+        self.assertIsInstance(method_main.return_type, ScriptHashType)
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'Hash160')
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'ScriptHash')
+
+    def test_generate_manifest_file_with_type_hint_uint160_to_scripthash(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintFromUInt160ToScriptHash.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import ScriptHashType
+        self.assertIsInstance(method_main.return_type, ScriptHashType)
+
+    def test_generate_manifest_file_with_type_hint_scripthashlittleendian(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintScriptHashLittleEndian.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import ScriptHashLittleEndianType
+        self.assertIsInstance(method_main.return_type, ScriptHashLittleEndianType)
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'Hash160')
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'ScriptHashLittleEndian')
+
+    def test_generate_manifest_file_with_type_hint_uint160_to_scripthashlittleendian(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintFromUInt160ToScriptHashLittleEndian.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import ScriptHashLittleEndianType
+        self.assertIsInstance(method_main.return_type, ScriptHashLittleEndianType)
+
+    def test_generate_manifest_file_with_type_hint_transactionid(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintTransactionId.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import TransactionIdType
+        self.assertIsInstance(method_main.return_type, TransactionIdType)
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'Hash256')
+        self.assertIn('returnhint', abi_method_main)
+        self.assertEqual(abi_method_main['returnhint'], 'TransactionId')
+
+    def test_generate_manifest_file_with_type_hint_uint256_to_transactionid(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintFromUInt256ToTransactionId.py')
+        methods, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
+
+        method_main: Method = methods[abi_methods[0]['name']]
+
+        from boa3.internal.model.type.neo import TransactionIdType
+        self.assertIsInstance(method_main.return_type, TransactionIdType)
+
+    def test_generate_manifest_file_with_type_hint_any(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintAny.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)  # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        self.assertEqual(abi_method_main['returntype'], 'Any')
+        # verifying if 'returnunion' was not wrongfully added to the manifest
+        self.assertNotIn('returnunion', abi_method_main)
+
+    def test_generate_manifest_file_with_type_hint_maps_array_union_hint(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintMapsArraysUnionHint.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)  # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        abi_method_main_parameter = abi_method_main['parameters'][0]
+
+        # verifying arg type
+        self.assertEqual('Map', abi_method_main_parameter['type'])
+        self.assertIn('generickey', abi_method_main_parameter)
+        self.assertIn('type', abi_method_main_parameter['generickey'])
+        self.assertEqual('String', abi_method_main_parameter['generickey']['type'])
+        self.assertIn('genericitem', abi_method_main_parameter)
+        self.assertIn('type', abi_method_main_parameter['genericitem'])
+        self.assertEqual('Array', abi_method_main_parameter['genericitem']['type'])
+        self.assertIn('generic', abi_method_main_parameter['genericitem'])
+        self.assertIn('type', abi_method_main_parameter['genericitem']['generic'])
+
+        # verifying return type
+        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertIn('returngeneric', abi_method_main)
+        self.assertIn('type', abi_method_main['returngeneric'])
+        self.assertEqual('Any', abi_method_main['returngeneric']['type'])
+        self.assertIn('union', abi_method_main['returngeneric'])
+        self.assertEqual(3, len(abi_method_main['returngeneric']['union']))
+        self.assertTrue(any(
+            union_type['type'] == 'Map' and 'generickey' in union_type and 'genericitem' in union_type
+            for union_type in abi_method_main['returngeneric']['union']
+        ))
+
+    def test_generate_manifest_file_with_type_hint_list_and_dict_not_from_typing(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestTypeHintListDictNotFromTyping.py')
+        _, abi_methods = self.verify_parameters_and_return_manifest(path)  # type: dict, list
+
+        abi_method_main = abi_methods[0]
+        abi_method_main_parameter = abi_method_main['parameters'][0]
+
+        # verifying arg type
+        self.assertEqual('Map', abi_method_main_parameter['type'])
+        self.assertIn('generickey', abi_method_main_parameter)
+        self.assertIn('type', abi_method_main_parameter['generickey'])
+        self.assertEqual('Any', abi_method_main_parameter['generickey']['type'])
+        self.assertIn('genericitem', abi_method_main_parameter)
+        self.assertIn('type', abi_method_main_parameter['genericitem'])
+        self.assertEqual('Any', abi_method_main_parameter['genericitem']['type'])
+
+        # verifying return type
+        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertIn('returngeneric', abi_method_main)
+        self.assertIn('type', abi_method_main['returngeneric'])
+        self.assertEqual('Any', abi_method_main['returngeneric']['type'])
+
+    def verify_parameters_and_return_manifest(self, path: str) -> Tuple[dict, list]:
+        expected_manifest_output = path.replace('.py', '.manifest.json')
+        compiler = Compiler()
+        compiler.compile_and_save(path, path.replace('.py', '.nef'))
+        methods: Dict[str, Event] = {
+            name: method
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+            if isinstance(method, Method)
+        }
+
+        output, manifest = self.get_output(path)
+        self.assertTrue(os.path.exists(expected_manifest_output))
+        self.assertIn('abi', manifest)
+        abi = manifest['abi']
+
+        self.assertIn('methods', abi)
+
+        for abi_method in abi['methods']:
+            self.assertIn('name', abi_method)
+            self.assertIn(abi_method['name'], abi_method['name'])
+            self.assertIn('parameters', abi_method)
+
+            method_args = methods[abi_method['name']].args
+            for abi_method_param in abi_method['parameters']:
+                self.assertIn('name', abi_method_param)
+                self.assertIn(abi_method_param['name'], method_args)
+
+            self.assertIn('returntype', abi_method)
+
+        return methods, abi['methods']

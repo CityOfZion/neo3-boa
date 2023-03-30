@@ -1,9 +1,9 @@
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.StackItem import StackItemType
-from boa3.neo.vm.type.String import String
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -719,8 +719,8 @@ class TestBytes(BoaTest):
         path = self.get_contract_path('BytearrayFromListOfInt.py')
         compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
-        from boa3.model.builtin.builtin import Builtin
-        from boa3.model.type.type import Type
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.type.type import Type
         arg_type = Type.list.build([Type.int])
         expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({arg_type.identifier})')
         self.assertEqual(expected_error._error_message, compiler_error_message)
@@ -858,7 +858,7 @@ class TestBytes(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         if isinstance(result, str):
-            from boa3.neo.vm.type.String import String
+            from boa3.internal.neo.vm.type.String import String
             result = String(result).to_bytes()
         self.assertEqual(b'0123456789abcdefghij', result)
 
@@ -867,7 +867,7 @@ class TestBytes(BoaTest):
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'main')
         if isinstance(result, str):
-            from boa3.neo.vm.type.String import String
+            from boa3.internal.neo.vm.type.String import String
             result = String(result).to_bytes()
         self.assertEqual((160).to_bytes(2, 'little') + bytes(18), result)
 

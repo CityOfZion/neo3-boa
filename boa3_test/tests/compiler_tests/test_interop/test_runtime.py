@@ -1,12 +1,12 @@
-from boa3 import constants
+from boa3.internal import constants
 from boa3.boa3 import Boa3
-from boa3.exception import CompilerError, CompilerWarning
-from boa3.model.builtin.interop.interop import Interop
-from boa3.neo import to_script_hash
-from boa3.neo.vm.opcode.Opcode import Opcode
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
-from boa3.neo3.contracts import TriggerType
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.neo import to_script_hash
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.contracts import TriggerType
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
@@ -719,7 +719,7 @@ class TestRuntimeInterop(BoaTest):
                                          operand_1, operand_2)
         self.assertEqual(expected_result, result)
 
-        from boa3.neo3.contracts import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         result = self.run_smart_contract(engine, path, 'dynamic_sum_with_flags',
                                          operand_1, operand_2, CallFlags.READ_ONLY)
         self.assertEqual(expected_result, result)

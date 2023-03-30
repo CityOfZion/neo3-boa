@@ -1,5 +1,5 @@
 from boa3.boa3 import Boa3
-from boa3.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -80,3 +80,20 @@ class TestOptional(BoaTest):
         self.assertEqual('int', result)
         result = self.run_smart_contract(engine, path, 'union_test', None)
         self.assertEqual('None', result)
+
+    def test_optional_inside_dict(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0  # return a
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('OptionalArgumentInsideDict.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'main', {})
+        self.assertEqual({}, result)

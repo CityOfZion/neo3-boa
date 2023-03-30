@@ -4,7 +4,7 @@ import os
 import sys
 
 from boa3.boa3 import Boa3
-from boa3.exception.NotLoadedException import NotLoadedException
+from boa3.internal.exception.NotLoadedException import NotLoadedException
 
 
 def main():

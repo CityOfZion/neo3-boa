@@ -3,8 +3,8 @@ from __future__ import annotations
 import base64
 from typing import Any, Dict, Optional
 
-from boa3.neo.vm.type.Integer import Integer
-from boa3.neo.vm.type.String import String
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from test_runner.blockchain.contract import TestRunnerContract
 from test_runner.blockchain.contractcollection import ContractCollection
 

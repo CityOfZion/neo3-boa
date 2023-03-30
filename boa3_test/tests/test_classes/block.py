@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from boa3.neo import from_hex_str
-from boa3.neo3.core.types import UInt256
+from boa3.internal.neo import from_hex_str
+from boa3.internal.neo3.core.types import UInt256
 from boa3_test.tests.test_classes.transaction import Transaction
 
 

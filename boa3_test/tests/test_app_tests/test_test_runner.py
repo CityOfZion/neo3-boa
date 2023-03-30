@@ -1,7 +1,7 @@
 import unittest
 
-from boa3.neo.vm.type.AbiType import AbiType
-from boa3.neo.vm.type.String import String
+from boa3.internal.neo.vm.type.AbiType import AbiType
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
 from test_runner import utils
 from test_runner.neo_test_runner import NeoTestRunner

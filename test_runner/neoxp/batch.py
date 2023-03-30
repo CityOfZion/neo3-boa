@@ -1,6 +1,6 @@
 from typing import List
 
-from boa3.neo.vm.type.String import String
+from boa3.internal.neo.vm.type.String import String
 from test_runner.neoxp.command import neoxp
 from test_runner.neoxp.command.neoexpresscommand import NeoExpressCommand
 from test_runner.neoxp.neoinvoke import NeoInvoke
