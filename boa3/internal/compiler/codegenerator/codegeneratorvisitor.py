@@ -3,7 +3,7 @@ import os.path
 from inspect import isclass
 from typing import Dict, List, Optional
 
-from boa3.compiler.codegenerator.variablegenerationdata import VariableGenerationData
+from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
