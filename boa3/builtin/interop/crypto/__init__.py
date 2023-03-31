@@ -163,3 +163,85 @@ def murmur32(data: bytes, seed: int) -> bytes:
     :rtype: bytes
     """
     pass
+
+
+def bls12_381_add(x: bytes, y: bytes) -> bytes:
+    """
+    Add operation of two bls12381 points.
+
+    :param x: The first point
+    :type x: bytes
+    :param y: The second point
+    :type y: bytes
+    :return: the two points sum
+    :rtype: bytes
+    """
+    pass
+
+
+def bls12_381_deserialize(data: bytes) -> bytes:
+    """
+    Deserialize a bls12381 point.
+
+    :param data: The point as byte array
+    :type data: bytes
+    :return: the deserialized point
+    :rtype: bytes
+    """
+    pass
+
+
+def bls12_381_equal(x: bytes, y: bytes) -> bool:
+    """
+    Determines whether the specified points are equal.
+
+    :param x: The first point
+    :type x: bytes
+    :param y: The second point
+    :type y: bytes
+    :return: whether the specified points are equal or not
+    :rtype: bool
+    """
+    pass
+
+
+def bls12_381_mul(x: bytes, mul: int, neg: bool) -> bytes:
+    """
+    Mul operation of gt point and multiplier.
+
+    :param x: The point
+    :type x: bytes
+    :param mul: Multiplier, 32 bytes, little-endian
+    :type mul: int
+    :param neg: negative number
+    :type neg: bool
+    :return: the two points product
+    :rtype: bytes
+    """
+    pass
+
+
+def bls12_381_pairing(g1: bytes, g2: bytes) -> bytes:
+    """
+    Pairing operation of g1 and g2.
+
+    :param g1: The g1 point
+    :type g1: bytes
+    :param g2: The g2 point
+    :type g2: bytes
+    :return: the two points pairing
+    :rtype: bytes
+    """
+    pass
+
+
+def bls12_381_serialize(g: bytes) -> bytes:
+    """
+    Serialize a bls12381 point.
+
+    :param g: The point to be serialized.
+    :type g: bytes
+    :return: the serialized point
+    :rtype: bytes
+    """
+    pass
