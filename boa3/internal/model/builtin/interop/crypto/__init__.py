@@ -1,14 +1,27 @@
-__all__ = ['CheckMultisigMethod',
-           'CheckSigMethod',
-           'Hash160Method',
-           'Hash256Method',
-           'Murmur32Method',
-           'NamedCurveType',
-           'Ripemd160Method',
-           'Sha256Method',
-           'VerifyWithECDsaMethod',
-           ]
+__all__ = [
+    'Bls12381AddMethod',
+    'Bls12381DeserializeMethod',
+    'Bls12381EqualMethod',
+    'Bls12381MulMethod',
+    'Bls12381PairingMethod',
+    'Bls12381SerializeMethod',
+    'CheckMultisigMethod',
+    'CheckSigMethod',
+    'Hash160Method',
+    'Hash256Method',
+    'Murmur32Method',
+    'NamedCurveType',
+    'Ripemd160Method',
+    'Sha256Method',
+    'VerifyWithECDsaMethod',
+]
 
+from boa3.internal.model.builtin.interop.crypto.bls12381addmethod import Bls12381AddMethod
+from boa3.internal.model.builtin.interop.crypto.bls12381deserializemethod import Bls12381DeserializeMethod
+from boa3.internal.model.builtin.interop.crypto.bls12381equalmethod import Bls12381EqualMethod
+from boa3.internal.model.builtin.interop.crypto.bls12381mulmethod import Bls12381MulMethod
+from boa3.internal.model.builtin.interop.crypto.bls12381pairingmethod import Bls12381PairingMethod
+from boa3.internal.model.builtin.interop.crypto.bls12381serializemethod import Bls12381SerializeMethod
 from boa3.internal.model.builtin.interop.crypto.checkmultisigmethod import CheckMultisigMethod
 from boa3.internal.model.builtin.interop.crypto.checksigmethod import CheckSigMethod
 from boa3.internal.model.builtin.interop.crypto.hash160method import Hash160Method
