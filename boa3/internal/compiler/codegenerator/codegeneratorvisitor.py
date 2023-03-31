@@ -3,11 +3,11 @@ import os.path
 from inspect import isclass
 from typing import Dict, List, Optional
 
-from boa3.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
+from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.constants import SYS_VERSION_INFO
 from boa3.internal.model.builtin.builtin import Builtin

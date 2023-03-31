@@ -238,7 +238,7 @@ from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3.internal import env
 from boa3.internal.neo.smart_contract.VoidType import VoidType
 
-env.TEST_ENGINE_DIRECTORY = '{path-to-test-engine-folder}' 
+env.TEST_ENGINE_DIRECTORY = '{path-to-test-engine-folder}'
 
 
 def test_hello_world_main():
