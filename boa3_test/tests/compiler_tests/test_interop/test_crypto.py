@@ -708,3 +708,107 @@ class TestCryptoInterop(BoaTest):
         path = self.get_contract_path('Murmur32.py')
         output = Boa3.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_bls12_381_add(self):
+        gt1 = b'1'
+        gt2 = b'2'
+
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(gt2)).to_byte_array(min_length=1)
+            + gt2
+            + Opcode.PUSHDATA1
+            + Integer(len(gt1)).to_byte_array(min_length=1)
+            + gt1
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Add.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_deserialize(self):
+        data = b'1'
+
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(data)).to_byte_array(min_length=1)
+            + data
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Deserialize.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_equal(self):
+        gt1 = b'1'
+        gt2 = b'2'
+
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(gt2)).to_byte_array(min_length=1)
+            + gt2
+            + Opcode.PUSHDATA1
+            + Integer(len(gt1)).to_byte_array(min_length=1)
+            + gt1
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Equal.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_mul(self):
+        gt = b'1'
+
+        expected_output = (
+            Opcode.PUSHT
+            + Opcode.PUSH2
+            + Opcode.PUSHDATA1
+            + Integer(len(gt)).to_byte_array(min_length=1)
+            + gt
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Mul.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_pairing(self):
+        gt1_bytes = b'1'
+        gt2_bytes = b'2'
+
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(gt2_bytes)).to_byte_array(min_length=1)
+            + gt2_bytes
+            + Opcode.PUSHDATA1
+            + Integer(len(gt1_bytes)).to_byte_array(min_length=1)
+            + gt1_bytes
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Pairing.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_serialize(self):
+        g = b'1'
+
+        expected_output = (
+            Opcode.PUSHDATA1
+            + Integer(len(g)).to_byte_array(min_length=1)
+            + g
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Serialize.py')
+        output = Boa3.compile(path)
+        self.assertEqual(expected_output, output)
