@@ -16,6 +16,7 @@ from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils as neoxp_utils
 from boa3_test.test_drive.neoxp.batch import NeoExpressBatch
+from boa3_test.test_drive.testrunner import utils
 from boa3_test.test_drive.testrunner.blockchain.block import TestRunnerBlock as Block
 from boa3_test.test_drive.testrunner.blockchain.log import TestRunnerLog as Log
 from boa3_test.test_drive.testrunner.blockchain.notification import TestRunnerNotification as Notification
@@ -272,6 +273,10 @@ class NeoTestRunner:
 
         try:
             result = json.loads(stdout)
+        except json.JSONDecodeError:
+            result = utils.handle_return_error(stdout)
+
+        try:
             self._update_runner(result)
             if clear_invokes:
                 self._invokes.clear()

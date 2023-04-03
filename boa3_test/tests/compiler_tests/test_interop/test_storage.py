@@ -9,7 +9,6 @@ from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestStorageInterop(BoaTest):
@@ -508,32 +507,64 @@ class TestStorageInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_find_bytes_prefix(self):
-        path = self.get_contract_path('StorageFindBytesPrefix.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', b'example')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths('StorageFindBytesPrefix.py')
+        runner = NeoTestRunner()
 
-        storage = {('example_0', path): '0',
-                   ('example_1', path): '1',
-                   ('example_2', path): '3'}
-        expected_result = [[key, value] for (key, sc), value in storage.items()]
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example', fake_storage=storage)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'find_by_prefix', b'example'))
+        expected_results.append([])
+
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        storage = {'example_0': '0',
+                   'example_1': '1',
+                   'example_2': '3'}
+        expected_result = [[key, value] for key, value in storage.items()]
+
+        for (key, value) in expected_result:
+            runner.call_contract(path, 'put_on_storage', key, value)
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', b'example'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_storage_find_str_prefix(self):
-        path = self.get_contract_path('StorageFindStrPrefix.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths('StorageFindStrPrefix.py')
+        runner = NeoTestRunner()
 
-        storage = {('example_0', path): '0',
-                   ('example_1', path): '1',
-                   ('example_2', path): '3'}
-        expected_result = [[key, value] for (key, sc), value in storage.items()]
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example', fake_storage=storage)
-        self.assertEqual(expected_result, result)
+        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
+        expected_results.append([])
+
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        storage = {'example_0': '0',
+                   'example_1': '1',
+                   'example_2': '3'}
+        expected_result = [[key, value] for key, value in storage.items()]
+
+        for (key, value) in expected_result:
+            runner.call_contract(path, 'put_on_storage', key, value)
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_storage_find_mismatched_type(self):
         path = self.get_contract_path('StorageFindMismatchedType.py')
@@ -713,36 +744,65 @@ class TestStorageInterop(BoaTest):
         self.assertIsNone(runner.storages.get(storage_contract, storage_key))
 
     def test_storage_find_with_context(self):
-        path = self.get_contract_path('StorageFindWithContext.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StorageFindWithContext.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
 
-        storage = {('example_0', path): '0',
-                   ('example_1', path): '1',
-                   ('example_2', path): '3'}
-        expected_result = [[key, value] for (key, sc), value in storage.items()]
+        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
+        expected_results.append([])
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example', fake_storage=storage)
-        self.assertEqual(expected_result, result)
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        storage = {'example_0': '0',
+                   'example_1': '1',
+                   'example_2': '3'}
+        expected_result = [[key, value] for key, value in storage.items()]
+
+        for (key, value) in expected_result:
+            runner.call_contract(path, 'put_on_storage', key, value)
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', b'example'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_storage_find_with_options(self):
-        path = self.get_contract_path('StorageFindWithOptions.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('StorageFindWithOptions.py')
+        runner = NeoTestRunner()
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'example')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
+        expected_results.append([])
+
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         prefix = 'example'
         expected_result = [['_0', '0'],
                            ['_1', '1'],
                            ['_2', '2']
                            ]
-        storage = {(prefix + key, path): value for (key, value) in expected_result}
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix, fake_storage=storage)
-        self.assertEqual(expected_result, result)
+        for (key, value) in expected_result:
+            runner.call_contract(path, 'put_on_storage', (prefix + key), value)
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_storage_test(self):
         path, _ = self.get_deploy_file_paths('StorageBoa2Test.py')
@@ -888,74 +948,104 @@ class TestStorageInterop(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_storage(self):
-        path = self.get_contract_path('ImportStorage.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportStorage.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         prefix = 'unit'
         key = f'{prefix}_test'
         value = 1234
 
-        result = self.run_smart_contract(engine, path, 'get_value', key)
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path, 'get_value', key))
+        expected_results.append(0)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
+        expected_results.append([])
 
-        result = self.run_smart_contract(engine, path, 'put_value', key, value)
-        self.assertIsVoid(result)
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'get_value', key)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'put_value', key, value))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
-        self.assertEqual([[key, Integer(value).to_byte_array()]], result)
+        invokes.append(runner.call_contract(path, 'get_value', key))
+        expected_results.append(value)
 
-        result = self.run_smart_contract(engine, path, 'delete_value', key)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
+        expected_results.append([[key, Integer(value).to_byte_array()]])
 
-        result = self.run_smart_contract(engine, path, 'get_value', key)
-        self.assertEqual(0, result)
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
-        self.assertEqual([], result)
+        runner.call_contract(path, 'put_value', key, value)
+        runner.call_contract(path, 'get_value', key)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'delete_value', key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'get_value', key))
+        expected_results.append(0)
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_interop_storage(self):
-        path = self.get_contract_path('ImportInteropStorage.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportInteropStorage.py')
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
 
         prefix = 'unit'
         key = f'{prefix}_test'
         value = 1234
 
-        result = self.run_smart_contract(engine, path, 'get_value', key)
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path, 'get_value', key))
+        expected_results.append(0)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
+        expected_results.append([])
 
-        result = self.run_smart_contract(engine, path, 'put_value', key, value)
-        self.assertIsVoid(result)
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'get_value', key)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'put_value', key, value))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
-        self.assertEqual([[key, Integer(value).to_byte_array()]], result)
+        invokes.append(runner.call_contract(path, 'get_value', key))
+        expected_results.append(value)
 
-        result = self.run_smart_contract(engine, path, 'delete_value', key)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
+        expected_results.append([[key, Integer(value).to_byte_array()]])
 
-        result = self.run_smart_contract(engine, path, 'get_value', key)
-        self.assertEqual(0, result)
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', 'prefix')
-        self.assertEqual([], result)
+        runner.call_contract(path, 'put_value', key, value)
+        runner.call_contract(path, 'get_value', key)
 
-        result = self.run_smart_contract(engine, path, 'find_by_prefix', prefix)
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'delete_value', key))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'get_value', key))
+        expected_results.append(0)
+
+        invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_as_read_only(self):
         path, _ = self.get_deploy_file_paths('StorageAsReadOnly.py')
