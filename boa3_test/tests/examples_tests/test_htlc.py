@@ -1,12 +1,12 @@
 from typing import List
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.neo import to_script_hash
 from boa3.internal.neo.cryptography import hash160
 from boa3.internal.neo.smart_contract.notification import Notification
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -20,11 +20,12 @@ class TestHTLCTemplate(BoaTest):
 
     def test_htlc_compile(self):
         path = self.get_contract_path('htlc.py')
-        Boa3.compile(path)
+        self.compile(path)
 
     def test_htlc_atomic_swap(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # starting atomic swap by using the atomic_swap method
         result = self.run_smart_contract(engine, path, 'atomic_swap',
@@ -37,6 +38,7 @@ class TestHTLCTemplate(BoaTest):
     def test_htlc_on_nep17_payment(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
@@ -148,6 +150,7 @@ class TestHTLCTemplate(BoaTest):
     def test_htlc_withdraw(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 
@@ -261,6 +264,7 @@ class TestHTLCTemplate(BoaTest):
     def test_htlc_refund(self):
         path = self.get_contract_path('htlc.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         transferred_amount_neo = 10 * 10 ** 8
         transferred_amount_gas = 10000 * 10 ** 8
 

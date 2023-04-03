@@ -1,3 +1,5 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -5,7 +7,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestNativeContracts(BoaTest):
@@ -14,7 +15,7 @@ class TestNativeContracts(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -30,7 +31,7 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -93,7 +94,7 @@ class TestNativeContracts(BoaTest):
 
     def test_import_interop_oracle(self):
         path, _ = self.get_deploy_file_paths('ImportOracle.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -124,7 +125,7 @@ class TestNativeContracts(BoaTest):
 
     def test_import_interop_oracle_package(self):
         path, _ = self.get_deploy_file_paths('ImportInteropOracle.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -170,7 +171,7 @@ class TestNativeContracts(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()

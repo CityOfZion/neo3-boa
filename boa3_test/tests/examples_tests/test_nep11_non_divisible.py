@@ -1,10 +1,11 @@
 import json
 from typing import Dict, List
 
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo import to_script_hash
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt160
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
@@ -43,6 +44,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_symbol(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
         result = self.run_smart_contract(engine, path, 'symbol')
         self.assertEqual('EXMP', result)
@@ -50,6 +52,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_decimals(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
         result = self.run_smart_contract(engine, path, 'decimals')
         self.assertEqual(0, result)
@@ -60,6 +63,7 @@ class TestNEP11Template(BoaTest):
 
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
         result = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(total_supply, result)
@@ -67,6 +71,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_deploy(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
         # contract is already deployed
 
@@ -80,6 +85,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_update(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         new_nef, new_manifest = self.get_bytes_output(path)
@@ -94,6 +100,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_destroy(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         # destroy contract
@@ -108,6 +115,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_verify(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         # should fail because account does not have enough for fees
@@ -140,6 +148,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_authorize_2(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         self.run_smart_contract(engine, path, 'setAuthorizedAddress',
@@ -163,6 +172,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_authorize(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         self.run_smart_contract(engine, path, 'setAuthorizedAddress',
@@ -186,6 +196,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_pause(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -221,6 +232,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_mint(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -255,6 +267,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_transfer(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -299,6 +312,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_burn(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         engine.add_contract(path.replace('.py', '.nef'))
@@ -328,6 +342,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_onNEP11Payment(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
         engine.add_contract(path.replace('.py', '.nef'))
 
@@ -350,6 +365,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_balance_of(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         # add some gas for fees
@@ -379,6 +395,7 @@ class TestNEP11Template(BoaTest):
     def test_nep11_tokens_of(self):
         path = self.get_contract_path('nep11_non_divisible.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
         # add some gas for fees

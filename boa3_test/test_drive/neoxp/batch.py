@@ -1,3 +1,4 @@
+import threading
 from typing import List, Union, Any, Type
 
 from boa3.internal.neo.vm.type.String import String
@@ -11,6 +12,8 @@ from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils
 from boa3_test.test_drive.neoxp.command import neoxp
 from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
+
+_NEOXP_BATCH_LOCK = threading.Lock()
 
 
 class NeoExpressBatch:
@@ -99,6 +102,8 @@ class NeoExpressBatch:
         self._instructions.clear()
         self._transaction_submissions.clear()
         self._transaction_logs.clear()
+        self._tx_invokes.clear()
+        self._tx_invokes_pos.clear()
 
     def pop(self):
         result = self._instructions.pop()
@@ -109,6 +114,10 @@ class NeoExpressBatch:
             self._transaction_submissions.pop(index)
             if len(self._transaction_logs) > index:
                 self._transaction_logs.pop(index)
+        if pop_index in self._tx_invokes_pos:
+            index = self._tx_invokes_pos.index(len(self._instructions))
+            self._tx_invokes_pos.pop(index)
+            self._tx_invokes.pop(index)
 
         return result
 
@@ -122,12 +131,14 @@ class NeoExpressBatch:
         except BaseException:
             return False
 
-    def execute(self, neoxp_path: str, batch_file_path: str, reset: bool = False) -> str:
-        self.write(batch_file_path)
-        self._transaction_logs.clear()
-        log = utils.run_batch(neoxp_path, batch_file_path, reset=reset)
+    def execute(self, neoxp_path: str, batch_file_path: str, reset: bool = False, check_point_file: str = None) -> str:
+        with _NEOXP_BATCH_LOCK:
+            self.write(batch_file_path)
+            log = utils.run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
 
+        self._transaction_logs.clear()
         self._update_logs(log)
+        self._remove_commands_until_checkpoint(check_point_file)
         return log
 
     def _update_logs(self, log: str):
@@ -137,13 +148,38 @@ class NeoExpressBatch:
                 tx_logs.append(line)
             if lineno in self._tx_invokes_pos:
                 index = self._tx_invokes_pos.index(lineno)
-                self._tx_invokes[index]._log = line
+                self._tx_invokes[index].set_log(line)
         self._transaction_logs = tx_logs
 
-    def has_new_deploys_since(self, last_verified_command: int = -1):
-        if not isinstance(last_verified_command, int):
-            last_verified_command = -1
+    def _remove_commands_until_checkpoint(self, check_point_file: str):
+        if isinstance(check_point_file, str):
+            condition = (index + 1 for index, command in enumerate(self._instructions)
+                         if (isinstance(command, neoxp.neoxp.checkpoint.CheckpointCreateCommand)
+                             and command.file_name == check_point_file
+                             )
+                         )
+        else:
+            condition = (index + 1 for index, command in enumerate(self._instructions)
+                         if isinstance(command, neoxp.neoxp.checkpoint.CheckpointCreateCommand)
+                         )
 
-        return next((True for command in self._instructions[last_verified_command + 1:]
-                     if command.is_command("contract deploy")),
+        instr_to_remove = next(condition, None)
+        if isinstance(instr_to_remove, int):
+            self._instructions[:instr_to_remove] = []
+
+            last_tx_submitted = next((index for index, tx_pos in enumerate(self._transaction_submissions)
+                                      if tx_pos > instr_to_remove
+                                      ), len(self._transaction_submissions))
+            last_sc_submitted = next((index for index, tx_pos in enumerate(self._tx_invokes_pos)
+                                      if tx_pos > instr_to_remove
+                                      ), len(self._tx_invokes))
+
+            self._transaction_logs[:last_tx_submitted] = []
+            self._transaction_submissions[:last_tx_submitted] = []
+            self._tx_invokes[:last_sc_submitted] = []
+            self._tx_invokes_pos[:last_sc_submitted] = []
+
+    def has_new_deploys(self):
+        return next((True for command in self._instructions
+                     if isinstance(command, neoxp.neoxp.contract.deploy.ContractDeployCommand)),
                     False)

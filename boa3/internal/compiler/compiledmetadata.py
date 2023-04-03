@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Union
 
-from boa3.internal import constants
 from boa3.builtin.compile_time import NeoMetadata
+from boa3.internal import constants
 from boa3.internal.neo3.core.types import UInt160
 
 

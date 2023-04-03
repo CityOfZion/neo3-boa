@@ -292,7 +292,7 @@ class FileGenerator:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 
         abi_method_name = method.external_name if isinstance(method.external_name, str) else method_id
-        logging.info(f"'{abi_method_name}' method included in the manifest")
+        logging.getLogger(constants.BOA_LOGGING_NAME).info(f"'{abi_method_name}' method included in the manifest")
 
         method_abi = {
             "name": abi_method_name,

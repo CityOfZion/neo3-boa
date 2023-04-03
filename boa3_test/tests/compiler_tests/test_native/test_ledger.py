@@ -1,4 +1,5 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.builtin.interop.interop import Interop
@@ -10,7 +11,6 @@ from boa3.internal.neo3.core.types import UInt160, UInt256
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestLedgerContract(BoaTest):
@@ -18,7 +18,7 @@ class TestLedgerContract(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -34,7 +34,7 @@ class TestLedgerContract(BoaTest):
 
     def test_get_block_by_hash(self):
         path, _ = self.get_deploy_file_paths('GetBlockByHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         genesis_block = runner.get_genesis_block()
         expected_result_size = len(Interop.BlockType.variables)
@@ -60,7 +60,7 @@ class TestLedgerContract(BoaTest):
 
     def test_get_block_by_index(self):
         path, _ = self.get_deploy_file_paths('GetBlockByIndex.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         test_index_0 = 0
         test_index_10 = 10
@@ -104,11 +104,11 @@ class TestLedgerContract(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransaction.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         sender = neoxp.utils.get_default_account()
         contract_deploy = runner.deploy_contract(path)
@@ -154,11 +154,11 @@ class TestLedgerContract(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionFromBlockInt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         sender = neoxp.utils.get_default_account()
         contract_deploy = runner.deploy_contract(path, account=sender)
@@ -203,11 +203,11 @@ class TestLedgerContract(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionFromBlockUInt256.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         runner.deploy_contract(path)  # to have a block with tx
         runner.update_contracts(export_checkpoint=True)
@@ -253,11 +253,11 @@ class TestLedgerContract(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GetTransactionHeight.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -301,7 +301,7 @@ class TestLedgerContract(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         expected_block_index = 10
         blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
@@ -349,7 +349,7 @@ class TestLedgerContract(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         contract_deploy = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -369,7 +369,7 @@ class TestLedgerContract(BoaTest):
 
     def test_get_current_index(self):
         path, _ = self.get_deploy_file_paths('GetCurrentIndex.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

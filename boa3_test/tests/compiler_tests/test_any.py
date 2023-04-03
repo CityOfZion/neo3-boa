@@ -1,9 +1,9 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestAny(BoaTest):
@@ -32,7 +32,7 @@ class TestAny(BoaTest):
             + Opcode.STLOC0
             + Opcode.RET        # return
         )
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_variable_assignment_with_any(self):
@@ -56,7 +56,7 @@ class TestAny(BoaTest):
             + Opcode.STLOC0
             + Opcode.RET        # return
         )
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_any_tuple(self):
@@ -76,7 +76,7 @@ class TestAny(BoaTest):
             + Opcode.STLOC0
             + Opcode.RET        # return
         )
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_any_operation(self):
@@ -137,7 +137,7 @@ class TestAny(BoaTest):
         )
 
         path = self.get_contract_path('FunctionAnyParam.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_any_sequence_assignments(self):
@@ -188,7 +188,7 @@ class TestAny(BoaTest):
         )
 
         path = self.get_contract_path('AnySequenceAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_int_sequence_any_assignments(self):
@@ -249,7 +249,7 @@ class TestAny(BoaTest):
         )
 
         path = self.get_contract_path('StrSequenceStrAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_sequence_of_any_sequence(self):
@@ -295,7 +295,7 @@ class TestAny(BoaTest):
         )
 
         path = self.get_contract_path('SequenceOfAnySequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_sequence_of_int_sequence_success(self):
@@ -324,7 +324,7 @@ class TestAny(BoaTest):
         )
 
         path = self.get_contract_path('SequenceOfIntSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_sequence_of_int_sequence_fail(self):

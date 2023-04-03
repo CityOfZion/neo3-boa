@@ -1,6 +1,7 @@
 import hashlib
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.type.type import Type
@@ -9,7 +10,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts.namedcurve import NamedCurve
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestCryptoLibClass(BoaTest):
@@ -28,7 +28,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -44,7 +44,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_str(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -65,7 +65,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_int(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -82,7 +82,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_bool(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -99,7 +99,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_bytes(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -124,7 +124,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_str(self):
         path, _ = self.get_deploy_file_paths('Sha256Str.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -145,7 +145,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_int(self):
         path, _ = self.get_deploy_file_paths('Sha256Int.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -162,7 +162,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_bool(self):
         path, _ = self.get_deploy_file_paths('Sha256Bool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -179,7 +179,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_bytes(self):
         path, _ = self.get_deploy_file_paths('Sha256Bytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -204,7 +204,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_verify_with_ecdsa(self):
         path = self.get_contract_path('VerifyWithECDsa.py')
-        Boa3.compile(path)
+        self.compile(path)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -230,7 +230,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Str.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
@@ -254,7 +254,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Bool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_int(self):
@@ -278,7 +278,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Int.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
@@ -305,7 +305,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Bytes.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
@@ -336,7 +336,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Str.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
@@ -360,7 +360,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_int(self):
@@ -384,7 +384,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Int.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
@@ -411,7 +411,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Bytes.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
@@ -430,5 +430,5 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('Murmur32.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)

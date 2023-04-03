@@ -36,8 +36,10 @@ class Compiler:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
-        logging.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
-        logging.info(f'Started compiling\t{filename}')
+        logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+
+        logger.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
+        logger.info(f'Started compiling\t{filename}')
         self._entry_smart_contract = os.path.splitext(filename)[0]
 
         from boa3.internal.compiler.compiledmetadata import CompiledMetadata

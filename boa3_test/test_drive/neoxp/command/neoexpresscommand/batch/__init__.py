@@ -25,7 +25,11 @@ class BatchCommand(NeoExpressCommand):
         options = super()._get_options()
 
         if self.reset or isinstance(self.check_point_file, str):
-            options['--reset'] = self.check_point_file if isinstance(self.check_point_file, str) else ''
+            flag = '--reset'
+            if isinstance(self.check_point_file, str):
+                flag = f'{flag}:{self.check_point_file}'
+
+            options[flag] = ''
         if self.trace:
             options['--trace'] = ''
 

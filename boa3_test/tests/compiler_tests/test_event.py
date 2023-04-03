@@ -1,4 +1,5 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -6,7 +7,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestEvent(BoaTest):
@@ -26,11 +26,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventWithoutArguments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main')
 
         runner.execute()
@@ -58,11 +58,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventWithArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main')
 
         runner.execute()
@@ -90,11 +90,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventWithName.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main')
 
         runner.execute()
@@ -126,7 +126,7 @@ class TestEvent(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main')
 
         runner.execute()
@@ -158,11 +158,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventNep5Transfer.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
 
         runner.execute()
@@ -194,11 +194,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventNep17Transfer.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
 
         runner.execute()
@@ -230,11 +230,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventNep17TransferBuilt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
 
         runner.execute()
@@ -267,11 +267,11 @@ class TestEvent(BoaTest):
         )
 
         path = self.get_contract_path('EventNep11Transfer.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', b'1', b'2', 10, b'someToken')
 
         runner.execute()
@@ -289,7 +289,7 @@ class TestEvent(BoaTest):
 
     def test_event_with_duplicated_name(self):
         path, _ = self.get_deploy_file_paths('EventWithDuplicatedName.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         arg = 10
         event_id = 'example'
@@ -313,10 +313,10 @@ class TestEvent(BoaTest):
         self.compile_and_save(path)
         path, _ = self.get_deploy_file_paths(path)
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         runner.call_contract(path, 'send_event_with_abort')
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
         self.assertGreater(len(runner.notifications), 0)
 
@@ -328,7 +328,7 @@ class TestEvent(BoaTest):
 
     def test_boa2_event_test(self):
         path, _ = self.get_deploy_file_paths('EventBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'main')
 
         runner.execute()

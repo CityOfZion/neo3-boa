@@ -1,9 +1,10 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestStdlibInterop(BoaTest):
@@ -12,7 +13,7 @@ class TestStdlibInterop(BoaTest):
     def test_base64_encode(self):
         import base64
         path, _ = self.get_deploy_file_paths('Base64Encode.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -53,7 +54,7 @@ class TestStdlibInterop(BoaTest):
     def test_base64_decode(self):
         import base64
         path, _ = self.get_deploy_file_paths('Base64Decode.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -94,7 +95,7 @@ class TestStdlibInterop(BoaTest):
     def test_base58_encode(self):
         import base58
         path, _ = self.get_deploy_file_paths('Base58Encode.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -135,7 +136,7 @@ class TestStdlibInterop(BoaTest):
     def test_base58_decode(self):
         import base58
         path, _ = self.get_deploy_file_paths('Base58Decode.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -173,7 +174,7 @@ class TestStdlibInterop(BoaTest):
     def test_base58_check_decode(self):
         import base58
         path, _ = self.get_deploy_file_paths('Base58CheckDecode.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -211,7 +212,7 @@ class TestStdlibInterop(BoaTest):
     def test_base58_check_encode(self):
         import base58
         path, _ = self.get_deploy_file_paths('Base58CheckEncode.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -251,7 +252,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_serialize_int(self):
         path, _ = self.get_deploy_file_paths('SerializeInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -269,7 +270,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_serialize_bool(self):
         path, _ = self.get_deploy_file_paths('SerializeBool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -287,7 +288,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_serialize_str(self):
         path, _ = self.get_deploy_file_paths('SerializeStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -305,7 +306,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_serialize_sequence(self):
         path, _ = self.get_deploy_file_paths('SerializeSequence.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -323,7 +324,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_serialize_dict(self):
         path, _ = self.get_deploy_file_paths('SerializeDict.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -341,7 +342,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_deserialize(self):
         path, _ = self.get_deploy_file_paths('Deserialize.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -396,7 +397,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_boa2_serialization_test1(self):
         path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -413,7 +414,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_boa2_serialization_test2(self):
         path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -430,7 +431,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_boa2_serialization_test3(self):
         path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -446,7 +447,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_boa2_serialization_test4(self):
         path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -462,7 +463,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_user_class_serialization(self):
         path, _ = self.get_deploy_file_paths('SerializationUserClass.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -497,7 +498,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_atoi(self):
         path, _ = self.get_deploy_file_paths('Atoi.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -528,27 +529,27 @@ class TestStdlibInterop(BoaTest):
 
         runner.call_contract(path, 'main', 'string', 10)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
 
         runner.call_contract(path, 'main', 'string', 16)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
 
         runner.call_contract(path, 'main', 'abc', 10)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
 
         runner.call_contract(path, 'main', '10', 2)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
 
     def test_atoi_default(self):
         path, _ = self.get_deploy_file_paths('AtoiDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -567,7 +568,7 @@ class TestStdlibInterop(BoaTest):
 
         runner.call_contract(path, 'main', 'string')
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
 
     def test_atoi_too_few_parameters(self):
@@ -584,7 +585,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_itoa(self):
         path, _ = self.get_deploy_file_paths('Itoa')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -608,12 +609,12 @@ class TestStdlibInterop(BoaTest):
 
         runner.call_contract(path, 'main', 10, 2)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
 
     def test_itoa_default(self):
         path, _ = self.get_deploy_file_paths('ItoaDefault')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -643,7 +644,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_import_stdlib(self):
         path, _ = self.get_deploy_file_paths('ImportStdlib')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -662,7 +663,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_import_interop_binary(self):
         path, _ = self.get_deploy_file_paths('ImportInteropStdlib')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -681,7 +682,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_memory_search(self):
         path, _ = self.get_deploy_file_paths('MemorySearch')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -724,12 +725,12 @@ class TestStdlibInterop(BoaTest):
 
         runner.call_contract(path, 'main', b'abcde', b'a', 20, False)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
 
     def test_memory_search_backward(self):
         path, _ = self.get_deploy_file_paths('MemorySearch')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -772,12 +773,12 @@ class TestStdlibInterop(BoaTest):
 
         runner.call_contract(path, 'main', b'abcde', b'a', 20, True)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
 
     def test_memory_search_start(self):
         path, _ = self.get_deploy_file_paths('MemorySearchStart')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -811,12 +812,12 @@ class TestStdlibInterop(BoaTest):
 
         runner.call_contract(path, 'main', b'abcde', b'a', 20)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
 
     def test_memory_search_default_values(self):
         path, _ = self.get_deploy_file_paths('MemorySearchDefault')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -865,7 +866,7 @@ class TestStdlibInterop(BoaTest):
 
     def test_memory_compare(self):
         path, _ = self.get_deploy_file_paths('MemoryCompare')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

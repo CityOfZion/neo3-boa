@@ -1,4 +1,5 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -6,7 +7,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestList(BoaTest):
@@ -28,7 +28,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('IntList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_string_values(self):
@@ -56,7 +56,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('StrList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_bool_values(self):
@@ -74,7 +74,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('BoolList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_variable_values(self):
@@ -98,7 +98,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('VariableList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_empty_dict(self):
@@ -110,7 +110,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('ListWithEmptyTypedDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_non_sequence_get_value(self):
@@ -137,11 +137,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('GetValue.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -152,7 +152,7 @@ class TestList(BoaTest):
         expected_results.append(5)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -160,7 +160,7 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_list_get_value_with_negative_index(self):
@@ -183,11 +183,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('GetValueNegativeIndex.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -198,7 +198,7 @@ class TestList(BoaTest):
         expected_results.append(2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -206,7 +206,7 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_list_type_hint(self):
@@ -224,7 +224,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('TypeHintAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_assign_empty_list(self):
@@ -238,7 +238,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('EmptyListAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_set_value(self):
@@ -246,7 +246,7 @@ class TestList(BoaTest):
         self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -257,7 +257,7 @@ class TestList(BoaTest):
         expected_results.append([1, 3, 2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -265,7 +265,7 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_list_set_value_with_negative_index(self):
@@ -273,7 +273,7 @@ class TestList(BoaTest):
         self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -284,7 +284,7 @@ class TestList(BoaTest):
         expected_results.append([5, 3, 1])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -292,7 +292,7 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_non_sequence_set_value(self):
@@ -305,7 +305,7 @@ class TestList(BoaTest):
 
     def test_array_boa2_test1(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test1.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -314,14 +314,14 @@ class TestList(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_array_test(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -342,14 +342,14 @@ class TestList(BoaTest):
         expected_results.append(9)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_array_test2(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test2.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -358,14 +358,14 @@ class TestList(BoaTest):
         expected_results.append(b'\xa0')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_array_test3(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test3.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -374,7 +374,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -409,11 +409,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('ListOfList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -424,13 +424,13 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
         runner.call_contract(path, 'Main', [[], [1, 2], [3, 4]])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_nep5_main(self):
@@ -453,11 +453,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('Nep5Main.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -468,7 +468,7 @@ class TestList(BoaTest):
         expected_results.append('a')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -476,12 +476,12 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', 'op', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_boa2_demo1(self):
         path, _ = self.get_deploy_file_paths('Demo1Boa2.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -493,7 +493,7 @@ class TestList(BoaTest):
         expected_results.append(8)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -502,7 +502,7 @@ class TestList(BoaTest):
 
     def test_list_slicing(self):
         path, _ = self.get_deploy_file_paths('ListSlicingLiteralValues.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -511,14 +511,14 @@ class TestList(BoaTest):
         expected_results.append([2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_start_larger_than_ending(self):
         path, _ = self.get_deploy_file_paths('ListSlicingStartLargerThanEnding.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -527,14 +527,14 @@ class TestList(BoaTest):
         expected_results.append([])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_with_variables(self):
         path, _ = self.get_deploy_file_paths('ListSlicingVariableValues.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -543,14 +543,14 @@ class TestList(BoaTest):
         expected_results.append([2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_negative_start(self):
         path, _ = self.get_deploy_file_paths('ListSlicingNegativeStart.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -559,14 +559,14 @@ class TestList(BoaTest):
         expected_results.append([2, 3, 4, 5])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_negative_end(self):
         path, _ = self.get_deploy_file_paths('ListSlicingNegativeEnd.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -575,14 +575,14 @@ class TestList(BoaTest):
         expected_results.append([0, 1])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_start_omitted(self):
         path, _ = self.get_deploy_file_paths('ListSlicingStartOmitted.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -591,14 +591,14 @@ class TestList(BoaTest):
         expected_results.append([0, 1, 2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_omitted(self):
         path, _ = self.get_deploy_file_paths('ListSlicingOmitted.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -607,14 +607,14 @@ class TestList(BoaTest):
         expected_results.append([0, 1, 2, 3, 4, 5])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_end_omitted(self):
         path, _ = self.get_deploy_file_paths('ListSlicingEndOmitted.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -623,14 +623,14 @@ class TestList(BoaTest):
         expected_results.append([2, 3, 4, 5])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_with_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingWithStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -686,14 +686,14 @@ class TestList(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingWithNegativeStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -749,14 +749,14 @@ class TestList(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_omitted_with_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingOmittedWithStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -807,14 +807,14 @@ class TestList(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_omitted_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingOmittedWithNegativeStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -865,7 +865,7 @@ class TestList(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -904,11 +904,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('AppendIntValue.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -917,7 +917,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, 4])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -956,11 +956,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('AppendAnyValue.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -969,7 +969,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, '4'])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1008,11 +1008,11 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('AppendIntWithBuiltin.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1021,7 +1021,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, 4])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1032,7 +1032,7 @@ class TestList(BoaTest):
 
     def test_boa2_list_append_test(self):
         path, _ = self.get_deploy_file_paths('AppendBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1041,14 +1041,14 @@ class TestList(BoaTest):
         expected_results.append([6, 7])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_append_in_class_variable(self):
         path, _ = self.get_deploy_file_paths('AppendInClassVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1057,7 +1057,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, 4])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1099,7 +1099,7 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('ClearList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_reverse(self):
@@ -1120,12 +1120,12 @@ class TestList(BoaTest):
         )
 
         path = self.get_contract_path('ReverseList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_boa2_list_reverse_test(self):
         path, _ = self.get_deploy_file_paths('ReverseBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1134,7 +1134,7 @@ class TestList(BoaTest):
         expected_results.append(['blah', 4, 2, 1])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1145,7 +1145,7 @@ class TestList(BoaTest):
 
     def test_list_extend_tuple_value(self):
         path, _ = self.get_deploy_file_paths('ExtendTupleValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1154,14 +1154,14 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, 4, 5, 6])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_extend_any_value(self):
         path, _ = self.get_deploy_file_paths('ExtendAnyValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1170,7 +1170,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, '4', 5, 1])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1185,7 +1185,7 @@ class TestList(BoaTest):
 
     def test_list_extend_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ExtendWithBuiltin.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1194,7 +1194,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 3, 4, 5, 6])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1241,7 +1241,7 @@ class TestList(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('PopList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_pop_without_assignment(self):
@@ -1278,7 +1278,7 @@ class TestList(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('PopListWithoutAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_pop_literal_argument(self):
@@ -1315,7 +1315,7 @@ class TestList(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('PopListLiteralArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_pop_literal_negative_argument(self):
@@ -1353,7 +1353,7 @@ class TestList(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('PopListLiteralNegativeArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_pop_literal_variable_argument(self):
@@ -1390,7 +1390,7 @@ class TestList(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('PopListVariableArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_list_pop_mismatched_type_argument(self):
@@ -1435,7 +1435,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1444,7 +1444,7 @@ class TestList(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1455,7 +1455,7 @@ class TestList(BoaTest):
 
     def test_boa2_list_remove_test(self):
         path, _ = self.get_deploy_file_paths('RemoveBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1464,7 +1464,7 @@ class TestList(BoaTest):
         expected_results.append([16, 3, 4])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1475,7 +1475,7 @@ class TestList(BoaTest):
 
     def test_list_insert_int_value(self):
         path, _ = self.get_deploy_file_paths('InsertIntValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1484,14 +1484,14 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 4, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_insert_any_value(self):
         path, _ = self.get_deploy_file_paths('InsertAnyValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1518,14 +1518,14 @@ class TestList(BoaTest):
         expected_results.append(list_)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_insert_int_negative_index(self):
         path, _ = self.get_deploy_file_paths('InsertIntNegativeIndex.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1534,14 +1534,14 @@ class TestList(BoaTest):
         expected_results.append([1, 4, 2, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_insert_int_with_builtin(self):
         path, _ = self.get_deploy_file_paths('InsertIntWithBuiltin.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1550,7 +1550,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 4, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1561,7 +1561,7 @@ class TestList(BoaTest):
 
     def test_list_remove_value(self):
         path, _ = self.get_deploy_file_paths('RemoveValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1573,7 +1573,7 @@ class TestList(BoaTest):
         expected_results.append([1, 2, 2, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1581,12 +1581,12 @@ class TestList(BoaTest):
         runner.call_contract(path, 'Main', [1, 2, 3, 4], 6)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_list_remove_int_value(self):
         path, _ = self.get_deploy_file_paths('RemoveIntValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1595,14 +1595,14 @@ class TestList(BoaTest):
         expected_results.append([10, 30])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_remove_int_with_builtin(self):
         path, _ = self.get_deploy_file_paths('RemoveIntWithBuiltin.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1611,7 +1611,7 @@ class TestList(BoaTest):
         expected_results.append([10, 20])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1622,7 +1622,7 @@ class TestList(BoaTest):
 
     def test_list_copy(self):
         path, _ = self.get_deploy_file_paths('Copy.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1652,14 +1652,14 @@ class TestList(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_int_list_copy(self):
         path, _ = self.get_deploy_file_paths('CopyInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1669,14 +1669,14 @@ class TestList(BoaTest):
                                  [1, 2, 3, 4, 5]])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_str_list_copy(self):
         path, _ = self.get_deploy_file_paths('CopyStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1687,14 +1687,14 @@ class TestList(BoaTest):
                                  ])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bool_list_copy(self):
         path, _ = self.get_deploy_file_paths('CopyBool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1705,14 +1705,14 @@ class TestList(BoaTest):
                                  ])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_copy_builtin_call(self):
         path, _ = self.get_deploy_file_paths('CopyListBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1731,7 +1731,7 @@ class TestList(BoaTest):
                                  [True, False, True]])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1742,7 +1742,7 @@ class TestList(BoaTest):
 
     def test_list_index(self):
         path, _ = self.get_deploy_file_paths('IndexList.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1776,7 +1776,7 @@ class TestList(BoaTest):
         expected_results.append(list_.index(value, start, end))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1785,24 +1785,24 @@ class TestList(BoaTest):
         runner.call_contract(path, 'main', [1, 2, 3, 4], 3, 3, 4)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
         runner.call_contract(path, 'main', [1, 2, 3, 4], 3, 4, -1)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
         runner.call_contract(path, 'main', [1, 2, 3, 4], 3, 0, -99)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
     def test_list_index_end_default(self):
         path, _ = self.get_deploy_file_paths('IndexListEndDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1820,7 +1820,7 @@ class TestList(BoaTest):
         expected_results.append(list_.index(value, start))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1829,18 +1829,18 @@ class TestList(BoaTest):
         runner.call_contract(path, 'main', [1, 2, 3, 4], 2, 99)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
         runner.call_contract(path, 'main', [1, 2, 3, 4], 4, -1)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
     def test_list_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexListDefaults.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1856,14 +1856,14 @@ class TestList(BoaTest):
         expected_results.append(list_.index(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_index_int(self):
         path, _ = self.get_deploy_file_paths('IndexListInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1874,14 +1874,14 @@ class TestList(BoaTest):
         expected_results.append(list_.index(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_index_str(self):
         path, _ = self.get_deploy_file_paths('IndexListStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1892,14 +1892,14 @@ class TestList(BoaTest):
         expected_results.append(list_.index(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_index_bool(self):
         path, _ = self.get_deploy_file_paths('IndexListBool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1910,7 +1910,7 @@ class TestList(BoaTest):
         expected_results.append(list_.index(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

@@ -1,6 +1,7 @@
 import json
 import os.path
 import subprocess
+import threading
 from typing import Any, List, Tuple, Dict, Optional, Union, Type
 
 from boa3.internal import env, constants
@@ -36,7 +37,7 @@ class NeoTestRunner:
 
     _DEFAULT_ACCOUNT = neoxp_utils.get_default_account()
 
-    def __init__(self, neoxp_path: str = None):
+    def __init__(self, neoxp_path: str = None, runner_id: str = None):
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
@@ -52,11 +53,17 @@ class NeoTestRunner:
         if not isinstance(neoxp_path, str):
             neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
-        self._file_name = self._FOLDER_NAME
+
+        if isinstance(runner_id, str):
+            self._file_name: str = None  # defined in the following line
+            self.file_name = self._FOLDER_NAME if not runner_id else runner_id
+        else:
+            self._file_name = self._FOLDER_NAME
+
+        self._clear_files_when_destroyed = True
+        self._first_execution = True
 
         self._batch = NeoExpressBatch()
-        self._batch_size_since_last_update = -1
-        self._batch_size_since_last_checkpoint = 0
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
         self._invokes_to_batch = 0
@@ -69,10 +76,12 @@ class NeoTestRunner:
     @file_name.setter
     def file_name(self, value: str):
         if isinstance(value, str) and not value.isspace():
+            from boa3_test.test_drive import utils
+            runner_specific_id = utils.create_custom_id(value)
             self._file_name = value
-            self._INVOKE_FILE = f'{value}.neo-invoke.json'
-            self._BATCH_FILE = f'{value}.batch'
-            self._CHECKPOINT_FILE = f'{value}.neoxp-checkpoint'
+            self._INVOKE_FILE = f'{runner_specific_id}.neo-invoke.json'
+            self._BATCH_FILE = f'{runner_specific_id}.batch'
+            self._CHECKPOINT_FILE = f'{runner_specific_id}.neoxp-checkpoint'
 
     @property
     def vm_state(self) -> VMState:
@@ -179,17 +188,23 @@ class NeoTestRunner:
             # genesis block doesn't change between neo express resets
             return genesis
 
-        block = neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index)
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+        block = neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
+                                      check_point_file=check_point_path)
 
         if not isinstance(genesis, Block) and isinstance(block, Block) and block.index == 0:
             neoxp_utils._set_genesis_block(block)  # optimization for consecutive executions
         return block
 
     def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
-        return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash)
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+        return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash,
+                                           check_point_file=check_point_path)
 
     def get_transaction_result(self, tx_hash: Union[UInt256, bytes]) -> Optional[TransactionLog]:
-        return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash)
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+        return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash,
+                                               check_point_file=check_point_path)
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
@@ -244,17 +259,22 @@ class NeoTestRunner:
             self._update_contracts()
 
     def _update_contracts(self):
-        cur_batch_size = self._batch.cur_size()
         batch_file_path = self.get_full_path(self._BATCH_FILE)
+        if self._first_execution:
+            check_point_path = None
+            self._first_execution = False
+        else:
+            check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
 
-        if self._batch_size_since_last_update < cur_batch_size:
-            log = self._batch.execute(self._neoxp_abs_path, batch_file_path, reset=True)
-            self._update_cli_log(log)
+        batch_has_deploys = self._batch.has_new_deploys()
+        log = self._batch.execute(self._neoxp_abs_path, batch_file_path,
+                                  check_point_file=check_point_path,
+                                  reset=True
+                                  )
+        self._update_cli_log(log)
 
-            if self._batch.has_new_deploys_since(self._batch_size_since_last_update):
-                deployed_contracts = neoxp_utils.get_deployed_contracts(self._neoxp_abs_path)
-                self._contracts.replace(deployed_contracts)
-            self._batch_size_since_last_update = cur_batch_size
+        if batch_has_deploys:
+            self._contracts.update_after_deploy()
 
     def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None,
                 clear_invokes: bool = True, add_invokes_to_batch: bool = False):
@@ -263,8 +283,9 @@ class NeoTestRunner:
         cli_args = ['neo-test-runner', invoke_file_path
                     ]
 
-        if self._batch_size_since_last_checkpoint > 0:
-            cli_args.extend(['--checkpoint', self.get_full_path(self._CHECKPOINT_FILE)])
+        checkpoint_file = self.get_full_path(self._CHECKPOINT_FILE)
+        if os.path.isfile(checkpoint_file):
+            cli_args.extend(['--checkpoint', checkpoint_file])
 
         if isinstance(account, Account):
             cli_args.extend(['--account', account.get_identifier()])
@@ -280,11 +301,11 @@ class NeoTestRunner:
         stdout, stderr = self._run_command_line(cli_args)
 
         try:
-            result = json.loads(stdout)
-        except json.JSONDecodeError:
-            result = utils.handle_return_error(stdout)
+            try:
+                result = json.loads(stdout)
+            except json.JSONDecodeError:
+                result = utils.handle_return_error(stdout)
 
-        try:
             self._update_runner(result)
             if add_invokes_to_batch:
                 import shutil
@@ -302,6 +323,22 @@ class NeoTestRunner:
         else:
             return self._last_execution_results
 
+    def __del__(self):
+        self.reset()
+        if self._clear_files_when_destroyed:
+            paths_to_delete = [
+                self.get_full_path(self._CHECKPOINT_FILE),
+                self.get_full_path(self._BATCH_FILE),
+                self.get_full_path(self._INVOKE_FILE)
+            ]
+            for path in paths_to_delete:
+                try:
+                    if os.path.exists(path):
+                        os.remove(path)
+                except BaseException as e:
+                    print(e)
+                    continue
+
     def reset_state(self):
         self._vm_state = VMState.NONE
         self._gas_consumed = 0
@@ -315,10 +352,9 @@ class NeoTestRunner:
 
     def reset(self):
         self.reset_state()
+        self._first_execution = True
 
         self._batch.clear()
-        self._batch_size_since_last_update = -1
-        self._batch_size_since_last_checkpoint = 0
         self._contracts.clear()
         self._invokes.clear()
         self._invokes_to_batch = 0
@@ -385,16 +421,19 @@ class NeoTestRunner:
 
     def _generate_files(self):
         self._generate_root_folder()
-        self._create_checkpoint_from_batch()
+
+        checkpoint_thread = threading.Thread(target=self._create_checkpoint_from_batch)
+        checkpoint_thread.start()
+
         self._generate_invoke_file()
+        checkpoint_thread.join()
 
     def _create_checkpoint_from_batch(self):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
 
-        if self._batch_size_since_last_checkpoint < self._batch.cur_size():
+        if not os.path.exists(check_point_path) or self._batch.cur_size() > 0:
             self._batch.create_neo_express_checkpoint(check_point_path,
                                                       overwrite=True)
-            self._batch_size_since_last_checkpoint = self._batch.cur_size()
         # update list of contracts
         self._update_contracts()
 

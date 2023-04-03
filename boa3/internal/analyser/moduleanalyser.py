@@ -3,6 +3,7 @@ import logging
 import os
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.analyser.importanalyser import ImportAnalyser
@@ -10,7 +11,6 @@ from boa3.internal.analyser.model.ManifestSymbol import ManifestSymbol
 from boa3.internal.analyser.model.functionarguments import FunctionArguments
 from boa3.internal.analyser.model.optimizer import UndefinedType
 from boa3.internal.analyser.model.symbolscope import SymbolScope
-from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.decorator import ContractDecorator
@@ -319,7 +319,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _log_import(self, import_from: str):
         if self._log:
-            logging.info("Importing '{0}'\t <{1}>".format(import_from, self.filename))
+            logging.getLogger(constants.BOA_LOGGING_NAME).info("Importing '{0}'\t <{1}>".format(import_from, self.filename))
 
     def _log_unresolved_import(self, origin_node: ast.AST, import_id: str):
         if self._log:

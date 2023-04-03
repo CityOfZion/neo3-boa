@@ -50,7 +50,7 @@ jobs:
             export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
             export PATH="$PATH:$DOTNET_TOOL_PATH"
             
-            coverage run -m unittest discover boa3_test
+            coverage run boa3_test/tests/run_unit_tests.py
             pip install coveralls
             coveralls --service=circleci
 

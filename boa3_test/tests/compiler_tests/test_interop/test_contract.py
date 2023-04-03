@@ -1,6 +1,7 @@
 import json
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.interop.interop import Interop
@@ -9,7 +10,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 
 
@@ -19,7 +19,7 @@ class TestContractInterop(BoaTest):
     def test_call_contract(self):
         path, _ = self.get_deploy_file_paths('CallScriptHash.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -46,19 +46,19 @@ class TestContractInterop(BoaTest):
         runner.reset()
         runner.call_contract(path, 'Main', call_hash, 'add', [1, 2])
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG)
 
     def test_call_contract_with_cast(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithCast.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
 
         contract = runner.deploy_contract(call_contract_path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         invokes.append(runner.call_contract(path, 'Main', call_hash, 'add', [1, 2]))
@@ -73,13 +73,13 @@ class TestContractInterop(BoaTest):
         runner.reset()
         runner.call_contract(path, 'Main', call_hash, 'add', [1, 2])
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG)
 
     def test_call_contract_without_args(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithoutArgs.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/list_test', 'IntList.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -102,19 +102,19 @@ class TestContractInterop(BoaTest):
         runner.reset()
         runner.call_contract(path, 'Main', call_hash, 'Main')
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG)
 
     def test_call_contract_with_flags(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithFlags.py')
         call_contract_path, _ = self.get_deploy_file_paths('CallFlagsUsage.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
 
         contract = runner.deploy_contract(call_contract_path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         from boa3.internal.neo3.contracts import CallFlags
@@ -155,32 +155,32 @@ class TestContractInterop(BoaTest):
 
         runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
 
         runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.READ_ONLY)
         runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.NONE)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
 
         runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.READ_ONLY)
         runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.STATES)
         runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
 
         runner.call_contract(path, 'Main', call_hash, 'call_another_contract', [], CallFlags.STATES)
         runner.call_contract(path, 'Main', call_hash, 'call_another_contract', [], CallFlags.NONE)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
 
         runner.reset()
         runner.call_contract(path, 'Main', call_hash, 'Main')
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX)
 
     def test_call_contract_too_many_parameters(self):
@@ -198,7 +198,7 @@ class TestContractInterop(BoaTest):
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, None)
 
         runner.execute()
@@ -218,7 +218,7 @@ class TestContractInterop(BoaTest):
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         runner.file_name = 'test_create_contract'
 
         data = 'some sort of data'
@@ -248,7 +248,7 @@ class TestContractInterop(BoaTest):
 
     def test_update_contract(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         runner.file_name = 'test_update_contract'
 
         invokes = []
@@ -256,7 +256,7 @@ class TestContractInterop(BoaTest):
 
         runner.call_contract(path, 'new_method')
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('new_method'))
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
@@ -278,14 +278,14 @@ class TestContractInterop(BoaTest):
 
     def test_update_contract_data_deploy(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
 
         runner.call_contract(path, 'new_method')
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('new_method'))
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
@@ -317,7 +317,7 @@ class TestContractInterop(BoaTest):
 
     def test_destroy_contract(self):
         path, _ = self.get_deploy_file_paths('DestroyContract.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -337,7 +337,7 @@ class TestContractInterop(BoaTest):
         runner.call_contract(call_contract_path, 'Main',
                              script_hash, 'Main', [])
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG}')
 
     def test_destroy_contract_too_many_parameters(self):
@@ -354,11 +354,11 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('NeoScriptHash.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -396,11 +396,11 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('GasScriptHash.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -430,7 +430,7 @@ class TestContractInterop(BoaTest):
 
     def test_call_flags_type(self):
         path, _ = self.get_deploy_file_paths('CallFlagsType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -461,13 +461,13 @@ class TestContractInterop(BoaTest):
     def test_get_call_flags(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithFlags.py')
         call_contract_path, _ = self.get_deploy_file_paths('GetCallFlags.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
 
         contract = runner.deploy_contract(call_contract_path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         from boa3.internal.neo3.contracts import CallFlags
@@ -498,13 +498,13 @@ class TestContractInterop(BoaTest):
         runner.reset()
         runner.call_contract(path, 'Main', call_hash, 'main', [])  # missing argument
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('Main'))
 
     def test_import_contract(self):
         path, _ = self.get_deploy_file_paths('ImportContract.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -532,7 +532,7 @@ class TestContractInterop(BoaTest):
     def test_import_interop_contract(self):
         path, _ = self.get_deploy_file_paths('ImportInteropContract.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -581,7 +581,7 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('CreateStandardAccount.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_create_standard_account_too_few_parameters(self):
@@ -594,7 +594,7 @@ class TestContractInterop(BoaTest):
 
     def test_get_minimum_deployment_fee(self):
         path, _ = self.get_deploy_file_paths('GetMinimumDeploymentFee.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -624,7 +624,7 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('CreateMultisigAccount.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_create_multisig_account_too_few_parameters(self):

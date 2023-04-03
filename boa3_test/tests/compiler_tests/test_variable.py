@@ -1,6 +1,7 @@
 from typing import Dict
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.method import Method
@@ -11,7 +12,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestVariable(BoaTest):
@@ -64,7 +64,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('AssignmentWithType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_assignment_without_type(self):
@@ -78,7 +78,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('AssignmentWithoutType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_argument_assignment(self):
@@ -96,7 +96,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ArgumentAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments(self):
@@ -114,7 +114,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MultipleAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_set_sequence(self):
@@ -149,7 +149,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MultipleAssignmentsSetSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_set_sequence_last(self):
@@ -184,7 +184,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MultipleAssignmentsSetSequenceLast.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_mismatched_type(self):
@@ -207,7 +207,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MismatchedTypeMultipleAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_multiple_assignments(self):
@@ -240,7 +240,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ManyAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_return_arg_value(self):
@@ -253,11 +253,11 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ReturnArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -268,7 +268,7 @@ class TestVariable(BoaTest):
         expected_results.append(-140)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -285,11 +285,11 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ReturnLocalVariable.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -300,7 +300,7 @@ class TestVariable(BoaTest):
         expected_results.append(1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -317,11 +317,11 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('AssignLocalWithArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -332,7 +332,7 @@ class TestVariable(BoaTest):
         expected_results.append(-140)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -464,11 +464,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalDeclarationWithArgumentWrittenAfter.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -477,7 +477,7 @@ class TestVariable(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -497,11 +497,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalAssignmentWithType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -510,7 +510,7 @@ class TestVariable(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -526,11 +526,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalAssignmentWithoutType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -539,7 +539,7 @@ class TestVariable(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -550,7 +550,7 @@ class TestVariable(BoaTest):
 
     def test_global_chained_multiple_assignments(self):
         path, _ = self.get_deploy_file_paths('GlobalMultipleAssignments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -568,7 +568,7 @@ class TestVariable(BoaTest):
         expected_results.append(100)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -608,11 +608,11 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ManyGlobalAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -621,14 +621,14 @@ class TestVariable(BoaTest):
         expected_results.append([0, 1, 2, 3, 4, 5, 6, 7])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_global_assignment(self):
         path, _ = self.get_deploy_file_paths('ListGlobalAssignment.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -644,7 +644,7 @@ class TestVariable(BoaTest):
         expected_results.append([])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -664,11 +664,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalAssignmentBetweenFunctions.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -679,14 +679,14 @@ class TestVariable(BoaTest):
         expected_results.append(5)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_variable_in_class_method(self):
         path, _ = self.get_deploy_file_paths('GlobalVariableInClassMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -698,7 +698,7 @@ class TestVariable(BoaTest):
         expected_results.append({'val1': 1, 'val2': 2, 'bar': 42})
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -737,11 +737,11 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GetGlobalValueWrittenAfter.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -750,7 +750,7 @@ class TestVariable(BoaTest):
         expected_results.append([0, 1, 2, 3, 4, 5, 6, 7])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -775,7 +775,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -786,14 +786,14 @@ class TestVariable(BoaTest):
         expected_results.append(-140)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_global_in_function_with_global_keyword(self):
         path, _ = self.get_deploy_file_paths('GlobalAssignmentInFunctionWithArgument.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -814,18 +814,18 @@ class TestVariable(BoaTest):
         expected_results.append(-140)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_void_function_call(self):
         path = self.get_contract_path('AssignVoidFunctionCall.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -834,14 +834,14 @@ class TestVariable(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_anonymous_variable(self):
         path, _ = self.get_deploy_file_paths('AnonymousVariable')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -850,7 +850,7 @@ class TestVariable(BoaTest):
         expected_results.append(400)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -861,7 +861,7 @@ class TestVariable(BoaTest):
 
     def test_variables_in_different_scope_with_same_name(self):
         path, _ = self.get_deploy_file_paths('DifferentScopesWithSameName.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -870,14 +870,14 @@ class TestVariable(BoaTest):
         expected_results.append(1_000)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_instance_variable_and_variable_with_same_name(self):
         path, _ = self.get_deploy_file_paths('InstanceVariableAndVariableWithSameName.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -886,14 +886,14 @@ class TestVariable(BoaTest):
         expected_results.append([10])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_inner_object_variable_access(self):
         path, _ = self.get_deploy_file_paths('InnerObjectVariableAccess.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -903,14 +903,14 @@ class TestVariable(BoaTest):
         expected_results.append(expected_return)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variables_with_same_name_class_variable_and_local(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameNameClassVariableAndLocal.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -920,14 +920,14 @@ class TestVariable(BoaTest):
         expected_results.append(expected_return)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variables_with_same_name_instance_and_local(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameNameInstanceAndLocal.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -937,14 +937,14 @@ class TestVariable(BoaTest):
         expected_results.append(expected_return)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variables_with_same_name(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameName.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -954,7 +954,7 @@ class TestVariable(BoaTest):
         expected_results.append(expected_return)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

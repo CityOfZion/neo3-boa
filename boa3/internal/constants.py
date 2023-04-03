@@ -17,6 +17,7 @@ IMPORT_WILDCARD = '*'
 SYS_VERSION_INFO = sys.version_info
 SYS_VERSION = platform.python_version()
 BOA_VERSION = _actual_boa_version  # for logging only
+BOA_LOGGING_NAME = 'neo3-boa-log'
 COMPILER_VERSION = BOA_VERSION
 BOA_PACKAGE_PATH = os.path.abspath(f'{__file__}/..')
 
