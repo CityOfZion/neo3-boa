@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from boa3.cli_commands import commands
+from boa3.internal.cli_commands import commands
 
 
 def main():

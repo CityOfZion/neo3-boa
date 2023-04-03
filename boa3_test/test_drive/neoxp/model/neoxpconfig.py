@@ -21,6 +21,7 @@ class NeoExpressConfig:
         with open(neo_express_path, 'rb') as config_file:
             config_json = json.loads(config_file.read())
 
+        self._neo_express_config_path = neo_express_path
         self._magic = config_json['magic']
         self._version = config_json['address-version']
 
@@ -67,6 +68,10 @@ class NeoExpressConfig:
     @property
     def genesis_block(self):
         return self._genesis_block
+
+    @property
+    def config_path(self):
+        return self._neo_express_config_path
 
 
 def _wallet_accounts_from_json(wallet_json: dict) -> List[Account]:

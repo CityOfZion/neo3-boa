@@ -1,7 +1,8 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestMath(BoaTest):
@@ -16,7 +17,7 @@ class TestMath(BoaTest):
 
     def test_pow_method(self):
         path, _ = self.get_deploy_file_paths('Pow.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -49,14 +50,14 @@ class TestMath(BoaTest):
         expected_results.append(math.pow(base, exponent))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_pow_method_from_math(self):
         path, _ = self.get_deploy_file_paths('PowFromMath.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -69,7 +70,7 @@ class TestMath(BoaTest):
         expected_results.append(pow(base, exponent))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -80,7 +81,7 @@ class TestMath(BoaTest):
 
     def test_sqrt_method(self):
         path, _ = self.get_deploy_file_paths('Sqrt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -117,19 +118,19 @@ class TestMath(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
         runner.call_contract(path, 'main', -1)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_CANNOT_BE_NEGATIVE_MSG)
 
     def test_sqrt_method_from_math(self):
         path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -142,7 +143,7 @@ class TestMath(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

@@ -3,8 +3,8 @@ import os
 import sys
 from argparse import _SubParsersAction
 
-from boa3.cli_commands.icommand import ICommand
 from boa3.boa3 import Boa3
+from boa3.internal.cli_commands.icommand import ICommand
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 
 

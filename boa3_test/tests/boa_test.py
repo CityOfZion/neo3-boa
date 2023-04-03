@@ -1,4 +1,5 @@
 import os
+import threading
 from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 from unittest import TestCase
 
@@ -14,6 +15,11 @@ from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 from boa3_test.tests.test_classes.transactionattribute import oracleresponse
+
+_COMPILER_LOCK = threading.RLock()
+_LOGGING_LOCK = threading.Lock()
+
+USE_UNIQUE_NAME = False
 
 
 class BoaTest(TestCase):
@@ -42,6 +48,10 @@ class BoaTest(TestCase):
 
     default_folder: str = ''
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._use_custom_name = USE_UNIQUE_NAME
+
     @classmethod
     def setUpClass(cls):
         folders = os.path.abspath(__file__).split(os.sep)
@@ -52,6 +62,9 @@ class BoaTest(TestCase):
 
         super(BoaTest, cls).setUpClass()
         constants.COMPILER_VERSION = '_unit_tests_'  # to not change test contract script hashes in different versions
+
+    def method_name(self) -> str:
+        return self._testMethodName if hasattr(self, '_testMethodName') else self.id()
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
@@ -93,18 +106,15 @@ class BoaTest(TestCase):
 
     def _get_compiler_log_data(self, expected_logged_exception, path):
         output = None
-        with self.assertLogs() as log:
-            from boa3.internal.exception.NotLoadedException import NotLoadedException
-            try:
-                from boa3.boa3 import Boa3
-                output = Boa3.compile(path)
-            except NotLoadedException:
-                # when an compiler error is logged this exception is raised.
-                pass
 
-        for logger in log.records:
-            import logging
-            logging.log(level=logger.levelno, msg=logger.msg)
+        with _LOGGING_LOCK:
+            with self.assertLogs() as log:
+                from boa3.internal.exception.NotLoadedException import NotLoadedException
+                try:
+                    output = self.compile(path)
+                except NotLoadedException:
+                    # when an compiler error is logged this exception is raised.
+                    pass
 
         expected_logged = [exception for exception in log.records
                            if isinstance(exception.msg, expected_logged_exception)]
@@ -178,25 +188,51 @@ class BoaTest(TestCase):
             raise FileNotFoundError(path)
         return path
 
+    def _get_deploy_file_paths_without_compiling(self, contract_path: str) -> Tuple[str, str]:
+        file_path_without_ext, _ = os.path.splitext(contract_path)
+        if USE_UNIQUE_NAME:
+            from boa3_test.test_drive import utils
+            file_path_without_ext = utils.create_custom_id(file_path_without_ext, use_time=False)
+
+        return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
+
     def get_deploy_file_paths(self, *args: str, compile_if_found: bool = False) -> Tuple[str, str]:
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
-            file_path_without_ext, _ = os.path.splitext(contract_path)
-            nef_path, manifest_path = f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
-            if compile_if_found or not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
-                # both .nef and .manifest.json are required to execute the smart contract
-                self.compile_and_save(contract_path, log=False)
+            nef_path, manifest_path = self._get_deploy_file_paths_without_compiling(contract_path)
+            with _COMPILER_LOCK:
+                if compile_if_found or not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
+                    # both .nef and .manifest.json are required to execute the smart contract
+                    self.compile_and_save(contract_path, output_path=nef_path, log=False)
             return nef_path, manifest_path
 
         return contract_path, contract_path
 
-    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
-        nef_output = path.replace('.py', '.nef')
-        manifest_output = path.replace('.py', '.manifest.json')
+    def compile(self, path: str, root_folder: str = None) -> bytes:
+        from boa3.boa3 import Boa3
+
+        with _COMPILER_LOCK:
+            result = Boa3.compile(path, root_folder=root_folder)
+
+        return result
+
+    def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True,
+                         output_path: str = None, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
+
+        if not isinstance(output_path, str) or not output_path.endswith('.nef'):
+            nef_output, _ = self._get_deploy_file_paths_without_compiling(path)
+        else:
+            nef_output = output_path
+
+        if nef_output.endswith('.py'):
+            nef_output = nef_output.replace('.py', '.nef')
+        manifest_output = nef_output.replace('.nef', '.manifest.json')
 
         from boa3.boa3 import Boa3
         from boa3.internal.neo.contracts.neffile import NefFile
-        Boa3.compile_and_save(path, root_folder=root_folder, show_errors=log, debug=debug)
+        with _COMPILER_LOCK:
+            Boa3.compile_and_save(path, output_path=nef_output, root_folder=root_folder,
+                                  show_errors=log, debug=debug)
 
         get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False
         with open(nef_output, mode='rb') as nef:
@@ -226,8 +262,9 @@ class BoaTest(TestCase):
 
     def get_output(self, path: str, root_folder: str = None) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
-        if not os.path.isfile(nef_output):
-            return self.compile_and_save(path, root_folder=root_folder)
+        with _COMPILER_LOCK:
+            if not os.path.isfile(nef_output):
+                return self.compile_and_save(path, root_folder=root_folder)
 
         manifest_output = path.replace('.py', '.manifest.json')
 
@@ -251,8 +288,9 @@ class BoaTest(TestCase):
 
     def get_bytes_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
         nef_output = path.replace('.py', '.nef')
-        if not os.path.isfile(nef_output):
-            return self.compile_and_save(path, get_raw_nef=True)
+        with _COMPILER_LOCK:
+            if not os.path.isfile(nef_output):
+                return self.compile_and_save(path, get_raw_nef=True)
 
         manifest_output = path.replace('.py', '.manifest.json')
 
@@ -280,11 +318,17 @@ class BoaTest(TestCase):
                            rollback_on_fault: bool = True) -> Any:
 
         if isinstance(smart_contract_path, str) and smart_contract_path.endswith('.py'):
-            if not (os.path.isfile(smart_contract_path.replace('.py', '.nef'))
-                    and os.path.isfile(smart_contract_path.replace('.py', '.manifest.json'))):
-                # both .nef and .manifest.json are required to execute the smart contract
-                self.compile_and_save(smart_contract_path, log=False)
-            smart_contract_path = smart_contract_path.replace('.py', '.nef')
+            if USE_UNIQUE_NAME:
+                nef_path, manifest_path = self._get_deploy_file_paths_without_compiling(smart_contract_path)
+            else:
+                nef_path = smart_contract_path.replace('.py', '.nef')
+                manifest_path = smart_contract_path.replace('.py', '.manifest.json')
+
+            with _COMPILER_LOCK:
+                if not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
+                    # both .nef and .manifest.json are required to execute the smart contract
+                    self.compile_and_save(smart_contract_path, log=False, output_path=nef_path)
+            smart_contract_path = nef_path
         elif isinstance(smart_contract_path, bytes):
             from boa3.internal.neo3.core.types import UInt160
             smart_contract_path = UInt160(smart_contract_path)

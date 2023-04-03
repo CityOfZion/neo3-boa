@@ -1,3 +1,5 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.constants import IMPORT_WILDCARD
 from boa3.internal.exception import CompilerError, CompilerWarning
@@ -5,7 +7,6 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.core.types import UInt160
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 
 
@@ -176,17 +177,17 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertEqual(manifest_struct, invoke.result[4])
 
     def test_metadata_info_supported_standards_with_imported_event(self):
@@ -281,17 +282,17 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         result_trusts = invoke.result[4][6]
 
         # transform the str values to bytes values
@@ -319,15 +320,15 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         result_trusts = invoke.result[4][6]
         self.assertEqual(None, result_trusts)
@@ -363,17 +364,17 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         call_hash = contract.script_hash
 
         invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         result_permissions = invoke.result[4][5]
 
         # casting the addresses to bytes values
@@ -465,18 +466,18 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract_call = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         call_hash = contract_call.invoke.contract.script_hash
         invoke = runner.call_contract(get_contract_path, 'main', call_hash)
         manifest_struct = NeoManifestStruct.from_json(manifest)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         result_groups = []
         for group in invoke.result[4][1]:

@@ -1,11 +1,11 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestTuple(BoaTest):
@@ -26,7 +26,7 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('IntTuple.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_string_values(self):
@@ -54,7 +54,7 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('StrTuple.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_bool_values(self):
@@ -72,7 +72,7 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('BoolTuple.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_variable_values(self):
@@ -96,7 +96,7 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('VariableTuple.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_assign_empty_tuple(self):
@@ -110,7 +110,7 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('EmptyTupleAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_get_value(self):
@@ -133,11 +133,11 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('GetValue.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -148,7 +148,7 @@ class TestTuple(BoaTest):
         expected_results.append(5)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -156,7 +156,7 @@ class TestTuple(BoaTest):
         runner.call_contract(path, 'Main', [])
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_non_sequence_get_value(self):
@@ -205,11 +205,11 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('TupleOfTuple.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -218,7 +218,7 @@ class TestTuple(BoaTest):
         expected_results.append(1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -226,13 +226,13 @@ class TestTuple(BoaTest):
         runner.call_contract(path, 'Main', ())
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
         runner.call_contract(path, 'Main', ((), (1, 2), (3, 4)))
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_nep5_main(self):
@@ -255,11 +255,11 @@ class TestTuple(BoaTest):
         )
 
         path = self.get_contract_path('Nep5Main.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -270,7 +270,7 @@ class TestTuple(BoaTest):
         expected_results.append('a')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -278,12 +278,12 @@ class TestTuple(BoaTest):
         runner.call_contract(path, 'Main', 'op', ())
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_tuple_slicing(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingLiteralValues.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -292,14 +292,14 @@ class TestTuple(BoaTest):
         expected_results.append([2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_start_larger_than_ending(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingStartLargerThanEnding.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -308,14 +308,14 @@ class TestTuple(BoaTest):
         expected_results.append([])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_with_variables(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingVariableValues.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -324,14 +324,14 @@ class TestTuple(BoaTest):
         expected_results.append([2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_negative_start(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingNegativeStart.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -340,14 +340,14 @@ class TestTuple(BoaTest):
         expected_results.append([2, 3, 4, 5])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_negative_end(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingNegativeEnd.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -356,14 +356,14 @@ class TestTuple(BoaTest):
         expected_results.append([0, 1])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_start_omitted(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingStartOmitted.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -372,7 +372,7 @@ class TestTuple(BoaTest):
         expected_results.append([0, 1, 2])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -397,11 +397,11 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
         path = self.get_contract_path('TupleSlicingOmitted.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -410,14 +410,14 @@ class TestTuple(BoaTest):
         expected_results.append([0, 1, 2, 3, 4, 5])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_end_omitted(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingEndOmitted.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -426,14 +426,14 @@ class TestTuple(BoaTest):
         expected_results.append([2, 3, 4, 5])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_with_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingWithStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -499,14 +499,14 @@ class TestTuple(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingWithNegativeStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -572,14 +572,14 @@ class TestTuple(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_omitted_with_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -639,14 +639,14 @@ class TestTuple(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_slicing_omitted_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithNegativeStride.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -706,14 +706,14 @@ class TestTuple(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_tuple_index(self):
         path, _ = self.get_deploy_file_paths('IndexTuple.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -747,7 +747,7 @@ class TestTuple(BoaTest):
         expected_results.append(tuple_.index(value, start, end))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -756,24 +756,24 @@ class TestTuple(BoaTest):
         runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 3, 4)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
         runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 4, -1)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
         runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 0, -99)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
     def test_tuple_index_end_default(self):
         path, _ = self.get_deploy_file_paths('IndexTupleEndDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -791,7 +791,7 @@ class TestTuple(BoaTest):
         expected_results.append(tuple_.index(value, start))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -800,18 +800,18 @@ class TestTuple(BoaTest):
         runner.call_contract(path, 'main', (1, 2, 3, 4), 2, 99)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
         runner.call_contract(path, 'main', (1, 2, 3, 4), 4, -1)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
 
     def test_tuple_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexTupleDefaults.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -827,7 +827,7 @@ class TestTuple(BoaTest):
         expected_results.append(tuple_.index(value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

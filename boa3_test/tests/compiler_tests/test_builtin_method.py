@@ -1,6 +1,7 @@
 import unittest
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -8,7 +9,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestBuiltinMethod(BoaTest):
@@ -34,11 +34,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('LenTuple.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -70,11 +70,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('LenList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -106,11 +106,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('LenString.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -126,7 +126,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_len_of_bytes(self):
         path, _ = self.get_deploy_file_paths('LenBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -193,11 +193,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('AppendMutableSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -240,11 +240,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('AppendMutableSequenceBuiltinCall.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -306,11 +306,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('ClearMutableSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -356,11 +356,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('ClearMutableSequenceBuiltinCall.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -407,11 +407,11 @@ class TestBuiltinMethod(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('ReverseMutableSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -427,7 +427,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_reverse_mutable_sequence_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ReverseMutableSequenceBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -464,7 +464,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_extend_mutable_sequence(self):
         path, _ = self.get_deploy_file_paths('ExtendMutableSequence.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -480,7 +480,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_extend_mutable_sequence_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ExtendMutableSequenceBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -508,7 +508,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_int(self):
         path, _ = self.get_deploy_file_paths('ScriptHashInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -527,7 +527,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_int_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ScriptHashIntBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -546,7 +546,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_str(self):
         path, _ = self.get_deploy_file_paths('ScriptHashStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -570,7 +570,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_str_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ScriptHashStrBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -590,7 +590,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_script_hash_variable(self):
         path, _ = self.get_deploy_file_paths('ScriptHashVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -615,11 +615,11 @@ class TestBuiltinMethod(BoaTest):
 
         runner.call_contract(path, 'Main', 123)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
 
     def test_script_hash_variable_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ScriptHashVariableBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -669,7 +669,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_int_to_bytes(self):
         path, _ = self.get_deploy_file_paths('IntToBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -687,7 +687,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_int_zero_to_bytes(self):
         path, _ = self.get_deploy_file_paths('IntZeroToBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -705,7 +705,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_int_to_bytes_with_builtin(self):
         path, _ = self.get_deploy_file_paths('IntToBytesWithBuiltin.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -723,7 +723,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_int_to_bytes_as_parameter(self):
         path, _ = self.get_deploy_file_paths('IntToBytesAsParameter.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -749,11 +749,11 @@ class TestBuiltinMethod(BoaTest):
         )
 
         path = self.get_contract_path('StrToBytes.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -778,11 +778,11 @@ class TestBuiltinMethod(BoaTest):
         )
 
         path = self.get_contract_path('StrToBytesWithBuiltin.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -807,7 +807,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_int(self):
         path, _ = self.get_deploy_file_paths('PrintInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -827,7 +827,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_str(self):
         path, _ = self.get_deploy_file_paths('PrintStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -847,7 +847,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_bytes(self):
         path, _ = self.get_deploy_file_paths('PrintBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -867,7 +867,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_bool(self):
         path, _ = self.get_deploy_file_paths('PrintBool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -887,7 +887,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_list(self):
         path, _ = self.get_deploy_file_paths('PrintList.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -910,7 +910,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_user_class(self):
         path, _ = self.get_deploy_file_paths('PrintClass.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -936,7 +936,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_many_values(self):
         path, _ = self.get_deploy_file_paths('PrintManyValues.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -957,7 +957,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_print_no_args(self):
         path, _ = self.get_deploy_file_paths('PrintNoArgs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -984,7 +984,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_int_literal(self):
         path, _ = self.get_deploy_file_paths('IsInstanceIntLiteral.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1000,7 +1000,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_int_variable(self):
         path, _ = self.get_deploy_file_paths('IsInstanceIntVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1022,7 +1022,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_bool_literal(self):
         path, _ = self.get_deploy_file_paths('IsInstanceBoolLiteral.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1038,7 +1038,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_bool_variable(self):
         path, _ = self.get_deploy_file_paths('IsInstanceBoolVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1060,7 +1060,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_str_literal(self):
         path, _ = self.get_deploy_file_paths('IsInstanceStrLiteral.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1076,7 +1076,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_str_variable(self):
         path, _ = self.get_deploy_file_paths('IsInstanceStrVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1098,7 +1098,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_list_literal(self):
         path, _ = self.get_deploy_file_paths('IsInstanceListLiteral.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1114,7 +1114,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_tuple_literal(self):
         path, _ = self.get_deploy_file_paths('IsInstanceTupleLiteral.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1130,7 +1130,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_tuple_variable(self):
         path, _ = self.get_deploy_file_paths('IsInstanceTupleVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1155,7 +1155,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_many_types(self):
         path, _ = self.get_deploy_file_paths('IsInstanceManyTypes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1182,7 +1182,7 @@ class TestBuiltinMethod(BoaTest):
         path, _ = self.get_deploy_file_paths('IsInstanceManyTypesWithClass.py')
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1216,7 +1216,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_uint160(self):
         path, _ = self.get_deploy_file_paths('IsInstanceUInt160.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1241,7 +1241,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_uint256(self):
         path, _ = self.get_deploy_file_paths('IsInstanceUInt256.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1270,7 +1270,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_exit(self):
         path, _ = self.get_deploy_file_paths('Exit.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1286,7 +1286,7 @@ class TestBuiltinMethod(BoaTest):
 
         runner.call_contract(path, 'main', True)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
 
     # endregion
@@ -1295,7 +1295,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_int(self):
         path, _ = self.get_deploy_file_paths('MaxInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1314,7 +1314,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_int_more_arguments(self):
         path, _ = self.get_deploy_file_paths('MaxIntMoreArguments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1332,7 +1332,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_str(self):
         path, _ = self.get_deploy_file_paths('MaxStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1365,7 +1365,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_str_more_arguments(self):
         path, _ = self.get_deploy_file_paths('MaxStrMoreArguments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1383,7 +1383,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_bytes(self):
         path, _ = self.get_deploy_file_paths('MaxBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1416,7 +1416,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_max_bytes_more_arguments(self):
         path, _ = self.get_deploy_file_paths('MaxBytesMoreArguments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1446,7 +1446,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_min_int(self):
         path, _ = self.get_deploy_file_paths('MinInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1465,7 +1465,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_min_int_more_arguments(self):
         path, _ = self.get_deploy_file_paths('MinIntMoreArguments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1483,7 +1483,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_min_str(self):
         path, _ = self.get_deploy_file_paths('MinStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1516,7 +1516,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_min_str_more_arguments(self):
         path, _ = self.get_deploy_file_paths('MinStrMoreArguments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1534,7 +1534,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_min_bytes(self):
         path, _ = self.get_deploy_file_paths('MinBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1567,7 +1567,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_min_bytes_more_arguments(self):
         path, _ = self.get_deploy_file_paths('MinBytesMoreArguments.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1597,7 +1597,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_abs(self):
         path, _ = self.get_deploy_file_paths('Abs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1643,7 +1643,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_sum(self):
         path, _ = self.get_deploy_file_paths('Sum.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1666,7 +1666,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_sum_with_start(self):
         path, _ = self.get_deploy_file_paths('SumWithStart.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1705,7 +1705,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_str_split(self):
         path, _ = self.get_deploy_file_paths('StrSplit.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1746,7 +1746,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_str_split_maxsplit_default(self):
         path, _ = self.get_deploy_file_paths('StrSplitMaxsplitDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1771,7 +1771,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_str_split_default(self):
         path, _ = self.get_deploy_file_paths('StrSplitSeparatorDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1793,7 +1793,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_int(self):
         path, _ = self.get_deploy_file_paths('CountListInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1811,7 +1811,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_str(self):
         path, _ = self.get_deploy_file_paths('CountListStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1829,7 +1829,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_bytes(self):
         path, _ = self.get_deploy_file_paths('CountListBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1847,7 +1847,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_different_primitive_types(self):
         path, _ = self.get_deploy_file_paths('CountListDifferentPrimitiveTypes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1866,7 +1866,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_different_any_types(self):
         path, _ = self.get_deploy_file_paths('CountListAnyType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1890,7 +1890,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_only_sequences(self):
         path, _ = self.get_deploy_file_paths('CountListOnlySequences.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1914,7 +1914,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_list_empty(self):
         path, _ = self.get_deploy_file_paths('CountListEmpty.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1932,7 +1932,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_int(self):
         path, _ = self.get_deploy_file_paths('CountTupleInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1950,7 +1950,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_str(self):
         path, _ = self.get_deploy_file_paths('CountTupleStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1968,7 +1968,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_bytes(self):
         path, _ = self.get_deploy_file_paths('CountTupleBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1986,7 +1986,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_different_types(self):
         path, _ = self.get_deploy_file_paths('CountTupleDifferentTypes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2005,7 +2005,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_different_non_primitive_types(self):
         path, _ = self.get_deploy_file_paths('CountTupleDifferentNonPrimitiveTypes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2028,7 +2028,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_tuple_empty(self):
         path, _ = self.get_deploy_file_paths('CountTupleEmpty.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2046,7 +2046,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_range(self):
         path, _ = self.get_deploy_file_paths('CountRange.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2071,7 +2071,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_str(self):
         path, _ = self.get_deploy_file_paths('CountStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2156,7 +2156,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_str_end_default(self):
         path, _ = self.get_deploy_file_paths('CountStrEndDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2197,7 +2197,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_count_str_default(self):
         path, _ = self.get_deploy_file_paths('CountStrDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2239,7 +2239,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_super_call_method(self):
         path, _ = self.get_deploy_file_paths('SuperCallMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2274,7 +2274,7 @@ class TestBuiltinMethod(BoaTest):
         self.compile_and_save(path)  # it doesn't compile, it isn't implemented yet
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2364,7 +2364,7 @@ class TestBuiltinMethod(BoaTest):
         base = 16
         runner.call_contract(path, 'main', value, base)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         with self.assertRaises(ValueError):
             int(value, base)
 
@@ -2372,7 +2372,7 @@ class TestBuiltinMethod(BoaTest):
         base = 8
         runner.call_contract(path, 'main', value, base)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         with self.assertRaises(ValueError):
             int(value, base)
 
@@ -2383,7 +2383,7 @@ class TestBuiltinMethod(BoaTest):
         self.compile_and_save(path)  # it doesn't compile, it isn't implemented yet
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2473,7 +2473,7 @@ class TestBuiltinMethod(BoaTest):
         base = 16
         runner.call_contract(path, 'main', value, base)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         with self.assertRaises(ValueError):
             int(value, base)
 
@@ -2481,13 +2481,13 @@ class TestBuiltinMethod(BoaTest):
         base = 8
         runner.call_contract(path, 'main', value, base)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         with self.assertRaises(ValueError):
             int(value, base)
 
     def test_int_int(self):
         path, _ = self.get_deploy_file_paths('IntInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2512,7 +2512,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_int_no_parameters(self):
         path, _ = self.get_deploy_file_paths('IntNoParameters.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2532,7 +2532,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool(self):
         path, _ = self.get_deploy_file_paths('Bool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2565,7 +2565,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_bytes(self):
         path, _ = self.get_deploy_file_paths('BoolBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2586,7 +2586,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_class(self):
         path, _ = self.get_deploy_file_paths('BoolClass.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2607,7 +2607,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_dict(self):
         path, _ = self.get_deploy_file_paths('BoolDict.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2628,7 +2628,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_int(self):
         path, _ = self.get_deploy_file_paths('BoolInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2653,7 +2653,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_list(self):
         path, _ = self.get_deploy_file_paths('BoolList.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2674,7 +2674,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_range(self):
         path, _ = self.get_deploy_file_paths('BoolRange.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2693,7 +2693,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_bool_str(self):
         path, _ = self.get_deploy_file_paths('BoolStr.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2718,7 +2718,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_list_any(self):
         path, _ = self.get_deploy_file_paths('ListAny.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2748,11 +2748,11 @@ class TestBuiltinMethod(BoaTest):
         val = 123
         runner.call_contract(path, 'main', val)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
 
     def test_list_default(self):
         path, _ = self.get_deploy_file_paths('ListDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2768,7 +2768,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_list_sequence(self):
         path, _ = self.get_deploy_file_paths('ListSequence.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2803,7 +2803,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_list_mapping(self):
         path, _ = self.get_deploy_file_paths('ListMapping.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2842,7 +2842,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_list_bytes(self):
         path, _ = self.get_deploy_file_paths('ListBytes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2863,7 +2863,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_list_str(self):
         path, _ = self.get_deploy_file_paths('ListString.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2884,7 +2884,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_list_bytes_str(self):
         path, _ = self.get_deploy_file_paths('ListBytesString.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2910,7 +2910,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_str_bytes_str(self):
         path, _ = self.get_deploy_file_paths('StrByteString.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2935,7 +2935,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_str_int(self):
         path, _ = self.get_deploy_file_paths('StrInt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2956,7 +2956,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_str_bool(self):
         path, _ = self.get_deploy_file_paths('StrBool.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

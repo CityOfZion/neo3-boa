@@ -1,4 +1,5 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.builtin.interop.interop import Interop
@@ -8,7 +9,6 @@ from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.contracts import CallFlags
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestRoleManagementClass(BoaTest):
@@ -16,7 +16,7 @@ class TestRoleManagementClass(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -44,7 +44,7 @@ class TestRoleManagementClass(BoaTest):
         )
 
         path = self.get_contract_path('GetDesignatedByRole.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_get_designated_by_role_too_many_parameters(self):

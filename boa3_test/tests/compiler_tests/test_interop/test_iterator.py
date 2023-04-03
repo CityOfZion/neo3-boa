@@ -1,7 +1,8 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestIteratorInterop(BoaTest):
@@ -13,7 +14,7 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_next(self):
         path, _ = self.get_deploy_file_paths('IteratorNext.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -35,7 +36,7 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_value(self):
         path, _ = self.get_deploy_file_paths('IteratorValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -61,7 +62,7 @@ class TestIteratorInterop(BoaTest):
 
     def test_import_iterator(self):
         path, _ = self.get_deploy_file_paths('ImportIterator.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -77,7 +78,7 @@ class TestIteratorInterop(BoaTest):
 
     def test_import_interop_iterator(self):
         path, _ = self.get_deploy_file_paths('ImportInteropIterator.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -93,7 +94,7 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_implicit_typing(self):
         path, _ = self.get_deploy_file_paths('IteratorImplicitTyping.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -119,7 +120,7 @@ class TestIteratorInterop(BoaTest):
 
     def test_iterator_value_access(self):
         path, _ = self.get_deploy_file_paths('IteratorValueAccess.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

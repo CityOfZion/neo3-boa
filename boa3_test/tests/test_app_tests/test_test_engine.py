@@ -1,8 +1,9 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo.utils import contract_parameter_to_json, stack_item_from_json
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -349,9 +350,11 @@ class TestTestEngine(BoaTest):
     def test_run(self):
         path = self.get_contract_path('test_sc/generation_test', 'GenerationWithDecorator.py')
         self.compile_and_save(path)
-        path = path.replace('.py', '.nef')
+        path, _ = self.get_deploy_file_paths(path)
 
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
+
         result = engine.run(path, 'Sub', 50, 20)
         self.assertEqual(30, result)
 

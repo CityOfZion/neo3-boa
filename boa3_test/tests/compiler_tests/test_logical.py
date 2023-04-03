@@ -1,10 +1,10 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestLogical(BoaTest):
@@ -24,11 +24,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('BoolAnd.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -43,7 +43,7 @@ class TestLogical(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -67,11 +67,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('BoolNot.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -82,7 +82,7 @@ class TestLogical(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -107,11 +107,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('BoolOr.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -126,7 +126,7 @@ class TestLogical(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -145,11 +145,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('BoolOrThreeElements.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -164,7 +164,7 @@ class TestLogical(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -185,11 +185,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicLeftShift.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -202,14 +202,14 @@ class TestLogical(BoaTest):
         expected_results.append(int('1010100000', 2))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_left_shift_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicLeftShiftBuiltinType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -218,7 +218,7 @@ class TestLogical(BoaTest):
         expected_results.append(FindOptions.NONE << FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -243,11 +243,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicAndBool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -260,7 +260,7 @@ class TestLogical(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -277,11 +277,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicAndInt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -294,14 +294,14 @@ class TestLogical(BoaTest):
         expected_results.append(-4 & 32)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_and_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicAndBuiltinType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -310,7 +310,7 @@ class TestLogical(BoaTest):
         expected_results.append(FindOptions.NONE & FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -334,11 +334,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicNotBool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -349,14 +349,14 @@ class TestLogical(BoaTest):
         expected_results.append(-1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_not_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicNotBuiltinType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -365,7 +365,7 @@ class TestLogical(BoaTest):
         expected_results.append(~FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -381,11 +381,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicNotInt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -398,7 +398,7 @@ class TestLogical(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -423,11 +423,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicOrBool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -440,7 +440,7 @@ class TestLogical(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -457,11 +457,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicOrInt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -474,14 +474,14 @@ class TestLogical(BoaTest):
         expected_results.append(-4 | 32)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_or_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicOrBuiltinType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -507,7 +507,7 @@ class TestLogical(BoaTest):
         expected_results.append(123456789)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -532,11 +532,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicXorBool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -549,7 +549,7 @@ class TestLogical(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -566,11 +566,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicXorInt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -583,14 +583,14 @@ class TestLogical(BoaTest):
         expected_results.append(-4 ^ 32)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_xor_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicXorBuiltinType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -599,7 +599,7 @@ class TestLogical(BoaTest):
         expected_results.append(FindOptions.NONE ^ FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -614,7 +614,7 @@ class TestLogical(BoaTest):
 
     def test_logic_augmented_assignment(self):
         path, _ = self.get_deploy_file_paths('AugmentedAssignmentOperators.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -645,14 +645,14 @@ class TestLogical(BoaTest):
         expected_results.append(a ^ b)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_logic_test(self):
         path, _ = self.get_deploy_file_paths('BinOpBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -697,7 +697,7 @@ class TestLogical(BoaTest):
         expected_results.append(2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -717,11 +717,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('MixedOperations.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -736,14 +736,14 @@ class TestLogical(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_operation_with_return_and_stack_filled(self):
         path, _ = self.get_deploy_file_paths('LogicOperationWithReturnAndStackFilled.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -752,7 +752,7 @@ class TestLogical(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -773,11 +773,11 @@ class TestLogical(BoaTest):
         )
 
         path = self.get_contract_path('LogicRightShift.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -790,14 +790,14 @@ class TestLogical(BoaTest):
         expected_results.append(int('101010', 2))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_logic_right_shift_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicRightShiftBuiltinType.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -806,7 +806,7 @@ class TestLogical(BoaTest):
         expected_results.append(FindOptions.NONE >> FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

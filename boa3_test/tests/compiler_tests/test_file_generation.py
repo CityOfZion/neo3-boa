@@ -1,7 +1,8 @@
 import os
 from typing import Dict, Tuple
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception import CompilerError
@@ -12,7 +13,6 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.contracts.neffile import NefFile
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestFileGeneration(BoaTest):
@@ -22,7 +22,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
-        Boa3.compile_and_save(path)
+        self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_nef_output))
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -32,7 +32,7 @@ class TestFileGeneration(BoaTest):
         expected_nef_output = path.replace('.py', '.nef')
         expected_manifest_output = path.replace('.py', '.manifest.json')
         expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
-        Boa3.compile_and_save(path, debug=True)
+        self.compile_and_save(path, debug=True)
 
         self.assertTrue(os.path.exists(expected_nef_output))
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -41,7 +41,7 @@ class TestFileGeneration(BoaTest):
     def test_generate_nef_file(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output = path.replace('.py', '.nef')
-        Boa3.compile_and_save(path)
+        self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_nef_output))
         with open(expected_nef_output, 'rb') as nef_output:
@@ -754,10 +754,14 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/built_in_methods_test', 'ClearTooManyParameters.py')
 
         with self.assertRaises(NotLoadedException):
-            Boa3.compile(path)
+            self.compile(path)
 
         with self.assertRaises(NotLoadedException):
-            Boa3.compile_and_save(path)
+            from boa3.boa3 import Boa3
+            from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
+
+            with LOCK:
+                Boa3.compile_and_save(path)
 
         with self.assertRaises(NotLoadedException):
             self.compile_and_save(path)
@@ -767,6 +771,7 @@ class TestFileGeneration(BoaTest):
 
         from boa3_test.tests.test_classes.testengine import TestEngine
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         expected = self.fact(57)
         result = self.run_smart_contract(engine, path, 'main')

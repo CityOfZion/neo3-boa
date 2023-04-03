@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 from typing import Dict, List, Optional
 
+from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.analyser.astoptimizer import AstOptimizer
@@ -10,7 +11,6 @@ from boa3.internal.analyser.constructanalyser import ConstructAnalyser
 from boa3.internal.analyser.moduleanalyser import ModuleAnalyser
 from boa3.internal.analyser.supportedstandard.standardanalyser import StandardAnalyser
 from boa3.internal.analyser.typeanalyser import TypeAnalyser
-from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal.compiler.compiledmetadata import CompiledMetadata
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning

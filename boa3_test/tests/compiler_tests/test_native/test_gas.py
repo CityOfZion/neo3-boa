@@ -1,9 +1,10 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestGasClass(BoaTest):
@@ -12,7 +13,7 @@ class TestGasClass(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -28,7 +29,7 @@ class TestGasClass(BoaTest):
 
     def test_symbol(self):
         path, _ = self.get_deploy_file_paths('Symbol.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -48,7 +49,7 @@ class TestGasClass(BoaTest):
 
     def test_decimals(self):
         path, _ = self.get_deploy_file_paths('Decimals.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -68,7 +69,7 @@ class TestGasClass(BoaTest):
 
     def test_total_supply(self):
         path, _ = self.get_deploy_file_paths('TotalSupply.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         contract_call = runner.call_contract(path, 'main')
         runner.execute()
@@ -83,7 +84,7 @@ class TestGasClass(BoaTest):
         path, _ = self.get_deploy_file_paths('BalanceOf.py')
         test_account_1 = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
         test_account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -107,7 +108,7 @@ class TestGasClass(BoaTest):
 
     def test_transfer(self):
         path, _ = self.get_deploy_file_paths('Transfer.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -145,7 +146,7 @@ class TestGasClass(BoaTest):
 
     def test_transfer_data_default(self):
         path, _ = self.get_deploy_file_paths('TransferDataDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -158,7 +159,7 @@ class TestGasClass(BoaTest):
         runner.add_gas(account_1, amount)
         invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount))
         expected_results.append(False)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
 
         # TestRunner doesn't have WitnessScope modifier
         # signing is not enough to pass check witness calling from test contract
@@ -184,7 +185,7 @@ class TestGasClass(BoaTest):
 
     def test_import_with_alias(self):
         path, _ = self.get_deploy_file_paths('ImportWithAlias.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

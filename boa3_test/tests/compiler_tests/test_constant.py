@@ -1,5 +1,7 @@
 import ast
 
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.model.type.type import Type
@@ -7,7 +9,6 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestConstant(BoaTest):

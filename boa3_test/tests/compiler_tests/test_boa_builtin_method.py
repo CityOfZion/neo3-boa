@@ -1,7 +1,8 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestBuiltinMethod(BoaTest):
@@ -9,7 +10,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_abort(self):
         path, _ = self.get_deploy_file_paths('Abort.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -18,19 +19,19 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(123)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
         runner.call_contract(path, 'main', True)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
 
     def test_deploy_def(self):
         path, _ = self.get_deploy_file_paths('DeployDef.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -39,7 +40,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -56,7 +57,7 @@ class TestBuiltinMethod(BoaTest):
 
     def test_sqrt_method(self):
         path, _ = self.get_deploy_file_paths('Sqrt.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -93,19 +94,19 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
         runner.call_contract(path, 'main', -1)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_CANNOT_BE_NEGATIVE_MSG)
 
     def test_sqrt_method_from_math(self):
         path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -118,14 +119,14 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_decimal_floor_method(self):
         path, _ = self.get_deploy_file_paths('DecimalFloor.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -158,7 +159,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value_floor)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -166,13 +167,13 @@ class TestBuiltinMethod(BoaTest):
         # negative decimals will raise an exception
         runner.call_contract(path, 'main', integer_value, -1)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         from boa3.internal.model.builtin.builtin import Builtin
         self.assertRegex(runner.error, f'{Builtin.BuiltinMathFloor.exception_message}$')
 
     def test_decimal_ceil_method(self):
         path, _ = self.get_deploy_file_paths('DecimalCeiling.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -205,7 +206,7 @@ class TestBuiltinMethod(BoaTest):
         expected_results.append(value_ceiling)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -213,7 +214,7 @@ class TestBuiltinMethod(BoaTest):
         # negative decimals will raise an exception
         runner.call_contract(path, 'main', integer_value, -1)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         from boa3.internal.model.builtin.builtin import Builtin
         self.assertRegex(runner.error, f'{Builtin.BuiltinMathCeil.exception_message}$')
 

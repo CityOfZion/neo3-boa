@@ -1,11 +1,11 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestDict(BoaTest):
@@ -34,7 +34,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('IntKeyDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_str_keys(self):
@@ -70,7 +70,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('StrKeyDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_any_value(self):
@@ -100,7 +100,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('AnyValueDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_of_dicts(self):
@@ -150,7 +150,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('DictOfDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_assign_empty_dict(self):
@@ -164,7 +164,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('EmptyDictAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_type_hint_assignment(self):
@@ -190,7 +190,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('TypeHintAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_variable_keys_and_values(self):
@@ -222,7 +222,7 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('VariableDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_dict_get_value(self):
@@ -237,11 +237,11 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('GetValue.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -250,7 +250,7 @@ class TestDict(BoaTest):
         expected_results.append('zero')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -258,7 +258,7 @@ class TestDict(BoaTest):
         runner.call_contract(path, 'Main', {1: 'one'})
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.MAP_KEY_NOT_FOUND_ERROR_MSG)
 
     def test_dict_get_value_mismatched_type(self):
@@ -287,7 +287,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -298,7 +298,7 @@ class TestDict(BoaTest):
         expected_results.append({0: 'ok', 1: 'one'})
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -344,11 +344,11 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('KeysDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -357,7 +357,7 @@ class TestDict(BoaTest):
         expected_results.append(['one', 'two', 'three'])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -403,7 +403,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -412,7 +412,7 @@ class TestDict(BoaTest):
         expected_results.append(['one', 'two', 'three'])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -454,11 +454,11 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('ValuesDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -467,7 +467,7 @@ class TestDict(BoaTest):
         expected_results.append([1, 2, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -513,7 +513,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -522,14 +522,14 @@ class TestDict(BoaTest):
         expected_results.append([1, 2, 3])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_dict_boa2_test2(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test2.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -538,14 +538,14 @@ class TestDict(BoaTest):
         expected_results.append(7)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_dict_any_key_and_value(self):
         path, _ = self.get_deploy_file_paths('DictAnyKeyAndValue.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -554,14 +554,14 @@ class TestDict(BoaTest):
         expected_results.append(66)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_dict_test1(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test1.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -569,19 +569,19 @@ class TestDict(BoaTest):
         invoke = runner.call_contract(path, 'main')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         from typing import Dict
         self.assertIsInstance(invoke.result, Dict)
 
     def test_boa2_dict_test3(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test3.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         from typing import Dict
         self.assertIsInstance(invoke.result, Dict)
@@ -589,7 +589,7 @@ class TestDict(BoaTest):
 
     def test_boa2_dict_test4(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test4.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -598,7 +598,7 @@ class TestDict(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -606,7 +606,7 @@ class TestDict(BoaTest):
     def test_boa2_dict_test5_should_not_compile(self):
         # this doesn't compile in boa2, but should compile here
         path, _ = self.get_deploy_file_paths('DictBoa2Test5ShouldNotCompile.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -615,7 +615,7 @@ class TestDict(BoaTest):
         expected_results.append({'a': 2})
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -623,7 +623,7 @@ class TestDict(BoaTest):
     def test_boa2_dict_test6_should_not_compile(self):
         # this doesn't compile in boa2, but should compile here
         path, _ = self.get_deploy_file_paths('DictBoa2Test6ShouldNotCompile.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -632,14 +632,14 @@ class TestDict(BoaTest):
         expected_results.append({'a': 1, 'b': 2})
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_dict_test_keys(self):
         path, _ = self.get_deploy_file_paths('DictBoa2TestKeys.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -648,14 +648,14 @@ class TestDict(BoaTest):
         expected_results.append('abblahmzmcallltrs')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_dict_test_values(self):
         path, _ = self.get_deploy_file_paths('DictBoa2TestValues.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -664,14 +664,14 @@ class TestDict(BoaTest):
         expected_results.append(55)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_dict_pop(self):
         path, _ = self.get_deploy_file_paths('DictPop.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -689,7 +689,7 @@ class TestDict(BoaTest):
         expected_results.append([dict_, value])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -699,12 +699,12 @@ class TestDict(BoaTest):
         runner.call_contract(path, 'main', dict_, key)
         runner.execute()
 
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.MAP_KEY_NOT_FOUND_ERROR_MSG)
 
     def test_dict_pop_default(self):
         path, _ = self.get_deploy_file_paths('DictPopDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -738,14 +738,14 @@ class TestDict(BoaTest):
         expected_results.append([dict_, value])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_dict_copy(self):
         path, _ = self.get_deploy_file_paths('DictCopy.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -757,14 +757,14 @@ class TestDict(BoaTest):
                                  ])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_dict_copy_builtin_call(self):
         path, _ = self.get_deploy_file_paths('CopyDictBuiltinCall.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -785,7 +785,7 @@ class TestDict(BoaTest):
                                  ])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

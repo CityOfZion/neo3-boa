@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from boa3.internal import constants
-from boa3.internal.neo import from_hex_str, to_hex_str
+from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.network.payloads.signer import Signer as TestSigner
 from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope

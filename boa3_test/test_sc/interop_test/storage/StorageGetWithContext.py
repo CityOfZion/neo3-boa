@@ -18,4 +18,3 @@ def _deploy(data: Any, update: bool):
     context = get_context()
     storage.put('example', 23, context)
     storage.put('test', 42, context)
-

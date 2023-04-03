@@ -1,8 +1,8 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestContractInterface(BoaTest):
@@ -10,11 +10,11 @@ class TestContractInterface(BoaTest):
 
     def test_contract_interface_decorator_literal_hash_str(self):
         path = self.get_contract_path('ContractInterfaceLiteralStrHash.py')
-        Boa3.compile(path)  # test if compiles because the smart contract doesn't exist
+        self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_decorator_literal_hash_bytes(self):
         path = self.get_contract_path('ContractInterfaceLiteralBytesHash.py')
-        Boa3.compile(path)  # test if compiles because the smart contract doesn't exist
+        self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_decorator_invalid_hash(self):
         path = self.get_contract_path('ContractInterfaceInvalidHash.py')
@@ -47,7 +47,7 @@ class TestContractInterface(BoaTest):
     def test_contract_interface_nep17(self):
         path, _ = self.get_deploy_file_paths('Nep17Interface.py')
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -66,11 +66,11 @@ class TestContractInterface(BoaTest):
 
     def test_contract_interface_display_name_argument(self):
         path = self.get_contract_path('ContractInterfaceDisplayNameRegularArgument.py')
-        Boa3.compile(path)  # test if compiles because the smart contract doesn't exist
+        self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_display_name_keyword_argument(self):
         path = self.get_contract_path('ContractInterfaceDisplayNameKeywordArgument.py')
-        Boa3.compile(path)  # test if compiles because the smart contract doesn't exist
+        self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_display_name_variable_name(self):
         path = self.get_contract_path('ContractInterfaceDisplayNameVariableArgument.py')
@@ -91,7 +91,7 @@ class TestContractInterface(BoaTest):
     def test_contract_interface_nep17_with_display_name(self):
         path, _ = self.get_deploy_file_paths('Nep17InterfaceWithDisplayName.py')
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -139,7 +139,7 @@ class TestContractInterface(BoaTest):
 
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -210,7 +210,7 @@ class TestContractInterface(BoaTest):
 
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -229,7 +229,7 @@ class TestContractInterface(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('ContractInterfaceGetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
