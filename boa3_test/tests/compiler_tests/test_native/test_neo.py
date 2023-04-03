@@ -1,11 +1,9 @@
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
-from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestNeoClass(BoaTest):
@@ -400,21 +398,34 @@ class TestNeoClass(BoaTest):
     def test_get_all_candidates(self):
         path = self.get_contract_path('GetAllCandidates.py')
         self.compile_and_save(path)
-        engine = TestEngine()
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
 
         # no candidate was registered
-        result = self.run_smart_contract(engine, path, 'main')
+        invoke = runner.call_contract(path, 'main')
+
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
         self.assertEqual(0, len(result))
 
-        path_register = self.get_contract_path('RegisterCandidate.py')
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
-                                         signer_accounts=[candidate_scripthash])
-        self.assertTrue(result)
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+        register_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
+        runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                            account=candidate)
 
         # after registering one
-        result = self.run_smart_contract(engine, path, 'main')
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
