@@ -114,6 +114,12 @@ class Interop:
     StdLibScriptHash = StdLibContract
 
     # Crypto Interops
+    Bls12381Add = Bls12381AddMethod()
+    Bls12381Deserialize = Bls12381DeserializeMethod()
+    Bls12381Equal = Bls12381EqualMethod()
+    Bls12381Mul = Bls12381MulMethod()
+    Bls12381Pairing = Bls12381PairingMethod()
+    Bls12381Serialize = Bls12381SerializeMethod()
     CheckMultisig = CheckMultisigMethod()
     CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
@@ -276,7 +282,13 @@ class Interop:
 
     CryptoPackage = Package(identifier=InteropPackage.Crypto,
                             types=[NamedCurveType],
-                            methods=[CheckMultisig,
+                            methods=[Bls12381Add,
+                                     Bls12381Deserialize,
+                                     Bls12381Equal,
+                                     Bls12381Mul,
+                                     Bls12381Pairing,
+                                     Bls12381Serialize,
+                                     CheckMultisig,
                                      CheckSig,
                                      Hash160,
                                      Hash256,
