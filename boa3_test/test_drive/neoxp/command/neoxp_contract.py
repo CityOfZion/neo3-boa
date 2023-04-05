@@ -17,3 +17,10 @@ def run(contract_id: str, method: str, *args: str, account: Account,
                                              account=account,
                                              witness_scope=witness_scope,
                                              trace=trace)
+
+
+def invoke(invoke_file: str, account: Account, witness_scope: WitnessScope = None,
+           trace: bool = False) -> NeoExpressCommand:
+    return neoxp.contract.ContractInvokeCommand(invoke_file, account,
+                                                witness_scope=witness_scope,
+                                                trace=trace)
