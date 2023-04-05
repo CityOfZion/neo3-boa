@@ -32,6 +32,13 @@ class NeoInvoke:
         return tuple((json.dumps(arg, separators=(',', ':')) for arg in self._args))
 
     @property
+    def cli_args(self) -> Tuple[str]:
+        import json
+        return tuple((str(arg) if (isinstance(arg, str) and len(arg.split(' ')) == 1)
+                      else json.dumps(arg, separators=(',', ':'))
+                      for arg in self._args))
+
+    @property
     def invoker(self) -> Account:
         return self._invoker
 

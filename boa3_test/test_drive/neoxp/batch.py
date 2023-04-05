@@ -5,6 +5,7 @@ from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils
@@ -47,7 +48,7 @@ class NeoExpressBatch:
 
         return deployed_contract
 
-    def run_contract(self, invoke: NeoInvoke,
+    def run_contract(self, invoke: NeoInvoke, witness_scope: WitnessScope = None,
                      expected_result_type: Type = None) -> NeoBatchInvoke:
         if hasattr(invoke.invoker, 'name') and isinstance(invoke.invoker.name, str):
             invoker_id = invoke.invoker
@@ -57,14 +58,26 @@ class NeoExpressBatch:
         tx_pos = len(self._instructions)
         batch_invoke = NeoBatchInvoke(invoke, tx_pos, expected_result_type=expected_result_type)
 
-        self._instructions.append(neoxp.contract.run(invoke.contract_id, invoke.operation, *invoke.args,
-                                                     account=invoker_id))
+        self._instructions.append(neoxp.contract.run(invoke.contract_id, invoke.operation, *invoke.cli_args,
+                                                     account=invoker_id, witness_scope=witness_scope))
         self._transaction_submissions.append(tx_pos)
 
         self._tx_invokes.append(batch_invoke)
         self._tx_invokes_pos.append(tx_pos)
 
         return batch_invoke
+
+    def invoke_file(self, invoke_file: str, account: Account = None, witness_scope: WitnessScope = None):
+        if hasattr(account, 'name') and isinstance(account.name, str):
+            invoker_id = account
+        else:
+            invoker_id = utils.get_default_account()  # neo express default account
+
+        if witness_scope != WitnessScope.CalledByEntry:
+            # only CalledByEntry and Global are accepted as WitnessScopes in neo express
+            witness_scope = WitnessScope.Global
+
+        self._instructions.append(neoxp.contract.invoke(invoke_file, invoker_id, witness_scope))
 
     def transfer_assets(self, sender: Account, receiver: Account, asset: Union[str, UInt160],
                         quantity: Union[int, float], decimals: int = 0, data: Any = None):

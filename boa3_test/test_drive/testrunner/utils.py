@@ -7,7 +7,7 @@ def value_to_parameter(value: Any) -> Any:
     if isinstance(value, (int, str)):
         return value
 
-    if isinstance(value, bytes):
+    if isinstance(value, (bytes, bytearray)):
         return bytes_to_hex(value)
 
     if isinstance(value, Sequence):
