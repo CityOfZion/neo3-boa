@@ -156,7 +156,7 @@ class TestTemplate(BoaTest):
         zgas_contract = runner.deploy_contract(path_zgas)
         runner.update_contracts(export_checkpoint=True)
 
-        amm_address = amm_contract.hex_script_hash
+        amm_address = amm_contract.script_hash
         zneo_address = zneo_contract.script_hash
         zgas_address = zgas_contract.script_hash
         self.assertIsNotNone(amm_address)
