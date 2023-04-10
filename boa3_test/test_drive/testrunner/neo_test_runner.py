@@ -11,6 +11,7 @@ from boa3.internal.neo3.vm import vmstate, VMState
 from boa3_test.test_drive.model.invoker.neobatchinvoke import NeoBatchInvoke
 from boa3_test.test_drive.model.invoker.neoinvokecollection import NeoInvokeCollection
 from boa3_test.test_drive.model.invoker.neoinvokeresult import NeoInvokeResult
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
@@ -58,6 +59,7 @@ class NeoTestRunner:
         self._batch_size_since_last_checkpoint = 0
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
+        self._invokes_to_batch = 0
         self._last_execution_results: List[NeoInvokeResult] = []
 
     @property
@@ -213,17 +215,22 @@ class NeoTestRunner:
                                                     expected_result_type=expected_result_type)
 
     def run_contract(self, nef_path: str, method: str, *arguments: Any,
-                     account: Account = None,
+                     account: Account = None, witness_scope: WitnessScope = WitnessScope.CalledByEntry,
                      expected_result_type: Type = None) -> NeoBatchInvoke:
         if nef_path not in self._contracts:
             contract = self.deploy_contract(nef_path)
         else:
             contract = self._contracts[nef_path]
 
+        if witness_scope != WitnessScope.CalledByEntry:
+            # neo express only supports CalledByEntry and Global as witness scopes
+            witness_scope = WitnessScope.Global
+
         invoke = self._invokes.create_contract_invoke(contract, method, *arguments)
         if isinstance(account, Account):
             invoke._invoker = account
         return self._batch.run_contract(invoke,
+                                        witness_scope=witness_scope,
                                         expected_result_type=expected_result_type)
 
     def get_contract(self, contract_id: Union[str, bytes]) -> TestContract:
@@ -250,9 +257,10 @@ class NeoTestRunner:
             self._batch_size_since_last_update = cur_batch_size
 
     def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None,
-                clear_invokes: bool = True):
+                clear_invokes: bool = True, add_invokes_to_batch: bool = False):
         self._generate_files()
-        cli_args = ['neo-test-runner', self.get_full_path(self._INVOKE_FILE)
+        invoke_file_path = self.get_full_path(self._INVOKE_FILE)
+        cli_args = ['neo-test-runner', invoke_file_path
                     ]
 
         if self._batch_size_since_last_checkpoint > 0:
@@ -278,6 +286,12 @@ class NeoTestRunner:
 
         try:
             self._update_runner(result)
+            if add_invokes_to_batch:
+                import shutil
+                self._invokes_to_batch += 1
+                invoke_file_path_to_batch = self.get_full_path(f'{self._file_name}_{self._invokes_to_batch}.neo-invoke.json')
+                shutil.copy(invoke_file_path, invoke_file_path_to_batch)
+                self._batch.invoke_file(invoke_file_path_to_batch, account=account)
             if clear_invokes:
                 self._invokes.clear()
         except BaseException:
@@ -307,6 +321,7 @@ class NeoTestRunner:
         self._batch_size_since_last_checkpoint = 0
         self._contracts.clear()
         self._invokes.clear()
+        self._invokes_to_batch = 0
 
     def _update_runner(self, result: Dict[str, Any]):
         self.reset_state()

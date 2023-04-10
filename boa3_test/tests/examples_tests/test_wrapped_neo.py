@@ -29,10 +29,10 @@ class TestTemplate(BoaTest):
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
         result = self.run_smart_contract(engine, path, 'decimals')
-        self.assertEqual(8, result)
+        self.assertEqual(0, result)
 
     def test_wrapped_neo_total_supply(self):
-        total_supply = 10_000_000 * 10 ** 8
+        total_supply = 10_000_000
 
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
@@ -41,7 +41,7 @@ class TestTemplate(BoaTest):
         self.assertEqual(total_supply, result)
 
     def test_wrapped_neo_total_balance_of(self):
-        total_supply = 10_000_000 * 10 ** 8
+        total_supply = 10_000_000
 
         path = self.get_contract_path('wrapped_neo.py')
         engine = TestEngine()
@@ -56,7 +56,7 @@ class TestTemplate(BoaTest):
             self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
 
     def test_wrapped_neo_total_transfer(self):
-        transferred_amount = 10 * 10 ** 8  # 10 tokens
+        transferred_amount = 10  # 10 tokens
         path = self.get_contract_path('wrapped_neo.py')
 
         engine = TestEngine()
@@ -160,8 +160,8 @@ class TestTemplate(BoaTest):
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
         engine.reset_engine()
-        engine.add_neo(wrapped_neo_address, 10_000_000 * 10 ** 8)
-        burned_amount = 100 * 10 ** 8
+        engine.add_neo(wrapped_neo_address, 10_000_000)
+        burned_amount = 100
 
         # burning zNEO will end up giving NEO to the one who burned it
         neo_wrapped_before = self.run_smart_contract(engine, constants.NEO_SCRIPT, 'balanceOf', wrapped_neo_address)
@@ -226,11 +226,11 @@ class TestTemplate(BoaTest):
 
         engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
-        allowed_amount = 10 * 10 ** 8
+        allowed_amount = 10
 
         # this approve will fail, because OTHER_ACCOUNT_1 doesn't have enough zNEO
         result = self.run_smart_contract(engine, wrapped_neo_address, 'approve',
-                                         self.OTHER_ACCOUNT_2, allowed_amount,
+                                         self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, allowed_amount,
                                          calling_script_hash=self.OTHER_ACCOUNT_1,
                                          signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
@@ -243,7 +243,7 @@ class TestTemplate(BoaTest):
 
         # this approve will succeed, because OTHER_ACCOUNT_1 have enough zNEO
         result = self.run_smart_contract(engine, wrapped_neo_address, 'approve',
-                                         self.OTHER_ACCOUNT_2, allowed_amount,
+                                         self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, allowed_amount,
                                          signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
 
@@ -269,7 +269,7 @@ class TestTemplate(BoaTest):
 
         engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
-        allowed_amount = 10 * 10 ** 8
+        allowed_amount = 10
 
         # OTHER_ACCOUNT_1 did not approve OTHER_SCRIPT_HASH
         result = self.run_smart_contract(engine, path, 'allowance', self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2,
@@ -284,7 +284,7 @@ class TestTemplate(BoaTest):
 
         # this approve will succeed, because OTHER_ACCOUNT_1 have enough zNEO
         result = self.run_smart_contract(engine, wrapped_neo_address, 'approve',
-                                         self.OTHER_ACCOUNT_2, allowed_amount,
+                                         self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, allowed_amount,
                                          calling_script_hash=self.OTHER_ACCOUNT_1,
                                          signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(True, result)
@@ -303,11 +303,11 @@ class TestTemplate(BoaTest):
 
         engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
-        allowed_amount = 10 * 10 ** 8
+        allowed_amount = 10
 
         # OWNER will give zNEO to OTHER_ACCOUNT_3 so that it can approve another contracts
         result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_3, 10_000_000 * 10 ** 8, None,
+                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_3, 10_000_000, None,
                                          signer_accounts=[self.OWNER_SCRIPT_HASH])
         self.assertEqual(True, result)
         transfer_events = engine.get_events('Transfer')
@@ -321,11 +321,11 @@ class TestTemplate(BoaTest):
             receiver = String(receiver).to_bytes()
         self.assertEqual(self.OWNER_SCRIPT_HASH, sender)
         self.assertEqual(self.OTHER_ACCOUNT_3, receiver)
-        self.assertEqual(10_000_000 * 100_000_000, amount)
+        self.assertEqual(10_000_000, amount)
 
         # this approve will succeed, because OTHER_ACCOUNT_3 have enough zNEO
         result = self.run_smart_contract(engine, wrapped_neo_address, 'approve',
-                                         self.OTHER_ACCOUNT_1, allowed_amount,
+                                         self.OTHER_ACCOUNT_3, self.OTHER_ACCOUNT_1, allowed_amount,
                                          calling_script_hash=self.OTHER_ACCOUNT_3,
                                          signer_accounts=[self.OTHER_ACCOUNT_3])
         self.assertEqual(True, result)
@@ -335,7 +335,7 @@ class TestTemplate(BoaTest):
         # this transfer will fail,
         # because OTHER_ACCOUNT_1 is not allowed to transfer more than OTHER_ACCOUNT_3 approved
         result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_3,
-                                         self.OTHER_ACCOUNT_2, transferred_amount + 1 * 10 ** 8, None,
+                                         self.OTHER_ACCOUNT_2, transferred_amount + 1, None,
                                          signer_accounts=[self.OTHER_ACCOUNT_1])
         self.assertEqual(False, result)
         transfer_events = engine.get_events('Transfer')
@@ -377,12 +377,12 @@ class TestTemplate(BoaTest):
 
         # this approve will succeed, because OTHER_ACCOUNT_3 have enough zNEO
         result = self.run_smart_contract(engine, wrapped_neo_address, 'approve',
-                                         self.OTHER_ACCOUNT_1, allowed_amount,
+                                         self.OTHER_ACCOUNT_3, self.OTHER_ACCOUNT_1, allowed_amount,
                                          calling_script_hash=self.OTHER_ACCOUNT_3,
                                          signer_accounts=[self.OTHER_ACCOUNT_3])
         self.assertEqual(True, result)
 
-        transferred_amount = allowed_amount - 4 * 10 ** 8
+        transferred_amount = allowed_amount - 4
 
         result = self.run_smart_contract(engine, path, 'transferFrom', self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_3,
                                          self.OTHER_ACCOUNT_2, transferred_amount, None,
@@ -419,7 +419,7 @@ class TestTemplate(BoaTest):
 
         engine.reset_engine()
         engine.add_contract(path.replace('.py', '.nef'))
-        minted_amount = 10 * 10 ** 8
+        minted_amount = 10
         engine.add_neo(self.OTHER_ACCOUNT_1, minted_amount)
 
         # the smart contract will abort if some address other than NEO calls the onPayment method

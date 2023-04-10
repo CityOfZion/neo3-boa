@@ -65,7 +65,7 @@ class TestBytes(BoaTest):
         expected_results.append(48)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -105,7 +105,7 @@ class TestBytes(BoaTest):
         expected_results.append(48)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -133,7 +133,7 @@ class TestBytes(BoaTest):
         expected_results.append(513)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -149,7 +149,7 @@ class TestBytes(BoaTest):
         expected_results.append(513)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -179,7 +179,7 @@ class TestBytes(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -201,7 +201,7 @@ class TestBytes(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -217,7 +217,7 @@ class TestBytes(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -233,7 +233,7 @@ class TestBytes(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -253,7 +253,7 @@ class TestBytes(BoaTest):
         expected_results.append('abc')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -269,7 +269,7 @@ class TestBytes(BoaTest):
         expected_results.append('123')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -313,19 +313,15 @@ class TestBytes(BoaTest):
                                             expected_result_type=bytearray))
         expected_results.append(b'123'[1:2])
 
+        invokes.append(runner.call_contract(path, 'main', bytearray(),
+                                            expected_result_type=bytearray))
+        expected_results.append(bytearray()[1:2])
+
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
-
-        # TODO: fix on #864dzfnew
-        runner.call_contract(path, 'main', bytearray(),
-                             expected_result_type=bytearray)
-        # expected_results.append(bytearray()[1:2])
-
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
 
     def test_slice_with_cast(self):
         path, _ = self.get_deploy_file_paths('SliceWithCast.py')
@@ -346,19 +342,15 @@ class TestBytes(BoaTest):
                                             expected_result_type=bytes))
         expected_results.append(Integer(12345).to_byte_array()[1:2])
 
+        invokes.append(runner.call_contract(path, 'main', bytearray(),
+                                            expected_result_type=bytearray))
+        expected_results.append(bytearray()[1:2])
+
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
-
-        # TODO: fix on #864dzfnew
-        runner.call_contract(path, 'main', bytearray(),
-                             expected_result_type=bytearray)
-        # expected_results.append(bytearray()[1:2])
-
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
 
     def test_slice_with_stride(self):
         path, _ = self.get_deploy_file_paths('SliceWithStride.py')
@@ -428,7 +420,7 @@ class TestBytes(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -501,7 +493,7 @@ class TestBytes(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -568,7 +560,7 @@ class TestBytes(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -635,7 +627,7 @@ class TestBytes(BoaTest):
         expected_results.append(expected_result)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -675,7 +667,7 @@ class TestBytes(BoaTest):
         expected_results.append(48)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -715,7 +707,7 @@ class TestBytes(BoaTest):
         expected_results.append(48)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -762,7 +754,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -809,7 +801,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -853,7 +845,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytearray())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -927,7 +919,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytearray(0))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -936,7 +928,7 @@ class TestBytes(BoaTest):
         runner.call_contract(path, 'create_bytearray', -10,
                              expected_result_type=bytes)
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.MAX_ITEM_SIZE_EXCEED_MSG_PREFIX}')
 
     def test_byte_array_from_list_of_int(self):
@@ -966,7 +958,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytearray(string, 'utf-8'))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -987,7 +979,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\x03\x04')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1004,7 +996,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\x03\x04')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1021,7 +1013,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\x03\x04')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1038,7 +1030,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1055,7 +1047,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x03\x02\x01')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1072,7 +1064,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\x03\x04\x05\x06')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1089,7 +1081,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\x03\x04\x05\x06')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1105,7 +1097,7 @@ class TestBytes(BoaTest):
         expected_results.append(513)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1121,7 +1113,7 @@ class TestBytes(BoaTest):
         expected_results.append(513)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1137,7 +1129,7 @@ class TestBytes(BoaTest):
         expected_results.append(513)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1154,7 +1146,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\t\x01\x02')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1174,7 +1166,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\xaa\xfe')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1191,7 +1183,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x01\x02\x03\x04')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1208,7 +1200,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1225,7 +1217,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'0123456789abcdefghij')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1242,7 +1234,7 @@ class TestBytes(BoaTest):
         expected_results.append((160).to_bytes(2, 'little') + bytes(18))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1259,7 +1251,7 @@ class TestBytes(BoaTest):
         expected_results.append(b'0123456789abcdefghijklmnopqrstuv')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1276,7 +1268,7 @@ class TestBytes(BoaTest):
         expected_results.append((256).to_bytes(2, 'little') + bytes(30))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1301,7 +1293,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.upper())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1326,7 +1318,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.lower())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1388,7 +1380,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.startswith(subbytes_value, start, end))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1449,7 +1441,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.startswith(subbytes_value, start))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1487,7 +1479,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.startswith(subbytes_value))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1518,7 +1510,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.strip(sub_bytes))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1551,7 +1543,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.strip())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1580,7 +1572,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.isdigit())
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1611,7 +1603,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.join(sequence))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1642,7 +1634,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_value.join(dictionary))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1683,24 +1675,24 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_.index(bytes_sequence, start, end))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
         invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 3, 4))
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
 
         invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 4, -1))
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
 
         invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 0, -99))
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
 
     def test_bytes_index_end_default(self):
@@ -1735,19 +1727,19 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_.index(bytes_sequence, start))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
         invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 99))
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
 
         invokes.append(runner.call_contract(path, 'main', 'unit test', 't', -1))
         runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
 
     def test_bytes_index_defaults(self):
@@ -1773,7 +1765,7 @@ class TestBytes(BoaTest):
         expected_results.append(bytes_.index(bytes_sequence))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
