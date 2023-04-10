@@ -1180,8 +1180,6 @@ class TestBuiltinMethod(BoaTest):
 
     def test_isinstance_many_types_with_class(self):
         path, _ = self.get_deploy_file_paths('IsInstanceManyTypesWithClass.py')
-
-        path, _ = self.get_deploy_file_paths(path)
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []

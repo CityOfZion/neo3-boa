@@ -234,7 +234,8 @@ class TestWrappedTokenTemplate(BoaTest):
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
         engine.reset_engine()
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
         allowed_amount = 10
 
         # this approve will fail, because OTHER_ACCOUNT_1 doesn't have enough zNEO
@@ -278,7 +279,8 @@ class TestWrappedTokenTemplate(BoaTest):
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
         engine.reset_engine()
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
         allowed_amount = 10
 
         # OTHER_ACCOUNT_1 did not approve OTHER_SCRIPT_HASH
@@ -313,7 +315,8 @@ class TestWrappedTokenTemplate(BoaTest):
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
         engine.reset_engine()
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
         allowed_amount = 10
 
         # OWNER will give zNEO to OTHER_ACCOUNT_3 so that it can approve another contracts
@@ -430,7 +433,8 @@ class TestWrappedTokenTemplate(BoaTest):
         wrapped_neo_address = engine.executed_script_hash.to_array()
 
         engine.reset_engine()
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
         minted_amount = 10
         engine.add_neo(self.OTHER_ACCOUNT_1, minted_amount)
 

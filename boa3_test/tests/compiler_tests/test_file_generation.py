@@ -1,7 +1,7 @@
 import os
 from typing import Dict, Tuple
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.compiler.compiler import Compiler
@@ -20,8 +20,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_files(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
-        expected_nef_output = path.replace('.py', '.nef')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        expected_nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_nef_output))
@@ -29,9 +28,8 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_files_with_debug_info(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
-        expected_nef_output = path.replace('.py', '.nef')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
-        expected_debug_info_output = path.replace('.py', '.nefdbgnfo')
+        expected_nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
+        expected_debug_info_output = expected_nef_output.replace('.nef', '.nefdbgnfo')
         self.compile_and_save(path, debug=True)
 
         self.assertTrue(os.path.exists(expected_nef_output))
@@ -40,7 +38,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_nef_file(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
-        expected_nef_output = path.replace('.py', '.nef')
+        expected_nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
         self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_nef_output))
@@ -68,7 +66,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_decorator(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -122,7 +120,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_without_decorator(self):
         path = self.get_contract_path('GenerationWithoutDecorator.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -137,16 +135,19 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_event(self):
         path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
-        events: Dict[str, Event] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Event)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output)
 
-        output, manifest = self.get_output(path)
+            events: Dict[str, Event] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Event)
+            }
+
+            output, manifest = self.get_output(nef_output)
+
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
         abi = manifest['abi']
@@ -172,16 +173,20 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_nep5_transfer_event(self):
         path = self.get_contract_path('test_sc/event_test', 'EventNep5Transfer.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
-        compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
-        events: Dict[str, Event] = {
-            event.name: event
-            for event in self.get_compiler_analyser(compiler).symbol_table.values()
-            if isinstance(event, Event)
-        }
+        nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
 
-        output, manifest = self.get_output(path)
+        compiler = Compiler()
+        with LOCK:
+            compiler.compile_and_save(path, nef_output)
+
+            events: Dict[str, Event] = {
+                event.name: event
+                for event in self.get_compiler_analyser(compiler).symbol_table.values()
+                if isinstance(event, Event)
+            }
+
+            output, manifest = self.get_output(nef_output)
+
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
         abi = manifest['abi']
@@ -207,17 +212,21 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_imported_event(self):
         path = self.get_contract_path('GenerationWithImportedEvent.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
-        compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
-        events: Dict[str, Event] = {}
-        for name, method in self.get_compiler_analyser(compiler).symbol_table.items():
-            if isinstance(method, Event):
-                events[name] = method
-                if method.name not in events:
-                    events[method.name] = method
+        nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
 
-        output, manifest = self.get_output(path)
+        compiler = Compiler()
+        with LOCK:
+            compiler.compile_and_save(path, nef_output)
+
+            events: Dict[str, Event] = {}
+            for name, method in self.get_compiler_analyser(compiler).symbol_table.items():
+                if isinstance(method, Event):
+                    events[name] = method
+                    if method.name not in events:
+                        events[method.name] = method
+
+            output, manifest = self.get_output(nef_output)
+
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
         abi = manifest['abi']
@@ -240,7 +249,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_public_name_decorator_kwarg(self):
         path = self.get_contract_path('MetadataMethodName.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -257,7 +266,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_public_name_decorator_arg(self):
         path = self.get_contract_path('MetadataMethodNameArg.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -278,7 +287,7 @@ class TestFileGeneration(BoaTest):
 
     def test_metadata_abi_method_with_duplicated_name_but_different_args(self):
         path = self.get_contract_path('MetadataMethodDuplicatedNameDifferentArgs.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -308,7 +317,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_public_safe_decorator_kwarg(self):
         path = self.get_contract_path('MetadataMethodSafe.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -325,7 +334,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_public_safe_decorator_arg(self):
         path = self.get_contract_path('MetadataMethodSafeArg.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -344,7 +353,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_unused_event(self):
         path = self.get_contract_path('MetadataUnusedEvent.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -375,18 +384,22 @@ class TestFileGeneration(BoaTest):
     def test_generate_nefdbgnfo_file(self):
         from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithDecorator.py')
+        nef_output, _ = self.get_deploy_file_paths(path)
+        expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
-        expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
-        methods: Dict[str, Method] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Method)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
 
-        self.assertTrue(os.path.exists(expected_nef_output))
-        debug_info = self.get_debug_info(path)
+            methods: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Method)
+            }
+
+            debug_info = self.get_debug_info(nef_output)
+
+        self.assertTrue(os.path.exists(expected_debug_info_output))
         self.assertNotIn('entrypoint', debug_info)
         self.assertIn('methods', debug_info)
         self.assertGreater(len(debug_info['methods']), 0)
@@ -423,18 +436,22 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_nefdbgnfo_file_with_event(self):
         path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
+        nef_output, _ = self.get_deploy_file_paths(path)
+        expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
-        expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
-        events: Dict[str, Event] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Event)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
 
-        self.assertTrue(os.path.exists(expected_nef_output))
-        debug_info = self.get_debug_info(path)
+            events: Dict[str, Event] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Event)
+            }
+
+            debug_info = self.get_debug_info(nef_output)
+
+        self.assertTrue(os.path.exists(expected_debug_info_output))
         self.assertNotIn('entrypoint', debug_info)
         self.assertIn('events', debug_info)
         self.assertGreater(len(debug_info['events']), 0)
@@ -461,19 +478,22 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_nefdbgnfo_file_with_static_variables(self):
         path = self.get_contract_path('GenerationWithStaticVariables.py')
+        nef_output, _ = self.get_deploy_file_paths(path)
+        expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
-        expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
-        variables: Dict[str, Method] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Variable)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
 
-        self.assertTrue(os.path.exists(expected_nef_output))
-        debug_info = self.get_debug_info(path)
+            variables: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Variable)
+            }
 
+            debug_info = self.get_debug_info(nef_output)
+
+        self.assertTrue(os.path.exists(expected_debug_info_output))
         self.assertNotIn('entrypoint', debug_info)
         self.assertIn('static-variables', debug_info)
         self.assertGreater(len(debug_info['static-variables']), 0)
@@ -497,18 +517,22 @@ class TestFileGeneration(BoaTest):
     def test_generate_nefdbgnfo_file_with_user_module_import(self):
         from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithUserModuleImportsDupNames.py')
+        nef_output, _ = self.get_deploy_file_paths(path)
+        expected_nef_output = nef_output.replace('.nef', '.nefdbgnfo')
 
-        expected_nef_output = path.replace('.py', '.nefdbgnfo')
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
-        methods: Dict[str, Method] = {
-            name: method
-            for name, method in self.get_all_imported_methods(compiler).items()
-            if isinstance(method, Method)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
+
+            methods: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_all_imported_methods(compiler).items()
+                if isinstance(method, Method)
+            }
+
+            debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_nef_output))
-        debug_info = self.get_debug_info(path)
         self.assertNotIn('entrypoint', debug_info)
         self.assertIn('methods', debug_info)
         self.assertGreater(len(debug_info['methods']), 0)
@@ -546,7 +570,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_with_notify_event(self):
         path = self.get_contract_path('test_sc/interop_test/runtime', 'NotifySequence.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -566,7 +590,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_without_main(self):
         path = self.get_contract_path('GenerationWithoutMain.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -590,19 +614,22 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_manifest_file_abi_method_offset(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
-        manifest_path = path.replace('.py', '.manifest.json')
+        nef_output, manifest_path = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
-        methods: Dict[str, Method] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Method)
-        }
-        self.assertGreater(len(methods), 0)
+        with LOCK:
+            compiler.compile_and_save(path, nef_output)
 
-        output, manifest = self.get_output(path)
+            methods: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Method)
+            }
+
+            output, manifest = self.get_output(nef_output)
+
         self.assertTrue(os.path.exists(manifest_path))
+        self.assertGreater(len(methods), 0)
         self.assertIn('abi', manifest)
         abi = manifest['abi']
 
@@ -618,17 +645,21 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_debug_info_with_multiple_flows(self):
         path = self.get_contract_path('GenerationWithMultipleFlows.py')
+        nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
-        methods: Dict[str, Method] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Method)
-        }
-        self.assertGreater(len(methods), 0)
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
 
-        debug_info = self.get_debug_info(path)
+            methods: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Method)
+            }
+
+            debug_info = self.get_debug_info(nef_output)
+
+        self.assertGreater(len(methods), 0)
         self.assertIn('methods', debug_info)
         self.assertGreater(len(debug_info['methods']), 0)
 
@@ -663,20 +694,24 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_init_method(self):
         path = self.get_contract_path('test_sc/variable_test', 'GlobalAssignmentWithType.py')
+        nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'), debug=True)
-        methods: Dict[str, Method] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Method)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
+
+            methods: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Method)
+            }
+
+            output, manifest = self.get_output(nef_output)
 
         self.assertGreater(len(methods), 0)
         self.assertIn(constants.INITIALIZE_METHOD_ID, methods)
         init_method = methods[constants.INITIALIZE_METHOD_ID]
 
-        output, manifest = self.get_output(path)
         self.assertIn('abi', manifest)
         abi = manifest['abi']
 
@@ -693,7 +728,7 @@ class TestFileGeneration(BoaTest):
         self.assertIn('returntype', abi_init)
         self.assertEqual(AbiType.Void, abi_init['returntype'])
 
-        debug_info = self.get_debug_info(path)
+        debug_info = self.get_debug_info(nef_output)
         self.assertIn('methods', debug_info)
         self.assertGreater(len(debug_info['methods']), 0)
 
@@ -718,7 +753,7 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_with_user_module_import(self):
         path = self.get_contract_path('GenerationWithUserModuleImports.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -736,7 +771,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('project_path', 'GenerationWithUserModuleImportsFromProjectRoot.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path, root_folder=self.get_dir_path(self.default_test_folder))
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -758,7 +793,6 @@ class TestFileGeneration(BoaTest):
 
         with self.assertRaises(NotLoadedException):
             from boa3.boa3 import Boa3
-            from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
 
             with LOCK:
                 Boa3.compile_and_save(path)
@@ -1070,16 +1104,19 @@ class TestFileGeneration(BoaTest):
         self.assertEqual('Any', abi_method_main['returngeneric']['type'])
 
     def verify_parameters_and_return_manifest(self, path: str) -> Tuple[dict, list]:
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        compiler.compile_and_save(path, path.replace('.py', '.nef'))
-        methods: Dict[str, Event] = {
-            name: method
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-            if isinstance(method, Method)
-        }
+        with LOCK:
+            compiler.compile_and_save(path, nef_output)
 
-        output, manifest = self.get_output(path)
+            methods: Dict[str, Event] = {
+                name: method
+                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
+                if isinstance(method, Method)
+            }
+
+            output, manifest = self.get_output(nef_output)
+
         self.assertTrue(os.path.exists(expected_manifest_output))
         self.assertIn('abi', manifest)
         abi = manifest['abi']
