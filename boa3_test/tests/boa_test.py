@@ -116,8 +116,8 @@ class BoaTest(TestCase):
                     # when an compiler error is logged this exception is raised.
                     pass
 
-        expected_logged = [exception for exception in log.records
-                           if isinstance(exception.msg, expected_logged_exception)]
+            expected_logged = [exception for exception in log.records
+                               if isinstance(exception.msg, expected_logged_exception)]
         return output, expected_logged
 
     def assertIsVoid(self, obj: Any):
