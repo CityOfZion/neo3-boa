@@ -22,8 +22,6 @@ _NEOXP_CONFIG = NeoExpressConfig(f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}/default.
 _NEOXP_CONFIG_LOCK = threading.Lock()
 _NEOXP_FILE_LOCK = FileLock(f'{env.TEST_RUNNER_DIRECTORY}/test-runner.lock')
 logging.getLogger("filelock").setLevel(logging.INFO)
-_neo_xp_logger = logging.getLogger("neo.express")
-_neo_xp_logger.setLevel(logging.INFO)
 
 
 def get_account_by_name(account_name) -> Account:
@@ -101,7 +99,6 @@ def reset_neo_express_instance(neoxp_path: str, check_point_file: str = None) ->
         command = neoxp.reset.ResetCommand(neo_express_data_file=neoxp_path,
                                            force=True)
     stdout, stderr = run_neo_express_cli(command)
-    # print(f'{command.cli_command()}\n{stdout}')
     return stdout
 
 
@@ -131,7 +128,6 @@ def _get_transaction_raw(neoxp_path: str, tx_hash: UInt256, check_point_file: st
         if isinstance(check_point_file, str):
             reset_neo_express_instance(neoxp_path, check_point_file)
         stdout, stderr = run_neo_express_cli(command)
-        # print(f'{command.cli_command()}\n{stdout}')
 
     return stdout
 
@@ -216,12 +212,6 @@ def run_neo_express_cli(command: neoxp.NeoExpressCommand) -> Tuple[str, str]:
     neoxp_args = ['neoxp']
     neoxp_args.extend(command.cli_command().split())
 
-    # expected_result = []
-    # worker = threading.Thread(target=_run_cli, args=(neoxp_args, expected_result))
-    # worker.start()
-    #
-    # worker.join()
-    # return expected_result[0], expected_result[1]
     with _NEOXP_FILE_LOCK:
         process = subprocess.Popen(neoxp_args,
                                    stdout=subprocess.PIPE,
@@ -229,8 +219,3 @@ def run_neo_express_cli(command: neoxp.NeoExpressCommand) -> Tuple[str, str]:
                                    text=True)
         cli_result = process.communicate()
     return cli_result
-
-
-# def _run_cli(args: List[str], result: list):
-#
-#     result.extend(cli_result)
