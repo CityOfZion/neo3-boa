@@ -14,9 +14,19 @@ class BuildCommand(ICommand):
         super().__init__(main_parser, 'compile', 'Compiles your smart contract')
 
     def add_arguments_and_callback(self):
-        self.parser.add_argument("input", help=".py smart contract to compile", type=str)
-        self.parser.add_argument("-db", "--debug", action='store_true', help="generates a .nefdbgnfo file")
-        self.parser.add_argument("--project-path", help="Project root path. Path of the contract by default.", type=str)
+        self.parser.add_argument("input",
+                                 type=str,
+                                 help=".py smart contract to compile")
+        self.parser.add_argument("-db", "--debug",
+                                 action='store_true',
+                                 help="generates a .nefdbgnfo file")
+        self.parser.add_argument("--project-path",
+                                 type=str,
+                                 help="Project root path. Path of the contract by default.")
+        self.parser.add_argument("-e", "'--env",
+                                 type=str,
+                                 help="Set the contract environment for compiling.")
+
         self.parser.set_defaults(func=self.execute_command)
 
     @staticmethod
@@ -24,6 +34,7 @@ class BuildCommand(ICommand):
         sc_path: str = args['input']
         project_path: str = args['project_path']
         debug: bool = args['debug']
+        env: str = args['env']
 
         if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
             logging.error("Input file is not .py")
@@ -36,7 +47,7 @@ class BuildCommand(ICommand):
             project_path = os.path.dirname(path)
 
         try:
-            Boa3.compile_and_save(sc_path, debug=debug, root_folder=project_path)
+            Boa3.compile_and_save(sc_path, debug=debug, root_folder=project_path, env=env)
             logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
         except NotLoadedException as e:
             error_message = e.message

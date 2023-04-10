@@ -25,13 +25,15 @@ class Analyser:
     :ivar symbol_table: a dictionary used to store the identifiers
     """
 
-    def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None, log: bool = False):
+    def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None,
+                 env: str = None, log: bool = False):
         self.symbol_table: Dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
         self.metadata: NeoMetadata = NeoMetadata()
         self.is_analysed: bool = False
         self._log: bool = log
+        self._env: str = env if env is not None else constants.DEFAULT_CONTRACT_ENVIRONMENT
 
         self.__include_builtins_symbols()
         self._errors = []
@@ -58,7 +60,7 @@ class Analyser:
     def analyse(path: str, log: bool = False,
                 imported_files: Optional[Dict[str, Analyser]] = None,
                 import_stack: Optional[List[str]] = None,
-                root: str = None) -> Analyser:
+                root: str = None, env: str = None, **kwargs) -> Analyser:
         """
         Analyses the syntax of the Python code
 
@@ -69,14 +71,21 @@ class Analyser:
         :param imported_files: a dict that maps the paths of the files that were analysed if it's from an import.
                                If it's not triggered by an import, must be None.
         :param root: the path of the project root that the current smart contract is part of.
+        :param env: specific environment id to compile.
         :return: a boolean value that represents if the analysis was successful
         :rtype: Analyser
         """
         with open(path, 'rb') as source:
             ast_tree = ast.parse(source.read())
 
-        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, log)
+        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log)
         CompiledMetadata.set_current_metadata(analyser.metadata)
+
+        from_compiler_entry = 'compiler_entry' in kwargs and kwargs['compiler_entry']
+        if from_compiler_entry:
+            from boa3.internal.model.imports.builtin import CompilerBuiltin
+            CompilerBuiltin.update_with_analyser(analyser)
+
         analyser.__pre_execute()
 
         # fill symbol table
@@ -102,8 +111,12 @@ class Analyser:
     def warnings(self) -> List[CompilerWarning]:
         return self._warnings.copy()
 
+    @property
+    def env(self) -> str:
+        return self._env
+
     def copy(self) -> Analyser:
-        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root, log=self._log)
+        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root, env=self._env, log=self._log)
 
         copied.metadata = self.metadata
         copied.is_analysed = self.is_analysed
