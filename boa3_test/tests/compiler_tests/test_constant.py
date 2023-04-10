@@ -1,6 +1,6 @@
 import ast
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
 
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
@@ -14,8 +14,11 @@ from boa3.internal.neo.vm.type.String import String
 class TestConstant(BoaTest):
     def build_code_generator(self) -> CodeGenerator:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
-        VMCodeMapping.reset()
-        return CodeGenerator({})
+
+        with LOCK:
+            VMCodeMapping.reset()
+            result = CodeGenerator({})
+        return result
 
     def test_small_integer_constant(self):
         input = 7
@@ -184,7 +187,8 @@ class TestConstant(BoaTest):
 
         analyser = Analyser(ast.parse(str(input)))
         analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser).bytecode
+        with LOCK:
+            output = CodeGenerator.generate_code(analyser).bytecode
 
         self.assertEqual(expected_output, output)
 

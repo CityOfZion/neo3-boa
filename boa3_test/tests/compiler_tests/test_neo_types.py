@@ -463,7 +463,7 @@ class TestNeoTypes(BoaTest):
 
     def test_byte_string_manifest_generation(self):
         path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths(path)
         output, manifest = self.get_output(path)
 
         import os
@@ -759,7 +759,7 @@ class TestNeoTypes(BoaTest):
 
     def test_opcode_manifest_generation(self):
         path = self.get_contract_path('opcode', 'ConcatWithBytes.py')
-        expected_manifest_output = path.replace('.py', '.manifest.json')
+        _, expected_manifest_output = self.get_deploy_file_paths(path)
         output, manifest = self.get_output(path)
 
         import os

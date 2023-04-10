@@ -199,7 +199,8 @@ class TestNEP11Template(BoaTest):
         engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
@@ -235,7 +236,8 @@ class TestNEP11Template(BoaTest):
         engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
@@ -270,7 +272,8 @@ class TestNEP11Template(BoaTest):
         engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
@@ -315,7 +318,8 @@ class TestNEP11Template(BoaTest):
         engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
 
-        engine.add_contract(path.replace('.py', '.nef'))
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8
@@ -344,7 +348,9 @@ class TestNEP11Template(BoaTest):
         engine = TestEngine()
         engine.use_contract_custom_name = self._use_custom_name
         self.deploy_contract(engine, path)
-        engine.add_contract(path.replace('.py', '.nef'))
+
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
+        engine.add_contract(nef_path)
 
         # add some gas for fees
         add_amount = 10 * 10 ** 8

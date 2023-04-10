@@ -103,8 +103,6 @@ class TestClass(BoaTest):
 
     def test_contract_constructor(self):
         path, _ = self.get_deploy_file_paths('ContractConstructor.py')
-
-        path, _ = self.get_deploy_file_paths(path)
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'new_contract')

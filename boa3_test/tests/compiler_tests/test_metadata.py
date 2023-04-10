@@ -503,7 +503,7 @@ class TestMetadata(BoaTest):
         path = self.get_contract_path('MetadataInfoSource.py')
         self.compile_and_save(path)
 
-        nef_path = path.replace('.py', '.nef')
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
         with open(nef_path, mode='rb') as nef:
             from boa3.internal.neo.contracts.neffile import NefFile
             generated_source = NefFile.deserialize(nef.read()).source
@@ -514,7 +514,7 @@ class TestMetadata(BoaTest):
         path = self.get_contract_path('MetadataInfoSourceDefault.py')
         self.compile_and_save(path)
 
-        nef_path = path.replace('.py', '.nef')
+        nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
         with open(nef_path, mode='rb') as nef:
             from boa3.internal.neo.contracts.neffile import NefFile
             generated_source = NefFile.deserialize(nef.read()).source
