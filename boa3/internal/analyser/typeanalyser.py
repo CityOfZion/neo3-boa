@@ -1312,10 +1312,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         if not isinstance(callable_target, Callable):
             # verify if it is a builtin method with its name shadowed
             call_target = Builtin.get_symbol(callable_id)
-            if not isinstance(call_target, Callable) and self.is_exception(callable_id):
-                call_target = Builtin.Exception
+            if not isinstance(call_target, Callable):
+                if self.is_exception(callable_id):
+                    call_target = Builtin.Exception
+                elif hasattr(callable_target, 'constructor_method'):
+                    call_target = callable_target.constructor_method()
 
             callable_target = call_target if call_target is not None else callable_target
+
         if isinstance(callable_target, IBuiltinMethod):
             # verify if it's a variation of the default builtin method
             args = [self.get_type(param, use_metatype=True) for param in call_args]
