@@ -2,14 +2,14 @@ import ast
 from abc import ABC
 from typing import Dict, List, Optional, Tuple
 
+from boa3.internal.model.builtin.builtinsymbol import IBuiltinSymbol
 from boa3.internal.model.callable import Callable
-from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
-class IBuiltinCallable(Callable, IdentifiedSymbol, ABC):
+class IBuiltinCallable(Callable, IBuiltinSymbol, ABC):
     def __init__(self, identifier: str, args: Dict[str, Variable] = None,
                  vararg: Optional[Tuple[str, Variable]] = None,
                  kwargs: Optional[Dict[str, Variable]] = None,
