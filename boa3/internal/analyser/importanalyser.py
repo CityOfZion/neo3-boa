@@ -52,13 +52,16 @@ class ImportAnalyser(IAstAnalyser):
             self._find_package(import_target, importer_file)
             return
 
+        importer_file_dir = os.path.dirname(importer_file)
         sys.path.append(self.root_folder)
+        sys.path.append(importer_file_dir)
         try:
             import_spec = importlib.util.find_spec(import_target)
             module_origin: str = import_spec.origin
         except BaseException:
             return
         finally:
+            sys.path.remove(importer_file_dir)
             sys.path.remove(self.root_folder)
 
         self._importer_file = importer_file
