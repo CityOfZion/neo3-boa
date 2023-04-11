@@ -3,12 +3,13 @@ from __future__ import annotations
 from typing import List, Dict, Any, Union, Optional
 
 from boa3.internal.neo import from_hex_str, utils
-from boa3.internal.neo.smart_contract.notification import Notification
 from boa3.internal.neo3.core.types import UInt256
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.model.network.payloads.signer import Signer
 from boa3_test.test_drive.model.network.payloads.witness import Witness
+from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
 from boa3_test.test_drive.model.smart_contract.triggertype import TriggerType
+from boa3_test.test_drive.testrunner.blockchain.notification import TestRunnerNotification as Notification
 
 
 class TestTransaction:
@@ -113,7 +114,7 @@ class TransactionExecution:
         return self._notifications.copy()
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TransactionExecution:
+    def from_json(cls, json: Dict[str, Any], contract_collection: ContractCollection = None) -> TransactionExecution:
         tx_exec = cls()
 
         tx_exec._trigger = TriggerType[json['trigger']]
@@ -121,6 +122,6 @@ class TransactionExecution:
         tx_exec._gas_consumed = int(json['gasconsumed'])
         tx_exec._exception = str(json['exception']) if json['exception'] is not None else None
         tx_exec._stack = [utils.stack_item_from_json(value) for value in json['stack']]
-        tx_exec._notifications = [Notification.from_json(notification) for notification in json['notifications']]
+        tx_exec._notifications = [Notification.from_json(notification, contract_collection) for notification in json['notifications']]
 
         return tx_exec

@@ -146,14 +146,14 @@ def get_transaction(neoxp_path: str, tx_hash: UInt256, check_point_file: str = N
     return tx
 
 
-def get_transaction_log(neoxp_path: str, tx_hash: UInt256, check_point_file: str = None) -> TransactionLog:
+def get_transaction_log(neoxp_path: str, tx_hash: UInt256, check_point_file: str = None, contract_collection=None) -> TransactionLog:
     raw_result = _get_transaction_raw(neoxp_path, tx_hash, check_point_file)
 
     tx_log: TransactionLog
     try:
         import json
         result_json = json.loads(raw_result)
-        tx_log = TransactionLog.from_json(result_json['application-log'])
+        tx_log = TransactionLog.from_json(result_json['application-log'], contract_collection)
         tx_log._tx_id = tx_hash
     except:
         tx_log = None

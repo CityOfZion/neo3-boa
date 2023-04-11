@@ -29,7 +29,7 @@ class Notification:
         return self._value
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> Notification:
+    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> Notification:
         """
         Creates a Notification object from a json.
 
