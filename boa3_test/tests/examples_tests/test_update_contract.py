@@ -1,9 +1,9 @@
 import json
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo import to_script_hash
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -16,8 +16,8 @@ class TestUpdateContractTemplate(BoaTest):
     def test_update_contract_compile(self):
         path = self.get_contract_path('update_contract.py')
         path_new = self.get_contract_path('examples/auxiliary_contracts', 'update_contract.py')
-        Boa3.compile(path)
-        Boa3.compile(path_new)
+        self.compile(path)
+        self.compile(path_new)
 
     def test_update_contract(self):
         path = self.get_contract_path('update_contract.py')
@@ -27,6 +27,7 @@ class TestUpdateContractTemplate(BoaTest):
         new_nef, new_manifest = self.get_bytes_output(path_new)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # Saving user's balance before calling method to compare it later
         tokens_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)

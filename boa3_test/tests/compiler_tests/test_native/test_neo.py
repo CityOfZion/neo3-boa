@@ -1,9 +1,10 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestNeoClass(BoaTest):
@@ -12,7 +13,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -21,14 +22,14 @@ class TestNeoClass(BoaTest):
         expected_results.append(constants.NEO_SCRIPT)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_symbol(self):
         path, _ = self.get_deploy_file_paths('Symbol.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -37,7 +38,7 @@ class TestNeoClass(BoaTest):
         expected_results.append('NEO')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -48,7 +49,7 @@ class TestNeoClass(BoaTest):
 
     def test_decimals(self):
         path, _ = self.get_deploy_file_paths('Decimals.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -57,7 +58,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -68,7 +69,7 @@ class TestNeoClass(BoaTest):
 
     def test_total_supply(self):
         path, _ = self.get_deploy_file_paths('TotalSupply.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -77,7 +78,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(100_000_000)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -90,7 +91,7 @@ class TestNeoClass(BoaTest):
         path, _ = self.get_deploy_file_paths('BalanceOf.py')
         test_account_1 = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
         test_account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -103,7 +104,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -114,7 +115,7 @@ class TestNeoClass(BoaTest):
 
     def test_transfer(self):
         path, _ = self.get_deploy_file_paths('Transfer.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -133,7 +134,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # TestRunner doesn't have WitnessScope modifier
         # signing is not enough to pass check witness calling from test contract
@@ -145,14 +146,14 @@ class TestNeoClass(BoaTest):
         expected_results.append(True)
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_transfer_data_default(self):
         path, _ = self.get_deploy_file_paths('TransferDataDefault.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -165,7 +166,7 @@ class TestNeoClass(BoaTest):
         runner.add_neo(account_1, amount)
         invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount))
         expected_results.append(False)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
 
         # TestRunner doesn't have WitnessScope modifier
         # signing is not enough to pass check witness calling from test contract
@@ -176,7 +177,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(True)
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -191,7 +192,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_gas_per_block(self):
         path, _ = self.get_deploy_file_paths('GetGasPerBlock.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -200,23 +201,23 @@ class TestNeoClass(BoaTest):
         expected_results.append(5 * 10 ** 8)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_unclaimed_gas(self):
         path, _ = self.get_deploy_file_paths('UnclaimedGas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         contract_call = runner.call_contract(path, 'main', bytes(20), 0)
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
         self.assertIsInstance(contract_call.result, int)
 
     def test_register_candidate(self):
         path, _ = self.get_deploy_file_paths('RegisterCandidate.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -229,10 +230,10 @@ class TestNeoClass(BoaTest):
 
         invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
         expected_results.append(False)
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # TestRunner doesn't have WitnessScope modifier
         # signing is not enough to pass check witness calling from test contract
@@ -240,7 +241,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(False)
 
         runner.execute(account=candidate)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # cannot test it with a Test Invoke
         runner.call_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey)
@@ -249,7 +250,7 @@ class TestNeoClass(BoaTest):
                                      account=candidate)
 
         runner.execute(account=candidate)
-        self.assertEqual(VMState.FAULT, runner.vm_state)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.INSUFFICIENT_GAS)
 
         for x in range(len(invokes)):
@@ -263,7 +264,7 @@ class TestNeoClass(BoaTest):
 
     def test_unregister_candidate(self):
         path, _ = self.get_deploy_file_paths('UnregisterCandidate.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -278,7 +279,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # TestRunner doesn't have WitnessScope modifier
         # signing is not enough to pass check witness calling from test contract
@@ -289,7 +290,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(True)
 
         runner.execute(account=candidate)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -298,7 +299,7 @@ class TestNeoClass(BoaTest):
         path, _ = self.get_deploy_file_paths('Vote.py')
         path_get, _ = self.get_deploy_file_paths('GetCandidates.py')
 
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
         runner.deploy_contract(path_get)
 
         invokes = []
@@ -320,14 +321,14 @@ class TestNeoClass(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # NeoAccountState is None and will return false
         invokes.append(runner.call_contract(path, 'main', account_script_hash, candidate_pubkey))
         expected_results.append(False)
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # adding NEO to the account will make NeoAccountState not None
         runner.add_neo(account_script_hash, n_votes)
@@ -337,7 +338,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(False)
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
                                      account=candidate)
@@ -366,7 +367,7 @@ class TestNeoClass(BoaTest):
         get_candidates_call_2 = runner.call_contract(path_get, 'main')
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -400,13 +401,13 @@ class TestNeoClass(BoaTest):
         self.compile_and_save(path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         # no candidate was registered
         invoke = runner.call_contract(path, 'main')
 
         runner.execute()  # getting result of multiple iterators is failing
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         result = invoke.result
         self.assertEqual(0, len(result))
@@ -423,7 +424,7 @@ class TestNeoClass(BoaTest):
         # after registering one
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         result = invoke.result
         self.assertEqual(1, len(result))
@@ -432,7 +433,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_candidates(self):
         path, _ = self.get_deploy_file_paths('GetCandidates.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -442,7 +443,7 @@ class TestNeoClass(BoaTest):
         expected_results.append([])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         candidate = neoxp.utils.get_account_by_name('testAccount1')
         candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
@@ -457,7 +458,7 @@ class TestNeoClass(BoaTest):
         invoke = runner.call_contract(path, 'main')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -475,7 +476,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_candidate_vote(self):
         path, _ = self.get_deploy_file_paths('GetCandidateVote.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -496,7 +497,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(-1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         runner.add_neo(account_script_hash, n_votes)
 
@@ -511,7 +512,7 @@ class TestNeoClass(BoaTest):
         expected_results.append(n_votes)
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -524,7 +525,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_committee(self):
         path, _ = self.get_deploy_file_paths('GetCommittee.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         default_committee = neoxp.utils.get_account_by_name('node1')
         default_council = [
@@ -534,7 +535,7 @@ class TestNeoClass(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         result = invoke.result
         is_committee_member = True
@@ -545,7 +546,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_next_block_validators(self):
         path, _ = self.get_deploy_file_paths('GetNextBlockValidators.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         default_committee = neoxp.utils.get_account_by_name('node1')
         consensus_nodes = [
@@ -555,7 +556,7 @@ class TestNeoClass(BoaTest):
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         result = invoke.result
         is_consensus_node = True
@@ -566,7 +567,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_account_state(self):
         path, _ = self.get_deploy_file_paths('GetAccountState.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -583,7 +584,7 @@ class TestNeoClass(BoaTest):
         invoke = runner.call_contract(path, 'main', account_script_hash)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         result = invoke.result
         self.assertEqual(3, len(result))
@@ -605,7 +606,7 @@ class TestNeoClass(BoaTest):
         invoke = runner.call_contract(path, 'main', account_script_hash)
 
         runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         result = invoke.result
         self.assertEqual(3, len(result))

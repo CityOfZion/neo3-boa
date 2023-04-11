@@ -5,6 +5,7 @@ from abc import ABC
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Sequence, Union
 
+from boa3.internal import constants
 from boa3.internal.exception.CompilerError import CompilerError, InternalError, UnresolvedReference
 from boa3.internal.exception.CompilerWarning import CompilerWarning
 from boa3.internal.model.attribute import Attribute
@@ -52,7 +53,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             # don't include duplicated errors
             self.errors.append(error)
             if self._log:
-                logging.error(error)
+                logging.getLogger(constants.BOA_LOGGING_NAME).error(error)
 
     def _log_warning(self, warning: CompilerWarning):
         if warning.filepath is None:
@@ -61,7 +62,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             # don't include duplicated warnings
             self.warnings.append(warning)
             if self._log:
-                logging.warning(warning)
+                logging.getLogger(constants.BOA_LOGGING_NAME).warning(warning)
 
     def _log_info(self, info_message: str, log_filename: bool = True):
         if self._log:
@@ -70,7 +71,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             else:
                 formatted_message = info_message
 
-            logging.info(formatted_message)
+            logging.getLogger(constants.BOA_LOGGING_NAME).info(formatted_message)
 
     def visit(self, node: ast.AST) -> Any:
         try:

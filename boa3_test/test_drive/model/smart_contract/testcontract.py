@@ -6,6 +6,8 @@ from boa3_test.test_drive.model.interface.itransactionobject import ITransaction
 
 
 class TestContract(ITransactionObject):
+    contract_hash_group = 'scripthash'
+
     def __init__(self, file_path: str, manifest_path: str):
         super().__init__()
         self._nef_path: str = file_path
@@ -19,6 +21,8 @@ class TestContract(ITransactionObject):
 
     @property
     def script_hash(self) -> Optional[bytes]:
+        if not isinstance(self._script_hash, bytes) and len(self._log) > 0 and not self._log.isspace():
+            self._handle_log()
         return self._script_hash
 
     @script_hash.setter
@@ -29,6 +33,15 @@ class TestContract(ITransactionObject):
     @property
     def name(self) -> str:
         return self._manifest['name'] if 'name' in self._manifest else None
+
+    def _log_pattern(self) -> str:
+        return rf'{self.name} \((?P<{self.contract_hash_group}>0x\w+)\).*?' + super()._log_pattern()
+
+    def _set_data_from_match_result(self, match_groups: dict):
+        from boa3.internal.neo3.core.types import UInt160
+        super()._set_data_from_match_result(match_groups)
+        script_hash = match_groups[self.contract_hash_group]
+        self._script_hash = UInt160.from_string(script_hash).to_array()
 
     def _read_manifest(self) -> dict:
         try:

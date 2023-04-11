@@ -1,11 +1,11 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo import to_script_hash
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestTemplate(BoaTest):
+class TestICOTemplate(BoaTest):
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -16,11 +16,12 @@ class TestTemplate(BoaTest):
 
     def test_ico_compile(self):
         path = self.get_contract_path('ico.py')
-        Boa3.compile(path)
+        self.compile(path)
 
     def test_ico_verify(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         result = self.run_smart_contract(engine, path, 'verify',
                                          signer_accounts=[self.OTHER_ACCOUNT_1])
@@ -33,6 +34,7 @@ class TestTemplate(BoaTest):
     def test_ico_total_supply(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         total_supply = 10_000_000 * 10 ** 8
 
         result = self.run_smart_contract(engine, path, 'totalSupply',
@@ -42,12 +44,14 @@ class TestTemplate(BoaTest):
     def test_ico_symbol(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         result = self.run_smart_contract(engine, path, 'symbol')
         self.assertEqual('ICO', result)
 
     def test_ico_decimals(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         result = self.run_smart_contract(engine, path, 'decimals')
         self.assertEqual(8, result)
 
@@ -56,6 +60,7 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(total_supply, result)
@@ -69,6 +74,7 @@ class TestTemplate(BoaTest):
     def test_ico_kyc_register(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # don't include if not signed by the administrator
         result = self.run_smart_contract(engine, path, 'kyc_register',
@@ -94,6 +100,7 @@ class TestTemplate(BoaTest):
     def test_ico_kyc_remove(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # don't remove if not signed by the administrator
         result = self.run_smart_contract(engine, path, 'kyc_remove',
@@ -117,6 +124,7 @@ class TestTemplate(BoaTest):
     def test_ico_approve(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         approved_amount = 100 * 10 ** 8
 
@@ -163,6 +171,7 @@ class TestTemplate(BoaTest):
     def test_ico_allowance(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         approved_amount = 100 * 10 ** 8
 
@@ -185,6 +194,7 @@ class TestTemplate(BoaTest):
     def test_ico_transfer_from(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         transferred_amount = 100 * 10 ** 8
 
@@ -273,6 +283,7 @@ class TestTemplate(BoaTest):
     def test_ico_mint(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # should fail if amount is a negative number
         with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
@@ -298,6 +309,7 @@ class TestTemplate(BoaTest):
     def test_ico_refund(self):
         path = self.get_contract_path('ico.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         transferred_amount = 10_000
 
         # should fail script hash length is not 20

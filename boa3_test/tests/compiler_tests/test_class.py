@@ -1,10 +1,10 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestClass(BoaTest):
@@ -12,7 +12,7 @@ class TestClass(BoaTest):
 
     def test_notification_get_variables(self):
         path, _ = self.get_deploy_file_paths('NotificationGetVariables.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -22,7 +22,7 @@ class TestClass(BoaTest):
         invokes.append(contract_invoke)
         expected_results.append(bytes(20))
 
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         script = contract_invoke.invoke.contract.script_hash
 
         invokes.append(runner.call_contract(path, 'event_name', []))
@@ -72,7 +72,7 @@ class TestClass(BoaTest):
 
     def test_notification_set_variables(self):
         path, _ = self.get_deploy_file_paths('NotificationSetVariables.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -82,7 +82,7 @@ class TestClass(BoaTest):
         invokes.append(contract_invoke)
         expected_results.append(b'')
 
-        runner.update_contracts()
+        runner.update_contracts(export_checkpoint=True)
         script = contract_invoke.invoke.contract.script_hash
 
         invokes.append(runner.call_contract(path, 'script_hash', script,
@@ -103,9 +103,7 @@ class TestClass(BoaTest):
 
     def test_contract_constructor(self):
         path, _ = self.get_deploy_file_paths('ContractConstructor.py')
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'new_contract')
         runner.execute()
@@ -131,13 +129,13 @@ class TestClass(BoaTest):
         path = self.get_contract_path('UserClassEmpty.py')
 
         with self.assertRaises(NotLoadedException) as e:
-            output = Boa3.compile(path)
+            output = self.compile(path)
 
         self.assertTrue(e.exception.empty_script)
 
     def test_user_class_with_static_method_from_class(self):
         path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodFromClass.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -153,7 +151,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_static_method_from_class_with_same_method_name(self):
         path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -173,7 +171,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_static_method_with_args(self):
         path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodWithArgs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -195,7 +193,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_static_method_with_vararg(self):
         path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodWithVararg.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -219,7 +217,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_static_method_not_class_method(self):
         path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodNotClassMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -235,7 +233,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_called_from_class_name(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromClass.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -251,7 +249,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_called_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -267,7 +265,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_called_from_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -283,7 +281,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_with_args(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassMethodWithArgs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -305,7 +303,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_method_with_vararg(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassMethodWithVararg.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -329,7 +327,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_variable_from_class(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromClass.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -348,7 +346,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_variable_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -367,7 +365,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_variable_from_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -394,7 +392,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_class_variable_and_class_method(self):
         path, _ = self.get_deploy_file_paths('UserClassWithClassVariableAndClassMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -413,7 +411,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_init(self):
         path, _ = self.get_deploy_file_paths('UserClassWithInit.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -429,7 +427,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_init_with_args(self):
         path, _ = self.get_deploy_file_paths('UserClassWithInitWithArgs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -445,7 +443,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method(self):
         path, _ = self.get_deploy_file_paths('UserClassWithInstanceMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -461,7 +459,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_method_from_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassWithInstanceMethodFromVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -481,7 +479,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_variable_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithInstanceVariableFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -500,7 +498,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_instance_variable_from_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassWithInstanceVariableFromVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -519,7 +517,7 @@ class TestClass(BoaTest):
 
     def test_user_class_update_instance_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassUpdateInstanceVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -538,7 +536,7 @@ class TestClass(BoaTest):
 
     def test_user_class_access_variable_on_init(self):
         path, _ = self.get_deploy_file_paths('UserClassAccessInstanceVariableOnInit.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -554,7 +552,7 @@ class TestClass(BoaTest):
 
     def test_user_class_access_variable_on_method(self):
         path, _ = self.get_deploy_file_paths('UserClassAccessInstanceVariableOnMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -577,7 +575,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCreatedBase.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -596,7 +594,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_cascated_created_base(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCascadeCreatedBase.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -615,7 +613,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base_with_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithVariables.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -646,7 +644,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base_with_args(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithArgs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -680,7 +678,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base_with_init(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithInit.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -697,7 +695,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base_with_init_with_args(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithInitWithArgs.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -714,7 +712,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_created_base_with_more_variables(self):
         path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithMoreVariables.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -747,7 +745,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_property_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithPropertyFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -763,7 +761,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_property_using_instance_variables_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingInstanceVariablesFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -779,7 +777,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_property_using_class_variables_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingClassVariablesFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -795,7 +793,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_property_using_variables_from_object(self):
         path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingVariablesFromObject.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -827,7 +825,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_augmented_assignment_operator_with_variable(self):
         path, _ = self.get_deploy_file_paths('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -858,7 +856,7 @@ class TestClass(BoaTest):
 
     def test_user_class_with_deploy_method(self):
         path, _ = self.get_deploy_file_paths('UserClassWithDeployMethod.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

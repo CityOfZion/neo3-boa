@@ -1,10 +1,10 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
@@ -28,11 +28,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('ConstantCondition.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -41,7 +41,7 @@ class TestIf(BoaTest):
         expected_results.append(2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -63,11 +63,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('VariableCondition.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -78,7 +78,7 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -86,12 +86,12 @@ class TestIf(BoaTest):
     def test_if_no_condition(self):
         path = self.get_contract_path('IfWithoutCondition.py')
         with self.assertRaises(SyntaxError):
-            Boa3.compile(path)
+            self.compile(path)
 
     def test_if_no_body(self):
         path = self.get_contract_path('IfWithoutBody.py')
         with self.assertRaises(SyntaxError):
-            Boa3.compile(path)
+            self.compile(path)
 
     def test_nested_if(self):
         expected_output = (
@@ -121,11 +121,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('NestedIf.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -140,7 +140,7 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -166,11 +166,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('IfElse.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -181,7 +181,7 @@ class TestIf(BoaTest):
         expected_results.append(10)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -189,7 +189,7 @@ class TestIf(BoaTest):
     def test_else_no_body(self):
         path = self.get_contract_path('ElseWithoutBody.py')
         with self.assertRaises(SyntaxError):
-            Boa3.compile(path)
+            self.compile(path)
 
     def test_if_elif(self):
         expected_output = (
@@ -215,11 +215,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('IfElif.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -230,7 +230,7 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -238,12 +238,12 @@ class TestIf(BoaTest):
     def test_elif_no_condition(self):
         path = self.get_contract_path('ElifWithoutCondition.py')
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            output = self.compile(path)
 
     def test_elif_no_body(self):
         path = self.get_contract_path('ElifWithoutBody.py')
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            output = self.compile(path)
 
     def test_if_relational_condition(self):
         jmp_address = Integer(4).to_byte_array(min_length=1, signed=True)
@@ -266,11 +266,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('RelationalCondition.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -281,7 +281,7 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -335,11 +335,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('MultipleBranches.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -358,7 +358,7 @@ class TestIf(BoaTest):
         expected_results.append(20)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -381,11 +381,11 @@ class TestIf(BoaTest):
         )
 
         path = self.get_contract_path('IfExpVariableCondition.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -396,7 +396,7 @@ class TestIf(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -404,7 +404,7 @@ class TestIf(BoaTest):
     def test_if_expression_without_else_branch(self):
         path = self.get_contract_path('IfExpWithoutElse.py')
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            output = self.compile(path)
 
     def test_if_expression_mismatched_types(self):
         expected_output = (
@@ -428,7 +428,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -439,14 +439,14 @@ class TestIf(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_inner_if_else(self):
         path, _ = self.get_deploy_file_paths('InnerIfElse.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -470,14 +470,14 @@ class TestIf(BoaTest):
         expected_results.append(22)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_is_instance_condition(self):
         path, _ = self.get_deploy_file_paths('IfIsInstanceCondition.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -495,14 +495,14 @@ class TestIf(BoaTest):
         expected_results.append(-1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_else_is_instance_condition(self):
         path, _ = self.get_deploy_file_paths('IfElseIsInstanceCondition.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -520,14 +520,14 @@ class TestIf(BoaTest):
         expected_results.append(-1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_else_is_instance_condition_with_union_variable(self):
         path, _ = self.get_deploy_file_paths('IfElseIsInstanceConditionWithUnionVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -549,14 +549,14 @@ class TestIf(BoaTest):
         expected_results.append(b'\x01')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_else_multiple_is_instance_condition_with_union_variable(self):
         path, _ = self.get_deploy_file_paths('IfElseMultipleIsInstanceConditionWithUnionVariable.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -577,14 +577,14 @@ class TestIf(BoaTest):
         expected_results.append(4)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variable_in_if_scopes(self):
         path, _ = self.get_deploy_file_paths('VariablesInIfScopes.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -614,14 +614,14 @@ class TestIf(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_compare_test0int(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test0int.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -636,14 +636,14 @@ class TestIf(BoaTest):
         expected_results.append(2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_compare_test0str(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test0str.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -655,14 +655,14 @@ class TestIf(BoaTest):
         expected_results.append(2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_compare_test1(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test1.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -686,14 +686,14 @@ class TestIf(BoaTest):
         expected_results.append(8)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_compare_test2(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test2.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -705,14 +705,14 @@ class TestIf(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_op_call_test(self):
         path, _ = self.get_deploy_file_paths('OpCallBoa2Test.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -744,14 +744,14 @@ class TestIf(BoaTest):
         expected_results.append(hash160(String('abc').to_bytes()))
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_test_many_elif(self):
         path, _ = self.get_deploy_file_paths('TestManyElifBoa2.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -769,14 +769,14 @@ class TestIf(BoaTest):
         expected_results.append(-1)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_with_inner_while(self):
         path, _ = self.get_deploy_file_paths('IfWithInnerWhile.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -788,14 +788,14 @@ class TestIf(BoaTest):
         expected_results.append('{[value1,value2,value3]}')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_with_inner_for(self):
         path, _ = self.get_deploy_file_paths('IfWithInnerFor.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -807,14 +807,14 @@ class TestIf(BoaTest):
         expected_results.append('{[value1,value2,value3]}')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_implicit_boolean(self):
         path, _ = self.get_deploy_file_paths('IfImplicitBoolean.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -850,14 +850,14 @@ class TestIf(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_implicit_boolean_literal(self):
         path, _ = self.get_deploy_file_paths('IfImplicitBooleanLiteral.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -866,18 +866,18 @@ class TestIf(BoaTest):
         expected_results.append(4)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_pass(self):
         path = self.get_contract_path('IfPass.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -886,18 +886,18 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_else_pass(self):
         path = self.get_contract_path('ElsePass.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -908,7 +908,7 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -916,8 +916,9 @@ class TestIf(BoaTest):
     def test_if_else_pass(self):
         path = self.get_contract_path('IfElsePass.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
-        output = Boa3.compile(path)
+        output = self.compile(path)
         n_nop = 0
         for byte_value in output:
             if byte_value == int.from_bytes(Opcode.NOP.value, 'little'):
@@ -925,7 +926,7 @@ class TestIf(BoaTest):
         self.assertEqual(n_nop, 2)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -934,14 +935,14 @@ class TestIf(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_is_none(self):
         path, _ = self.get_deploy_file_paths('IfIsNone.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -952,14 +953,14 @@ class TestIf(BoaTest):
         expected_results.append(True)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_is_not_none(self):
         path, _ = self.get_deploy_file_paths('IfIsNotNone.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -970,14 +971,14 @@ class TestIf(BoaTest):
         expected_results.append(False)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_if_is_none_type_check(self):
         path, _ = self.get_deploy_file_paths('IfIsNoneTypeCheck.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -991,7 +992,7 @@ class TestIf(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

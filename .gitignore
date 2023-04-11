@@ -4,6 +4,7 @@ __pycache__
 *.nef
 *.manifest.json
 *.nefdbgnfo
+*.lock
 dist
 build
 _build

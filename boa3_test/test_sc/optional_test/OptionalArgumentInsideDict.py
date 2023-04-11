@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict
+from typing import Optional, Dict
 
 from boa3.builtin.compile_time import public
 

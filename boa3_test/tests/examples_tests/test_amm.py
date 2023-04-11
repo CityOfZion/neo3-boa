@@ -1,13 +1,13 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3_test.tests.boa_test import BoaTest
 
 
-class TestTemplate(BoaTest):
+class TestAMMTemplate(BoaTest):
     default_folder: str = 'examples'
 
     OWNER = neoxp.utils.get_account_by_name('owner')
@@ -17,13 +17,13 @@ class TestTemplate(BoaTest):
 
     def test_amm_compile(self):
         path = self.get_contract_path('amm.py')
-        Boa3.compile(path)
+        self.compile(path)
 
     def test_amm_set_address(self):
         path, _ = self.get_deploy_file_paths('amm.py')
         path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
         path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -68,7 +68,7 @@ class TestTemplate(BoaTest):
 
     def test_amm_symbol(self):
         path, _ = self.get_deploy_file_paths('amm.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'symbol')
         runner.execute()
@@ -78,7 +78,7 @@ class TestTemplate(BoaTest):
 
     def test_amm_decimals(self):
         path, _ = self.get_deploy_file_paths('amm.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'decimals')
         runner.execute()
@@ -88,7 +88,7 @@ class TestTemplate(BoaTest):
 
     def test_amm_total_supply(self):
         path, _ = self.get_deploy_file_paths('amm.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'totalSupply')
         runner.execute()
@@ -98,7 +98,7 @@ class TestTemplate(BoaTest):
 
     def test_amm_total_balance_of(self):
         path, _ = self.get_deploy_file_paths('amm.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'balanceOf', self.OWNER.script_hash.to_array())
         runner.execute()
@@ -119,7 +119,7 @@ class TestTemplate(BoaTest):
 
     def test_amm_quote(self):
         path, _ = self.get_deploy_file_paths('amm.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         amount_zneo = 1
         reserve_zneo = 100
@@ -137,7 +137,7 @@ class TestTemplate(BoaTest):
         path, _ = self.get_deploy_file_paths('amm.py')
         path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
         path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -192,7 +192,7 @@ class TestTemplate(BoaTest):
         path, _ = self.get_deploy_file_paths('amm.py')
         path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
         path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -395,7 +395,7 @@ class TestTemplate(BoaTest):
         path, _ = self.get_deploy_file_paths('amm.py')
         path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
         path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -535,7 +535,7 @@ class TestTemplate(BoaTest):
         path, _ = self.get_deploy_file_paths('amm.py')
         path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
         path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -678,12 +678,10 @@ class TestTemplate(BoaTest):
         self.assertEqual(reserves_before.result[1] - swapped_zgas, reserves_after.result[1])
 
     def test_amm_swap_zgas_to_zneo(self):
-        # path = self.get_contract_path('amm.py')
-        # self.compile_and_save(path, debug=True)
         path, _ = self.get_deploy_file_paths('amm.py')
         path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
         path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = NeoTestRunner()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

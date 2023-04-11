@@ -1,12 +1,12 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo import to_script_hash
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
 from boa3_test.tests.test_classes.testengine import TestEngine
 
 
-class TestTemplate(BoaTest):
+class TestNEP5Template(BoaTest):
     default_folder: str = 'examples'
 
     OWNER_SCRIPT_HASH = bytes(20)
@@ -14,23 +14,26 @@ class TestTemplate(BoaTest):
 
     def test_nep5_compile(self):
         path = self.get_contract_path('nep5.py')
-        Boa3.compile(path)
+        self.compile(path)
 
     def test_nep5_name(self):
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         result = self.run_smart_contract(engine, path, 'name')
         self.assertEqual('NEP5 Standard', result)
 
     def test_nep5_symbol(self):
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         result = self.run_smart_contract(engine, path, 'symbol')
         self.assertEqual('NEP5', result)
 
     def test_nep5_decimals(self):
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         result = self.run_smart_contract(engine, path, 'decimals')
         self.assertEqual(8, result)
 
@@ -39,6 +42,7 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
         result = self.run_smart_contract(engine, path, 'totalSupply')
         self.assertEqual(total_supply, result)
 
@@ -47,6 +51,7 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
         self.assertEqual(total_supply, result)
@@ -62,6 +67,7 @@ class TestTemplate(BoaTest):
 
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # should fail if the sender doesn't sign
         result = self.run_smart_contract(engine, path, 'transfer',
@@ -130,6 +136,7 @@ class TestTemplate(BoaTest):
     def test_nep5_verify(self):
         path = self.get_contract_path('nep5.py')
         engine = TestEngine()
+        engine.use_contract_custom_name = self._use_custom_name
 
         # should fail without signature
         result = self.run_smart_contract(engine, path, 'verify')
