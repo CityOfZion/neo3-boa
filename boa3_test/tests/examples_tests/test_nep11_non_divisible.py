@@ -274,14 +274,15 @@ class TestNEP11Template(BoaTest):
         self.assertEqual(1, len([notification for notification in tx_result.notifications if notification.name == "Deploy"]))
 
     def test_nep11_update(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
+        path = self.get_contract_path('nep11_non_divisible.py')
+        new_nef, new_manifest = self.get_bytes_output(path)
+        arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
+
+        path, _ = self.get_deploy_file_paths(path)
         runner = NeoTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
-
-        new_nef, new_manifest = self.get_bytes_output(path)
-        arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
         # update contract
         invoke = runner.call_contract(path, 'update',
