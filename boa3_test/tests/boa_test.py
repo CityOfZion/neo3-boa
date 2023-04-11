@@ -32,6 +32,7 @@ class BoaTest(TestCase):
     CANT_FIND_METHOD_MSG_PREFIX = "Can't find method"
     CANT_PARSE_VALUE_MSG = "The value could not be parsed."
     CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
+    CONTRACT_NOT_FOUND_MSG_REGEX = 'contract "(.*?)" not found'
     GAS_MUST_BE_POSITIVE_MSG = 'GAS must be positive.'
     GIVEN_KEY_NOT_PRESENT_IN_DICT_MSG_REGEX = "The given key '\\S+' was not present in the dictionary."
     INSUFFICIENT_GAS = 'Insufficient GAS.'

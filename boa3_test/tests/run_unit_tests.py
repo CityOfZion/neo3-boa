@@ -1,5 +1,3 @@
-import time
-
 if __name__ == '__main__':
     import sys
     import os.path

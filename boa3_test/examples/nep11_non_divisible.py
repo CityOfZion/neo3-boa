@@ -5,10 +5,10 @@
 
 from typing import Any, Dict, List, Union, cast
 
-from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
+from boa3.builtin.compile_time import metadata, public, CreateNewEvent, NeoMetadata
 from boa3.builtin.contract import abort
-from boa3.builtin.interop.blockchain import Transaction, get_contract
-from boa3.builtin.interop.contract import call_contract, destroy_contract, update_contract
+from boa3.builtin.interop.blockchain import get_contract, Transaction
+from boa3.builtin.interop.contract import CallFlags, call_contract, destroy_contract, get_call_flags, update_contract
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.json import json_deserialize
 from boa3.builtin.interop.runtime import check_witness, get_network, script_container
@@ -111,12 +111,18 @@ on_unlock = CreateNewEvent(
 # DEBUG
 # -------------------------------------------
 
-debug = CreateNewEvent(
+on_debug = CreateNewEvent(
     [
         ('params', list),
     ],
     'Debug'
 )
+
+
+def debug(params: list):
+    allow_notify = get_call_flags() & CallFlags.ALLOW_NOTIFY
+    if allow_notify == CallFlags.ALLOW_NOTIFY:
+        on_debug(params)
 
 
 # DEBUG_END
@@ -835,10 +841,11 @@ def set_locked_view_counter(tokenId: ByteString):
 # helpers
 
 def expect(condition: bool, message: str):
-    # TODO: Add assert message back after PR #737 is fixed
-    # https://github.com/neo-project/neo-modules/pull/737
-    # assert condition, message
-    assert condition
+    allow_notify = get_call_flags() & CallFlags.ALLOW_NOTIFY
+    if allow_notify == CallFlags.ALLOW_NOTIFY:
+        assert condition, message
+    else:
+        assert condition
 
 
 def validateAddress(address: UInt160) -> bool:
