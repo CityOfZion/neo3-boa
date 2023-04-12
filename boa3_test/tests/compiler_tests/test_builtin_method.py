@@ -2265,13 +2265,8 @@ class TestBuiltinMethod(BoaTest):
 
     # region int test
 
-    # TODO: Int constructor is not accepting more than one method
-    @unittest.skip('Int constructor is not accepting more than one method')
     def test_int_str(self):
-        path = self.get_contract_path('IntStr.py')
-        self.compile_and_save(path)  # it doesn't compile, it isn't implemented yet
-
-        path, _ = self.get_deploy_file_paths(path)
+        path, _ = self.get_deploy_file_paths('IntStr.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -2374,13 +2369,8 @@ class TestBuiltinMethod(BoaTest):
         with self.assertRaises(ValueError):
             int(value, base)
 
-    # TODO: Int constructor is not accepting more than one method
-    @unittest.skip('Int constructor is not accepting more than one method')
     def test_int_bytes(self):
-        path = self.get_contract_path('IntBytes.py')
-        self.compile_and_save(path)  # it doesn't compile, it isn't implemented yet
-
-        path, _ = self.get_deploy_file_paths(path)
+        path, _ = self.get_deploy_file_paths('IntBytes.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
