@@ -204,7 +204,8 @@ class NeoTestRunner:
     def get_transaction_result(self, tx_hash: Union[UInt256, bytes]) -> Optional[TransactionLog]:
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash,
-                                               check_point_file=check_point_path)
+                                               check_point_file=check_point_path,
+                                               contract_collection=self._contracts)
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
@@ -301,22 +302,24 @@ class NeoTestRunner:
         stdout, stderr = self._run_command_line(cli_args)
 
         try:
+            self.reset_state()
             try:
                 result = json.loads(stdout)
             except json.JSONDecodeError:
                 result = utils.handle_return_error(stdout)
 
             self._update_runner(result)
-            if add_invokes_to_batch:
-                import shutil
-                self._invokes_to_batch += 1
-                invoke_file_path_to_batch = self.get_full_path(f'{self._file_name}_{self._invokes_to_batch}.neo-invoke.json')
-                shutil.copy(invoke_file_path, invoke_file_path_to_batch)
-                self._batch.invoke_file(invoke_file_path_to_batch, account=account)
-            if clear_invokes:
-                self._invokes.clear()
         except BaseException:
             self._error_message = stdout
+
+        if add_invokes_to_batch and self._vm_state == VMState.HALT:
+            import shutil
+            self._invokes_to_batch += 1
+            invoke_file_path_to_batch = self.get_full_path(f'{self._file_name}_{self._invokes_to_batch}.neo-invoke.json')
+            shutil.copy(invoke_file_path, invoke_file_path_to_batch)
+            self._batch.invoke_file(invoke_file_path_to_batch, account=account)
+        if clear_invokes:
+            self._invokes.clear()
 
         if self._error_message is not None:
             return self._error_message
@@ -388,7 +391,7 @@ class NeoTestRunner:
 
             notifications = []
             for n in json_notifications:
-                new = Notification.from_json(n)
+                new = Notification.from_json(n, contract_collection=self._contracts)
                 if new is not None:
                     notifications.append(new)
             self._notifications.extend(notifications)
