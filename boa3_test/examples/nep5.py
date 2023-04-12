@@ -8,6 +8,7 @@ from typing import Any
 from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep5TransferEvent
 from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.type import UInt160
 
 
@@ -34,9 +35,8 @@ def manifest_metadata() -> NeoMetadata:
 # TOKEN SETTINGS
 # -------------------------------------------
 
-
-# Script hash of the contract owner
-OWNER = UInt160(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+# The keys used to access the storage
+OWNER_KEY = 'owner'
 SUPPLY_KEY = 'totalSupply'
 
 # Name of the Token
@@ -73,7 +73,7 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    return runtime.check_witness(OWNER)
+    return runtime.check_witness(get_owner())
 
 
 @public
@@ -208,7 +208,16 @@ def _deploy(data: Any, update: bool):
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
+        container: Transaction = runtime.script_container
+        storage.put(OWNER_KEY, container.sender)
         storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        storage.put(OWNER, TOKEN_TOTAL_SUPPLY)
+        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
 
-        on_transfer(b'', OWNER, TOKEN_TOTAL_SUPPLY)
+        on_transfer(b'', container.sender, TOKEN_TOTAL_SUPPLY)
+
+
+def get_owner() -> UInt160:
+    """
+    Gets the script hash of the owner (the account that deployed this smart contract)
+    """
+    return UInt160(storage.get(OWNER_KEY))
