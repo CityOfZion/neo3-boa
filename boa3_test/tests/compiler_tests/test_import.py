@@ -351,6 +351,27 @@ class TestImport(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    def test_from_import_user_module_from_root_and_file_directories(self):
+        path = self.get_contract_path('FromImportUserModuleFromRootAndFileDir.py')
+        self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner()
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'call_imported_from_root'))
+        expected_results.append([])
+
+        invokes.append(runner.call_contract(path, 'call_imported_from_file_dir'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
     def test_import_non_existent_package(self):
         path = self.get_contract_path('ImportNonExistentPackage.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
