@@ -361,7 +361,9 @@ class BoaTest(TestCase):
             with _COMPILER_LOCK:
                 if not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
                     # both .nef and .manifest.json are required to execute the smart contract
-                    self.compile_and_save(smart_contract_path, log=False, output_name=nef_path)
+                    self.compile_and_save(smart_contract_path, log=False, output_name=nef_path,
+                                          use_unique_name=False  # already using unique name
+                                          )
             smart_contract_path = nef_path
         elif isinstance(smart_contract_path, bytes):
             from boa3.internal.neo3.core.types import UInt160
