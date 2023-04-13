@@ -23,7 +23,7 @@ class BuildCommand(ICommand):
         self.parser.add_argument("--project-path",
                                  type=str,
                                  help="Project root path. Path of the contract by default.")
-        self.parser.add_argument("-e", "'--env",
+        self.parser.add_argument("-e", "--env",
                                  type=str,
                                  help="Set the contract environment for compiling.")
 
