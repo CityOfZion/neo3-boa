@@ -30,10 +30,14 @@ class TestVariable(BoaTest):
             + b'\x00'
             + Opcode.RET        # return
         )
-        compiler_output = compiler.compile(path)
+
+        from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
+        with LOCK:
+            compiler_output = compiler.compile(path)
+            main_symbol_table: Dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
+
         self.assertEqual(expected_compiler_output, compiler_output)
 
-        main_symbol_table: Dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
         # the variable is local to a method, so it shouldn't be in the main symbol table
         self.assertFalse(test_variable_id in main_symbol_table)
 
