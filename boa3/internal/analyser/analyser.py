@@ -60,7 +60,7 @@ class Analyser:
     def analyse(path: str, log: bool = False,
                 imported_files: Optional[Dict[str, Analyser]] = None,
                 import_stack: Optional[List[str]] = None,
-                root: str = None, env: str = None, **kwargs) -> Analyser:
+                root: str = None, env: str = None, compiler_entry: bool = False) -> Analyser:
         """
         Analyses the syntax of the Python code
 
@@ -72,6 +72,7 @@ class Analyser:
                                If it's not triggered by an import, must be None.
         :param root: the path of the project root that the current smart contract is part of.
         :param env: specific environment id to compile.
+        :param compiler_entry: Whether this is the entry compiler analyser. False by default.
         :return: a boolean value that represents if the analysis was successful
         :rtype: Analyser
         """
@@ -81,8 +82,7 @@ class Analyser:
         analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log)
         CompiledMetadata.set_current_metadata(analyser.metadata)
 
-        from_compiler_entry = 'compiler_entry' in kwargs and kwargs['compiler_entry']
-        if from_compiler_entry:
+        if compiler_entry:
             from boa3.internal.model.imports.builtin import CompilerBuiltin
             CompilerBuiltin.update_with_analyser(analyser)
 
