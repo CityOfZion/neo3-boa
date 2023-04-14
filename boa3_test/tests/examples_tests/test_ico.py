@@ -468,18 +468,6 @@ class TestICOTemplate(BoaTest):
         runner.add_neo(contract_script_hash, transferred_neo_amount * 2)
         runner.add_gas(contract_script_hash, transferred_gas_amount * 2)
 
-        # should fail script hash length is not 20
-        runner.call_contract(path, 'refund', bytes(10), transferred_neo_amount, transferred_gas_amount)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        # should fail no amount is a positive number
-        runner.call_contract(path, 'refund', owner_script_hash, 0, 0)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
         # should fail if not signed by the owner
         invokes.append(runner.call_contract(path, 'refund',
                                             owner_script_hash, transferred_neo_amount, transferred_gas_amount))
@@ -513,3 +501,15 @@ class TestICOTemplate(BoaTest):
 
         self.assertEqual(balance_neo_before.result + transferred_neo_amount, balance_neo_after.result)
         self.assertEqual(balance_gas_before.result + transferred_gas_amount, balance_gas_after.result)
+
+        # should fail script hash length is not 20
+        runner.call_contract(path, 'refund', bytes(10), transferred_neo_amount, transferred_gas_amount)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        # should fail no amount is a positive number
+        runner.call_contract(path, 'refund', owner_script_hash, 0, 0)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
