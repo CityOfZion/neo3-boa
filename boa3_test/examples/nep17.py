@@ -3,6 +3,7 @@ from typing import Any, Union, cast
 from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160
@@ -32,8 +33,8 @@ def manifest_metadata() -> NeoMetadata:
 # -------------------------------------------
 
 
-# Script hash of the contract owner
-OWNER = UInt160()
+# The keys used to access the storage
+OWNER_KEY = 'owner'
 SUPPLY_KEY = 'totalSupply'
 
 # Symbol of the Token
@@ -223,7 +224,7 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    return runtime.check_witness(OWNER)
+    return runtime.check_witness(get_owner())
 
 
 @public
@@ -234,10 +235,13 @@ def _deploy(data: Any, update: bool):
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
-        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        storage.put(OWNER, TOKEN_TOTAL_SUPPLY)
+        container: Transaction = runtime.script_container
 
-        on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
+        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put(OWNER_KEY, container.sender)
+        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
+
+        on_transfer(None, container.sender, TOKEN_TOTAL_SUPPLY)
 
 
 @public
@@ -271,3 +275,10 @@ def onNEP17Payment(from_address: Union[UInt160, None], amount: int, data: Any):
         mint(from_addr, corresponding_amount)
     else:
         abort()
+
+
+def get_owner() -> UInt160:
+    """
+    Gets the script hash of the owner (the account that deployed this smart contract)
+    """
+    return UInt160(storage.get(OWNER_KEY))
