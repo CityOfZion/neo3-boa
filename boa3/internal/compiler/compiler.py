@@ -21,18 +21,19 @@ class Compiler:
         self._analyser: Analyser = None
         self._entry_smart_contract: str = ''
 
-    def compile(self, path: str, root_folder: str = None, log: bool = True) -> bytes:
+    def compile(self, path: str, root_folder: str = None, env: str = None, log: bool = True) -> bytes:
         """
         Load a Python file and tries to compile it
 
         :param path: the path of the Python file to compile
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
+        :param env: specific environment id to compile.
         :return: the bytecode of the compiled .nef file
         """
-        return self._internal_compile(path, root_folder, log).bytecode
+        return self._internal_compile(path, root_folder, env, log).bytecode
 
-    def _internal_compile(self, path: str, root_folder: str = None, log: bool = True) -> CompilerOutput:
+    def _internal_compile(self, path: str, root_folder: str = None, env: str = None, log: bool = True) -> CompilerOutput:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
@@ -47,10 +48,11 @@ class Compiler:
         CompilerBuiltin.reset()
         CompiledMetadata.reset()
 
-        self._analyse(fullpath, root_folder, log)
+        self._analyse(fullpath, root_folder, env, log)
         return self._compile()
 
-    def compile_and_save(self, path: str, output_path: str, root_folder: str = None, log: bool = True, debug: bool = False):
+    def compile_and_save(self, path: str, output_path: str, root_folder: str = None, log: bool = True,
+                         debug: bool = False, env: str = None):
         """
         Save the compiled file and the metadata files
 
@@ -59,11 +61,12 @@ class Compiler:
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         :param debug: if nefdbgnfo file should be generated.
+        :param env: specific environment id to compile.
         """
-        self.result = self._internal_compile(path, root_folder, log)
+        self.result = self._internal_compile(path, root_folder, env, log)
         self._save(output_path, debug)
 
-    def _analyse(self, path: str, root_folder: str = None, log: bool = True):
+    def _analyse(self, path: str, root_folder: str = None, env: str = None, log: bool = True):
         """
         Load a Python file and analyses its syntax
 
@@ -71,7 +74,7 @@ class Compiler:
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         """
-        self._analyser = Analyser.analyse(path, log=log, root=root_folder)
+        self._analyser = Analyser.analyse(path, log=log, root=root_folder, env=env, compiler_entry=True)
 
     def _compile(self) -> CompilerOutput:
         """

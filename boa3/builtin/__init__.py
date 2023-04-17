@@ -4,3 +4,11 @@ import boa3.builtin.interop
 import boa3.builtin.math
 import boa3.builtin.nativecontract
 import boa3.builtin.vm
+
+
+env: str
+"""
+Gets the compiled environment
+
+:meta hide-value:
+"""

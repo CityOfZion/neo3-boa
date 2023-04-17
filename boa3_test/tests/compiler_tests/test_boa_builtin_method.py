@@ -1,11 +1,12 @@
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
+from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
-class TestBuiltinMethod(BoaTest):
+class TestBoaBuiltinMethod(BoaTest):
     default_folder: str = 'test_sc/boa_built_in_methods_test'
 
     def test_abort(self):
@@ -28,6 +29,32 @@ class TestBuiltinMethod(BoaTest):
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
+
+    def test_env(self):
+        path = self.get_contract_path('Env.py')
+        custom_env = 'testnet'
+        custom_name = f'Env_{custom_env}.nef'
+
+        path_default_env, _ = self.get_deploy_file_paths(path)
+        self.compile_and_save(path, env=custom_env, output_name=custom_name, change_manifest_name=True)
+        path_custom_env, _ = self.get_deploy_file_paths(path, output_name=custom_name)
+
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path_custom_env, 'main'))
+        expected_results.append(custom_env)
+
+        invokes.append(runner.call_contract(path_default_env, 'main'))
+        expected_results.append(constants.DEFAULT_CONTRACT_ENVIRONMENT)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_deploy_def(self):
         path, _ = self.get_deploy_file_paths('DeployDef.py')

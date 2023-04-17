@@ -58,6 +58,12 @@ class CompilerBuiltin:
             for event in cls._instance._events:
                 event.reset_calls()
 
+    @classmethod
+    def update_with_analyser(cls, analyser):
+        for pkg in cls.instance().packages:
+            if hasattr(pkg, 'update_with_analyser'):
+                pkg.update_with_analyser(analyser)
+
     def _set_events(self, events: List[Event]):
         self._events.extend(events)
 

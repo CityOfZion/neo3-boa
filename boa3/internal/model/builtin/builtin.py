@@ -6,7 +6,7 @@ from boa3.internal.model.builtin.classmethod import *
 from boa3.internal.model.builtin.compile_time import *
 from boa3.internal.model.builtin.contract import *
 from boa3.internal.model.builtin.decorator import *
-from boa3.internal.model.builtin.internal.innerdeploymethod import InnerDeployMethod
+from boa3.internal.model.builtin.internal import *
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.math import *
 from boa3.internal.model.builtin.method import *
@@ -24,11 +24,11 @@ from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
 
 class BoaPackage(str, Enum):
+    CompileTime = 'compile_time'
     Contract = 'contract'
     Interop = 'interop'
     Type = 'type'
     VM = 'vm'
-    CompileTime = 'compile_time'
 
 
 class Builtin:
@@ -193,6 +193,7 @@ class Builtin:
 
     # boa smart contract methods
     Abort = AbortMethod()
+    Env = EnvProperty.build()
 
     # region boa builtin modules
 
@@ -204,11 +205,14 @@ class Builtin:
                                   BuiltinMathCeil,
                                   BuiltinMathFloor])
 
+    _symbols = [Env]
     _modules = [MathModule]
 
     # endregion
 
-    boa_builtins: List[IdentifiedSymbol] = _modules
+    boa_builtins: List[IdentifiedSymbol] = []
+    boa_builtins.extend(_modules)
+    boa_builtins.extend(_symbols)
 
     metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
         'name': str,

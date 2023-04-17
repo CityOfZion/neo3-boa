@@ -189,23 +189,33 @@ class BoaTest(TestCase):
             raise FileNotFoundError(path)
         return path
 
-    def get_deploy_file_paths_without_compiling(self, contract_path: str) -> Tuple[str, str]:
-        file_path_without_ext, _ = os.path.splitext(contract_path)
+    def get_deploy_file_paths_without_compiling(self, contract_path: str, output_name: str = None) -> Tuple[str, str]:
+        if isinstance(output_name, str):
+            file_path = os.path.dirname(contract_path)
+            file_name, _ = os.path.splitext(os.path.basename(output_name))
+            file_path_without_ext = f'{file_path}/{file_name}'
+        else:
+            file_path_without_ext, _ = os.path.splitext(contract_path)
+
         if USE_UNIQUE_NAME:
             from boa3_test.test_drive import utils
             file_path_without_ext = utils.create_custom_id(file_path_without_ext, use_time=False)
 
         return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
 
-    def get_deploy_file_paths(self, *args: str, compile_if_found: bool = False) -> Tuple[str, str]:
+    def get_deploy_file_paths(self, *args: str, output_name: str = None,
+                              compile_if_found: bool = False, change_manifest_name: bool = False) -> Tuple[str, str]:
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
-            nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(contract_path)
+            nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(contract_path, output_name)
             if contract_path.endswith('.py'):
                 with _COMPILER_LOCK:
                     if compile_if_found or not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
                         # both .nef and .manifest.json are required to execute the smart contract
-                        self.compile_and_save(contract_path, output_path=nef_path, log=False)
+                        self.compile_and_save(contract_path, output_name=nef_path, log=True,
+                                              change_manifest_name=change_manifest_name,
+                                              use_unique_name=False  # already using unique name
+                                              )
 
             return nef_path, manifest_path
 
@@ -220,12 +230,24 @@ class BoaTest(TestCase):
         return result
 
     def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True,
-                         output_path: str = None, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
+                         output_name: str = None, env: str = None, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
 
-        if not isinstance(output_path, str) or not output_path.endswith('.nef'):
-            nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
+        if output_name is not None:
+            output_dir, manifest_name = os.path.split(output_name)  # get name
+            if len(output_dir) == 0:
+                output_dir, _ = os.path.split(path)
+                output_name = f'{output_dir}/{manifest_name}'
+            manifest_name, _ = os.path.splitext(manifest_name)  # remove extension
         else:
-            nef_output = output_path
+            manifest_name = None
+
+        use_unique_name = kwargs['use_unique_name'] if 'use_unique_name' in kwargs else True
+        if not isinstance(output_name, str) or not output_name.endswith('.nef'):
+            nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
+        elif use_unique_name and USE_UNIQUE_NAME:
+            nef_output, _ = self.get_deploy_file_paths_without_compiling(output_name)
+        else:
+            nef_output = output_name
 
         if nef_output.endswith('.py'):
             nef_output = nef_output.replace('.py', '.nef')
@@ -235,9 +257,11 @@ class BoaTest(TestCase):
         from boa3.internal.neo.contracts.neffile import NefFile
         with _COMPILER_LOCK:
             Boa3.compile_and_save(path, output_path=nef_output, root_folder=root_folder,
-                                  show_errors=log, debug=debug)
+                                  env=env, show_errors=log, debug=debug)
 
         get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False
+        change_manifest_name = kwargs['change_manifest_name'] if 'change_manifest_name' in kwargs else False
+
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
             if get_raw_nef:
@@ -245,9 +269,15 @@ class BoaTest(TestCase):
             else:
                 output = NefFile.deserialize(file).script
 
-        with open(manifest_output) as manifest_output:
+        with open(manifest_output) as manifest_file:
             import json
-            manifest = json.loads(manifest_output.read())
+            manifest = json.loads(manifest_file.read())
+
+        if change_manifest_name and manifest_name is not None:
+            manifest['name'] = manifest_name
+            with _COMPILER_LOCK:
+                with open(manifest_output, mode='w') as manifest_file:
+                    manifest_file.write(json.dumps(manifest, indent=4))
 
         return output, manifest
 
@@ -331,7 +361,9 @@ class BoaTest(TestCase):
             with _COMPILER_LOCK:
                 if not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
                     # both .nef and .manifest.json are required to execute the smart contract
-                    self.compile_and_save(smart_contract_path, log=False, output_path=nef_path)
+                    self.compile_and_save(smart_contract_path, log=False, output_name=nef_path,
+                                          use_unique_name=False  # already using unique name
+                                          )
             smart_contract_path = nef_path
         elif isinstance(smart_contract_path, bytes):
             from boa3.internal.neo3.core.types import UInt160

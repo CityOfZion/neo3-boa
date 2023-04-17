@@ -162,7 +162,9 @@ class ImportAnalyser(IAstAnalyser):
                         files = self._import_stack
                         files.append(origin)
                         if self.is_namespace_package:
-                            analyser = Analyser(self.tree, module_origin, self.root_folder, self._log)
+                            analyser = Analyser(self.tree, module_origin, self.root_folder, log=self._log,
+                                                env=self.analyser.env if hasattr(self.analyser, 'env') else None
+                                                )
                             if self._include_inner_packages(analyser):
                                 analyser.is_analysed = True
                                 self._imported_files[self.path] = analyser
