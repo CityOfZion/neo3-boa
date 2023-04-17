@@ -312,7 +312,7 @@ class NeoTestRunner:
         except BaseException:
             self._error_message = stdout
 
-        if add_invokes_to_batch and self._vm_state == VMState.HALT:
+        if add_invokes_to_batch:
             import shutil
             self._invokes_to_batch += 1
             invoke_file_path_to_batch = self.get_full_path(f'{self._file_name}_{self._invokes_to_batch}.neo-invoke.json')
@@ -456,5 +456,5 @@ class NeoTestRunner:
                                    text=True)
         return process.communicate()
 
-    def increase_block(self, block_to_mint: int = None):
-        self._batch.mint_block(block_to_mint)
+    def increase_block(self, block_to_mint: int = None, time_interval_in_secs: int = 0):
+        self._batch.mint_block(block_to_mint, time_interval_in_secs)
