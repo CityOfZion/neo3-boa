@@ -333,7 +333,7 @@ def mint(account: UInt160, amount: int):
         post_transfer(None, account, amount, None, True)
 
 
-@public(safe=True)
+@public
 def burn(account: UInt160, amount: int):
     """
     Burns zNEO tokens.
