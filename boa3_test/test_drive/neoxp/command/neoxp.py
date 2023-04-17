@@ -14,11 +14,11 @@ def reset() -> NeoExpressCommand:
     return neoxp.reset.ResetCommand(force=True)
 
 
-def fastfwd(block_count: int) -> NeoExpressCommand:
+def fastfwd(block_count: int, time_interval_in_secs: int = 0) -> NeoExpressCommand:
     if not isinstance(block_count, int) or block_count < 1:
         block_count = 1
 
-    return neoxp.fastforward.FastForwardCommand(block_count)
+    return neoxp.fastforward.FastForwardCommand(block_count, time_interval_in_secs)
 
 
 def transfer(sender: Account, receiver: Account, asset: str,

@@ -3,6 +3,7 @@ from typing import Any
 from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import abort
 from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
 from boa3.builtin.interop.crypto import hash160
 from boa3.builtin.type import UInt160
@@ -28,7 +29,7 @@ def manifest_metadata() -> NeoMetadata:
 # -------------------------------------------
 
 
-OWNER = UInt160()
+OWNER_KEY = b'owner'
 PERSON_A: bytes = b'person a'
 PERSON_B: bytes = b'person b'
 ADDRESS_PREFIX: bytes = b'address'
@@ -36,8 +37,8 @@ AMOUNT_PREFIX: bytes = b'amount'
 TOKEN_PREFIX: bytes = b'token'
 FUNDED_PREFIX: bytes = b'funded'
 
-# Number of seconds that need to pass before refunding the contract
-LOCK_TIME = 15 * 1
+# Number of milliseconds that need to pass before refunding the contract
+LOCK_TIME = 15 * 10 ** 3
 
 NOT_INITIALIZED: bytes = b'not initialized'
 START_TIME: bytes = b'start time'
@@ -58,37 +59,39 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    return runtime.check_witness(OWNER)
+    return runtime.check_witness(get_owner())
 
 
 @public
 def _deploy(data: Any, update: bool):
     """
-    Initializes OWNER and change values of NOT_INITIALIZED and DEPLOYED when the smart contract is deployed.
+    Initializes OWNER_KEY and change values of NOT_INITIALIZED and DEPLOYED when the smart contract is deployed.
 
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
-        storage.put(OWNER, OWNER)
+        container: Transaction = runtime.script_container
+
+        storage.put(OWNER_KEY, container.sender)
         storage.put(NOT_INITIALIZED, True)
 
 
 @public
-def atomic_swap(person_a_address: UInt160, person_a_token: bytes, person_a_amount: int, person_b_address: UInt160,
-                person_b_token: bytes, person_b_amount: int, secret_hash: bytes) -> bool:
+def atomic_swap(person_a_address: UInt160, person_a_token: UInt160, person_a_amount: int, person_b_address: UInt160,
+                person_b_token: UInt160, person_b_amount: int, secret_hash: bytes) -> bool:
     """
     Initializes the storage when the atomic swap starts.
 
     :param person_a_address: address of person_a
     :type person_a_address: UInt160
     :param person_a_token: person_b's desired token
-    :type person_a_token: bytes
+    :type person_a_token: UInt160
     :param person_a_amount: person_b's desired amount of tokens
     :type person_a_amount: int
     :param person_b_address: address of person_b
     :type person_b_address: bytes
     :param person_b_token: person_a's desired token
-    :type person_b_token: bytes
+    :type person_b_token: UInt160
     :param person_b_amount: person_a's desired amount of tokens
     :type person_b_amount: int
     :param secret_hash: the secret hash created by the contract deployer
@@ -230,3 +233,10 @@ def refund() -> bool:
         storage.put(START_TIME, 0)
         return True
     return False
+
+
+def get_owner() -> UInt160:
+    """
+    Gets the script hash of the owner (the account that deployed this smart contract)
+    """
+    return UInt160(storage.get(OWNER_KEY))

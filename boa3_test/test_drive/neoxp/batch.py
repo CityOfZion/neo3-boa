@@ -92,8 +92,8 @@ class NeoExpressBatch:
                                                  data=data)
                                   )
 
-    def mint_block(self, block_count: int):
-        self._instructions.append(neoxp.fastfwd(block_count))
+    def mint_block(self, block_count: int, time_interval_in_secs: int = 0):
+        self._instructions.append(neoxp.fastfwd(block_count, time_interval_in_secs))
 
     def reset_blockchain(self):
         self._instructions.append(neoxp.reset())
