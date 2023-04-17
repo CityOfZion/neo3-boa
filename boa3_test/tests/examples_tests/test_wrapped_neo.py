@@ -192,8 +192,11 @@ class TestWrappedTokenTemplate(BoaTest):
         runner.update_contracts(export_checkpoint=True)
         wrapped_neo_address = wrapped_neo_contract.script_hash
 
-        runner.add_neo(wrapped_neo_address, 10_000_000)
+        total_supply = 10_000_000
         burned_amount = 100
+
+        # adding the same amount of tokens that the wrapped neo smart contract has minted
+        runner.add_neo(wrapped_neo_address, total_supply)
 
         owner_script_hash = self.OWNER.script_hash.to_array()
 
@@ -373,12 +376,12 @@ class TestWrappedTokenTemplate(BoaTest):
 
         # OWNER will give zNEO to OTHER_ACCOUNT_3 so that it can approve another contracts
         invokes.append(runner.call_contract(path, 'transfer', owner_script_hash, test_account_3_script_hash,
-                                            10_000_000, None))
+                                            allowed_amount, None))
         expected_results.append(True)
         runner.execute(account=self.OWNER)
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        runner.run_contract(path, 'transfer', owner_script_hash, test_account_3_script_hash, 10_000_000,
+        runner.run_contract(path, 'transfer', owner_script_hash, test_account_3_script_hash, allowed_amount,
                             None, account=self.OWNER)
 
         transfer_events = runner.get_events('Transfer')
@@ -388,7 +391,7 @@ class TestWrappedTokenTemplate(BoaTest):
         sender, receiver, amount = transfer_events[0].arguments
         self.assertEqual(owner_script_hash, sender)
         self.assertEqual(test_account_3_script_hash, receiver)
-        self.assertEqual(10_000_000, amount)
+        self.assertEqual(allowed_amount, amount)
 
         # this approve will succeed, because OTHER_ACCOUNT_3 have enough zNEO
         invokes.append(runner.call_contract(path, 'approve', test_account_3_script_hash, test_account_1_script_hash,
