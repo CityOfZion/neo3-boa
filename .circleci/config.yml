@@ -36,9 +36,6 @@ jobs:
             sudo apt update && \
               sudo apt-get install -y dotnet-sdk-6.0
 
-            git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.5.0
-            dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o ./Neo.TestEngine
-            
             sudo apt install libsnappy-dev libc6-dev librocksdb-dev -y
             dotnet tool install Neo.Express --version 3.5.20 -g
             dotnet tool install Neo.Test.Runner --version 3.5.17 -g

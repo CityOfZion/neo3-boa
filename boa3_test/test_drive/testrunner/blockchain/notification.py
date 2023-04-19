@@ -2,8 +2,8 @@ from typing import Dict, Any
 
 from boa3.internal.neo.smart_contract.notification import Notification
 from boa3.internal.neo3.core.types import UInt160
-from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
+from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 
 
 class TestRunnerNotification(Notification):

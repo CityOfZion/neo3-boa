@@ -47,5 +47,10 @@ class NeoBatchInvoke(ITransactionObject):
 
         return result
 
+    def _set_data_from_match_result(self, match_groups: dict):
+        super()._set_data_from_match_result(match_groups)
+        if self._tx_id is not None and self._result is not invokeresult.TRANSACTION_EXECUTED:
+            self._result = invokeresult.TRANSACTION_EXECUTED
+
     def __repr__(self):
         return f'{self._invoke.__repr__()} -> {self.tx_id.__repr__()}'

@@ -318,8 +318,9 @@ class NeoTestRunner:
             invoke_file_path_to_batch = self.get_full_path(f'{self._file_name}_{self._invokes_to_batch}.neo-invoke.json')
             shutil.copy(invoke_file_path, invoke_file_path_to_batch)
             self._batch.invoke_file(invoke_file_path_to_batch, account=account)
+
         if clear_invokes:
-            self._invokes.clear()
+            self._invokes.clear(state=self._vm_state)
 
         if self._error_message is not None:
             return self._error_message

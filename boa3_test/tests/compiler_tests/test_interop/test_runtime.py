@@ -504,6 +504,16 @@ class TestRuntimeInterop(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        contract = runner.deploy_contract(path)
+        invoke = runner.call_contract(path, 'Main')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(contract.script_hash, invoke.result)
+
     def test_executing_script_hash_cant_assign(self):
         expected_output = (
             Opcode.INITSLOT
@@ -550,13 +560,23 @@ class TestRuntimeInterop(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         runner = NeoTestRunner(runner_id=self.method_name())
 
-        invoke = runner.call_contract(path, 'Main')
+        invoke_1 = runner.run_contract(path, 'Main')
+        invoke_2 = runner.call_contract(path, 'Main')
         runner.execute()
 
         # Test Runner has an error when returning block time
         # it returns None instead of the actual timestamp and raises NullPointerException
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.NULL_POINTER_MSG)
+
+        self.assertIsNotNone(invoke_1.tx_id)
+        invoke_tx = runner.get_transaction_result(invoke_1.tx_id)
+        self.assertEqual(1, len(invoke_tx.executions))
+
+        tx_result = invoke_tx.executions[0]
+        self.assertEqual(VMState.HALT, tx_result.vm_state)
+        self.assertEqual(1, len(tx_result.result_stack))
+        self.assertGreater(tx_result.result_stack[0], 0)
 
     def test_block_time_cant_assign(self):
         expected_output = (
@@ -583,6 +603,14 @@ class TestRuntimeInterop(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'Main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)
+
     def test_gas_left_cant_assign(self):
         expected_output = (
             Opcode.INITSLOT
@@ -607,6 +635,14 @@ class TestRuntimeInterop(BoaTest):
         path = self.get_contract_path('InvocationCounter.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'Main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(1, invoke.result)
 
     def test_invocation_counter_cant_assign(self):
         expected_output = (
@@ -670,6 +706,17 @@ class TestRuntimeInterop(BoaTest):
         path = self.get_contract_path('EntryScriptHash.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(len(result), constants.SIZE_OF_INT160)
 
     def test_entry_script_hash_cant_assign(self):
         expected_output = (

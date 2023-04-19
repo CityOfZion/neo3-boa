@@ -110,7 +110,7 @@ def _deploy(data: Any, update: bool):
         container: Transaction = runtime.script_container
         owner = container.sender
         storage.put(TOKEN_OWNER_KEY, owner)
-        
+
         storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
         storage.put(owner, TOKEN_INITIAL_SUPPLY)
 

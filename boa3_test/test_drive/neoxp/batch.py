@@ -143,7 +143,7 @@ class NeoExpressBatch:
 
     def _update_logs(self, log: str):
         import re
-        cli_color_change = r'?(?:\[\d+m)?'
+        cli_color_change = r'\xb1?(?:\[\d+m)?'
         log_regex = rf'{cli_color_change}(?P<contract>.+?){cli_color_change}\sLog:\s{cli_color_change}'
         tx_logs = []
 
@@ -158,7 +158,7 @@ class NeoExpressBatch:
                 logs.pop(index)
             index -= 1
 
-        for lineno, line in enumerate(logs[-len(self._instructions):]):
+        for lineno, line in enumerate(logs[-max_log_count:]):
             if lineno in self._transaction_submissions:
                 tx_logs.append(line)
             if lineno in self._tx_invokes_pos:
