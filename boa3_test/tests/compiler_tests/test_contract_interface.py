@@ -113,11 +113,15 @@ class TestContractInterface(BoaTest):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         from boa3.internal.neo.vm.type.Integer import Integer
         from boa3.internal.neo.vm.type.String import String
-        from boa3.internal.neo3.core.types import UInt160
+
+        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+        nep17_contract = runner.deploy_contract(nep17_path)
+        runner.update_contracts(export_checkpoint=True)
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = UInt160.from_string('409eb4868a2c43611b9c0f9df98de3846ada4fcb').to_array()
+        contract_script_bytes = nep17_contract.script_hash
 
         expected_output = (
             Opcode.NEWARRAY0    # arguments list
@@ -137,9 +141,7 @@ class TestContractInterface(BoaTest):
         output, _ = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -161,11 +163,15 @@ class TestContractInterface(BoaTest):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         from boa3.internal.neo.vm.type.Integer import Integer
         from boa3.internal.neo.vm.type.String import String
-        from boa3.internal.neo3.core.types import UInt160
+
+        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+        nep17_contract = runner.deploy_contract(nep17_path)
+        runner.update_contracts(export_checkpoint=True)
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = UInt160.from_string('409eb4868a2c43611b9c0f9df98de3846ada4fcb').to_array()
+        contract_script_bytes = nep17_contract.script_hash
 
         expected_output = (
             # start public method
@@ -208,9 +214,7 @@ class TestContractInterface(BoaTest):
         output, _ = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
-        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

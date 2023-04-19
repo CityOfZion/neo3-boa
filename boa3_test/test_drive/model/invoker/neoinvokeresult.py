@@ -44,5 +44,9 @@ class NeoInvokeResult:
 
         return result
 
+    def cancel(self):
+        if self._result is invokeresult.NOT_EXECUTED:
+            self._result = invokeresult.CANCELED
+
     def __repr__(self):
         return f'{self._invoke.__repr__()} -> {self._result.__repr__()}'
