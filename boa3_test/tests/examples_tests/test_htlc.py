@@ -19,6 +19,7 @@ class TestHTLCTemplate(BoaTest):
     OTHER_ACCOUNT_1 = neoxp.utils.get_account_by_name('testAccount1')
     OTHER_ACCOUNT_2 = neoxp.utils.get_account_by_name('testAccount2')
     GAS_TO_DEPLOY = 1000 * 10 ** 8
+    REFUND_WAIT_TIME = 24 * 60 * 60     # smart contract constant in seconds
 
     def _validate_execution_result(self, runner: NeoTestRunner, tx_id: UInt256, expected_result: Any) -> TransactionExecution:
         # Test Runner isn't returning the runtime.time value correctly when using `call_contract`, so we have to get the
@@ -173,12 +174,12 @@ class TestHTLCTemplate(BoaTest):
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.add_gas(person_a.address, self.GAS_TO_DEPLOY)    # adding GAS to let them be able to invoke contracts
         runner.add_gas(person_b.address, self.GAS_TO_DEPLOY)    # adding GAS to let them be able to invoke contracts
+        runner.add_neo(person_a.address, transferred_amount_neo)    # adding NEO that will be swapped
+        runner.add_gas(person_b.address, transferred_amount_gas)    # adding GAS that will be swapped
+
         htlc_contract = runner.deploy_contract(path, account=self.OWNER)
         runner.update_contracts(export_checkpoint=True)
         htlc_script_hash = htlc_contract.script_hash
-
-        runner.add_neo(person_a.address, transferred_amount_neo)    # adding NEO that will be swapped
-        runner.add_gas(person_b.address, transferred_amount_gas)    # adding GAS that will be swapped
 
         # starting atomic swap by using the atomic_swap method
         runner.run_contract(path, 'atomic_swap',
@@ -315,7 +316,7 @@ class TestHTLCTemplate(BoaTest):
 
         # this simulates a new block in the blockchain
         # time only changes value when a new block enters the blockchain
-        runner.increase_block(time_interval_in_secs=30)
+        runner.increase_block(time_interval_in_secs=self.REFUND_WAIT_TIME)
         # will be able to refund, because enough time has passed
         invoke_refund_success = runner.run_contract(path, 'refund', account=self.OWNER)
 
@@ -377,7 +378,7 @@ class TestHTLCTemplate(BoaTest):
 
         # this simulates a new block in the blockchain
         # time only changes value when a new block enters the blockchain
-        runner.increase_block(time_interval_in_secs=30)
+        runner.increase_block(time_interval_in_secs=self.REFUND_WAIT_TIME)
         # will be able to refund, because enough time has passed
         invoke_refund_success = runner.run_contract(path, 'refund', account=self.OWNER)
 
@@ -445,7 +446,7 @@ class TestHTLCTemplate(BoaTest):
 
         # this simulates a new block in the blockchain
         # time only changes value when a new block enters the blockchain
-        runner.increase_block(time_interval_in_secs=30)
+        runner.increase_block(time_interval_in_secs=self.REFUND_WAIT_TIME)
         # will be able to refund, because enough time has passed
         invoke_refund_success = runner.run_contract(path, 'refund', account=self.OWNER)
 
