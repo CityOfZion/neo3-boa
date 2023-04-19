@@ -38,7 +38,7 @@ TOKEN_PREFIX: bytes = b'token'
 FUNDED_PREFIX: bytes = b'funded'
 
 # Number of milliseconds that need to pass before refunding the contract
-LOCK_TIME = 15 * 10 ** 3
+LOCK_TIME = 24 * 60 * (60 * 10 ** 3)    # 1 day in milliseconds
 
 NOT_INITIALIZED: bytes = b'not initialized'
 START_TIME: bytes = b'start time'
