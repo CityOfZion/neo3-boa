@@ -92,8 +92,8 @@ class NeoExpressBatch:
                                                  data=data)
                                   )
 
-    def mint_block(self, block_count: int):
-        self._instructions.append(neoxp.fastfwd(block_count))
+    def mint_block(self, block_count: int, time_interval_in_secs: int = 0):
+        self._instructions.append(neoxp.fastfwd(block_count, time_interval_in_secs))
 
     def reset_blockchain(self):
         self._instructions.append(neoxp.reset())
@@ -142,13 +142,29 @@ class NeoExpressBatch:
         return log
 
     def _update_logs(self, log: str):
+        import re
+        cli_color_change = r'?(?:\[\d+m)?'
+        log_regex = rf'{cli_color_change}(?P<contract>.+?){cli_color_change}\sLog:\s{cli_color_change}'
         tx_logs = []
-        for lineno, line in enumerate(log.splitlines()[-len(self._instructions):]):
+
+        # filter to remove logs
+        logs = log.splitlines()
+        max_log_count = len(self._instructions)
+
+        index = len(logs) - 1
+        while index >= 0 and 0 < len(logs) - index <= max_log_count:
+            line = logs[index]
+            if re.match(log_regex, line):
+                logs.pop(index)
+            index -= 1
+
+        for lineno, line in enumerate(logs[-len(self._instructions):]):
             if lineno in self._transaction_submissions:
                 tx_logs.append(line)
             if lineno in self._tx_invokes_pos:
                 index = self._tx_invokes_pos.index(lineno)
                 self._tx_invokes[index].set_log(line)
+
         self._transaction_logs = tx_logs
 
     def _remove_commands_until_checkpoint(self, check_point_file: str):
