@@ -1,3 +1,5 @@
+import unittest
+
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.neo.utils import contract_parameter_to_json, stack_item_from_json
@@ -347,6 +349,7 @@ class TestTestEngine(BoaTest):
         result = stack_item_from_json(stack_item)
         self.assertEqual(expected_result, result)
 
+    @unittest.skip("Remove this test when TestEngine is removed. Deprecating for now")
     def test_run(self):
         path = self.get_contract_path('test_sc/generation_test', 'GenerationWithDecorator.py')
         self.compile_and_save(path)
@@ -358,6 +361,7 @@ class TestTestEngine(BoaTest):
         result = engine.run(path, 'Sub', 50, 20)
         self.assertEqual(30, result)
 
+    @unittest.skip("Remove this test when TestEngine is removed. Deprecating for now")
     def test_test_engine_not_found_error(self):
         # if the TestEngine is correctly installed a error should not occur
         from boa3.internal import env
