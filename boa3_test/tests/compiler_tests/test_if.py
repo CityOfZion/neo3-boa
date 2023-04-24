@@ -915,9 +915,6 @@ class TestIf(BoaTest):
 
     def test_if_else_pass(self):
         path = self.get_contract_path('IfElsePass.py')
-        engine = TestEngine()
-        engine.use_contract_custom_name = self._use_custom_name
-
         output = self.compile(path)
         n_nop = 0
         for byte_value in output:
