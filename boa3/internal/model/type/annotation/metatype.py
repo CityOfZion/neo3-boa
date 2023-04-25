@@ -19,7 +19,7 @@ class MetaType(IType):
         return AbiType.Any
 
     @classmethod
-    def build(cls, value: Any) -> IType:
+    def build(cls, value: Any = None) -> IType:
         if isinstance(value, MetaType):
             return value
         if isinstance(value, IType):
