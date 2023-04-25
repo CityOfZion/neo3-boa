@@ -57,7 +57,13 @@ def contract(script_hash: Union[str, bytes]):
     :type script_hash: str or bytes
     """
     def decorator_wrapper(cls, *args, **kwargs):
-        cls.hash = script_hash
+        if isinstance(script_hash, str):
+            from boa3.internal.neo import from_hex_str
+            _hash = from_hex_str(script_hash)
+        else:
+            _hash = script_hash
+
+        cls.hash = _hash
         return cls
     return decorator_wrapper
 
@@ -203,6 +209,13 @@ class NeoMetadata:
         :param methods: a list of methods or '*'
         :type methods: Union[List[str], str]
         """
+
+        if isinstance(contract, bytes):
+            try:
+                from boa3.internal.neo3.core.types import UInt160
+                contract = str(UInt160(contract))
+            except BaseException:
+                pass
 
         if not isinstance(contract, str):
             return
