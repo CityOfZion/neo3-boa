@@ -244,3 +244,31 @@ class TestContractInterface(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_get_hash_on_metadata(self):
+        path = self.get_contract_path('ContractInterfaceGetHashOnMetadata.py')
+        _, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertIn({'contract': '0x000102030405060708090a0b0c0d0e0f10111213',
+                       'methods': '*'
+                       },
+                      manifest['permissions'])
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        contract_script_bytes = bytes(reversed(range(20)))
+        invokes.append(runner.call_contract(path, 'main',
+                                            expected_result_type=bytes))
+        expected_results.append(contract_script_bytes)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
