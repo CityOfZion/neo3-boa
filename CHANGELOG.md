@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.12.3] - 2023-04-26
+### Fixed
+- Fixed incorrect import error raised when importing modules in the same directory of the importer file
+
+
 ## [0.12.2] - 2023-03-30
 ### Added
 - Included extra data to manifest and new types to better interface with manifest
@@ -432,6 +437,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.12.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.3
 [0.12.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.2
 [0.12.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.1
 [0.12.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.0
