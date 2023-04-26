@@ -1,9 +1,10 @@
 from boa3.builtin.compile_time import NeoMetadata, metadata, public
+from boa3.builtin.nativecontract.neo import NEO
 
 
 @public
-def Main() -> int:
-    return 5
+def main() -> int:
+    return NEO.totalSupply()
 
 
 @metadata
