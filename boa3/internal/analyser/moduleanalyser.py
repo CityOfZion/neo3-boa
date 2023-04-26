@@ -368,7 +368,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             function.decorator_list = []
             module: ast.Module = ast.parse('')
             module.body = [node for node in self._tree.body
-                           if isinstance(node, (ast.ImportFrom, ast.Import))]
+                           if isinstance(node, (ast.ImportFrom, ast.Import, ast.ClassDef))]
             module.body.append(function)
             ast.copy_location(module, function)
 
