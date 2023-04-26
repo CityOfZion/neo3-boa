@@ -256,6 +256,17 @@ class TestImport(BoaTest):
         result = self.run_smart_contract(engine, path, 'Main')
         self.assertEqual([], result)
 
+    def test_from_import_user_module_from_root_and_file_directories(self):
+        path = self.get_contract_path('FromImportUserModuleFromRootAndFileDir.py')
+        self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
+
+        engine = TestEngine()
+        result = self.run_smart_contract(engine, path, 'call_imported_from_root')
+        self.assertEqual([], result)
+
+        result = self.run_smart_contract(engine, path, 'call_imported_from_file_dir')
+        self.assertEqual([], result)
+
     def test_import_non_existent_package(self):
         path = self.get_contract_path('ImportNonExistentPackage.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)

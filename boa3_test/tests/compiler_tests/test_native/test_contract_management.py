@@ -1,7 +1,7 @@
 import json
 
-from boa3.internal import constants
 from boa3.boa3 import Boa3
+from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest
