@@ -276,7 +276,7 @@ def approve(owner: UInt160, spender: UInt160, amount: int) -> bool:
     return False
 
 
-@public
+@public(safe=True)
 def allowance(owner: UInt160, spender: UInt160) -> int:
     """
     Gets the amount of zGAS from the owner that can be used by the spender.

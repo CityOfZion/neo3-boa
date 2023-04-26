@@ -113,6 +113,7 @@ class TestContractInterface(BoaTest):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         from boa3.internal.neo.vm.type.Integer import Integer
         from boa3.internal.neo.vm.type.String import String
+        from boa3.internal.neo3.core.types import UInt160
 
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
         runner = NeoTestRunner(runner_id=self.method_name())
@@ -122,6 +123,7 @@ class TestContractInterface(BoaTest):
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
         contract_script_bytes = nep17_contract.script_hash
+        contract_script_hex_str = str(UInt160(contract_script_bytes))
 
         expected_output = (
             Opcode.NEWARRAY0    # arguments list
@@ -138,8 +140,15 @@ class TestContractInterface(BoaTest):
         )
 
         path = self.get_contract_path('ContractInterfaceCodeOptimization.py')
-        output, _ = self.compile_and_save(path)
+        output, manifest = self.compile_and_save(path)
+
         self.assertEqual(expected_output, output)
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertIn({'contract': contract_script_hex_str,
+                       'methods': [external_contract_name]
+                       },
+                      manifest['permissions'])
 
         path, _ = self.get_deploy_file_paths(path)
 
@@ -211,7 +220,7 @@ class TestContractInterface(BoaTest):
         )
 
         path = self.get_contract_path('ContractManualInterfaceCodeOptimization.py')
-        output, _ = self.compile_and_save(path)
+        output, manifest = self.compile_and_save(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)

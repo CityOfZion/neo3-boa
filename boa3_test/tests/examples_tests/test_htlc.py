@@ -19,7 +19,7 @@ class TestHTLCTemplate(BoaTest):
     OTHER_ACCOUNT_1 = neoxp.utils.get_account_by_name('testAccount1')
     OTHER_ACCOUNT_2 = neoxp.utils.get_account_by_name('testAccount2')
     GAS_TO_DEPLOY = 1000 * 10 ** 8
-    REFUND_WAIT_TIME = 24 * 60 * (60 * 10 ** 3)     # smart contract constant
+    REFUND_WAIT_TIME = 24 * 60 * 60     # smart contract constant in seconds
 
     def _validate_execution_result(self, runner: NeoTestRunner, tx_id: UInt256, expected_result: Any) -> TransactionExecution:
         # Test Runner isn't returning the runtime.time value correctly when using `call_contract`, so we have to get the

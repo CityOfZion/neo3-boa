@@ -27,10 +27,10 @@ class CompiledMetadata:
     def set_current_metadata(cls, metadata: NeoMetadata):
         cls.instance()._metadata = metadata
 
-    def add_contract_permission(self, contract: Union[bytes, str], method: str = None):
+    def add_contract_permission(self, contract: Union[UInt160, bytes, str], method: str = None):
         if isinstance(contract, bytes):
             contract = UInt160(contract)
-        else:
+        elif not isinstance(contract, UInt160):
             contract = UInt160.from_string(contract)
         contract_hex_script = str(contract)
         method_string = method if isinstance(method, str) and len(method) > 0 else constants.IMPORT_WILDCARD
