@@ -213,17 +213,23 @@ class NeoMetadata:
               (isinstance(methods, list) and any(not isinstance(method, str) for method in methods))):
             return
 
-        # if both values are the import wildcard, then it's not necessary to include it in the manifest
-        if contract == '*' and methods == '*':
-            return
-
-        new_permission = {
-            'contract': contract.lower(),
-            'methods': methods,
+        from boa3.internal import constants
+        wildcard_permission = {
+            'contract': constants.IMPORT_WILDCARD,
+            'methods': constants.IMPORT_WILDCARD,
         }
 
-        if new_permission not in self._permissions:
-            self._permissions.append(new_permission)
+        if wildcard_permission not in self._permissions:
+            new_permission = {
+                'contract': contract.lower(),
+                'methods': methods,
+            }
+
+            if contract == constants.IMPORT_WILDCARD and methods == constants.IMPORT_WILDCARD:
+                self._permissions.clear()
+                self._permissions.append(wildcard_permission)
+            elif new_permission not in self._permissions:
+                self._permissions.append(new_permission)
 
     @staticmethod
     def _verify_is_valid_public_key(public_key: str) -> bool:
