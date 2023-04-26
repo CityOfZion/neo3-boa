@@ -1,5 +1,3 @@
-import unittest
-
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError

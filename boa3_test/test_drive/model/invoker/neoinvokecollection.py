@@ -1,9 +1,12 @@
 from typing import Any, List, Optional, Type
 
+from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 from boa3_test.test_drive.model.invoker.neoinvokeresult import NeoInvokeResult
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
+
+__all__ = ['NeoInvokeCollection']
 
 
 class NeoInvokeCollection:
@@ -27,9 +30,14 @@ class NeoInvokeCollection:
         self._pending_results.append(invoke_result)
         return invoke_result
 
-    def clear(self):
+    def clear(self, *, state: VMState = VMState.HALT):
+        pending_results = self._pending_results.copy()
         self._invoke_results.clear()
         self._pending_results.clear()
+
+        if state != VMState.HALT:
+            for pending_invoke in pending_results:
+                pending_invoke.cancel()
         return self._internal_list.clear()
 
     def to_json(self):

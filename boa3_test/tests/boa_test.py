@@ -1,6 +1,6 @@
 import os
 import threading
-from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from unittest import TestCase
 
 from boa3.internal import constants, env
@@ -8,13 +8,6 @@ from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.model.method import Method
-from boa3.internal.neo.smart_contract.VoidType import VoidType
-from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3_test.tests.test_classes.transactionattribute import oracleresponse
 
 _COMPILER_LOCK = threading.RLock()
 _LOGGING_LOCK = threading.Lock()
@@ -75,10 +68,6 @@ class BoaTest(TestCase):
         generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
         return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
-    def indent_text(self, text: str, no_spaces: int = 4) -> str:
-        import re
-        return re.sub('\n[ \t]+', '\n' + ' ' * no_spaces, text)
-
     def assertCompilerLogs(self, expected_logged_exception, path) -> Union[bytes, str]:
         output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, path)
         if not issubclass(expected_logged_exception, CompilerError):
@@ -120,10 +109,6 @@ class BoaTest(TestCase):
             expected_logged = [exception for exception in log.records
                                if isinstance(exception.msg, expected_logged_exception)]
         return output, expected_logged
-
-    def assertIsVoid(self, obj: Any):
-        if obj is not VoidType:
-            self.fail('{0} is not Void'.format(obj))
 
     def assertStartsWith(self, first: Any, second: Any):
         if not (hasattr(first, 'startswith') and first.startswith(second)):
@@ -346,79 +331,3 @@ class BoaTest(TestCase):
                 manifest = json.loads(manifest_output.read())
 
         return output, manifest
-
-    def run_smart_contract(self, test_engine: TestEngine, smart_contract_path: Union[str, bytes], method: str,
-                           *arguments: Any, reset_engine: bool = False,
-                           fake_storage: Dict[Tuple[str, str], Any] = None,
-                           signer_accounts: Iterable[bytes] = (),
-                           calling_script_hash: Optional[bytes] = None,
-                           expected_result_type: Type = None,
-                           rollback_on_fault: bool = True) -> Any:
-
-        if isinstance(smart_contract_path, str) and smart_contract_path.endswith('.py'):
-            nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(smart_contract_path)
-
-            with _COMPILER_LOCK:
-                if not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
-                    # both .nef and .manifest.json are required to execute the smart contract
-                    self.compile_and_save(smart_contract_path, log=False, output_name=nef_path,
-                                          use_unique_name=False  # already using unique name
-                                          )
-            smart_contract_path = nef_path
-        elif isinstance(smart_contract_path, bytes):
-            from boa3.internal.neo3.core.types import UInt160
-            smart_contract_path = UInt160(smart_contract_path)
-
-        self._set_fake_data(test_engine, fake_storage, signer_accounts, calling_script_hash)
-        result = test_engine.run(smart_contract_path, method, *arguments,
-                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
-
-        return self._filter_result(test_engine, expected_result_type, result)
-
-    def run_oracle_response(self, test_engine: TestEngine, request_id: int,
-                            response_code: oracleresponse.OracleResponseCode,
-                            oracle_result: bytes, reset_engine: bool = False,
-                            fake_storage: Dict[Tuple[str, str], Any] = None,
-                            signer_accounts: Iterable[bytes] = (),
-                            expected_result_type: Type = None,
-                            rollback_on_fault: bool = True) -> Any:
-
-        self._set_fake_data(test_engine, fake_storage, signer_accounts)
-        result = test_engine.run_oracle_response(request_id, response_code, oracle_result,
-                                                 reset_engine=reset_engine, rollback_on_fault=rollback_on_fault)
-
-        return self._filter_result(test_engine, expected_result_type, result)
-
-    def _set_fake_data(self, test_engine: TestEngine,
-                       fake_storage: Dict[Tuple[str, str], Any],
-                       signer_accounts: Iterable[bytes],
-                       calling_script_hash: Optional[bytes] = None):
-
-        if isinstance(fake_storage, dict):
-            test_engine.set_storage(fake_storage)
-
-        if calling_script_hash is not None and len(calling_script_hash) == constants.SIZE_OF_INT160:
-            test_engine.set_calling_script_hash(calling_script_hash)
-
-        from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
-        for account in signer_accounts:
-            test_engine.add_signer_account(account, WitnessScope.Global)
-
-    def _filter_result(self, test_engine, expected_result_type, result) -> Any:
-        if test_engine.vm_state is not VMState.HALT and test_engine.error is not None:
-            raise TestExecutionException(test_engine.error)
-
-        if expected_result_type is not None:
-            if expected_result_type is not str and isinstance(result, str):
-                result = String(result).to_bytes()
-
-            if expected_result_type is bool:
-                if isinstance(result, bytes):
-                    result = Integer.from_bytes(result, signed=True)
-                if isinstance(result, int) and result in (False, True):
-                    result = bool(result)
-
-            if expected_result_type is bytearray and isinstance(result, bytes):
-                result = bytearray(result)
-
-        return result

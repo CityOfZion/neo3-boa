@@ -801,15 +801,17 @@ class TestFileGeneration(BoaTest):
             self.compile_and_save(path)
 
     def test_generation_with_recursive_function(self):
-        path = self.get_contract_path('test_sc/function_test', 'RecursiveFunction.py')
+        path, _ = self.get_deploy_file_paths('test_sc/function_test', 'RecursiveFunction.py')
 
-        from boa3_test.tests.test_classes.testengine import TestEngine
-        engine = TestEngine()
-        engine.use_contract_custom_name = self._use_custom_name
+        from boa3.internal.neo3.vm import VMState
+        from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         expected = self.fact(57)
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected, result)
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(expected, invoke.result)
 
     def fact(self, f: int) -> int:
         if f <= 1:
