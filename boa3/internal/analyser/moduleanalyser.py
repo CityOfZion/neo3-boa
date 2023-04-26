@@ -1238,29 +1238,51 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                            col=value.col_offset,
                                                            param=list(Builtin.NewEvent.args)[0])
                         )
-                    elif not (isinstance(value.elts[0], ast.Str) and
-                              ((isinstance(value.elts[1], ast.Name)  # if is name, get the type of its id
-                                and isinstance(self.get_symbol(value.elts[1].id), IType))
-                               or isinstance(self.visit(value.elts[1]), IType)  # otherwise, if the result is a type
-                               )):
-                        CompilerError.MismatchedTypes(line=value.lineno,
-                                                      col=value.col_offset,
-                                                      expected_type_id=Type.tuple.identifier,
-                                                      actual_type_id=self.get_type(value).identifier)
                     else:
-                        arg_name = value.elts[0].s
-                        arg_type = (self.get_symbol(value.elts[1].id)
-                                    if isinstance(value.elts[1], ast.Name)
-                                    else self.visit(value.elts[1]))
-                        args[arg_name] = Variable(arg_type)
+                        event_arg_name, event_arg_type = value.elts
+                        are_types_valid = True
+                        if not isinstance(event_arg_name, ast.Str):
+                            are_types_valid = False
+                        else:
+                            if isinstance(event_arg_type, ast.Name):  # if is name, get the type of its id
+                                arg_type = self.get_symbol(event_arg_type.id)
+                            else:  # otherwise, if the result is a type
+                                arg_type = self.visit(event_arg_type)
+
+                            from boa3.internal.neo.vm.type.AbiType import AbiType
+                            if not isinstance(arg_type, IType):
+                                are_types_valid = False
+                            elif arg_type.abi_type is AbiType.InteropInterface:
+                                self._log_error(
+                                    CompilerError.MismatchedTypes(line=event_arg_type.lineno,
+                                                                  col=event_arg_type.col_offset,
+                                                                  expected_type_id=MetaType.build().identifier,
+                                                                  actual_type_id=arg_type.identifier)
+                                )
+
+                        if not are_types_valid:
+                            self._log_error(
+                                CompilerError.MismatchedTypes(line=value.lineno,
+                                                              col=value.col_offset,
+                                                              expected_type_id=Type.tuple.identifier,
+                                                              actual_type_id=self.get_type(value).identifier)
+                            )
+                        else:
+                            arg_name = event_arg_name.s
+                            arg_type = (self.get_symbol(event_arg_type.id)
+                                        if isinstance(event_arg_type, ast.Name)
+                                        else self.visit(event_arg_type))
+                            args[arg_name] = Variable(arg_type)
 
             if len(event_args) > 1:
                 if not isinstance(event_args[1], ast.Str):
                     name_type = self.get_type(event_args[1])
-                    CompilerError.MismatchedTypes(line=event_args[1].lineno,
-                                                  col=event_args[1].col_offset,
-                                                  expected_type_id=Type.str.identifier,
-                                                  actual_type_id=name_type.identifier)
+                    self._log_error(
+                        CompilerError.MismatchedTypes(line=event_args[1].lineno,
+                                                      col=event_args[1].col_offset,
+                                                      expected_type_id=Type.str.identifier,
+                                                      actual_type_id=name_type.identifier)
+                    )
                 else:
                     name = event_args[1].s
 

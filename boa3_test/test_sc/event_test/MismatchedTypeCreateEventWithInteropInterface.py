@@ -3,10 +3,10 @@ from boa3.builtin.interop.iterator import Iterator
 
 Event = CreateNewEvent(
     [
-        ('a', Iterator)
+        ('a', Iterator)  # this shouldn't compile
     ]
 )
 
 
-def Main():
-    Event(b'10')
+def Main() -> bool:
+    return False
