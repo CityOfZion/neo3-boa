@@ -410,7 +410,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_permissions_wildcard(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
-        output, manifest = self.compile_and_save(path.replace('nef', 'py'))
+        output, manifest = self.compile_and_save(path)
 
         self.assertIn('permissions', manifest)
         self.assertIsInstance(manifest['permissions'], list)
@@ -441,7 +441,7 @@ class TestMetadata(BoaTest):
 
     def test_metadata_info_permissions_invalid_call(self):
         path = self.get_contract_path('MetadataInfoPermissionsInvalidCall.py')
-        output, manifest = self.compile_and_save(path.replace('nef', 'py'))
+        output, manifest = self.compile_and_save(path)
 
         expected_permission = {
             'contract': '0x0102030405060708090A0B0C0D0E0F1011121314'.lower(),
