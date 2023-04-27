@@ -125,58 +125,37 @@ Using Python Script
     Boa3.compile_and_save('path/to/your/file.py', debug=True)
 
 
-Test Engine
------------
+Neo Test Runner
+---------------
 
 Downloading
 ***********
 
-Clone neo-devpack-dotnet project and compile the TestEngine.
-
-.. note:: 
-    Until ``neo-devpack-dotnet#365`` is approved by Neo, you need to clone ``neo-devpack-dotnet`` from ``simplitech:test-engine-executable`` branch
+Install `NeoExpress <https://www.nuget.org/packages/Neo.Express>`_ and `NeoTestRunner <https://www.nuget.org/packages/Neo.Test.Runner>`_.
 
 ::
     
-    $ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.5.0
-    $ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj
+    $ dotnet tool install Neo.Express
+    $ dotnet tool install Neo.Test.Runner
 
-
-Updating
-********
-
-Go into the neo-devpack-dotnet, pull and recompile.
-
-::
-    
-    ${path-to-folder}/neo-devpack-dotnet git pull
-    ${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj
 
 Testing
 *******
 
-.. note::
-   If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in the file ``boa3/env.py``
-
-Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function you'll need to call the method run(). Its parameters are the path of the compiled smart contract, the smart contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
+Create a Python Script, import the NeoTestRunner class, and define a function to test your smart contract. In this function you'll need to call the method call_contract(). Its parameters are the path of the compiled smart contract, the smart contract's method, and the arguments if necessary. Then assert the result to see if it's correct.
 
 Your Python Script should look something like this:
 
 ::
     
-    from boa3_test.tests.test_classes.testengine import TestEngine
-    from boa3.internal.neo.smart_contract.VoidType import VoidType
+    from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
     def test_hello_world_main():
-        root_folder = '{path-to-test-engine-folder}'
+        neoxp_folder = '{path-to-neo-express-directory}'
         path = '%s/boa3_test/examples/HelloWorld.nef' % root_folder
-        engine = TestEngine(root_folder)
+        runner = NeoTestRunner(neoxp_folder)
 
-        result = engine.run(path, 'Main')
-        assert result is VoidType
+        invoke = runner.call_contract(path, 'Main')
+        assert invoke.result is None
 
-To run your tests use:
-
-::
-
-    python -m unittest discover boa3_tests
+To run all tests run the python script at boa3_test/tests/run_unit_tests.py

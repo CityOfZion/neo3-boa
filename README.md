@@ -40,9 +40,8 @@
     - [Using CLI](#using-cli)
     - [Using Python Script](#using-python-script)
   - [Configuring the Debugger](#configuring-the-debugger)
-  - [TestEngine](#testengine)
+  - [NeoTestRunner](#neotestrunner)
     - [Downloading](#downloading)
-    - [Updating](#updating)
     - [Testing](#testing)
 - [Docs](#docs)
 - [Reference Examples](#reference-examples)
@@ -66,7 +65,7 @@ We want Python developers to feel comfortable when trying neo3-boa for the first
 In the real world, simply coding a smart contract is not enough. Developers need to debug, deploy and invoke it. Therefore, it’s important for this tool to be part of a bigger Python framework. To help the developers and avoid a bad user experience, we need to use logs and inform errors with details.
 
 ##### Testing against Neo VM
-We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo repository already contains a class called TestEngine that is capable of running tests using C# smart-contracts. It will be adjusted to support compiled smart-contracts.
+We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo organization already has a [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner) available to C# dApp developers. A [NeoTestRunner](boa3_test/test_drive/testrunner/neo_test_runner.py) class was implemented in this project to facilitate testing compiled smart-contracts with Python.
 
 ##### Maintenance
 Create a product that is easy to maintain and upgrade. Use Unit tests, typed and documented code to ensure its maintainability.
@@ -186,68 +185,58 @@ Boa3.compile_and_save('path/to/your/file.py', debug=True)
 ```
 
 
-### TestEngine
+### NeoTestRunner
 
 #### Downloading
 
-Clone neo-devpack-dotnet project and compile the TestEngine.
-
-> Note: Until [neo-devpack-dotnet#365](https://github.com/neo-project/neo-devpack-dotnet/pull/365) is approved by Neo, you need to clone neo-devpack-dotnet from [simplitech:test-engine-executable](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch 
+Install [NeoExpress](https://www.nuget.org/packages/Neo.Express) and [NeoTestRunner](https://www.nuget.org/packages/Neo.Test.Runner).
 
 ```shell
-$ git clone https://github.com/simplitech/neo-devpack-dotnet.git -b v3.5.0
-$ dotnet build ./neo-devpack-dotnet/src/Neo.TestEngine/Neo.TestEngine.csproj -o {path-to-folder}/Neo.TestEngine
-```
-
-#### Updating
-
-Go into the neo-devpack-dotnet, pull and recompile.
-```shell
-${path-to-folder}/neo-devpack-dotnet git pull
-${path-to-folder}/neo-devpack-dotnet dotnet build ./src/Neo.TestEngine/Neo.TestEngine.csproj -o {path-to-folder}/Neo.TestEngine
+$ dotnet tool install Neo.Express
+$ dotnet tool install Neo.Test.Runner
 ```
 
 #### Testing
 
-Create a Python Script, import the TestEngine class, and define a function to test your smart contract. In this function
-you'll need to call the method `run()`. Its parameters are the path of the compiled smart contract, the smart
-contract's method, and the arguments if necessary. Then assert your result to see if it's correct.
+Create a Python Script, import the NeoTestRunner class, and define a function to test your smart contract. In this 
+function you'll need to call the method `call_contract()`. Its parameters are the path of the compiled smart contract, 
+the smart contract's method, and the arguments if necessary. Then assert the result of your invoke to see if it's correct.
 
 Your Python Script should look something like this:
 
 ```python
-from boa3_test.tests.test_classes.testengine import TestEngine
-from boa3.internal.neo.smart_contract.VoidType import VoidType
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 def test_hello_world_main():
-    root_folder = '{path-to-test-engine-folder}'
+    neoxp_folder = '{path-to-neo-express-directory}'
     project_root_folder = '{path-to-project-root-folder}'
     path = f'{project_root_folder}/boa3_test/examples/hello_world.nef'
-    engine = TestEngine(root_folder)
+    runner = NeoTestRunner(neoxp_folder)
 
-    result = engine.run(path, 'Main')
-    assert result is VoidType
+    invoke = runner.call_contract(path, 'Main')
+    runner.execute()
+
+    assert invoke.result is None
 ```
 
-Alternatively you can change the value of `boa3.env.TEST_ENGINE_DIRECTORY` to the path of your TestEngine:
-> Note: If you intend to run neo3-boa unit tests, this is a requirement
+Alternatively you can change the value of `boa3.env.NEO_EXPRESS_INSTANCE_DIRECTORY` to the path of your 
+default.neo-express instance:
 
 ```python
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3.internal import env
-from boa3.internal.neo.smart_contract.VoidType import VoidType
 
-env.TEST_ENGINE_DIRECTORY = '{path-to-test-engine-folder}'
+env.NEO_EXPRESS_INSTANCE_DIRECTORY = '{path-to-neo-express-directory}'
 
 
 def test_hello_world_main():
     root_folder = '{path-to-project-root-folder}'
     path = f'{root_folder}/boa3_test/examples/hello_world.nef'
-    engine = TestEngine()  # the default path to the TestEngine is the one on env.TEST_ENGINE_DIRECTORY
+    runner = NeoTestRunner()  # the default path to the neo-express is the one on env.NEO_EXPRESS_INSTANCE_DIRECTORY
 
-    result = engine.run(path, 'Main')
-    assert result is VoidType
+    invoke = runner.call_contract(path, 'Main')
+    assert invoke.result is None
 ```
 
 ## Docs
@@ -261,13 +250,12 @@ For an extensive collection of examples:
 
 ## Tests
 
-Install [`neo3-boa`](#installation) and the [`TestEngine`](#testengine) and run the following command
+This project uses NeoTestRunner and NeoExpress to test its features. To run all tests run the python
+script at boa3_test/tests/run_unit_tests.py
 
-> Note: If you didn't install TestEngine in neo3-boa's root folder, you need to change the value of `TEST_ENGINE_DIRECTORY` in [this file](/boa3/internal/env.py)
-
-```
-python -m unittest discover boa3_test
-```
+> Note: If you don't want to use the neo-express instance on boa3_test/tests, you can change the path of this constant
+> [here](/boa3/internal/env.py). However, your neo-express instance will need to have the following accounts: "owner", 
+> "testAccount1", "testAccount2" and "testAccount3".
 
 ## Python Supported Features
 
