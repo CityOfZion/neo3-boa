@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from argparse import _SubParsersAction
+from typing import Optional
 
 from boa3.boa3 import Boa3
 from boa3.internal.cli_commands.icommand import ICommand
@@ -26,6 +27,13 @@ class BuildCommand(ICommand):
         self.parser.add_argument("-e", "--env",
                                  type=str,
                                  help="Set the contract environment for compiling.")
+        self.parser.add_argument("-o", "--output-path",
+                                 metavar='NEF_OUTPUT',
+                                 type=str,
+                                 default=None,
+                                 help="Chooses the name and where the compiled files will be generated, "
+                                      "if not specified it will be generated on the same directory with the same name "
+                                      "as the python file.")
 
         self.parser.set_defaults(func=self.execute_command)
 
@@ -35,9 +43,14 @@ class BuildCommand(ICommand):
         project_path: str = args['project_path']
         debug: bool = args['debug']
         env: str = args['env']
+        output_path: Optional[str] = args['output_path']
 
         if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
             logging.error("Input file is not .py")
+            sys.exit(1)
+
+        if isinstance(output_path, str) and not output_path.endswith('.nef'):
+            logging.error("Output path file extension is not .nef")
             sys.exit(1)
 
         fullpath = os.path.realpath(sc_path)
@@ -47,7 +60,7 @@ class BuildCommand(ICommand):
             project_path = os.path.dirname(path)
 
         try:
-            Boa3.compile_and_save(sc_path, debug=debug, root_folder=project_path, env=env)
+            Boa3.compile_and_save(sc_path, output_path=output_path, debug=debug, root_folder=project_path, env=env)
             logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
         except NotLoadedException as e:
             error_message = e.message
