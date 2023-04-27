@@ -24,6 +24,7 @@ class BoaTest(TestCase):
     CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX = "Cannot call this SYSCALL with the flag"
     CANT_FIND_METHOD_MSG_PREFIX = "Can't find method"
     CANT_PARSE_VALUE_MSG = "The value could not be parsed."
+    CANT_CALL_METHOD_PREFIX = "Cannot Call Method"
     CALLED_CONTRACT_DOES_NOT_EXIST_MSG = 'Called Contract Does Not Exist'
     CONTRACT_NOT_FOUND_MSG_REGEX = 'contract "(.*?)" not found'
     GAS_MUST_BE_POSITIVE_MSG = 'GAS must be positive.'
