@@ -38,7 +38,7 @@ In the real world, simply coding a smart contract is not enough. Developers need
 Testing against Neo VM
 ----------------------
 
-We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo repository already contains a class called TestEngine that is capable of running tests using C# smart-contracts. It will be adjusted to support compiled smart-contracts.
+We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo organization already has a Neo Test Runner available to C# dApp developers. A NeoTestRunner class was implemented in this project to facilitate testing compiled smart-contracts with Python.
 
 Maintenance
 -----------

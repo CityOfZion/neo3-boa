@@ -40,7 +40,7 @@
     - [Using CLI](#using-cli)
     - [Using Python Script](#using-python-script)
   - [Configuring the Debugger](#configuring-the-debugger)
-  - [Neo Test Runner](#neo-test-runner)
+  - [NeoTestRunner](#neotestrunner)
     - [Downloading](#downloading)
     - [Testing](#testing)
 - [Docs](#docs)
@@ -162,11 +162,11 @@ Boa3.compile_and_save('path/to/your/file.py', debug=True)
 ```
 
 
-### Neo Test Runner
+### NeoTestRunner
 
 #### Downloading
 
-Install [Neo-Express](https://github.com/neo-project/neo-express#neo-express-and-neo-trace) and [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner).
+Install [NeoExpress](https://www.nuget.org/packages/Neo.Express) and [NeoTestRunner](https://www.nuget.org/packages/Neo.Test.Runner).
 
 ```shell
 $ dotnet tool install Neo.Express
@@ -193,11 +193,12 @@ def test_hello_world_main():
 
     invoke = runner.call_contract(path, 'Main')
     runner.execute()
+
     assert invoke.result is None
 ```
 
-Alternatively you can change the value of `boa3.env.NEO_EXPRESS_INSTANCE_DIRECTORY` to the path of your .neo-express 
-data file:
+Alternatively you can change the value of `boa3.env.NEO_EXPRESS_INSTANCE_DIRECTORY` to the path of your 
+default.neo-express instance:
 
 ```python
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
@@ -209,10 +210,9 @@ env.NEO_EXPRESS_INSTANCE_DIRECTORY = '{path-to-neo-express-directory}'
 def test_hello_world_main():
     root_folder = '{path-to-project-root-folder}'
     path = f'{root_folder}/boa3_test/examples/hello_world.nef'
-    runner = NeoTestRunner()  # the default path to the Neo-Express is the one on env.NEO_EXPRESS_INSTANCE_DIRECTORY
+    runner = NeoTestRunner()  # the default path to the neo-express is the one on env.NEO_EXPRESS_INSTANCE_DIRECTORY
 
     invoke = runner.call_contract(path, 'Main')
-    runner.execute()
     assert invoke.result is None
 ```
 
@@ -224,6 +224,15 @@ You can [read the docs here](https://docs.coz.io/neo3/boa/index.html). Please ch
 For an extensive collection of examples:
 - [Smart contract examples](/boa3_test/examples)
 - [Features tests](/boa3_test/test_sc)
+
+## Tests
+
+This project uses NeoTestRunner and NeoExpress to test its features. To run all tests run the python
+script at boa3_test/tests/run_unit_tests.py
+
+> Note: If you don't want to use the neo-express instance on boa3_test/tests, you can change the path of this constant
+> [here](/boa3/internal/env.py). However, your neo-express instance will need to have the following accounts: "owner", 
+> "testAccount1", "testAccount2" and "testAccount3".
 
 ## Python Supported Features
 
