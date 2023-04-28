@@ -131,7 +131,7 @@ Neo Test Runner
 Downloading
 ***********
 
-Install `NeoExpress <https://www.nuget.org/packages/Neo.Express>`_ and `NeoTestRunner <https://www.nuget.org/packages/Neo.Test.Runner>`_.
+Install `Neo-Express <https://www.nuget.org/packages/Neo.Express>`_ and `NeoTestRunner <https://www.nuget.org/packages/Neo.Test.Runner>`_.
 
 ::
     
