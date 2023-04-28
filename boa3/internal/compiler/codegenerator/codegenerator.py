@@ -1797,6 +1797,7 @@ class CodeGenerator:
                                     for symbol_id, symbol in function.origin_class.symbols.items()
                                     if symbol is function),
                                    None)
+            self._add_to_metadata_permissions(function.origin_class, function_id)
 
             if isinstance(function_id, str):
                 self.convert_new_array(len(function.args))
@@ -2114,6 +2115,10 @@ class CodeGenerator:
 
     def _get_jump_data(self, op_info: OpcodeInformation, jump_to: int) -> bytes:
         return Integer(jump_to).to_byte_array(min_length=op_info.data_len, signed=True)
+
+    def _add_to_metadata_permissions(self, contract_class: ContractInterfaceClass, method_name: str):
+        from boa3.internal.compiler.compiledmetadata import CompiledMetadata
+        CompiledMetadata.instance().add_contract_permission(contract_class.contract_hash, method_name)
 
     def duplicate_stack_top_item(self):
         self.duplicate_stack_item(1)
