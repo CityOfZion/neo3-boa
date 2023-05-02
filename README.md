@@ -216,7 +216,6 @@ def test_hello_world_main():
 
     invoke = runner.call_contract(path, 'Main')
     runner.execute()
-
     assert invoke.result is None
 ```
 
@@ -236,6 +235,7 @@ def test_hello_world_main():
     runner = NeoTestRunner()  # the default path to the Neo-Express is the one on env.NEO_EXPRESS_INSTANCE_DIRECTORY
 
     invoke = runner.call_contract(path, 'Main')
+    runner.execute()
     assert invoke.result is None
 ```
 
