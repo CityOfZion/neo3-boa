@@ -156,6 +156,7 @@ Your Python Script should look something like this:
         runner = NeoTestRunner(neoxp_folder)
 
         invoke = runner.call_contract(path, 'Main')
+        runner.execute()
         assert invoke.result is None
 
 To run all tests run the python script at boa3_test/tests/run_unit_tests.py
