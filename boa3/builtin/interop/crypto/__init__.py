@@ -80,12 +80,12 @@ def check_multisig(pubkeys: List[ECPoint], signatures: List[bytes]) -> bool:
     pass
 
 
-def verify_with_ecdsa(message: Any, pubkey: ECPoint, signature: ByteString, curve: NamedCurve) -> bool:
+def verify_with_ecdsa(message: ByteString, pubkey: ECPoint, signature: ByteString, curve: NamedCurve) -> bool:
     """
-    Using the elliptic curve, it checks if the signature of the any item was originally produced by the public key.
+    Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
 
     :param message: the encrypted message
-    :type message: Any
+    :type message: bytes
     :param pubkey: the public key that might have created the item
     :type pubkey: ECPoint
     :param signature: the signature of the item
