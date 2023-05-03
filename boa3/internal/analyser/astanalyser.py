@@ -80,6 +80,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             self._log_error(error)
         except CompilerWarning as warning:
             self._log_warning(warning)
+        except KeyboardInterrupt as interrupt:
+            raise interrupt
         except BaseException as exception:
             if hasattr(node, 'lineno'):
                 self._log_error(
