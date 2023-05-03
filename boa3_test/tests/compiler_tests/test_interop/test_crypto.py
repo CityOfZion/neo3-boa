@@ -434,8 +434,6 @@ class TestCryptoInterop(BoaTest):
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -459,64 +457,18 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
-        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
-        byte_input2 = b'signature'
-        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-
-        expected_output = (
-            Opcode.PUSHINT8 + named_curve
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input2)).to_byte_array(min_length=1)
-            + byte_input2
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + self.ecpoint_init
-            + Opcode.PUSHF
-            + Opcode.CALLT + b'\x00\x00'
-            + Opcode.DROP
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Bool.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256r1_int(self):
-        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
-        byte_input2 = b'signature'
-        named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-
-        expected_output = (
-            Opcode.PUSHINT8 + named_curve
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input2)).to_byte_array(min_length=1)
-            + byte_input2
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + self.ecpoint_init
-            + Opcode.PUSH10
-            + Opcode.CALLT + b'\x00\x00'
-            + Opcode.DROP
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Int.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256R1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -548,8 +500,6 @@ class TestCryptoInterop(BoaTest):
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -573,64 +523,18 @@ class TestCryptoInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
-        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
-        byte_input2 = b'signature'
-        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-
-        expected_output = (
-            Opcode.PUSHINT8 + named_curve
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input2)).to_byte_array(min_length=1)
-            + byte_input2
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + self.ecpoint_init
-            + Opcode.PUSHF
-            + Opcode.CALLT + b'\x00\x00'
-            + Opcode.DROP
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256k1_int(self):
-        byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
-        byte_input2 = b'signature'
-        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-
-        expected_output = (
-            Opcode.PUSHINT8 + named_curve
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input2)).to_byte_array(min_length=1)
-            + byte_input2
-            + Opcode.PUSHDATA1
-            + Integer(len(byte_input1)).to_byte_array(min_length=1)
-            + byte_input1
-            + self.ecpoint_init
-            + Opcode.PUSH10
-            + Opcode.CALLT + b'\x00\x00'
-            + Opcode.DROP
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Int.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
         named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
-        function_id = String(Interop.VerifyWithECDsa._sys_call).to_bytes()
-        call_flag = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve

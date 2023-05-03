@@ -15,7 +15,7 @@ class VerifyWithECDsaMethod(CryptoLibMethod):
         identifier = 'verify_with_ecdsa'
         native_identifier = 'verifyWithECDsa'
         args: Dict[str, Variable] = {
-            'data': Variable(Type.any),
+            'data': Variable(ByteStringType.build()),
             'pubkey': Variable(ECPointType.build()),
             'signature': Variable(ByteStringType.build()),
             'curve': Variable(NamedCurveType.build())
