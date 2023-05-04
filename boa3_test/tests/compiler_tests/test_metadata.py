@@ -396,8 +396,7 @@ class TestMetadata(BoaTest):
 
         self.assertIn('permissions', manifest)
         self.assertIsInstance(manifest['permissions'], list)
-        self.assertEqual(len(manifest['permissions']), 1)
-        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+        self.assertEqual(len(manifest['permissions']), 0)
 
     def test_metadata_info_permissions_default(self):
         path = self.get_contract_path('MetadataInfoPermissionsDefault.py')
@@ -405,8 +404,7 @@ class TestMetadata(BoaTest):
 
         self.assertIn('permissions', manifest)
         self.assertIsInstance(manifest['permissions'], list)
-        self.assertEqual(len(manifest['permissions']), 1)
-        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+        self.assertEqual(len(manifest['permissions']), 0)
 
     def test_metadata_info_permissions_wildcard(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
