@@ -332,7 +332,6 @@ class TestICOTemplate(BoaTest):
         runner.execute(account=self.OWNER, add_invokes_to_batch=True)
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        # doesn't fire the transfer event when transferring to yourself or amount is zero
         balance_before_1 = runner.call_contract(path, 'balanceOf', owner_script_hash)
         invokes.append(runner.call_contract(path, 'transferFrom',
                                             owner_script_hash, other_account_1_script_hash, owner_script_hash,
@@ -371,7 +370,30 @@ class TestICOTemplate(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        self.assertEqual(0, len(runner.get_events('transfer')))
+        transfer_events = runner.get_events('Transfer')
+        self.assertEqual(3, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(3, len(transfer_events[1].arguments))
+        self.assertEqual(3, len(transfer_events[2].arguments))
+
+        # transfer event when the address that has the tokens is the same as the one receiving
+        sender, receiver, amount = transfer_events[0].arguments
+        self.assertEqual(other_account_1_script_hash, sender)
+        self.assertEqual(owner_script_hash, receiver)
+        self.assertEqual(transferred_amount, amount)
+
+        # transfer event when the address that is receiving is the same that is calling the transfer
+        sender, receiver, amount = transfer_events[1].arguments
+        self.assertEqual(other_account_1_script_hash, sender)
+        self.assertEqual(other_account_1_script_hash, receiver)
+        self.assertEqual(transferred_amount, amount)
+
+        # transfer event when the amount transferred is zero
+        sender, receiver, amount = transfer_events[2].arguments
+        self.assertEqual(other_account_1_script_hash, sender)
+        self.assertEqual(other_account_2_script_hash, receiver)
+        self.assertEqual(0, amount)
+
         self.assertEqual(balance_after_1.result, balance_before_1.result)
         self.assertEqual(balance_after_2.result, balance_before_2.result)
         self.assertEqual(balance_originator_before.result, balance_originator_after.result)
