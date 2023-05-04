@@ -255,8 +255,7 @@ class FileGenerator:
 
         :return: a dictionary with the permission information
         """
-        return self._metadata.permissions if self._metadata.permissions else [{"contract": constants.IMPORT_WILDCARD,
-                                                                               "methods": constants.IMPORT_WILDCARD}]
+        return self._metadata.permissions
 
     def _get_groups(self) -> List[Dict[str, Any]]:
         """
