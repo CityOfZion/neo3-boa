@@ -5,7 +5,7 @@ from boa3.internal import constants
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.compileroutput import CompilerOutput
-from boa3.internal.compiler.filegenerator import FileGenerator
+from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 
 

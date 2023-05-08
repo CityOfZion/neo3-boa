@@ -1,12 +1,15 @@
 import json
 import logging
+import os.path
 from typing import Any, Dict, List, Optional, Tuple
 
 from boa3.internal import constants
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.compileroutput import CompilerOutput
+from boa3.internal.compiler.filegenerator.importdata import ImportData
 from boa3.internal.model.event import Event
 from boa3.internal.model.imports.importsymbol import BuiltinImport, Import
+from boa3.internal.model.imports.package import Package
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.classes.classtype import ClassType
@@ -38,6 +41,9 @@ class FileGenerator:
         self._all_methods: Dict[str, Method] = None
         self._all_static_vars: Dict[str, Variable] = None
 
+        self._inner_methods = None
+        self._inner_events = None
+
     @property
     def _public_methods(self) -> Dict[str, Method]:
         """
@@ -54,9 +60,7 @@ class FileGenerator:
 
         :return: a dictionary that maps each global variable with its identifier
         """
-        if self._all_static_vars is not None:
-            return self._all_static_vars
-        else:
+        if self._all_static_vars is None:
             variables: Dict[Tuple[str, str], Variable] = {}
             imported_symbols: Dict[str, Import] = {}
 
@@ -95,7 +99,7 @@ class FileGenerator:
                 self._all_static_vars = {var_id: var
                                          for (unique_id, var_id), var in variables.items()}
 
-            return self._all_static_vars
+        return self._all_static_vars
 
     @property
     def _methods(self) -> Dict[str, Method]:
@@ -104,51 +108,54 @@ class FileGenerator:
 
         :return: a dictionary that maps each method with its identifier
         """
-        from boa3.internal.model.builtin.method import IBuiltinMethod
-        return {name: method for name, method in self._symbols.items()
-                if ((isinstance(method, Method) and method.defined_by_entry)
-                    or (isinstance(method, IBuiltinMethod) and method.is_public)
-                    )}
+        if self._inner_methods is None:
+            from boa3.internal.model.builtin.method import IBuiltinMethod
+            self._inner_methods = {name: method for name, method in self._symbols.items()
+                                   if ((isinstance(method, Method) and method.defined_by_entry)
+                                       or (isinstance(method, IBuiltinMethod) and method.is_public)
+                                       )}
+        return self._inner_methods
 
     @property
     def _methods_with_imports(self) -> Dict[Tuple[str, str], Method]:
-        if self._all_methods is not None:
-            return self._all_methods
+        if self._all_methods is None:
+            from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinCallable
 
-        from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinCallable
+            methods: Dict[Tuple[str, str], Method] = {}
+            imported_symbols: Dict[str, Import] = {}
 
-        methods: Dict[Tuple[str, str], Method] = {}
-        imported_symbols: Dict[str, Import] = {}
+            for name, symbol in self._symbols.items():
+                if symbol.defined_by_entry and isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
+                    methods[(self._entry_file, name)] = symbol
+                elif isinstance(symbol, Import):
+                    imported_symbols[symbol.origin] = symbol
 
-        for name, symbol in self._symbols.items():
-            if symbol.defined_by_entry and isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
-                methods[(self._entry_file, name)] = symbol
-            elif isinstance(symbol, Import):
-                imported_symbols[symbol.origin] = symbol
+            imported_to_map, imports_unique_ids = self._get_imports_unique_ids(imported_symbols,
+                                                                               True,
+                                                                               list(methods.values())
+                                                                               )
 
-        imported_to_map, imports_unique_ids = self._get_imports_unique_ids(imported_symbols,
-                                                                           True,
-                                                                           list(methods.values())
-                                                                           )
+            if imports_unique_ids[-1] != self._entry_file:
+                # update entry file to be a unique name
+                unique_id = imports_unique_ids[-1]
+                methods = {(unique_id, method_name): method for (module_id, method_name), method in methods.items()}
 
-        if imports_unique_ids[-1] != self._entry_file:
-            # update entry file to be a unique name
-            unique_id = imports_unique_ids[-1]
-            methods = {(unique_id, method_name): method for (module_id, method_name), method in methods.items()}
+            # include all user created methods in the list, even the methods that aren't imported in the entry file
+            for index in range(len(imported_to_map)):
+                module_full_path, module_import = list(imported_to_map.items())[index]
+                module_id = imports_unique_ids[index]
 
-        # include all user created methods in the list, even the methods that aren't imported in the entry file
-        for index in range(len(imported_to_map)):
-            module_full_path, module_import = list(imported_to_map.items())[index]
-            module_id = imports_unique_ids[index]
+                for name, symbol in module_import.all_symbols.items():
+                    if (isinstance(symbol, Method)
+                            and not isinstance(symbol, IBuiltinCallable)
+                            and symbol not in [method for method in methods.values()]):
+                        if symbol.file_origin is None and module_import.origin_file in self._files:
+                            symbol.file_origin = module_import.origin_file
 
-            for name, symbol in module_import.all_symbols.items():
-                if (isinstance(symbol, Method)
-                        and not isinstance(symbol, IBuiltinCallable)
-                        and symbol not in [method for method in methods.values()]):
-                    methods[(module_id, name)] = symbol
+                        methods[(module_id, name)] = symbol
 
-        self._all_methods = methods
-        return methods
+            self._all_methods = methods
+        return self._all_methods
 
     @property
     def _events(self) -> Dict[str, Event]:
@@ -157,36 +164,38 @@ class FileGenerator:
 
         :return: a dictionary that maps each event with its identifier
         """
-        events = set()
-        for imported in self._all_imports:
-            events.update([event for event in imported.all_symbols.values() if isinstance(event, Event)])
-        events.update([event for event in self._symbols.values() if isinstance(event, Event)])
+        if self._inner_events is None:
+            events = set()
+            for imported in self._all_imports:
+                events.update([event for event in imported.all_symbols.values() if isinstance(event, Event)])
+            events.update([event for event in self._symbols.values() if isinstance(event, Event)])
 
-        return {event.name: event for event in events}
+            self._inner_events = {event.name: event for event in events}
+        return self._inner_events
 
     @property
     def _all_imports(self) -> List[Import]:
-        if self.__all_imports is not None:
-            return self.__all_imports
+        if self.__all_imports is None:
 
-        all_imports = [imported for imported in self._symbols.values()
-                       if (isinstance(imported, Import)
-                           and not isinstance(imported, BuiltinImport))]
-        index = 0
-        while index < len(all_imports):
-            imported = all_imports[index]
-            for inner in imported.all_symbols.values():
-                if (isinstance(inner, Import)
-                        and not isinstance(inner, BuiltinImport)
-                        and inner not in all_imports):
-                    all_imports.append(inner)
-            index += 1
+            all_imports = [imported for imported in self._symbols.values()
+                           if (isinstance(imported, Import)
+                               and not isinstance(imported, BuiltinImport))]
+            index = 0
+            while index < len(all_imports):
+                imported = all_imports[index]
+                for inner in imported.all_symbols.values():
+                    if (isinstance(inner, Import)
+                            and not isinstance(inner, BuiltinImport)
+                            and inner not in all_imports):
+                        all_imports.append(inner)
+                index += 1
 
-        self.__all_imports = list(reversed(all_imports))  # first positions are the most inner imports
-        # using for instead a generator to keep the result determined
-        for import_ in all_imports:
-            if import_.origin not in self._files:
-                self._files.append(import_.origin)
+            self.__all_imports = list(reversed(all_imports))  # first positions are the most inner imports
+            # using for instead a generator to keep the result determined
+            for import_ in all_imports:
+                if os.path.isfile(import_.origin) and import_.origin not in self._files:
+                    self._files.append(import_.origin)
+
         return self.__all_imports
 
     # region NEF
@@ -282,10 +291,10 @@ class FileGenerator:
 
         :return: a dictionary with the abi methods
         """
-        methods = []
-        for method_id, method in self._public_methods.items():
-            methods.append(self._construct_abi_method(method_id, method))
-        return methods
+        return [
+            self._construct_abi_method(method_id, method)
+            for method_id, method in self._public_methods.items()
+        ]
 
     def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
@@ -441,6 +450,7 @@ class FileGenerator:
         """
         return {
             "hash": self._nef_hash,
+            "entrypoint": self._entry_file_full_path,
             "documents": self._files,
             "static-variables": self._get_debug_static_variables(),
             "methods": self._get_debug_methods(),
@@ -485,6 +495,9 @@ class FileGenerator:
         }
 
     def _get_method_origin_index(self, method: Method) -> int:
+        if method.file_origin in self._files:
+            return self._files.index(method.file_origin)
+
         imported_files: List[Import] = [imported for imported in self._symbols.values()
                                         if (isinstance(imported, Import)
                                             and not isinstance(imported, BuiltinImport)
@@ -587,13 +600,11 @@ class FileGenerator:
 
     def _get_imports_unique_ids(self, imported_symbols: Dict[str, Import],
                                 importing_methods: bool,
-                                inner_imported_symbols: List[ISymbol] = None) -> Tuple[Dict[str, Import], List[str]]:
+                                inner_imported_symbols: List[ISymbol] = None) -> Tuple[Dict[str, ImportData], List[str]]:
         if not isinstance(imported_symbols, dict):
             return {}, []
         if not isinstance(inner_imported_symbols, list):
             inner_imported_symbols = []
-
-        from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 
         # must map all imports, including inner imports
         index = 0
@@ -605,22 +616,7 @@ class FileGenerator:
             index += 1
 
         # map the modules that have user modules not imported by the entry file
-        imported_to_map: Dict[str, Import] = {}
-        for name, imported in imported_symbols.items():
-            if isinstance(imported, BuiltinImport):
-                need_to_map = False
-            else:
-                need_to_map = any(not importing_methods  # is importing variables or is a method but not builtin
-                                  or (((isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable))
-                                       or (isinstance(symbol, ClassType) and len(symbol.symbols) > 0)
-                                       )
-                                      and symbol not in inner_imported_symbols)
-                                  for name, symbol in imported.all_symbols.items())
-            if need_to_map:
-                filtered_name = name.replace('.py', '').replace('/__init__', '')
-                imported_to_map[filtered_name] = imported_symbols[name]
-                if name not in self._files:
-                    self._files.append(name)
+        imported_to_map: Dict[str, ImportData] = self._get_imports_to_map(imported_symbols, importing_methods)
 
         # change the full path names to unique small names
         imports_paths = list(imported_to_map)
@@ -657,3 +653,64 @@ class FileGenerator:
             imports_unique_ids.append(short_name)
 
         return imported_to_map, imports_unique_ids
+
+    def _get_imports_to_map(self, imported_symbols: Dict[str, Import],
+                            importing_methods: bool) -> Dict[str, ImportData]:
+
+        imported_to_map: Dict[str, ImportData] = {}
+        inner_packages: List[Tuple[str, Package]] = []
+
+        for name, imported in imported_symbols.items():
+            need_to_map = False
+            filtered_name = name.replace('.py', '').replace('/__init__', '')
+
+            if not isinstance(imported, BuiltinImport):
+                for _, symbol in imported.all_symbols.items():
+                    if isinstance(symbol, Package):
+                        inner_packages.append((filtered_name, symbol))
+
+                    elif self._need_to_map_symbol(symbol, importing_methods):
+                        need_to_map = True
+
+            if need_to_map:
+                if os.path.isfile(name):
+                    origin_file = name
+                else:
+                    origin_file = None
+
+                imported_to_map[filtered_name] = ImportData(imported_symbols[name], filtered_name, origin_file)
+                if isinstance(origin_file, str) and origin_file not in self._files:
+                    self._files.append(origin_file)
+
+        while len(inner_packages) > 0:
+            origin, package = inner_packages.pop(0)
+            package_origin = f'{origin}/{package.raw_identifier}'
+            for child in package.inner_packages.values():
+                inner_packages.append((package_origin, child))
+
+            if isinstance(package.origin, Import):
+                need_to_map = self._need_to_map_symbol(package.origin, False)
+                origin_file = package.origin.origin
+
+                if not os.path.isfile(origin_file):
+                    origin_file = None
+
+                if isinstance(origin_file, str) and origin_file not in self._files:
+                    self._files.append(origin_file)
+            else:
+                origin_file = None
+                need_to_map = True
+
+            if need_to_map:
+                imported_to_map[package_origin] = ImportData(package, package_origin, origin_file)
+
+        return imported_to_map
+
+    def _need_to_map_symbol(self, symbol: ISymbol, importing_methods: bool) -> bool:
+        from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
+
+        return (not importing_methods  # is importing variables or is a method but not builtin
+                or (((isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable))
+                     or (isinstance(symbol, ClassType) and len(symbol.symbols) > 0)
+                     ))
+                )
