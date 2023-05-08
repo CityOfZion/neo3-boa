@@ -1,5 +1,7 @@
 import ast
 
+from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
+
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.model.type.type import Type
@@ -7,12 +9,12 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
 
 
 class TestConstant(BoaTest):
     def build_code_generator(self) -> CodeGenerator:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
+
         VMCodeMapping.reset()
         return CodeGenerator({})
 
@@ -20,9 +22,10 @@ class TestConstant(BoaTest):
         input = 7
         expected_output = Opcode.PUSH7
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -33,9 +36,10 @@ class TestConstant(BoaTest):
             + Opcode.NEGATE
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -47,9 +51,10 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -61,9 +66,10 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -75,9 +81,10 @@ class TestConstant(BoaTest):
             + byte_input[:32]
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -89,9 +96,10 @@ class TestConstant(BoaTest):
             + byte_input[:32]
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -108,9 +116,10 @@ class TestConstant(BoaTest):
             + unsigned_byte_input
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(unsigned)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(unsigned)
+            output = generator.bytecode
 
         self.assertEqual(unsigned_expected_output, output)
 
@@ -121,9 +130,10 @@ class TestConstant(BoaTest):
             + signed_byte_input
         )
 
-        generator = self.build_code_generator()
-        generator.convert_integer_literal(signed)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_integer_literal(signed)
+            output = generator.bytecode
 
         self.assertEqual(signed_expected_output, output)
 
@@ -136,9 +146,10 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        generator = self.build_code_generator()
-        generator.convert_string_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_string_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -152,9 +163,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -183,7 +195,8 @@ class TestConstant(BoaTest):
 
         analyser = Analyser(ast.parse(str(input)))
         analyser.symbol_table['x'] = Variable(Type.any)
-        output = CodeGenerator.generate_code(analyser).bytecode
+        with LOCK:
+            output = CodeGenerator.generate_code(analyser).bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -201,9 +214,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -230,9 +244,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -246,9 +261,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -272,9 +288,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -292,9 +309,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -321,9 +339,10 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -345,9 +364,10 @@ class TestConstant(BoaTest):
             + Opcode.SETITEM
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -379,9 +399,10 @@ class TestConstant(BoaTest):
             + Opcode.SETITEM
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 
@@ -407,9 +428,10 @@ class TestConstant(BoaTest):
             + Opcode.SETITEM
         )
 
-        generator = self.build_code_generator()
-        generator.convert_literal(input)
-        output = generator.bytecode
+        with LOCK:
+            generator = self.build_code_generator()
+            generator.convert_literal(input)
+            output = generator.bytecode
 
         self.assertEqual(expected_output, output)
 

@@ -249,28 +249,34 @@ def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, 
 
 
 @public
-def approve(spender: UInt160, amount: int) -> bool:
+def approve(owner: UInt160, spender: UInt160, amount: int) -> bool:
     """
     Allows spender to spend from your account as many times as they want until it reaches the amount allowed.
     The allowed amount will be overwritten if this method is called once more.
 
+    :param owner: the address that is allowing to use their zNEO
+    :type owner: UInt160
     :param spender: the address that will be allowed to use your zGAS
     :type spender: UInt160
     :param amount: the total amount of zGAS that the spender can spent
     :type amount: int
     :raise AssertionError: raised if `from_address` length is not 20 or if `amount` if less than zero.
     """
+    assert len(owner) == 20
     assert len(spender) == 20
     assert amount >= 0
 
-    if balance_of(runtime.calling_script_hash) >= amount:
-        storage.put(ALLOWANCE_PREFIX + runtime.calling_script_hash + spender, amount)
-        on_approval(runtime.calling_script_hash, spender, amount)
+    if not runtime.check_witness(owner):
+        return False
+
+    if balance_of(owner) >= amount:
+        storage.put(ALLOWANCE_PREFIX + owner + spender, amount)
+        on_approval(owner, spender, amount)
         return True
     return False
 
 
-@public
+@public(safe=True)
 def allowance(owner: UInt160, spender: UInt160) -> int:
     """
     Gets the amount of zGAS from the owner that can be used by the spender.

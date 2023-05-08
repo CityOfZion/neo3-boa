@@ -1,103 +1,186 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
-from boa3.internal.neo import from_hex_str
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive import neoxp
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestNeoClass(BoaTest):
     default_folder: str = 'test_sc/native_test/neo'
+    NEO_CONTRACT_NAME = 'NeoToken'
 
     def test_get_hash(self):
-        path = self.get_contract_path('GetHash.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetHash.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(constants.NEO_SCRIPT, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(constants.NEO_SCRIPT)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_symbol(self):
-        path = self.get_contract_path('Symbol.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Symbol.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual('NEO', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append('NEO')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_symbol_too_many_parameters(self):
         path = self.get_contract_path('SymbolTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_decimals(self):
-        path = self.get_contract_path('Decimals.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Decimals.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(0, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(0)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_decimals_too_many_parameters(self):
         path = self.get_contract_path('DecimalsTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_total_supply(self):
-        path = self.get_contract_path('TotalSupply.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TotalSupply.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(100_000_000, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(100_000_000)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_total_supply_too_many_parameters(self):
         path = self.get_contract_path('TotalSupplyTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_balance_of(self):
-        path = self.get_contract_path('BalanceOf.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('BalanceOf.py')
+        test_account_1 = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
+        test_account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', bytes(range(20)))
-        self.assertEqual(0, result)
+        invokes = []
+        expected_results = []
 
-        engine.add_neo(bytes(range(20)), 10)
-        result = self.run_smart_contract(engine, path, 'main', bytes(range(20)))
-        self.assertEqual(10, result)
+        invokes.append(runner.call_contract(path, 'main', test_account_2))
+        expected_results.append(0)
+
+        runner.add_neo(test_account_1, 10)
+        invokes.append(runner.call_contract(path, 'main', test_account_1))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_balance_of_too_many_parameters(self):
         path = self.get_contract_path('BalanceOfTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_transfer(self):
-        path = self.get_contract_path('Transfer.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Transfer.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        account_1 = bytes(range(20))
-        account_2 = bytes(range(20)[::-1])
+        invokes = []
+        expected_results = []
+
+        account = neoxp.utils.get_account_by_name('testAccount1')
+        account_1 = account.script_hash.to_array()
+        account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
         amount = 10000
 
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount, ['value', 123, False])
-        self.assertEqual(False, result)
+        runner.add_neo(account_1, amount)
+        invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount, ['value', 123, False]))
+        expected_results.append(False)
 
-        engine.add_neo(account_1, amount)
         # can't transfer if there is no signature, even with enough GAS
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount, ['value', 123, False])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount, ['value', 123, False]))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount, ['value', 123, False],
-                                         signer_accounts=[account_1])
-        self.assertEqual(True, result)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount, ['value', 123, False]))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'transfer',
+                                            account_1, account_2, amount, ['value', 123, False]))
+        expected_results.append(True)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_transfer_data_default(self):
-        path = self.get_contract_path('TransferDataDefault.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TransferDataDefault.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        account_1 = bytes(range(20))
-        account_2 = bytes(range(20)[::-1])
+        invokes = []
+        expected_results = []
+
+        account = neoxp.utils.get_account_by_name('testAccount1')
+        account_1 = account.script_hash.to_array()
+        account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
         amount = 100
 
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount)
-        self.assertEqual(False, result)
+        runner.add_neo(account_1, amount)
+        invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount))
+        expected_results.append(False)
+        runner.update_contracts(export_checkpoint=True)
 
-        engine.add_neo(account_1, amount)
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount,
-                                         signer_accounts=[account_1])
-        self.assertEqual(True, result)
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'transfer', account_1, account_2, amount, None))
+        expected_results.append(True)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_transfer_too_many_parameters(self):
         path = self.get_contract_path('TransferTooManyArguments.py')
@@ -108,103 +191,199 @@ class TestNeoClass(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_get_gas_per_block(self):
-        path = self.get_contract_path('GetGasPerBlock.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetGasPerBlock.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(5 * 10 ** 8, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(5 * 10 ** 8)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_unclaimed_gas(self):
-        path = self.get_contract_path('UnclaimedGas.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UnclaimedGas.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', bytes(20), 0)
-        self.assertIsInstance(result, int)
+        contract_call = runner.call_contract(path, 'main', bytes(20), 0)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+        self.assertIsInstance(contract_call.result, int)
 
     def test_register_candidate(self):
-        path = self.get_contract_path('RegisterCandidate.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('RegisterCandidate.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
-        self.assertEqual(False, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey,
-                                         signer_accounts=[candidate_scripthash])
-        self.assertEqual(True, result)
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+        register_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
+        invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
+        expected_results.append(False)
+        runner.update_contracts(export_checkpoint=True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
+        expected_results.append(False)
+
+        runner.execute(account=candidate)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        # cannot test it with a Test Invoke
+        runner.call_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey)
+        # expected_results.append(True)
+        invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                     account=candidate)
+
+        runner.execute(account=candidate)
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.INSUFFICIENT_GAS)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
 
     def test_unregister_candidate(self):
-        path = self.get_contract_path('UnregisterCandidate.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('UnregisterCandidate.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
-        self.assertEqual(False, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey, signer_accounts=[candidate_scripthash])
-        self.assertEqual(True, result)
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+        unregister_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (unregister_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
+        invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'unregisterCandidate', candidate_pubkey))
+        expected_results.append(True)
+
+        runner.execute(account=candidate)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_vote(self):
-        path = self.get_contract_path('Vote.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Vote.py')
+        path_get, _ = self.get_deploy_file_paths('GetCandidates.py')
 
-        account = bytes(range(20))
+        runner = NeoTestRunner(runner_id=self.method_name())
+        runner.deploy_contract(path_get)
+
+        invokes = []
+        expected_results = []
+
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+
         n_votes = 100
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
+        account = neoxp.utils.get_account_by_name('testAccount2')
+        account_script_hash = account.script_hash.to_array()
+
+        register_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
         # will fail check_witness
-        result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey)
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', account_script_hash, candidate_pubkey))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # NeoAccountState is None and will return false
-        result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', account_script_hash, candidate_pubkey))
+        expected_results.append(False)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
 
         # adding NEO to the account will make NeoAccountState not None
-        engine.add_neo(account, n_votes)
+        runner.add_neo(account_script_hash, n_votes)
 
         # candidate is not registered yet
-        result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', account_script_hash, candidate_pubkey))
+        expected_results.append(False)
 
-        path_register = self.get_contract_path('RegisterCandidate.py')
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
-                                signer_accounts=[candidate_scripthash])
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                     account=candidate)
 
         # candidate was registered
-        result = self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
-        self.assertEqual(True, result)
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', account_script_hash, candidate_pubkey))
+        expected_results.append(False)
 
-        path_get = self.get_contract_path('GetCandidates.py')
-        result = self.run_smart_contract(engine, path_get, 'main')
-        self.assertEqual(1, len(result))
-        self.assertEqual(candidate_pubkey, result[0][0])
-        self.assertEqual(n_votes, result[0][1])
+        invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'vote', account_script_hash, candidate_pubkey))
+        expected_results.append(True)
+
+        get_candidates_call_1 = runner.call_contract(path_get, 'main')
 
         # remove votes from candidate
-        result = self.run_smart_contract(engine, path, 'un_vote', account, signer_accounts=[account])
-        self.assertEqual(True, result)
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'un_vote', account_script_hash))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'vote', account_script_hash, None))
+        expected_results.append(True)
 
         # candidate has no votes now
-        result = self.run_smart_contract(engine, path_get, 'main')
+        get_candidates_call_2 = runner.call_contract(path_get, 'main')
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
+
+        result = get_candidates_call_1.result
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
-        self.assertEqual(0, result[0][1])
-
-        # voting for candidate again
-        self.run_smart_contract(engine, path, 'main', account, candidate_pubkey, signer_accounts=[account])
-        result = self.run_smart_contract(engine, path_get, 'main')
         self.assertEqual(n_votes, result[0][1])
 
-        # it's also possible to remove votes by voting for None instead of using un_vote
-        result = self.run_smart_contract(engine, path, 'main', account, None, signer_accounts=[account])
-        self.assertEqual(True, result)
-
-        # candidate has no votes now again
-        result = self.run_smart_contract(engine, path_get, 'main')
+        result = get_candidates_call_2.result
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
@@ -220,100 +399,145 @@ class TestNeoClass(BoaTest):
     def test_get_all_candidates(self):
         path = self.get_contract_path('GetAllCandidates.py')
         self.compile_and_save(path)
-        engine = TestEngine()
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
         # no candidate was registered
-        result = self.run_smart_contract(engine, path, 'main')
+        invoke = runner.call_contract(path, 'main')
+
+        runner.execute()  # getting result of multiple iterators is failing
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        result = invoke.result
         self.assertEqual(0, len(result))
 
-        path_register = self.get_contract_path('RegisterCandidate.py')
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
-                                         signer_accounts=[candidate_scripthash])
-        self.assertTrue(result)
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+        register_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
+        runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                            account=candidate)
 
         # after registering one
-        result = self.run_smart_contract(engine, path, 'main')
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        result = invoke.result
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
 
     def test_get_candidates(self):
-        path = self.get_contract_path('GetCandidates.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetCandidates.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         # no candidate was registered
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(0, len(result))
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append([])
 
-        path_register = self.get_contract_path('RegisterCandidate.py')
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
-                                signer_accounts=[candidate_scripthash])
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+        register_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
+        register_invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                              account=candidate)
 
         # after registering one
-        result = self.run_smart_contract(engine, path, 'main')
+        invoke = runner.call_contract(path, 'main')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(register_invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
+
+        result = invoke.result
         self.assertEqual(1, len(result))
         self.assertEqual(candidate_pubkey, result[0][0])
         self.assertEqual(0, result[0][1])
 
     def test_get_candidate_vote(self):
-        path = self.get_contract_path('GetCandidateVote.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetCandidateVote.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        account = bytes(range(20))
+        invokes = []
+        expected_results = []
+
+        candidate = neoxp.utils.get_account_by_name('testAccount1')
+        candidate_pubkey = bytes.fromhex('035F34EF4B4704C68617C427B3A3059BF0AF86E9AF46992588C6605C2B87366F16')
+        candidate_script_hash = candidate.script_hash.to_array()
+
         n_votes = 100
-        candidate_pubkey = bytes.fromhex('0296852e74830f48185caec9980d21dee5e8bee3da97d712123c19ee01c2d3f3ae')
-        candidate_scripthash = from_hex_str('a8de26eb4931c674d31885acf722bd82e6bcd06d')
-        # will fail check_witness
-        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
-        self.assertEqual(-1, result)
+        account = neoxp.utils.get_account_by_name('testAccount2')
+        account_script_hash = account.script_hash.to_array()
 
-        engine.add_neo(account, n_votes)
-        path_register = self.get_contract_path('RegisterCandidate.py')
-        result = self.run_smart_contract(engine, path_register, 'main', candidate_pubkey,
-                                         signer_accounts=[candidate_scripthash])
-        self.assertTrue(result)
+        register_gas_price = 1_000
+        runner.add_gas(candidate_script_hash, (register_gas_price + 1) * 10 ** 8)  # +1 to make sure it has enough gas
+
+        # will fail check_witness
+        invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
+        expected_results.append(-1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        runner.add_neo(account_script_hash, n_votes)
+
+        invoke = runner.run_contract(self.NEO_CONTRACT_NAME, 'registerCandidate', candidate_pubkey,
+                                     account=candidate)
 
         # candidate was registered
-        path_vote = self.get_contract_path('Vote.py')
-        result = self.run_smart_contract(engine, path_vote, 'main', account, candidate_pubkey,
-                                         signer_accounts=[account])
-        self.assertTrue(result)
+        invokes.append(runner.call_contract(self.NEO_CONTRACT_NAME, 'vote', account_script_hash, candidate_pubkey))
+        expected_results.append(True)
 
-        result = self.run_smart_contract(engine, path, 'main', candidate_pubkey)
-        self.assertEqual(n_votes, result)
+        invokes.append(runner.call_contract(path, 'main', candidate_pubkey))
+        expected_results.append(n_votes)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        invoke_tx = runner.get_transaction_result(invoke.tx_id)
+        tx_executions = invoke_tx.executions
+        self.assertEqual(1, len(tx_executions))
+        self.assertEqual(1, len(tx_executions[0].result_stack))
+        self.assertEqual(True, invoke_tx.executions[0].result_stack[0])
 
     def test_get_committee(self):
-        path = self.get_contract_path('GetCommittee.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetCommittee.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
+        default_committee = neoxp.utils.get_account_by_name('node1')
         default_council = [
-            bytes.fromhex('03b209fd4f53a7170ea4444e0cb0a6bb6a53c2bd016926989cf85f9b0fba17a70c'),
-            bytes.fromhex('02486fd15702c4490a26703112a5cc1d0923fd697a33406bd5a1c00e0013b09a70'),
-            bytes.fromhex('02ca0e27697b9c248f6f16e085fd0061e26f44da85b58ee835c110caa5ec3ba554'),
-            bytes.fromhex('024c7b7fb6c310fccf1ba33b082519d82964ea93868d676662d4a59ad548df0e7d'),
-            bytes.fromhex('03b8d9d5771d8f513aa0869b9cc8d50986403b78c6da36890638c3d46a5adce04a'),
-            bytes.fromhex('02df48f60e8f3e01c48ff40b9b7f1310d7a8b2a193188befe1c2e3df740e895093'),
-            bytes.fromhex('02aaec38470f6aad0042c6e877cfd8087d2676b0f516fddd362801b9bd3936399e'),
-            bytes.fromhex('023a36c72844610b4d34d1968662424011bf783ca9d984efa19a20babf5582f3fe'),
-            bytes.fromhex('03708b860c1de5d87f5b151a12c2a99feebd2e8b315ee8e7cf8aa19692a9e18379'),
-            bytes.fromhex('03c6aa6e12638b36e88adc1ccdceac4db9929575c3e03576c617c49cce7114a050'),
-            bytes.fromhex('03204223f8c86b8cd5c89ef12e4f0dbb314172e9241e30c9ef2293790793537cf0'),
-            bytes.fromhex('02a62c915cf19c7f19a50ec217e79fac2439bbaad658493de0c7d8ffa92ab0aa62'),
-            bytes.fromhex('03409f31f0d66bdc2f70a9730b66fe186658f84a8018204db01c106edc36553cd0'),
-            bytes.fromhex('0288342b141c30dc8ffcde0204929bb46aed5756b41ef4a56778d15ada8f0c6654'),
-            bytes.fromhex('020f2887f41474cfeb11fd262e982051c1541418137c02a0f4961af911045de639'),
-            bytes.fromhex('0222038884bbd1d8ff109ed3bdef3542e768eef76c1247aea8bc8171f532928c30'),
-            bytes.fromhex('03d281b42002647f0113f36c7b8efb30db66078dfaaa9ab3ff76d043a98d512fde'),
-            bytes.fromhex('02504acbc1f4b3bdad1d86d6e1a08603771db135a73e61c9d565ae06a1938cd2ad'),
-            bytes.fromhex('0226933336f1b75baa42d42b71d9091508b638046d19abd67f4e119bf64a7cfb4d'),
-            bytes.fromhex('03cdcea66032b82f5c30450e381e5295cae85c5e6943af716cc6b646352a6067dc'),
-            bytes.fromhex('02cd5a5547119e24feaa7c2a0f37b8c9366216bab7054de0065c9be42084003c8a'),
+            # default_committee.public_key,  # not implemented
+            bytes.fromhex('027C84B056C26A7B2458471E6DCF6752EDD96B96887D783334E351DDFE13C4BCA2'),
         ]
+
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        result = invoke.result
         is_committee_member = True
         for pubkey in default_council:
             if pubkey not in result:
@@ -321,19 +545,20 @@ class TestNeoClass(BoaTest):
         self.assertEqual(True, is_committee_member)
 
     def test_get_next_block_validators(self):
-        path = self.get_contract_path('GetNextBlockValidators.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetNextBlockValidators.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
+        default_committee = neoxp.utils.get_account_by_name('node1')
         consensus_nodes = [
-            bytes.fromhex('03b209fd4f53a7170ea4444e0cb0a6bb6a53c2bd016926989cf85f9b0fba17a70c'),
-            bytes.fromhex('02486fd15702c4490a26703112a5cc1d0923fd697a33406bd5a1c00e0013b09a70'),
-            bytes.fromhex('02ca0e27697b9c248f6f16e085fd0061e26f44da85b58ee835c110caa5ec3ba554'),
-            bytes.fromhex('024c7b7fb6c310fccf1ba33b082519d82964ea93868d676662d4a59ad548df0e7d'),
-            bytes.fromhex('03b8d9d5771d8f513aa0869b9cc8d50986403b78c6da36890638c3d46a5adce04a'),
-            bytes.fromhex('02df48f60e8f3e01c48ff40b9b7f1310d7a8b2a193188befe1c2e3df740e895093'),
-            bytes.fromhex('02aaec38470f6aad0042c6e877cfd8087d2676b0f516fddd362801b9bd3936399e'),
+            # default_committee.public_key,  # not implemented
+            bytes.fromhex('027C84B056C26A7B2458471E6DCF6752EDD96B96887D783334E351DDFE13C4BCA2'),
         ]
+
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        result = invoke.result
         is_consensus_node = True
         for pubkey in consensus_nodes:
             if pubkey not in result:
@@ -341,36 +566,50 @@ class TestNeoClass(BoaTest):
         self.assertEqual(True, is_consensus_node)
 
     def test_get_account_state(self):
-        path = self.get_contract_path('GetAccountState.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetAccountState.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        account = bytes(range(20))
-        result = self.run_smart_contract(engine, path, 'main', account)
-        self.assertIsNone(result)
+        invokes = []
+        expected_results = []
+
+        account = neoxp.utils.get_account_by_name('testAccount1')
+        account_script_hash = account.script_hash.to_array()
+
+        invokes.append(runner.call_contract(path, 'main', account_script_hash))
+        expected_results.append(None)
 
         # adding votes
         votes = 10000
-        engine.add_neo(account, votes)
-        result = self.run_smart_contract(engine, path, 'main', account)
+        runner.add_neo(account_script_hash, votes)
+        invoke = runner.call_contract(path, 'main', account_script_hash)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        result = invoke.result
         self.assertEqual(3, len(result))
         # number of votes in the account
         self.assertEqual(votes, result[0])
         # balance was changed at height 0
-        self.assertEqual(0, result[1])
+        self.assertEqual(2, result[1])
         # who the account is voting for
         self.assertIsNone(result[2])
 
-        engine.increase_block(10)
-        other_account = bytes(20)
+        runner.increase_block(10)
+        other_account = neoxp.utils.get_account_by_name('testAccount2')
+        other_account_script_hash = other_account.script_hash.to_array()
 
-        path_transfer = self.get_contract_path('Transfer.py')
-
-        self.run_smart_contract(engine, path_transfer, 'main', account, other_account, 1, None,
-                                signer_accounts=[account])
+        runner.call_contract(self.NEO_CONTRACT_NAME, 'transfer',
+                             account_script_hash, other_account_script_hash, 1, None)
         votes = votes - 1
 
-        result = self.run_smart_contract(engine, path, 'main', account)
+        invoke = runner.call_contract(path, 'main', account_script_hash)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=f'{runner.error}\n{runner.cli_log}')
+
+        result = invoke.result
         self.assertEqual(3, len(result))
         self.assertEqual(votes, result[0])
-        self.assertEqual(10, result[1])
+        self.assertEqual(2, result[1])
         self.assertIsNone(result[2])

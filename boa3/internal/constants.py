@@ -1,3 +1,4 @@
+import locale
 import os
 import platform
 import sys
@@ -16,8 +17,13 @@ IMPORT_WILDCARD = '*'
 SYS_VERSION_INFO = sys.version_info
 SYS_VERSION = platform.python_version()
 BOA_VERSION = _actual_boa_version  # for logging only
+BOA_LOGGING_NAME = 'neo3-boa-log'
 COMPILER_VERSION = BOA_VERSION
 BOA_PACKAGE_PATH = os.path.abspath(f'{__file__}/..')
+
+locale.setlocale(locale.LC_ALL, '')
+SYS_LOCALE = locale.localeconv()
+SYS_LOCALE_DECIMAL_POINT = SYS_LOCALE['decimal_point'] if 'decimal_point' in SYS_LOCALE else '.'
 
 ONE_BYTE_MAX_VALUE = 255
 TWO_BYTES_MAX_VALUE = 256 ** 2 - 1
@@ -29,6 +35,7 @@ SIZE_OF_INT256 = 32
 SIZE_OF_ECPOINT = 33
 DEFAULT_UINT32 = 0
 GAS_DECIMALS = 8
+NEO_DECIMALS = 0
 
 INIT_METHOD_ID = '__init__'
 INITIALIZE_METHOD_ID = '_initialize'

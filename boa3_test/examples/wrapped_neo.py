@@ -3,6 +3,7 @@ from typing import Any, Union
 from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.nativecontract.neo import NEO as NEO_TOKEN
@@ -33,18 +34,18 @@ def manifest_metadata() -> NeoMetadata:
 # -------------------------------------------
 
 
-# Script hash of the contract owner
-OWNER = UInt160()
+# The keys used to access the storage
+OWNER_KEY = 'owner'
 SUPPLY_KEY = 'totalSupply'
 
 # Symbol of the Token
 TOKEN_SYMBOL = 'zNEO'
 
 # Number of decimal places
-TOKEN_DECIMALS = 8
+TOKEN_DECIMALS = 0
 
 # Total Supply of tokens in the system
-TOKEN_TOTAL_SUPPLY = 10_000_000 * 10 ** TOKEN_DECIMALS  # 10m total supply * 10^8 (decimals)
+TOKEN_TOTAL_SUPPLY = 10_000_000 * 10 ** TOKEN_DECIMALS  # 10m total supply * 10^0 (decimals)
 
 # Allowance
 ALLOWANCE_PREFIX = b'allowance'
@@ -248,28 +249,34 @@ def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, 
 
 
 @public
-def approve(spender: UInt160, amount: int) -> bool:
+def approve(owner: UInt160, spender: UInt160, amount: int) -> bool:
     """
     Allows spender to spend from your account as many times as they want until it reaches the amount allowed.
     The allowed amount will be overwritten if this method is called once more.
 
+    :param owner: the address that is allowing to use their zNEO
+    :type owner: UInt160
     :param spender: the address that will be allowed to use your zNEO
     :type spender: UInt160
     :param amount: the total amount of zNEO that the spender can spent
     :type amount: int
     :raise AssertionError: raised if `from_address` length is not 20 or if `amount` if less than zero.
     """
+    assert len(owner) == 20
     assert len(spender) == 20
     assert amount >= 0
 
-    if balance_of(runtime.calling_script_hash) >= amount:
-        storage.put(ALLOWANCE_PREFIX + runtime.calling_script_hash + spender, amount)
-        on_approval(runtime.calling_script_hash, spender, amount)
+    if not runtime.check_witness(owner):
+        return False
+
+    if balance_of(owner) >= amount:
+        storage.put(ALLOWANCE_PREFIX + owner + spender, amount)
+        on_approval(owner, spender, amount)
         return True
     return False
 
 
-@public
+@public(safe=True)
 def allowance(owner: UInt160, spender: UInt160) -> int:
     """
     Gets the amount of zNEO from the owner that can be used by the spender.
@@ -327,7 +334,7 @@ def mint(account: UInt160, amount: int):
         post_transfer(None, account, amount, None, True)
 
 
-@public(safe=True)
+@public
 def burn(account: UInt160, amount: int):
     """
     Burns zNEO tokens.
@@ -370,7 +377,7 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    return runtime.check_witness(OWNER)
+    return runtime.check_witness(get_owner())
 
 
 @public
@@ -381,10 +388,13 @@ def _deploy(data: Any, update: bool):
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
-        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        storage.put(OWNER, TOKEN_TOTAL_SUPPLY)
+        container: Transaction = runtime.script_container
 
-        on_transfer(None, OWNER, TOKEN_TOTAL_SUPPLY)
+        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
+        storage.put(OWNER_KEY, container.sender)
+
+        on_transfer(None, container.sender, TOKEN_TOTAL_SUPPLY)
 
 
 @public
@@ -407,3 +417,10 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
         return
     else:
         abort()
+
+
+def get_owner() -> UInt160:
+    """
+    Gets the script hash of the owner (the account that deployed this smart contract)
+    """
+    return UInt160(storage.get(OWNER_KEY))

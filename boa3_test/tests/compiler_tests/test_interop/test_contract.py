@@ -1,130 +1,187 @@
 import json
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
-from boa3_test.tests.test_classes.testengine import TestEngine
 
 
 class TestContractInterop(BoaTest):
     default_folder: str = 'test_sc/interop_test/contract'
 
     def test_call_contract(self):
-        path = self.get_contract_path('CallScriptHash.py')
-        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        path, _ = self.get_deploy_file_paths('CallScriptHash.py')
+        call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        expected_output = self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaisesRegex(TestExecutionException, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
-        engine.add_contract(call_contract_path)
+        contract_call = runner.call_contract(call_contract_path, 'add', 1, 2)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected_output = contract_call.result
+        call_hash = contract_call.invoke.contract.script_hash
 
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
-        self.assertEqual(expected_output, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, -24])
-        self.assertEqual(-66, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [-42, 24])
-        self.assertEqual(-18, result)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'add', [1, 2]))
+        expected_results.append(expected_output)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'add', [-42, -24]))
+        expected_results.append(-66)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'add', [-42, 24]))
+        expected_results.append(-18)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.reset()
+        runner.call_contract(path, 'Main', call_hash, 'add', [1, 2])
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG)
 
     def test_call_contract_with_cast(self):
-        path = self.get_contract_path('CallScriptHashWithCast.py')
-        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        path, _ = self.get_deploy_file_paths('CallScriptHashWithCast.py')
+        call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaisesRegex(TestExecutionException, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
-        engine.add_contract(call_contract_path)
+        contract = runner.deploy_contract(call_contract_path)
+        runner.update_contracts(export_checkpoint=True)
+        call_hash = contract.script_hash
 
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'add', [1, 2])
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'add', [1, 2]))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.reset()
+        runner.call_contract(path, 'Main', call_hash, 'add', [1, 2])
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG)
 
     def test_call_contract_without_args(self):
-        path = self.get_contract_path('CallScriptHashWithoutArgs.py')
-        call_contract_path = self.get_contract_path('test_sc/list_test', 'IntList.py')
-        Boa3.compile_and_save(call_contract_path)
+        path, _ = self.get_deploy_file_paths('CallScriptHashWithoutArgs.py')
+        call_contract_path, _ = self.get_deploy_file_paths('test_sc/list_test', 'IntList.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        expected_output = self.run_smart_contract(engine, call_contract_path, 'Main')
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaisesRegex(TestExecutionException, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
-        engine.add_contract(call_contract_path)
+        contract_call = runner.call_contract(call_contract_path, 'Main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected_output = contract_call.result
+        call_hash = contract_call.invoke.contract.script_hash
 
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
-        self.assertEqual(expected_output, result)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'Main'))
+        expected_results.append(expected_output)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.reset()
+        runner.call_contract(path, 'Main', call_hash, 'Main')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG)
 
     def test_call_contract_with_flags(self):
-        path = self.get_contract_path('CallScriptHashWithFlags.py')
-        call_contract_path = self.get_contract_path('CallFlagsUsage.py')
+        path, _ = self.get_deploy_file_paths('CallScriptHashWithFlags.py')
+        call_contract_path, _ = self.get_deploy_file_paths('CallFlagsUsage.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, call_contract_path, 'notify_user')
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'Main')
-        engine.add_contract(call_contract_path)
+        contract = runner.deploy_contract(call_contract_path)
+        runner.update_contracts(export_checkpoint=True)
+        call_hash = contract.script_hash
 
         from boa3.internal.neo3.contracts import CallFlags
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
+        expected_results.append(0)
 
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.STATES))
+        expected_results.append(None)
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.READ_ONLY)
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.NONE)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
+        expected_results.append(10)
 
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.STATES)
-        self.assertEqual(None, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'put_value', ['num', 99], CallFlags.ALL)
-        self.assertEqual(None, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY)
-        self.assertEqual(99, result)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 99], CallFlags.ALL))
+        expected_results.append(None)
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.READ_ONLY)
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.STATES)
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'notify_user', [], CallFlags.ALL)
-        self.assertEqual(None, result)
-        notify = engine.get_events(origin=call_hash)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
+        expected_results.append(99)
+
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.ALL))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'call_another_contract', [], CallFlags.ALL))
+        expected_results.append(0)
+
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'call_another_contract', [], CallFlags.READ_ONLY))
+        expected_results.append(0)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        notify = runner.get_events(origin=call_hash)
         self.assertEqual(1, len(notify))
         self.assertEqual('Notify was called', notify[0].arguments[0])
 
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.STATES)
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.NONE)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract', [], CallFlags.ALL)
-        self.assertEqual(0, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'call_another_contract',
-                                         [], CallFlags.READ_ONLY)
-        self.assertEqual(0, result)
+        runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
+
+        runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.READ_ONLY)
+        runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.NONE)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
+
+        runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.READ_ONLY)
+        runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.STATES)
+        runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.NONE)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
+
+        runner.call_contract(path, 'Main', call_hash, 'call_another_contract', [], CallFlags.STATES)
+        runner.call_contract(path, 'Main', call_hash, 'call_another_contract', [], CallFlags.NONE)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
+
+        runner.reset()
+        runner.call_contract(path, 'Main', call_hash, 'Main')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX)
 
     def test_call_contract_too_many_parameters(self):
         path = self.get_contract_path('CallScriptHashTooManyArguments.py')
@@ -135,44 +192,51 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_create_contract(self):
-        path = self.get_contract_path('CreateContract.py')
+        path, _ = self.get_deploy_file_paths('CreateContract.py')
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        Boa3.compile_and_save(call_contract_path)
 
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest, None)
+        runner = NeoTestRunner(runner_id=self.method_name())
+        invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, None)
 
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
         self.assertEqual(5, len(result))
         self.assertEqual(nef_file, result[3])
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
 
     def test_create_contract_data_deploy(self):
-        path = self.get_contract_path('CreateContract.py')
+        path, _ = self.get_deploy_file_paths('CreateContract.py')
         call_contract_path = self.get_contract_path('NewContract.py')
-        Boa3.compile_and_save(call_contract_path)
 
+        self.compile_and_save(call_contract_path)
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        engine = TestEngine()
-        data = 'some sort of data'
-        result = self.run_smart_contract(engine, path, 'Main', nef_file, arg_manifest, data)
+        runner = NeoTestRunner(runner_id=self.method_name())
+        runner.file_name = 'test_create_contract'
 
+        data = 'some sort of data'
+        invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, data)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = invoke.result
         self.assertEqual(5, len(result))
         self.assertEqual(nef_file, result[3])
         manifest_struct = NeoManifestStruct.from_json(manifest)
         self.assertEqual(manifest_struct, result[4])
 
-        notifies = engine.get_events('notify')
+        notifies = runner.get_events('notify')
         self.assertEqual(2, len(notifies))
         self.assertEqual(False, notifies[0].arguments[0])  # not updated
         self.assertEqual(data, notifies[1].arguments[0])  # data
-        result = self.run_smart_contract(engine, call_contract_path, 'main')
-        self.assertEqual(data, result)
 
     def test_create_contract_too_many_parameters(self):
         path = self.get_contract_path('CreateContractTooManyArguments.py')
@@ -183,37 +247,62 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_update_contract(self):
-        path = self.get_contract_path('UpdateContract.py')
-        engine = TestEngine()
-        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : new_method'):
-            self.run_smart_contract(engine, path, 'new_method')
+        path, _ = self.get_deploy_file_paths('UpdateContract.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+        runner.file_name = 'test_update_contract'
+
+        invokes = []
+        expected_results = []
+
+        runner.call_contract(path, 'new_method')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('new_method'))
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
         self.compile_and_save(new_path)
         new_nef, new_manifest = self.get_bytes_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
-        result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest, None)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'update', new_nef, arg_manifest, None))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'new_method')
-        self.assertEqual(42, result)
+        invokes.append(runner.call_contract(path, 'new_method'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_update_contract_data_deploy(self):
-        path = self.get_contract_path('UpdateContract.py')
-        engine = TestEngine()
-        with self.assertRaisesRegex(TestExecutionException, f'{self.CANT_FIND_METHOD_MSG_PREFIX} : new_method'):
-            self.run_smart_contract(engine, path, 'new_method')
+        path, _ = self.get_deploy_file_paths('UpdateContract.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.call_contract(path, 'new_method')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('new_method'))
 
         new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
-        self.compile_and_save(new_path)
         new_nef, new_manifest = self.get_bytes_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
         data = 'this function was deployed'
-        result = self.run_smart_contract(engine, path, 'update', new_nef, arg_manifest, data)
-        self.assertIsVoid(result)
-        notifies = engine.get_events('notify')
+        invokes.append(runner.call_contract(path, 'update', new_nef, arg_manifest, data))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        notifies = runner.get_events('notify')
         self.assertEqual(2, len(notifies))
         self.assertEqual(True, notifies[0].arguments[0])
         self.assertEqual(data, notifies[1].arguments[0])
@@ -227,16 +316,29 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_destroy_contract(self):
-        path = self.get_contract_path('DestroyContract.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertIsVoid(result)
+        path, _ = self.get_deploy_file_paths('DestroyContract.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        script_hash = engine.executed_script_hash.to_array()
-        call_contract_path = self.get_contract_path('CallScriptHash.py')
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG}'):
-            self.run_smart_contract(engine, call_contract_path, 'Main',
-                                    script_hash, 'Main', [])
+        invokes = []
+        expected_results = []
+
+        call = runner.call_contract(path, 'Main')
+        invokes.append(call)
+        expected_results.append(None)
+
+        runner.execute(clear_invokes=False)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        script_hash = call.invoke.contract.script_hash
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        call_contract_path, _ = self.get_deploy_file_paths('CallScriptHash.py')
+        runner.call_contract(call_contract_path, 'Main',
+                             script_hash, 'Main', [])
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'^{self.CALLED_CONTRACT_DOES_NOT_EXIST_MSG}')
 
     def test_destroy_contract_too_many_parameters(self):
         path = self.get_contract_path('DestroyContractTooManyArguments.py')
@@ -252,12 +354,23 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('NeoScriptHash.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(value, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_neo_native_script_hash_cant_assign(self):
         expected_output = (
@@ -283,12 +396,23 @@ class TestContractInterop(BoaTest):
         )
 
         path = self.get_contract_path('GasScriptHash.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(value, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_gas_native_script_hash_cant_assign(self):
         expected_output = (
@@ -305,97 +429,133 @@ class TestContractInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_call_flags_type(self):
-        path = self.get_contract_path('CallFlagsType.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('CallFlagsType.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', 'ALL')
-        self.assertEqual(0b00001111, result)
-        result = self.run_smart_contract(engine, path, 'main', 'READ_ONLY')
-        self.assertEqual(0b00000101, result)
-        result = self.run_smart_contract(engine, path, 'main', 'STATES')
-        self.assertEqual(0b00000011, result)
-        result = self.run_smart_contract(engine, path, 'main', 'ALLOW_NOTIFY')
-        self.assertEqual(0b00001000, result)
-        result = self.run_smart_contract(engine, path, 'main', 'ALLOW_CALL')
-        self.assertEqual(0b00000100, result)
-        result = self.run_smart_contract(engine, path, 'main', 'WRITE_STATES')
-        self.assertEqual(0b00000010, result)
-        result = self.run_smart_contract(engine, path, 'main', 'READ_STATES')
-        self.assertEqual(0b00000001, result)
-        result = self.run_smart_contract(engine, path, 'main', 'NONE')
-        self.assertEqual(0, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'ALL'))
+        expected_results.append(0b00001111)
+        invokes.append(runner.call_contract(path, 'main', 'READ_ONLY'))
+        expected_results.append(0b00000101)
+        invokes.append(runner.call_contract(path, 'main', 'STATES'))
+        expected_results.append(0b00000011)
+        invokes.append(runner.call_contract(path, 'main', 'ALLOW_NOTIFY'))
+        expected_results.append(0b00001000)
+        invokes.append(runner.call_contract(path, 'main', 'ALLOW_CALL'))
+        expected_results.append(0b00000100)
+        invokes.append(runner.call_contract(path, 'main', 'WRITE_STATES'))
+        expected_results.append(0b00000010)
+        invokes.append(runner.call_contract(path, 'main', 'READ_STATES'))
+        expected_results.append(0b00000001)
+        invokes.append(runner.call_contract(path, 'main', 'NONE'))
+        expected_results.append(0)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_get_call_flags(self):
-        path = self.get_contract_path('CallScriptHashWithFlags.py')
-        call_contract_path = self.get_contract_path('GetCallFlags.py')
-        Boa3.compile_and_save(call_contract_path)
+        path, _ = self.get_deploy_file_paths('CallScriptHashWithFlags.py')
+        call_contract_path, _ = self.get_deploy_file_paths('GetCallFlags.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        self.run_smart_contract(engine, call_contract_path, 'main')
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        with self.assertRaisesRegex(TestExecutionException, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}'):
-            self.run_smart_contract(engine, path, 'Main', call_hash, 'main')
-        engine.add_contract(call_contract_path)
+        contract = runner.deploy_contract(call_contract_path)
+        runner.update_contracts(export_checkpoint=True)
+        call_hash = contract.script_hash
 
         from boa3.internal.neo3.contracts import CallFlags
 
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALL)
-        self.assertEqual(CallFlags.ALL, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.READ_ONLY)
-        self.assertEqual(CallFlags.READ_ONLY, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.STATES)
-        self.assertEqual(CallFlags.STATES, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.NONE)
-        self.assertEqual(CallFlags.NONE, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.READ_STATES)
-        self.assertEqual(CallFlags.READ_STATES, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.WRITE_STATES)
-        self.assertEqual(CallFlags.WRITE_STATES, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_CALL)
-        self.assertEqual(CallFlags.ALLOW_CALL, result)
-        result = self.run_smart_contract(engine, path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_NOTIFY)
-        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.ALL))
+        expected_results.append(CallFlags.ALL)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.READ_ONLY))
+        expected_results.append(CallFlags.READ_ONLY)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.STATES))
+        expected_results.append(CallFlags.STATES)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.NONE))
+        expected_results.append(CallFlags.NONE)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.READ_STATES))
+        expected_results.append(CallFlags.READ_STATES)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.WRITE_STATES))
+        expected_results.append(CallFlags.WRITE_STATES)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_CALL))
+        expected_results.append(CallFlags.ALLOW_CALL)
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'main', [], CallFlags.ALLOW_NOTIFY))
+        expected_results.append(CallFlags.ALLOW_NOTIFY)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.reset()
+        runner.call_contract(path, 'Main', call_hash, 'main', [])  # missing argument
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('Main'))
 
     def test_import_contract(self):
-        path = self.get_contract_path('ImportContract.py')
-        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        path, _ = self.get_deploy_file_paths('ImportContract.py')
+        call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        expected_output = self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        engine.add_contract(call_contract_path)
+        contract_call = runner.call_contract(call_contract_path, 'add', 1, 2)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'main', call_hash, 'add', [1, 2])
-        self.assertEqual(expected_output, result)
+        call_hash = contract_call.invoke.contract.script_hash
+        expected_output = contract_call.result
 
-        result = self.run_smart_contract(engine, path, 'call_flags_all')
+        invokes.append(runner.call_contract(path, 'main', call_hash, 'add', [1, 2]))
+        expected_results.append(expected_output)
+
+        invokes.append(runner.call_contract(path, 'call_flags_all'))
         from boa3.internal.neo3.contracts import CallFlags
-        self.assertEqual(CallFlags.ALL, result)
+        expected_results.append(CallFlags.ALL)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_interop_contract(self):
-        path = self.get_contract_path('ImportInteropContract.py')
-        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
+        path, _ = self.get_deploy_file_paths('ImportInteropContract.py')
+        call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        expected_output = self.run_smart_contract(engine, call_contract_path, 'add', 1, 2)
-        call_hash = engine.executed_script_hash.to_array()
+        invokes = []
+        expected_results = []
 
-        engine.reset_engine()
-        call_contract_path = call_contract_path.replace('.py', '.nef')
-        engine.add_contract(call_contract_path)
+        contract_call = runner.call_contract(call_contract_path, 'add', 1, 2)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'main', call_hash, 'add', [1, 2])
-        self.assertEqual(expected_output, result)
+        call_hash = contract_call.invoke.contract.script_hash
+        expected_output = contract_call.result
 
-        result = self.run_smart_contract(engine, path, 'call_flags_all')
+        invokes.append(runner.call_contract(path, 'main', call_hash, 'add', [1, 2]))
+        expected_results.append(expected_output)
+
+        invokes.append(runner.call_contract(path, 'call_flags_all'))
         from boa3.internal.neo3.contracts import CallFlags
-        self.assertEqual(CallFlags.ALL, result)
+        expected_results.append(CallFlags.ALL)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_create_standard_account(self):
         from boa3.internal.neo.vm.type.StackItem import StackItemType
@@ -421,7 +581,7 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('CreateStandardAccount.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_create_standard_account_too_few_parameters(self):
@@ -433,12 +593,21 @@ class TestContractInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_get_minimum_deployment_fee(self):
-        path = self.get_contract_path('GetMinimumDeploymentFee.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetMinimumDeploymentFee.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         minimum_cost = 10 * 10 ** 8  # minimum deployment cost is 10 GAS right now
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(minimum_cost, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(minimum_cost)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_get_minimum_deployment_fee_too_many_parameters(self):
         path = self.get_contract_path('GetMinimumDeploymentFeeTooManyArguments.py')
@@ -455,7 +624,7 @@ class TestContractInterop(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('CreateMultisigAccount.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_create_multisig_account_too_few_parameters(self):

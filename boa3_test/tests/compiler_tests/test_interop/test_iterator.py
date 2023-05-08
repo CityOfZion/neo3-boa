@@ -1,6 +1,8 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestIteratorInterop(BoaTest):
@@ -11,78 +13,133 @@ class TestIteratorInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_iterator_next(self):
-        path = self.get_contract_path('IteratorNext.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IteratorNext.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         prefix = 'test_iterator_next'
-        result = self.run_smart_contract(engine, path, 'has_next', prefix)
-        self.assertEqual(False, result)
-
-        engine.storage_put(prefix + 'example1', 1, contract_path=path)
-        result = self.run_smart_contract(engine, path, 'has_next', prefix)
-        self.assertEqual(True, result)
-
-    def test_iterator_value(self):
-        path = self.get_contract_path('IteratorValue.py')
-        engine = TestEngine()
-
-        prefix = 'test_iterator_value'
-        result = self.run_smart_contract(engine, path, 'test_iterator', prefix)
-        self.assertIsNone(result)
+        invokes.append(runner.call_contract(path, 'has_next', prefix))
+        expected_results.append(False)
 
         key = prefix + 'example1'
-        engine.storage_put(key, 1, contract_path=path)
-        result = self.run_smart_contract(engine, path, 'test_iterator', prefix)
-        self.assertEqual([key, '\x01'], result)
+        runner.call_contract(path, 'store_data', key, 1)
+        invokes.append(runner.call_contract(path, 'has_next', prefix))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_iterator_value(self):
+        path, _ = self.get_deploy_file_paths('IteratorValue.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        prefix = 'test_iterator_value'
+        invokes.append(runner.call_contract(path, 'test_iterator', prefix))
+        expected_results.append(None)
+
+        key = prefix + 'example1'
+        runner.call_contract(path, 'store_data', key, 1)
+        invokes.append(runner.call_contract(path, 'test_iterator', prefix))
+        expected_results.append([key, '\x01'])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_iterator_value_dict_mismatched_type(self):
         path = self.get_contract_path('IteratorValueMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_import_iterator(self):
-        path = self.get_contract_path('ImportIterator.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportIterator.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'return_iterator')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'return_iterator'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_import_interop_iterator(self):
-        path = self.get_contract_path('ImportInteropIterator.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportInteropIterator.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'return_iterator')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'return_iterator'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_iterator_implicit_typing(self):
-        path = self.get_contract_path('IteratorImplicitTyping.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IteratorImplicitTyping.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         prefix = 'test_iterator_'
-        result = self.run_smart_contract(engine, path, 'search_storage', prefix)
-        self.assertEqual({}, result)
+        invokes.append(runner.call_contract(path, 'search_storage', prefix))
+        expected_results.append({})
 
-        result = self.run_smart_contract(engine, path, 'store', f'{prefix}1', 1)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'store', f'{prefix}1', 1))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'store', f'{prefix}2', 2)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'store', f'{prefix}2', 2))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'search_storage', prefix)
-        self.assertEqual({f'{prefix}1': 1, f'{prefix}2': 2}, result)
+        invokes.append(runner.call_contract(path, 'search_storage', prefix))
+        expected_results.append({f'{prefix}1': 1, f'{prefix}2': 2})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_iterator_value_access(self):
-        path = self.get_contract_path('IteratorValueAccess.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IteratorValueAccess.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         prefix = 'test_iterator_'
-        result = self.run_smart_contract(engine, path, 'search_storage', prefix)
-        self.assertEqual({}, result)
+        invokes.append(runner.call_contract(path, 'search_storage', prefix))
+        expected_results.append({})
 
-        result = self.run_smart_contract(engine, path, 'store', f'{prefix}1', 1)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'store', f'{prefix}1', 1))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'store', f'{prefix}2', 2)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'store', f'{prefix}2', 2))
+        expected_results.append(None)
 
-        result = self.run_smart_contract(engine, path, 'search_storage', prefix)
-        self.assertEqual({f'{prefix}1': 1, f'{prefix}2': 2}, result)
+        invokes.append(runner.call_contract(path, 'search_storage', prefix))
+        expected_results.append({f'{prefix}1': 1, f'{prefix}2': 2})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

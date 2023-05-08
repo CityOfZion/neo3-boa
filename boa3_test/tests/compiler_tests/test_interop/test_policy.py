@@ -1,50 +1,67 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestPolicyInterop(BoaTest):
     default_folder: str = 'test_sc/interop_test/policy'
 
     def test_get_exec_fee_factor(self):
-        path = self.get_contract_path('GetExecFeeFactor.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetExecFeeFactor.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)
 
     def test_get_exec_fee_too_many_parameters(self):
         path = self.get_contract_path('GetExecFeeFactorTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_get_fee_per_byte(self):
-        path = self.get_contract_path('GetFeePerByte.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetFeePerByte.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)
 
     def test_get_fee_per_byte_too_many_parameters(self):
         path = self.get_contract_path('GetFeePerByteTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_get_storage_price(self):
-        path = self.get_contract_path('GetStoragePrice.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetStoragePrice.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)
 
     def test_get_storage_price_too_many_parameters(self):
         path = self.get_contract_path('GetStoragePriceTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_is_blocked(self):
-        path = self.get_contract_path('IsBlocked.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('IsBlocked.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', bytes(20))
-        self.assertEqual(False, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', bytes(20)))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_is_blocked_mismatched_type(self):
         path = self.get_contract_path('IsBlockedMismatchedTypeInt.py')
@@ -65,15 +82,19 @@ class TestPolicyInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_import_policy(self):
-        path = self.get_contract_path('ImportPolicy.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportPolicy.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)
 
     def test_import_interop_policy(self):
-        path = self.get_contract_path('ImportInteropPolicy.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportInteropPolicy.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        invoke = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(invoke.result, int)

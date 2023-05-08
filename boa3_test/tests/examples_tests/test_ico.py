@@ -1,316 +1,515 @@
-from boa3.boa3 import Boa3
-from boa3.internal.neo import to_script_hash
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
+from boa3.internal import constants
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive import neoxp
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
-class TestTemplate(BoaTest):
+class TestICOTemplate(BoaTest):
     default_folder: str = 'examples'
 
-    OWNER_SCRIPT_HASH = bytes(20)
-    OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
-    OTHER_ACCOUNT_2 = bytes(range(20))
+    OWNER = neoxp.utils.get_account_by_name('owner')
+    OTHER_ACCOUNT_1 = neoxp.utils.get_account_by_name('testAccount1')
+    OTHER_ACCOUNT_2 = neoxp.utils.get_account_by_name('testAccount2')
+    GAS_TO_DEPLOY = int(10.5 * 10 ** 8)
 
     KYC_WHITELIST_PREFIX = b'KYCWhitelistApproved'
 
     def test_ico_compile(self):
         path = self.get_contract_path('ico.py')
-        Boa3.compile(path)
-
-    def test_ico_verify(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-
-        result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(False, result)
-
-        result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
-
-    def test_ico_total_supply(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-        total_supply = 10_000_000 * 10 ** 8
-
-        result = self.run_smart_contract(engine, path, 'totalSupply',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(total_supply, result)
+        self.compile(path)
 
     def test_ico_symbol(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'symbol')
-        self.assertEqual('ICO', result)
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        invoke = runner.call_contract(path, 'symbol')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual('ICO', invoke.result)
 
     def test_ico_decimals(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'decimals')
-        self.assertEqual(8, result)
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        invoke = runner.call_contract(path, 'decimals')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(8, invoke.result)
 
     def test_ico_total_balance_of(self):
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
         total_supply = 10_000_000 * 10 ** 8
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
 
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-
-        result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(total_supply, result)
+        invoke = runner.call_contract(path, 'balanceOf', self.OWNER.script_hash.to_array())
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(total_supply, invoke.result)
 
         # should fail when the script length is not 20
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'balanceOf', bytes(10))
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
+        runner.call_contract(path, 'balanceOf', bytes(10))
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'balanceOf', bytes(30))
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+    def test_ico_total_supply(self):
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        total_supply = 10_000_000 * 10 ** 8
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        invoke = runner.call_contract(path, 'totalSupply')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(total_supply, invoke.result)
+
+    def test_ico_verify(self):
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        invokes.append(runner.call_contract(path, 'verify'))
+        expected_results.append(False)
+
+        runner.execute(account=self.OTHER_ACCOUNT_1)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        invokes.append(runner.call_contract(path, 'verify'))
+        expected_results.append(True)
+
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ico_kyc_register(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        contract = runner.deploy_contract(path, account=self.OWNER)
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
 
         # don't include if not signed by the administrator
-        result = self.run_smart_contract(engine, path, 'kyc_register',
-                                         [self.OWNER_SCRIPT_HASH, bytes(22)])
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path, 'kyc_register',
+                                            [owner_script_hash, bytes(22)]))
+        expected_results.append(0)
 
-        # don't include script hashes with size different than 20
-        result = self.run_smart_contract(engine, path, 'kyc_register',
-                                         [bytes(40), self.OWNER_SCRIPT_HASH, bytes(12)],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(1, result)
-        storage_value = engine.storage_get(self.KYC_WHITELIST_PREFIX + self.OWNER_SCRIPT_HASH, path)
-        self.assertIsNotNone(storage_value)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        # don't include script hashes with size different from 20
+        invokes.append(runner.call_contract(path, 'kyc_register',
+                                            [bytes(40), owner_script_hash, bytes(12)]))
+        expected_results.append(1)
 
         # script hashes already registered are returned as well
-        result = self.run_smart_contract(engine, path, 'kyc_register',
-                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(2, result)
-        storage_value = engine.storage_get(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1, path)
+        invokes.append(runner.call_contract(path, 'kyc_register',
+                                            [owner_script_hash, other_account_script_hash]))
+        expected_results.append(2)
+
+        runner.execute(account=self.OWNER, get_storage_from=contract)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        storage_value = runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + owner_script_hash)
+        self.assertIsNotNone(storage_value)
+
+        storage_value = runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + other_account_script_hash)
         self.assertIsNotNone(storage_value)
 
     def test_ico_kyc_remove(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        contract = runner.deploy_contract(path, account=self.OWNER)
+        runner.update_contracts(export_checkpoint=True)
+
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
 
         # don't remove if not signed by the administrator
-        result = self.run_smart_contract(engine, path, 'kyc_remove',
-                                         [self.OWNER_SCRIPT_HASH, bytes(22)])
-        self.assertEqual(0, result)
+        invokes.append(runner.call_contract(path, 'kyc_remove',
+                                            [owner_script_hash, bytes(22)]))
+        expected_results.append(0)
+
+        runner.execute(get_storage_from=contract)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # script hashes that weren't registered are returned as well
-        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 not in engine.storage)
-        result = self.run_smart_contract(engine, path, 'kyc_remove',
-                                         [self.OTHER_ACCOUNT_1],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(1, result)
-        self.assertTrue(self.KYC_WHITELIST_PREFIX + self.OTHER_ACCOUNT_1 not in engine.storage)
+        self.assertIsNone(runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + other_account_script_hash))
 
-        # don't include script hashes with size different than 20
-        result = self.run_smart_contract(engine, path, 'kyc_remove',
-                                         [bytes(40), self.OWNER_SCRIPT_HASH, bytes(12)],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(1, result)
+        invokes.append(runner.call_contract(path, 'kyc_remove',
+                                            [other_account_script_hash]))
+        expected_results.append(1)
+
+        # don't remove script hashes with size different from 20
+        invokes.append(runner.call_contract(path, 'kyc_remove',
+                                            [bytes(40), owner_script_hash, bytes(12)]))
+        expected_results.append(1)
+
+        runner.execute(account=self.OWNER, get_storage_from=contract)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertIsNone(runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + other_account_script_hash))
 
     def test_ico_approve(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
         approved_amount = 100 * 10 ** 8
-
-        # should fail when any of the scripts' length is not 20
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'approve',
-                                    self.OWNER_SCRIPT_HASH, bytes(10), approved_amount)
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'approve',
-                                    bytes(10), self.OTHER_ACCOUNT_1, approved_amount)
-
-        # should fail when the amount is less than 0
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'approve',
-                                    self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10)
 
         # should fail if the origin doesn't sign
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount)
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'approve',
+                                            owner_script_hash, other_account_script_hash, approved_amount))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # should fail if origin and target are the same
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, approved_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'approve',
+                                            owner_script_hash, owner_script_hash, approved_amount))
+        expected_results.append(False)
 
         # should fail if any of the addresses is not included in the kyc
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'approve',
+                                            owner_script_hash, other_account_script_hash, approved_amount))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'kyc_register',
-                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(2, result)
+        invokes.append(runner.call_contract(path, 'kyc_register',
+                                            [owner_script_hash, other_account_script_hash]))
+        expected_results.append(2)
 
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'approve',
+                                            owner_script_hash, other_account_script_hash, approved_amount))
+        expected_results.append(True)
 
-    def test_ico_allowance(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        approved_amount = 100 * 10 ** 8
-
-        result = self.run_smart_contract(engine, path, 'allowance', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1)
-        self.assertEqual(0, result)
-
-        result = self.run_smart_contract(engine, path, 'kyc_register',
-                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(2, result)
-
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, approved_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
-
-        result = self.run_smart_contract(engine, path, 'allowance', self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1)
-        self.assertEqual(approved_amount, result)
-
-    def test_ico_transfer_from(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-
-        transferred_amount = 100 * 10 ** 8
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
         # should fail when any of the scripts' length is not 20
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
-                                    self.OWNER_SCRIPT_HASH, bytes(10), self.OTHER_ACCOUNT_2, transferred_amount, None)
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
-                                    bytes(10), self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, transferred_amount, None)
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
-                                    self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, bytes(30), transferred_amount, None)
+        runner.call_contract(path, 'approve',
+                             owner_script_hash, bytes(10), approved_amount)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
-        # should fail when the amount is less than 0
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transferFrom',
-                                    self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, -10, None)
+        runner.call_contract(path, 'approve',
+                             bytes(10), other_account_script_hash, approved_amount)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'approve',
+                             other_account_script_hash, owner_script_hash, -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+    def test_ico_allowance(self):
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        approved_amount = 100 * 10 ** 8
+
+        invokes.append(runner.call_contract(path, 'allowance', owner_script_hash, other_account_script_hash))
+        expected_results.append(0)
+
+        invokes.append(runner.call_contract(path, 'kyc_register',
+                                            [owner_script_hash, other_account_script_hash]))
+        expected_results.append(2)
+
+        invokes.append(runner.call_contract(path, 'approve',
+                                            owner_script_hash, other_account_script_hash, approved_amount))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'allowance', owner_script_hash, other_account_script_hash))
+        expected_results.append(approved_amount)
+
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_ico_transfer_from(self):
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        other_account_1_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        other_account_2_script_hash = self.OTHER_ACCOUNT_2.script_hash.to_array()
+        transferred_amount = 100 * 10 ** 8
 
         # should fail if the sender doesn't sign
-        result = self.run_smart_contract(engine, path, 'transferFrom',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2,
-                                         transferred_amount, None)
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'transferFrom',
+                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
+                                            transferred_amount, None))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # should fail if the allowed amount is less than the given amount
-        result = self.run_smart_contract(engine, path, 'transferFrom',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2,
-                                         transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'transferFrom',
+                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
+                                            transferred_amount, None))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'kyc_register',
-                                         [self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1],
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(2, result)
+        runner.execute(account=self.OTHER_ACCOUNT_1)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'approve',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount * 2,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'kyc_register',
+                                            [owner_script_hash, other_account_1_script_hash]))
+        expected_results.append(2)
+
+        invokes.append(runner.call_contract(path, 'approve',
+                                            owner_script_hash, other_account_1_script_hash, transferred_amount * 2))
+        expected_results.append(True)
+
+        runner.execute(account=self.OWNER, add_invokes_to_batch=True)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # doesn't fire the transfer event when transferring to yourself or amount is zero
-        balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        result = self.run_smart_contract(engine, path, 'transferFrom',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH,
-                                         transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(True, result)
-        self.assertEqual(0, len(engine.get_events('transfer')))
-        balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(balance_after, balance_before)
+        balance_before_1 = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        invokes.append(runner.call_contract(path, 'transferFrom',
+                                            owner_script_hash, other_account_1_script_hash, owner_script_hash,
+                                            transferred_amount, None))
+        expected_results.append(True)
+        balance_after_1 = runner.call_contract(path, 'balanceOf', owner_script_hash)
 
-        balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
-        result = self.run_smart_contract(engine, path, 'transferFrom',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_1,
-                                         transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(True, result)
-        self.assertEqual(0, len(engine.get_events('transfer')))
-        balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
-        self.assertEqual(balance_after, balance_before)
+        balance_before_2 = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        invokes.append(runner.call_contract(path, 'transferFrom',
+                                            owner_script_hash, other_account_1_script_hash, other_account_1_script_hash,
+                                            transferred_amount, None))
+        expected_results.append(True)
+        balance_after_2 = runner.call_contract(path, 'balanceOf', owner_script_hash)
 
-        result = self.run_smart_contract(engine, path, 'transferFrom',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2, 0, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(True, result)
-        self.assertEqual(0, len(engine.get_events('transfer')))
+        invokes.append(runner.call_contract(path, 'transferFrom',
+                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
+                                            0, None))
+        expected_results.append(True)
 
-        balance_originator_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
-        balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
-        result = self.run_smart_contract(engine, path, 'transferFrom',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, self.OTHER_ACCOUNT_2,
-                                         transferred_amount, None,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(False, result)
+        balance_originator_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        balance_sender_before = runner.call_contract(path, 'balanceOf', other_account_1_script_hash)
+        balance_receiver_before = runner.call_contract(path, 'balanceOf', other_account_2_script_hash)
 
-        balance_originator_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(balance_originator_before, balance_originator_after)
-        balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
-        self.assertEqual(balance_sender_before, balance_sender_after)
-        balance_receiver_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_2)
-        self.assertEqual(balance_receiver_before, balance_receiver_after)
+        invokes.append(runner.call_contract(path, 'transferFrom',
+                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
+                                            transferred_amount, None))
+        expected_results.append(False)
+
+        balance_originator_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        balance_sender_after = runner.call_contract(path, 'balanceOf', other_account_1_script_hash)
+        balance_receiver_after = runner.call_contract(path, 'balanceOf', other_account_2_script_hash)
+
+        runner.execute(account=self.OTHER_ACCOUNT_1)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertEqual(0, len(runner.get_events('transfer')))
+        self.assertEqual(balance_after_1.result, balance_before_1.result)
+        self.assertEqual(balance_after_2.result, balance_before_2.result)
+        self.assertEqual(balance_originator_before.result, balance_originator_after.result)
+        self.assertEqual(balance_sender_before.result, balance_sender_after.result)
+        self.assertEqual(balance_receiver_before.result, balance_receiver_after.result)
+
+        # should fail when any of the scripts' length is not 20
+        runner.call_contract(path, 'transferFrom',
+                             owner_script_hash, bytes(10), other_account_1_script_hash, transferred_amount, None)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'transferFrom',
+                             bytes(10), other_account_1_script_hash, other_account_2_script_hash, transferred_amount, None)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'transferFrom',
+                             owner_script_hash, other_account_1_script_hash, bytes(30), transferred_amount, None)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        # should fail when the amount is less than 0
+        runner.call_contract(path, 'transferFrom',
+                             owner_script_hash, other_account_1_script_hash, other_account_2_script_hash, -10, None)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_ico_mint(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        minted_amount = 10_000 * 10 ** 8
 
         # should fail if amount is a negative number
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'mint', -10 * 10 ** 8)
+        runner.call_contract(path, 'mint', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
-        minted_amount = 10_000 * 10 ** 8
         # should fail if not signed by the administrator
-        result = self.run_smart_contract(engine, path, 'mint', minted_amount)
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'mint', minted_amount))
+        expected_results.append(False)
 
-        total_supply_before = self.run_smart_contract(engine, path, 'totalSupply')
-        owner_balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'mint', minted_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
+        total_supply_before = runner.call_contract(path, 'totalSupply')
+        owner_balance_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
 
-        total_supply_after = self.run_smart_contract(engine, path, 'totalSupply')
-        self.assertEqual(total_supply_before + minted_amount, total_supply_after)
-        owner_balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(owner_balance_before + minted_amount, owner_balance_after)
+        invokes.append(runner.call_contract(path, 'mint', minted_amount))
+        expected_results.append(True)
+
+        total_supply_after = runner.call_contract(path, 'totalSupply')
+        owner_balance_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
+
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertEqual(total_supply_before.result + minted_amount, total_supply_after.result)
+        self.assertEqual(owner_balance_before.result + minted_amount, owner_balance_after.result)
 
     def test_ico_refund(self):
-        path = self.get_contract_path('ico.py')
-        engine = TestEngine()
-        transferred_amount = 10_000
+        path, _ = self.get_deploy_file_paths('ico.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        # should fail script hash length is not 20
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'refund', bytes(10), transferred_amount, transferred_amount)
+        invokes = []
+        expected_results = []
 
-        # should fail no amount is a positive number
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'refund', self.OWNER_SCRIPT_HASH, 0, 0)
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        contract = runner.deploy_contract(path, account=self.OWNER)
+        runner.update_contracts(export_checkpoint=True)
+
+        transferred_neo_amount = 1
+        transferred_gas_amount = 10_000
+
+        owner_script_hash = self.OWNER.script_hash.to_array()
+        contract_script_hash = contract.script_hash
+
+        runner.add_neo(contract_script_hash, transferred_neo_amount * 2)
+        runner.add_gas(contract_script_hash, transferred_gas_amount * 2)
 
         # should fail if not signed by the owner
-        result = self.run_smart_contract(engine, path, 'refund',
-                                         self.OWNER_SCRIPT_HASH, transferred_amount, transferred_amount)
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'refund',
+                                            owner_script_hash, transferred_neo_amount, transferred_gas_amount))
+        expected_results.append(False)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        # TODO: Test if the refund is successful when update the TestEngine to make Neo/Gas transfers
+        # should fail if given address is not included in the kyc
+        invokes.append(runner.call_contract(path, 'refund',
+                                            owner_script_hash, transferred_neo_amount, transferred_gas_amount))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(path, 'kyc_register', [owner_script_hash]))
+        expected_results.append(1)
+
+        balance_neo_before = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', owner_script_hash)
+        balance_gas_before = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', owner_script_hash)
+
+        invokes.append(runner.call_contract(path, 'refund',
+                                            owner_script_hash, transferred_neo_amount, transferred_gas_amount))
+        expected_results.append(True)
+
+        balance_neo_after = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', owner_script_hash)
+        balance_gas_after = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', owner_script_hash)
+
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        self.assertEqual(balance_neo_before.result + transferred_neo_amount, balance_neo_after.result)
+        self.assertEqual(balance_gas_before.result + transferred_gas_amount, balance_gas_after.result)
+
+        # should fail script hash length is not 20
+        runner.call_contract(path, 'refund', bytes(10), transferred_neo_amount, transferred_gas_amount)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        # should fail no amount is a positive number
+        runner.call_contract(path, 'refund', owner_script_hash, 0, 0)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)

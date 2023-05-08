@@ -1,8 +1,9 @@
 from typing import Any, List, Union
 
 from boa3.builtin.compile_time import NeoMetadata, metadata, public
-from boa3.builtin.contract import Nep17TransferEvent
+from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.nativecontract.gas import GAS as GAS_TOKEN
@@ -38,15 +39,13 @@ def manifest_metadata() -> NeoMetadata:
 KYC_WHITELIST_PREFIX = b'KYCWhitelistApproved'
 TOKEN_TOTAL_SUPPLY_PREFIX = b'TokenTotalSupply'
 TRANSFER_ALLOWANCE_PREFIX = b'TransferAllowancePrefix_'
+TOKEN_OWNER_KEY = b'owner'
 
 
 # -------------------------------------------
 # TOKEN SETTINGS
 # -------------------------------------------
 
-
-# Script hash of the contract owner
-TOKEN_OWNER = UInt160()
 
 # Symbol of the Token
 TOKEN_SYMBOL = 'ICO'
@@ -88,7 +87,7 @@ def is_administrator() -> bool:
 
     :return: whether the contract's invoker is an administrator
     """
-    return runtime.check_witness(TOKEN_OWNER)
+    return runtime.check_witness(get_owner())
 
 
 def is_valid_address(address: UInt160) -> bool:
@@ -108,10 +107,18 @@ def _deploy(data: Any, update: bool):
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
-        storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
-        storage.put(TOKEN_OWNER, TOKEN_INITIAL_SUPPLY)
+        container: Transaction = runtime.script_container
+        owner = container.sender
+        storage.put(TOKEN_OWNER_KEY, owner)
 
-        on_transfer(None, TOKEN_OWNER, TOKEN_INITIAL_SUPPLY)
+        storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
+        storage.put(owner, TOKEN_INITIAL_SUPPLY)
+
+        on_transfer(None, owner, TOKEN_INITIAL_SUPPLY)
+
+
+def get_owner() -> UInt160:
+    return UInt160(storage.get(TOKEN_OWNER_KEY))
 
 
 @public
@@ -119,23 +126,24 @@ def mint(amount: int) -> bool:
     """
     Mints new tokens
 
-    :param amount: the amount of gas to be refunded
+    :param amount: the amount tokens to be minted
     :type amount: int
-    :return: whether the refund was successful
+    :return: whether the mint was successful
     """
     assert amount >= 0
     if not is_administrator():
         return False
 
+    token_owner = get_owner()
     if amount > 0:
         current_total_supply = total_supply()
-        owner_balance = balance_of(TOKEN_OWNER)
+        owner_balance = balance_of(token_owner)
 
         storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
-        storage.put(TOKEN_OWNER, owner_balance + amount)
+        storage.put(token_owner, owner_balance + amount)
 
-    on_transfer(None, TOKEN_OWNER, amount)
-    post_transfer(None, TOKEN_OWNER, amount, None)
+    on_transfer(None, token_owner, amount)
+    post_transfer(None, token_owner, amount, None)
     return True
 
 
@@ -158,19 +166,16 @@ def refund(address: UInt160, neo_amount: int, gas_amount: int) -> bool:
     if not is_administrator():
         return False
 
+    if not is_valid_address(address):
+        return False
+
     if neo_amount > 0:
-        result = NEO_TOKEN.transfer(runtime.calling_script_hash, address, neo_amount)
-        if not result:
-            # due to a current limitation in the neo3-boa, changing the condition to `not result`
-            # will result in a compiler error
-            return False
+        result = NEO_TOKEN.transfer(runtime.executing_script_hash, address, neo_amount)
+        assert result, 'Neo transfer failed'
 
     if gas_amount > 0:
-        result = GAS_TOKEN.transfer(runtime.calling_script_hash, address, gas_amount)
-        if not result:
-            # due to a current limitation in the neo3-boa, changing the condition to `not result`
-            # will result in a compiler error
-            return False
+        result = GAS_TOKEN.transfer(runtime.executing_script_hash, address, gas_amount)
+        assert result, 'Gas transfer failed'
 
     return True
 
@@ -311,6 +316,34 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
             call_contract(to_address, 'onNEP17Payment', [from_address, amount, data])
 
 
+@public(name='onNEP17Payment')
+def on_nep17_payment(from_address: Union[UInt160, None], amount: int, data: Any):
+    """
+    NEP-17 affirms :"if the receiver is a deployed contract, the function MUST call onPayment method on receiver
+    contract with the data parameter from transfer AFTER firing the Transfer event. If the receiver doesn't want to
+    receive this transfer it MUST call ABORT." Therefore, since this is a smart contract, onPayment must exist.
+
+    There is no guideline as to how it should verify the transaction and it's up to the user to make this verification.
+
+    For instance, this onPayment method checks if this smart contract is receiving NEO or GAS so that it can mint a
+    NEP17 token. If it's not receiving a native token, than it will abort.
+
+    :param from_address: the address of the one who is trying to send cryptocurrency to this smart contract
+    :type from_address: UInt160
+    :param amount: the amount of cryptocurrency that is being sent to this smart contract
+    :type amount: int
+    :param data: any pertinent data that might validate the transaction
+    :type data: Any
+    """
+    if from_address is None:
+        return
+
+    # Use calling_script_hash to identify if the incoming token is NEO or GAS
+    caller = runtime.calling_script_hash
+    if caller != NEO_TOKEN.hash and caller != GAS_TOKEN.hash:
+        abort()
+
+
 @public
 def allowance(from_address: UInt160, to_address: UInt160) -> int:
     """
@@ -420,7 +453,7 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
         return False
 
     if not is_valid_address(originator) or not is_valid_address(to_address):
-        # one of the address doesn't passed the kyc yet
+        # one of the addresses didn't pass the kyc
         return False
 
     if balance_of(originator) < amount:

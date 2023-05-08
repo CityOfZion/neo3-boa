@@ -1,9 +1,10 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestUnion(BoaTest):
@@ -28,15 +29,26 @@ class TestUnion(BoaTest):
         )
 
         path = self.get_contract_path('UnionReturn.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', True)
-        self.assertEqual(42, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', False)
-        self.assertEqual('42', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', True))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append('42')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_union_variable_reassign(self):
         expected_output = (
@@ -58,32 +70,59 @@ class TestUnion(BoaTest):
         )
 
         path = self.get_contract_path('UnionVariableReassign.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_union_variable_argument(self):
-        path = self.get_contract_path('UnionVariableArgument.py')
+        path, _ = self.get_deploy_file_paths('UnionVariableArgument.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 'unittest')
-        self.assertEqual('string', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', False)
-        self.assertEqual('boolean', result)
+        invokes.append(runner.call_contract(path, 'main', 'unittest'))
+        expected_results.append('string')
+
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append('boolean')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_union_isinstance_validation(self):
-        path = self.get_contract_path('UnionIsInstanceValidation.py')
+        path, _ = self.get_deploy_file_paths('UnionIsInstanceValidation.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main', 'unittest')
-        self.assertEqual('unittest', result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'main', False)
-        self.assertEqual('boolean', result)
+        invokes.append(runner.call_contract(path, 'main', 'unittest'))
+        expected_results.append('unittest')
+
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append('boolean')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_union_int_none(self):
-        path = self.get_contract_path('UnionIntNone.py')
+        path, _ = self.get_deploy_file_paths('UnionIntNone.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(42)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

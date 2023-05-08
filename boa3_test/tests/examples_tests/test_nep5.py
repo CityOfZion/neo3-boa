@@ -1,145 +1,219 @@
-from boa3.boa3 import Boa3
-from boa3.internal.neo import to_script_hash
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive import neoxp
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
-class TestTemplate(BoaTest):
+class TestNEP5Template(BoaTest):
     default_folder: str = 'examples'
 
-    OWNER_SCRIPT_HASH = bytes(20)
-    OTHER_ACCOUNT_1 = to_script_hash(b'NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB')
+    OWNER = neoxp.utils.get_account_by_name('owner')
+    OTHER_ACCOUNT = neoxp.utils.get_account_by_name('testAccount1')
+    GAS_TO_DEPLOY = 1000 * 10 ** 8
 
     def test_nep5_compile(self):
         path = self.get_contract_path('nep5.py')
-        Boa3.compile(path)
-
-    def test_nep5_name(self):
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'name')
-        self.assertEqual('NEP5 Standard', result)
+        self.compile(path)
 
     def test_nep5_symbol(self):
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'symbol')
-        self.assertEqual('NEP5', result)
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'symbol')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual('NEP5', invoke.result)
 
     def test_nep5_decimals(self):
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'decimals')
-        self.assertEqual(8, result)
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'decimals')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual(8, invoke.result)
 
     def test_nep5_total_supply(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'totalSupply')
-        self.assertEqual(total_supply, result)
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'totalSupply')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual(total_supply, invoke.result)
 
     def test_nep5_total_balance_of(self):
         total_supply = 10_000_000 * 10 ** 8
 
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(total_supply, result)
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+        runner.update_contracts(export_checkpoint=True)
+
+        invoke = runner.call_contract(path, 'balanceOf', self.OWNER.script_hash.to_array())
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual(total_supply, invoke.result)
 
         # should fail when the script length is not 20
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'balanceOf', bytes(10))
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'balanceOf', bytes(30))
+        runner.call_contract(path, 'balanceOf', bytes(10))
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'balanceOf', bytes(30))
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_nep5_total_transfer(self):
         transferred_amount = 10 * 10 ** 8  # 10 tokens
+        test_account = self.OTHER_ACCOUNT
+        test_account_script_hash = test_account.script_hash.to_array()
+        owner_script_hash = self.OWNER.script_hash.to_array()
 
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        nep5_contract = runner.deploy_contract(path, account=self.OWNER)
+        runner.update_contracts(export_checkpoint=True)
+
+        nep5_address = nep5_contract.script_hash
 
         # should fail if the sender doesn't sign
-        result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount)
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'transfer', owner_script_hash,
+                                            test_account_script_hash, transferred_amount))
+        expected_results.append(False)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # other account doesn't have enough balance
-        result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, transferred_amount,
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'transfer', test_account_script_hash,
+                                            owner_script_hash, transferred_amount))
+        expected_results.append(False)
 
-        # should fail when any of the scripts' length is not 20
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer',
-                                    self.OWNER_SCRIPT_HASH, bytes(10), transferred_amount)
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer',
-                                    bytes(10), self.OTHER_ACCOUNT_1, transferred_amount)
-
-        # should fail when the amount is less than 0
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'transfer',
-                                    self.OTHER_ACCOUNT_1, self.OWNER_SCRIPT_HASH, -10)
+        runner.execute(account=test_account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # doesn't fire the transfer event when transferring to yourself
-        balance_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OWNER_SCRIPT_HASH, transferred_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
-        transfer_events = engine.get_events('transfer')
-        # there is one transfer event thanks to the deploy
-        self.assertEqual(1, len(transfer_events))
+        balance_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        invokes.append(runner.call_contract(path, 'transfer', owner_script_hash,
+                                            owner_script_hash, transferred_amount))
+        expected_results.append(True)
+
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        transfer_events = runner.get_events('transfer', origin=nep5_address)
+        self.assertEqual(0, len(transfer_events))
+
+        balance_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # transferring to yourself doesn't change the balance
-        balance_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        self.assertEqual(balance_before, balance_after)
+        self.assertEqual(balance_before.result, balance_after.result)
 
-        # doesn't fire the transfer event when transferring to yourself
-        balance_sender_before = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        balance_receiver_before = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
-        result = self.run_smart_contract(engine, path, 'transfer',
-                                         self.OWNER_SCRIPT_HASH, self.OTHER_ACCOUNT_1, transferred_amount,
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
-        transfer_events = engine.get_events('transfer')
-        self.assertEqual(2, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
+        balance_sender_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        balance_receiver_before = runner.call_contract(path, 'balanceOf', test_account_script_hash)
+        invokes.append(runner.call_contract(path, 'transfer', owner_script_hash,
+                                            test_account_script_hash, transferred_amount))
+        expected_results.append(True)
+        balance_sender_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        balance_receiver_after = runner.call_contract(path, 'balanceOf', test_account_script_hash)
 
-        sender, receiver, amount = transfer_events[1].arguments
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual(balance_sender_before.result - transferred_amount, balance_sender_after.result)
+        self.assertEqual(balance_receiver_before.result + transferred_amount, balance_receiver_after.result)
+
+        transfer_events = runner.get_events('transfer', origin=nep5_address)
+        self.assertEqual(1, len(transfer_events))
+        self.assertEqual(3, len(transfer_events[0].arguments))
+
+        sender, receiver, amount = transfer_events[0].arguments
         if isinstance(sender, str):
             sender = String(sender).to_bytes()
         if isinstance(receiver, str):
             receiver = String(sender).to_bytes()
-        self.assertEqual(self.OWNER_SCRIPT_HASH, sender)
-        self.assertEqual(self.OTHER_ACCOUNT_1, receiver)
+        self.assertEqual(owner_script_hash, sender)
+        self.assertEqual(test_account_script_hash, receiver)
         self.assertEqual(transferred_amount, amount)
 
-        # transferring to yourself doesn't change the balance
-        balance_sender_after = self.run_smart_contract(engine, path, 'balanceOf', self.OWNER_SCRIPT_HASH)
-        balance_receiver_after = self.run_smart_contract(engine, path, 'balanceOf', self.OTHER_ACCOUNT_1)
-        self.assertEqual(balance_sender_before - transferred_amount, balance_sender_after)
-        self.assertEqual(balance_receiver_before + transferred_amount, balance_receiver_after)
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        # should fail when any of the scripts' length is not 20
+        runner.call_contract(path, 'transfer', owner_script_hash, bytes(10), transferred_amount)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        runner.call_contract(path, 'transfer', bytes(10), owner_script_hash, transferred_amount)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+        # should fail when the amount is less than 0
+        runner.call_contract(path, 'transfer', test_account_script_hash,
+                             owner_script_hash, -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+
+    def test_nep5_name(self):
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'name')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual('NEP5 Standard', invoke.result)
 
     def test_nep5_verify(self):
-        path = self.get_contract_path('nep5.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('nep5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
+        runner.deploy_contract(path, account=self.OWNER)
+
+        invokes = []
+        expected_results = []
 
         # should fail without signature
-        result = self.run_smart_contract(engine, path, 'verify')
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'verify'))
+        expected_results.append(False)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         # should fail if not signed by the owner
-        result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OTHER_ACCOUNT_1])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'verify'))
+        expected_results.append(False)
+        runner.execute(account=self.OTHER_ACCOUNT)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        result = self.run_smart_contract(engine, path, 'verify',
-                                         signer_accounts=[self.OWNER_SCRIPT_HASH])
-        self.assertEqual(True, result)
+        invokes.append(runner.call_contract(path, 'verify'))
+        expected_results.append(True)
+        runner.execute(account=self.OWNER)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

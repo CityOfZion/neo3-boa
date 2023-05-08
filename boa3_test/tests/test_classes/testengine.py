@@ -1,3 +1,4 @@
+import threading
 from os import path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -10,6 +11,7 @@ from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt160
 from boa3.internal.neo3.vm import VMState, vmstate
+from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.tests.test_classes.block import Block
 from boa3_test.tests.test_classes.contractcollection import ContractCollection
 from boa3_test.tests.test_classes.signer import Signer
@@ -17,7 +19,8 @@ from boa3_test.tests.test_classes.storage import Storage
 from boa3_test.tests.test_classes.testcontract import TestContract
 from boa3_test.tests.test_classes.transaction import Transaction
 from boa3_test.tests.test_classes.transactionattribute import oracleresponse
-from boa3_test.tests.test_classes.witnessscope import WitnessScope
+
+_TEST_ENGINE_LOCK = threading.Lock()  # avoid race condition when calling test engine
 
 
 class TestEngine:
@@ -32,6 +35,8 @@ class TestEngine:
                 "File at {0} was not found.\n"
                 "Visit the docs or the README file and search for 'TestEngine' to correctly install it."
                 .format(engine_path))
+
+        self.use_contract_custom_name = False
 
         self._test_engine_path = engine_path
         self._vm_state: VMState = VMState.NONE
@@ -88,6 +93,16 @@ class TestEngine:
             return [n for n in self._notifications if ((n.name == event_name or event_name is None)
                                                        and n.origin == origin_bytes)]
 
+    def _get_contract_nef(self, contract_path: str) -> str:
+        if contract_path.endswith('.py'):
+            if self.use_contract_custom_name:
+                from boa3_test.test_drive import utils
+                name_without_extension, _ = contract_path.split('.py', maxsplit=1)
+                contract_path = f'{utils.create_custom_id(name_without_extension, use_time=False)}.py'
+
+            contract_path = contract_path.replace('.py', '.nef')
+        return contract_path
+
     @property
     def storage(self) -> Storage:
         return self._storage.copy()
@@ -97,7 +112,7 @@ class TestEngine:
             key = String(key).to_bytes()
 
         if contract_path.endswith('.py'):
-            contract_path = contract_path.replace('.py', '.nef')
+            contract_path = self._get_contract_nef(contract_path)
         if contract_path not in self.contracts:
             return None
 
@@ -113,7 +128,7 @@ class TestEngine:
             key = String(key).to_bytes()
 
         if contract_path.endswith('.py'):
-            contract_path = contract_path.replace('.py', '.nef')
+            contract_path = self._get_contract_nef(contract_path)
         if contract_path in self.contracts:
             contract_id = self._get_contract_id(contract_path)
             storage_key = Storage.build_key(key, contract_id)
@@ -130,7 +145,7 @@ class TestEngine:
             key = String(key).to_bytes()
 
         if contract_path.endswith('.py'):
-            contract_path = contract_path.replace('.py', '.nef')
+            contract_path = self._get_contract_nef(contract_path)
         if contract_path not in self.contracts:
             return None
 
@@ -286,23 +301,24 @@ class TestEngine:
         test_engine_args = self.to_json(contract_id, method, *arguments)
         param_json = json.dumps(test_engine_args, separators=(',', ':'))
 
-        try:
-            process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT,
-                                       text=True)
-        except BaseException:
-            json_path = '{0}/test-engine-test.json'.format(path.curdir)
-            with open(json_path, 'wb+') as json_file:
-                json_file.write(String(param_json).to_bytes())
-                json_file.close()
+        with _TEST_ENGINE_LOCK:
+            try:
+                process = subprocess.Popen(['dotnet', self._test_engine_path, param_json],
+                                           stdout=subprocess.PIPE,
+                                           stderr=subprocess.STDOUT,
+                                           text=True)
+            except BaseException:
+                json_path = '{0}/test-engine-test.json'.format(path.curdir)
+                with open(json_path, 'wb+') as json_file:
+                    json_file.write(String(param_json).to_bytes())
+                    json_file.close()
 
-            process = subprocess.Popen(['dotnet', self._test_engine_path, json_path],
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT,
-                                       text=True)
+                process = subprocess.Popen(['dotnet', self._test_engine_path, json_path],
+                                           stdout=subprocess.PIPE,
+                                           stderr=subprocess.STDOUT,
+                                           text=True)
 
-        stdout, stderr = process.communicate()
+            stdout, stderr = process.communicate()
 
         if reset_engine:
             self.reset_engine()

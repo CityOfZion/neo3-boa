@@ -1,14 +1,15 @@
 import hashlib
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts.namedcurve import NamedCurve
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestCryptoLibClass(BoaTest):
@@ -26,43 +27,92 @@ class TestCryptoLibClass(BoaTest):
     )
 
     def test_get_hash(self):
-        path = self.get_contract_path('GetHash.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetHash.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(constants.CRYPTO_SCRIPT, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(constants.CRYPTO_SCRIPT)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_str(self):
-        path = self.get_contract_path('Ripemd160Str.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', 'unit test'))
+        expected_results.append(expected_result.digest())
 
         expected_result = hashlib.new('ripemd160', b'')
-        result = self.run_smart_contract(engine, path, 'Main', '')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', ''))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_int(self):
-        path = self.get_contract_path('Ripemd160Int.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_bool(self):
-        path = self.get_contract_path('Ripemd160Bool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_bytes(self):
-        path = self.get_contract_path('Ripemd160Bytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.new('ripemd160', b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_ripemd160_too_many_parameters(self):
         path = self.get_contract_path('Ripemd160TooManyArguments.py')
@@ -73,36 +123,76 @@ class TestCryptoLibClass(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_sha256_str(self):
-        path = self.get_contract_path('Sha256Str.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Str.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main', 'unit test')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', 'unit test'))
+        expected_results.append(expected_result.digest())
 
         expected_result = hashlib.sha256(b'')
-        result = self.run_smart_contract(engine, path, 'Main', '')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main', ''))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_int(self):
-        path = self.get_contract_path('Sha256Int.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Int.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(Integer(10).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_bool(self):
-        path = self.get_contract_path('Sha256Bool.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Bool.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(Integer(1).to_byte_array())
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_bytes(self):
-        path = self.get_contract_path('Sha256Bytes.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Sha256Bytes.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         expected_result = hashlib.sha256(b'unit test')
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(expected_result.digest(), result)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result.digest())
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_sha256_too_many_parameters(self):
         path = self.get_contract_path('Sha256TooManyArguments.py')
@@ -114,7 +204,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_verify_with_ecdsa(self):
         path = self.get_contract_path('VerifyWithECDsa.py')
-        Boa3.compile(path)
+        self.compile(path)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -140,7 +230,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Str.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
@@ -164,7 +254,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Bool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_int(self):
@@ -188,7 +278,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Int.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
@@ -215,7 +305,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256r1Bytes.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
@@ -246,7 +336,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Str.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
@@ -270,7 +360,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_int(self):
@@ -294,7 +384,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Int.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
@@ -321,7 +411,7 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('VerifyWithECDsaSecp256k1Bytes.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
@@ -340,5 +430,5 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('Murmur32.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)

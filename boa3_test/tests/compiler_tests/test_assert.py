@@ -1,12 +1,11 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
-from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestAssert(BoaTest):
@@ -25,15 +24,28 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertUnaryOperation.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', False, 10)
-        self.assertEqual(10, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', True, 20)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', False, 10))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', True, 20)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_binary_boolean_operation(self):
         expected_output = (
@@ -49,35 +61,70 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertBinaryOperation.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 10, 20)
-        self.assertEqual(10, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', 20, 20)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 10, 20))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', 20, 20)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_with_message(self):
-        path = self.get_contract_path('AssertWithMessage.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('AssertWithMessage.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', -10)
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_with_bytes_message(self):
-        path = self.get_contract_path('AssertWithBytesMessage.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('AssertWithBytesMessage.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', -10)
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_with_int_message(self):
         path = self.get_contract_path('AssertWithIntMessage.py')
@@ -92,24 +139,46 @@ class TestAssert(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_assert_with_str_var_message(self):
-        path = self.get_contract_path('AssertWithStrVarMessage.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('AssertWithStrVarMessage.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', -10)
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_with_str_function_message(self):
-        path = self.get_contract_path('AssertWithStrFunctionMessage.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('AssertWithStrFunctionMessage.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', -10)
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', -10)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_int(self):
         expected_output = (
@@ -123,17 +192,30 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertInt.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'Main', -10)
-        self.assertEqual(-10, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', 0)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'Main', -10))
+        expected_results.append(-10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', 0)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_str(self):
         expected_output = (
@@ -147,15 +229,28 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertStr.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 'unittest')
-        self.assertEqual('unittest', result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', '')
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 'unittest'))
+        expected_results.append('unittest')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', '')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_bytes(self):
         expected_output = (
@@ -169,15 +264,29 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertBytes.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', b'unittest')
-        self.assertEqual(b'unittest', String(result).to_bytes())
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', b'')
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', b'unittest',
+                                            expected_result_type=bytes))
+        expected_results.append(b'unittest')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', b'')
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_list(self):
         expected_output = (
@@ -193,15 +302,28 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertList.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3])
-        self.assertEqual(3, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', [])
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3]))
+        expected_results.append(3)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', [])
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_dict(self):
         expected_output = (
@@ -217,15 +339,28 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertDict.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', {1: 2, 2: 5})
-        self.assertEqual(2, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'Main', {})
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', {1: 2, 2: 5}))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', {})
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_any(self):
         expected_output = (
@@ -248,19 +383,41 @@ class TestAssert(BoaTest):
         )
 
         path = self.get_contract_path('AssertAny.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', True)
-        self.assertIsVoid(result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', True))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_throw_test(self):
-        path = self.get_contract_path('ThrowBoa2Test.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ThrowBoa2Test.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', 1)
-        self.assertEqual(True, result)
+        invokes = []
+        expected_results = []
 
-        with self.assertRaisesRegex(TestExecutionException, self.ASSERT_RESULTED_FALSE_MSG):
-            self.run_smart_contract(engine, path, 'main', 4)
+        invokes.append(runner.call_contract(path, 'main', 1))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'main', 4)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)

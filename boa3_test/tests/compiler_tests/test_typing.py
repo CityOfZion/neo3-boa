@@ -1,9 +1,11 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestTyping(BoaTest):
@@ -122,11 +124,22 @@ class TestTyping(BoaTest):
         path = self.get_contract_path('CastToUInt160.py')
         self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
 
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
         value = bytes(range(20))
-        result = self.run_smart_contract(engine, path, 'Main', value,
-                                         expected_result_type=bytes)
-        self.assertEqual(value, result)
+        invokes.append(runner.call_contract(path, 'Main', value,
+                                            expected_result_type=bytes))
+        expected_results.append(value)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_cast_to_transaction(self):
         expected_output = (
@@ -144,16 +157,34 @@ class TestTyping(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_cast_inside_if(self):
-        path = self.get_contract_path('CastInsideIf.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('CastInsideIf.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual('body', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append('body')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_cast_persisted_in_scope(self):
-        path = self.get_contract_path('CastPersistedInScope.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('CastPersistedInScope.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         test_address = bytes(20)
-        result = self.run_smart_contract(engine, path, 'main', test_address, 10, None)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'main', test_address, 10, None))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

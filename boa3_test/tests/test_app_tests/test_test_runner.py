@@ -1,23 +1,25 @@
-import unittest
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from test_runner import utils
-from test_runner.neo_test_runner import NeoTestRunner
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.model.invoker import invokeresult
+from boa3_test.test_drive.testrunner import utils
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestTestRunner(BoaTest):
 
-    @unittest.skip("don't run while circleci config is not updated with test runner")
     def test_run(self):
-        path = self.get_contract_path('test_sc/generation_test', 'GenerationWithDecorator.py')
-        self.compile_and_save(path)
-        path = path.replace('.py', '.nef')
+        path, _ = self.get_deploy_file_paths('test_sc/generation_test', 'GenerationWithDecorator.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        runner = NeoTestRunner()
-        result = runner.run(path, 'Sub', 50, 20)
-        self.assertEqual(30, result)
+        invoke_result = runner.call_contract(path, 'Sub', 50, 20)
+        self.assertEqual(invokeresult.NOT_EXECUTED, invoke_result.result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(30, invoke_result.result)
 
     def test_int_value_to_invoke_parameter(self):
         expected_result = 5

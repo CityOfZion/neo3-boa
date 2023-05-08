@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.13.0] - 2023-05-08
+### Added
+- Included execution tests in the unit tests using the [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner).
+
+
+### Deprecated
+- Deprecating [TestEngine](https://github.com/CityOfZion/neo3-boa/blob/4e3ad421ed9a85b04d70239b5d4ab3a98f2da06d/boa3_test/tests/test_classes/testengine.py) interface. 
+
+
 ## [0.12.3] - 2023-04-26
 ### Fixed
 - Fixed incorrect import error raised when importing modules in the same directory of the importer file
@@ -437,6 +446,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[0.13.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.0
 [0.12.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.3
 [0.12.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.2
 [0.12.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.1

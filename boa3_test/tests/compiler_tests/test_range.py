@@ -1,11 +1,11 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.TestExecutionException import TestExecutionException
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestRange(BoaTest):
@@ -63,16 +63,27 @@ class TestRange(BoaTest):
         )
 
         path = self.get_contract_path('RangeGivenLen.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'range_example', 5)
-        self.assertEqual([0, 1, 2, 3, 4], result)
-        result = self.run_smart_contract(engine, path, 'range_example', 10)
-        self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], result)
-        result = self.run_smart_contract(engine, path, 'range_example', 0)
-        self.assertEqual([], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'range_example', 5))
+        expected_results.append([0, 1, 2, 3, 4])
+        invokes.append(runner.call_contract(path, 'range_example', 10))
+        expected_results.append([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        invokes.append(runner.call_contract(path, 'range_example', 0))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_given_start(self):
         expected_output = (
@@ -124,14 +135,25 @@ class TestRange(BoaTest):
         )
 
         path = self.get_contract_path('RangeGivenStart.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'range_example', 2, 6)
-        self.assertEqual([2, 3, 4, 5], result)
-        result = self.run_smart_contract(engine, path, 'range_example', -10, 0)
-        self.assertEqual([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'range_example', 2, 6))
+        expected_results.append([2, 3, 4, 5])
+        invokes.append(runner.call_contract(path, 'range_example', -10, 0))
+        expected_results.append([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_given_step(self):
         expected_output = (
@@ -183,14 +205,25 @@ class TestRange(BoaTest):
         )
 
         path = self.get_contract_path('RangeGivenStep.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'range_example', 2, 10, 3)
-        self.assertEqual([2, 5, 8], result)
-        result = self.run_smart_contract(engine, path, 'range_example', -2, 10, 3)
-        self.assertEqual([-2, 1, 4, 7], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'range_example', 2, 10, 3))
+        expected_results.append([2, 5, 8])
+        invokes.append(runner.call_contract(path, 'range_example', -2, 10, 3))
+        expected_results.append([-2, 1, 4, 7])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_parameter_mismatched_type(self):
         path = self.get_contract_path('RangeParameterMismatchedType.py')
@@ -246,14 +279,25 @@ class TestRange(BoaTest):
         )
 
         path = self.get_contract_path('RangeExpectedSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'range_example', 2, 6)
-        self.assertEqual([2, 3, 4, 5], result)
-        result = self.run_smart_contract(engine, path, 'range_example', -10, 0)
-        self.assertEqual([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'range_example', 2, 6))
+        expected_results.append([2, 3, 4, 5])
+        invokes.append(runner.call_contract(path, 'range_example', -10, 0))
+        expected_results.append([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_mismatched_type(self):
         path = self.get_contract_path('RangeMismatchedType.py')
@@ -287,298 +331,427 @@ class TestRange(BoaTest):
         )
 
         path = self.get_contract_path('GetValue.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', [1, 2, 3, 4])
-        self.assertEqual(1, result)
-        result = self.run_smart_contract(engine, path, 'Main', [5, 3, 2])
-        self.assertEqual(5, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        with self.assertRaisesRegex(TestExecutionException, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX):
-            self.run_smart_contract(engine, path, 'Main', [])
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3, 4]))
+        expected_results.append(1)
+        invokes.append(runner.call_contract(path, 'Main', [5, 3, 2]))
+        expected_results.append(5)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        runner.call_contract(path, 'Main', [])
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_range_set_value(self):
         path = self.get_contract_path('SetValue.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_range_slicing(self):
-        path = self.get_contract_path('RangeSlicingLiteralValues.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingLiteralValues.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_start_larger_than_ending(self):
-        path = self.get_contract_path('RangeSlicingStartLargerThanEnding.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingStartLargerThanEnding.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_with_variables(self):
-        path = self.get_contract_path('RangeSlicingVariableValues.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingVariableValues.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_negative_start(self):
-        path = self.get_contract_path('RangeSlicingNegativeStart.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingNegativeStart.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2, 3, 4, 5], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2, 3, 4, 5])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_negative_end(self):
-        path = self.get_contract_path('RangeSlicingNegativeEnd.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingNegativeEnd.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_start_omitted(self):
-        path = self.get_contract_path('RangeSlicingStartOmitted.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingStartOmitted.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1, 2], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1, 2])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_omitted(self):
-        path = self.get_contract_path('RangeSlicingOmitted.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingOmitted.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1, 2, 3, 4, 5], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1, 2, 3, 4, 5])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_end_omitted(self):
-        path = self.get_contract_path('RangeSlicingEndOmitted.py')
+        path, _ = self.get_deploy_file_paths('RangeSlicingEndOmitted.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([2, 3, 4, 5], result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([2, 3, 4, 5])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_with_stride(self):
-        path = self.get_contract_path('RangeSlicingWithStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('RangeSlicingWithStride.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         a = range(6)
         expected_result = a[2:5:2]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'literal_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[2:5:2]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'literal_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-6:5:2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[0:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-6:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-999:5:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[0:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-999:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[999:5:2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[0:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[999:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_values'))
+        expected_results.append(list(expected_result))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_with_negative_stride(self):
-        path = self.get_contract_path('RangeSlicingWithNegativeStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('RangeSlicingWithNegativeStride.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         a = range(6)
         expected_result = a[2:5:-1]
-        result = self.run_smart_contract(engine, path, 'literal_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'literal_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-6:5:-1]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[0:-1:-1]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-6:-1:-1]
-        result = self.run_smart_contract(engine, path, 'negative_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-999:5:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[0:-999:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-999:-999:-1]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[999:5:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[0:999:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[999:999:-1]
-        result = self.run_smart_contract(engine, path, 'really_high_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_values'))
+        expected_results.append(list(expected_result))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_omitted_with_stride(self):
-        path = self.get_contract_path('RangeSlicingOmittedWithStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('RangeSlicingOmittedWithStride.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         a = range(6)
         expected_result = a[::2]
-        result = self.run_smart_contract(engine, path, 'omitted_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'omitted_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:5:2]
-        result = self.run_smart_contract(engine, path, 'omitted_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'omitted_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[2::2]
-        result = self.run_smart_contract(engine, path, 'omitted_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'omitted_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-6::2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:-1:2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-999::2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:-999:2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[999::2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:999:2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(list(expected_result))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_slicing_omitted_with_negative_stride(self):
-        path = self.get_contract_path('RangeSlicingOmittedWithNegativeStride.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('RangeSlicingOmittedWithNegativeStride.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         a = range(6)
         expected_result = a[::-2]
-        result = self.run_smart_contract(engine, path, 'omitted_values')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'omitted_values'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:5:-2]
-        result = self.run_smart_contract(engine, path, 'omitted_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'omitted_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[2::-2]
-        result = self.run_smart_contract(engine, path, 'omitted_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'omitted_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-6::-2]
-        result = self.run_smart_contract(engine, path, 'negative_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:-1:-2]
-        result = self.run_smart_contract(engine, path, 'negative_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[-999::-2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:-999:-2]
-        result = self.run_smart_contract(engine, path, 'negative_really_low_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[999::-2]
-        result = self.run_smart_contract(engine, path, 'really_high_start')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_start'))
+        expected_results.append(list(expected_result))
 
         a = range(6)
         expected_result = a[:999:-2]
-        result = self.run_smart_contract(engine, path, 'really_high_end')
-        self.assertEqual(list(expected_result), result)
+        invokes.append(runner.call_contract(path, 'really_high_end'))
+        expected_results.append(list(expected_result))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_range_test(self):
-        path = self.get_contract_path('RangeBoa2Test.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(list(range(100, 120)), result)
+        path, _ = self.get_deploy_file_paths('RangeBoa2Test.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(list(range(100, 120)))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_range_index(self):
         path = self.get_contract_path('IndexRange.py')
-        engine = TestEngine()
-
         # TODO: change when index() with only one argument is implemented for range
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

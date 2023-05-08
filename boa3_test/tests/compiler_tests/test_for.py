@@ -1,9 +1,10 @@
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestFor(BoaTest):
@@ -58,20 +59,39 @@ class TestFor(BoaTest):
         )
 
         path = self.get_contract_path('TupleCondition.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(23, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(23)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_string_condition(self):
-        path = self.get_contract_path('StringCondition.py')
-        output = Boa3.compile(path)
+        path, _ = self.get_deploy_file_paths('StringCondition.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual('5', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append('5')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_mismatched_type_condition(self):
         path = self.get_contract_path('MismatchedTypeCondition.py')
@@ -79,9 +99,8 @@ class TestFor(BoaTest):
 
     def test_for_no_condition(self):
         path = self.get_contract_path('NoCondition.py')
-
         with self.assertRaises(SyntaxError):
-            output = Boa3.compile(path)
+            output = self.compile(path)
 
     def test_nested_for(self):
         outer_jmpif_address = Integer(47).to_byte_array(min_length=1, signed=True)
@@ -165,12 +184,23 @@ class TestFor(BoaTest):
         )
 
         path = self.get_contract_path('NestedFor.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(529, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(529)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_else(self):
         jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
@@ -227,99 +257,228 @@ class TestFor(BoaTest):
         )
 
         path = self.get_contract_path('ForElse.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(24, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(24)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_continue(self):
-        path = self.get_contract_path('ForContinue.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ForContinue.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(20, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(20)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_break(self):
-        path = self.get_contract_path('ForBreak.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ForBreak.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(6, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(6)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_break_else(self):
-        path = self.get_contract_path('ForBreakElse.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ForBreakElse.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(6, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(6)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_iterate_dict(self):
         path = self.get_contract_path('ForIterateDict.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_iteration_test(self):
-        path = self.get_contract_path('IterBoa2Test.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(18, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(18)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_iteration_test2(self):
-        path = self.get_contract_path('IterBoa2Test2.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(8, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test2.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(8)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_iteration_test3(self):
-        path = self.get_contract_path('IterBoa2Test3.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(7, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test3.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(7)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_iteration_test4(self):
         path = self.get_contract_path('IterBoa2Test4.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_boa2_iteration_test5(self):
-        path = self.get_contract_path('IterBoa2Test5.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(51, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test5.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(51)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_iteration_test6(self):
-        path = self.get_contract_path('IterBoa2Test6.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(10, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test6.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_iteration_test7(self):
-        path = self.get_contract_path('IterBoa2Test7.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(12, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test7.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(12)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_iteration_test8(self):
-        path = self.get_contract_path('IterBoa2Test8.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(6, result)
+        path, _ = self.get_deploy_file_paths('IterBoa2Test8.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(6)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_pass(self):
         path = self.get_contract_path('ForPass.py')
-        engine = TestEngine()
-
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertIn(Opcode.NOP, output)
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsVoid(result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_for_range(self):
-        path = self.get_contract_path('ForWithContractInterface.py')
-        path_contract_called = self.get_contract_path('ForWithContractInterfaceCalled.py')
-        engine = TestEngine()
-        self.run_smart_contract(engine, path_contract_called, 'return_zero')
+        path, _ = self.get_deploy_file_paths('ForWithContractInterface.py')
+        path_contract_called, _ = self.get_deploy_file_paths('ForWithContractInterfaceCalled.py')
 
-        result = self.run_smart_contract(engine, path, 'main', 3)
-        self.assertEqual([0, 0, 0], result)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        runner.deploy_contract(path_contract_called)
+
+        invokes.append(runner.call_contract(path, 'main', 3))
+        expected_results.append([0, 0, 0])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

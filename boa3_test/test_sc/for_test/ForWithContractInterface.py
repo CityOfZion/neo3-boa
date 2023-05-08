@@ -12,7 +12,7 @@ def main(number: int) -> List[int]:
     return result_list
 
 
-@contract('0x5cb5e1b45b64e343ae79ded04f670b3770eadf48')
+@contract('0x4080550f521e0ce4a650b3d4c6df22be960335fd')
 class AnotherContract:
 
     @staticmethod

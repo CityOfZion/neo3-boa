@@ -1,6 +1,7 @@
 from typing import Dict
 
-from boa3.boa3 import Boa3
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.method import Method
@@ -9,8 +10,8 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestVariable(BoaTest):
@@ -29,10 +30,14 @@ class TestVariable(BoaTest):
             + b'\x00'
             + Opcode.RET        # return
         )
-        compiler_output = compiler.compile(path)
+
+        from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
+        with LOCK:
+            compiler_output = compiler.compile(path)
+            main_symbol_table: Dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
+
         self.assertEqual(expected_compiler_output, compiler_output)
 
-        main_symbol_table: Dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
         # the variable is local to a method, so it shouldn't be in the main symbol table
         self.assertFalse(test_variable_id in main_symbol_table)
 
@@ -63,7 +68,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('AssignmentWithType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_assignment_without_type(self):
@@ -77,7 +82,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('AssignmentWithoutType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_argument_assignment(self):
@@ -95,7 +100,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ArgumentAssignment.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments(self):
@@ -113,7 +118,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MultipleAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_set_sequence(self):
@@ -148,7 +153,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MultipleAssignmentsSetSequence.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_set_sequence_last(self):
@@ -183,7 +188,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MultipleAssignmentsSetSequenceLast.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_multiple_assignments_mismatched_type(self):
@@ -206,7 +211,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('MismatchedTypeMultipleAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_tuple_multiple_assignments(self):
@@ -239,7 +244,7 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ManyAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
     def test_return_arg_value(self):
@@ -252,14 +257,25 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ReturnArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'Main', -140)
-        self.assertEqual(-140, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'Main', -140))
+        expected_results.append(-140)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_return_local_var_value(self):
         expected_output = (
@@ -273,14 +289,25 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ReturnLocalVariable.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(1, result)
-        result = self.run_smart_contract(engine, path, 'Main', -140)
-        self.assertEqual(1, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(1)
+        invokes.append(runner.call_contract(path, 'Main', -140))
+        expected_results.append(1)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_local_with_arg_value(self):
         expected_output = (
@@ -294,14 +321,25 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('AssignLocalWithArgument.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'Main', -140)
-        self.assertEqual(-140, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'Main', -140))
+        expected_results.append(-140)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_using_undeclared_variable(self):
         path = self.get_contract_path('UsingUndeclaredVariable.py')
@@ -430,12 +468,23 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalDeclarationWithArgumentWrittenAfter.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(10, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_declaration_without_assignment(self):
         path = self.get_contract_path('GlobalDeclarationWithoutAssignment.py')
@@ -452,12 +501,23 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalAssignmentWithType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(10, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_assignment_without_type(self):
         expected_output = (
@@ -470,32 +530,52 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalAssignmentWithoutType.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(10, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_tuple_multiple_assignments(self):
         path = self.get_contract_path('GlobalAssignmentWithTuples.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_global_chained_multiple_assignments(self):
-        path = self.get_contract_path('GlobalMultipleAssignments.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GlobalMultipleAssignments.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'get_a')
-        self.assertEqual(10, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'get_c')
-        self.assertEqual(15, result)
+        invokes.append(runner.call_contract(path, 'get_a'))
+        expected_results.append(10)
 
-        result = self.run_smart_contract(engine, path, 'set_a', 100)
-        self.assertIsVoid(result)
+        invokes.append(runner.call_contract(path, 'get_c'))
+        expected_results.append(15)
 
-        result = self.run_smart_contract(engine, path, 'get_a')
-        self.assertEqual(100, result)
+        invokes.append(runner.call_contract(path, 'set_a', 100))
+        expected_results.append(None)
+
+        invokes.append(runner.call_contract(path, 'get_a'))
+        expected_results.append(100)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_many_global_assignments(self):
         expected_output = (
@@ -532,26 +612,46 @@ class TestVariable(BoaTest):
         )
 
         path = self.get_contract_path('ManyGlobalAssignments.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1, 2, 3, 4, 5, 6, 7])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_global_assignment(self):
-        path = self.get_contract_path('ListGlobalAssignment.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ListGlobalAssignment.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         expected_value = [1, 2, 3, 4]
-        result = self.run_smart_contract(engine, path, 'get_from_global')
-        self.assertEqual(expected_value, result)
+        invokes.append(runner.call_contract(path, 'get_from_global'))
+        expected_results.append(expected_value)
 
-        result = self.run_smart_contract(engine, path, 'get_from_class')
-        self.assertEqual(expected_value, result)
+        invokes.append(runner.call_contract(path, 'get_from_class'))
+        expected_results.append(expected_value)
 
-        result = self.run_smart_contract(engine, path, 'get_from_class_without_assigning')
-        self.assertEqual([], result)
+        invokes.append(runner.call_contract(path, 'get_from_class_without_assigning'))
+        expected_results.append([])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_assignment_between_functions(self):
         expected_output = (
@@ -568,24 +668,44 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GlobalAssignmentBetweenFunctions.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'example')
-        self.assertEqual(5, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'example'))
+        expected_results.append(5)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_variable_in_class_method(self):
-        path = self.get_contract_path('GlobalVariableInClassMethod.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GlobalVariableInClassMethod.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'use_variable_in_func')
-        self.assertEqual(42, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'use_variable_in_map')
-        self.assertEqual({'val1': 1, 'val2': 2, 'bar': 42}, result)
+        invokes.append(runner.call_contract(path, 'use_variable_in_func'))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'use_variable_in_map'))
+        expected_results.append({'val1': 1, 'val2': 2, 'bar': 42})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_get_global_variable_value_written_after(self):
         expected_output = (
@@ -621,12 +741,23 @@ class TestVariable(BoaTest):
             + Opcode.RET
         )
         path = self.get_contract_path('GetGlobalValueWrittenAfter.py')
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7], result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append([0, 1, 2, 3, 4, 5, 6, 7])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_local_shadowing_global_with_arg_value(self):
         expected_output = (
@@ -647,91 +778,187 @@ class TestVariable(BoaTest):
         output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
-        result = self.run_smart_contract(engine, path, 'Main', -140)
-        self.assertEqual(-140, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
+        invokes.append(runner.call_contract(path, 'Main', -140))
+        expected_results.append(-140)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_global_in_function_with_global_keyword(self):
-        path = self.get_contract_path('GlobalAssignmentInFunctionWithArgument.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GlobalAssignmentInFunctionWithArgument.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'get_b')
-        self.assertEqual(0, result)
+        invokes = []
+        expected_results = []
 
-        result = self.run_smart_contract(engine, path, 'Main', 10)
-        self.assertEqual(10, result)
+        invokes.append(runner.call_contract(path, 'get_b'))
+        expected_results.append(0)
 
-        result = self.run_smart_contract(engine, path, 'get_b')
-        self.assertEqual(10, result)
+        invokes.append(runner.call_contract(path, 'Main', 10))
+        expected_results.append(10)
 
-        result = self.run_smart_contract(engine, path, 'Main', -140)
-        self.assertEqual(-140, result)
+        invokes.append(runner.call_contract(path, 'get_b'))
+        expected_results.append(10)
 
-        result = self.run_smart_contract(engine, path, 'get_b')
-        self.assertEqual(-140, result)
+        invokes.append(runner.call_contract(path, 'Main', -140))
+        expected_results.append(-140)
+
+        invokes.append(runner.call_contract(path, 'get_b'))
+        expected_results.append(-140)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_void_function_call(self):
         path = self.get_contract_path('AssignVoidFunctionCall.py')
-        engine = TestEngine()
-
-        output = Boa3.compile(path)
+        output = self.compile(path)
         self.assertIn(Opcode.NOP, output)
 
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(None, result)
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(None)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_anonymous_variable(self):
-        path = self.get_contract_path('AnonymousVariable')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'Main')
-        self.assertEqual(400, result)
+        path, _ = self.get_deploy_file_paths('AnonymousVariable')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(400)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_assign_starred_variable(self):
         path = self.get_contract_path('AssignStarredVariable.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_variables_in_different_scope_with_same_name(self):
-        path = self.get_contract_path('DifferentScopesWithSameName.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test')
-        self.assertEqual(1_000, result)
+        path, _ = self.get_deploy_file_paths('DifferentScopesWithSameName.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test'))
+        expected_results.append(1_000)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_instance_variable_and_variable_with_same_name(self):
-        path = self.get_contract_path('InstanceVariableAndVariableWithSameName.py')
-        engine = TestEngine()
-        result = self.run_smart_contract(engine, path, 'test')
-        self.assertEqual([10], result)
+        path, _ = self.get_deploy_file_paths('InstanceVariableAndVariableWithSameName.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'test'))
+        expected_results.append([10])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_inner_object_variable_access(self):
-        path = self.get_contract_path('InnerObjectVariableAccess.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('InnerObjectVariableAccess.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         expected_return = 'InnerObjectVariableAccess'
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_return, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_return)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variables_with_same_name_class_variable_and_local(self):
-        path = self.get_contract_path('VariablesWithSameNameClassVariableAndLocal.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('VariablesWithSameNameClassVariableAndLocal.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         expected_return = 'example'
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_return, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_return)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variables_with_same_name_instance_and_local(self):
-        path = self.get_contract_path('VariablesWithSameNameInstanceAndLocal.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('VariablesWithSameNameInstanceAndLocal.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         expected_return = 'example'
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_return, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_return)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_variables_with_same_name(self):
-        path = self.get_contract_path('VariablesWithSameName.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('VariablesWithSameName.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
 
         expected_return = 'example'
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(expected_return, result)
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(expected_return)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

@@ -319,7 +319,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _log_import(self, import_from: str):
         if self._log:
-            logging.info("Importing '{0}'\t <{1}>".format(import_from, self.filename))
+            logging.getLogger(constants.BOA_LOGGING_NAME).info("Importing '{0}'\t <{1}>".format(import_from, self.filename))
 
     def _log_unresolved_import(self, origin_node: ast.AST, import_id: str):
         if self._log:

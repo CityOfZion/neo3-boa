@@ -6,3 +6,6 @@ PROJECT_ROOT_DIRECTORY = constants.PATH_SEPARATOR.join(os.path.dirname(__file__)
 
 # If you didn't install TestEngine in this project's root folder, change this to the path of your .dll folder
 TEST_ENGINE_DIRECTORY = f'{PROJECT_ROOT_DIRECTORY}{constants.PATH_SEPARATOR}Neo.TestEngine'
+
+NEO_EXPRESS_INSTANCE_DIRECTORY = f'{PROJECT_ROOT_DIRECTORY}/boa3_test/tests'
+TEST_RUNNER_DIRECTORY = os.path.abspath('.')

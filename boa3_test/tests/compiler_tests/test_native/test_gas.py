@@ -1,102 +1,179 @@
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
-from boa3_test.tests.boa_test import BoaTest
-from boa3_test.tests.test_classes.testengine import TestEngine
+from boa3.internal.neo3.vm import VMState
+from boa3_test.test_drive import neoxp
+from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 class TestGasClass(BoaTest):
     default_folder: str = 'test_sc/native_test/gas'
+    GAS_CONTRACT_NAME = 'GasToken'
 
     def test_get_hash(self):
-        path = self.get_contract_path('GetHash.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('GetHash.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(constants.GAS_SCRIPT, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(constants.GAS_SCRIPT)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_symbol(self):
-        path = self.get_contract_path('Symbol.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Symbol.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual('GAS', result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append('GAS')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_symbol_too_many_parameters(self):
         path = self.get_contract_path('SymbolTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_decimals(self):
-        path = self.get_contract_path('Decimals.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Decimals.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertEqual(8, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append(8)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_decimals_too_many_parameters(self):
         path = self.get_contract_path('DecimalsTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_total_supply(self):
-        path = self.get_contract_path('TotalSupply.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TotalSupply.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main')
-        self.assertIsInstance(result, int)
+        contract_call = runner.call_contract(path, 'main')
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsInstance(contract_call.result, int)
 
     def test_total_supply_too_many_parameters(self):
         path = self.get_contract_path('TotalSupplyTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_balance_of(self):
-        path = self.get_contract_path('BalanceOf.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('BalanceOf.py')
+        test_account_1 = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
+        test_account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', bytes(range(20)))
-        self.assertEqual(0, result)
+        invokes = []
+        expected_results = []
 
-        engine.add_gas(bytes(range(20)), 10)
-        result = self.run_smart_contract(engine, path, 'main', bytes(range(20)))
-        self.assertEqual(10, result)
+        invokes.append(runner.call_contract(path, 'main', test_account_2))
+        expected_results.append(0)
+
+        runner.add_gas(test_account_1, 10)
+        invokes.append(runner.call_contract(path, 'main', test_account_1))
+        expected_results.append(10)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_balance_of_too_many_parameters(self):
         path = self.get_contract_path('BalanceOfTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
     def test_transfer(self):
-        path = self.get_contract_path('Transfer.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('Transfer.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        account_1 = bytes(range(20))
-        account_2 = bytes(range(20)[::-1])
+        invokes = []
+        expected_results = []
+
+        account = neoxp.utils.get_account_by_name('testAccount1')
+        account_1 = account.script_hash.to_array()
+        account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
         amount = 10000
 
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount, ['value', 123, False])
-        self.assertEqual(False, result)
+        runner.add_gas(account_1, amount)
+        invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount, ['value', 123, False]))
+        expected_results.append(False)
 
-        engine.add_gas(account_1, amount)
         # can't transfer if there is no signature, even with enough GAS
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount, ['value', 123, False])
-        self.assertEqual(False, result)
+        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount, ['value', 123, False]))
+        expected_results.append(False)
 
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount, ['value', 123, False],
-                                         signer_accounts=[account_1])
-        self.assertEqual(True, result)
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount, ['value', 123, False]))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(self.GAS_CONTRACT_NAME, 'transfer',
+                                            account_1, account_2, amount, ['value', 123, False]))
+        expected_results.append(True)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_transfer_data_default(self):
-        path = self.get_contract_path('TransferDataDefault.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('TransferDataDefault.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        account_1 = bytes(range(20))
-        account_2 = bytes(range(20)[::-1])
+        invokes = []
+        expected_results = []
+
+        account = neoxp.utils.get_account_by_name('testAccount1')
+        account_1 = account.script_hash.to_array()
+        account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
         amount = 100
 
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount)
-        self.assertEqual(False, result)
+        runner.add_gas(account_1, amount)
+        invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount))
+        expected_results.append(False)
+        runner.update_contracts(export_checkpoint=True)
 
-        engine.add_gas(account_1, amount)
-        result = self.run_smart_contract(engine, path, 'main', account_1, account_2, amount,
-                                         signer_accounts=[account_1])
-        self.assertEqual(True, result)
+        # TestRunner doesn't have WitnessScope modifier
+        # signing is not enough to pass check witness calling from test contract
+        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount))
+        expected_results.append(False)
+
+        invokes.append(runner.call_contract(self.GAS_CONTRACT_NAME, 'transfer', account_1, account_2, amount, None))
+        expected_results.append(True)
+
+        runner.execute(account=account)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_transfer_too_many_parameters(self):
         path = self.get_contract_path('TransferTooManyArguments.py')
@@ -107,8 +184,17 @@ class TestGasClass(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_import_with_alias(self):
-        path = self.get_contract_path('ImportWithAlias.py')
-        engine = TestEngine()
+        path, _ = self.get_deploy_file_paths('ImportWithAlias.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
 
-        result = self.run_smart_contract(engine, path, 'main', bytes(20))
-        self.assertEqual(0, result)
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', bytes(20)))
+        expected_results.append(0)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
