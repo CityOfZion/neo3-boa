@@ -7,7 +7,8 @@ class Event:
     """
     Describes an action that happened in the blockchain.
     """
-    pass
+    def __call__(self, *args, **kwargs):
+        pass
 
 
 class UInt160(bytes):
