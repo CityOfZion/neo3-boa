@@ -781,6 +781,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         external_name=external_function_name,
                         is_init=is_class_constructor)
 
+        # debug information
+        method.file_origin = self.filename.replace(os.path.sep, constants.PATH_SEPARATOR)
+
         if function.name in Builtin.internal_methods:
             internal_method = Builtin.internal_methods[function.name]
             if not internal_method.is_valid_deploy_method(method):

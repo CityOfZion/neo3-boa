@@ -118,6 +118,16 @@ class ClassType(IType, ABC):
             instance_funcs.update(base.instance_methods)
         return instance_funcs
 
+    @property
+    def methods(self):
+        """
+        :rtype: Dict[str, boa3.internal.model.method.Method]
+        """
+        methods = self.static_methods.copy()
+        methods.update(self.class_methods)
+        methods.update(self.instance_methods)
+        return methods
+
     @abstractmethod
     def constructor_method(self):
         """
@@ -130,9 +140,7 @@ class ClassType(IType, ABC):
     @property
     def symbols(self) -> Dict[str, ISymbol]:
         s = {}
-        s.update(self.static_methods)
-        s.update(self.class_methods)
-        s.update(self.instance_methods)
+        s.update(self.methods)
         s.update(self.variables)
         s.update(self.properties)
         return s

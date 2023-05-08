@@ -65,7 +65,7 @@ class BoaTest(TestCase):
         return compiler._analyser
 
     def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
-        from boa3.internal.compiler.filegenerator import FileGenerator
+        from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
         generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
         return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
@@ -173,6 +173,8 @@ class BoaTest(TestCase):
         path = '{0}/{1}'.format(dir_folder, contract_name)
         if not os.path.isfile(path):
             raise FileNotFoundError(path)
+        else:
+            path = os.path.abspath(path).replace(os.path.sep, constants.PATH_SEPARATOR)
         return path
 
     def get_deploy_file_paths_without_compiling(self, contract_path: str) -> Tuple[str, str]:
