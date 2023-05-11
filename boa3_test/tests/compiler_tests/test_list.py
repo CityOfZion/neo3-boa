@@ -124,14 +124,6 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -170,14 +162,11 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[-1]
             + Opcode.PUSHM1
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
+
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.ADD
+
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -208,6 +197,55 @@ class TestList(BoaTest):
 
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+
+    def test_list_get_value_with_variable(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK
+            + Opcode.LDARG0     # [0, 1, 2, 3, 4, 5][arg]
+
+            + Opcode.DUP        # will check if number is negative
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+
+            + Opcode.PICKITEM
+            + Opcode.RET        # return
+        )
+
+        path = self.get_contract_path('GetValueWithVariable.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 0))
+        expected_results.append(0)
+        invokes.append(runner.call_contract(path, 'main', 2))
+        expected_results.append(2)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_type_hint(self):
         expected_output = (
@@ -386,24 +424,8 @@ class TestList(BoaTest):
             + b'\x01'
             + Opcode.LDARG0     # arg[0][0]
             + Opcode.PUSH0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.PUSH0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -440,14 +462,6 @@ class TestList(BoaTest):
             + b'\x02'
             + Opcode.LDARG1     # args[0]
             + Opcode.PUSH0
-            + Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
             + Opcode.PICKITEM
             + Opcode.RET        # return
         )
@@ -629,7 +643,166 @@ class TestList(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_list_slicing_with_stride(self):
-        path, _ = self.get_deploy_file_paths('ListSlicingWithStride.py')
+        check_if_fix_negative_index =(
+            Opcode.DUP
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+        )
+
+        fix_negative_lower_index = (
+            Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.ADD
+        )
+
+        fix_negative_upper_index = (
+            Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.ADD
+        )
+
+        check_lower_index_out_of_bounds = (
+            Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
+        )
+
+        check_upper_index_out_of_bounds = (
+            Opcode.OVER  # checks if upper index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(6).to_byte_array(min_length=1)
+            + Opcode.SWAP
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.SWAP
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN
+        )
+
+        expected_not_negative_index_output = (
+            Opcode.INITSLOT     # literal_values function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.PUSH2
+
+            + check_lower_index_out_of_bounds
+
+            + Opcode.PUSH5
+
+            + check_upper_index_out_of_bounds
+
+            + Opcode.NEWARRAY0  # starts getting the subarray
+        )
+
+        expected_negative_lower_index_output = (
+            Opcode.INITSLOT     # negative_start function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.PUSH6
+            + Opcode.NEGATE
+
+            + fix_negative_lower_index
+            + check_lower_index_out_of_bounds
+
+            + Opcode.PUSH5
+            + check_upper_index_out_of_bounds
+            + Opcode.NEWARRAY0  # starts getting the subarray
+        )
+        expected_negative_upper_index_output = (
+            Opcode.INITSLOT     # negative_end function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.PUSH0
+            + check_lower_index_out_of_bounds
+            + Opcode.PUSHM1
+
+            + fix_negative_upper_index
+            + check_upper_index_out_of_bounds
+
+            + Opcode.NEWARRAY0  # starts getting the subarray
+        )
+        expected_possible_negative_index_output = (
+            Opcode.INITSLOT     # with_variables function signature
+            + b'\x01'
+            + b'\x02'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.LDARG0
+
+            + check_if_fix_negative_index
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + fix_negative_lower_index
+            + check_lower_index_out_of_bounds
+
+            + Opcode.LDARG1
+
+            + check_if_fix_negative_index
+            + Integer(6).to_byte_array(min_length=1, signed=True)
+            + fix_negative_upper_index
+            + check_upper_index_out_of_bounds
+
+            + Opcode.NEWARRAY0  # starts getting the subarray
+        )
+
+        path = self.get_contract_path('ListSlicingWithStride.py')
+        output = self.compile(path)
+        self.assertIn(expected_not_negative_index_output, output)
+        self.assertIn(expected_negative_lower_index_output, output)
+        self.assertIn(expected_negative_upper_index_output, output)
+        self.assertIn(expected_possible_negative_index_output, output)
+
+        path, _ = self.get_deploy_file_paths(path)
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -683,6 +856,13 @@ class TestList(BoaTest):
         a = [0, 1, 2, 3, 4, 5]
         expected_result = a[999:999:2]
         invokes.append(runner.call_contract(path, 'really_high_values'))
+        expected_results.append(expected_result)
+
+        a = [0, 1, 2, 3, 4, 5]
+        x = 2
+        y = 4
+        expected_result = a[x:y:2]
+        invokes.append(runner.call_contract(path, 'with_variables', x, y))
         expected_results.append(expected_result)
 
         runner.execute()
