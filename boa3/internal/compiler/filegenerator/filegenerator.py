@@ -13,6 +13,7 @@ from boa3.internal.model.imports.package import Package
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.classes.classtype import ClassType
+from boa3.internal.model.type.classes.userclass import UserClass
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo import to_hex_str
@@ -122,12 +123,17 @@ class FileGenerator:
             from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinCallable
 
             methods: Dict[Tuple[str, str], Method] = {}
-            imported_symbols: Dict[str, Import] = {}
+            imported_symbols: Dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
 
             for name, symbol in self._symbols.items():
-                if symbol.defined_by_entry and isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
-                    methods[(self._entry_file, name)] = symbol
-                elif isinstance(symbol, Import):
+                if symbol.defined_by_entry:
+                    if isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
+                        methods[(self._entry_file, name)] = symbol
+                    elif isinstance(symbol, UserClass):
+                        for class_method_name, class_method in symbol.methods.items():
+                            methods[(self._entry_file, f'{symbol.identifier}.{class_method_name}')] = class_method
+
+                elif isinstance(symbol, Import) and symbol.origin not in imported_symbols:
                     imported_symbols[symbol.origin] = symbol
 
             imported_to_map, imports_unique_ids = self._get_imports_unique_ids(imported_symbols,
@@ -153,6 +159,12 @@ class FileGenerator:
                             symbol.file_origin = module_import.origin_file
 
                         methods[(module_id, name)] = symbol
+                    elif isinstance(symbol, UserClass):
+                        for class_method_name, class_method in symbol.methods.items():
+                            if class_method.file_origin is None and module_import.origin_file in self._files:
+                                class_method.file_origin = module_import.origin_file
+
+                            methods[(module_id, f'{symbol.identifier}.{class_method_name}')] = class_method
 
             self._all_methods = methods
         return self._all_methods
@@ -176,25 +188,49 @@ class FileGenerator:
     @property
     def _all_imports(self) -> List[Import]:
         if self.__all_imports is None:
-
             all_imports = [imported for imported in self._symbols.values()
-                           if (isinstance(imported, Import)
+                           if (isinstance(imported, (Import, Package))
                                and not isinstance(imported, BuiltinImport))]
+            only_imports = []
+            imported_files = []
+
             index = 0
             while index < len(all_imports):
                 imported = all_imports[index]
-                for inner in imported.all_symbols.values():
-                    if (isinstance(inner, Import)
+                index += 1
+
+                if isinstance(imported, Package) and isinstance(imported.origin, Import):
+                    all_imports.append(imported.origin)
+                    file_origin = imported.origin.origin
+
+                    for symbol in imported.symbols.values():
+                        if isinstance(symbol, Method) and symbol.is_compiled and symbol.file_origin is None:
+                            symbol.file_origin = file_origin
+                        if isinstance(symbol, UserClass):
+                            for class_symbol in symbol.symbols.values():
+                                if isinstance(class_symbol, Method) and class_symbol.file_origin is None:
+                                    class_symbol.file_origin = file_origin
+
+                if isinstance(imported, Import):
+                    if imported.origin not in imported_files:
+                        only_imports.append(imported)
+                        imported_files.append(imported.origin)
+                    else:
+                        # import already included
+                        continue
+
+                inner_symbols = imported.all_symbols if hasattr(imported, 'all_symbols') else imported.symbols
+                for inner in inner_symbols.values():
+                    if (isinstance(inner, (Import, Package))
                             and not isinstance(inner, BuiltinImport)
                             and inner not in all_imports):
                         all_imports.append(inner)
-                index += 1
 
-            self.__all_imports = list(reversed(all_imports))  # first positions are the most inner imports
+            self.__all_imports = list(reversed(only_imports))  # first positions are the most inner imports
             # using for instead a generator to keep the result determined
-            for import_ in all_imports:
-                if os.path.isfile(import_.origin) and import_.origin not in self._files:
-                    self._files.append(import_.origin)
+            for import_ in imported_files:
+                if os.path.isfile(import_) and import_ not in self._files:
+                    self._files.append(import_)
 
         return self.__all_imports
 
@@ -561,10 +597,10 @@ class FileGenerator:
     # endregion
 
     def _get_static_var_unique_name(self, variable_id) -> str:
-        imported_symbols: Dict[str, Import] = {}
+        imported_symbols: Dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
 
         for name, symbol in self._symbols.items():
-            if isinstance(symbol, Import):
+            if isinstance(symbol, Import) and symbol.origin not in imported_symbols:
                 imported_symbols[symbol.origin] = symbol
 
         imported_to_map, imports_unique_ids = self._get_imports_unique_ids(imported_symbols,
