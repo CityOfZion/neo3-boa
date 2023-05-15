@@ -642,29 +642,24 @@ class TestList(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-    def test_list_slicing_with_stride(self):
-        check_if_fix_negative_index =(
-            Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-        )
+    def test_list_slicing_positive_index_opcode(self):
+        expected_output = (
+            Opcode.INITSLOT  # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK  # [0, 1, 2, 3, 4, 5]
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.PUSH2  # lower index
 
-        fix_negative_lower_index = (
-            Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-        )
-
-        fix_negative_upper_index = (
-            Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.SIZE
-            + Opcode.ADD
-        )
-
-        check_lower_index_out_of_bounds = (
-            Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.DUP  # checks if lower index is out of bounds on the array
             + Opcode.SIGN
             + Opcode.PUSHM1
             + Opcode.JMPNE
@@ -674,10 +669,10 @@ class TestList(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.MIN
-        )
 
-        check_upper_index_out_of_bounds = (
-            Opcode.OVER  # checks if upper index is out of bounds on the array
+            + Opcode.PUSH3  # upper index
+
+            + Opcode.OVER  # checks if upper index is out of bounds on the array
             + Opcode.SIGN
             + Opcode.PUSHM1
             + Opcode.JMPNE
@@ -690,35 +685,17 @@ class TestList(BoaTest):
             + Opcode.PICK
             + Opcode.SIZE
             + Opcode.MIN
-        )
-
-        expected_not_negative_index_output = (
-            Opcode.INITSLOT     # literal_values function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH5
-            + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH0
-            + Opcode.PUSH6
-            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
-            + Opcode.STLOC0
-            + Opcode.LDLOC0
-            + Opcode.PUSH2
-
-            + check_lower_index_out_of_bounds
-
-            + Opcode.PUSH5
-
-            + check_upper_index_out_of_bounds
 
             + Opcode.NEWARRAY0  # starts getting the subarray
-        )
 
-        expected_negative_lower_index_output = (
-            Opcode.INITSLOT     # negative_start function signature
+        )
+        path = self.get_contract_path('ListSlicingLiteralValues.py')
+        output = self.compile(path)
+        self.assertIn(expected_output, output)
+
+    def test_list_slicing_negative_lower_index_opcode(self):
+        expected_output = (
+            Opcode.INITSLOT  # function signature
             + b'\x01'
             + b'\x00'
             + Opcode.PUSH5
@@ -728,45 +705,82 @@ class TestList(BoaTest):
             + Opcode.PUSH1
             + Opcode.PUSH0
             + Opcode.PUSH6
-            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
+            + Opcode.PACK  # [0, 1, 2, 3, 4, 5]
             + Opcode.STLOC0
             + Opcode.LDLOC0
-            + Opcode.PUSH6
-            + Opcode.NEGATE
-
-            + fix_negative_lower_index
-            + check_lower_index_out_of_bounds
-
-            + Opcode.PUSH5
-            + check_upper_index_out_of_bounds
-            + Opcode.NEWARRAY0  # starts getting the subarray
-        )
-        expected_negative_upper_index_output = (
-            Opcode.INITSLOT     # negative_end function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSH5
             + Opcode.PUSH4
-            + Opcode.PUSH3
-            + Opcode.PUSH2
-            + Opcode.PUSH1
-            + Opcode.PUSH0
-            + Opcode.PUSH6
-            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
-            + Opcode.STLOC0
-            + Opcode.LDLOC0
-            + Opcode.PUSH0
-            + check_lower_index_out_of_bounds
+            + Opcode.NEGATE  # lower index
+
+            + Opcode.OVER   # fix negative index
+            + Opcode.SIZE
+            + Opcode.ADD
+
+            + Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.SIGN
             + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
 
-            + fix_negative_upper_index
-            + check_upper_index_out_of_bounds
+            + Opcode.OVER
+            + Opcode.SIZE  # upper index
 
             + Opcode.NEWARRAY0  # starts getting the subarray
         )
-        expected_possible_negative_index_output = (
-            Opcode.INITSLOT     # with_variables function signature
+        path = self.get_contract_path('ListSlicingNegativeStart.py')
+        output = self.compile(path)
+        self.assertIn(expected_output, output)
+
+    def test_list_slicing_negative_upper_index_opcode(self):
+        expected_output = (
+            Opcode.INITSLOT  # function signature
             + b'\x01'
+            + b'\x00'
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH6
+            + Opcode.PACK  # [0, 1, 2, 3, 4, 5]
+            + Opcode.STLOC0
+            + Opcode.LDLOC0
+            + Opcode.PUSH4
+            + Opcode.NEGATE  # upper index
+
+            + Opcode.OVER  # fix negative index
+            + Opcode.SIZE
+            + Opcode.ADD
+
+            + Opcode.DUP  # checks if upper index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
+
+            + Opcode.PUSH0  # lower index
+            + Opcode.SWAP
+
+            + Opcode.NEWARRAY0  # starts getting the subarray
+        )
+        path = self.get_contract_path('ListSlicingNegativeEnd.py')
+        output = self.compile(path)
+        self.assertIn(expected_output, output)
+
+    def test_list_slicing_variable_index_opcode(self):
+        expected_output = (
+            Opcode.INITSLOT  # function signature
+            + b'\x00'
             + b'\x02'
             + Opcode.PUSH5
             + Opcode.PUSH4
@@ -775,34 +789,65 @@ class TestList(BoaTest):
             + Opcode.PUSH1
             + Opcode.PUSH0
             + Opcode.PUSH6
-            + Opcode.PACK       # [0, 1, 2, 3, 4, 5]
-            + Opcode.STLOC0
-            + Opcode.LDLOC0
-            + Opcode.LDARG0
+            + Opcode.PACK  # [0, 1, 2, 3, 4, 5]
+            + Opcode.LDARG0  # lower index
 
-            + check_if_fix_negative_index
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + fix_negative_lower_index
-            + check_lower_index_out_of_bounds
+            + Opcode.DUP     # checks if variable is negative
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
 
-            + Opcode.LDARG1
+            + Opcode.OVER  # fix negative index
+            + Opcode.SIZE
+            + Opcode.ADD
 
-            + check_if_fix_negative_index
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-            + fix_negative_upper_index
-            + check_upper_index_out_of_bounds
+            + Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
+
+            + Opcode.LDARG1  # upper index
+
+            + Opcode.DUP  # checks if variable is negative
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(6).to_byte_array(min_length=1)
+
+            + Opcode.PUSH2  # fix negative index
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.ADD
+
+            + Opcode.OVER  # checks if upper index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(6).to_byte_array(min_length=1)
+            + Opcode.SWAP
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.SWAP
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN
 
             + Opcode.NEWARRAY0  # starts getting the subarray
         )
-
-        path = self.get_contract_path('ListSlicingWithStride.py')
+        path = self.get_contract_path('ListSlicingWithVariables.py')
         output = self.compile(path)
-        self.assertIn(expected_not_negative_index_output, output)
-        self.assertIn(expected_negative_lower_index_output, output)
-        self.assertIn(expected_negative_upper_index_output, output)
-        self.assertIn(expected_possible_negative_index_output, output)
+        self.assertIn(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
+    def test_list_slicing_with_stride(self):
+        path, _ = self.get_deploy_file_paths('ListSlicingWithStride.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
