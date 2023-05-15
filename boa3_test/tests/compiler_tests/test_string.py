@@ -242,7 +242,7 @@ class TestString(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_string_slicing_negative_start(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingNegativeStart.py')
+        path, _ = self.get_deploy_file_paths('StringSlicingNegativeStartOmitted.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -344,31 +344,22 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-    def test_string_slicing_with_stride(self):
+    def test_string_slicing_positive_index_opcode(self):
         unit_test_string = String('unit_test').to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1
+            + Integer(len(unit_test_string)).to_byte_array()
+            + unit_test_string
+            + Opcode.STLOC0
+            + Opcode.PUSHDATA1
+            + Integer(len(unit_test_string)).to_byte_array()
+            + unit_test_string
+            + Opcode.PUSH2
 
-        check_if_fix_negative_index =(
-            Opcode.DUP
-            + Opcode.SIGN
-            + Opcode.PUSHM1
-            + Opcode.JMPNE
-        )
-
-        fix_negative_lower_index = (
-            Opcode.OVER
-            + Opcode.SIZE
-            + Opcode.ADD
-        )
-
-        fix_negative_upper_index = (
-            Opcode.PUSH2
-            + Opcode.PICK
-            + Opcode.SIZE
-            + Opcode.ADD
-        )
-
-        check_lower_index_out_of_bounds = (
-            Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.DUP  # checks if lower index is out of bounds on the array
             + Opcode.SIGN
             + Opcode.PUSHM1
             + Opcode.JMPNE
@@ -378,10 +369,10 @@ class TestString(BoaTest):
             + Opcode.OVER
             + Opcode.SIZE
             + Opcode.MIN
-        )
 
-        check_upper_index_out_of_bounds = (
-            Opcode.OVER  # checks if upper index is out of bounds on the array
+            + Opcode.PUSH3
+
+            + Opcode.OVER  # checks if upper index is out of bounds on the array
             + Opcode.SIGN
             + Opcode.PUSHM1
             + Opcode.JMPNE
@@ -394,32 +385,18 @@ class TestString(BoaTest):
             + Opcode.PICK
             + Opcode.SIZE
             + Opcode.MIN
-        )
-
-        expected_not_negative_index_output = (
-            Opcode.INITSLOT     # literal_values function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1
-            + Integer(len(unit_test_string)).to_byte_array()
-            + unit_test_string
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(unit_test_string)).to_byte_array()
-            + unit_test_string
-            + Opcode.PUSH2
-
-            + check_lower_index_out_of_bounds
-
-            + Opcode.PUSH5
-
-            + check_upper_index_out_of_bounds
 
             + Opcode.OVER  # starts getting the substring
         )
 
-        expected_negative_lower_index_output = (
-            Opcode.INITSLOT     # negative_start function signature
+        path = self.get_contract_path('StringSlicingLiteralValues.py')
+        output = self.compile(path)
+        self.assertIn(expected_output, output)
+
+    def test_string_slicing_negative_lower_index_opcode(self):
+        unit_test_string = String('unit_test').to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
             + Opcode.PUSHDATA1
@@ -429,18 +406,42 @@ class TestString(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(unit_test_string)).to_byte_array()
             + unit_test_string
-            + Opcode.PUSH6
+            + Opcode.PUSH4      # lower index
             + Opcode.NEGATE
 
-            + fix_negative_lower_index
-            + check_lower_index_out_of_bounds
+            + Opcode.OVER       # fix negative index
+            + Opcode.SIZE
+            + Opcode.ADD
 
-            + Opcode.PUSH5
-            + check_upper_index_out_of_bounds
-            + Opcode.OVER  # starts getting the substring
+            + Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
+
+            + Opcode.OVER   # gets the upper index
+            + Opcode.SIZE
+            + Opcode.SWAP
+            + Opcode.SUB
+
+            + Opcode.RIGHT  # starts getting the substring
+            + Opcode.CONVERT + StackItemType.ByteString
+            + Opcode.RET
         )
-        expected_negative_upper_index_output = (
-            Opcode.INITSLOT     # negative_end function signature
+
+        path = self.get_contract_path('StringSlicingNegativeEndOmitted.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_string_slicing_negative_upper_index_opcode(self):
+        unit_test_string = String('unit_test').to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
             + b'\x01'
             + b'\x00'
             + Opcode.PUSHDATA1
@@ -450,51 +451,101 @@ class TestString(BoaTest):
             + Opcode.PUSHDATA1
             + Integer(len(unit_test_string)).to_byte_array()
             + unit_test_string
-            + Opcode.PUSH0
-            + check_lower_index_out_of_bounds
+            + Opcode.PUSH4      # upper index
+            + Opcode.NEGATE
+
+            + Opcode.OVER       # fix negative index
+            + Opcode.SIZE
+            + Opcode.ADD
+
+            + Opcode.DUP        # checks if upper index is out of bounds on the array
+            + Opcode.SIGN
             + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
 
-            + fix_negative_upper_index
-            + check_upper_index_out_of_bounds
-
-            + Opcode.OVER  # starts getting the substring
+            + Opcode.LEFT  # starts getting the substring
+            + Opcode.CONVERT + StackItemType.ByteString
+            + Opcode.RET
         )
-        expected_possible_negative_index_output = (
-            Opcode.INITSLOT     # with_variables function signature
-            + b'\x01'
+
+        path = self.get_contract_path('StringSlicingNegativeStartOmitted.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_string_slicing_variable_index_opcode(self):
+        unit_test_string = String('unit_test').to_bytes(min_length=1)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
             + b'\x02'
             + Opcode.PUSHDATA1
             + Integer(len(unit_test_string)).to_byte_array()
             + unit_test_string
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(unit_test_string)).to_byte_array()
-            + unit_test_string
-            + Opcode.LDARG0
+            + Opcode.LDARG0     # lower index
 
-            + check_if_fix_negative_index
-            + Integer(5).to_byte_array(min_length=1, signed=True)
-            + fix_negative_lower_index
-            + check_lower_index_out_of_bounds
+            + Opcode.DUP        # check if lower index is negative
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(5).to_byte_array(min_length=1)
 
-            + Opcode.LDARG1
+            + Opcode.OVER       # fix negative index
+            + Opcode.SIZE
+            + Opcode.ADD
 
-            + check_if_fix_negative_index
-            + Integer(6).to_byte_array(min_length=1, signed=True)
-            + fix_negative_upper_index
-            + check_upper_index_out_of_bounds
+            + Opcode.DUP  # checks if lower index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(4).to_byte_array(min_length=1)
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.OVER
+            + Opcode.SIZE
+            + Opcode.MIN
+
+            + Opcode.LDARG1     # upper index
+
+            + Opcode.DUP        # check if upper index is negative
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(6).to_byte_array(min_length=1)
+
+            + Opcode.PUSH2      # fix negative index
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.ADD
+
+            + Opcode.OVER  # checks if upper index is out of bounds on the array
+            + Opcode.SIGN
+            + Opcode.PUSHM1
+            + Opcode.JMPNE
+            + Integer(6).to_byte_array(min_length=1)
+            + Opcode.SWAP
+            + Opcode.DROP
+            + Opcode.PUSH0
+            + Opcode.SWAP
+            + Opcode.PUSH2
+            + Opcode.PICK
+            + Opcode.SIZE
+            + Opcode.MIN
 
             + Opcode.OVER  # starts getting the substring
         )
 
-        path = self.get_contract_path('StringSlicingWithStride.py')
+        path = self.get_contract_path('StringSlicingWithVariables.py')
         output = self.compile(path)
-        self.assertIn(expected_not_negative_index_output, output)
-        self.assertIn(expected_negative_lower_index_output, output)
-        self.assertIn(expected_negative_upper_index_output, output)
-        self.assertIn(expected_possible_negative_index_output, output)
+        self.assertIn(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
+    def test_string_slicing_with_stride(self):
+        path, _ = self.get_deploy_file_paths('StringSlicingWithStride.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
         invokes = []
