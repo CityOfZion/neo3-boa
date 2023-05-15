@@ -499,11 +499,17 @@ class FileGenerator:
 
         :return: a dictionary with the methods' debug information
         """
-        return [
-            self._get_method_debug_info(module_id, method_id, method)
-            for (module_id, method_id), method in self._methods_with_imports.items()
-            if method.is_compiled
-        ]
+        method_ids = []
+        debug_methods = []
+
+        for (module_id, method_id), method in self._methods_with_imports.items():
+            dbg_method = self._get_method_debug_info(module_id, method_id, method)
+            dbg_id = dbg_method['id']
+            if method.is_compiled and dbg_id not in method_ids:
+                method_ids.append(dbg_id)
+                debug_methods.append(dbg_method)
+
+        return debug_methods
 
     def _get_method_debug_info(self, module_id: str, method_id: str, method: Method) -> Dict[str, Any]:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
@@ -557,15 +563,23 @@ class FileGenerator:
 
         :return: a dictionary with the event's debug information
         """
-        return [
-            {
-                "id": str(id(event)),
+        event_ids = []
+        debug_events = []
+
+        for event_id, event in self._events.items():
+            dbg_id = str(id(event))
+            dbg_event = {
+                "id": dbg_id,
                 "name": ',{0}'.format(event_id),  # TODO: include module name
                 "params": [
                     '{0},{1}'.format(name, var.type.abi_type) for name, var in event.args.items()
                 ]
-            } for event_id, event in self._events.items()
-        ]
+            }
+            if dbg_id not in event_ids:
+                event_ids.append(dbg_id)
+                debug_events.append(dbg_event)
+
+        return debug_events
 
     def _get_debug_static_variables(self) -> List[str]:
         """
