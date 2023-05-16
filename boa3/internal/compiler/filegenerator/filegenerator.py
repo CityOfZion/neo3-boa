@@ -139,7 +139,7 @@ class FileGenerator:
                         methods[(self._entry_file, name)] = symbol
                 elif isinstance(symbol, UserClass):
                     for class_method_name, class_method in symbol.methods.items():
-                        if class_method.defined_by_entry:
+                        if class_method.defined_by_entry and class_method.is_compiled:
                             methods[(self._entry_file, f'{symbol.identifier}.{class_method_name}')] = class_method
 
                 elif isinstance(symbol, Import) and symbol.origin not in imported_symbols:
@@ -524,6 +524,20 @@ class FileGenerator:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
         from boa3.internal.neo.vm.type.AbiType import AbiType
         from boa3.internal.model.type.itype import IType
+
+        sequence_points = []
+        for instruction in method.debug_map():
+            vm_code_map = VMCodeMapping.instance()
+            start_address = vm_code_map.get_start_address(instruction.code)
+            end_address = vm_code_map.get_end_address(instruction.code)
+            if start_address >= method.start_address and end_address <= method.end_address:
+                sequence_points.append(
+                    '{0}[{1}]{2}:{3}-{4}:{5}'.format(start_address,
+                                                     self._get_method_origin_index(method),
+                                                     instruction.start_line, instruction.start_col,
+                                                     instruction.end_line, instruction.end_col)
+                )
+
         return {
             "id": str(id(method)),
             "name": '{0},{1}'.format(module_id, method_id),
@@ -536,13 +550,7 @@ class FileGenerator:
                 '{0},{1}'.format(name, var.type.abi_type if isinstance(var.type, IType) else AbiType.Any)
                 for name, var in method.locals.items()
             ],
-            "sequence-points": [
-                '{0}[{1}]{2}:{3}-{4}:{5}'.format(VMCodeMapping.instance().get_start_address(instruction.code),
-                                                 self._get_method_origin_index(method),
-                                                 instruction.start_line, instruction.start_col,
-                                                 instruction.end_line, instruction.end_col)
-                for instruction in method.debug_map()
-            ]
+            "sequence-points": sequence_points
         }
 
     def _get_method_origin_index(self, method: Method) -> int:
