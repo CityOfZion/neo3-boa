@@ -111,10 +111,18 @@ class FileGenerator:
         """
         if self._inner_methods is None:
             from boa3.internal.model.builtin.method import IBuiltinMethod
-            self._inner_methods = {name: method for name, method in self._symbols.items()
-                                   if ((isinstance(method, Method) and method.defined_by_entry)
-                                       or (isinstance(method, IBuiltinMethod) and method.is_public)
-                                       )}
+            all_entry_file_methods = {}
+            for name, symbol in self._symbols.items():
+                if isinstance(symbol, Method) and symbol.defined_by_entry:
+                    all_entry_file_methods[name] = symbol
+                elif isinstance(symbol, IBuiltinMethod) and symbol.is_public:
+                    all_entry_file_methods[name] = symbol
+                elif isinstance(symbol, UserClass):
+                    for class_method_name, class_method in symbol.methods.items():
+                        if class_method.defined_by_entry:
+                            all_entry_file_methods[f'{symbol.identifier}.{class_method_name}'] = class_method
+
+            self._inner_methods = all_entry_file_methods
         return self._inner_methods
 
     @property
@@ -126,11 +134,12 @@ class FileGenerator:
             imported_symbols: Dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
 
             for name, symbol in self._symbols.items():
-                if symbol.defined_by_entry:
-                    if isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
+                if isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
+                    if symbol.defined_by_entry:
                         methods[(self._entry_file, name)] = symbol
-                    elif isinstance(symbol, UserClass):
-                        for class_method_name, class_method in symbol.methods.items():
+                elif isinstance(symbol, UserClass):
+                    for class_method_name, class_method in symbol.methods.items():
+                        if class_method.defined_by_entry:
                             methods[(self._entry_file, f'{symbol.identifier}.{class_method_name}')] = class_method
 
                 elif isinstance(symbol, Import) and symbol.origin not in imported_symbols:
