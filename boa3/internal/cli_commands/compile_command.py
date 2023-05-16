@@ -9,7 +9,7 @@ from boa3.internal.cli_commands.icommand import ICommand
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 
 
-class BuildCommand(ICommand):
+class CompileCommand(ICommand):
 
     def __init__(self, main_parser: _SubParsersAction):
         super().__init__(main_parser, 'compile', 'Compiles your smart contract')

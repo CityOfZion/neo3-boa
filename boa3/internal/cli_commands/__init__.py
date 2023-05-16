@@ -1,5 +1,5 @@
-from boa3.internal.cli_commands.build_command import BuildCommand
+from boa3.internal.cli_commands.compile_command import CompileCommand
 
 commands = (
-    BuildCommand,
+    CompileCommand,
 )
