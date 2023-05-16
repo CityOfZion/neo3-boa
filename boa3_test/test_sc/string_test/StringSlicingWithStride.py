@@ -59,3 +59,9 @@ def really_high_end() -> str:
 def really_high_values() -> str:
     a = 'unit_test'
     return a[999:999:2]
+
+
+@public
+def with_variables(x: int, y: int) -> str:
+    a = 'unit_test'
+    return a[x:y:2]

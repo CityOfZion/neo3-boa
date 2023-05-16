@@ -59,3 +59,9 @@ def really_high_end() -> list:
 def really_high_values() -> list:
     a = [0, 1, 2, 3, 4, 5]
     return a[999:999:2]
+
+
+@public
+def with_variables(x: int, y: int) -> list:
+    a = [0, 1, 2, 3, 4, 5]
+    return a[x:y:2]

@@ -779,18 +779,19 @@ class CodeGenerator:
 
         self._update_jump(last_address, VMCodeMapping.instance().bytecode_size)
 
-    def fix_negative_index(self, value_index: int = None):
+    def fix_negative_index(self, value_index: int = None, test_is_negative=True):
         self._can_append_target = not self._can_append_target
 
         value_code = self.last_code_start_address
         size = VMCodeMapping.instance().bytecode_size
 
-        self.duplicate_stack_top_item()
-        self.__insert1(OpcodeInfo.SIGN)
-        self.convert_literal(-1)
+        if test_is_negative:
+            self.duplicate_stack_top_item()
+            self.__insert1(OpcodeInfo.SIGN)
+            self.convert_literal(-1)
 
-        jmp_address = VMCodeMapping.instance().bytecode_size
-        self._insert_jump(OpcodeInfo.JMPNE)     # if index < 0
+            jmp_address = VMCodeMapping.instance().bytecode_size
+            self._insert_jump(OpcodeInfo.JMPNE)     # if index < 0
 
         state = self._stack_states.get_state(value_index) if isinstance(value_index, int) else self._stack
         # get position of collection relative to top
@@ -809,14 +810,46 @@ class CodeGenerator:
         self.convert_builtin_method_call(Builtin.Len)
         self.convert_operation(BinaryOp.Add)
 
-        if not isinstance(value_index, int):
-            value_index = VMCodeMapping.instance().bytecode_size
-        jmp_target = value_index if value_index < size else VMCodeMapping.instance().bytecode_size
-        self._update_jump(jmp_address, jmp_target)
+        if test_is_negative:
+            if not isinstance(value_index, int):
+                value_index = VMCodeMapping.instance().bytecode_size
+            jmp_target = value_index if value_index < size else VMCodeMapping.instance().bytecode_size
+            self._update_jump(jmp_address, jmp_target)
 
-        VMCodeMapping.instance().move_to_end(value_index, value_code)
+            VMCodeMapping.instance().move_to_end(value_index, value_code)
 
         self._can_append_target = not self._can_append_target
+
+    def fix_index_out_of_range(self, has_another_index_in_stack: bool):
+        """
+        Will fix a negative index to 0 or an index greater than the sequence length to the length.
+
+        For example: [0, 1, 2][-999:999] is the same as [0, 1, 2][0:3]
+
+        :param has_another_index_in_stack: whether the stack is [..., Sequence, index, index] or [..., Sequence, index].
+        """
+        # if index is still negative, then it should be 0
+        self.duplicate_stack_item(2 if has_another_index_in_stack else 1)
+        self.__insert1(OpcodeInfo.SIGN)
+        self.convert_literal(-1)
+        jmp_address = VMCodeMapping.instance().bytecode_size
+        self._insert_jump(OpcodeInfo.JMPNE)  # if index < 0, then index = 0
+
+        if has_another_index_in_stack:
+            self.swap_reverse_stack_items(2)
+        self.remove_stack_top_item()
+        self.convert_literal(0)
+        if has_another_index_in_stack:
+            self.swap_reverse_stack_items(2)
+        jmp_target = VMCodeMapping.instance().bytecode_size
+        self._update_jump(jmp_address, jmp_target)
+
+        # index can not be greater than len(string)
+        self.duplicate_stack_item(3 if has_another_index_in_stack else 2)
+        self.convert_builtin_method_call(Builtin.Len)
+        self.__insert1(
+            OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
+        self._stack_pop()
 
     def fix_index_negative_stride(self):
         """
@@ -1101,18 +1134,19 @@ class CodeGenerator:
         self._stack_pop()  # index
         self._stack_pop()  # array or map
 
-    def _get_array_item(self, check_for_negative_index: bool = True):
+    def _get_array_item(self, check_for_negative_index: bool = True, test_is_negative_index=True):
         """
         Converts the end of get a value in an array
         """
         index_type: IType = self._stack[-1]  # top: index
         if index_type is Type.int and check_for_negative_index:
-            self.fix_negative_index()
+            self.fix_negative_index(test_is_negative=test_is_negative_index)
 
-    def convert_get_item(self, index_inserted_internally: bool = False):
+    def convert_get_item(self, index_inserted_internally: bool = False, index_is_positive=False, test_is_negative_index=True):
         array_or_map_type: IType = self._stack[-2]  # second-to-top: array or map
         if array_or_map_type.stack_item is not StackItemType.Map:
-            self._get_array_item(check_for_negative_index=not index_inserted_internally)
+            self._get_array_item(check_for_negative_index=not (index_inserted_internally or index_is_positive),
+                                 test_is_negative_index=test_is_negative_index)
 
         if array_or_map_type is Type.str:
             self.convert_literal(1)  # length of substring
@@ -1148,20 +1182,6 @@ class CodeGenerator:
         """
         Converts the end of get a substring
         """
-        # if lower is still negative, then it should be 0
-        self.duplicate_stack_item(2)
-        self.__insert1(OpcodeInfo.SIGN)
-        self.convert_literal(-1)
-        jmp_address = VMCodeMapping.instance().bytecode_size
-        self._insert_jump(OpcodeInfo.JMPNE)         # if lower < 0, then lower = 0
-
-        self.swap_reverse_stack_items(2)
-        self.remove_stack_top_item()
-        self.convert_literal(0)
-        self.swap_reverse_stack_items(2)
-        jmp_target = VMCodeMapping.instance().bytecode_size
-        self._update_jump(jmp_address, jmp_target)
-
         self.convert_new_empty_array(0, array)      # slice = []
         self.duplicate_stack_item(3)                # index = slice_start
 
@@ -1193,124 +1213,29 @@ class CodeGenerator:
         self.remove_stack_top_item()
         self.remove_stack_top_item()
 
-    def convert_get_sub_array(self, value_addresses: List[int] = None, negative_stride: bool = False):
+    def convert_get_sub_sequence(self):
         """
-        Converts the end of get a slice in the beginning of an array
-
-        :param value_addresses: the start and end values addresses
-        :param negative_stride: whether stride is negative or not
+        Gets a slice of an array or ByteString
         """
         # top: length, index, array
         if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
-            if value_addresses is not None:
-                # use the next value address to found where the opcodes to fix the value sign should be
-                end_value_opcodes = value_addresses[1:]
-                for code in reversed(end_value_opcodes):
-                    self.fix_negative_index(code)
-                self.fix_negative_index()  # fix the last value sign
-
-                if negative_stride:
-                    """
-                    If stride is negative, then the array was reversed, thus, lower and upper should be changed 
-                    accordingly.
-                    array[lower:upper:-1] == reversed_array[len(array)-lower-1:len(array)-upper-1]
-                    """
-                    # calculates corresponding upper
-                    # upper = len(array)-upper-1
-                    self.duplicate_stack_item(3)
-                    self.fix_index_negative_stride()
-
-                    # puts lower at the top of the stack
-                    self.swap_reverse_stack_items(2)
-
-                    # calculates corresponding lower
-                    # lower = len(array)-lower-1
-                    self.duplicate_stack_item(3)
-                    self.fix_index_negative_stride()
-
-                    # reverts lower to its correct place
-                    self.swap_reverse_stack_items(2)
 
             if self._stack[-3].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
-
-                # if lower is still negative, then it should be 0
-                self.duplicate_stack_item(2)
-                self.__insert1(OpcodeInfo.SIGN)
-                self.convert_literal(-1)
-                jmp_address = VMCodeMapping.instance().bytecode_size
-                self._insert_jump(OpcodeInfo.JMPNE)     # if lower < 0, then lower = 0
-
-                self.swap_reverse_stack_items(2)
-                self.remove_stack_top_item()
-                self.convert_literal(0)
-                self.swap_reverse_stack_items(2)
-                jmp_target = VMCodeMapping.instance().bytecode_size
-                self._update_jump(jmp_address, jmp_target)
-
-                # lower can not be greater than len(string)
-                self.swap_reverse_stack_items(2)
-                self.duplicate_stack_item(3)
-                self.convert_builtin_method_call(Builtin.Len)
-                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
-                self._stack_pop()
-                # reverts lower to its correct place
-                self.swap_reverse_stack_items(2)
-
-                # upper can not be greater than len(string)
-                self.duplicate_stack_item(3)
-                self.convert_builtin_method_call(Builtin.Len)
-                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
-                self._stack_pop()
-
                 self.duplicate_stack_item(2)
                 self.convert_operation(BinaryOp.Sub)
                 self.convert_get_substring()
             else:
                 array = self._stack[-3]
-                self.duplicate_stack_item(3)
-                self.convert_builtin_method_call(Builtin.Len)
-
-                # if slice end is greater than the array size, fixes them
-                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
-                self._stack_pop()
                 self.convert_get_array_slice(array)
 
-    def convert_get_array_beginning(self, negative_stride: bool = False):
+    def convert_get_sequence_beginning(self):
         """
-        Converts the end of get a slice in the beginning of an array
-
-        :param negative_stride: whether stride is negative or not
+        Gets the beginning slice of an array or ByteString
         """
         if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
-            self.fix_negative_index()
-
-            if negative_stride:
-                # calculates corresponding upper
-                # upper = len(array)-upper-1
-                self.duplicate_stack_item(2)
-                self.fix_index_negative_stride()
-
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
-                # if upper is still negative, then it should be 0
-                self.duplicate_stack_top_item()
-                self.__insert1(OpcodeInfo.SIGN)
-                self.convert_literal(-1)
-                jmp_address = VMCodeMapping.instance().bytecode_size
-                self._insert_jump(OpcodeInfo.JMPNE)     # if upper < 0, then upper = 0
-
-                self.remove_stack_top_item()
-                self.convert_literal(0)
-                jmp_target = VMCodeMapping.instance().bytecode_size
-                self._update_jump(jmp_address, jmp_target)
-
-                # upper can not be greater than len(string)
-                self.duplicate_stack_item(2)
-                self.convert_builtin_method_call(Builtin.Len)
-                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
-                self._stack_pop()
-
                 self.__insert1(OpcodeInfo.LEFT)
                 self._stack_pop()  # length
                 original_type = self._stack_pop()  # original array
@@ -1319,62 +1244,33 @@ class CodeGenerator:
             else:
                 array = self._stack[-2]
 
-                self.duplicate_stack_item(2)
-                self.convert_builtin_method_call(Builtin.Len)
-
-                # if slice end is greater than the array size, fixes them
-                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
-                self._stack_pop()
-
                 self.convert_literal(0)
                 self.swap_reverse_stack_items(2)
                 self.convert_get_array_slice(array)
 
-    def convert_get_array_ending(self, negative_stride: bool = False):
+    def convert_get_sequence_ending(self):
         """
-        Converts the end of get a slice in the ending of an array
-
-        :param negative_stride: whether stride is negative or not
+        Gets the ending slice of an array or ByteString
         """
-        # top: start_slice, array_length, array
-        if len(self._stack) > 2 and isinstance(self._stack[-3], SequenceType):
-            self.fix_negative_index()
-
-            if negative_stride:
-                # calculates corresponding lower
-                # lower = len(array)-lower-1
-                self.duplicate_stack_item(3)
-                self.fix_index_negative_stride()
-
-            if self._stack[-3].stack_item in (StackItemType.ByteString,
+        # top: start_slice, array
+        if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
+            if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
-                # if lower is still negative, then it should be 0
-                self.duplicate_stack_top_item()
-                self.__insert1(OpcodeInfo.SIGN)
-                self.convert_literal(-1)
-                jmp_address = VMCodeMapping.instance().bytecode_size
-                self._insert_jump(OpcodeInfo.JMPNE)     # if lower < 0, then lower = 0
-
-                self.remove_stack_top_item()
-                self.convert_literal(0)
-                jmp_target = VMCodeMapping.instance().bytecode_size
-                self._update_jump(jmp_address, jmp_target)
-
-                # lower can not be greater than len(string)
-                self.duplicate_stack_item(3)
+                self.duplicate_stack_item(2)
                 self.convert_builtin_method_call(Builtin.Len)
-                self.__insert1(OpcodeInfo.MIN)  # the builtin MinMethod accepts more than 2 arguments, that's why this Opcode is being directly inserted
-                self._stack_pop()
-
-                self.convert_operation(BinaryOp.Sub)
+                self.swap_reverse_stack_items(2)
+                self.convert_operation(BinaryOp.Sub)    # gets the amount of chars that should be taken after the index
                 self.__insert1(OpcodeInfo.RIGHT)
                 self._stack_pop()  # length
                 original_type = self._stack_pop()  # original array
                 self._stack_append(BufferType)     # right returns a buffer instead of a bytestring
                 self.convert_cast(original_type)
             else:
-                array = self._stack[-3]
-                self.swap_reverse_stack_items(2)
+                array = self._stack[-2]
+
+                self.duplicate_stack_item(2)
+                self.convert_builtin_method_call(Builtin.Len)
+
                 self.convert_get_array_slice(array)
 
     def convert_copy(self):
