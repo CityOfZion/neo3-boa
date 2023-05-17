@@ -9,7 +9,7 @@
   <br/> Made by <b>COZ.IO</b>
 </p>
 
-<p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo-mamba">neo-mamba</a>  </p>
+<p align="center">  <a href="https://github.com/CityOfZion/neo3-boa"><strong>Neo3-boa</strong></a> · <a href="https://github.com/CityOfZion/neo-mamba">neo-mamba</a>  </p>
 
 <p align="center">
   <a href="https://circleci.com/gh/CityOfZion/neo3-boa/tree/master">
@@ -30,8 +30,6 @@
 
 ## Table of Contents
 - [Overview](#overview)
-  - [Product Strategy](#product-strategy)
-  - [Project Structure](#project-structure)
 - [Quickstart](#quickstart)
   - [Installation](#installation)
     - [Pip (Recommended)](#pip-recommended)
@@ -47,37 +45,14 @@
 - [Reference Examples](#reference-examples)
 - [Python Supported Features](#python-supported-features)
 - [Neo Python Suite Projects](#neo-python-suite-projects)
-- [Opening a New Issue](#opening-a-new-issue)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Overview
 
-Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manifest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
+Neo3-boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manifest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
 
-Neo-boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
-
-#### Product Strategy
-
-##### Pure Python
-We want Python developers to feel comfortable when trying neo3-boa for the first time. It should look and behave like regular Python. For this reason we decided to avoid adding new keywords, but use decorators and helper functions instead.
-
-##### Neo Python Framework
-In the real world, simply coding a smart contract is not enough. Developers need to debug, deploy and invoke it. Therefore, it’s important for this tool to be part of a bigger Python framework. To help the developers and avoid a bad user experience, we need to use logs and inform errors with details.
-
-##### Testing against Neo VM
-We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official Neo 3 VM. Neo organization already has a [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner) available to C# dApp developers. A [NeoTestRunner](boa3_test/test_drive/testrunner/neo_test_runner.py) class was implemented in this project to facilitate testing compiled smart-contracts with Python.
-
-##### Maintenance
-Create a product that is easy to maintain and upgrade. Use Unit tests, typed and documented code to ensure its maintainability.
-
-#### Project Structure
-
-The diagram bellow shows the basic building blocks of the Neo3-Boa project.
-<p>
-  <img
-    src="/.github/resources/images/diagram.png"
-    width="500px;">
-</p>
+Neo3-boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
 
 ## Quickstart
 
@@ -102,16 +77,16 @@ $ venv\Scripts\activate.bat
 
 ##### Pip (Recommended)
 
-###### Install Neo3-Boa using Pip:
+###### Install Neo3-boa using Pip:
 
 ```shell
 $ pip install neo3-boa
 ```
 
 ##### Build from Source (Optional)
-If neo3-boa is not available via pip, you can run it from source.
+If Neo3-boa is not available via pip, you can run it from source.
 
-###### Clone neo3-boa:
+###### Clone Neo3-boa:
 ```shell
 $ git clone https://github.com/CityOfZion/neo3-boa.git
 ```
@@ -247,15 +222,6 @@ You can [read the docs here](https://docs.coz.io/neo3/boa/index.html). Please ch
 For an extensive collection of examples:
 - [Smart contract examples](/boa3_test/examples)
 - [Features tests](/boa3_test/test_sc)
-
-## Tests
-
-This project uses Neo Test Runner and Neo-Express to test its features. To run all tests run the python
-script at boa3_test/tests/run_unit_tests.py
-
-> Note: If you don't want to use the Neo-Express instance on boa3_test/tests, you can change the path of this constant
-> [here](/boa3/internal/env.py). However, your Neo-Express instance will need to have the following accounts: "owner", 
-> "testAccount1", "testAccount2" and "testAccount3".
 
 ## Python Supported Features
 
@@ -1003,14 +969,12 @@ script at boa3_test/tests/run_unit_tests.py
 
 ## Neo Python Suite Projects
 
-- **[neo3-boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts' compiler.</br>
-- [neo3-mamba](https://github.com/CityOfZion/neo-mamba): Python SDK for interacting with neo.</br>
+- **[Neo3-boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts' compiler.
+- [neo3-mamba](https://github.com/CityOfZion/neo-mamba): Python SDK for interacting with Neo.
 
-## Opening a New Issue
+## Contributing
 
-- Open a new [issue](https://github.com/CityOfZion/neo3-boa/issues/new) if you encounter a problem.
-- Pull requests are welcome. New features, writing tests and documentation are all needed.
-
+Checkout our [contributing file](CONTRIBUTING.md) to see how you can contribute with our project.
 
 ## License
 
