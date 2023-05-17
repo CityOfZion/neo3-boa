@@ -225,15 +225,6 @@ For an extensive collection of examples:
 - [Smart contract examples](/boa3_test/examples)
 - [Features tests](/boa3_test/test_sc)
 
-## Tests
-
-This project uses Neo Test Runner and Neo-Express to test its features. To run all tests run the python
-script at boa3_test/tests/run_unit_tests.py
-
-> Note: If you don't want to use the Neo-Express instance on boa3_test/tests, you can change the path of this constant
-> [here](/boa3/internal/env.py). However, your Neo-Express instance will need to have the following accounts: "owner", 
-> "testAccount1", "testAccount2" and "testAccount3".
-
 ## Python Supported Features
 
 <table>
