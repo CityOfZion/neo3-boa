@@ -400,7 +400,8 @@ class TestFileGeneration(BoaTest):
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
-        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('entrypoint', debug_info)
+        self.assertEqual(path, debug_info['entrypoint'])
         self.assertIn('methods', debug_info)
         self.assertGreater(len(debug_info['methods']), 0)
 
@@ -452,7 +453,8 @@ class TestFileGeneration(BoaTest):
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
-        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('entrypoint', debug_info)
+        self.assertEqual(path, debug_info['entrypoint'])
         self.assertIn('events', debug_info)
         self.assertGreater(len(debug_info['events']), 0)
 
@@ -494,7 +496,8 @@ class TestFileGeneration(BoaTest):
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
-        self.assertNotIn('entrypoint', debug_info)
+        self.assertIn('entrypoint', debug_info)
+        self.assertEqual(path, debug_info['entrypoint'])
         self.assertIn('static-variables', debug_info)
         self.assertGreater(len(debug_info['static-variables']), 0)
 
@@ -516,9 +519,9 @@ class TestFileGeneration(BoaTest):
 
     def test_generate_nefdbgnfo_file_with_user_module_import(self):
         from boa3.internal.model.type.itype import IType
-        path = self.get_contract_path('GenerationWithUserModuleImportsDupNames.py')
+        path = self.get_contract_path('GenerationWithUserModuleImports.py')
         nef_output, _ = self.get_deploy_file_paths(path)
-        expected_nef_output = nef_output.replace('.nef', '.nefdbgnfo')
+        expected_debug_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
         with LOCK:
@@ -532,8 +535,70 @@ class TestFileGeneration(BoaTest):
 
             debug_info = self.get_debug_info(nef_output)
 
-        self.assertTrue(os.path.exists(expected_nef_output))
-        self.assertNotIn('entrypoint', debug_info)
+        self.assertTrue(os.path.exists(expected_debug_output))
+        self.assertIn('entrypoint', debug_info)
+        self.assertEqual(debug_info['entrypoint'], path)
+        self.assertIn('methods', debug_info)
+        self.assertGreater(len(debug_info['methods']), 0)
+
+        for debug_method in debug_info['methods']:
+            self.assertIn('name', debug_method)
+            name_without_parsing = debug_method['name']
+            parsed_name = name_without_parsing.split(constants.VARIABLE_NAME_SEPARATOR)
+            self.assertEqual(2, len(parsed_name))
+            self.assertIn(name_without_parsing, methods)
+            actual_method = methods[name_without_parsing]
+
+            # validate id
+            self.assertIn('id', debug_method)
+            self.assertEqual(str(id(actual_method)), debug_method['id'])
+
+            # validate parameters
+            self.assertIn('params', debug_method)
+            self.assertEqual(len(actual_method.args), len(debug_method['params']))
+            for var in debug_method['params']:
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                param_id, param_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
+                self.assertIn(param_id, actual_method.args)
+                self.assertEqual(param_type, actual_method.args[param_id].type.abi_type)
+
+            # validate local variables
+            self.assertIn('variables', debug_method)
+            self.assertEqual(len(actual_method.locals), len(debug_method['variables']))
+            for var in debug_method['variables']:
+                self.assertEqual(2, len(var.split(constants.VARIABLE_NAME_SEPARATOR)))
+                var_id, var_type = var.split(constants.VARIABLE_NAME_SEPARATOR)
+                self.assertIn(var_id, actual_method.locals)
+                local_type = actual_method.locals[var_id].type
+                self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
+
+    def test_generate_nefdbgnfo_file_with_user_module_name_import(self):
+        from boa3.internal.model.type.itype import IType
+        path = self.get_contract_path('test_sc/import_test', 'ImportModuleWithoutInit.py')
+        imported_path = self.get_contract_path('test_sc/import_test/sample_package/package', 'another_module.py')
+        nef_output, _ = self.get_deploy_file_paths(path)
+        expected_debug_output = nef_output.replace('.nef', '.nefdbgnfo')
+
+        compiler = Compiler()
+        with LOCK:
+            compiler.compile_and_save(path, nef_output, debug=True)
+
+            methods: Dict[str, Method] = {
+                name: method
+                for name, method in self.get_all_imported_methods(compiler).items()
+                if isinstance(method, Method)
+            }
+
+            debug_info = self.get_debug_info(nef_output)
+
+        self.assertTrue(os.path.exists(expected_debug_output))
+        self.assertIn('entrypoint', debug_info)
+        self.assertEqual(debug_info['entrypoint'], path)
+
+        self.assertIn('documents', debug_info)
+        self.assertGreater(len(debug_info['documents']), 1)
+        self.assertIn(imported_path, debug_info['documents'])
+
         self.assertIn('methods', debug_info)
         self.assertGreater(len(debug_info['methods']), 0)
 
