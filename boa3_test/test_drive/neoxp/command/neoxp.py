@@ -3,6 +3,7 @@ from typing import Any, Union
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
 from boa3_test.test_drive.neoxp.command import neoxp_contract as contract
+from boa3_test.test_drive.neoxp.command import neoxp_oracle as oracle
 from boa3_test.test_drive.neoxp.command.neoexpresscommand import NeoExpressCommand
 
 
