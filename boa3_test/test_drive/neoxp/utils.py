@@ -219,3 +219,20 @@ def run_neo_express_cli(command: neoxp.NeoExpressCommand) -> Tuple[str, str]:
                                    text=True)
         cli_result = process.communicate()
     return cli_result
+
+
+def oracle_response(neoxp_path: str, url: str, response_path: str, request_id: int = None,
+                    check_point_file: str = None) -> List[UInt256]:
+    command = neoxp.oracle.OracleResponseCommand(url, response_path, request_id, neo_express_data_file=neoxp_path)
+
+    with _NEOXP_CONFIG_LOCK:
+        if isinstance(check_point_file, str):
+            reset_neo_express_instance(neoxp_path, check_point_file)
+        stdout, stderr = run_neo_express_cli(command)
+
+    import re
+    from boa3.internal.neo import from_hex_str
+
+    oracle_response_submitted = re.findall(r"0x\w{64}", stdout)
+
+    return [UInt256(from_hex_str(tx)) for tx in oracle_response_submitted]

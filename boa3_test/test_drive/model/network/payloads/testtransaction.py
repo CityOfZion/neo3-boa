@@ -6,6 +6,7 @@ from boa3.internal.neo import from_hex_str, utils
 from boa3.internal.neo3.core.types import UInt256
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.model.network.payloads.signer import Signer
+from boa3_test.test_drive.model.network.payloads.transactionattribute import TransactionAttribute
 from boa3_test.test_drive.model.network.payloads.witness import Witness
 from boa3_test.test_drive.model.smart_contract.contractcollection import ContractCollection
 from boa3_test.test_drive.model.smart_contract.triggertype import TriggerType
@@ -22,7 +23,7 @@ class TestTransaction:
 
         self._signers: List[Signer] = signers if signers is not None else []
         self._witnesses: List[Witness] = witnesses if witnesses is not None else []
-        self._attributes = []
+        self._attributes: List[TransactionAttribute] = []
 
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
@@ -55,7 +56,17 @@ class TestTransaction:
         tx = object.__new__(cls)  # init was causing errors with inherited classes
         tx._hash = tx_hash
         tx._script = script
+
         tx._attributes = []
+        if 'attributes' in json:
+            attributes_json = json['attributes']
+
+            for attribute in attributes_json:
+                from boa3_test.test_drive.model.network.payloads.transactionattribute import \
+                    TransactionAttributeType
+                if attribute['type'] == TransactionAttributeType.ORACLE_RESPONSE:
+                    from boa3_test.test_drive.model.network.payloads.oracleresponse import OracleResponse
+                    tx._attributes.append(OracleResponse.from_json(attribute))
 
         if 'signers' in json:
             signers_json = json['signers']

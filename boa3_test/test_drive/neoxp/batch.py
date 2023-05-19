@@ -199,3 +199,11 @@ class NeoExpressBatch:
         return next((True for command in self._instructions
                      if isinstance(command, neoxp.neoxp.contract.deploy.ContractDeployCommand)),
                     False)
+
+    def oracle_enable(self, account: Account):
+        self._instructions.append(neoxp.oracle.enable(account)
+                                  )
+
+    def oracle_response(self, url: str, response_path: str, request_id: int = None):
+        self._instructions.append(neoxp.oracle.response(url, response_path,
+                                                        request_id=request_id))
