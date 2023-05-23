@@ -24,8 +24,7 @@ class NativeContract:
 
     ContractManagementModule = Package(identifier=ContractManagement.identifier.lower(),
                                        types=[ContractManagement,
-                                              Interop.ContractType,
-                                              Builtin.UInt160])
+                                              Interop.ContractType])
 
     CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
                               types=[CryptoLib,
@@ -36,9 +35,7 @@ class NativeContract:
                         )
 
     LedgerModule = Package(identifier=Ledger.identifier.lower(),
-                           types=[Ledger,
-                                  Interop.BlockType,
-                                  Interop.TransactionType]
+                           types=[Ledger]
                            )
 
     NeoModule = Package(identifier=NEO.identifier.lower(),

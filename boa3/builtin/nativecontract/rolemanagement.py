@@ -1,3 +1,9 @@
+__all__ = [
+    'RoleManagement',
+    'Role',
+]
+
+
 from boa3.builtin.interop.role.roletype import Role
 from boa3.builtin.type import ECPoint, UInt160
 

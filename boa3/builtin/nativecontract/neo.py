@@ -1,3 +1,8 @@
+__all__ = [
+    'NEO',
+]
+
+
 from typing import Any, List, Tuple
 
 from boa3.builtin.contract import NeoAccountState

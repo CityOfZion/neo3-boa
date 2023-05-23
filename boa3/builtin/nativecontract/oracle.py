@@ -1,3 +1,8 @@
+__all__ = [
+    'Oracle',
+]
+
+
 from typing import Union, Any
 
 from boa3.builtin.type import UInt160

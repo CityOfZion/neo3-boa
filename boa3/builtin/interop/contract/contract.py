@@ -1,3 +1,7 @@
+__all__ = [
+    'Contract',
+]
+
 from boa3.builtin.interop.contract.contractmanifest import ContractManifest
 from boa3.builtin.type import UInt160
 

@@ -1,3 +1,15 @@
+__all__ = [
+    'ContractManifest',
+    'ContractPermission',
+    'ContractPermissionDescriptor',
+    'ContractGroup',
+    'ContractAbi',
+    'ContractMethodDescriptor',
+    'ContractEventDescriptor',
+    'ContractParameterDefinition',
+    'ContractParameterType',
+]
+
 from typing import List, Optional
 
 from boa3.builtin.type import ECPoint, UInt160

@@ -336,9 +336,14 @@ class Interop:
                                      ]
                             )
 
+    RoleTypeModule = Package(identifier=RoleType.identifier.lower(),
+                             types=[RoleType]
+                             )
+
     RolePackage = Package(identifier=InteropPackage.Role,
                           types=[RoleType],
-                          methods=[GetDesignatedByRole]
+                          methods=[GetDesignatedByRole],
+                          packages=[RoleTypeModule]
                           )
 
     RuntimePackage = Package(identifier=InteropPackage.Runtime,
