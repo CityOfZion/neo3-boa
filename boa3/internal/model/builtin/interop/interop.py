@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from boa3.internal.model.builtin.interop.blockchain import *
 from boa3.internal.model.builtin.interop.contract import *
@@ -38,6 +38,12 @@ class InteropPackage(str, Enum):
 
 
 class Interop:
+    @classmethod
+    def get_symbol(cls, symbol_id: str) -> Optional[IdentifiedSymbol]:
+        for pkg_symbols in cls._interop_symbols.values():
+            for method in pkg_symbols:
+                if method.identifier == symbol_id:
+                    return method
 
     @classmethod
     def interop_symbols(cls, package: str = None) -> List[IdentifiedSymbol]:
