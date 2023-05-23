@@ -1,3 +1,6 @@
+__all__ = ['Notification']
+
+
 from boa3.builtin.type import UInt160
 
 

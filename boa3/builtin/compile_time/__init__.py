@@ -1,3 +1,12 @@
+__all__ = [
+    'CreateNewEvent',
+    'public',
+    'metadata',
+    'contract',
+    'display_name',
+    'NeoMetadata',
+]
+
 from typing import List, Dict, Any, Union, Optional, Tuple
 
 from boa3.builtin.type import ByteString, Event

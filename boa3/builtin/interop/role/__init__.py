@@ -1,3 +1,9 @@
+__all__ = [
+    'Role',
+    'get_designated_by_role',
+]
+
+
 from boa3.builtin.interop.role.roletype import Role
 from boa3.builtin.type import ECPoint
 
