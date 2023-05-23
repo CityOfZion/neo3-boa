@@ -366,23 +366,39 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             function.returns = None
             function.decorator_list = []
+
+            imports: List[ast.AST] = []
+            other_instructions: List[ast.AST] = []
+            for node in self._tree.body:
+                if node == function:
+                    # metadata function must be right after all the imports, so it executes correctly
+                    continue
+
+                if isinstance(node, (ast.ImportFrom, ast.Import)):
+                    imports.append(node)
+                else:
+                    other_instructions.append(node)
+
             module: ast.Module = ast.parse('')
-            module.body = [node for node in self._tree.body
-                           if isinstance(node, (ast.ImportFrom, ast.Import, ast.ClassDef))]
-            module.body.append(function)
+            module.body = imports + [function] + other_instructions
             ast.copy_location(module, function)
+            namespace = {}
 
             try:
                 # executes the function
                 code = compile(module, filename='<boa3>', mode='exec')
-                namespace = {}
                 exec(code, namespace)
-                obj: Any = namespace[function.name]()
             except ModuleNotFoundError:
                 # will fail if any imports can't be executed
                 # in this case, the error is already logged
                 return
+            except BaseException as inner_exception:
+                # reordering the module tree may raise unexpected exceptions
+                # ignore if it has generated the metadata function
+                if function.name not in namespace:
+                    raise inner_exception
 
+            obj: Any = namespace[function.name]()
             node: ast.AST = function.body[-1] if len(function.body) > 0 else function
             # return must be a NeoMetadata object
             if not isinstance(obj, NeoMetadata):
