@@ -419,6 +419,9 @@ class CodeGenerator:
                 else:
                     # the symbol may be a built-in. If not, returns None
                     symbol = Builtin.get_symbol(identifier)
+                    if symbol is None:
+                        symbol = Interop.get_symbol(identifier)
+
                     if symbol is not None:
                         found_id, found_symbol = identifier, symbol
 
