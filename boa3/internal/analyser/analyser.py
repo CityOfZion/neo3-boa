@@ -226,3 +226,6 @@ class Analyser:
                 self.symbol_table[file_path] = import_symbol
 
         self._included_imported_files = True
+
+    def get_imports(self) -> List[Analyser]:
+        return list(self._imported_files.values())
