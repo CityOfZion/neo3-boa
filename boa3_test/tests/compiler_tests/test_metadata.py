@@ -190,6 +190,32 @@ class TestMetadata(BoaTest):
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
         self.assertEqual(manifest_struct, invoke.result[4])
 
+    def test_metadata_info_supported_standards_from_package(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsEventFromPackage.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-17', manifest['supportedstandards'])
+
+        nef, manifest = self.get_bytes_output(path)
+        path, _ = self.get_deploy_file_paths(path)
+        get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
+
+        runner = NeoTestRunner(runner_id=self.method_name())
+        # verify using NeoManifestStruct
+        contract = runner.deploy_contract(path)
+        runner.update_contracts(export_checkpoint=True)
+        call_hash = contract.script_hash
+
+        invoke = runner.call_contract(get_contract_path, 'main', call_hash)
+        manifest_struct = NeoManifestStruct.from_json(manifest)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(manifest_struct, invoke.result[4])
+
     def test_metadata_info_supported_standards_with_imported_event(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsImportedEvent.py')
         output, manifest = self.get_output(path)
