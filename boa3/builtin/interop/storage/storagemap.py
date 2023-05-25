@@ -1,3 +1,5 @@
+__all__ = ['StorageMap']
+
 from typing import Union
 
 from boa3.builtin.type import ByteString

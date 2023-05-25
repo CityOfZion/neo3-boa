@@ -1,3 +1,8 @@
+__all__ = [
+    'Policy',
+]
+
+
 from boa3.builtin.type import UInt160
 
 

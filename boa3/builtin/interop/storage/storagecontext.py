@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ['StorageContext']
+
 from boa3.builtin.interop.storage.storagemap import StorageMap
 from boa3.builtin.type import ByteString
 

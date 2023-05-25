@@ -1,3 +1,12 @@
+__all__ = [
+    "Signer",
+    "WitnessRule",
+    "WitnessCondition",
+    "WitnessConditionType",
+    "WitnessRuleAction",
+    "WitnessScope",
+]
+
 from typing import List
 
 from boa3.builtin.type import UInt160
