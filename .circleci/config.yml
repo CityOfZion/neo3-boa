@@ -43,7 +43,7 @@ jobs:
       - python/save-cache
       - run:
           name: Test
-          command: |            
+          command: |
             export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
             export PATH="$PATH:$DOTNET_TOOL_PATH"
             
@@ -103,61 +103,61 @@ jobs:
     <<: *build_deploy
 
   publish-docs:
-      executor: python38-executor
-      working_directory: ~/neo3-boa
-      steps:
-        - checkout
-        - python/load-cache
+    executor: python38-executor
+    working_directory: ~/neo3-boa
+    steps:
+      - checkout
+      - python/load-cache
 
-        - run:
-            name: Install Dependencies
-            command: |
-              pip install -r requirements_dev.txt
+      - run:
+          name: Install Dependencies
+          command: |
+            pip install -r requirements_dev.txt
 
-        - run:
-            name: install aws cli
-            command: |
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install
-        - run:
-            name: Build and release docs
-            command: |
-              cd docs
-              make publish-docs
+      - run:
+          name: install aws cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Build and release docs
+          command: |
+            cd docs
+            make publish-docs
 
 workflows:
   version: 2
   build_test_deploy:
     jobs:
       - unit-test-37:
-         filters:
-           tags:
-             only: /.*/
+          filters:
+            tags:
+              only: /.*/
       - unit-test-38:
-         filters:
-           tags:
-             only: /.*/
+          filters:
+            tags:
+              only: /.*/
       - unit-test-39:
-         filters:
-           tags:
-             only: /.*/
+          filters:
+            tags:
+              only: /.*/
       - unit-test-310:
-         filters:
-           tags:
-             only: /.*/
+          filters:
+            tags:
+              only: /.*/
       - build_deploy_test:
-         context: pypi_test
-         requires:
-           - unit-test-37
-           - unit-test-38
-           - unit-test-39
-           - unit-test-310
-         filters:
-           tags:
-             only: /^v.*/
-           branches:
-             ignore: /.*/
+          context: pypi_test
+          requires:
+            - unit-test-37
+            - unit-test-38
+            - unit-test-39
+            - unit-test-310
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - approve-release:
           type: approval
           requires:
