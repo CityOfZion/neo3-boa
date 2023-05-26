@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal import constants
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -69,46 +69,57 @@ class UInt256Method(IBuiltinMethod):
 
         return super().evaluate_literal(*args)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.model.type.type import Type
 
-        from boa3.internal.neo.vm.type.StackItem import StackItemType
-        return [
-            (Opcode.DUP, b''),
-            (Opcode.ISTYPE, Type.int.stack_item),  # if istype(arg, int):
-            (Opcode.JMPIFNOT, Integer(56).to_byte_array(signed=True)),
-            (Opcode.DUP, b''),                       # assert num >= 0
-            (Opcode.PUSH0, b''),
-            (Opcode.GE, b''),
-            (Opcode.ASSERT, b''),
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(Type.int.stack_item)
+        # if isinstance(arg, int):
+        is_int = code_generator.convert_begin_if()
 
-            (Opcode.DUP, b''),                       # if len(num) < 32
-            (Opcode.SIZE, b''),                        # increase number's length to 32
-            (Opcode.PUSHINT8, Integer(constants.SIZE_OF_INT256).to_byte_array(signed=True)),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
+        #   assert num >= 0
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.GtE, is_internal=True)
+        code_generator.convert_assert()
 
-            (Opcode.JMPGE, Integer(44).to_byte_array(signed=True)),
-            (Opcode.PUSHDATA1, (Integer(constants.SIZE_OF_INT256).to_byte_array(signed=True)
-                                + bytes(constants.SIZE_OF_INT256))),
-            (Opcode.REVERSE3, b''),
-            (Opcode.SUB, b''),
-            (Opcode.LEFT, b''),
-            (Opcode.CAT, b''),
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(constants.SIZE_OF_INT256)
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
 
-            (Opcode.JMP, Integer(4).to_byte_array()),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
+        #   if len(num) < 32
+        need_to_adjust_size = code_generator.convert_begin_if()
+        code_generator.change_jump(need_to_adjust_size, Opcode.JMPGE)
 
-            (Opcode.CONVERT, StackItemType.ByteString),  # convert to uint256
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.PUSHINT8, Integer(constants.SIZE_OF_INT256).to_byte_array(signed=True)),
-            (Opcode.NUMEQUAL, b''),
-            (Opcode.ASSERT, b''),
-        ]
+        #       # increase length of number to 32
+        code_generator.convert_literal(bytes(constants.SIZE_OF_INT256))
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.convert_operation(BinaryOp.Sub, is_internal=True)
+        code_generator.insert_opcode(Opcode.LEFT, pop_from_stack=True, add_to_stack=[Type.bytes])
+        code_generator.convert_operation(BinaryOp.Concat.build(Type.bytes, Type.bytes), is_internal=True)
+
+        #   else:
+        need_to_adjust_size = code_generator.convert_begin_else(need_to_adjust_size, is_internal=True)
+        #       # clean stack
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+
+        code_generator.convert_end_if(need_to_adjust_size, is_internal=True)
+        code_generator.convert_end_if(is_int, is_internal=True)
+
+        #   # convert to uint256
+        code_generator.convert_cast(self.return_type, is_internal=True)
+
+        # assert len(value) == 32
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(constants.SIZE_OF_INT256)
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        code_generator.convert_assert()
 
     @property
     def _args_on_stack(self) -> int:

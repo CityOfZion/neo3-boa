@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from boa3.internal import constants
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class TransactionType(ClassArrayType):
@@ -88,25 +86,21 @@ class TransactionMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.neo3.core.types import UInt160, UInt256
 
-        uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
-        uint256_default = Integer(constants.SIZE_OF_INT256).to_byte_array() + bytes(constants.SIZE_OF_INT256)
+        uint160_default = UInt160.zero().to_array()
+        uint256_default = UInt256.zero().to_array()
 
-        return [
-            (Opcode.PUSHDATA1, Integer(0).to_byte_array()),  # script
-            (Opcode.PUSH0, b''),  # valid_until_block
-            (Opcode.PUSH0, b''),  # network_fee
-            (Opcode.PUSH0, b''),  # system_fee
-            (Opcode.PUSHDATA1, uint160_default),  # sender
-            (Opcode.PUSH0, b''),  # nonce
-            (Opcode.PUSH0, b''),  # version
-            (Opcode.PUSHDATA1, uint256_default),  # hash
-            (Opcode.PUSH8, b''),
-            (Opcode.PACK, b'')
-        ]
+        code_generator.convert_literal(b'')  # script
+        code_generator.convert_literal(0)  # valid_until_block
+        code_generator.convert_literal(0)  # network_fee
+        code_generator.convert_literal(0)  # system_fee
+        code_generator.convert_literal(uint160_default)  # sender
+        code_generator.convert_literal(0)  # nonce
+        code_generator.convert_literal(0)  # version
+        code_generator.convert_literal(uint256_default)  # hash
+        code_generator.convert_new_array(length=8, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:

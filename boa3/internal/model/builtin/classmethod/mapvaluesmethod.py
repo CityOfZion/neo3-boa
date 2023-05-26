@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -30,9 +30,8 @@ class MapValuesMethod(IBuiltinMethod):
             return False
         return self._arg_self.type.is_type_of(params[0].type)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.VALUES, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.VALUES)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

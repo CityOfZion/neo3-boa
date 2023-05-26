@@ -1062,10 +1062,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                     symbol_id = attribute.attr if isinstance(generation_result, Variable) else class_attr_id
                     result_type = result
                 else:
+                    current_bytecode_size = self.generator.bytecode_size
                     index = self.generator.convert_class_symbol(result,
                                                                 attribute.attr,
                                                                 isinstance(attribute.ctx, ast.Load))
-                    generated = True
+                    generated = self.generator.bytecode_size > current_bytecode_size
                     symbol = result
                     if not isinstance(result, UserClass):
                         if isinstance(index, int):

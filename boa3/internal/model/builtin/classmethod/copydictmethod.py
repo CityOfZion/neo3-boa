@@ -68,3 +68,11 @@ class CopyDictMethod(CopyMethod):
             while_loop +
             clean_stack
         )
+
+    def generate_opcodes(self, code_generator):
+        # TODO: implement on #864eq2qev
+        pass
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.UNPACK)
+        code_generator.insert_opcode(Opcode.PACKMAP)

@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.internal.model.type.type import IType, Type
@@ -44,9 +42,7 @@ class NoneNotIdentity(UnaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [
-            (Opcode.ISNULL, b''),
-            (Opcode.NOT, b'')
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.operation.unaryop import UnaryOp
+        code_generator.insert_opcode(Opcode.ISNULL)
+        code_generator.convert_operation(UnaryOp.Not, is_internal=True)

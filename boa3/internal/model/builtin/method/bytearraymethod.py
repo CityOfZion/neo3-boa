@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Union
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -66,15 +66,13 @@ class ByteArrayMethod(IBuiltinMethod):
                      or isinstance(param_type.value_type, type(Type.int))
                      ))
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.StackItem import StackItemType
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.type.type import Type
 
-        if self._arg_object.type is Type.int:
-            return [(Opcode.NEWBUFFER, b'')]
+        if Type.int.is_type_of(self._arg_object.type):
+            code_generator.insert_opcode(Opcode.NEWBUFFER)
         else:
-            return [(Opcode.CONVERT, StackItemType.Buffer)]
+            code_generator.convert_cast(self.return_type, is_internal=True)
 
     @property
     def is_supported(self) -> bool:

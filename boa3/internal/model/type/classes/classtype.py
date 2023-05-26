@@ -181,6 +181,78 @@ class ClassType(IType, ABC):
         from boa3.internal.model.builtin.decorator import ContractDecorator
         return any(isinstance(decorator, ContractDecorator) for decorator in self.decorators)
 
+    def generate_is_instance_type_check(self, code_generator):
+        start_address = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+
+        begin_generic_type = code_generator.bytecode_size
+        super().generate_is_instance_type_check(code_generator)
+        generic_type_check_size = code_generator.bytecode_size - begin_generic_type
+
+        # if type check is ok
+        begin_if = code_generator.convert_begin_if()
+        #   result = specific check
+        first_if_code = code_generator.bytecode_size
+        inner_jumps = self._generate_specific_class_type_check(code_generator)
+
+        if first_if_code == code_generator.bytecode_size:
+            code_generator.convert_end_if(begin_if, is_internal=True)
+
+            from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
+            map_instance = VMCodeMapping.instance()
+            map_instance.move_to_end(start_address, begin_generic_type - 1)
+            map_instance.remove_opcodes(start_address + generic_type_check_size)
+            return
+
+        # else
+        begin_else = code_generator.convert_begin_else(begin_if, insert_jump=True)
+        for validation in inner_jumps:
+            code_generator.convert_end_if(validation, is_internal=True)
+
+        #   result = False
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(False)
+        code_generator.convert_end_if(begin_else, is_internal=True)
+
+    def _generate_specific_class_type_check(self, code_generator) -> List[int]:
+        """
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+
+        :return: list of inner jumps addresses for failed checks
+        :rtype: list[int]
+        """
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        # check variable count
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(len(self._all_variables))
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        # if len(arg) == len(self):
+        begin_if = code_generator.convert_begin_if()
+
+        last_index = len(self._all_variables) - 1
+        inner_validations = []
+        for var_index, (var_id, var) in list(enumerate(self._all_variables.items())):
+            if var.type.stack_item != StackItemType.Any:
+                code_generator.duplicate_stack_top_item()
+                # validate primitive types only to avoid recursive code
+                if self.stack_item == StackItemType.Map:
+                    code_generator.convert_literal(var_id)
+                else:
+                    code_generator.convert_literal(var_index)
+                code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
+                code_generator.insert_type_check(var.type.stack_item)
+
+                if var_index < last_index:
+                    inner_validations.append(code_generator.convert_begin_if())
+
+        code_generator.remove_stack_item(2)
+
+        inner_validations.insert(0, begin_if)
+        return inner_validations
+
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
         is_type_opcodes = [
             (Opcode.DUP, b''),  # if is the same internal type

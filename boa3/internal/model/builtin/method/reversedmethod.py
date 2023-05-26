@@ -127,3 +127,57 @@ class ReversedMethod(IBuiltinMethod):
             else_body +
             reverse_array
         )
+
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.type.type import Type
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
+
+        # if isinstance(arg1, (str, bytes)):
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(StackItemType.ByteString)
+        is_byte_str = code_generator.convert_begin_if()
+
+        #     list_aux = []
+        code_generator.convert_new_empty_array(length=0, array_type=self.return_type)
+        #     limit = len(arg)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        #     index = 0
+        code_generator.convert_literal(0)
+
+        #     while index < limit:
+        while_index_is_valid = code_generator.convert_begin_while()
+        #         list_aux.append(arg[index])
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_literal(1)
+        code_generator.convert_get_substring(is_internal=True)
+        code_generator.convert_cast(Type.int if Type.bytes.is_type_of(self.args['sequence'].type)
+                                    else Type.str, is_internal=True)
+        code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
+        #         index += 1
+        code_generator.insert_opcode(Opcode.INC)
+
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        code_generator.convert_end_while(while_index_is_valid, while_condition, is_internal=True)
+
+        for _ in range(3):
+            code_generator.remove_stack_top_item()
+
+        # else:
+        else_is_bytes_str = code_generator.convert_begin_else(is_byte_str, is_internal=True)
+        #     list_aux = arg.copy()
+        code_generator.convert_copy()
+
+        # list_aux.reverse()
+        code_generator.convert_end_if(else_is_bytes_str, is_internal=True)
+
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.REVERSEITEMS)

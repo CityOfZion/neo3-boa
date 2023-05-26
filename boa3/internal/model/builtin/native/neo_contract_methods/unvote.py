@@ -1,8 +1,7 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.interop.nativecontract import NeoContractMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class UnVoteMethod(NeoContractMethod):
@@ -26,12 +25,8 @@ class UnVoteMethod(NeoContractMethod):
         super().__init__(identifier, native_identifier, args, return_type=Type.bool,
                          internal_call_args=len(neo_internal_args))
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return (
-            [
-                (Opcode.PUSHNULL, b''),
-                (Opcode.SWAP, b''),
-            ] +
-            super()._opcode
-        )
+    def generate_internal_opcodes(self, code_generator):
+        # unvote(account) = vote(account, None)
+        code_generator.convert_literal(None)
+        code_generator.swap_reverse_stack_items(2)
+        super().generate_internal_opcodes(code_generator)

@@ -1,12 +1,11 @@
 import ast
 from abc import ABC
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class InteropMethod(IBuiltinMethod, ABC):
@@ -36,9 +35,12 @@ class InteropMethod(IBuiltinMethod, ABC):
 
         return cryptography.sha256(String(method_name).to_bytes())[:SIZE_OF_INT32]
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.SYSCALL, self.interop_method_hash)]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_sys_call(self.interop_method_hash)
+
+    def _raw_bytecode(self) -> bytes:
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
+        return Opcode.SYSCALL + self.interop_method_hash
 
     @property
     def _args_on_stack(self) -> int:

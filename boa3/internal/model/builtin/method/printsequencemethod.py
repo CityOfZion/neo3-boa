@@ -1,8 +1,5 @@
-from typing import List, Tuple
-
 from boa3.internal.model.builtin.method.printmethod import PrintMethod
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class PrintSequenceMethod(PrintMethod):
@@ -15,10 +12,7 @@ class PrintSequenceMethod(PrintMethod):
 
         super().__init__(arg_value)
 
-    @property
-    def print_value_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        if self._print_value_opcodes is None:
-            from boa3.internal.model.builtin.interop.interop import Interop
-            self._print_value_opcodes = Interop.JsonSerialize.opcode.copy()
+    def _generate_print_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.interop.interop import Interop
 
-        return super().print_value_opcodes
+        code_generator.convert_builtin_method_call(Interop.JsonSerialize, is_internal=True)

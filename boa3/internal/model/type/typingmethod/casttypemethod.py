@@ -7,7 +7,6 @@ from boa3.internal.model.type.anytype import anyType
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CastTypeMethod(IBuiltinMethod):
@@ -73,9 +72,8 @@ class CastTypeMethod(IBuiltinMethod):
                        else self.typ_arg.type)
         return origin_type, target_type
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return []
+    def generate_internal_opcodes(self, code_generator):
+        pass
 
     @property
     def _args_on_stack(self) -> int:

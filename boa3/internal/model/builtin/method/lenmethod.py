@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Sized, Tuple
+from typing import Any, Dict, Optional, Sized
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -27,9 +27,8 @@ class LenMethod(IBuiltinMethod):
             return False
         return isinstance(params[0].type, SequenceType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.SIZE, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.SIZE)
 
     @property
     def _args_on_stack(self) -> int:

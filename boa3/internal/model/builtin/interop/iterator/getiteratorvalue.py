@@ -1,10 +1,9 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.builtin.interop.iterator.iteratortype import IteratorType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class GetIteratorValue(InteropMethod):
@@ -28,16 +27,21 @@ class GetIteratorValue(InteropMethod):
     def self_arg(self) -> Variable:
         return self.args['self']
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.type.type import Type
         from boa3.internal.neo.vm.type.StackItem import StackItemType
-        from boa3.internal.neo.vm.type.Integer import Integer
-        return super()._opcode + [
-            (Opcode.DUP, b''),
-            (Opcode.ISTYPE, StackItemType.Struct),
-            (Opcode.JMPIFNOT, Integer(3).to_byte_array()),
-            (Opcode.CONVERT, StackItemType.Array),
-        ]
+
+        super().generate_internal_opcodes(code_generator)
+
+        # if result is not Struct
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(StackItemType.Struct)
+        is_struct = code_generator.convert_begin_if()
+
+        #   cast(result, list)
+        code_generator.convert_cast(Type.list, is_internal=True)
+
+        code_generator.convert_end_if(is_struct, is_internal=True)
 
 
 class IteratorValueProperty(IBuiltinProperty):

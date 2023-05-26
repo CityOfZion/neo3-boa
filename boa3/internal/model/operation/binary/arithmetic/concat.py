@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
@@ -52,8 +52,12 @@ class Concat(BinaryOperation):
         return next((valid_type for valid_type in self._valid_types
                      if valid_type.is_type_of(operator_type)), None)
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.CAT, b''),
-                (Opcode.CONVERT, Type.str.stack_item)
-                ]
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
+
+        super().generate_opcodes(code_generator)
+        if self.result.stack_item != StackItemType.Buffer:
+            code_generator.convert_cast(self.result, is_internal=True)
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.CAT)

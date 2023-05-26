@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -7,7 +7,6 @@ from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.bytestype import BytesType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class ToStrMethod(IBuiltinMethod, ABC):
@@ -29,12 +28,9 @@ class ToStrMethod(IBuiltinMethod, ABC):
             return False
         return isinstance(params[0], IExpression) and isinstance(params[0].type, BytesType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.type.type import Type
-        return [
-            (Opcode.CONVERT, Type.str.stack_item)
-        ]
+        code_generator.convert_cast(Type.str, is_internal=True)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

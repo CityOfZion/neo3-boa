@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
@@ -35,27 +35,36 @@ class StrBytesMultiplication(BinaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        codes = [
-            (Opcode.PUSHDATA1, Integer(0).to_byte_array(min_length=1)),  # concatString = ''
-            (Opcode.ROT, b''),
-            (Opcode.ROT, b''),
-            (Opcode.JMP, Integer(7).to_byte_array()),       # while argInt > 0
-            (Opcode.REVERSE3, b''),
-            (Opcode.OVER, b''),
-            (Opcode.CAT, b''),                                  # concatString += argString
-            (Opcode.REVERSE3, b''),
-            (Opcode.DEC, b''),                                  # argInt -= 1
-            (Opcode.DUP, b''),
-            (Opcode.PUSH0, b''),
-            (Opcode.JMPGT, Integer(-7).to_byte_array()),   # return concatString
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b'')
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        # concatString = ''
+        code_generator.convert_literal('')
+        # reorganize stack
+        code_generator.insert_opcode(Opcode.ROT)
+        code_generator.insert_opcode(Opcode.ROT)
+
+        # while argInt > 0:
+        concat_start = code_generator.convert_begin_while()
+
+        #   concatString += argString
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        #   argInt -= 1
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.insert_opcode(Opcode.DEC)
+
+        # while condition
+        condition_start = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+        code_generator.convert_end_while(concat_start, condition_start, is_internal=True)
+
+        # clear stack
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+
         if Type.str.is_type_of(self.left_type):
-            codes.append(
-                (Opcode.CONVERT, Type.str.stack_item)
-            )
-        return codes
+            code_generator.convert_cast(self.left_type, is_internal=True)

@@ -805,7 +805,6 @@ class TestFunction(BoaTest):
             + Integer(3).to_byte_array(min_length=1, signed=True)
             + Opcode.PUSH10  # 10
             + Opcode.RET  # return
-            + Opcode.RET
         )
 
         path = self.get_contract_path('ReturnIfExpression.py')
