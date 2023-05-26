@@ -132,6 +132,13 @@ class MaxMethod(IBuiltinMethod):
             clean_stack
         )
 
+    def generate_opcodes(self, code_generator):
+        # TODO: implement on #864eq2q3y
+        pass
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.MAX)
+
     def _compare_values(self) -> List[Tuple[Opcode, bytes]]:
         return [(Opcode.MAX, b'')]
 

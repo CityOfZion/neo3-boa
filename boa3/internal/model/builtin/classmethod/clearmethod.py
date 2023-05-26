@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -30,20 +30,27 @@ class ClearMethod(IBuiltinMethod):
             return False
         return isinstance(params[0], IExpression) and isinstance(params[0].type, MutableSequenceType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.model.type.type import Type
-        from boa3.internal.neo.vm.type.Integer import Integer
-        return [
-            (Opcode.DUP, b''),
-            (Opcode.ISTYPE, Type.bytearray.stack_item),     # append opcode only works for array
-            (Opcode.JMPIFNOT, Integer(9).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
-            (Opcode.DROP, b''),
-            (Opcode.PUSHDATA1, b'\x00'),
-            (Opcode.CONVERT, Type.bytearray.stack_item),
-            (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
-            (Opcode.CLEARITEMS, b'')
-        ]
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
+
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(StackItemType.Buffer)
+        if_is_bytes = code_generator.convert_begin_if()
+        # if arg is bytes:
+
+        code_generator.remove_stack_top_item()
+        #   result = bytearray()
+        code_generator.convert_literal(bytearray())
+
+        else_is_bytes = code_generator.convert_begin_else(if_is_bytes, is_internal=True)
+        # else:
+        super().generate_opcodes(code_generator)
+        #   arg.clear()
+
+        code_generator.convert_end_if(else_is_bytes, is_internal=True)
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.CLEARITEMS)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

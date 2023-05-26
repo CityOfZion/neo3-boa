@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Sized, Tuple
+from typing import Any, Dict, Optional, Sized
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -43,18 +43,27 @@ class AppendMethod(IBuiltinMethod):
             return False
         return sequence_type.value_type.is_type_of(value_type)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.model.type.type import Type
-        from boa3.internal.neo.vm.type.Integer import Integer
-        return [
-            (Opcode.OVER, b''),
-            (Opcode.ISTYPE, Type.bytearray.stack_item),     # append opcode only works for array
-            (Opcode.JMPIFNOT, Integer(5).to_byte_array(min_length=1)),  # when it's bytearray, concatenates the value
-            (Opcode.CAT, b''),
-            (Opcode.JMP, Integer(5).to_byte_array(min_length=1)),
-            (Opcode.APPEND, b'')
-        ]
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
+
+        code_generator.duplicate_stack_item(2)
+        code_generator.insert_type_check(StackItemType.Buffer)  # append opcode only works for array
+        # if self is bytes
+        if_bytes = code_generator.convert_begin_if()
+        #   result = self + arg     # when it's bytearray, concatenates the value
+        code_generator.convert_operation(BinaryOp.Concat.build(Type.bytearray, Type.bytearray))
+
+        # else:
+        else_bytes = code_generator.convert_begin_else(if_bytes, is_internal=True)
+        #   self.append()
+        super().generate_opcodes(code_generator)
+
+        code_generator.convert_end_if(else_bytes, is_internal=True)
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.APPEND)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

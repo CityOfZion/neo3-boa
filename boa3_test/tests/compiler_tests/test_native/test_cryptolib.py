@@ -15,14 +15,17 @@ from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 class TestCryptoLibClass(BoaTest):
     default_folder: str = 'test_sc/native_test/cryptolib'
     ecpoint_init = (
-        Opcode.CONVERT + Type.bytes.stack_item
-        + Opcode.DUP
+        Opcode.DUP
         + Opcode.ISNULL
-        + Opcode.JMPIF + Integer(8).to_byte_array()
+        + Opcode.NOT
+        + Opcode.JMPIFNOT
+        + Integer(11).to_byte_array(min_length=1)
+        + Opcode.CONVERT + Type.bytes.stack_item
         + Opcode.DUP
         + Opcode.SIZE
         + Opcode.PUSHINT8 + Integer(33).to_byte_array(signed=True)
-        + Opcode.JMPEQ + Integer(3).to_byte_array()
+        + Opcode.NUMEQUAL
+        + Opcode.JMPIF + Integer(3).to_byte_array()
         + Opcode.THROW
     )
 

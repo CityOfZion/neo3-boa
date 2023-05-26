@@ -1,12 +1,11 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class ExceptionMethod(IBuiltinMethod):
@@ -48,9 +47,8 @@ class ExceptionMethod(IBuiltinMethod):
         param_type: IType = params[0].type if isinstance(params[0], IExpression) else params[0]
         return isinstance(param_type, PrimitiveType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return []
+    def generate_internal_opcodes(self, code_generator):
+        pass
 
     @property
     def _args_on_stack(self) -> int:

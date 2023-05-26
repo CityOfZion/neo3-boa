@@ -1,9 +1,8 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.method.strmethod import StrMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class StrByteStringMethod(StrMethod):
@@ -18,6 +17,5 @@ class StrByteStringMethod(StrMethod):
 
         super().__init__(args, [object_default])
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return []
+    def generate_internal_opcodes(self, code_generator):
+        pass

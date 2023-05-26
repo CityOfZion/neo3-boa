@@ -605,7 +605,7 @@ class TestString(BoaTest):
         x = 0
         y = 5
         expected_result = a[x:y:2]
-        invokes.append(runner.call_contract(path, 'with_variables',x , y))
+        invokes.append(runner.call_contract(path, 'with_variables', x, y))
         expected_results.append(expected_result)
 
         runner.execute()

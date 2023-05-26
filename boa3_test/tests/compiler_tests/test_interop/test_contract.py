@@ -563,17 +563,19 @@ class TestContractInterop(BoaTest):
             Opcode.INITSLOT
             + b'\x00\x01'
             + Opcode.LDARG0
-            + Opcode.CONVERT
-            + StackItemType.ByteString
             + Opcode.DUP
             + Opcode.ISNULL
-            + Opcode.JMPIF
-            + Integer(8).to_byte_array(min_length=1)
+            + Opcode.NOT
+            + Opcode.JMPIFNOT
+            + Integer(11).to_byte_array(min_length=1)
+            + Opcode.CONVERT
+            + StackItemType.ByteString
             + Opcode.DUP
             + Opcode.SIZE
             + Opcode.PUSHINT8
             + Integer(33).to_byte_array(min_length=1)
-            + Opcode.JMPEQ
+            + Opcode.NUMEQUAL
+            + Opcode.JMPIF
             + Integer(3).to_byte_array(min_length=1)
             + Opcode.THROW
             + Opcode.SYSCALL

@@ -1,8 +1,7 @@
-from typing import Any, List, Tuple
+from typing import Any
 
 from boa3.internal.model.type.classes.pythonclass import PythonClass
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.AbiType import AbiType
 
 
@@ -30,8 +29,8 @@ class NoneType(PythonClass):
         from boa3.internal.model.type.type import Type
         return value is None or value is Type.none
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.ISNULL, b'')]
+    def generate_is_instance_type_check(self, code_generator):
+        code_generator.insert_type_check(None)
 
 
 noneType: IType = NoneType()

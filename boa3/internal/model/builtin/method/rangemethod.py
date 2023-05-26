@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -63,44 +63,63 @@ class RangeMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
         return all(param is Type.int for param in params_type)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        from boa3.internal.neo.vm.type.String import String
-        range_error_msg = String('range() arg 3 must not be zero').to_bytes()
-        return [
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIGN, b''),
-            (Opcode.JMPIF, Integer(5 + len(range_error_msg)).to_byte_array(signed=True)),
-            (Opcode.PUSHDATA1, Integer(len(range_error_msg)).to_byte_array(signed=True) + range_error_msg),
-            (Opcode.THROW, b''),
-            (Opcode.NEWARRAY0, b''),
-            (Opcode.REVERSE4, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.JMP, Integer(8).to_byte_array(signed=True, min_length=1)),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.APPEND, b''),
-            (Opcode.OVER, b''),
-            (Opcode.ADD, b''),
-            (Opcode.DUP, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIGN, b''),
-            (Opcode.PUSH0, b''),
-            (Opcode.JMPGT, Integer(5).to_byte_array(signed=True, min_length=1)),
-            (Opcode.GT, b''),
-            (Opcode.JMP, Integer(3).to_byte_array(signed=True, min_length=1)),
-            (Opcode.LT, b''),
-            (Opcode.JMPIF, Integer(-19).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b'')
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        range_error_msg = 'range() arg 3 must not be zero'
+
+        code_generator.duplicate_stack_item(3)
+        code_generator.insert_opcode(Opcode.SIGN)
+        # if step == 0
+        if_invalid_step = code_generator.convert_begin_if()
+        code_generator.change_jump(if_invalid_step, Opcode.JMPIF)
+        #   raise error
+        code_generator.convert_literal(range_error_msg)
+        code_generator.convert_raise_exception()
+
+        code_generator.convert_end_if(if_invalid_step, is_internal=True)
+
+        # aux = []
+        code_generator.convert_literal([])
+        # new_item = start
+        code_generator.swap_reverse_stack_items(4)
+        code_generator.swap_reverse_stack_items(2)
+
+        # while new_item is valid
+        begin_while = code_generator.convert_begin_while()
+
+        #   aux.append(new_item)
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
+        #   new_item += step
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+
+        # while condition
+        test_while = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(4)
+        code_generator.insert_opcode(Opcode.SIGN)
+        code_generator.convert_literal(0)
+
+        # if step <= 0 -> condition is GT
+        if_condition = code_generator.convert_begin_if()
+        code_generator.change_jump(if_condition, Opcode.JMPGT)  # jmp to negation of LE
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+
+        # else -> condition is LT
+        else_condition = code_generator.convert_begin_else(if_condition, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        code_generator.convert_end_if(else_condition, is_internal=True)
+
+        code_generator.convert_end_while(begin_while, test_while, is_internal=True)
+
+        # clear stack
+        for _ in self.args:
+            code_generator.remove_stack_top_item()
 
     @property
     def _args_on_stack(self) -> int:

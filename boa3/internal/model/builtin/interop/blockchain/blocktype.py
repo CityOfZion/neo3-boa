@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from boa3.internal import constants
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class BlockType(ClassArrayType):
@@ -92,27 +90,23 @@ class BlockMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.neo3.core.types import UInt160, UInt256
 
-        uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
-        uint256_default = Integer(constants.SIZE_OF_INT256).to_byte_array() + bytes(constants.SIZE_OF_INT256)
+        uint160_default = UInt160.zero().to_array()
+        uint256_default = UInt256.zero().to_array()
 
-        return [
-            (Opcode.PUSH0, b''),  # transaction_count
-            (Opcode.PUSHDATA1, uint160_default),  # next_consensus
-            (Opcode.PUSH0, b''),  # primary_index
-            (Opcode.PUSH0, b''),  # index
-            (Opcode.PUSH0, b''),  # nonce
-            (Opcode.PUSH0, b''),  # timestamp
-            (Opcode.PUSHDATA1, uint256_default),  # merkle_root
-            (Opcode.PUSHDATA1, uint256_default),  # previous_hash
-            (Opcode.PUSH0, b''),  # version
-            (Opcode.PUSHDATA1, uint256_default),  # hash
-            (Opcode.PUSH10, b''),
-            (Opcode.PACK, b'')
-        ]
+        code_generator.convert_literal(0)  # transaction_count
+        code_generator.convert_literal(uint160_default)  # next_consensus
+        code_generator.convert_literal(0)  # primary_index
+        code_generator.convert_literal(0)  # index
+        code_generator.convert_literal(0)  # nonce
+        code_generator.convert_literal(0)  # timestamp
+        code_generator.convert_literal(uint256_default)  # merkle_root
+        code_generator.convert_literal(uint256_default)  # previous_hash
+        code_generator.convert_literal(0)  # version
+        code_generator.convert_literal(uint256_default)  # hash
+        code_generator.convert_new_array(length=10, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:

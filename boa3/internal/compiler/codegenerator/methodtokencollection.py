@@ -63,3 +63,9 @@ class MethodTokenCollection:
 
     def to_list(self) -> List[MethodToken]:
         return self._method_tokens.copy()
+
+    def __getitem__(self, item):
+        if isinstance(item, int) and len(self._method_tokens) > item:
+            return self._method_tokens[item]
+        else:
+            return None

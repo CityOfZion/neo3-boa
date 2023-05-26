@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.method.listmethod import ListMethod
 from boa3.internal.model.type.itype import IType
@@ -21,14 +21,8 @@ class ListMappingMethod(ListMethod):
 
         super().__init__(args, return_type)
 
-    @property
-    def prepare_for_packing(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_pack_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
 
-        if self._prepare_for_packing is None:
-
-            self._prepare_for_packing = [
-                (Opcode.KEYS, b''),
-                (Opcode.UNPACK, b'')
-            ]
-
-        return super().prepare_for_packing
+        code_generator.convert_builtin_method_call(Builtin.DictKeys, is_internal=True)
+        code_generator.insert_opcode(Opcode.UNPACK)

@@ -49,6 +49,15 @@ class VMCodeMapping:
             return self._method_tokens.append(method, call_flag)
         return None
 
+    def get_method_token(self, method_token_id: int):
+        """
+        Returns the method token with given id if it exists.
+        Otherwise, returns None
+
+        :rtype: boa3.internal.neo3.contracts.nef.MethodToken or None
+        """
+        return self._method_tokens[method_token_id]
+
     @property
     def codes(self) -> List[VMCode]:
         """

@@ -1,7 +1,4 @@
-from typing import List, Tuple
-
 from boa3.internal.model.builtin.method.printmethod import PrintMethod
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class PrintIntMethod(PrintMethod):
@@ -12,13 +9,8 @@ class PrintIntMethod(PrintMethod):
 
         super().__init__(arg_value)
 
-    @property
-    def print_value_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        if self._print_value_opcodes is None:
-            from boa3.internal.model.builtin.interop.stdlib.itoamethod import ItoaMethod
-            itoa_method = ItoaMethod(internal_call_args=1)
-            self._print_value_opcodes = (
-                itoa_method.opcode.copy()
-            )
+    def _generate_print_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.interop.stdlib.itoamethod import ItoaMethod
 
-        return super().print_value_opcodes
+        itoa_method = ItoaMethod(internal_call_args=1)
+        code_generator.convert_builtin_method_call(itoa_method, is_internal=True)

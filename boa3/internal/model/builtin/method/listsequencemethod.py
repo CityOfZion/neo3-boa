@@ -1,5 +1,5 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.method.listmethod import ListMethod
 from boa3.internal.model.type.itype import IType
@@ -25,11 +25,5 @@ class ListSequenceMethod(ListMethod):
 
         super().__init__(args, return_type, [value_default])
 
-    @property
-    def prepare_for_packing(self) -> List[Tuple[Opcode, bytes]]:
-
-        if self._prepare_for_packing is None:
-
-            self._prepare_for_packing = [(Opcode.UNPACK, b'')]
-
-        return super().prepare_for_packing
+    def generate_pack_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.UNPACK)

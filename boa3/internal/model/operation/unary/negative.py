@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
@@ -33,6 +33,5 @@ class Negative(UnaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.NEGATE, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.NEGATE)

@@ -1,7 +1,6 @@
-from typing import Any, List, Tuple
+from typing import Any
 
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.AbiType import AbiType
 
 
@@ -27,8 +26,8 @@ class __AnyType(IType):
     def _is_type_of(cls, value: Any):
         return True
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.PUSH1, b'')]  # any is type of everything, so inserts True
+    def generate_is_instance_type_check(self, code_generator):
+        code_generator.convert_literal(True)  # any is type of everything, so inserts True
 
 
 anyType: IType = __AnyType()
