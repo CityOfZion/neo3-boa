@@ -5,7 +5,6 @@ from boa3.internal.analyser import supportedstandard
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.event import Event
-from boa3.internal.model.imports import importsymbol
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
 
@@ -33,6 +32,7 @@ class StandardAnalyser(IAstAnalyser):
             standards = []
 
         self.standards: List[str] = standards
+        self._analyser = analyser
         self._filter_standards_names()
         self._validate_standards()
         self._check_other_implemented_standards()
@@ -88,8 +88,9 @@ class StandardAnalyser(IAstAnalyser):
                 # validate standard's events
                 events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
                 # imported events should be included in the validation
-                for imported in self._get_all_imports():
-                    events.extend([event for event in imported.all_symbols.values() if isinstance(event, Event)])
+                for import_ in self._analyser.get_imports():
+                    events.extend([event for event in import_.symbol_table.values()
+                                   if isinstance(event, Event) and event not in events])
 
                 for standard_event in current_standard.events:
                     is_implemented = False
@@ -122,22 +123,6 @@ class StandardAnalyser(IAstAnalyser):
                             CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
                         )
 
-    def _get_all_imports(self) -> List[importsymbol.Import]:
-        all_imports = [imported for imported in self.symbols.values()
-                       if (isinstance(imported, importsymbol.Import)
-                           and not isinstance(imported, importsymbol.BuiltinImport))]
-        index = 0
-        while index < len(all_imports):
-            imported = all_imports[index]
-            for inner in imported.all_symbols.values():
-                if (isinstance(inner, importsymbol.Import)
-                        and not isinstance(inner, importsymbol.BuiltinImport)
-                        and inner not in all_imports):
-                    all_imports.append(inner)
-            index += 1
-
-        return all_imports
-
     def _check_other_implemented_standards(self):
         other_standards = supportedstandard.neo_standards.copy()
         # verify only standards that were not mentioned
@@ -147,8 +132,8 @@ class StandardAnalyser(IAstAnalyser):
 
         # gets a list of all events
         events = [symbol for symbol in self.symbols.copy().values() if isinstance(symbol, Event)]
-        for imported in self._get_all_imports():
-            events.extend([event for event in imported.all_symbols.values() if isinstance(event, Event)])
+        for import_ in self._analyser.get_imports():
+            events.extend([event for event in import_.symbol_table.values() if isinstance(event, Event)])
 
         # verify if the methods and events that were implemented corresponds to a standard
         for standard in other_standards:
