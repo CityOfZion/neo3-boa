@@ -64,7 +64,7 @@ class ECPointMethod(IBuiltinMethod):
         code_generator.convert_literal(constants.SIZE_OF_ECPOINT)
         code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
 
-        else_address = code_generator.convert_begin_else(is_arg_null, True, is_internal=True)
+        else_address = code_generator.convert_begin_else(is_arg_null, True)
         code_generator.change_jump(else_address, Opcode.JMPIF)
         #   raise exception
         code_generator.convert_raise_exception()

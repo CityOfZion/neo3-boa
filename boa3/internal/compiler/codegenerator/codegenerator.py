@@ -1907,12 +1907,17 @@ class CodeGenerator:
         :param operation: the operation that will be converted
         :param is_internal: whether it was called when generating other implemented symbols
         """
+        stack_before = len(self._stack)
         if is_internal:
             operation.generate_internal_opcodes(self)
         else:
             operation.generate_opcodes(self)
 
-        for op in range(operation.op_on_stack):
+        expected_stack_after = stack_before - operation.op_on_stack
+        if expected_stack_after < 0:
+            expected_stack_after = 0
+
+        while expected_stack_after < len(self._stack):
             self._stack_pop()
         self._stack_append(operation.result)
 
