@@ -10,7 +10,6 @@ Welcome to neo3-boa's documentation!
    :caption: Contents:
 
    getting-started
-   tutorials
-   conceptual-overview
-   code-reference
+   testing-and-debugging
+   calling-smart-contracts
    package-reference

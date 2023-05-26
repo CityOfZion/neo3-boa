@@ -20,6 +20,9 @@ class RoleManagement:
         """
         Gets the list of nodes for the specified role.
 
+        >>> get_designated_by_role(Role.ORACLE, 0)
+        []
+
         :param role: the type of the role
         :type role: Role
         :param index: the index of the block to be queried

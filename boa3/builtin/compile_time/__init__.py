@@ -16,6 +16,14 @@ def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '')
     """
     Creates a new event.
 
+    >>> new_event: Event = CreateNewEvent(
+    ...     [
+    ...        ('name', str),
+    ...        ('amount', int)
+    ...     ],
+    ...     'New Event'
+    ... )
+
     :param arguments: the list of the events args' names and types
     :type arguments: List[Tuple[str, type]]
     :param event_name: custom name of the event. It's filled with the variable name if not specified
@@ -29,6 +37,39 @@ def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '')
 def public(name: str = None, safe: bool = True, *args, **kwargs):
     """
     This decorator identifies which methods should be included in the abi file.
+
+    >>> @public     # this method will be added to the abi
+    ... def callable_function() -> bool:
+    ...     return True
+    {
+        "name": "callable_function",
+        "offset": 0,
+        "parameters": [],
+        "safe": false,
+        "returntype": "Boolean"
+    }
+
+    >>> @public(name='callableFunction')     # the method will be added with the different name to the abi
+    ... def callable_function() -> bool:
+    ...     return True
+    {
+        "name": "callableFunction",
+        "offset": 0,
+        "parameters": [],
+        "safe": false,
+        "returntype": "Boolean"
+    }
+
+    >>> @public(safe=True)      # the method will be added with the safe flag to the abi
+    ... def callable_function() -> bool:
+    ...     return True
+    {
+        "name": "callable_function",
+        "offset": 0,
+        "parameters": [],
+        "safe": true,
+        "returntype": "Boolean"
+    }
 
     :param name: Identifier for this method that'll be used on the abi. If not specified, it'll be the same
      identifier from Python method definition
@@ -45,6 +86,12 @@ def metadata(*args):
     """
     This decorator identifies the function that returns the metadata object of the smart contract.
     This can be used to only one function. Using this decorator in multiple functions will raise a compiler error.
+
+    >>> @metadata   # this indicates that this function will have information about the smart contract
+    ... def neo_metadata() -> NeoMetadata:      # needs to return a NeoMetadata
+    ...     meta = NeoMetadata()
+    ...     meta.name = 'NewContractName'
+    ...     return meta
     """
     pass
 
@@ -52,6 +99,15 @@ def metadata(*args):
 def contract(script_hash: Union[str, bytes]):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
+
+    >>> @contract('0xd2a4cff31913016155e38e474a2c06d08be276cf')
+    ... class GASInterface:
+    ...     @staticmethod
+    ...     def symbol() -> str:
+    ...         pass
+    ... @public
+    ... def main() -> str:
+    ...     return "Symbol is " + GASInterface.symbol()
 
     :param script_hash: Script hash of the interfaced contract
     :type script_hash: str or bytes
@@ -73,6 +129,16 @@ def display_name(name: str):
     This decorator identifies which methods from a contract interface should have a different identifier from the one
     interfacing it. It only works in contract interface classes.
 
+    >>> @contract('0xd2a4cff31913016155e38e474a2c06d08be276cf')
+    ... class GASInterface:
+    ...     @staticmethod
+    ...     @display_name('totalSupply')
+    ...     def total_supply() -> int:      # the smart contract will call "totalSupply", but when writing the script you can call this method whatever you want to
+    ...         pass
+    ... @public
+    ... def main() -> int:
+    ...     return GASInterface.total_supply()
+
     :param name: Method identifier from the contract manifest.
     :type name: str
     """
@@ -82,6 +148,15 @@ def display_name(name: str):
 class NeoMetadata:
     """
     This class stores the smart contract manifest information.
+
+    >>> @metadata
+    ... def neo_metadata() -> NeoMetadata:
+    ...     meta = NeoMetadata()
+    ...     meta.name = 'NewContractName'
+    ...     meta.add_permission(methods=['onNEP17Payment'])
+    ...     meta.add_trusted_source("0x1234567890123456789012345678901234567890")
+    ...     meta.date = "2023/05/30"    # this property will end up inside the extra property
+    ...     return meta
 
     :ivar name: the smart contract name. Will be the name of the file by default;
     :vartype type name: str
@@ -152,6 +227,12 @@ class NeoMetadata:
         """
         Adds a valid contract hash, valid group public key, or the '*' wildcard to trusts.
 
+        >>> self.add_trusted_source("0x1234567890123456789012345678901234abcdef")
+
+        >>> self.add_trusted_source("035a928f201639204e06b4368b1a93365462a8ebbff0b8818151b74faab3a2b61a")
+
+        >>> self.add_trusted_source("*")
+
         :param hash_or_address: a contract hash, group public key or '*'
         :type hash_or_address: str
         """
@@ -179,6 +260,9 @@ class NeoMetadata:
         """
         Adds a pair of public key and signature to the groups in the manifest.
 
+        >>> self.add_group("031f64da8a38e6c1e5423a72ddd6d4fc4a777abe537e5cb5aa0425685cda8e063b",
+        ...                "fhsOJNF3N5Pm3oV1b7wYTx0QVelYNu7whwXMi8GsNGFKUnu3ZG8z7oWLfzzEz9pbnzwQe8WFCALEiZhLD1jG/w==")
+
         :param pub_key: public key of the group
         :type pub_key: str
         :param signature: signature of the contract hash encoded in Base64
@@ -203,6 +287,12 @@ class NeoMetadata:
     def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: Union[List[str], str] = IMPORT_WILDCARD):
         """
         Adds a valid contract and a valid methods to the permissions in the manifest.
+
+        >>> self.add_permission(methods=['onNEP17Payment'])
+
+        >>> self.add_permission(contract='0x3846a4aa420d9831044396dd3a56011514cd10e3', methods=['get_object'])
+
+        >>> self.add_permission(contract='0333b24ee50a488caa5deec7e021ff515f57b7993b93b45d7df901e23ee3004916')
 
         :param contract: a contract hash, group public key or '*'
         :type contract: str

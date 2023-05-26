@@ -20,6 +20,9 @@ class GAS:
         """
         Gets the symbol of GAS.
 
+        >>> GAS.symbol()
+        'GAS'
+
         :return: the GAS string.
         :rtype: str
         """
@@ -29,6 +32,9 @@ class GAS:
     def decimals(cls) -> int:
         """
         Gets the amount of decimals used by GAS.
+
+        >>> GAS.decimals()
+        8
 
         :return: the number 8.
         :rtype: int
@@ -40,6 +46,12 @@ class GAS:
         """
         Gets the total token supply deployed in the system.
 
+        >>> GAS.totalSupply()
+        5199999098939320
+
+        >>> GAS.totalSupply()
+        5522957322800300
+
         :return: the total token supply deployed in the system.
         :rtype: int
         """
@@ -49,6 +61,12 @@ class GAS:
     def balanceOf(cls, account: UInt160) -> int:
         """
         Get the current balance of an address.
+
+        >>> GAS.balanceOf(UInt160(bytes(20)))
+        0
+
+        >>> GAS.balanceOf(UInt160(b'\\xabv\\xe2\\xcb\\xb0\\x16,vG\\x2f\\x44Va\\x10\\x14\\x19\\xf3\\xff\\xa1\\xe6'))
+        1000000000
 
         :param account: the account's address to retrieve the balance for
         :type account: UInt160
@@ -64,6 +82,21 @@ class GAS:
 
         If the method succeeds, it will fire the `Transfer` event and must return true, even if the amount is 0,
         or from and to are the same address.
+
+        >>> GAS.transfer(UInt160(b'\\xc9F\\x17\\xba!\\x99\\x07\\xc1\\xc5\\xd6\t#\\xe1\\x9096\\x89U\\xac\\x13'),     # this script hash needs to have signed the transaction or block
+        ...              UInt160(b'\\xabv\\xe2\\xcb\\xb0\\x16,vG\\x2f\\x44Va\\x10\\x14\\x19\\xf3\\xff\\xa1\\xe6'),
+        ...              10000, None)
+        True
+
+        >>> GAS.transfer(UInt160(bytes(20)),
+        ...              UInt160(b'\\xabv\\xe2\\xcb\\xb0\\x16,vG\\x2f\\x44Va\\x10\\x14\\x19\\xf3\\xff\\xa1\\xe6'),
+        ...              10000, None)
+        False
+
+        >>> GAS.transfer(UInt160(b'\\xc9F\\x17\\xba!\\x99\\x07\\xc1\\xc5\\xd6\t#\\xe1\\x9096\\x89U\\xac\\x13'),
+        ...              UInt160(b'\\xabv\\xe2\\xcb\\xb0\\x16,vG\\x2f\\x44Va\\x10\\x14\\x19\\xf3\\xff\\xa1\\xe6'),
+        ...              -1, None)
+        False
 
         :param from_address: the address to transfer from
         :type from_address: UInt160

@@ -2,6 +2,14 @@ __all__ = [
     'CallFlags',
     'Contract',
     'ContractManifest',
+    'ContractPermission',
+    'ContractPermissionDescriptor',
+    'ContractGroup',
+    'ContractAbi',
+    'ContractMethodDescriptor',
+    'ContractEventDescriptor',
+    'ContractParameterDefinition',
+    'ContractParameterType',
     'call_contract',
     'create_contract',
     'update_contract',
@@ -19,13 +27,17 @@ from typing import Any, List, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
-from boa3.builtin.interop.contract.contractmanifest import ContractManifest
+from boa3.builtin.interop.contract.contractmanifest import ContractManifest, ContractPermission, ContractPermissionDescriptor, \
+    ContractGroup, ContractAbi, ContractMethodDescriptor, ContractEventDescriptor, ContractParameterDefinition, ContractParameterType
 from boa3.builtin.type import ECPoint, UInt160
 
 
 def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_flags: CallFlags = CallFlags.ALL) -> Any:
     """
     Calls a smart contract given the method and the arguments.
+
+    >>> call_contract(NEO, 'balanceOf', UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'))
+    100
 
     :param script_hash: the target smart contract's script hash
     :type script_hash: UInt160
@@ -49,6 +61,24 @@ def create_contract(nef_file: bytes, manifest: bytes, data: Any = None) -> Contr
     """
     Creates a smart contract given the script and the manifest.
 
+    >>> nef_file_ = get_script(); manifest_ = get_manifest()    # get the script and manifest somehow
+    ... create_contract(nef_file_, manifest_, None)             # smart contract will be deployed
+    {
+        'id': 2,
+        'update_counter': 0,
+        'hash': b'\\x92\\x8f+1q\\x86z_@\\x94\\xf5pE\\xcb\\xb8 \\x0f\\\\`Z',
+        'nef': b'NEF3neo3-boa by COZ-_unit_tests_\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x07W\\x00\\x02xy\\x9e@\\xf9\\7b\\xbb\\xcc',
+        'manifest': {
+            'name': 'TestContract',
+            'group': [],
+            'supported_standards': [],
+            'abi': [[['test', [['a', 17], ['b', 17]], 17, 0, False]], []],
+            'permissions': [],
+            'trusts': [],
+            'extras': 'null'
+        },
+    }
+
     :param nef_file: the target smart contract's compiled nef
     :type nef_file: bytes
     :param manifest: the manifest.json that describes how the script should behave
@@ -68,6 +98,10 @@ def update_contract(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the executing smart contract given the script and the manifest.
 
+    >>> nef_file_ = get_script(); manifest_ = get_manifest()    # get the script and manifest somehow
+    ... update_contract(nef_file_, manifest_, None)             # smart contract will be updated
+    None
+
     :param nef_file: the new smart contract's compiled nef
     :type nef_file: bytes
     :param manifest: the new smart contract's manifest
@@ -84,6 +118,10 @@ def update_contract(nef_file: bytes, manifest: bytes, data: Any = None):
 def destroy_contract():
     """
     Destroy the executing smart contract.
+
+    >>> destroy_contract()
+    None
+
     """
     pass
 
@@ -91,6 +129,9 @@ def destroy_contract():
 def get_minimum_deployment_fee() -> int:
     """
     Gets the minimum fee of contract deployment.
+
+    >>> get_minimum_deployment_fee()
+    1000000000
 
     :return: the minimum fee of contract deployment
     """
@@ -100,6 +141,9 @@ def get_minimum_deployment_fee() -> int:
 def get_call_flags() -> CallFlags:
     """
     Gets the CallFlags in the current context.
+
+    >>> get_call_flags()
+    CallFlags.READ_ONLY
     """
     pass
 
@@ -107,6 +151,9 @@ def get_call_flags() -> CallFlags:
 def create_standard_account(pub_key: ECPoint) -> UInt160:
     """
     Calculates the script hash from a public key.
+
+    >>> create_standard_account(ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a'))
+    b'\\r\\xa9g\\xa4\\x00C+\\xf2\\x7f\\x8e\\x8e\\xb4o\\xe8\\xace\\x9e\\xcc\\xde\\x04'
 
     :param pub_key: the given public key
     :type pub_key: ECPoint
@@ -120,6 +167,9 @@ def create_standard_account(pub_key: ECPoint) -> UInt160:
 def create_multisig_account(m: int, pub_keys: List[ECPoint]) -> UInt160:
     """
     Calculates corresponding multisig account script hash for the given public keys.
+
+    >>> create_multisig_account(1, [ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a')])
+    b'"5,\\xd2\\x9e\\xe7\\xb4\\x02\\x08b\\xdbd\\x1e\\xedx\\x82\\x8fU(m'
 
     :param m: the minimum number of correct signatures need to be provided in order for the verification to pass.
     :type m: int
@@ -136,12 +186,18 @@ NEO: UInt160 = UInt160()
 """
 NEO's token script hash.
 
+>>> NEO
+b'\\xf5c\\xea@\\xbc(=M\\x0e\\x05\\xc4\\x8e\\xa3\\x05\\xb3\\xf2\\xa0s@\\xef'
+
 :meta hide-value:
 """
 
 GAS: UInt160 = UInt160()
 """
 GAS' token script hash.
+
+>>> GAS
+b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'
 
 :meta hide-value:
 """

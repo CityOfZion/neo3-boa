@@ -24,6 +24,18 @@ Nep5TransferEvent: Event = CreateNewEvent(
 The NEP-5 transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
 addresses of the sender, receiver and the amount transferred.
 
+>>> Nep5TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
+...                   b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0', 100)
+{
+    'name': 'transfer',
+    'script hash': b'\\xee\\xc3\\x12\\xfd\\x12\\x95\\x84\\44\\x7f\\xb8\\xed\\x41\\xdc\\x86\\x33\\x95\\x10\\x10\\x9f\\x85',
+    'state': {
+        'from': b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',
+        'to': b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0',
+        'amount': 100
+    }
+}
+
 :meta hide-value:
 """
 
@@ -39,6 +51,19 @@ Nep11TransferEvent: Event = CreateNewEvent(
 """
 The NEP-11 Transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
 addresses of the sender, receiver, amount transferred and the id of the token.
+
+>>> Nep11TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
+...                    b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0', 1, '01')
+{
+    'name': 'Transfer',
+    'script hash': b'\\x13\\xb4\\x51\\xa2\\x1c\\x10\\x12\\xd6\\x13\\x12\\x19\\x0c\\x15\\x61\\x9b\\x1b\\xd1\\xa2\\xf4\\xb2',
+    'state': {
+        'from': b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',
+        'to': b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0',
+        'amount': 1,
+        'tokenId': '01'
+    }
+}
 
 :meta hide-value:
 """
@@ -56,6 +81,18 @@ Nep17TransferEvent: Event = CreateNewEvent(
 The NEP-17 Transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
 addresses of the sender, receiver and the amount transferred.
 
+>>> Nep17TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
+...                    b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0', 100)
+{
+    'name': 'Transfer',
+    'script hash': b'\\x17\\xe3\\xca\\x91\\xca\\xb7\\xaf\\xdd\\xe6\\xba\\x07\\xaa\\xba\\xa1\\x66\\xab\\xcf\\x00\\x04\\x50',
+    'state': {
+        'from': b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',
+        'to': b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0',
+        'amount': 100
+    }
+}
+
 :meta hide-value:
 """
 
@@ -63,6 +100,10 @@ addresses of the sender, receiver and the amount transferred.
 def abort():
     """
     Aborts the execution of a smart contract.
+
+    >>> abort()     # abort doesn't return anything by itself, but the execution will stop and the VMState will be FAULT
+    VMState.FAULT
+
     """
     pass
 
@@ -89,6 +130,12 @@ class NeoAccountState:
 def to_script_hash(data_bytes: Any) -> bytes:
     """
     Converts a data to a script hash.
+
+    >>> to_script_hash(ECPoint(bytes(range(33))))
+    b'\\x12\\xc8z\\xfb3k\\x1e4>\\xb3\\x83\\tK\\xc7\\xdch\\xe5\\xee\\xc7\\x98'
+
+    >>> to_script_hash(b'1234567891')
+    b'\\x4b\\x56\\x34\\x17\\xed\\x99\\x7f\\x13\\x22\\x67\\x40\\x79\\x36\\x8b\\xa2\\xcd\\x72\\x41\\x25\\x6d'
 
     :param data_bytes: data to hash
     :type data_bytes: Any
