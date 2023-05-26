@@ -11,6 +11,9 @@ def json_serialize(item: Any) -> str:
     """
     Serializes an item into a json.
 
+    >>> json_serialize({'one': 1, 'two': 2, 'three': 3})
+    '{"one":1,"two":2,"three":3}'
+
     :param item: The item that will be serialized
     :type item: Any
     :return: The serialized item
@@ -25,6 +28,9 @@ def json_serialize(item: Any) -> str:
 def json_deserialize(json: str) -> Any:
     """
     Deserializes a json into some valid type.
+
+    >>> json_deserialize('{"one":1,"two":2,"three":3}')
+    {'one': 1, 'three': 3, 'two': 2}
 
     :param json: A json that will be deserialized
     :type json: str

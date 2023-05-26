@@ -23,6 +23,10 @@ class Oracle:
 
         This method just requests data from the oracle, it won't return the result.
 
+        >>> Oracle.request('https://dora.coz.io/api/v1/neo3/testnet/asset/0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5',
+        ...                '', 'callback_name', None, 10 * 10 ** 8)
+        None
+
         :param url: External url to retrieve the data
         :type url: str
         :param request_filter:
@@ -55,6 +59,9 @@ class Oracle:
     def get_price(cls) -> int:
         """
         Gets the price for an Oracle request.
+
+        >>> Oracle.get_price()
+        50000000
 
         :return: the price for an Oracle request
         """

@@ -23,6 +23,9 @@ def get_context() -> StorageContext:
     """
     Gets current storage context.
 
+    >>> get_context()       # StorageContext cannot be read outside the blockchain
+    _InteropInterface
+
     :return: the current storage context
     :rtype: StorageContext
     """
@@ -32,6 +35,13 @@ def get_context() -> StorageContext:
 def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
+
+    >>> put('unit', 'test')
+    ... get('unit')
+    'test'
+
+    >>> get('fake_key')
+    ''
 
     :param key: value identifier in the store
     :type key: bytes
@@ -47,6 +57,9 @@ def get_read_only_context() -> StorageContext:
     """
     Gets current read only storage context.
 
+    >>> get_context()       # StorageContext cannot be read outside the blockchain
+    _InteropInterface
+
     :return: the current read only storage context
     :rtype: StorageContext
     """
@@ -56,6 +69,9 @@ def get_read_only_context() -> StorageContext:
 def put(key: bytes, value: Union[int, bytes, str], context: StorageContext = get_context()):
     """
     Inserts a given value in the key-value format into the persistent storage.
+
+    >>> put('unit', 'test')
+    None
 
     :param key: the identifier in the store for the new value
     :type key: bytes
@@ -71,6 +87,11 @@ def delete(key: bytes, context: StorageContext = get_context()):
     """
     Removes a given key from the persistent storage if exists.
 
+    >>> put('unit', 'test')
+    ... delete()
+    ... get('unit')
+    ''
+
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param context: storage context to be used
@@ -84,6 +105,17 @@ def find(prefix: bytes,
          options: FindOptions = FindOptions.NONE) -> Iterator:
     """
     Searches in the storage for keys that start with the given prefix.
+
+    >>> put('a1', 'one')
+    ... put('a2', 'two')
+    ... put('a3', 'three')
+    ... put('b4', 'four')
+    ... findIterator = find('a')
+    ... findResults = []
+    ... while findIterator.next():
+    ...     findResults.append(findIterator.value)
+    ... findResults
+    ['one', 'two', 'three']
 
     :param prefix: prefix to find the storage keys
     :type prefix: bytes
