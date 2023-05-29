@@ -345,10 +345,16 @@ class VisitorCodeGenerator(IAstAnalyser):
         """
         if self.generator.stack_size > 0:
             self.generator.clear_stack(True)
+
         if self.current_method.return_type is not Type.none:
             result = self.visit_to_generate(ret.value)
             if result.type is Type.none and not self.generator.is_none_inserted():
                 self.generator.convert_literal(None)
+        elif ret.value is not None:
+            self.visit_to_generate(ret.value)
+            if self.generator.stack_size > 0:
+                self.generator.remove_stack_top_item()
+
         self.generator.insert_return()
 
         return self.build_data(ret)
