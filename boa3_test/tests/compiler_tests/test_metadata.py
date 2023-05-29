@@ -396,8 +396,7 @@ class TestMetadata(BoaTest):
 
         self.assertIn('permissions', manifest)
         self.assertIsInstance(manifest['permissions'], list)
-        self.assertEqual(len(manifest['permissions']), 1)
-        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+        self.assertEqual(len(manifest['permissions']), 0)
 
     def test_metadata_info_permissions_default(self):
         path = self.get_contract_path('MetadataInfoPermissionsDefault.py')
@@ -405,8 +404,7 @@ class TestMetadata(BoaTest):
 
         self.assertIn('permissions', manifest)
         self.assertIsInstance(manifest['permissions'], list)
-        self.assertEqual(len(manifest['permissions']), 1)
-        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+        self.assertEqual(len(manifest['permissions']), 0)
 
     def test_metadata_info_permissions_wildcard(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
@@ -416,6 +414,15 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['permissions'], list)
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+        path, _ = self.get_deploy_file_paths_without_compiling(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'main')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertEqual(invoke.result, 100_000_000)    # NEO total supply
 
     def test_metadata_info_permissions_native_contract(self):
         path = self.get_contract_path('MetadataInfoPermissionsNativeContract.py')
@@ -429,6 +436,28 @@ class TestMetadata(BoaTest):
         self.assertIsInstance(manifest['permissions'], list)
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn(expected_permission, manifest['permissions'])
+
+    def test_metadata_info_permissions_invalid_call(self):
+        path = self.get_contract_path('MetadataInfoPermissionsInvalidCall.py')
+        output, manifest = self.compile_and_save(path)
+
+        expected_permission = {
+            'contract': '0x0102030405060708090A0B0C0D0E0F1011121314'.lower(),
+            'methods': '*'
+        }
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn(expected_permission, manifest['permissions'])
+
+        path, _ = self.get_deploy_file_paths_without_compiling(path)
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        runner.call_contract(path, 'main')
+
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'^{self.CANT_CALL_METHOD_PREFIX}')
 
     def test_metadata_info_name(self):
         path = self.get_contract_path('MetadataInfoName.py')
