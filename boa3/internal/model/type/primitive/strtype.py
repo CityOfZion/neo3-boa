@@ -51,7 +51,8 @@ class StrType(IByteStringType):
 
     @classmethod
     def _is_type_of(cls, value: Any) -> bool:
-        return type(value) in [str, StrType]
+        from boa3.internal.model.type.collection.sequence.buffertype import BufferType
+        return isinstance(value, (str, StrType)) and not isinstance(value, BufferType)
 
     def is_type_of(self, value: Any) -> bool:
         return self._is_type_of(value)
