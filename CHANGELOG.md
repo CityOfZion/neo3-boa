@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.13.1] - 2023-05-29
+### Changed
+- Imported contract interfaces are included on metadata permissions to ensure the expected executing behaviour 
+
+
+### Fixed
+- Fixed inconsistent behaviour on metadata permission
+
+
 ## [0.13.0] - 2023-05-08
 ### Added
 - Included execution tests in the unit tests using the [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner).
@@ -445,7 +454,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...development
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/tree/development
+[0.13.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.1
 [0.13.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.0
 [0.12.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.3
 [0.12.2]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.2
