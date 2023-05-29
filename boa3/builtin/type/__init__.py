@@ -20,6 +20,7 @@ class Event:
     """
     Describes an action that happened in the blockchain.
     """
+
     def __call__(self, *args, **kwargs):
         pass
 
@@ -63,50 +64,56 @@ class ECPoint(bytes):
         pass
 
 
-class Address(str):
-    """
-    A class used only to indicate that a parameter or return on the manifest should be treated as an Address.
-    It's a subclass of str and it doesn't implement new properties or methods.
-    """
-    pass
+Address = str
+"""
+A type used only to indicate that a parameter or return on the manifest should be treated as an Address.
+Same as str.
+
+:meta hide-value:
+"""
 
 
-class BlockHash(UInt256):
-    """
-    A class used only to indicate that a parameter or return on the manifest should be treated as a BlockHash.
-    It's a subclass of UInt256 and it doesn't implement new properties or methods.
-    """
-    pass
+BlockHash = UInt256
+"""
+A type used only to indicate that a parameter or return on the manifest should be treated as a BlockHash.
+Same as UInt256.
+
+:meta hide-value:
+"""
 
 
-class PublicKey(ECPoint):
-    """
-    A class used only to indicate that a parameter or return on the manifest should be treated as a PublicKey.
-    It's a subclass of ECPoint and it doesn't implement new properties or methods.
-    """
-    pass
+PublicKey = ECPoint
+"""
+A type used only to indicate that a parameter or return on the manifest should be treated as a PublicKey.
+Same as ECPoint.
+
+:meta hide-value:
+"""
 
 
-class ScriptHash(UInt160):
-    """
-    A class used only to indicate that a parameter or return on the manifest should be treated as a ScriptHash.
-    It's a subclass of UInt160 and it doesn't implement new properties or methods.
-    """
-    pass
+ScriptHash = UInt160
+"""
+A type used only to indicate that a parameter or return on the manifest should be treated as a ScriptHash.
+Same as UInt160.
+
+:meta hide-value:
+"""
 
 
-class ScriptHashLittleEndian(UInt160):
-    """
-    A class used only to indicate that a parameter or return on the manifest should be treated as a
-    ScriptHashLittleEndian.
-    It's a subclass of UInt160 and it doesn't implement new properties or methods.
-    """
-    pass
+ScriptHashLittleEndian = UInt160
+"""
+A type used only to indicate that a parameter or return on the manifest should be treated as a
+ScriptHashLittleEndian.
+Same as UInt160.
+
+:meta hide-value:
+"""
 
 
-class TransactionId(UInt256):
-    """
-    A class used only to indicate that a parameter or return on the manifest should be treated as a TransactionId.
-    It's a subclass of UInt256 and it doesn't implement new properties or methods.
-    """
-    pass
+TransactionId = UInt256
+"""
+A type used only to indicate that a parameter or return on the manifest should be treated as a TransactionId.
+Same as UInt256.
+
+:meta hide-value:
+"""
