@@ -82,6 +82,8 @@ class Analyser:
         # fill symbol table
         if not analyser.__analyse_modules(imported_files, import_stack):
             return analyser
+        analyser.__pre_execute()
+
         # check if standards are correctly implemented
         if not analyser.__check_standards():
             return analyser
@@ -173,7 +175,7 @@ class Analyser:
         """
         Pre executes the instructions of the ast for optimization
         """
-        self.ast_tree = ConstructAnalyser(self.ast_tree, log=self._log).tree
+        self.ast_tree = ConstructAnalyser(self.ast_tree, self.symbol_table, log=self._log).tree
 
     def __pos_execute(self):
         """

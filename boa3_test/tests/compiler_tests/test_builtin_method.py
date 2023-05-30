@@ -526,23 +526,8 @@ class TestBuiltinMethod(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_script_hash_int_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('ScriptHashIntBuiltinCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        from boa3.internal.neo import to_script_hash
-        script_hash = to_script_hash(Integer(123).to_byte_array())
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(script_hash)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('ScriptHashIntBuiltinCall.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_script_hash_str(self):
         path, _ = self.get_deploy_file_paths('ScriptHashStr.py')
@@ -569,24 +554,8 @@ class TestBuiltinMethod(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_script_hash_str_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('ScriptHashStrBuiltinCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        from boa3.internal.neo import to_script_hash
-        script_hash = to_script_hash(String('123').to_bytes())
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(script_hash)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('ScriptHashStrBuiltinCall.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_script_hash_variable(self):
         path, _ = self.get_deploy_file_paths('ScriptHashVariable.py')
@@ -618,34 +587,8 @@ class TestBuiltinMethod(BoaTest):
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
 
     def test_script_hash_variable_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('ScriptHashVariableBuiltinCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        from boa3.internal.neo import to_script_hash
-        from base58 import b58encode
-
-        script_hash = to_script_hash(String('123').to_bytes())
-        invokes.append(runner.call_contract(path, 'Main', '123',
-                                            expected_result_type=bytes))
-        expected_results.append(script_hash)
-
-        value = b58encode('123')
-        if isinstance(value, int):
-            value = Integer(value).to_byte_array()
-
-        script_hash = to_script_hash(value)
-        invokes.append(runner.call_contract(path, 'Main', value,
-                                            expected_result_type=bytes))
-        expected_results.append(script_hash)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('ScriptHashVariableBuiltinCall.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_script_hash_too_many_parameters(self):
         path = self.get_contract_path('ScriptHashTooManyParameters.py')
@@ -659,9 +602,9 @@ class TestBuiltinMethod(BoaTest):
         path = self.get_contract_path('ScriptHashMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_script_hash_builtin_mismatched_types(self):
-        path = self.get_contract_path('ScriptHashBuiltinMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+    def test_script_hash_builtin(self):
+        path = self.get_contract_path('ScriptHashBuiltinWrongUsage.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     # endregion
 
@@ -704,22 +647,8 @@ class TestBuiltinMethod(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_int_to_bytes_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('IntToBytesWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        value = Integer(123).to_byte_array()
-        invokes.append(runner.call_contract(path, 'int_to_bytes',
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('IntToBytesWithBuiltin.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_int_to_bytes_as_parameter(self):
         path, _ = self.get_deploy_file_paths('IntToBytesAsParameter.py')
@@ -769,33 +698,8 @@ class TestBuiltinMethod(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_str_to_bytes_with_builtin(self):
-        value = String('123').to_bytes()
-        expected_output = (
-            Opcode.PUSHDATA1        # str.to_bytes('123')
-            + Integer(len(value)).to_byte_array(min_length=1)
-            + value
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('StrToBytesWithBuiltin.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'str_to_bytes',
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_to_bytes_mismatched_types(self):
         path = self.get_contract_path('ToBytesMismatchedType.py')

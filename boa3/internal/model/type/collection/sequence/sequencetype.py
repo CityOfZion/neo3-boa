@@ -34,3 +34,15 @@ class SequenceType(ICollectionType, ABC):
     @property
     def stack_item(self) -> StackItemType:
         return StackItemType.Array
+
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.internal.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.CountSequenceGeneric,
+                            Builtin.SequenceIndex,
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build([self, self.value_type])

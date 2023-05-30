@@ -139,28 +139,8 @@ class TestBytes(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bytes_to_int_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytesToIntWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_int'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_to_int_mismatched_types(self):
-        path = self.get_contract_path('BytesToIntWithBuiltinMismatchedTypes.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
-
-    def test_bytes_to_int_with_byte_array_builtin(self):
-        path = self.get_contract_path('BytesToIntWithBytearrayBuiltin.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        path = self.get_contract_path('BytesToIntWithBuiltin.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_bytes_to_bool(self):
         path, _ = self.get_deploy_file_paths('BytesToBool.py')
@@ -185,62 +165,8 @@ class TestBytes(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bytes_to_bool_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytesToBoolWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_bool', b'\x00'))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'bytes_to_bool', b'\x01'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'bytes_to_bool', b'\x02'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_to_bool_with_builtin_hard_coded_false(self):
-        path, _ = self.get_deploy_file_paths('BytesToBoolWithBuiltinHardCodedFalse.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_bool'))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_to_bool_with_builtin_hard_coded_true(self):
-        path, _ = self.get_deploy_file_paths('BytesToBoolWithBuiltinHardCodedTrue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_bool'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_to_bool_mismatched_types(self):
-        path = self.get_contract_path('BytesToBoolWithBuiltinMismatchedTypes.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        path = self.get_contract_path('BytesToBoolWithBuiltin.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_bytes_to_str(self):
         path, _ = self.get_deploy_file_paths('BytesToStr.py')
@@ -259,24 +185,8 @@ class TestBytes(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bytes_to_str_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytesToStrWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_str'))
-        expected_results.append('123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_to_str_mismatched_types(self):
-        path = self.get_contract_path('BytesToStrWithBuiltinMismatchedTypes.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        path = self.get_contract_path('BytesToStrWithBuiltin.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
@@ -1103,36 +1013,12 @@ class TestBytes(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_array_to_int_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayToIntWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_int'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('BytearrayToIntWithBuiltin.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_byte_array_to_int_with_bytes_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayToIntWithBytesBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_int'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('BytearrayToIntWithBytesBuiltin.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_boa2_byte_array_test(self):
         path, _ = self.get_deploy_file_paths('BytearrayBoa2Test.py')

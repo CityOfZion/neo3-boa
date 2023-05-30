@@ -9,7 +9,7 @@ from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep5TransferEvent
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.blockchain import Transaction
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 
 # -------------------------------------------
@@ -142,7 +142,7 @@ def balanceOf(account: bytes) -> int:
     :raise AssertionError: raised if `account` length is not 20.
     """
     assert len(account) == 20
-    return storage.get(account).to_int()
+    return type_helper.to_int(storage.get(account))
 
 
 @public
@@ -169,7 +169,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int) -> bool:
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = storage.get(from_address).to_int()
+    from_balance = type_helper.to_int(storage.get(from_address))
     if from_balance < amount:
         return False
 
@@ -192,7 +192,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int) -> bool:
     else:
         storage.put(from_address, from_balance - amount)
 
-    to_balance = storage.get(to_address).to_int()
+    to_balance = type_helper.to_int(storage.get(to_address))
     storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event, and must return true

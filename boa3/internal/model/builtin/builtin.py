@@ -27,6 +27,7 @@ class BoaPackage(str, Enum):
     Contract = 'contract'
     Interop = 'interop'
     Type = 'type'
+    TypeHelper = 'helper'
     VM = 'vm'
     CompileTime = 'compile_time'
 
@@ -241,6 +242,26 @@ class Builtin:
 
         return lst
 
+    _builtin_type_package_symbols = [ByteString,
+                                     ECPoint,
+                                     UInt160,
+                                     UInt256,
+                                     Event,
+                                     Address,
+                                     BlockHash,
+                                     PublicKey,
+                                     ScriptHashType_,
+                                     ScriptHashLittleEndian,
+                                     TransactionId,
+                                     Package(identifier=BoaPackage.TypeHelper,
+                                             methods=[ConvertToBool,
+                                                      ConvertToBytes,
+                                                      ConvertToInt,
+                                                      ConvertToStr,
+                                                      ]
+                                             )
+                                     ]
+
     _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
                               NeoAccountState,
@@ -250,18 +271,7 @@ class Builtin:
                               ScriptHashMethod_
                               ],
         BoaPackage.Interop: Interop.package_symbols,
-        BoaPackage.Type: [ByteString,
-                          ECPoint,
-                          UInt160,
-                          UInt256,
-                          Event,
-                          Address,
-                          BlockHash,
-                          PublicKey,
-                          ScriptHashType_,
-                          ScriptHashLittleEndian,
-                          TransactionId,
-                          ],
+        BoaPackage.Type: _builtin_type_package_symbols,
         BoaPackage.VM: [Opcode
                         ],
         BoaPackage.CompileTime: [ContractInterface,

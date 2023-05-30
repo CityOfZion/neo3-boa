@@ -1,6 +1,7 @@
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop import storage
 from boa3.builtin.interop.stdlib import serialize
+from boa3.builtin.type.helper import to_bytes
 
 
 @public
@@ -15,7 +16,7 @@ def return_bytes(value: bytes) -> bytes:
 class Example:
     def __init__(self, current_supply: int):
 
-        set_value(current_supply.to_bytes(), self)
+        set_value(to_bytes(current_supply), self)
 
 
 def set_value(token_id: bytes, example_class: Example):

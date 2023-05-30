@@ -1,4 +1,5 @@
 from boa3.builtin.compile_time import public
+from boa3.builtin.type.helper import to_bytes, to_str
 
 
 @public
@@ -14,7 +15,7 @@ def Main(condition: bool) -> str:
 
         while index < len(some_string):
             c = some_string[index:index + 1]
-            if c.to_bytes().to_str() != "|":
+            if to_str(to_bytes(c)) != "|":
                 id_destiny = id_destiny + c
             else:
                 if count > 0:
