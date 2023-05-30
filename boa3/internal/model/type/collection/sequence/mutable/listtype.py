@@ -27,6 +27,12 @@ class ListType(MutableSequenceType):
 
         from boa3.internal.model.builtin.builtin import Builtin
 
+        instance_methods = [Builtin.Copy
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
         self._instance_methods[constants.INIT_METHOD_ID] = Builtin.ListGeneric
 
     @property

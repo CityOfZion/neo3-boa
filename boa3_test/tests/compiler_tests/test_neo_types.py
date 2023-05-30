@@ -462,7 +462,7 @@ class TestNeoTypes(BoaTest):
     # region ByteString
 
     def test_byte_string_manifest_generation(self):
-        path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
+        path = self.get_contract_path('bytestring', 'ConcatWithByteString.py')
         _, expected_manifest_output = self.get_deploy_file_paths(path)
         output, manifest = self.get_output(path)
 
@@ -479,181 +479,27 @@ class TestNeoTypes(BoaTest):
         method = abi['methods'][0]
 
         self.assertIn('parameters', method)
-        self.assertEqual(1, len(method['parameters']))
+        self.assertEqual(2, len(method['parameters']))
         self.assertIn('type', method['parameters'][0])
         self.assertEqual(AbiType.ByteArray, method['parameters'][0]['type'])
+        self.assertIn('type', method['parameters'][1])
+        self.assertEqual(AbiType.ByteArray, method['parameters'][1]['type'])
 
     def test_byte_string_to_bool(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_bool', b'\x00'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'to_bool', '\x00'))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'to_bool', b'\x01'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'to_bool', '\x01'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'to_bool', b'\x02'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'to_bool', '\x02'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_string_to_bool_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBoolWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_bool', b'\x00'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'to_bool', '\x00'))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'to_bool', b'\x01'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'to_bool', '\x01'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'to_bool', b'\x02'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'to_bool', '\x02'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('bytestring', 'ByteStringToBool.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_byte_string_to_int(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_int', b'\x01\x02'))
-        expected_results.append(513)
-        invokes.append(runner.call_contract(path, 'to_int', '\x01\x02'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_string_to_int_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToIntWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_int', b'\x01\x02'))
-        expected_results.append(513)
-        invokes.append(runner.call_contract(path, 'to_int', '\x01\x02'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('bytestring', 'ByteStringToInt.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_byte_string_to_str(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToStr.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_str', b'abc'))
-        expected_results.append('abc')
-
-        invokes.append(runner.call_contract(path, 'to_str', b'123'))
-        expected_results.append('123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_string_to_str_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToStrWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_str', b'abc'))
-        expected_results.append('abc')
-
-        invokes.append(runner.call_contract(path, 'to_str', b'123'))
-        expected_results.append('123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('bytestring', 'ByteStringToStr.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_byte_string_to_bytes(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_bytes', 'abc',
-                                            expected_result_type=bytes))
-        expected_results.append(b'abc')
-
-        invokes.append(runner.call_contract(path, 'to_bytes', '123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_string_to_bytes_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('bytestring', 'ByteStringToBytesWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'to_bytes', 'abc',
-                                            expected_result_type=bytes))
-        expected_results.append(b'abc')
-
-        invokes.append(runner.call_contract(path, 'to_bytes', '123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('bytestring', 'ByteStringToBytes.py')
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_concat_with_bytes(self):
         path, _ = self.get_deploy_file_paths('bytestring', 'ConcatWithBytes.py')

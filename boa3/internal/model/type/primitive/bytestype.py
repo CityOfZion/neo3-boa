@@ -36,16 +36,3 @@ class BytesType(IByteStringType):
     @classmethod
     def _is_type_of(cls, value: Any):
         return type(value) is bytes or isinstance(value, BytesType)
-
-    def _init_class_symbols(self):
-        super()._init_class_symbols()
-
-        from boa3.internal.model.builtin.builtin import Builtin
-
-        instance_methods = [Builtin.ConvertToBool,
-                            Builtin.ConvertToInt,
-                            Builtin.ConvertToStr,
-                            ]
-
-        for instance_method in instance_methods:
-            self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)

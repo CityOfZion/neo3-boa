@@ -8,7 +8,7 @@ from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.nativecontract.gas import GAS as GAS_TOKEN
 from boa3.builtin.nativecontract.neo import NEO as NEO_TOKEN
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 
 # -------------------------------------------
@@ -96,7 +96,7 @@ def is_valid_address(address: UInt160) -> bool:
 
     :return: whether the given address is validated by kyc
     """
-    return storage.get(KYC_WHITELIST_PREFIX + address).to_int() > 0
+    return type_helper.to_int(storage.get(KYC_WHITELIST_PREFIX + address)) > 0
 
 
 @public
@@ -222,7 +222,7 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return storage.get(TOKEN_TOTAL_SUPPLY_PREFIX).to_int()
+    return type_helper.to_int(storage.get(TOKEN_TOTAL_SUPPLY_PREFIX))
 
 
 @public(name='balanceOf', safe=True)
@@ -239,7 +239,7 @@ def balance_of(account: UInt160) -> int:
     :raise AssertionError: raised if `account` length is not 20.
     """
     assert len(account) == 20
-    return storage.get(account).to_int()
+    return type_helper.to_int(storage.get(account))
 
 
 @public
@@ -268,7 +268,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = storage.get(from_address).to_int()
+    from_balance = type_helper.to_int(storage.get(from_address))
     if from_balance < amount:
         return False
 
@@ -286,7 +286,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         else:
             storage.put(from_address, from_balance - amount)
 
-        to_balance = storage.get(to_address).to_int()
+        to_balance = type_helper.to_int(storage.get(to_address))
         storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
@@ -359,7 +359,7 @@ def allowance(from_address: UInt160, to_address: UInt160) -> int:
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
     assert len(from_address) == 20 and len(to_address) == 20
-    return storage.get(TRANSFER_ALLOWANCE_PREFIX + from_address + to_address).to_int()
+    return type_helper.to_int(storage.get(TRANSFER_ALLOWANCE_PREFIX + from_address + to_address))
 
 
 @public(name='transferFrom')
@@ -417,7 +417,7 @@ def transfer_from(originator: UInt160, from_address: UInt160, to_address: UInt16
             storage.put(originator, originator_balance - amount)
 
         # updates to's balance
-        to_balance = storage.get(to_address).to_int()
+        to_balance = type_helper.to_int(storage.get(to_address))
         storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event

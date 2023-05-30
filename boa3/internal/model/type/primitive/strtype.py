@@ -28,8 +28,7 @@ class StrType(IByteStringType):
 
         from boa3.internal.model.builtin.builtin import Builtin
 
-        instance_methods = [Builtin.ConvertToBytes,
-                            Builtin.StrSplit,
+        instance_methods = [Builtin.StrSplit,
                             Builtin.BytesStringIndex,
                             ]
 

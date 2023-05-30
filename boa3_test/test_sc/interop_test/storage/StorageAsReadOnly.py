@@ -1,5 +1,6 @@
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.storage import get, get_context, put
+from boa3.builtin.type.helper import to_str
 
 
 @public
@@ -9,7 +10,7 @@ def put_value_in_storage(key: str, value: str):
 
 @public
 def get_value_in_storage(key: str) -> str:
-    return get(key).to_str()
+    return to_str(get(key))
 
 
 @public
@@ -19,4 +20,4 @@ def put_value_in_storage_read_only(key: str, value: str):
 
 @public
 def get_value_in_storage_read_only(key: str) -> str:
-    return get(key, get_context().as_read_only()).to_str()
+    return to_str(get(key, get_context().as_read_only()))

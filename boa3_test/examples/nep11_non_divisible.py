@@ -15,7 +15,7 @@ from boa3.builtin.interop.runtime import check_witness, get_network, script_cont
 from boa3.builtin.interop.stdlib import deserialize, serialize
 from boa3.builtin.interop.storage import delete, find, get, get_read_only_context, put
 from boa3.builtin.interop.storage.findoptions import FindOptions
-from boa3.builtin.type import ByteString, UInt160
+from boa3.builtin.type import ByteString, UInt160, helper as type_helper
 
 
 # -------------------------------------------
@@ -170,8 +170,8 @@ def totalSupply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    debug(['totalSupply: ', get(SUPPLY_PREFIX).to_int()])
-    return get(SUPPLY_PREFIX, get_read_only_context()).to_int()
+    debug(['totalSupply: ', type_helper.to_int(get(SUPPLY_PREFIX))])
+    return type_helper.to_int(get(SUPPLY_PREFIX, get_read_only_context()))
 
 
 @public(safe=True)
@@ -187,8 +187,8 @@ def balanceOf(owner: UInt160) -> int:
     :raise AssertionError: raised if `owner` length is not 20.
     """
     expect(validateAddress(owner), "Not a valid address")
-    debug(['balanceOf: ', get(mk_balance_key(owner), get_read_only_context()).to_int()])
-    return get(mk_balance_key(owner), get_read_only_context()).to_int()
+    debug(['balanceOf: ', type_helper.to_int(get(mk_balance_key(owner), get_read_only_context()))])
+    return type_helper.to_int(get(mk_balance_key(owner), get_read_only_context()))
 
 
 @public(safe=True)
@@ -349,7 +349,7 @@ def _deploy(data: Any, upgrade: bool):
     if upgrade:
         return
 
-    if get(DEPLOYED, get_read_only_context()).to_bool():
+    if type_helper.to_bool(get(DEPLOYED, get_read_only_context())):
         return
 
     tx = cast(Transaction, script_container)
@@ -574,8 +574,8 @@ def updatePause(status: bool) -> bool:
     expect(verified, '`account` is not allowed for updatePause')
     expect(isinstance(status, bool), "status has to be of type bool")
     put(PAUSED, status)
-    debug(['updatePause: ', get(PAUSED, get_read_only_context()).to_bool()])
-    return get(PAUSED, get_read_only_context()).to_bool()
+    debug(['updatePause: ', type_helper.to_bool(get(PAUSED, get_read_only_context()))])
+    return type_helper.to_bool(get(PAUSED, get_read_only_context()))
 
 
 @public(safe=True)
@@ -587,8 +587,8 @@ def isPaused() -> bool:
 
     :return: whether the contract is paused
     """
-    debug(['isPaused: ', get(PAUSED).to_bool()])
-    if get(PAUSED, get_read_only_context()).to_bool():
+    debug(['isPaused: ', type_helper.to_bool(get(PAUSED))])
+    if type_helper.to_bool(get(PAUSED, get_read_only_context())):
         return True
     return False
 
@@ -689,9 +689,9 @@ def internal_mint(account: UInt160, meta: ByteString, lockedContent: ByteString,
     """
     expect(len(meta) != 0, '`meta` can not be empty')
 
-    tokenId = get(TOKEN_COUNT, get_read_only_context()).to_int() + 1
+    tokenId = type_helper.to_int(get(TOKEN_COUNT, get_read_only_context())) + 1
     put(TOKEN_COUNT, tokenId)
-    tokenIdBytes = tokenId.to_bytes()
+    tokenIdBytes = type_helper.to_bytes(tokenId)
 
     set_owner_of(tokenIdBytes, account)
     set_balance(account, 1)
@@ -745,14 +745,14 @@ def set_owner_of(tokenId: ByteString, owner: UInt160):
 
 
 def add_to_supply(amount: int):
-    total = totalSupply() + (amount)
+    total = totalSupply() + amount
     debug(['add_to_supply: ', amount])
     put(SUPPLY_PREFIX, total)
 
 
 def set_balance(owner: UInt160, amount: int):
     old = balanceOf(owner)
-    new = old + (amount)
+    new = old + amount
     debug(['set_balance: ', amount])
 
     key = mk_balance_key(owner)
@@ -822,7 +822,7 @@ def remove_royalties(tokenId: ByteString):
 def get_locked_view_counter(tokenId: ByteString) -> int:
     key = mk_lv_key(tokenId)
     debug(['get_locked_view_counter: ', key, tokenId])
-    return get(key, get_read_only_context()).to_int()
+    return type_helper.to_int(get(key, get_read_only_context()))
 
 
 def remove_locked_view_counter(tokenId: ByteString):
@@ -834,7 +834,7 @@ def remove_locked_view_counter(tokenId: ByteString):
 def set_locked_view_counter(tokenId: ByteString):
     key = mk_lv_key(tokenId)
     debug(['set_locked_view_counter: ', key, tokenId])
-    count = get(key, get_read_only_context()).to_int() + 1
+    count = type_helper.to_int(get(key, get_read_only_context())) + 1
     put(key, count)
 
 

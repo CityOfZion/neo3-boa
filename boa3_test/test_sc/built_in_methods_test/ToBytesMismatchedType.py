@@ -1,2 +1,5 @@
+from boa3.builtin.type.helper import to_bytes
+
+
 def list_to_bytes() -> bytes:
-    return ['1', '2', '3'].to_bytes()
+    return to_bytes(['1', '2', '3'])

@@ -17,14 +17,14 @@ class ScriptHashMethod(IBuiltinMethod):
             data_type = Type.any
 
         identifier = 'to_script_hash'
-        args: Dict[str, Variable] = {'self': Variable(data_type)}
+        args: Dict[str, Variable] = {'value': Variable(data_type)}
         from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
         super().__init__(identifier, args, return_type=UInt160Type.build())
 
     @property
     def identifier(self) -> str:
         from boa3.internal.model.type.type import Type
-        self_type = self.args['self'].type
+        self_type = self.args['value'].type
         if self_type is Type.any:
             return self._identifier
         return '-{0}_from_{1}'.format(self._identifier, self_type._identifier)
@@ -38,7 +38,7 @@ class ScriptHashMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        return self.args['self'].type is not Type.any
+        return self.args['value'].type is not Type.any
 
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal import constants
@@ -101,7 +101,7 @@ class ScriptHashMethod(IBuiltinMethod):
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if 'self' in self.args and self.args['self'].type is not Type.any:
+        if 'value' in self.args and self.args['value'].type is not Type.any:
             return self
 
         from boa3.internal.model.type.collection.sequence.ecpointtype import ECPointType

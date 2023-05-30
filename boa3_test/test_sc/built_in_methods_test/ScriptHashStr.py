@@ -1,11 +1,12 @@
 from boa3.builtin.compile_time import public
+from boa3.builtin.contract import to_script_hash
 
 
 @public
 def Main() -> bytes:
-    return 'NUnLWXALK2G6gYa7RadPLRiQYunZHnncxg '.to_script_hash()
+    return to_script_hash('NUnLWXALK2G6gYa7RadPLRiQYunZHnncxg ')
 
 
 @public
 def Main2() -> bytes:
-    return '123'.to_script_hash()
+    return to_script_hash('123')

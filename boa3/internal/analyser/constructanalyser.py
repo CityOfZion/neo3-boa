@@ -1,7 +1,9 @@
 import ast
+from typing import Dict
 
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.model import set_internal_call
+from boa3.internal.model.symbol import ISymbol
 
 
 class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
@@ -12,8 +14,9 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
     These methods are used to walk through the Python abstract syntax tree.
     """
 
-    def __init__(self, ast_tree: ast.AST, log: bool = False):
+    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol], log: bool = False):
         super().__init__(ast_tree, log=log)
+        self.symbols = symbol_table.copy()
         self.visit(self._tree)
 
     @property
@@ -31,9 +34,15 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
 
         :param call: the python ast function call node
         """
-        if isinstance(call.func, ast.Attribute):
-            from boa3.internal.model.builtin.builtin import Builtin
-            if call.func.attr == Builtin.ScriptHashMethod_.identifier:
+        if isinstance(call.func, ast.Name):
+            from boa3.internal.model.builtin.method import ScriptHashMethod
+            to_script_hash = None
+            for symbol_id, symbol in self.symbols.items():
+                if isinstance(symbol, ScriptHashMethod) and call.func.id == symbol_id:
+                    to_script_hash = symbol
+                    break
+
+            if to_script_hash is not None:
                 from boa3.internal.constants import SYS_VERSION_INFO
                 from boa3.internal.model.type.type import Type
                 types = {
@@ -45,16 +54,12 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
                                   if SYS_VERSION_INFO >= (3, 8)
                                   else (ast.Num, ast.Str, ast.Bytes))
 
-                if isinstance(call.func.value, literal) and len(call.args) == 0:
-                    value = ast.literal_eval(call.func.value)
-                    if not isinstance(value, tuple(types.values())):
-                        return call
-                elif (isinstance(call.func.value, ast.Name)  # checks if is the name of a type
-                      and call.func.value.id in types  # and if the arguments is from the same type
-                      and len(call.args) == 1
-                      and isinstance(call.args[0], literal)):
+                if len(call.args) != 1:
+                    return call
+
+                if isinstance(call.args[0], literal):
                     value = ast.literal_eval(call.args[0])
-                    if not isinstance(value, (types[call.func.value.id],)):
+                    if not isinstance(value, tuple(types.values())):
                         return call
                 else:
                     return call
