@@ -2,7 +2,6 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.builtin.interop.interop import Interop
-from boa3.internal.model.type.type import Type
 from boa3.internal.neo.core.types.InteropInterface import InteropInterface
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -28,12 +27,10 @@ class TestStorageInterop(BoaTest):
             + Opcode.DUP
             + Opcode.ISNULL
             + Opcode.JMPIFNOT
-            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Integer(5).to_byte_array(signed=True, min_length=1)
             + Opcode.DROP
             + Opcode.PUSHDATA1
             + Integer(0).to_byte_array(signed=False, min_length=1)
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -54,12 +51,10 @@ class TestStorageInterop(BoaTest):
             + Opcode.DUP
             + Opcode.ISNULL
             + Opcode.JMPIFNOT
-            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Integer(5).to_byte_array(signed=True, min_length=1)
             + Opcode.DROP
             + Opcode.PUSHDATA1
             + Integer(0).to_byte_array(signed=False, min_length=1)
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 

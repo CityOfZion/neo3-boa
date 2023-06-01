@@ -73,9 +73,8 @@ class CastTypeMethod(IBuiltinMethod):
                        else self.typ_arg.type)
         return origin_type, target_type
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return []
+    def generate_internal_opcodes(self, code_generator):
+        pass
 
     @property
     def _args_on_stack(self) -> int:

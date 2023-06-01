@@ -52,18 +52,15 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
 
         :return: the number of arguments if opcode is not empty. Zero otherwise.
         """
-        if len(self.opcode) > 0:
-            if self.pack_arguments:
-                return 1
+        if self.pack_arguments:
+            return 1
 
-            num_args = self._args_on_stack
-            if num_args < 0:
-                return 0
-            elif num_args > len(self.args):
-                return len(self.args)
-            return num_args
-        else:
+        num_args = self._args_on_stack
+        if num_args < 0:
             return 0
+        elif num_args > len(self.args):
+            return len(self.args)
+        return num_args
 
     def push_self_first(self) -> bool:
         """

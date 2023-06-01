@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Iterable, List, Sized, Tuple
+from typing import Any, Dict, Iterable, List, Sized
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -7,7 +7,6 @@ from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class StorageGetMethod(InteropMethod):
@@ -31,21 +30,17 @@ class StorageGetMethod(InteropMethod):
                                                       ).body[0].value)
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.bytes)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.model.type.type import Type
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        super().generate_internal_opcodes(code_generator)
+        # if result is None:
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(None)
+        if_is_null = code_generator.convert_begin_if()
 
-        opcodes = super()._opcode
-        opcodes.extend([
-            (Opcode.DUP, b''),
-            (Opcode.ISNULL, b''),
-            (Opcode.JMPIFNOT, Integer(7).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DROP, b''),
-            (Opcode.PUSHDATA1, b'\x00'),
-            (Opcode.CONVERT, Type.bytes.stack_item),
-        ])
-        return opcodes
+        #   result = b''
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(b'')
+        code_generator.convert_end_if(if_is_null, is_internal=True)
 
     @property
     def generation_order(self) -> List[int]:

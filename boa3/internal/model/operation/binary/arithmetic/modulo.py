@@ -1,9 +1,8 @@
-from typing import List, Tuple
+from typing import List
 
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -36,40 +35,38 @@ class Modulo(BinaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        jmp_place_holder = (Opcode.JMP, b'')
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
 
-        mod = [
-            (Opcode.SWAP, b''),  # neo's mod has a different result from python's mod in some cases
-            (Opcode.OVER, b''),
-            (Opcode.MOD, b''),
-            (Opcode.DUP, b''),
-            (Opcode.SIGN, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIGN, b''),
-            (Opcode.OVER, b''),      # if the result is not zero and the sign is different than the second operator
-            (Opcode.NUMEQUAL, b''),  # the result is different
-            (Opcode.SWAP, b''),
-            (Opcode.PUSH0, b''),
-            (Opcode.NUMEQUAL, b''),  # the result is different
-            (Opcode.BOOLOR, b''),
-            jmp_place_holder,
-        ]
+        # neo's mod has a different result from python's mod in some cases
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.duplicate_stack_item(2)
 
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        if_negative = [
-            (Opcode.ADD, b''),
-            jmp_place_holder
-        ]
-        num_jmp_code = get_bytes_count(if_negative)
-        mod[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, num_jmp_code, True)
+        # result = first % second
+        super().generate_opcodes(code_generator)
 
-        else_negative = [
-            (Opcode.NIP, b'')
-        ]
-        num_jmp_code = get_bytes_count(else_negative)
-        if_negative[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        # if the result is not zero and the sign is different from the second operator the result is different
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.SIGN)   # sign of result
+        code_generator.duplicate_stack_item(3)
+        code_generator.insert_opcode(Opcode.SIGN)   # sign of second
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.NumNotEq, is_internal=True)
 
-        return mod + if_negative + else_negative
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.NumNotEq, is_internal=True)
+
+        # if sign(result) != sign(second) and result != 0:
+        code_generator.convert_operation(BinaryOp.And, is_internal=True)
+        if_negative = code_generator.convert_begin_if()
+        #   result += second
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        # else
+        else_negative = code_generator.convert_begin_else(if_negative, is_internal=True)
+        #   # just clear stack
+        code_generator.remove_stack_item(2)
+        code_generator.convert_end_if(else_negative, is_internal=True)
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.MOD)

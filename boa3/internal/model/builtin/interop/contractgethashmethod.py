@@ -7,7 +7,6 @@ from typing import Dict, List, Optional, Tuple
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class ContractGetHashMethod(IBuiltinMethod, ABC):
@@ -22,11 +21,5 @@ class ContractGetHashMethod(IBuiltinMethod, ABC):
     def script_hash(self) -> bytes:
         return self._script_hash
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-
-        value = self.script_hash
-        return [
-            (Opcode.PUSHDATA1, Integer(len(value)).to_byte_array() + value)
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.convert_literal(self.script_hash)

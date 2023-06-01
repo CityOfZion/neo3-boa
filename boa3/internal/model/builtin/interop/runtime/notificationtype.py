@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from boa3.internal import constants
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
@@ -10,7 +9,6 @@ from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class NotificationType(ClassArrayType):
@@ -82,19 +80,15 @@ class NotificationMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.neo3.core.types import UInt160
 
-        uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
+        uint160_default = UInt160.zero().to_array()
 
-        return [
-            (Opcode.NEWARRAY0, b''),
-            (Opcode.PUSHDATA1, Integer(0).to_byte_array()),
-            (Opcode.PUSHDATA1, uint160_default),
-            (Opcode.PUSH3, b''),
-            (Opcode.PACK, b'')
-        ]
+        code_generator.convert_literal(())  # state
+        code_generator.convert_literal('')  # event_name
+        code_generator.convert_literal(uint160_default)  # script_hash
+        code_generator.convert_new_array(length=3, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:

@@ -1,8 +1,7 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class StorageContextCreateMapMethod(IBuiltinMethod):
@@ -28,7 +27,6 @@ class StorageContextCreateMapMethod(IBuiltinMethod):
     def _body(self) -> Optional[str]:
         return None
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap as StorageMapType
-        return StorageMapType.constructor_method().opcode
+        code_generator.convert_builtin_method_call(StorageMapType.constructor_method(), is_internal=True)

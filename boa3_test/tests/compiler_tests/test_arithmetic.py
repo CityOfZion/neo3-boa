@@ -36,7 +36,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-110)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -58,7 +58,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -74,7 +74,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -90,7 +90,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-9)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -106,7 +106,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-9)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -122,7 +122,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -156,7 +156,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-18)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -188,7 +188,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.VALUES_ONLY + FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -213,7 +213,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -247,7 +247,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -283,7 +283,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-14)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -332,7 +332,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-36)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -366,7 +366,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -396,7 +396,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'value1__value2__value3__' + address_version + b'some_bytes_after')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -430,7 +430,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unittest')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -465,7 +465,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('[1,2]')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -493,7 +493,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES // FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -527,7 +527,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-33)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -569,7 +569,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(['unit', ' '] + ['test', '.'])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -622,7 +622,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(10 + 30 * 50 + 40 // 20)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -659,7 +659,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(10 + 30 * (50 + 40) // 20)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -700,7 +700,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(expected_output)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -737,7 +737,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(expected_output)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -753,7 +753,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES % FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -793,7 +793,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -825,7 +825,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES * FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -864,7 +864,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -900,7 +900,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES ** FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -937,7 +937,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -953,7 +953,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -985,7 +985,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1001,7 +1001,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(+FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1009,6 +1009,23 @@ class TestArithmetic(BoaTest):
     # endregion
 
     # region StrBytesMultiplication
+    byte_str_mult = (
+        Opcode.PUSHDATA1 + Integer(0).to_byte_array(min_length=1)
+        + Opcode.ROT
+        + Opcode.ROT
+        + Opcode.JMP + Integer(7).to_byte_array()
+        + Opcode.REVERSE3
+        + Opcode.OVER
+        + Opcode.CAT
+        + Opcode.REVERSE3
+        + Opcode.DEC
+        + Opcode.DUP
+        + Opcode.PUSH0
+        + Opcode.GT
+        + Opcode.JMPIF + Integer(-8).to_byte_array()
+        + Opcode.DROP
+        + Opcode.DROP
+    )
 
     def test_bytes_multiplication_operation(self):
         expected_output = (
@@ -1017,7 +1034,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.build(Type.bytes).bytecode
+            + self.byte_str_mult
             + Opcode.RET
         )
 
@@ -1039,7 +1056,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1051,7 +1068,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.build(Type.bytes).bytecode
+            + self.byte_str_mult
             + Opcode.STARG0
             + Opcode.LDARG0
             + Opcode.RET
@@ -1072,7 +1089,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1089,7 +1106,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'unit test' * FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1101,7 +1118,8 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.bytecode
+            + self.byte_str_mult
+            + Opcode.CONVERT + Type.str.stack_item
             + Opcode.RET
         )
 
@@ -1121,7 +1139,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1133,7 +1151,8 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.bytecode
+            + self.byte_str_mult
+            + Opcode.CONVERT + Type.str.stack_item
             + Opcode.STARG0
             + Opcode.LDARG0
             + Opcode.RET
@@ -1153,7 +1172,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1169,7 +1188,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unit test' * FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1207,7 +1226,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-66)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1239,7 +1258,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES - FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

@@ -113,9 +113,7 @@ class PythonClass(classtype.ClassType, abc.ABC):
         return super().stack_item
 
     def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        """
-        Get the list of opcodes to check if an value is of this type
-
-        :return: A list of opcodes to check a value type
-        """
         return [(Opcode.ISTYPE, self.stack_item)]
+
+    def generate_is_instance_type_check(self, code_generator):
+        code_generator.insert_type_check(self.stack_item)

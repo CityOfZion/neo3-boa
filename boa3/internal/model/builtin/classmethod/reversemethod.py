@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -26,9 +26,8 @@ class ReverseMethod(IBuiltinMethod):
             return False
         return isinstance(params[0], IExpression) and isinstance(params[0].type, MutableSequenceType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.REVERSEITEMS, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.REVERSEITEMS)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

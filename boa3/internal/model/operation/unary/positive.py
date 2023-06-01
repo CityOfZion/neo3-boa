@@ -1,9 +1,8 @@
-from typing import List, Tuple
+from typing import List
 
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.internal.model.type.type import IType, Type
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class Positive(UnaryOperation):
@@ -33,7 +32,6 @@ class Positive(UnaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         # it is the identity function, so there is no need of including another opcode
-        return []
+        super().generate_internal_opcodes(code_generator)

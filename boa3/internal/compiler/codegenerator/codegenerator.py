@@ -8,6 +8,7 @@ from boa3.internal.compiler.codegenerator.stackmemento import NeoStack, StackMem
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.compiler.compileroutput import CompilerOutput
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -434,7 +435,7 @@ class CodeGenerator:
                             attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
                             another_attr_id, attr = self.get_symbol(attribute, is_internal=is_internal)
                             if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
-                                found_id, found_symbol =  symbol_id, attr.symbols[symbol_id]
+                                found_id, found_symbol = symbol_id, attr.symbols[symbol_id]
                             elif isinstance(attr, Package) and symbol_id in attr.inner_packages:
                                 found_id, found_symbol = symbol_id, attr.inner_packages[symbol_id]
 
@@ -553,6 +554,12 @@ class CodeGenerator:
         """
         self.__insert1(OpcodeInfo.NOP)
 
+    def insert_sys_call(self, sys_call_id: bytes):
+        """
+        Insert a SYSCALL opcode call
+        """
+        self.__insert1(OpcodeInfo.SYSCALL, sys_call_id)
+
     def convert_begin_while(self, is_for: bool = False) -> int:
         """
         Converts the beginning of the while statement
@@ -570,14 +577,15 @@ class CodeGenerator:
 
         return start_address
 
-    def convert_end_while(self, start_address: int, test_address: int):
+    def convert_end_while(self, start_address: int, test_address: int, *, is_internal: bool = False):
         """
         Converts the end of the while statement
 
         :param start_address: the address of the while first opcode
         :param test_address: the address of the while test fist opcode
+        :param is_internal: whether it was called when generating other implemented symbols
         """
-        self.convert_end_loop(start_address, test_address, False)
+        self.convert_end_loop(start_address, test_address, False, is_internal=is_internal)
 
     def convert_begin_for(self) -> int:
         """
@@ -593,11 +601,12 @@ class CodeGenerator:
         self.convert_get_item()
         return address
 
-    def convert_end_for(self, start_address: int) -> int:
+    def convert_end_for(self, start_address: int, is_internal: bool = False) -> int:
         """
         Converts the end of the for statement
 
         :param start_address: the address of the for first opcode
+        :param is_internal: whether it was called when generating other implemented symbols
         :return: the address of the loop condition
         """
         self.__insert1(OpcodeInfo.INC)      # index += 1
@@ -612,17 +621,18 @@ class CodeGenerator:
         self.convert_builtin_method_call(Builtin.Len)
         self.convert_operation(BinaryOp.Lt)  # continue loop condition: index < len(sequence)
 
-        self.convert_end_loop(start_address, test_address, True)
+        self.convert_end_loop(start_address, test_address, True, is_internal=is_internal)
 
         return test_address
 
-    def convert_end_loop(self, start_address: int, test_address: int, is_for: bool):
+    def convert_end_loop(self, start_address: int, test_address: int, is_for: bool, is_internal: bool = False):
         """
         Converts the end of a loop statement
 
         :param start_address: the address of the while first opcode
         :param test_address: the address of the while test fist opcode
         :param is_for: whether the loop is a for loop or not
+        :param is_internal: whether it was called when generating other implemented symbols
         """
         # updates the begin jmp with the target address
         self._update_jump(start_address, test_address)
@@ -654,6 +664,9 @@ class CodeGenerator:
 
         self._insert_loop_break_addresses(start_address, is_break_pos, is_break_end, self.bytecode_size)
         self._insert_jump(OpcodeInfo.JMPIF)
+
+        if is_internal:
+            self.convert_end_loop_else(start_address, self.last_code_start_address)
 
     def convert_end_loop_else(self, start_address: int, else_begin: int, has_else: bool = False, is_for: bool = False):
         """
@@ -692,12 +705,12 @@ class CodeGenerator:
         self._insert_jump(OpcodeInfo.JMPIFNOT)
         return VMCodeMapping.instance().get_start_address(self.last_code)
 
-    def convert_begin_else(self, start_address: int, insert_jump: bool = False) -> int:
+    def convert_begin_else(self, start_address: int, insert_jump: bool = False, is_internal: bool = False) -> int:
         """
         Converts the beginning of the if else statement
 
         :param start_address: the address of the if first opcode
-        :param insert_jump: whether should be included a jump to the end before the else branch
+        :param insert_jump: whether it should be included a jump to the end before the else branch
         :return: the address of the if else first opcode
         """
         # it will be updated when the if ends
@@ -705,10 +718,12 @@ class CodeGenerator:
 
         # updates the begin jmp with the target address
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
+        if is_internal:
+            self._stack_states.restore_state(start_address + 1)
 
         return self.last_code_start_address
 
-    def convert_end_if(self, start_address: int):
+    def convert_end_if(self, start_address: int, is_internal: bool = False):
         """
         Converts the end of the if statement
 
@@ -716,6 +731,8 @@ class CodeGenerator:
         """
         # updates the begin jmp with the target address
         self._update_jump(start_address, VMCodeMapping.instance().bytecode_size)
+        if is_internal:
+            self._stack_states.restore_state(start_address)
 
     def convert_begin_try(self) -> int:
         """
@@ -912,7 +929,7 @@ class CodeGenerator:
         self._insert_loop_break_addresses(loop_start, is_break_pos, is_break_end, break_address)
 
     def _insert_loop_break_addresses(self, loop_start: int, is_break_start: int, is_break_end: int, break_address: int):
-        if loop_start not in self._jumps_to_loop_condition:
+        if loop_start not in self._jumps_to_loop_break:
             self._jumps_to_loop_break[loop_start] = [break_address]
         elif break_address not in self._jumps_to_loop_break[loop_start]:
             self._jumps_to_loop_break[loop_start].append(break_address)
@@ -1047,7 +1064,8 @@ class CodeGenerator:
         :param array: the value to be converted
         """
         self.insert_push_data(array)
-        self.convert_cast(Type.bytes)
+        self.convert_cast(Type.bytearray if isinstance(array, bytearray)
+                          else Type.bytes)
 
     def insert_push_data(self, data: bytes):
         """
@@ -1074,7 +1092,7 @@ class CodeGenerator:
         self.__insert1(OpcodeInfo.PUSHNULL)
         self._stack_append(Type.none)
 
-    def convert_cast(self, value_type: IType):
+    def convert_cast(self, value_type: IType, is_internal: bool = False):
         """
         Converts casting types in Neo VM
         """
@@ -1083,7 +1101,7 @@ class CodeGenerator:
                 and not stack_top_type.is_generic
                 and value_type.stack_item is not Type.any.stack_item):
 
-            if value_type.stack_item != stack_top_type.stack_item:
+            if is_internal or value_type.stack_item != stack_top_type.stack_item:
                 # converts only if the stack types are different
                 self.__insert1(OpcodeInfo.CONVERT, value_type.stack_item)
 
@@ -1126,7 +1144,10 @@ class CodeGenerator:
             self.convert_new_empty_array(length, array_type)
         else:
             self.convert_literal(length)
-            self.__insert1(OpcodeInfo.PACK)
+            if array_type.stack_item is StackItemType.Struct:
+                self.__insert1(OpcodeInfo.PACKSTRUCT)
+            else:
+                self.__insert1(OpcodeInfo.PACK)
             self._stack_pop()  # array size
             for x in range(length):
                 self._stack_pop()
@@ -1173,27 +1194,37 @@ class CodeGenerator:
         else:
             self.__insert1(OpcodeInfo.PICKITEM)
             self._stack_pop()
+            self._stack_pop()
+            if hasattr(array_or_map_type, 'value_type'):
+                new_stack_item = array_or_map_type.value_type
+            else:
+                new_stack_item = Type.any
+            self._stack_append(new_stack_item)
 
-    def convert_get_substring(self):
+    def convert_get_substring(self, *, is_internal: bool = False):
         """
         Converts the end of get a substring
-        """
-        # if given substring size is negative, return empty string
-        self.duplicate_stack_top_item()
-        self.convert_literal(0)
-        self.convert_operation(BinaryOp.GtE)
 
-        self._insert_jump(OpcodeInfo.JMPIF)
-        jmp_address = self.last_code_start_address
-        self.remove_stack_top_item()
-        self.convert_literal(0)
+        :param is_internal: whether it was called when generating other implemented symbols
+        """
+        if not is_internal:
+            # if given substring size is negative, return empty string
+            self.duplicate_stack_top_item()
+            self.convert_literal(0)
+            self.convert_operation(BinaryOp.GtE)
+
+            self._insert_jump(OpcodeInfo.JMPIF)
+            jmp_address = self.last_code_start_address
+            self.remove_stack_top_item()
+            self.convert_literal(0)
 
         self._stack_pop()  # length
         self._stack_pop()  # start
         original = self._stack_pop()  # original string
 
         self.__insert1(OpcodeInfo.SUBSTR)
-        self._update_jump(jmp_address, self.last_code_start_address)
+        if not is_internal:
+            self._update_jump(jmp_address, self.last_code_start_address)
         self._stack_append(BufferType)  # substr returns a buffer instead of a bytestring
         self.convert_cast(original)
 
@@ -1214,7 +1245,7 @@ class CodeGenerator:
         self.duplicate_stack_item(6)
         self.duplicate_stack_item(3)
         self.convert_get_item()
-        self.convert_builtin_method_call(Builtin.SequenceAppend)
+        self.convert_builtin_method_call(Builtin.SequenceAppend.build(array))
         self.convert_end_if(is_valid_index)
 
         self.__insert1(OpcodeInfo.INC)              # index += 1
@@ -1482,6 +1513,19 @@ class CodeGenerator:
             elif isinstance(symbol, UserClass):
                 self.convert_class_symbol(symbol, symbol_id)
 
+    def convert_load_class_variable(self, class_type: ClassType, var_id: str, is_internal: bool = False):
+        variable_list = (class_type._all_variables
+                         if hasattr(class_type, '_all_variables') and is_internal
+                         else class_type.variables)
+
+        if var_id in variable_list:
+            var = variable_list[var_id]
+            index = list(variable_list).index(var_id)
+            self.convert_literal(index)
+            self.convert_get_item(index_inserted_internally=True)
+            self._stack_pop()  # pop class type
+            self._stack_append(var.type)  # push variable type
+
     def convert_load_variable(self, var_id: str, var: Variable, class_type: Optional[UserClass] = None):
         """
         Converts the assignment of a variable
@@ -1513,12 +1557,7 @@ class CodeGenerator:
             self._convert_builtin_storage_get_or_put(True, storage_key)
 
         elif class_type:
-            if var_id in class_type.variables:
-                index = list(class_type.variables).index(var_id)
-                self.convert_literal(index)
-                self.convert_get_item(index_inserted_internally=True)
-                self._stack_pop()             # pop class type
-                self._stack_append(var.type)  # push variable type
+            self.convert_load_class_variable(class_type, var_id)
 
     def convert_store_variable(self, var_id: str, value_start_address: int = None, user_class: UserClass = None):
         """
@@ -1628,13 +1667,15 @@ class CodeGenerator:
 
         return index, local, is_arg
 
-    def convert_builtin_method_call(self, function: IBuiltinMethod, args_address: List[int] = None):
+    def convert_builtin_method_call(self, function: IBuiltinMethod, args_address: List[int] = None, is_internal: bool = False):
         """
         Converts a builtin method function call
 
         :param function: the function to be converted
         :param args_address: a list with each function arguments' first addresses
+        :param is_internal: whether it was called when generating other implemented symbols
         """
+        stack_before = len(self._stack)
         if args_address is None:
             args_address = []
         store_opcode: OpcodeInformation = None
@@ -1665,26 +1706,54 @@ class CodeGenerator:
                 if len(addresses) > arg:
                     self.fix_negative_index(addresses[arg])
 
-        for opcode, data in function.opcode:
-            op_info = OpcodeInfo.get_info(opcode)
-            if opcode is Opcode.CALL and isinstance(data, Method):
-                # avoid losing current stack state
-                for _ in data.args:
-                    self._stack_append(Type.any)
-                self.convert_method_call(data, len(data.args) - 1)
-            else:
-                self.__insert1(op_info, data)
+        self._convert_builtin_call(function, previous_stack_size=stack_before, is_internal=is_internal)
 
         if store_opcode is not None:
             self._insert_jump(OpcodeInfo.JMP)
+            self._update_codes_without_target_to_next(self.last_code_start_address)
             jump = self.last_code_start_address
             self.__insert1(store_opcode, store_data)
             self._update_jump(jump, VMCodeMapping.instance().bytecode_size)
 
-        for _ in range(function.args_on_stack):
+    def _convert_builtin_call(self, builtin: IBuiltinCallable, previous_stack_size: int = None, is_internal: bool = False):
+        if not isinstance(previous_stack_size, int):
+            previous_stack_size = len(self._stack)
+        elif previous_stack_size < 0:
+            previous_stack_size = 0
+
+        size_before_generating = self.bytecode_size
+        if is_internal:
+            builtin.generate_internal_opcodes(self)
+        else:
+            builtin.generate_opcodes(self)
+
+        if size_before_generating == self.bytecode_size:
+            # TODO: remove this when the built in code generation refactoring is finished
+            for opcode, data in builtin.opcode:
+                op_info = OpcodeInfo.get_info(opcode)
+                if opcode is Opcode.CALL and isinstance(data, Method):
+                    # avoid losing current stack state
+                    for _ in data.args:
+                        self._stack_append(Type.any)
+                    self.convert_method_call(data, len(data.args) - 1)
+                else:
+                    self.__insert1(op_info, data)
+
+        if isinstance(builtin, IBuiltinMethod):
+            if is_internal and hasattr(builtin, 'internal_call_args'):
+                expected_stack_after = previous_stack_size - builtin.internal_call_args
+            else:
+                expected_stack_after = previous_stack_size - builtin.args_on_stack
+        else:
+            expected_stack_after = previous_stack_size - len(builtin.args)
+
+        if expected_stack_after < 0:
+            expected_stack_after = 0
+
+        while expected_stack_after < len(self._stack):
             self._stack_pop()
-        if function.return_type not in (None, Type.none):
-            self._stack_append(function.return_type)
+        if builtin.return_type not in (None, Type.none):
+            self._stack_append(builtin.return_type)
 
     def convert_method_call(self, function: Method, num_args: int):
         """
@@ -1735,6 +1804,16 @@ class CodeGenerator:
         if function.return_type is not Type.none:
             self._stack_append(function.return_type)
 
+    def convert_method_token_call(self, method_token_id: int):
+        """
+        Converts a method token call
+        """
+        if method_token_id >= 0:
+            method_token = VMCodeMapping.instance().get_method_token(method_token_id)
+            if method_token is not None:
+                opcode_info = OpcodeInfo.CALLT
+                self.__insert1(opcode_info, Integer(method_token_id).to_byte_array(min_length=opcode_info.data_len))
+
     def convert_event_call(self, event: Event):
         """
         Converts an event call
@@ -1749,11 +1828,7 @@ class CodeGenerator:
             self.swap_reverse_stack_items(2)
 
         from boa3.internal.model.builtin.interop.interop import Interop
-        for opcode, data in Interop.Notify.opcode:
-            info = OpcodeInfo.get_info(opcode)
-            self.__insert1(info, data)
-            self._stack_pop()
-            self._stack_pop()
+        self._convert_builtin_call(Interop.Notify, is_internal=True)
 
     def convert_class_symbol(self, class_type: ClassType, symbol_id: str, load: bool = True) -> Optional[int]:
         """
@@ -1764,11 +1839,13 @@ class CodeGenerator:
         :param load:
         """
         method: Method
+        is_safe_to_convert = False
 
         if symbol_id in class_type.variables:
             return self.convert_class_variable(class_type, symbol_id, load)
         elif symbol_id in class_type.properties:
             symbol = class_type.properties[symbol_id]
+            is_safe_to_convert = True
             method = symbol.getter if load else symbol.setter
         elif symbol_id in class_type.instance_methods:
             method = class_type.instance_methods[symbol_id]
@@ -1780,7 +1857,11 @@ class CodeGenerator:
             return
 
         if isinstance(method, IBuiltinMethod):
-            self.convert_builtin_method_call(method)
+            if not is_safe_to_convert:
+                is_safe_to_convert = len(method.args) == 0
+
+            if is_safe_to_convert:
+                self.convert_builtin_method_call(method)
         else:
             self.convert_method_call(method, 0)
         return symbol_id
@@ -1819,17 +1900,24 @@ class CodeGenerator:
 
             return index
 
-    def convert_operation(self, operation: IOperation):
+    def convert_operation(self, operation: IOperation, is_internal: bool = False):
         """
         Converts an operation
 
         :param operation: the operation that will be converted
+        :param is_internal: whether it was called when generating other implemented symbols
         """
-        for opcode, data in operation.opcode:
-            op_info: OpcodeInformation = OpcodeInfo.get_info(opcode)
-            self.__insert1(op_info, data)
+        stack_before = len(self._stack)
+        if is_internal:
+            operation.generate_internal_opcodes(self)
+        else:
+            operation.generate_opcodes(self)
 
-        for op in range(operation.op_on_stack):
+        expected_stack_after = stack_before - operation.op_on_stack
+        if expected_stack_after < 0:
+            expected_stack_after = 0
+
+        while expected_stack_after < len(self._stack):
             self._stack_pop()
         self._stack_append(operation.result)
 
@@ -1845,20 +1933,22 @@ class CodeGenerator:
             if asserted_type is Type.any:
                 # need to check in runtime
                 self.duplicate_stack_top_item()
-                self.__insert1(OpcodeInfo.ISTYPE, StackItemType.Array)
+                self.insert_type_check(StackItemType.Array)
                 self._insert_jump(OpcodeInfo.JMPIF, len_code)
 
                 self.duplicate_stack_top_item()
-                self.__insert1(OpcodeInfo.ISTYPE, StackItemType.Map)
+                self.insert_type_check(StackItemType.Map)
                 self._insert_jump(OpcodeInfo.JMPIF, len_code)
 
                 self.duplicate_stack_top_item()
-                self.__insert1(OpcodeInfo.ISTYPE, StackItemType.Struct)
+                self.insert_type_check(StackItemType.Struct)
                 self._insert_jump(OpcodeInfo.JMPIFNOT, 2)
 
                 VMCodeMapping.instance().move_to_end(len_pos, len_pos)
 
         self.__insert1(OpcodeInfo.ASSERT)
+        if len(self._stack) > 0:
+            self._stack_pop()
 
     def convert_new_exception(self, exception_args_len: int = 0):
         if exception_args_len == 0 or len(self._stack) == 0:
@@ -1876,6 +1966,35 @@ class CodeGenerator:
 
         self._stack_pop()
         self.__insert1(OpcodeInfo.THROW)
+
+    def insert_opcode(self, opcode: Opcode, data: bytes = None,
+                      add_to_stack: List[IType] = None, pop_from_stack: bool = False):
+        """
+        Inserts one opcode into the bytecode. Used to generate built-in symbols.
+
+        :param opcode: info of the opcode  that will be inserted
+        :param data: data of the opcode, if needed
+        :param add_to_stack: expected data to be included on stack, if needed
+        :param pop_from_stack: if needs to update stack given opcode stack items
+        """
+        op_info = OpcodeInfo.get_info(opcode)
+        if op_info is not None:
+            self.__insert1(op_info, data)
+            if pop_from_stack:
+                for _ in range(op_info.stack_items):
+                    self._stack_pop()
+
+        if isinstance(add_to_stack, list):
+            for stack_item in add_to_stack:
+                self._stack_append(stack_item)
+
+    def insert_type_check(self, type_to_check: Optional[StackItemType]):
+        if isinstance(type_to_check, StackItemType):
+            self.__insert1(OpcodeInfo.ISTYPE, type_to_check)
+        else:
+            self.__insert1(OpcodeInfo.ISNULL)
+        self._stack_pop()
+        self._stack_append(Type.bool)
 
     def __insert1(self, op_info: OpcodeInformation, data: bytes = None):
         """
@@ -1955,7 +2074,7 @@ class CodeGenerator:
         if None in self._missing_target:
             for code in self._missing_target[None]:
                 if OpcodeHelper.is_jump(code.info.opcode) and code.target is None:
-                    target = Integer.from_bytes(code.raw_data) + VMCodeMapping.instance().get_start_address(code) + 1
+                    target = Integer.from_bytes(code.raw_data) + VMCodeMapping.instance().get_start_address(code)
                     if target >= current_bytecode_size:
                         return True
         return False
@@ -1973,6 +2092,32 @@ class CodeGenerator:
                 for code in codes:
                     code.set_target(vm_code)
                 self._missing_target.pop(target_address)
+
+    def _update_codes_without_target_to_next(self, address: int = None):
+        if address is None:
+            address = self.bytecode_size
+
+        instance = VMCodeMapping.instance()
+        vm_code = instance.get_code(address)
+        if vm_code is None:
+            return
+
+        next_address = instance.get_end_address(vm_code)
+        if address in self._missing_target:
+            targets = self._missing_target.pop(address)
+
+            if next_address in self._missing_target:
+                self._missing_target[next_address].extend(targets)
+            else:
+                self._missing_target[next_address] = targets
+
+        if None in self._missing_target:
+            for code in self._missing_target[None]:
+                code_address = instance.get_start_address(code)
+                target_address = Integer.from_bytes(code.raw_data) + code_address
+                if target_address == address and target_address != code_address:
+                    data = self._get_jump_data(code.info, next_address - code_address)
+                    instance.update_vm_code(code, code.info, data)
 
     def set_code_targets(self):
         for target, vmcodes in self._missing_target.copy().items():
@@ -1998,7 +2143,7 @@ class CodeGenerator:
 
         :param op_info: info of the opcode  that will be inserted
         :param jump_to: data of the opcode
-        :param insert_jump: whether should be included a jump to the end before the else branch
+        :param insert_jump: whether it should be included a jump to the end before the else branch
         """
         if isinstance(jump_to, VMCode):
             jump_to = VMCodeMapping.instance().get_start_address(jump_to) - VMCodeMapping.instance().bytecode_size
@@ -2028,6 +2173,35 @@ class CodeGenerator:
                 if updated_jump_to not in VMCodeMapping.instance().code_map:
                     self._include_missing_target(vmcode, updated_jump_to)
 
+    def change_jump(self, jump_address: int, new_jump_opcode: Opcode):
+        """
+        Changes the type of jump code in the bytecode
+
+        """
+        if not OpcodeHelper.is_jump(new_jump_opcode):
+            return
+
+        vmcode: VMCode = VMCodeMapping.instance().get_code(jump_address)
+        if vmcode is not None and OpcodeHelper.is_jump(vmcode.opcode):
+            previous_consumed_items_from_stack = vmcode.info.stack_items
+            new_consumed_items_from_stack = OpcodeInfo.get_info(new_jump_opcode).stack_items
+            if previous_consumed_items_from_stack < new_consumed_items_from_stack:
+                # if previous jump doesn't have condition and the new one has
+                previous_stack = self._stack_states.get_state(jump_address)
+                items_to_consume = new_consumed_items_from_stack - previous_consumed_items_from_stack
+
+                if jump_address == self.last_code_start_address:
+                    for _ in range(items_to_consume):
+                        self._stack_pop()
+                    target_stack_size = len(self._stack)
+                else:
+                    target_stack_size = len(previous_stack) - items_to_consume
+
+                while len(previous_stack) > target_stack_size:
+                    previous_stack.pop(-1)  # consume last stack item as jump condition
+
+            vmcode.set_opcode(OpcodeInfo.get_info(new_jump_opcode))
+
     def _get_jump_data(self, op_info: OpcodeInformation, jump_to: int) -> bytes:
         return Integer(jump_to).to_byte_array(min_length=op_info.data_len, signed=True)
 
@@ -2038,7 +2212,7 @@ class CodeGenerator:
     def duplicate_stack_top_item(self):
         self.duplicate_stack_item(1)
 
-    def duplicate_stack_item(self, pos: int = 0):
+    def duplicate_stack_item(self, pos: int = 0, *, expected_stack_item: IType = None):
         """
         Duplicates the item n back in the stack
 
@@ -2048,12 +2222,39 @@ class CodeGenerator:
         # n = 0 -> value varies in runtime
         if pos >= 0:
             opcode: Opcode = OpcodeHelper.get_dup(pos)
-            if opcode is Opcode.PICK and pos > 0:
-                self.convert_literal(pos - 1)
-                self._stack_pop()
+            if opcode is Opcode.PICK:
+                if pos > 0:
+                    self.convert_literal(pos - 1)
+                    self._stack_pop()
+                elif Type.int.is_type_of(self._stack[-1]) and expected_stack_item is not None:
+                    self._stack_pop()
+
             op_info = OpcodeInfo.get_info(opcode)
             self.__insert1(op_info)
-            self._stack_append(self._stack[-pos])
+            if expected_stack_item is None:
+                stacked_value = self._stack[-pos]
+            else:
+                stacked_value = expected_stack_item
+
+            self._stack_append(stacked_value)
+
+    def move_stack_item_to_top(self, pos: int = 0):
+        """
+        Moves the item n back in the stack to the top
+
+        :param pos: index of the variable
+        """
+        # n = 1 -> stack top item
+        # n = 0 -> value varies in runtime
+        # do nothing in those cases
+        if pos == 2:
+            self.swap_reverse_stack_items(2)
+        elif pos > 2:
+            self.convert_literal(pos - 1)
+            self._stack_pop()
+            self.__insert1(OpcodeInfo.ROLL)
+            stack_type = self._stack_pop(-pos)
+            self._stack_append(stack_type)
 
     def clear_stack(self, clear_if_in_loop: bool = False):
         if not clear_if_in_loop or len(self._current_for) > 0:

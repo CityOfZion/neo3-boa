@@ -1,8 +1,7 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class StorageMapGetMethod(IBuiltinMethod):
@@ -25,20 +24,31 @@ class StorageMapGetMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
+    def self_type(self):
+        """
+        :rtype: boa3.internal.model.builtin.interop.storage.storagemap.storagemaptype.StorageMapType
+        """
+        return self.args['self'].type
+
+    @property
     def _body(self) -> Optional[str]:
         return None
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.interop.interop import Interop
-        return [
-            (Opcode.SWAP, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PUSH1, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.CAT, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.PUSH0, b''),
-            (Opcode.PICKITEM, b''),
-        ] + Interop.StorageGet.opcode
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        # actual_key = self._prefix + key
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_load_class_variable(self.self_type, '_prefix', is_internal=True)  # self._prefix
+
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+
+        # actual_context = self._context
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_load_class_variable(self.self_type, '_context', is_internal=True)  # self._context
+
+        # return get(actual_key, actual_context)
+        code_generator.convert_builtin_method_call(Interop.StorageGet, is_internal=True)

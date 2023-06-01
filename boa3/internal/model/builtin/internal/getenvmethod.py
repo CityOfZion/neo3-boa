@@ -1,8 +1,7 @@
-from typing import Optional, List, Tuple, Any
+from typing import Optional, Any
 
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.method import IBuiltinMethod
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class GetEnvMethod(IBuiltinMethod):
@@ -18,12 +17,8 @@ class GetEnvMethod(IBuiltinMethod):
     def _args_on_stack(self) -> int:
         return super()._args_on_stack
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.opcode import OpcodeHelper
-        return [
-            OpcodeHelper.get_pushdata_and_data(self._env)
-        ]
+    def generate_opcodes(self, code_generator):
+        code_generator.convert_literal(self._env)
 
     @property
     def _body(self) -> Optional[str]:

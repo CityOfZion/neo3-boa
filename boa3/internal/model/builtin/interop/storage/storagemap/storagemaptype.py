@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -8,7 +8,6 @@ from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class StorageMapType(ClassArrayType):
@@ -111,12 +110,8 @@ class StorageMapMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [
-            (Opcode.PUSH2, b''),
-            (Opcode.PACK, b'')
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.convert_new_array(len(self.args), self.return_type)
 
     @property
     def _args_on_stack(self) -> int:

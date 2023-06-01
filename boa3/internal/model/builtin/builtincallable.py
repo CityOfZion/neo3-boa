@@ -31,6 +31,22 @@ class IBuiltinCallable(Callable, IBuiltinSymbol, ABC):
             self._generated_opcode = self._opcode
         return self._generated_opcode
 
+    def generate_opcodes(self, code_generator):
+        """
+        Generate the Neo VM opcodes for the method.
+
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        self.generate_internal_opcodes(code_generator)
+
+    def generate_internal_opcodes(self, code_generator):
+        """
+        Generate the Neo VM opcodes for the method.
+
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        pass
+
     def reset(self):
         # reset the opcodes to ensure the correct output when calling consecutive compilations
         self._generated_opcode = None

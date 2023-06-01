@@ -57,133 +57,131 @@ class IndexSequenceMethod(IndexMethod):
     def exception_message(self) -> str:
         return "x not in sequence"
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-
-        jmp_place_holder = (Opcode.JMP, b'\x01')
-        message = String(self.exception_message).to_bytes()
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
+        start_address = code_generator.bytecode_size
 
         # receives: end, start, x, sequence
-        verify_negative_index = [           # verifies if index in a negative value
-            (Opcode.DUP, b''),
-            (Opcode.PUSHM1, b''),
-            jmp_place_holder                # if index >= 0, jump to verify_big_end or verify_big_start
-        ]
+        code_generator.swap_reverse_stack_items(4)
 
-        fix_negative_end = [                # gets the correspondent positive value of end
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.ADD, b''),
-            (Opcode.INC, b''),              # end = end + len(sequence) + 1
-            (Opcode.DUP, b''),
-            (Opcode.PUSHM1, b''),
-            jmp_place_holder                # if end is not negative anymore, start verifying start
-        ]
+        # if index < 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        is_negative_index = code_generator.convert_begin_if()
+        # # if index >= 0, jump to verify_big_end
+        code_generator.change_jump(is_negative_index, Opcode.JMPGE)
 
-        fix_still_negative_index = [        # if index is still negative, consider it 0 then
-            (Opcode.DROP, b''),
-            (Opcode.PUSH0, b''),            # end = 0
-        ]
+        #   # gets the correspondent positive value of end
+        #   end = end + len(sequence) + 1
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        code_generator.insert_opcode(Opcode.INC)
 
-        jmp_fix_negative_index = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_negative_end +
-                                                                                              fix_still_negative_index), True)
-        verify_negative_index[-1] = jmp_fix_negative_index
+        #   if index < 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        is_still_negative_index = code_generator.convert_begin_if()
+        #   # if end is not negative anymore, start verifying start
+        code_generator.change_jump(is_still_negative_index, Opcode.JMPGE)
 
-        verify_big_end = [                  # verify if end is bigger then len(sequence)
-            (Opcode.DUP, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            jmp_place_holder                # if end <= len(sequence), start verifying start
-        ]
+        #       index = 0
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(0)
 
-        fix_big_end = [                     # consider end as len(sequence)
-            (Opcode.DROP, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),             # end = len(sequence)
-        ]
+        code_generator.convert_end_if(is_negative_index, is_internal=True)
 
-        jmp_other_verifies = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(fix_still_negative_index +
-                                                                                          verify_big_end +
-                                                                                          fix_big_end), True)
-        fix_negative_end[-1] = jmp_other_verifies
+        # if end > len(sequence)
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        is_big_end = code_generator.convert_begin_if()
+        # # if end <= len(sequence), start verifying start
+        code_generator.change_jump(is_big_end, Opcode.JMPLE)
 
-        jmp_fix_big_index = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(fix_big_end), True)
-        verify_big_end[-1] = jmp_fix_big_index
+        #   end = len(sequence)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-        verify_and_fix_end = [              # collection of Opcodes regarding verifying and fixing end index
-            (Opcode.REVERSE4, b''),
-        ]
-        verify_and_fix_end.extend(verify_negative_index)
-        verify_and_fix_end.extend(fix_negative_end)
-        verify_and_fix_end.extend(fix_still_negative_index)
-        verify_and_fix_end.extend(verify_big_end)
-        verify_and_fix_end.extend(fix_big_end)
+        code_generator.convert_end_if(is_still_negative_index, is_internal=True)
+        code_generator.convert_end_if(is_big_end, is_internal=True)
+        code_generator.swap_reverse_stack_items(2)
 
-        verify_and_fix_start = [            # collection of Opcodes regarding verifying and fixing start index
-            (Opcode.SWAP, b'')
-        ]
-        verify_and_fix_start.extend(verify_negative_index)
-        verify_and_fix_start.extend(fix_negative_end)
-        verify_and_fix_start.extend(fix_still_negative_index)
-        verify_and_fix_start.extend(verify_big_end)
-        verify_and_fix_start.extend(fix_big_end)
+        # if index < 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        is_negative_index = code_generator.convert_begin_if()
+        # # if index >= 0, jump to verify_big_start
+        code_generator.change_jump(is_negative_index, Opcode.JMPGE)
 
-        verify_while = [                    # verify if already went through all items on the sequence[start:end]
-            (Opcode.OVER, b''),             # index = start
-            (Opcode.OVER, b''),
-            jmp_place_holder                # if index <= start, jump to not_inside_sequence
-        ]
+        #   # gets the correspondent positive value of end
+        #   start = start + len(sequence) + 1
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        code_generator.insert_opcode(Opcode.INC)
 
-        compare_item = [                    # verifies if x is in sequence
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.NUMEQUAL, b''),         # found_x = sequence[index] == x
-            jmp_place_holder                # if found_x, jump to return_index
-        ]
+        #   if index < 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        is_still_negative_index = code_generator.convert_begin_if()
+        #   # if start is not negative anymore
+        code_generator.change_jump(is_still_negative_index, Opcode.JMPGE)
 
-        not_found = [                       # increments index and goes back to verify again
-            (Opcode.INC, b''),              # index++
-            # jump to verify_while
-        ]
+        #       index = 0
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(0)
 
-        jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
-                                                                                         compare_item +
-                                                                                         not_found), True)
-        not_found.append(jmp_back_to_verify)
+        code_generator.convert_end_if(is_negative_index, is_internal=True)
 
-        jmp_to_error = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(compare_item +
-                                                                                    not_found), True)
-        verify_while[-1] = jmp_to_error
+        # if start > len(sequence)
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        is_big_end = code_generator.convert_begin_if()
+        # # if start <= len(sequence), start verifying start
+        code_generator.change_jump(is_big_end, Opcode.JMPLE)
 
-        not_inside_sequence = [             # send error message saying that x is not in sequence
-            (Opcode.PUSHDATA1, Integer(len(message)).to_byte_array(signed=True, min_length=1) + message),
-            (Opcode.THROW, b''),
-        ]
+        #   start = len(sequence)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-        jmp_to_return_index = OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(not_found +
-                                                                                           not_inside_sequence), True)
-        compare_item[-1] = jmp_to_return_index
+        code_generator.convert_end_if(is_still_negative_index, is_internal=True)
+        code_generator.convert_end_if(is_big_end, is_internal=True)
 
-        return_index = [                    # removes all values in the stack but the index
-            (Opcode.NIP, b''),
-            (Opcode.NIP, b''),
-            (Opcode.NIP, b''),
-        ]
+        # begin while
+        # while self[index] != x:
+        while_start = code_generator.convert_begin_while()
 
-        return (
-            verify_and_fix_end +
-            verify_and_fix_start +
-            verify_while +
-            compare_item +
-            not_found +
-            not_inside_sequence +
-            return_index
-        )
+        #   index += 1
+        code_generator.insert_opcode(Opcode.INC)
+
+        while_condition = code_generator.bytecode_size
+        #   if end <= index
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        invalid_index = code_generator.convert_begin_if()
+        code_generator.change_jump(invalid_index, Opcode.JMPGT)
+        #       raise error
+        code_generator.convert_literal(self.exception_message)
+        code_generator.convert_raise_exception()
+
+        invalid_index = code_generator.convert_begin_else(invalid_index, is_internal=True)
+
+        code_generator.convert_end_if(invalid_index, is_internal=True)
+
+        #   self[index] == x:
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_operation(BinaryOp.NumNotEq, is_internal=True)
+
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
+
+        for _ in range(1, len(self.args)):
+            code_generator.remove_stack_item(2)

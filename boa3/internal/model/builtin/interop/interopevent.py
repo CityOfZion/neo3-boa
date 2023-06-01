@@ -1,10 +1,9 @@
 import ast
 from abc import ABC
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from boa3.internal.model.builtin.method.builtinevent import IBuiltinEvent
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class InteropEvent(IBuiltinEvent, ABC):
@@ -25,6 +24,5 @@ class InteropEvent(IBuiltinEvent, ABC):
 
         return cryptography.sha256(String(method_name).to_bytes())[:SIZE_OF_INT32]
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.SYSCALL, self.interop_method_hash)]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_sys_call(self.interop_method_hash)

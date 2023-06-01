@@ -65,58 +65,97 @@ class CollectionMembership(BinaryOperation):
 
         return left_operand, self.right_type
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        return [
-            (Opcode.DUP, b''),
-            (Opcode.ISTYPE, Type.mapping.stack_item),   # if isinstance(arg1, dict)
-            (Opcode.JMPIFNOT, Integer(6).to_byte_array(signed=True, min_length=1)),
-            (Opcode.SWAP, b''),
-            (Opcode.HASKEY, b''),                           # return value.has_key(arg0)
-            (Opcode.JMP, Integer(54).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DUP, b''),
-            (Opcode.DUP, b''),
-            (Opcode.ISTYPE, Type.str.stack_item),       # is_bytestr = isinstance(arg1, (str, bytes))
-            (Opcode.SWAP, b''),
-            (Opcode.SIZE, b''),                         # limit = len(arg1)
-            (Opcode.OVER, b''),                         # if is_bytestr:
-            (Opcode.JMPIFNOT, Integer(7).to_byte_array(signed=True, min_length=1)),
-            (Opcode.PUSH3, b''),                            # limit = limit - len(arg0) + 1
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.SUB, b''),
-            (Opcode.INC, b''),
-            (Opcode.PUSH0, b''),                        # index = 0
-            (Opcode.DUP, b''),                          # while index < limit:
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.LT, b''),
-            (Opcode.JMPIFNOT, Integer(28).to_byte_array(signed=True, min_length=1)),
-            (Opcode.PUSH4, b''),                            # aux = arg0
-            (Opcode.PICK, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH5, b''),
-            (Opcode.PICK, b''),                             # if is_bytestr:
-            (Opcode.JMPIFNOT, Integer(10).to_byte_array(signed=True, min_length=1)),
-            (Opcode.PUSH2, b''),                                # if arg1[index:len(arg0)] == arg0:
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.SUBSTR, b''),
-            (Opcode.CONVERT, Type.str.stack_item),
-            (Opcode.NUMEQUAL, b''),                                 # break
-            (Opcode.JMP, Integer(4).to_byte_array(signed=True, min_length=1)),
-            (Opcode.PICKITEM, b''),                         # elif arg1[index] == arg0:
-            (Opcode.EQUAL, b''),                                    # break
-            (Opcode.JMPIF, Integer(5).to_byte_array(signed=True, min_length=1)),
-            (Opcode.INC, b''),                              # index += 1
-            (Opcode.JMP, Integer(-30).to_byte_array(signed=True, min_length=1)),
-            (Opcode.GT, b''),                       # return index < limit
-            (Opcode.REVERSE4, b''),                     # if the value is found, index won't reach the limit
-            (Opcode.DROP, b''),                     # remove auxiliar values from stack
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(Type.dict.stack_item)
+        # if isinstance(arg1, dict)
+        is_dict = code_generator.convert_begin_if()
+
+        #   return value.has_key(arg0)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.insert_opcode(Opcode.HASKEY, pop_from_stack=True, add_to_stack=[Type.bool])
+
+        is_dict = code_generator.convert_begin_else(is_dict, is_internal=True)
+        code_generator.duplicate_stack_top_item()
+
+        # is_bytestr = isinstance(arg1, (str, bytes))
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(Type.str.stack_item)
+
+        # limit = len(arg1)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+
+        code_generator.duplicate_stack_item(2)
+        # if is_bytestr:
+        is_bytestr = code_generator.convert_begin_if()
+
+        #   limit = limit - len(arg0) + 1
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Sub, is_internal=True)
+        code_generator.insert_opcode(Opcode.INC)
+
+        code_generator.convert_end_if(is_bytestr)
+
+        # index = 0
+        code_generator.convert_literal(0)
+
+        # while index < limit:
+        while_start = code_generator.convert_begin_while()
+
+        code_generator.duplicate_stack_item(5)
+        code_generator.duplicate_stack_item(5)
+        code_generator.duplicate_stack_item(3)
+        #   aux = arg0
+
+        code_generator.duplicate_stack_item(6)
+        #   if is_bytestr:
+        is_bytestr_while = code_generator.convert_begin_if()
+
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_get_substring(is_internal=True)
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        #       if arg1[index:len(arg0)] == arg0:
+        break_if = code_generator.convert_begin_if()
+        #           break
+        code_generator.convert_loop_break()
+
+        code_generator.convert_end_if(break_if, is_internal=True)
+        is_bytestr_while = code_generator.convert_begin_else(is_bytestr_while, is_internal=True)
+
+        code_generator.convert_get_item(index_inserted_internally=True)
+        code_generator.convert_operation(BinaryOp.Eq, is_internal=True)
+        #   elif arg1[index] == arg0:
+        break_elif = code_generator.convert_begin_if()
+        #       break
+        code_generator.convert_loop_break()
+
+        code_generator.convert_end_if(break_elif, is_internal=True)
+        code_generator.convert_end_if(is_bytestr_while, is_internal=True)
+
+        #   index += 1
+        code_generator.insert_opcode(Opcode.INC)
+
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
+
+        # return limit > index
+        #   if the value is found, index won't reach the limit
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+
+        # remove auxiliary values from stack
+        code_generator.swap_reverse_stack_items(4)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+
+        code_generator.convert_end_if(is_dict, is_internal=True)

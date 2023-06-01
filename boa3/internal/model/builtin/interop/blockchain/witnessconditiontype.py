@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -8,8 +8,6 @@ from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class WitnessConditionType(ClassArrayType):
@@ -79,15 +77,11 @@ class WitnessConditionMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
 
-        return [
-            OpcodeHelper.get_push_and_data(WitnessConditionEnum.build().default_value),  # type
-            (Opcode.PUSH1, b''),
-            (Opcode.PACK, b'')
-        ]
+        code_generator.convert_literal(WitnessConditionEnum.build().default_value)  # type
+        code_generator.convert_new_array(length=1, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:

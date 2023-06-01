@@ -1,12 +1,10 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class GetNotificationsMethod(InteropMethod):
@@ -26,33 +24,25 @@ class GetNotificationsMethod(InteropMethod):
         super().__init__(identifier, syscall, args, [args_default],
                          return_type=Type.list.build([notification_type]))
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.model.type.type import Type
-        jmp_place_holder = (Opcode.JMP, b'\x01')
 
-        verify_arg_is_null = [
-            (Opcode.DUP, b''),
-            (Opcode.JMPIFNOT, jmp_place_holder),
-        ]
+        # if arg is not None:
+        code_generator.duplicate_stack_top_item()
+        arg_is_null = code_generator.convert_begin_if()
 
-        arg_is_not_null = [
-            (Opcode.DUP, b''),
-            (Opcode.CONVERT, Type.int.stack_item),
-            (Opcode.PUSH0, b''),
-            (Opcode.NUMEQUAL, b''),
-            (Opcode.JMPIFNOT, Integer(4).to_byte_array(signed=True)),
-            (Opcode.DROP, b''),
-            (Opcode.PUSHNULL, b'')
-        ]
+        #   if arg == 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_cast(Type.int, is_internal=True)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
 
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        jmp_to_convert = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(arg_is_not_null), True)
-        verify_arg_is_null[-1] = jmp_to_convert
+        arg_is_zero = code_generator.convert_begin_if()
+        #       arg = None
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(None)
+        code_generator.convert_end_if(arg_is_zero, is_internal=True)
 
-        return (
-            verify_arg_is_null +
-            arg_is_not_null +
-            super()._opcode
-        )
+        code_generator.convert_end_if(arg_is_null, is_internal=True)
+        super().generate_internal_opcodes(code_generator)

@@ -1,12 +1,10 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from boa3.internal.compiler.codegenerator import get_bytes_count
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.collection.sequence.ecpointtype import ECPointType
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -47,29 +45,30 @@ class ECPointMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
         return Type.bytes.is_type_of(param_type)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        from boa3.internal.neo.vm.type.StackItem import StackItemType
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal import constants
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.operation.unaryop import UnaryOp
 
-        ECPOINT_SIZE = 33
+        # if (arg is not None
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(None)
+        code_generator.convert_operation(UnaryOp.Not, is_internal=True)
 
-        throw_if_invalid = [
-            (Opcode.THROW, b''),
-        ]
-        check_bytestr_size = [
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.PUSHINT8, Integer(ECPOINT_SIZE).to_byte_array(signed=True)),
-            OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(throw_if_invalid), jump_through=True),
-        ]
+        is_arg_null = code_generator.convert_begin_if()
+        #       or len(arg) != ECPOINT_SIZE):
+        code_generator.convert_cast(self.return_type, is_internal=True)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(constants.SIZE_OF_ECPOINT)
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
 
-        return [
-            (Opcode.CONVERT, StackItemType.ByteString),  # convert to ECPoint
-            (Opcode.DUP, b''),
-            (Opcode.ISNULL, b''),
-            OpcodeHelper.get_jump_and_data(Opcode.JMPIF, get_bytes_count(check_bytestr_size), jump_through=True),
-        ] + check_bytestr_size + throw_if_invalid
+        else_address = code_generator.convert_begin_else(is_arg_null, True)
+        code_generator.change_jump(else_address, Opcode.JMPIF)
+        #   raise exception
+        code_generator.convert_raise_exception()
+        code_generator.convert_end_if(else_address, is_internal=True)
 
     @property
     def _args_on_stack(self) -> int:

@@ -1,9 +1,7 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class DecimalCeilingMethod(IBuiltinMethod):
@@ -19,55 +17,49 @@ class DecimalCeilingMethod(IBuiltinMethod):
     def exception_message(self) -> str:
         return "decimals cannot be negative"
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.neo.vm.type.Integer import Integer
-        from boa3.internal.neo.vm.type.String import String
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.operation.unaryop import UnaryOp
 
-        message = String(self.exception_message).to_bytes()
+        # if decimals < 0
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        if_negative_decimal = code_generator.convert_begin_if()
+        #   raise error
+        code_generator.convert_literal(self.exception_message)
+        code_generator.convert_raise_exception()
+        code_generator.convert_end_if(if_negative_decimal, is_internal=True)
 
-        if_negative_decimal = [
-            (Opcode.PUSHDATA1, Integer(len(message)).to_byte_array(signed=True, min_length=1) + message),
-            (Opcode.THROW, b''),
-        ]
+        # unit = 10 ** decimal
+        code_generator.duplicate_stack_top_item()
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.convert_literal(10)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_operation(BinaryOp.Pow, is_internal=True)
 
-        decimals_unit = [
-            (Opcode.OVER, b''),
-            (Opcode.PUSH0, b''),
-            OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(if_negative_decimal), True),
-        ] + if_negative_decimal + [
-            (Opcode.DUP, b''),
-            (Opcode.REVERSE3, b''),
-            OpcodeHelper.get_push_and_data(10),
-            (Opcode.SWAP, b''),
-            (Opcode.POW, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.NEGATE, b''),
-            (Opcode.OVER, b''),
-            (Opcode.MOD, b'')
-        ]
+        # difference = (-x) % unit
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_operation(UnaryOp.Negative, is_internal=True)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Mod, is_internal=True)
 
-        if_negative_mod = [
-            (Opcode.ADD, b''),
-            (Opcode.JMP, b'')
-        ]
-        else_negative_mod = [
-            (Opcode.NIP, b'')
-        ]
-        num_jmp_code = get_bytes_count(else_negative_mod)
-        if_negative_mod[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        # if difference < 0
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        if_negative_mod = code_generator.convert_begin_if()
+        #   difference = unit + difference
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        # else
+        else_negative_mod = code_generator.convert_begin_else(if_negative_mod, is_internal=True)
+        #   # just clear stack
+        code_generator.remove_stack_item(2)
+        code_generator.convert_end_if(else_negative_mod, is_internal=True)
 
-        num_jmp_code = get_bytes_count(if_negative_mod)
-        floor_computation = [
-            (Opcode.DUP, b''),
-            (Opcode.PUSH0, b''),
-            OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True),
-        ] + if_negative_mod + else_negative_mod + [
-            (Opcode.ADD, b'')
-        ]
-
-        return decimals_unit + floor_computation
+        # result = x + difference
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        super().generate_opcodes(code_generator)
 
     @property
     def _args_on_stack(self) -> int:

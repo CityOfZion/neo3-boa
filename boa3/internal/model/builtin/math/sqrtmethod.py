@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
@@ -13,9 +13,8 @@ class SqrtMethod(IBuiltinMethod):
         args: Dict[str, Variable] = {'val': Variable(Type.int)}
         super().__init__(identifier, args, return_type=Type.int)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.SQRT, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.SQRT)
 
     @property
     def _args_on_stack(self) -> int:

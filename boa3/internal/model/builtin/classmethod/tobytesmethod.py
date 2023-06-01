@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Sequence
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -10,7 +10,6 @@ from boa3.internal.model.type.primitive.bytestype import BytesType
 from boa3.internal.model.type.primitive.inttype import IntType
 from boa3.internal.model.type.primitive.strtype import StrType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -33,12 +32,9 @@ class ToBytesMethod(IBuiltinMethod, ABC):
             return False
         return isinstance(params[0], IExpression) and isinstance(params[0].type, BytesType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.type.type import Type
-        return [
-            (Opcode.CONVERT, Type.bytes.stack_item)
-        ]
+        code_generator.convert_cast(Type.bytes, is_internal=True)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument
@@ -84,37 +80,20 @@ class IntToBytesMethod(ToBytesMethod):
             return IntToBytesMethod(value)
         return super().build(value)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.NZ)
+        is_zero = code_generator.convert_begin_if()
+        # if number != 0:
+        #   generic implementation
+        super().generate_internal_opcodes(code_generator)
+        # else:
+        is_zero = code_generator.convert_begin_else(is_zero, is_internal=True)
+        #   result = b'\x00'
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(b'\x00')
 
-        number_zero_to_bytes = b'\x00'
-        jmp_place_holder = (Opcode.JMP, b'\x01')
-
-        verify_number_is_zero = [
-            (Opcode.DUP, b''),
-            (Opcode.NZ, b''),
-            jmp_place_holder
-        ]
-
-        number_is_not_zero = super()._opcode.copy()
-        number_is_not_zero.append(jmp_place_holder)
-
-        number_is_zero = [
-            (Opcode.DROP, b''),
-            (Opcode.PUSHDATA1, Integer(len(number_zero_to_bytes)).to_byte_array() + number_zero_to_bytes),
-        ]
-
-        number_is_not_zero[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(number_is_zero))
-
-        verify_number_is_zero[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, get_bytes_count(number_is_not_zero))
-
-        return (
-            verify_number_is_zero +
-            number_is_not_zero +
-            number_is_zero
-        )
+        code_generator.convert_end_if(is_zero, is_internal=True)
 
 
 class StrToBytesMethod(ToBytesMethod):
@@ -124,10 +103,9 @@ class StrToBytesMethod(ToBytesMethod):
             self_type = Type.str
         super().__init__(self_type)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         # string and bytes' stack item are the same
-        return []
+        pass
 
     def build(self, value: Any) -> IBuiltinMethod:
         if isinstance(value, Sequence) and len(value) == 1:
