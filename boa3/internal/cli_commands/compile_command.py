@@ -56,9 +56,6 @@ class CompileCommand(ICommand):
         fullpath = os.path.realpath(sc_path)
         path, filename = os.path.split(fullpath)
 
-        if not project_path:
-            project_path = os.path.dirname(path)
-
         try:
             Boa3.compile_and_save(sc_path, output_path=output_path, debug=debug, root_folder=project_path, env=env)
             logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
