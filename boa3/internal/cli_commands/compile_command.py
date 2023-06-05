@@ -49,12 +49,15 @@ class CompileCommand(ICommand):
             logging.error("Input file is not .py")
             sys.exit(1)
 
-        if isinstance(output_path, str) and not output_path.endswith('.nef'):
-            logging.error("Output path file extension is not .nef")
-            sys.exit(1)
-
         fullpath = os.path.realpath(sc_path)
         path, filename = os.path.split(fullpath)
+
+        if isinstance(output_path, str):
+            if not output_path.endswith('.nef'):
+                logging.error("Output path file extension is not .nef")
+                sys.exit(1)
+
+            path, _ = os.path.split(os.path.realpath(output_path))
 
         try:
             Boa3.compile_and_save(sc_path, output_path=output_path, debug=debug, root_folder=project_path, env=env)

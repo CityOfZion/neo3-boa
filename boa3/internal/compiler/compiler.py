@@ -115,7 +115,15 @@ class Compiler:
                 or is_bytecode_empty):
             raise NotLoadedException(empty_script=is_bytecode_empty)
 
+        if not os.path.isdir(output_path):
+            output_folder = os.path.abspath(os.path.dirname(output_path))
+        else:
+            output_folder = os.path.abspath(output_path)
+
         generator = FileGenerator(self.result, self._analyser, self._entry_smart_contract)
+
+        generator.create_folder(output_folder)
+
         with open(output_path, 'wb+') as nef_file:
             nef_bytes = generator.generate_nef_file()
             nef_file.write(nef_bytes)
