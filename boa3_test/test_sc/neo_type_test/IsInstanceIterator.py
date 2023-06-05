@@ -12,5 +12,5 @@ def is_iterator(value: Any) -> bool:
 
 @public
 def storage_find_is_context() -> bool:
-    storage_find_iterator = find('unit_test')
+    storage_find_iterator = find(b'unit_test')
     return is_iterator(storage_find_iterator)

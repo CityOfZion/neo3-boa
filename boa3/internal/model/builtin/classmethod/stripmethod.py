@@ -13,8 +13,7 @@ class StripMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
 
         if not isinstance(self_type, IByteStringType):
-            from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
-            self_type = ByteStringType.build()
+            self_type = Type.bytes
 
         identifier = 'strip'
         args: Dict[str, Variable] = {

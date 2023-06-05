@@ -18,8 +18,7 @@ class ByteStringType(IByteStringType):
     def _is_type_of(cls, value: Any) -> bool:
         from boa3.internal.model.type.type import Type
         return (Type.str.is_type_of(value)
-                or Type.bytes.is_type_of(value)
-                or isinstance(value, ByteStringType))
+                or Type.bytes.is_type_of(value))
 
     @classmethod
     def build(cls, value: Any = None) -> IType:

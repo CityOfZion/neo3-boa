@@ -4,7 +4,7 @@ from boa3.builtin.interop import storage
 
 @public
 def Main():
-    storage.put('hello', 'world')
+    storage.put(b'hello', b'world')
 
 
 @metadata

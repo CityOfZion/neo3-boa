@@ -8,7 +8,7 @@ from boa3.builtin.type import UInt160
 
 FEE_RECEIVER_KEY = b'FEE_RECEIVER'
 
-feesMap = get_context().create_map('feesMap')
+feesMap = get_context().create_map(b'feesMap')
 
 
 @public

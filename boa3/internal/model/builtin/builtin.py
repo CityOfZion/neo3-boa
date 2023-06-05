@@ -20,7 +20,6 @@ from boa3.internal.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.math import Math
 from boa3.internal.model.type.neo import *
-from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
 
 class BoaPackage(str, Enum):
@@ -74,7 +73,7 @@ class Builtin:
     Range = RangeMethod()
     Reversed = ReversedMethod()
     StrBool = StrBoolMethod()
-    StrByteString = StrByteStringMethod()
+    StrBytes = StrBytesMethod()
     StrInt = StrIntMethod()
     Super = SuperMethod()
 
@@ -173,7 +172,6 @@ class Builtin:
     Public = PublicDecorator()
 
     # boa builtin type
-    ByteString = ByteStringType.build()
     Event = EventType
     UInt160 = UInt160Type.build()
     UInt256 = UInt256Type.build()
@@ -246,8 +244,7 @@ class Builtin:
 
         return lst
 
-    _builtin_type_package_symbols = [ByteString,
-                                     ECPoint,
+    _builtin_type_package_symbols = [ECPoint,
                                      UInt160,
                                      UInt256,
                                      Event,

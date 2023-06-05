@@ -36,7 +36,7 @@ def manifest_metadata() -> NeoMetadata:
 
 # Script hash of the contract owner
 OWNER = UInt160()
-SUPPLY_KEY = 'totalSupply'
+SUPPLY_KEY = b'totalSupply'
 
 # Symbol of the Token
 TOKEN_SYMBOL = 'zGAS'

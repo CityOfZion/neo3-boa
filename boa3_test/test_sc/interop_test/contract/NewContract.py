@@ -8,7 +8,7 @@ from boa3.builtin.type.helper import to_str
 
 @public
 def main() -> str:
-    return to_str(get('storage'))
+    return to_str(get(b'storage'))
 
 
 @public
@@ -16,4 +16,4 @@ def _deploy(data: Any, update: bool):
     notify(update)
     notify(data)
     if isinstance(data, str):
-        put('storage', data)
+        put(b'storage', data)

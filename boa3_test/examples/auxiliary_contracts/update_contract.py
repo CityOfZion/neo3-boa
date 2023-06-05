@@ -13,8 +13,8 @@ from boa3.builtin.type import UInt160, helper as type_helper
 
 
 # The keys used to access the storage
-OWNER_KEY = 'owner'
-SUPPLY_KEY = 'totalSupply'
+OWNER_KEY = b'owner'
+SUPPLY_KEY = b'totalSupply'
 
 TOKEN_TOTAL_SUPPLY = 10_000_000 * 10 ** 8  # 10m total supply * 10^8 (decimals)
 

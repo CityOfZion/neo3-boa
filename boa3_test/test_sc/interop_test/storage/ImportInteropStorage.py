@@ -5,25 +5,25 @@ from boa3.builtin.type.helper import to_int
 
 
 @public
-def put_value(key: str, value: int):
+def put_value(key: bytes, value: int):
     interop.storage.put(key, value)
 
 
 @public
-def get_value(key: str) -> int:
+def get_value(key: bytes) -> int:
     return to_int(interop.storage.get(key))
 
 
 @public
-def delete_value(key: str):
+def delete_value(key: bytes):
     interop.storage.delete(key)
 
 
 @public
-def find_by_prefix(prefix: str) -> Iterator:
+def find_by_prefix(prefix: bytes) -> Iterator:
     return interop.storage.find(prefix)
 
 
 @public
-def create_storage_map(prefix: str) -> interop.storage.StorageMap:
+def create_storage_map(prefix: bytes) -> interop.storage.StorageMap:
     return interop.storage.get_context().create_map(prefix)

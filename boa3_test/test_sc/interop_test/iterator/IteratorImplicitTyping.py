@@ -6,13 +6,13 @@ from boa3.builtin.nativecontract.stdlib import StdLib
 
 
 @public
-def store(prefix: str, value: Any):
+def store(prefix: bytes, value: Any):
     serialized_value = StdLib.serialize(value)
     storage.put(prefix, serialized_value)
 
 
 @public
-def search_storage(prefix: str) -> dict:
+def search_storage(prefix: bytes) -> dict:
     data_list = {}
     data = storage.find(prefix)
 
