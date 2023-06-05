@@ -28,7 +28,7 @@ class Iterator:
         Advances the iterator to the next element of the collection.
 
         >>> from boa3.builtin.interop import storage
-        ... iterator = storage.find('prefix')
+        ... iterator = storage.find(b'prefix')
         ... iterator.next()
         True
 

@@ -4,6 +4,9 @@ from enum import IntFlag
 class NamedCurve(IntFlag):
     """
     Represents the named curve used in ECDSA.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/foundation/Cryptography/encryption_algorithm#ecdsa-signing>`__
+    to learn more about ECDSA signing.
     """
 
     SECP256K1 = 22

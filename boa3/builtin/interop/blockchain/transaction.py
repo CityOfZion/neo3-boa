@@ -9,6 +9,9 @@ class Transaction:
     """
     Represents a transaction.
 
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/foundation/Transactions>`__ to learn more about
+    Transactions.
+
     :ivar hash: a unique identifier based on the unsigned data portion of the object
     :vartype hash: UInt256
     :ivar version: the data structure version of the transaction

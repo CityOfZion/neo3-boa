@@ -109,7 +109,7 @@ autodoc_default_options = {
     'class-signature': 'separated',
     'undoc-members': True,
     'show-inheritance': True,
-    'private-members': True
+    'private-members': False
 }
 
 # -- Options for HTML output ----------------------------------------------
@@ -128,8 +128,8 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-html_logo = "logo.png"
+html_static_path = []
+html_logo = "images/logo.png"
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #

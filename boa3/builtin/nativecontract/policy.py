@@ -8,7 +8,10 @@ from boa3.builtin.type import UInt160
 
 class Policy:
     """
-    A class used to represent the Policy native contract
+    A class used to represent the Policy native contract.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/native/Policy>`__
+    to learn more about the Policy class.
     """
 
     hash: UInt160

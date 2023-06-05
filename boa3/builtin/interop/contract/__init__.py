@@ -34,7 +34,8 @@ from boa3.builtin.type import ECPoint, UInt160
 
 def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_flags: CallFlags = CallFlags.ALL) -> Any:
     """
-    Calls a smart contract given the method and the arguments.
+    Calls a smart contract given the method and the arguments. Since the return is type Any, you'll probably need to
+    type cast the return.
 
     >>> call_contract(NEO, 'balanceOf', UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'))
     100

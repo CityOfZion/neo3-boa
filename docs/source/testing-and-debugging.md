@@ -32,7 +32,7 @@ It's necessary to generate the nef debugger info file to use Neo Debugger.
 ### Using CLI
 
 ```shell
-$ neo3-boa path/to/your/file.py -d|--debug
+$ neo3-boa compile path/to/your/file.py -d|--debug
 ```
 
 ### Using Python Script
@@ -47,12 +47,7 @@ Boa3.compile_and_save('path/to/your/file.py', debug=True)
 
 ### Downloading
 
-Install [Neo-Express](https://github.com/neo-project/neo-express#neo-express-and-neo-trace) and [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner).
-
-```shell
-$ dotnet tool install Neo.Express
-$ dotnet tool install Neo.Test.Runner
-```
+Install [Neo-Express](https://github.com/neo-project/neo-express#installation) and [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner).
 
 ### Testing
 

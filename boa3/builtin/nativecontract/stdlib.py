@@ -10,7 +10,10 @@ from boa3.builtin.type import UInt160
 
 class StdLib:
     """
-    A class used to represent StdLib native contract
+    A class used to represent StdLib native contract.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/native/StdLib>`__
+    to learn more about the StdLib class.
     """
 
     hash: UInt160

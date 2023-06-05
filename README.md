@@ -92,8 +92,8 @@ $ pip install -e .
 ```
 
 ## Docs
-Check out our [getting started documentation](https://dojo.coz.io/neo3/boa/getting-started.html) if you want to know 
-more about the usage of our compiler. Also check our examples below for reference.
+Check out our [getting started documentation](https://dojo.coz.io/neo3/boa/getting-started.html) to learn how to use the 
+compiler. Also check our examples below for reference.
 
 ## Reference Examples
 

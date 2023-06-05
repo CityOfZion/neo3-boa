@@ -10,6 +10,9 @@ class Contract:
     """
     Represents a contract that can be invoked.
 
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/glossary#smart-contract>`__ to learn about
+    Smart Contracts.
+
     :ivar id: the serial number of the contract
     :vartype id: int
     :ivar update_counter: the number of times the contract was updated

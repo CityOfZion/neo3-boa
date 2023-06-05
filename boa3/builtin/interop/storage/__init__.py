@@ -36,11 +36,11 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
 
-    >>> put('unit', 'test')
-    ... get('unit')
+    >>> put(b'unit', 'test')
+    ... get(b'unit')
     'test'
 
-    >>> get('fake_key')
+    >>> get(b'fake_key')
     ''
 
     :param key: value identifier in the store
@@ -70,7 +70,7 @@ def put(key: bytes, value: Union[int, bytes, str], context: StorageContext = get
     """
     Inserts a given value in the key-value format into the persistent storage.
 
-    >>> put('unit', 'test')
+    >>> put(b'unit', 'test')
     None
 
     :param key: the identifier in the store for the new value
@@ -87,9 +87,9 @@ def delete(key: bytes, context: StorageContext = get_context()):
     """
     Removes a given key from the persistent storage if exists.
 
-    >>> put('unit', 'test')
+    >>> put(b'unit', 'test')
     ... delete()
-    ... get('unit')
+    ... get(b'unit')
     ''
 
     :param key: the identifier in the store for the new value
@@ -106,11 +106,11 @@ def find(prefix: bytes,
     """
     Searches in the storage for keys that start with the given prefix.
 
-    >>> put('a1', 'one')
-    ... put('a2', 'two')
-    ... put('a3', 'three')
-    ... put('b4', 'four')
-    ... findIterator = find('a')
+    >>> put(b'a1', 'one')
+    ... put(b'a2', 'two')
+    ... put(b'a3', 'three')
+    ... put(b'b4', 'four')
+    ... findIterator = find(b'a')
     ... findResults = []
     ... while findIterator.next():
     ...     findResults.append(findIterator.value)

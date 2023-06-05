@@ -17,7 +17,8 @@ Let us also assume it is `0x000102030405060708090A0B0C0D0E0F10111213`.
 ## with call_contract
 Use the `call_contract` method from `boa3.builtin.interop.contract` on your smart contract. You'll need to use the 
 script hash, followed by the name of the function you want to call, followed by the arguments of said function. You'll 
-also need to type cast the return, otherwise it will be considered as `Any`.
+also need to type cast the return so the compiler type checker works as expected, otherwise the return type will be 
+considered as `Any`.
 ```python
 # calling_with_call_contract.py
 from boa3.builtin.compile_time import public
@@ -75,8 +76,8 @@ def calling_other_contract() -> str:
 ### Automate with CPM
 Instead of manually writing the smart contract interface, you can use [CPM](https://github.com/CityOfZion/cpm/tree/master#readme) 
 to generate it automatically. After installing Neo3-Boa, you can install CPM by typing `install_cpm` on CLI (without the 
-`neo3-boa` prefix). Then, you'll need to create a [cpm.yaml config file](https://github.com/CityOfZion/cpm/blob/master/docs/config.md) 
-and put the smart contract information there, and [run cpm](https://github.com/CityOfZion/cpm#example-commands).
+`neo3-boa` prefix). Then, you'll need to create a [cpm.yaml config file](https://github.com/CityOfZion/cpm/blob/master/docs/config.md), 
+put the smart contract information there, and [run cpm](https://github.com/CityOfZion/cpm#example-commands).
 
 For example, if you use CPM to create a [dice smart contract](https://dora.coz.io/contract/neo3/mainnet/0x4380f2c1de98bb267d3ea821897ec571a04fe3e0)
 interface, the following file will be generated:
@@ -121,5 +122,5 @@ from cpm_out.python.dice.contract import Dice
 @public
 def calling_other_contract() -> str:
     d6_roll = Dice.rand_between(1, 6)
-    return "Die result is " + str(d6_roll)
+    return "Dice result is " + str(d6_roll)
 ```

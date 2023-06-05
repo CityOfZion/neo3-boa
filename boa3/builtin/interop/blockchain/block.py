@@ -9,6 +9,9 @@ class Block:
     """
     Represents a block.
 
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/foundation/Blocks>`__ to learn more
+    about Blocks.
+
     :ivar hash: a unique identifier based on the unsigned data portion of the object
     :vartype hash: UInt256
     :ivar version: the data structure version of the block
