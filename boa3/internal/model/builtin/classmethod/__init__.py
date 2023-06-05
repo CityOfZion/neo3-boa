@@ -22,10 +22,6 @@ __all__ = ['AppendMethod',
            'StartsWithMethod',
            'StripMethod',
            'UpperMethod',
-           'ToBoolMethod',
-           'ToBytesMethod',
-           'ToIntMethod',
-           'ToStrMethod',
            'UpperMethod',
            ]
 
@@ -52,8 +48,4 @@ from boa3.internal.model.builtin.classmethod.removemethod import RemoveMethod
 from boa3.internal.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.internal.model.builtin.classmethod.startswithmethod import StartsWithMethod
 from boa3.internal.model.builtin.classmethod.stripmethod import StripMethod
-from boa3.internal.model.builtin.classmethod.toboolmethod import ToBool as ToBoolMethod
-from boa3.internal.model.builtin.classmethod.tobytesmethod import ToBytes as ToBytesMethod
-from boa3.internal.model.builtin.classmethod.tointmethod import ToInt as ToIntMethod
-from boa3.internal.model.builtin.classmethod.tostrmethod import ToStr as ToStrMethod
 from boa3.internal.model.builtin.classmethod.uppermethod import UpperMethod
