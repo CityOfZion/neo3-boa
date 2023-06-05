@@ -107,7 +107,6 @@ class PrintMethod(IBuiltinMethod):
         from boa3.internal.model.builtin.method.printbytestringmethod import PrintByteStringMethod
         from boa3.internal.model.type.classes.userclass import UserClass
         from boa3.internal.model.type.type import Type
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
         if Type.bool.is_type_of(value):
             from boa3.internal.model.builtin.method.printboolmethod import PrintBoolMethod
@@ -117,7 +116,7 @@ class PrintMethod(IBuiltinMethod):
             from boa3.internal.model.builtin.method.printintmethod import PrintIntMethod
             return PrintIntMethod()
 
-        elif ByteStringType.build().is_type_of(value):
+        elif Type.str.is_type_of(value) or Type.bytes.is_type_of(value):
             return PrintByteStringMethod(value)
 
         elif isinstance(value, UserClass):

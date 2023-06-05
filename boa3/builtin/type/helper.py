@@ -7,10 +7,8 @@ __all__ = [
 
 from typing import Union
 
-from boa3.builtin.type import ByteString
 
-
-def to_bytes(value: Union[ByteString, int]) -> bytes:
+def to_bytes(value: Union[str, int]) -> bytes:
     """
     Converts a str or integer value to an array of bytes
     """

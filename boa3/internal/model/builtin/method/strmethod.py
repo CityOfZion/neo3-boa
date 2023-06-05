@@ -50,4 +50,4 @@ class StrMethod(IBuiltinMethod):
             if Type.int.is_type_of(value[0]):
                 return Builtin.StrInt
 
-        return Builtin.StrByteString
+        return Builtin.StrBytes

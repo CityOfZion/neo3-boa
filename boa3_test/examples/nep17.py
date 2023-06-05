@@ -34,8 +34,8 @@ def manifest_metadata() -> NeoMetadata:
 
 
 # The keys used to access the storage
-OWNER_KEY = 'owner'
-SUPPLY_KEY = 'totalSupply'
+OWNER_KEY = b'owner'
+SUPPLY_KEY = b'totalSupply'
 
 # Symbol of the Token
 TOKEN_SYMBOL = 'NEP17'

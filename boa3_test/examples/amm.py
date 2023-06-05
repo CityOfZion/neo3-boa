@@ -243,7 +243,7 @@ def _deploy(data: Any, update: bool):
     """
     if not update:
         container: Transaction = runtime.script_container
-        storage.put('owner', container.sender)
+        storage.put(b'owner', container.sender)
         storage.put(DEPLOYED, True)
 
 
@@ -259,7 +259,7 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
 
 
 def get_owner() -> UInt160:
-    return UInt160(storage.get('owner'))
+    return UInt160(storage.get(b'owner'))
 
 
 @public

@@ -5,7 +5,6 @@ __all__ = [
     'UInt160',
     'UInt256',
     'ECPoint',
-    'ByteString',
     'Address',
     'BlockHash',
     'PublicKey',
@@ -61,12 +60,6 @@ class ECPoint(bytes):
         :rtype: bytes
         """
         pass
-
-
-ByteString = Union[str, bytes]
-"""
-An type annotation for values that can be str or bytes. Same as Union[str, bytes]
-"""
 
 
 class Address(str):

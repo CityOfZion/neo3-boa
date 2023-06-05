@@ -18,10 +18,10 @@ def notify_user():
 
 
 @public
-def put_value(key: str, value: int):
+def put_value(key: bytes, value: int):
     put(key, value)
 
 
 @public
-def get_value(key: str) -> int:
+def get_value(key: bytes) -> int:
     return to_int(get(key))

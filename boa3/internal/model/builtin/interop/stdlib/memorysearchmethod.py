@@ -10,11 +10,10 @@ class MemorySearchMethod(StdLibMethod):
 
     def __init__(self):
         from boa3.internal.model.type.type import Type
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'memory_search'
         native_identifier = 'memorySearch'
-        byte_string_type = ByteStringType.build()
+        byte_string_type = Type.union.build([Type.bytes, Type.str])
 
         args: Dict[str, Variable] = {
             'mem': Variable(byte_string_type),

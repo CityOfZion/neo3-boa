@@ -35,7 +35,7 @@ class StrType(IByteStringType):
         for instance_method in instance_methods:
             self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
 
-        self._instance_methods[constants.INIT_METHOD_ID] = Builtin.StrByteString
+        self._instance_methods[constants.INIT_METHOD_ID] = Builtin.StrBytes
 
     @classmethod
     def build(cls, value: Any) -> IType:

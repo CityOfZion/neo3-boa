@@ -5,7 +5,7 @@ from boa3.builtin.interop import storage
 
 
 @public
-def test_iterator(prefix: str) -> Union[tuple, None]:
+def test_iterator(prefix: bytes) -> Union[tuple, None]:
     it = storage.find(prefix)
     if it.next():
         return it.value
@@ -13,5 +13,5 @@ def test_iterator(prefix: str) -> Union[tuple, None]:
 
 
 @public
-def store_data(key: str, value: int):
+def store_data(key: bytes, value: int):
     storage.put(key, value)

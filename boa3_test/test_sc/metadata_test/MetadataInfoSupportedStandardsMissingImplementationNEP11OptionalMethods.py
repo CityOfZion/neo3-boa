@@ -3,7 +3,7 @@ from typing import Any, Dict
 from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep11TransferEvent
 from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.type import ByteString, UInt160
+from boa3.builtin.type import UInt160
 
 on_transfer = Nep11TransferEvent
 
@@ -47,10 +47,10 @@ def tokens_of(owner: UInt160) -> Iterator:
 
 
 @public(name='ownerOf', safe=True)
-def owner_of(token_id: ByteString) -> UInt160:
+def owner_of(token_id: bytes) -> UInt160:
     pass
 
 
 @public
-def transfer(to_address: UInt160, token_id: ByteString, data: Any) -> bool:
+def transfer(to_address: UInt160, token_id: bytes, data: Any) -> bool:
     pass
