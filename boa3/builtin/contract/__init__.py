@@ -21,7 +21,10 @@ Nep5TransferEvent: Event = CreateNewEvent(
     'transfer'
 )
 """
-The NEP-5 transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
+This NEP was replaced by NEP-17. But, you can still check out the `proposal <https://github.com/neo-project/proposals/blob/master/obsolete/nep-5.mediawiki>`__ 
+of this standard.
+
+The NEP-5 transfer event that should be triggered whenever a token is transferred, minted or burned. It needs the 
 addresses of the sender, receiver and the amount transferred.
 
 >>> Nep5TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
@@ -49,8 +52,11 @@ Nep11TransferEvent: Event = CreateNewEvent(
     'Transfer'
 )
 """
-The NEP-11 Transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
-addresses of the sender, receiver, amount transferred and the id of the token.
+The NEP-11 Transfer event that should be triggered whenever a non-fungible token is transferred, minted or burned. It 
+needs the addresses of the sender, receiver, amount transferred and the id of the token.
+
+Check out the `proposal <https://github.com/neo-project/proposals/blob/master/nep-11.mediawiki>`__ or 
+`Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/nep11>`__ about this NEP.
 
 >>> Nep11TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
 ...                    b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0', 1, '01')
@@ -78,8 +84,11 @@ Nep17TransferEvent: Event = CreateNewEvent(
     'Transfer'
 )
 """
-The NEP-17 Transfer event that will be triggered whenever a token is transferred, minted or burned. It needs the 
-addresses of the sender, receiver and the amount transferred.
+The NEP-17 Transfer event that should be triggered whenever a fungible token is transferred, minted or burned. It needs
+the addresses of the sender, receiver and the amount transferred.
+
+Check out the `proposal <https://github.com/neo-project/proposals/blob/master/nep-17.mediawiki>`__ or 
+`Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/nep17>`__ about this NEP.
 
 >>> Nep17TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
 ...                    b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0', 100)
@@ -99,7 +108,8 @@ addresses of the sender, receiver and the amount transferred.
 
 def abort():
     """
-    Aborts the execution of a smart contract.
+    Aborts the execution of a smart contract. Using this will cancel the changes made on the blockchain by the
+    transaction.
 
     >>> abort()     # abort doesn't return anything by itself, but the execution will stop and the VMState will be FAULT
     VMState.FAULT

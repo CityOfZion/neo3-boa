@@ -12,4 +12,5 @@ Welcome to neo3-boa's documentation!
    getting-started
    testing-and-debugging
    calling-smart-contracts
-   package-reference
+   invoking-with-neonova
+   auto-package/package-reference

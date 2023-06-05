@@ -14,7 +14,10 @@ from boa3.builtin.type import Event
 
 def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '') -> Event:
     """
-    Creates a new event.
+    Creates a new Event.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/basics#events>`__ to learn more
+    about Events.
 
     >>> new_event: Event = CreateNewEvent(
     ...     [
@@ -36,7 +39,8 @@ def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '')
 
 def public(name: str = None, safe: bool = True, *args, **kwargs):
     """
-    This decorator identifies which methods should be included in the abi file.
+    This decorator identifies which methods should be included in the abi file. Adding this decorator to a function
+    means it could be called externally.
 
     >>> @public     # this method will be added to the abi
     ... def callable_function() -> bool:
@@ -100,6 +104,9 @@ def contract(script_hash: Union[str, bytes]):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
 
+    Check out `Our Documentation <https://dojo.coz.io/neo3/boa/calling-smart-contracts.html#with-interface>`__ to learn
+    more about this decorator.
+
     >>> @contract('0xd2a4cff31913016155e38e474a2c06d08be276cf')
     ... class GASInterface:
     ...     @staticmethod
@@ -148,6 +155,9 @@ def display_name(name: str):
 class NeoMetadata:
     """
     This class stores the smart contract manifest information.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/manifest>`__ to learn more about
+    the Manifest.
 
     >>> @metadata
     ... def neo_metadata() -> NeoMetadata:

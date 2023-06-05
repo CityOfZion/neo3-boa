@@ -11,7 +11,10 @@ from boa3.builtin.type import ECPoint, UInt160
 
 class CryptoLib:
     """
-    A class used to represent the CryptoLib native contract
+    A class used to represent the CryptoLib native contract.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/native/CryptoLib>`__
+    to learn more about the CryptoLib class.
     """
 
     hash: UInt160
@@ -21,7 +24,7 @@ class CryptoLib:
         """
         Computes the hash value for the specified byte array using the murmur32 algorithm.
 
-        >>> CryptoLib.murmur32('unit test', 0)
+        >>> CryptoLib.murmur32(b'unit test', 0)
         b"\\x90D'G"
 
         :param data: the input to compute the hash code for
@@ -74,7 +77,7 @@ class CryptoLib:
         """
         Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
 
-        >>> CryptoLib.verify_with_ecdsa('unit test', ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a'),
+        >>> CryptoLib.verify_with_ecdsa(b'unit test', ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a'),
         ...                             b'wrong_signature', NamedCurve.SECP256R1)
         False
 

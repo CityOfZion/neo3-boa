@@ -18,14 +18,15 @@ from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterTyp
 
 class ContractManifest:
     """
-    Represents the manifest of a smart contract [#]_.
+    Represents the manifest of a smart contract.
 
     When a smart contract is deployed, it must explicitly declare the features and permissions it will use.
 
     When it is running, it will be limited by its declared list of features and permissions, and cannot make any
     behavior beyond the scope of the list.
 
-    .. [#] For more details, see NEP-15.
+    For more details, check out `NEP-15 <https://github.com/neo-project/proposals/blob/master/nep-15.mediawiki>`__ or
+    `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/manifest#manifest>`__.
 
     :ivar name: The name of the contract.
     :vartype name: str
@@ -67,17 +68,18 @@ class ContractPermission:
     :ivar contract:
         Indicates which contract to be invoked.
 
-        It can be a hash of a contract, a public key of a group, or a wildcard *.
+        It can be a hash of a contract, a public key of a group, or a wildcard \\*.
 
         If it specifies a hash of a contract, then the contract will be invoked; If it specifies a public key of a
-        group, then any contract in this group may be invoked; If it specifies a wildcard *, then any contract may be
+        group, then any contract in this group may be invoked; If it specifies a wildcard \\*, then any contract may be
         invoked.
 
     :vartype contract: ContractPermissionDescriptor or None
     :ivar methods:
         Indicates which methods to be called.
 
-        It can also be assigned with a wildcard *. If it is a wildcard *, then it means that any method can be called.
+        It can also be assigned with a wildcard \\*. If it is a wildcard \\*, then it means that any method can be
+        called.
 
     :vartype methods: List[str] or None
     """
@@ -125,9 +127,10 @@ class ContractGroup:
 
 class ContractAbi:
     """
-    Represents the ABI of a smart contract [#]_.
+    Represents the ABI of a smart contract.
 
-    .. [#] For more details, see NEP-14.
+    For more details, check out `NEP-14 <https://github.com/neo-project/proposals/blob/master/nep-14.mediawiki>`__ or
+    `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/manifest#manifest>`__.
 
     :ivar methods: Gets the methods in the ABI.
     :vartype methods: List[ContractMethodDescriptor]

@@ -26,7 +26,8 @@ from boa3.builtin.type import UInt160, UInt256
 
 def get_contract(hash: UInt160) -> Contract:
     """
-    Gets a contract with a given hash.
+    Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will return
+    None.
 
     >>> get_contract(UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'))    # GAS script hash
     {
@@ -45,6 +46,9 @@ def get_contract(hash: UInt160) -> Contract:
         },
     }
 
+    >>> get_contract(UInt160(bytes(20)))    # there is no smart contract associated with this script hash
+    None
+
     :param hash: a smart contract hash
     :type hash: UInt160
     :return: a contract
@@ -57,7 +61,7 @@ def get_contract(hash: UInt160) -> Contract:
 
 def get_block(index_or_hash: Union[int, UInt256]) -> Block:
     """
-    Gets the block with the given index or hash.
+    Gets the block with the given index or hash. Will return None if the index or hash is not associated with a Block.
 
     >>> get_block(0)        # first block
     {
@@ -103,7 +107,7 @@ def get_block(index_or_hash: Union[int, UInt256]) -> Block:
 
 def get_transaction(hash_: UInt256) -> Transaction:
     """
-    Gets a transaction with the given hash.
+    Gets a transaction with the given hash. Will return None if the hash is not associated with a Transaction.
 
     >>> get_transaction(UInt256(b'\\xff\\x7f\\x18\\x99\\x8c\\x1d\\x10X{bA\\xc2\\xe3\\xdf\\xc8\\xb0\\x9f>\\xd0\\xd2G\\xe3\\xba\\xd8\\x96\\xb9\\x0e\\xc1iS\\xcdr'))
     {
@@ -129,7 +133,7 @@ def get_transaction(hash_: UInt256) -> Transaction:
 
 def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_index: int) -> Transaction:
     """
-    Gets a transaction from a block.
+    Gets a transaction from a block. Will return None if the block hash or height is not associated with a Transaction.
 
     >>> get_transaction_from_block(1, 0)
     {
@@ -166,7 +170,7 @@ def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_ind
 
 def get_transaction_height(hash_: UInt256) -> int:
     """
-    Gets the height of a transaction.
+    Gets the height of a transaction. Will return -1 if the hash is not associated with a Transaction.
 
     >>> get_transaction_height(UInt256(b'\\x28\\x89\\x4f\\xb6\\x10\\x62\\x9d\\xea\\x4c\\xcd\\x00\\x2e\\x9e\\x11\\xa6\\xd0\\x3d\\x28\\x90\\xc0\\xe5\\xd4\\xfc\\x8f\\xc6\\x4f\\xcc\\x32\\x53\\xb5\\x48\\x01'))
     2108703
@@ -186,7 +190,7 @@ def get_transaction_height(hash_: UInt256) -> int:
 
 def get_transaction_signers(hash_: UInt256) -> List[Signer]:
     """
-    Gets the VM state of a transaction.
+    Gets a list with the signers of a transaction.
 
     >>> get_transaction_signers(UInt256(b'\\x29\\x41\\x06\\xdb\\x4c\\xf3\\x84\\xa7\\x20\\x4d\\xba\\x0a\\x04\\x03\\x72\\xb3\\x27\\x76\\xf2\\x6e\\xd3\\x87\\x49\\x88\\xd0\\x3e\\xff\\x5d\\xa9\\x93\\x8c\\xa3'))
     [

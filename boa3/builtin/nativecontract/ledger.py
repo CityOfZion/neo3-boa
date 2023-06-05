@@ -11,7 +11,10 @@ from boa3.builtin.type import UInt256, UInt160
 
 class Ledger:
     """
-    A class used to represent the Ledger native contract
+    A class used to represent the Ledger native contract.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/native/Ledger>`__
+    to learn more about the Ledger class.
     """
 
     hash: UInt160

@@ -8,6 +8,9 @@ from boa3.builtin.interop.storage.storagemap import StorageMap
 class StorageContext:
     """
     The storage context used to read and write data in smart contracts.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/services/StorageContext>`__
+    to learn more about the StorageContext class.
     """
 
     def __init__(self):

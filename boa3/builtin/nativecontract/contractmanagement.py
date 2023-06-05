@@ -12,7 +12,10 @@ from boa3.builtin.type import UInt160
 
 class ContractManagement:
     """
-    A class used to represent the ContractManagement native contract
+    A class used to represent the ContractManagement native contract.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/native/ContractManagement>`__
+    to learn more about the ContractManagement class.
     """
 
     hash: UInt160
@@ -32,7 +35,8 @@ class ContractManagement:
     @classmethod
     def get_contract(cls, script_hash: UInt160) -> Contract:
         """
-        Gets a contract with a given hash.
+        Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will
+        return None.
 
         >>> ContractManagement.get_contract(UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'))    # GAS script hash
         {
@@ -50,6 +54,9 @@ class ContractManagement:
                 'extras': 'null'
             },
         }
+
+        >>> ContractManagement.get_contract(UInt160(bytes(20)))    # there is no smart contract associated with this script hash
+        None
 
         :param script_hash: a smart contract hash
         :type script_hash: UInt160
@@ -153,7 +160,7 @@ class ContractManagement:
         """
         Destroy the executing smart contract.
 
-        >>> destroy_contract()
+        >>> ContractManagement.destroy()
         None
 
         """
