@@ -16,9 +16,6 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 class ToBytesMethod(IBuiltinMethod, ABC):
     def __init__(self, self_type: IType):
         identifier = 'to_bytes'
-        if isinstance(self_type, IdentifiedSymbol):
-            identifier = '-{0}_{1}'.format(self_type.identifier, identifier)
-
         args: Dict[str, Variable] = {'self': Variable(self_type)}
         from boa3.internal.model.type.type import Type
         super().__init__(identifier, args, return_type=Type.bytes)
@@ -32,9 +29,23 @@ class ToBytesMethod(IBuiltinMethod, ABC):
             return False
         return isinstance(params[0], IExpression) and isinstance(params[0].type, BytesType)
 
+    @property
+    def identifier(self) -> str:
+        if isinstance(self._arg_self.type, IdentifiedSymbol):
+            return '-{0}_{1}'.format(self._arg_self.type.identifier, self._identifier)
+        return self._identifier
+
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.type.type import Type
         code_generator.convert_cast(Type.bytes, is_internal=True)
+
+    def build(self, value: Any) -> IBuiltinMethod:
+        if isinstance(value, IntType):
+            return IntToBytesMethod(value)
+        elif isinstance(value, (StrType, ByteStringType)):
+            return StrToBytesMethod(value)
+        # if it is not a valid type, show mismatched type with int
+        return IntToBytesMethod()
 
     def push_self_first(self) -> bool:
         return self.has_self_argument
@@ -51,14 +62,6 @@ class ToBytesMethod(IBuiltinMethod, ABC):
 class _ConvertToBytesMethod(ToBytesMethod):
     def __init__(self):
         super().__init__(None)
-
-    def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, IntType):
-            return IntToBytesMethod(value)
-        elif isinstance(value, (StrType, ByteStringType)):
-            return StrToBytesMethod(value)
-        # if it is not a valid type, show mismatched type with int
-        return IntToBytesMethod()
 
 
 ToBytes = _ConvertToBytesMethod()

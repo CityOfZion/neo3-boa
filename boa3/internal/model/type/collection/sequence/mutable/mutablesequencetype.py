@@ -22,6 +22,7 @@ class MutableSequenceType(SequenceType, ABC):
                             Builtin.SequenceClear,
                             Builtin.SequenceInsert,
                             Builtin.SequenceExtend,
+                            Builtin.SequencePop,
                             Builtin.SequenceReverse,
                             Builtin.SequenceRemove,
                             ]

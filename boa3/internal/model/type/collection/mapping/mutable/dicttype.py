@@ -28,7 +28,8 @@ class DictType(MutableMappingType):
 
         from boa3.internal.model.builtin.builtin import Builtin
 
-        instance_methods = [Builtin.DictKeys,
+        instance_methods = [Builtin.Copy,
+                            Builtin.DictKeys,
                             Builtin.DictValues,
                             Builtin.DictPop,
                             Builtin.DictPopDefault,

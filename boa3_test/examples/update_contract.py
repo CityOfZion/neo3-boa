@@ -5,7 +5,7 @@ from boa3.builtin.interop import storage, runtime
 from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 # -------------------------------------------
 # TOKEN SETTINGS
@@ -78,7 +78,7 @@ def method(account: UInt160):
     This method is not working as intended and ends up giving tokens to a user whenever he wants.
     """
     # some omitted code
-    storage.put(account, storage.get(account).to_int() + 2 * 10 ** 8)
+    storage.put(account, type_helper.to_int(storage.get(account)) + 2 * 10 ** 8)
     on_transfer(None, account, 2 * 10 ** 8)
     # more omitted code
 
@@ -103,7 +103,7 @@ def balance_of(account: UInt160) -> int:
     Get the current balance of an address.
     """
     assert len(account) == 20
-    return storage.get(account).to_int()
+    return type_helper.to_int(storage.get(account))
 
 
 def get_owner() -> UInt160:

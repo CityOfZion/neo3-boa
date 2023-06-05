@@ -7,7 +7,7 @@ from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.math import sqrt
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 
 # -------------------------------------------
@@ -143,7 +143,7 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return storage.get(SUPPLY_KEY).to_int()
+    return type_helper.to_int(storage.get(SUPPLY_KEY))
 
 
 @public(name='balanceOf', safe=True)
@@ -157,7 +157,7 @@ def balance_of(account: UInt160) -> int:
     :type account: UInt160
     """
     assert len(account) == 20
-    return storage.get(account).to_int()
+    return type_helper.to_int(storage.get(account))
 
 
 @public
@@ -186,7 +186,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = storage.get(from_address).to_int()
+    from_balance = type_helper.to_int(storage.get(from_address))
     if from_balance < amount:
         return False
 
@@ -204,7 +204,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         else:
             storage.put(from_address, from_balance - amount)
 
-        to_balance = storage.get(to_address).to_int()
+        to_balance = type_helper.to_int(storage.get(to_address))
         storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
@@ -277,7 +277,7 @@ def set_address(address_token_a: UInt160, address_token_b: UInt160) -> bool:
     if not runtime.check_witness(get_owner()):
         return False
 
-    if not storage.get(DEPLOYED).to_bool():
+    if not type_helper.to_bool(storage.get(DEPLOYED)):
         return False
 
     if storage.get(TOKEN_A) != b'' or storage.get(TOKEN_B) != b'':
@@ -306,7 +306,8 @@ def get_reserves() -> List[int]:
 
     :return: a list of 2 ints, the value in the first index is reserve of token_a and the second value is the reserve of token_b
     """
-    return [storage.get(SUPPLY_KEY + TOKEN_A).to_int(), storage.get(SUPPLY_KEY + TOKEN_B).to_int()]
+    return [type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A)),
+            type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))]
 
 
 @public
@@ -334,8 +335,8 @@ def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amou
     """
     assert runtime.check_witness(user_address), 'failed on check witness'
 
-    reserve_token_a = storage.get(SUPPLY_KEY + TOKEN_A).to_int()
-    reserve_token_b = storage.get(SUPPLY_KEY + TOKEN_B).to_int()
+    reserve_token_a = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A))
+    reserve_token_b = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))
     # If there is no liquidity pool, then the values that will be used to mint and create a pool are the desired ones
     if reserve_token_a == 0 and reserve_token_b == 0:
         amount_token_a = amount_token_a_desired
@@ -391,8 +392,8 @@ def mint(user_address: UInt160) -> int:
     # reserve_token_a and reserve_token_b are the amount of token_a and token_b tokens that the smart contract has saved in the
     # storage, it's not the actual amount that is in the balance, because the amount is not updated after transferring
     # the token_a and token_b tokens, it will be update only after minting
-    reserve_token_a = storage.get(SUPPLY_KEY + TOKEN_A).to_int()
-    reserve_token_b = storage.get(SUPPLY_KEY + TOKEN_B).to_int()
+    reserve_token_a = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A))
+    reserve_token_b = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))
 
     # balance_token_a and balance_token_b are the actual amount that are in the balance of this smart contract
     balance_token_a = call_contract(get_token_a(), 'balanceOf', [runtime.executing_script_hash])
@@ -405,7 +406,7 @@ def mint(user_address: UInt160) -> int:
         amount_token_a = balance_token_a - reserve_token_a
         amount_token_b = balance_token_b - reserve_token_b
 
-        total_supply = storage.get(SUPPLY_KEY).to_int()
+        total_supply = type_helper.to_int(storage.get(SUPPLY_KEY))
         # if there are no AMM tokens, then the quantity of AMM tokens that will be minted are calculated multiplying
         # amount_token_a and amount_token_b
         if total_supply == 0:
@@ -419,7 +420,7 @@ def mint(user_address: UInt160) -> int:
         # updates the total supply of AMM tokens
         storage.put(SUPPLY_KEY, total_supply + liquidity)
         # change the amount of liquidity the user has
-        storage.put(user_address, storage.get(user_address).to_int() + liquidity)
+        storage.put(user_address, type_helper.to_int(storage.get(user_address)) + liquidity)
         on_transfer(None, user_address, liquidity)
 
         update(balance_token_a, balance_token_b)
@@ -510,7 +511,7 @@ def burn(liquidity: int, user_address: UInt160) -> List[int]:
     amount_token_b: int = 0
 
     if isinstance(balance_token_a, int) and isinstance(balance_token_b, int):
-        total_supply = storage.get(SUPPLY_KEY).to_int()
+        total_supply = type_helper.to_int(storage.get(SUPPLY_KEY))
 
         # amount_token_a and amount_token_b are the amount that will be transferred to the user after burning the liquidity
         amount_token_a = liquidity * balance_token_a // total_supply
@@ -575,8 +576,8 @@ def swap(amount_token_a_out: int, amount_token_b_out: int, user_address: UInt160
     any token from the user, or if the constant k after the swap ends up being lower than the one at the beginning
     """
     assert amount_token_a_out > 0 or amount_token_b_out > 0
-    reserve_token_a = storage.get(SUPPLY_KEY + TOKEN_A).to_int()
-    reserve_token_b = storage.get(SUPPLY_KEY + TOKEN_B).to_int()
+    reserve_token_a = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A))
+    reserve_token_b = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))
     assert amount_token_a_out < reserve_token_a and amount_token_b_out < reserve_token_b
 
     token_a = get_token_a()
@@ -633,13 +634,13 @@ def swap_tokens(amount_in: int, amount_out_min: int, token_in: UInt160, user_add
 
     # Verifies if the user is trying to swap token_a or token_b and set the variables accordingly
     if token_in == token_a:
-        reserve_token_in = storage.get(SUPPLY_KEY + TOKEN_A).to_int()
-        reserve_token_out = storage.get(SUPPLY_KEY + TOKEN_B).to_int()
+        reserve_token_in = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A))
+        reserve_token_out = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))
         amount_token_a_in = amount_in
         amount_token_b_in = 0
     else:
-        reserve_token_in = storage.get(SUPPLY_KEY + TOKEN_B).to_int()
-        reserve_token_out = storage.get(SUPPLY_KEY + TOKEN_A).to_int()
+        reserve_token_in = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))
+        reserve_token_out = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A))
         amount_token_a_in = 0
         amount_token_b_in = amount_in
 
