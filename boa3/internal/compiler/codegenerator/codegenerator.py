@@ -72,7 +72,7 @@ class CodeGenerator:
         if hasattr(deploy_method, 'origin') and deploy_method.origin in analyser.ast_tree.body:
             analyser.ast_tree.body.remove(deploy_method.origin)
 
-        visitor = VisitorCodeGenerator(generator, analyser.filename)
+        visitor = VisitorCodeGenerator(generator, analyser.filename, analyser.root)
         visitor._root_module = analyser.ast_tree
         visitor.visit_and_update_analyser(analyser.ast_tree, analyser)
 

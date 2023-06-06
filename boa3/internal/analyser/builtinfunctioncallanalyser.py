@@ -13,7 +13,7 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
     def __init__(self, origin: IAstAnalyser, call: ast.Call, method_id: str, builtin_method: IBuiltinMethod, log: bool):
         self._method: IBuiltinMethod = builtin_method
         self.method_id: str = method_id
-        super().__init__(call, log=log)
+        super().__init__(call, root_folder=origin.root_folder, log=log)
 
         self._origin: IAstAnalyser = origin
 
