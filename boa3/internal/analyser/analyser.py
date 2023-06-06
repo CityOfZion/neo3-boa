@@ -188,7 +188,7 @@ class Analyser:
         """
         Pre executes the instructions of the ast for optimization
         """
-        self.ast_tree = ConstructAnalyser(self.ast_tree, self.symbol_table, log=self._log).tree
+        self.ast_tree = ConstructAnalyser(self, self.ast_tree, self.symbol_table, log=self._log).tree
 
     def __pos_execute(self):
         """

@@ -39,8 +39,8 @@ class VisitorCodeGenerator(IAstAnalyser):
     :ivar generator:
     """
 
-    def __init__(self, generator: CodeGenerator, filename: str = None):
-        super().__init__(ast.parse(""), filename=filename, log=True)
+    def __init__(self, generator: CodeGenerator, filename: str = None, root: str = None):
+        super().__init__(ast.parse(""), filename=filename, root_folder=root, log=True)
 
         self.generator = generator
         self.current_method: Optional[Method] = None

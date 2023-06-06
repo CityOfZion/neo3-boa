@@ -30,7 +30,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     """
 
     def __init__(self, analyser, log: bool = False):
-        super().__init__(analyser.ast_tree, filename=analyser.filename, log=log)
+        super().__init__(analyser.ast_tree, filename=analyser.filename, root_folder=analyser.root, log=log)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = analyser.symbol_table
 
