@@ -10,8 +10,8 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 class LowerMethod(IBuiltinMethod):
     def __init__(self, self_type: IByteStringType = None):
         if not isinstance(self_type, IByteStringType):
-            from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
-            self_type = ByteStringType.build()
+            from boa3.internal.model.type.type import Type
+            self_type = Type.bytes
 
         identifier = 'lower'
         args: Dict[str, Variable] = {'self': Variable(self_type)}

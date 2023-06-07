@@ -34,12 +34,11 @@ class StorageMapType(ClassArrayType):
     def _all_variables(self) -> Dict[str, Variable]:
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import \
             _StorageContext as StorageContextType
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
+        from boa3.internal.model.type.type import Type
 
-        byte_string_type = ByteStringType.build()
         private_variables = {
             '_context': Variable(StorageContextType),
-            '_prefix': Variable(byte_string_type)
+            '_prefix': Variable(Type.bytes)
         }
         variables = super()._all_variables
         variables.update(private_variables)
@@ -101,9 +100,7 @@ class StorageMapMethod(IBuiltinMethod):
         identifier = '-StorageMap__init__'
         args: Dict[str, Variable] = {
             'context': Variable(StorageContextType),
-            'prefix': Variable(Type.union.build([Type.bytes,
-                                                 Type.str
-                                                 ]))
+            'prefix': Variable(Type.bytes)
         }
         super().__init__(identifier, args, return_type=return_type)
 

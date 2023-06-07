@@ -1,3 +1,4 @@
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
@@ -19,11 +20,11 @@ class TestIteratorInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        prefix = 'test_iterator_next'
+        prefix = b'test_iterator_next'
         invokes.append(runner.call_contract(path, 'has_next', prefix))
         expected_results.append(False)
 
-        key = prefix + 'example1'
+        key = prefix + b'example1'
         runner.call_contract(path, 'store_data', key, 1)
         invokes.append(runner.call_contract(path, 'has_next', prefix))
         expected_results.append(True)
@@ -41,14 +42,15 @@ class TestIteratorInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        prefix = 'test_iterator_value'
+        prefix = b'test_iterator_value'
         invokes.append(runner.call_contract(path, 'test_iterator', prefix))
         expected_results.append(None)
 
-        key = prefix + 'example1'
+        key = prefix + b'example1'
+        key_str = String.from_bytes(key)
         runner.call_contract(path, 'store_data', key, 1)
         invokes.append(runner.call_contract(path, 'test_iterator', prefix))
-        expected_results.append([key, '\x01'])
+        expected_results.append([key_str, '\x01'])
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -99,18 +101,19 @@ class TestIteratorInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        prefix = 'test_iterator_'
+        prefix = b'test_iterator_'
+        prefix_str = String.from_bytes(prefix)
         invokes.append(runner.call_contract(path, 'search_storage', prefix))
         expected_results.append({})
 
-        invokes.append(runner.call_contract(path, 'store', f'{prefix}1', 1))
+        invokes.append(runner.call_contract(path, 'store', prefix + b'1', 1))
         expected_results.append(None)
 
-        invokes.append(runner.call_contract(path, 'store', f'{prefix}2', 2))
+        invokes.append(runner.call_contract(path, 'store', prefix + b'2', 2))
         expected_results.append(None)
 
         invokes.append(runner.call_contract(path, 'search_storage', prefix))
-        expected_results.append({f'{prefix}1': 1, f'{prefix}2': 2})
+        expected_results.append({f'{prefix_str}1': 1, f'{prefix_str}2': 2})
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -125,18 +128,19 @@ class TestIteratorInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        prefix = 'test_iterator_'
+        prefix = b'test_iterator_'
+        prefix_str = String.from_bytes(prefix)
         invokes.append(runner.call_contract(path, 'search_storage', prefix))
         expected_results.append({})
 
-        invokes.append(runner.call_contract(path, 'store', f'{prefix}1', 1))
+        invokes.append(runner.call_contract(path, 'store', prefix + b'1', 1))
         expected_results.append(None)
 
-        invokes.append(runner.call_contract(path, 'store', f'{prefix}2', 2))
+        invokes.append(runner.call_contract(path, 'store', prefix + b'2', 2))
         expected_results.append(None)
 
         invokes.append(runner.call_contract(path, 'search_storage', prefix))
-        expected_results.append({f'{prefix}1': 1, f'{prefix}2': 2})
+        expected_results.append({f'{prefix_str}1': 1, f'{prefix_str}2': 2})
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)

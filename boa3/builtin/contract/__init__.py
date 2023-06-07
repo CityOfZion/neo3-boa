@@ -10,7 +10,7 @@ __all__ = [
 from typing import Union, Any
 
 from boa3.builtin.compile_time import CreateNewEvent
-from boa3.builtin.type import ByteString, ECPoint, UInt160, Event
+from boa3.builtin.type import ECPoint, UInt160, Event
 
 Nep5TransferEvent: Event = CreateNewEvent(
     [
@@ -32,7 +32,7 @@ Nep11TransferEvent: Event = CreateNewEvent(
         ('from', Union[UInt160, None]),
         ('to', Union[UInt160, None]),
         ('amount', int),
-        ('tokenId', ByteString)
+        ('tokenId', Union[str, bytes])
     ],
     'Transfer'
 )

@@ -14,14 +14,12 @@ class StorageGetMethod(InteropMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'get'
         syscall = 'System.Storage.Get'
         context_type = StorageContextType.build()
-        byte_string_type = ByteStringType.build()
 
-        args: Dict[str, Variable] = {'key': Variable(byte_string_type),
+        args: Dict[str, Variable] = {'key': Variable(Type.bytes),
                                      'context': Variable(context_type)}
 
         from boa3.internal.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod

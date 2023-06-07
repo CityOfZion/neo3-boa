@@ -18,4 +18,4 @@ def has_key(key: bytes) -> bool:
 @public
 def _deploy(data: Any, update: bool):
     # test data to test in unit tests
-    storage.put('example', 23)
+    storage.put(b'example', 23)

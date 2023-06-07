@@ -9,13 +9,10 @@ class StorageMapGetMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.internal.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap
         from boa3.internal.model.type.type import Type
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'get'
-        byte_string_type = ByteStringType.build()
-
         args: Dict[str, Variable] = {'self': Variable(_StorageMap),
-                                     'key': Variable(byte_string_type)}
+                                     'key': Variable(Type.bytes)}
 
         super().__init__(identifier, args, return_type=Type.bytes)
 

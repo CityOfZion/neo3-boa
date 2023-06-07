@@ -14,17 +14,17 @@ class StoragePutMethod(InteropMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'put'
         syscall = 'System.Storage.Put'
         context_type = StorageContextType.build()
-        byte_string_type = ByteStringType.build()
+        storage_value_type = Type.union.build([Type.bytes,
+                                               Type.int,
+                                               Type.str,
+                                               ])
 
-        args: Dict[str, Variable] = {'key': Variable(byte_string_type),
-                                     'value': Variable(Type.union.build([byte_string_type,
-                                                                         Type.int
-                                                                         ])),
+        args: Dict[str, Variable] = {'key': Variable(Type.bytes),
+                                     'value': Variable(storage_value_type),
                                      'context': Variable(context_type)}
 
         from boa3.internal.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod

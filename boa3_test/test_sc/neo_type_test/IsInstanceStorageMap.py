@@ -11,5 +11,5 @@ def is_storage_map(value: Any) -> bool:
 
 @public
 def create_map_is_storage_map() -> Any:
-    storage_map = get_context().create_map('example_')
+    storage_map = get_context().create_map(b'example_')
     return is_storage_map(storage_map)

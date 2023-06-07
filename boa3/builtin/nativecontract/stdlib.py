@@ -3,9 +3,9 @@ __all__ = [
 ]
 
 
-from typing import Any
+from typing import Any, Union
 
-from boa3.builtin.type import ByteString, UInt160
+from boa3.builtin.type import UInt160
 
 
 class StdLib:
@@ -177,7 +177,7 @@ class StdLib:
         pass
 
     @classmethod
-    def memory_compare(cls, mem1: ByteString, mem2: ByteString) -> int:
+    def memory_compare(cls, mem1: Union[bytes, str], mem2: Union[bytes, str]) -> int:
         """
         Compares a memory with another one.
 
@@ -192,7 +192,7 @@ class StdLib:
         pass
 
     @classmethod
-    def memory_search(cls, mem: ByteString, value: ByteString, start: int = 0, backward: bool = False) -> int:
+    def memory_search(cls, mem: Union[bytes, str], value: Union[bytes, str], start: int = 0, backward: bool = False) -> int:
         """
         Searches for a given value in a given memory.
 
