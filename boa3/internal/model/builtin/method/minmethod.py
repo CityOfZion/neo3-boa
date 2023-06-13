@@ -6,7 +6,6 @@ from boa3.internal.model.type.collection.sequence.sequencetype import SequenceTy
 from boa3.internal.model.type.collection.sequence.tupletype import TupleType
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -51,97 +50,66 @@ class MinMethod(IBuiltinMethod):
             return False
         return isinstance(params[0].type, SequenceType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.neo.vm.type.Integer import Integer
-
-        jmp_place_holder = (Opcode.JMP, b'\x01')
-
-        verify_number_of_parameters = [  # verifies if the stack has 2 or 3 items
-            (Opcode.DEPTH, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.JMPEQ, b''),
-            jmp_place_holder
-        ]
-
-        if_n_parameters_gt_2 = [  # if number of items in stack is 3
-            (Opcode.REVERSE3, b''),
-            (Opcode.UNPACK, b''),
-            (Opcode.INC, b''),
-            (Opcode.INC, b''),
-            jmp_place_holder  # skips the next block of instructions
-        ]
-
-        if_n_parameters_eq_2 = [  # if number of items in stack is 2
-            (Opcode.PUSH2, b'')
-        ]
-
-        jmp_n_parameters_eq_2 = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(if_n_parameters_eq_2), True)
-        if_n_parameters_gt_2[-1] = jmp_n_parameters_eq_2
-
-        jmp_n_parameters_gt_2 = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, get_bytes_count(if_n_parameters_gt_2))
-        verify_number_of_parameters[-1] = jmp_n_parameters_gt_2
-
-        repack_array = [  # pack all the arguments in the array
-            (Opcode.PACK, b''),
-        ]
-
-        is_int_initialize = [  # puts the last array element as the max value
-            (Opcode.DUP, b''),  # index = len(array) - 1
-            (Opcode.SIZE, b''),
-            (Opcode.DEC, b''),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),     # min = array[index]
-        ]
-
-        is_int_while = [    # this will get the next number in the array and compare it with the current min
-            (Opcode.SWAP, b''),         # index--
-            (Opcode.DEC, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),         # min = min if min < array[index] else array[index]
-            (Opcode.PICKITEM, b''),
-        ]
-        is_int_while.extend(self._compare_values())
-        is_int_while.extend([
-            (Opcode.OVER, b''),
-            (Opcode.SIGN, b'')
-            # if index != 0: go back to index--
-            # else go to the end
-        ])
-
-        jmp_back_to_while_statement = (Opcode.JMPIF, Integer(-get_bytes_count(is_int_while)).to_byte_array(signed=True))
-        is_int_while.append(jmp_back_to_while_statement)
-
-        clean_stack = [    # removes everything but min
-            (Opcode.REVERSE3, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
-
-        return (
-            verify_number_of_parameters +
-            if_n_parameters_gt_2 +
-            if_n_parameters_eq_2 +
-            repack_array +
-            is_int_initialize +
-            is_int_while +
-            clean_stack
-        )
-
     def generate_opcodes(self, code_generator):
-        # TODO: implement on #864eq2qev
-        pass
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.type.type import Type
+
+        # if len(stack) == 2:
+        code_generator.insert_opcode(Opcode.DEPTH, add_to_stack=[Type.int])
+        code_generator.convert_literal(2)
+        if_stack_size_equals_2 = code_generator.convert_begin_if()
+        code_generator.change_jump(if_stack_size_equals_2, Opcode.JMPNE)
+
+        #   aux_list = [arg1, arg2]
+        code_generator.convert_literal(2)
+
+        # else:
+        else_stack_size_equals_3 = code_generator.convert_begin_else(if_stack_size_equals_2, is_internal=True)
+        #   aux_list = [arg1, arg2, *values]
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.insert_opcode(Opcode.UNPACK)
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.convert_end_if(else_stack_size_equals_3, is_internal=True)
+        code_generator.insert_opcode(Opcode.PACK)
+
+        # index = len(aux_list) - 1
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.insert_opcode(Opcode.DEC)
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        # current_min = aux_list[index]
+        code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
+
+        # while (index != 0):
+        start_while = code_generator.convert_begin_while()
+
+        #   index -= 1
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.insert_opcode(Opcode.DEC)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
+
+        #   current_min = min(current_min, aux_list[index])
+        self.generate_internal_opcodes(code_generator)
+
+        # while condition and end
+        condition_address = code_generator.bytecode_size
+        code_generator.duplicate_stack_item(2)
+        code_generator.insert_opcode(Opcode.SIGN)
+        code_generator.convert_end_while(start_while, condition_address, is_internal=True)
+
+        # return min
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
 
     def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
         code_generator.insert_opcode(Opcode.MIN)
-
-    def _compare_values(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.MIN, b'')]
 
     @property
     def _args_on_stack(self) -> int:
