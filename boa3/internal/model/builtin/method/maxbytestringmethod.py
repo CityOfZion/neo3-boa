@@ -1,10 +1,7 @@
-from typing import List, Optional, Tuple
+from typing import Optional
 
-from boa3.internal.compiler.codegenerator import get_bytes_count
 from boa3.internal.model.builtin.method.maxmethod import MaxMethod
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class MaxByteStringMethod(MaxMethod):
@@ -14,98 +11,96 @@ class MaxByteStringMethod(MaxMethod):
         is_valid_type = Type.str.is_type_of(arg_value) or Type.bytes.is_type_of(arg_value)
         super().__init__(arg_value if is_valid_type else Type.str)
 
-    def _compare_values(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def _compare_values(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
 
-        test_if_are_equal = [
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.EQUAL, b''),  # if str1 == str2:
-            OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, 4),
-            (Opcode.PUSH1, b''),
-            jmp_place_holder,     # go to final test
-        ]
+        if_is_equal = code_generator.convert_begin_if()
+        code_generator.change_jump(if_is_equal, Opcode.JMPNE)
+        # if str1 == str2:
+        code_generator.convert_literal(True)
+        #   condition = True
 
-        get_limit_index = [
-            (Opcode.OVER, b''),   # limit = min((len(str1), len(str2))
-            (Opcode.SIZE, b''),
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.MIN, b''),
-            (Opcode.PUSH0, b''),  # index = 0
-        ]
+        if_is_equal = code_generator.convert_begin_else(if_is_equal, insert_jump=True)
+        # else:
+        #   limit = min((len(str1), len(str2))
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_builtin_method_call(Builtin.Min, is_internal=True)
 
-        while_body_before_compare = [
-            (Opcode.PUSH3, b''),  # value1 = str1[index]
-            (OpcodeHelper.get_dup(3), b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PUSH4, b''),  # value2 = str2[index]
-            (OpcodeHelper.get_dup(4), b''),
-            (Opcode.SWAP, b''),
-            (Opcode.PICKITEM, b''),
-        ]
-        while_body_compare = [
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.JMPEQ, Integer(7).to_byte_array(signed=True)),     # if value1 != value2 jmp to end
-            (Opcode.GT, b''),
-            (Opcode.NIP, b''),
-            (Opcode.NIP, b''),
-            jmp_place_holder,     # jmp to end
-        ]
-        while_body_after_compare = [
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.INC, b''),    # index++
-        ]
+        #   index = 0
+        code_generator.convert_literal(0)
 
-        while_full_body = while_body_before_compare + while_body_compare + while_body_after_compare
-        while_bytes_size = get_bytes_count(while_full_body)
-        get_limit_index.append(
-            OpcodeHelper.get_jump_and_data(Opcode.JMP, while_bytes_size, True)
-        )
+        #   while index < limit:
+        start_while = code_generator.convert_begin_while()
 
-        while_condition = [
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b'')
-        ]
-        while_condition_bytes_size = get_bytes_count(while_condition)
-        while_condition.append(OpcodeHelper.get_jump_and_data(Opcode.JMPGT, -while_bytes_size - while_condition_bytes_size))
+        #       value1 = str1[index]
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
+        code_generator.duplicate_stack_item(2)
 
-        while_else_body = [
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.OVER, b''),  # if len(str1) > len(str2) jmp to end
-            (Opcode.SIZE, b''),
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.GT, b''),
-        ]
+        #       value2 = str2[index]
+        code_generator.duplicate_stack_item(5)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
 
-        everything_after_while_check = while_body_after_compare + while_condition + while_else_body
-        jmp_while_check = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(everything_after_while_check), True)
-        while_body_compare[-1] = jmp_while_check
+        #       if (value2 != value1):
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        if_values_not_equal = code_generator.convert_begin_if()
+        code_generator.change_jump(if_values_not_equal, Opcode.JMPEQ)
 
-        everything_after_equal_check = (get_limit_index +
-                                        while_body_before_compare +
-                                        while_body_compare +
-                                        everything_after_while_check)
-        jmp_test_equal = OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(everything_after_equal_check), True)
-        test_if_are_equal[-1] = jmp_test_equal
+        #           condition = value2 > value1
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+        code_generator.remove_stack_item(2)
+        code_generator.remove_stack_item(2)
+        #           break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_values_not_equal)
 
-        final_test = [
-            (Opcode.JMPIFNOT, Integer(4).to_byte_array(signed=True)),   # if condition is True
-            (Opcode.DROP, b''),                                            # remove str2 <=> return str1
-            (Opcode.JMP, Integer(3).to_byte_array(signed=True)),        # else
-            (Opcode.NIP, b'')                                              # remove str1 <=> return str2
-        ]
+        #       index += 1
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.insert_opcode(Opcode.INC)
 
-        return (
-            test_if_are_equal +
-            everything_after_equal_check +
-            final_test
-        )
+        #   while condition and end
+        condition_address = code_generator.bytecode_size
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+        while_break = code_generator.convert_end_while(start_while, condition_address)
+
+        #   else:
+        while_else = code_generator.bytecode_size
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        #       condition = len(str1) > len(str2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+
+        code_generator.convert_end_loop_else(start_while, while_else, has_else=True)
+
+        code_generator.convert_end_if(while_break, is_internal=True)
+        code_generator.convert_end_if(if_is_equal, is_internal=True)
+
+        # if condition is True
+        is_condition = code_generator.convert_begin_if()
+        #   remove str2 <=> return str1
+        code_generator.remove_stack_top_item()
+
+        # else
+        is_condition = code_generator.convert_begin_else(is_condition)
+        #   remove str1 <=> return str2
+        code_generator.remove_stack_item(2)
+
+        code_generator.convert_end_if(is_condition)

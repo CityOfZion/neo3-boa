@@ -585,7 +585,7 @@ class CodeGenerator:
 
         return start_address
 
-    def convert_end_while(self, start_address: int, test_address: int, *, is_internal: bool = False):
+    def convert_end_while(self, start_address: int, test_address: int, *, is_internal: bool = False) -> int:
         """
         Converts the end of the while statement
 
@@ -593,7 +593,7 @@ class CodeGenerator:
         :param test_address: the address of the while test fist opcode
         :param is_internal: whether it was called when generating other implemented symbols
         """
-        self.convert_end_loop(start_address, test_address, False, is_internal=is_internal)
+        return self.convert_end_loop(start_address, test_address, False, is_internal=is_internal)
 
     def convert_begin_for(self) -> int:
         """
@@ -633,7 +633,7 @@ class CodeGenerator:
 
         return test_address
 
-    def convert_end_loop(self, start_address: int, test_address: int, is_for: bool, is_internal: bool = False):
+    def convert_end_loop(self, start_address: int, test_address: int, is_for: bool, is_internal: bool = False) -> int:
         """
         Converts the end of a loop statement
 
@@ -670,11 +670,13 @@ class CodeGenerator:
 
             self._insert_loop_break_addresses(start_address, reverse_to_drop_pos, reverse_to_drop_end, self.bytecode_size)
 
-        self._insert_loop_break_addresses(start_address, is_break_pos, is_break_end, self.bytecode_size)
+        last_opcode = self.bytecode_size
+        self._insert_loop_break_addresses(start_address, is_break_pos, is_break_end, last_opcode)
         self._insert_jump(OpcodeInfo.JMPIF)
 
         if is_internal:
             self.convert_end_loop_else(start_address, self.last_code_start_address)
+        return last_opcode
 
     def convert_end_loop_else(self, start_address: int, else_begin: int, has_else: bool = False, is_for: bool = False):
         """
