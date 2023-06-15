@@ -417,7 +417,7 @@ class OpcodeInfo:
     # Returns 1 if a is greater than or equal to b, 0 otherwise.
     GE = OpcodeInformation(Opcode.GE)
     # Returns the smaller of a and b.
-    MIN = OpcodeInformation(Opcode.MIN)
+    MIN = OpcodeInformation(Opcode.MIN, stack_items=2)
     # Returns the larger of a and b.
     MAX = OpcodeInformation(Opcode.MAX)
     # Returns 1 if x is within the specified range (left-inclusive), 0 otherwise.
