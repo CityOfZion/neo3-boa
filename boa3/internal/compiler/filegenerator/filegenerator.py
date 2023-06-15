@@ -258,7 +258,6 @@ class FileGenerator:
             folder = folders_to_generate.pop()
             os.mkdir(folder)
 
-
     # region NEF
 
     @property

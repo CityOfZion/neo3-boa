@@ -19,7 +19,17 @@ from boa3.builtin.interop.storage.storagecontext import StorageContext
 from boa3.builtin.interop.storage.storagemap import StorageMap
 
 
-def get(key: bytes, context: StorageContext = None) -> bytes:
+def get_context() -> StorageContext:
+    """
+    Gets current storage context.
+
+    :return: the current storage context
+    :rtype: StorageContext
+    """
+    pass
+
+
+def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
 
@@ -29,16 +39,6 @@ def get(key: bytes, context: StorageContext = None) -> bytes:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: bytes
-    """
-    pass
-
-
-def get_context() -> StorageContext:
-    """
-    Gets current storage context.
-
-    :return: the current storage context
-    :rtype: StorageContext
     """
     pass
 
@@ -53,7 +53,7 @@ def get_read_only_context() -> StorageContext:
     pass
 
 
-def put(key: bytes, value: Union[int, bytes, str], context: StorageContext = None):
+def put(key: bytes, value: Union[int, bytes, str], context: StorageContext = get_context()):
     """
     Inserts a given value in the key-value format into the persistent storage.
 
@@ -67,7 +67,7 @@ def put(key: bytes, value: Union[int, bytes, str], context: StorageContext = Non
     pass
 
 
-def delete(key: bytes, context: StorageContext = None):
+def delete(key: bytes, context: StorageContext = get_context()):
     """
     Removes a given key from the persistent storage if exists.
 
@@ -80,7 +80,7 @@ def delete(key: bytes, context: StorageContext = None):
 
 
 def find(prefix: bytes,
-         context: StorageContext = None,
+         context: StorageContext = get_context(),
          options: FindOptions = FindOptions.NONE) -> Iterator:
     """
     Searches in the storage for keys that start with the given prefix.
