@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -94,7 +94,7 @@ class MinMethod(IBuiltinMethod):
         code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
 
         #   current_min = min(current_min, aux_list[index])
-        self.generate_internal_opcodes(code_generator)
+        self._compare_values(code_generator)
 
         # while condition and end
         condition_address = code_generator.bytecode_size
@@ -107,9 +107,16 @@ class MinMethod(IBuiltinMethod):
         code_generator.remove_stack_top_item()
         code_generator.remove_stack_top_item()
 
+    def _compare_values(self, code_generator):
+        """
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        self.generate_internal_opcodes(code_generator)
+
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        code_generator.insert_opcode(Opcode.MIN)
+        from boa3.internal.model.type.type import Type
+        code_generator.insert_opcode(Opcode.MIN, pop_from_stack=True, add_to_stack=[Type.int])
 
     @property
     def _args_on_stack(self) -> int:

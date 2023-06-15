@@ -11,7 +11,7 @@ class MinByteStringMethod(MinMethod):
         is_valid_type = Type.str.is_type_of(arg_value) or Type.bytes.is_type_of(arg_value)
         super().__init__(arg_value if is_valid_type else Type.str)
 
-    def generate_internal_opcodes(self, code_generator):
+    def _compare_values(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -27,10 +27,9 @@ class MinByteStringMethod(MinMethod):
         code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
         code_generator.duplicate_stack_item(2)
         code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
-        code_generator.insert_opcode(Opcode.MIN)    # Pensar nisso aqui depois
+        self.generate_internal_opcodes(code_generator)
         #   index = 0
         code_generator.convert_literal(0)
-        code_generator.convert_begin_if()
 
         #   while(index <= min_len_str):
         start_while = code_generator.convert_begin_while()
