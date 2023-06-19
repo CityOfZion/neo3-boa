@@ -2299,10 +2299,10 @@ class CodeGenerator:
             for _ in range(self.stack_size - last_stack_size):
                 self._stack_pop()
 
-    def swap_reverse_stack_items(self, no_items: int = 0):
+    def swap_reverse_stack_items(self, no_items: int = 0, rotate: bool = False):
         # n = 0 -> value varies in runtime
         if 0 <= no_items != 1:
-            opcode: Opcode = OpcodeHelper.get_reverse(no_items)
+            opcode: Opcode = OpcodeHelper.get_reverse(no_items, rotate)
             if opcode is Opcode.REVERSEN and no_items > 0:
                 self.convert_literal(no_items)
             op_info = OpcodeInfo.get_info(opcode)
@@ -2310,7 +2310,7 @@ class CodeGenerator:
             if opcode is Opcode.REVERSEN and no_items > 0:
                 self._stack_pop()
             if no_items > 0:
-                self._stack.reverse(-no_items)
+                self._stack.reverse(-no_items, rotate=rotate)
 
     def convert_init_user_class(self, class_type: ClassType):
         # TODO: refactor when instance variables are implemented
