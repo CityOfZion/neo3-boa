@@ -111,9 +111,13 @@ class NeoStack:
     def __getitem__(self, index_or_slice: Union[int, slice]):
         return self._stack[index_or_slice]
 
-    def reverse(self, start: int = 0, end: int = None):
+    def reverse(self, start: int = 0, end: int = None, *, rotate: bool = False):
         if end is None:
             end = len(self._stack)
 
-        reverse = list(reversed(self._stack[start:end]))
+        if rotate:
+            reverse = self._stack[start:end]
+            reverse.append(reverse.pop(0))
+        else:
+            reverse = list(reversed(self._stack[start:end]))
         self._stack[start:end] = reverse

@@ -234,14 +234,18 @@ def get_dup(position: int) -> Optional[Opcode]:
             return Opcode.PICK
 
 
-def get_reverse(no_stack_items: int) -> Optional[Opcode]:
+def get_reverse(no_stack_items: int, rotate: bool = False) -> Optional[Opcode]:
     """
     Gets the opcode to reverse n items on the stack
 
     :param no_stack_items: index of the variable
+    :param rotate: whether the stack should be reversed or rotated
     :return: the respective opcode
     :rtype: Opcode
     """
+    if no_stack_items == 3 and rotate:
+        return Opcode.ROT
+
     reverse_stack = {
         2: Opcode.SWAP,
         3: Opcode.REVERSE3,

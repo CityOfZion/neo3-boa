@@ -1,9 +1,8 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -22,123 +21,88 @@ class LowerMethod(IBuiltinMethod):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.neo.vm.type.StackItem import StackItemType
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.neo.vm.type.Integer import Integer
 
         upper_a = Integer(ord('A')).to_byte_array()
         upper_z = Integer(ord('Z')).to_byte_array()
-        jmp_place_holder = (Opcode.JMP, b'\x01')
 
-        initializing = [                    # initialize auxiliary values
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.PUSH0, b''),            # index = 0
-        ]
+        # string = arg
+        code_generator.duplicate_stack_top_item()
+        # max_index = len(arg)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-        verify_while = [                    # verifies if while is over
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            jmp_place_holder,               # jump to last statement to clean the stack if index >= len(string)
-        ]
+        # index = 0
+        code_generator.convert_literal(0)
 
-        get_substring_left = [              # gets the substring to the left of the index
-            (Opcode.REVERSE3, b''),
-            (Opcode.DUP, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.LEFT, b''),             # substr_left = string[:index]
-            (Opcode.CONVERT, StackItemType.ByteString),
-            (Opcode.ROT, b''),
-            (Opcode.ROT, b''),
-        ]
+        # while index < max_index
+        while_begin = code_generator.convert_begin_while()
 
-        get_substring_middle = [            # gets the substring on the index
-            (Opcode.OVER, b''),             # TODO: verify if string[index] < c0 when other values are implemented
-            (Opcode.OVER, b''),
-            (Opcode.PUSH1, b''),            # modifier = 1, since using upper is only supported with ASCII for now
-            (Opcode.SUBSTR, b''),           # substr_middle = string[index:index+modifier]
-            (Opcode.CONVERT, StackItemType.ByteString),
-            (Opcode.DUP, b''),
-            (Opcode.PUSHDATA1, Integer(len(upper_a)).to_byte_array() + upper_a),
-            jmp_place_holder,               # jump to get the substring to the right if substr_middle value is lower than 'A'
-        ]
+        #   substr_left = string[:index]
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_sequence_beginning()
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
 
-        verify_greater_than_z = [           # verifies if substr_middle is between 'A' and 'Z'
-            (Opcode.DUP, b''),
-            (Opcode.PUSHDATA1, Integer(len(upper_z)).to_byte_array() + upper_z),
-            jmp_place_holder,               # jump to get the substring to the right if substr_middle value is greater than 'Z'
-        ]
+        #   modifier = 1, since using upper is only supported with ASCII for now
+        code_generator.duplicate_stack_item(2)  # TODO: verify if string[index] < c0 when other values are implemented
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(1)
 
-        swap_upper_to_lower_case = [        # change middle_substr to lowercase equivalent
-            (Opcode.PUSHINT8, Integer(32).to_byte_array(signed=True)),
-            (Opcode.ADD, b''),
-            (Opcode.CONVERT, StackItemType.ByteString),
-        ]
+        #   substr_middle = string[index:index+modifier]
+        code_generator.convert_get_substring(is_internal=True)
 
-        jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, get_bytes_count(verify_greater_than_z +
-                                                                                             swap_upper_to_lower_case), True)
-        get_substring_middle[-1] = jmp_to_join_substring
+        #   if 'A' <= substr_middle <= 'Z':
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(upper_a)
+        if_lower_than_a = code_generator.convert_begin_if()
+        code_generator.change_jump(if_lower_than_a, Opcode.JMPLT)
 
-        jmp_to_join_substring = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, get_bytes_count(swap_upper_to_lower_case), True)
-        verify_greater_than_z[-1] = jmp_to_join_substring
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(upper_z)
+        if_greater_than_z = code_generator.convert_begin_if()
+        code_generator.change_jump(if_greater_than_z, Opcode.JMPGT)
 
-        get_substring_middle.extend(verify_greater_than_z)
-        get_substring_middle.extend(swap_upper_to_lower_case)
+        #       substr_middle = lower(substr_middle)
+        code_generator.convert_literal(ord('a') - ord('A'))
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        code_generator.convert_cast(self.type)
 
-        get_substring_right = [             # gets the substring to the right of the index
-            (Opcode.ROT, b''),
-            (Opcode.ROT, b''),
-            (Opcode.INC, b''),
-            (Opcode.NEGATE, b''),
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.ADD, b''),
-            (Opcode.RIGHT, b''),            # substr_right = string[index+modifier:]
-        ]
+        code_generator.convert_end_if(if_greater_than_z)
+        code_generator.convert_end_if(if_lower_than_a)
 
-        join_substrings = [                 # concatenate substr_left, substr_middle, substr_right
-            (Opcode.CAT, b''),
-            (Opcode.CAT, b''),              # substr_left + substr_middle + substr_right
-            (Opcode.NIP, b''),
-            (Opcode.CONVERT, StackItemType.ByteString),
-            (Opcode.REVERSE3, b''),
-            (Opcode.INC, b''),              # index ++
-            # jump back to verify,
-        ]
+        #   substr_right = string[index+modifier:]
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.convert_get_sequence_ending()
 
-        jmp_to_verify_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_while +
-                                                                                          get_substring_left +
-                                                                                          get_substring_middle +
-                                                                                          get_substring_right +
-                                                                                          join_substrings))
-        join_substrings.append(jmp_to_verify_while)
+        concat = BinaryOp.Concat.build(self.type, self.type)  # ensure the correct type on generator stack
+        #   string = substr_left + substr_middle + substr_right
+        code_generator.convert_operation(concat, is_internal=True)
+        code_generator.convert_operation(concat)
+        code_generator.remove_stack_item(2)
+        code_generator.swap_reverse_stack_items(3)
 
-        clean_stack = [                     # removes all auxiliary values
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
+        #   index += 1
+        code_generator.insert_opcode(Opcode.INC)
 
-        while_body = (
-            get_substring_left +
-            get_substring_middle +
-            get_substring_right +
-            join_substrings
-        )
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
 
-        jmp_to_clean_stack = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(while_body), True)
-        verify_while[-1] = jmp_to_clean_stack
+        code_generator.convert_end_while(while_begin, while_condition, is_internal=True)
 
-        return (
-            initializing +
-            verify_while +
-            while_body +
-            clean_stack
-        )
+        # clean stack
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
 
     def push_self_first(self) -> bool:
         return self.has_self_argument
