@@ -22,43 +22,6 @@ class WitnessScope(IntFlag):
     #: Allow the witness in all context. Equal to NEO 2.x's default behaviour.
     GLOBAL = 0x80
 
-    def to_csharp_name(self) -> str:
-        """
-        Internal helper to match C# convention
-        """
-        if self == 0:
-            return "None"
-        flags = []
-        if self.CALLED_BY_ENTRY in self:
-            flags.append("CalledByEntry")
-        if self.CUSTOM_CONTRACTS in self:
-            flags.append("CustomContracts")
-        if self.CUSTOM_GROUPS in self:
-            flags.append("CustomGroups")
-        if self.WITNESS_RULES in self:
-            flags.append("WitnessRules")
-        if self.GLOBAL in self:
-            flags.append("Global")
-        return ", ".join(flags)
-
-    @classmethod
-    def from_chsarp_name(cls, csharp_name):
-        """
-        Internal helper to parse from C# convention
-        """
-        c = cls(cls.NONE)
-        if "CalledByEntry" in csharp_name:
-            c |= c.CALLED_BY_ENTRY
-        if "CustomContracts" in csharp_name:
-            c |= c.CUSTOM_CONTRACTS
-        if "CustomGroups" in csharp_name:
-            c |= c.CUSTOM_GROUPS
-        if "WitnessRules" in csharp_name:
-            c |= c.WITNESS_RULES
-        if "Global" in csharp_name:
-            c |= c.GLOBAL
-        return c
-
 
 class WitnessRuleAction(IntEnum):
     DENY = 0
@@ -75,15 +38,3 @@ class WitnessConditionType(IntEnum):
     CALLED_BY_ENTRY = 0x20
     CALLED_BY_CONTRACT = 0x28
     CALLED_BY_GROUP = 0x29
-
-    def to_csharp_string(self) -> str:
-        if self == WitnessConditionType.SCRIPT_HASH:
-            return "ScriptHash"
-        elif self == WitnessConditionType.CALLED_BY_ENTRY:
-            return "CalledByEntry"
-        elif self == WitnessConditionType.CALLED_BY_CONTRACT:
-            return "CalledByContract"
-        elif self == WitnessConditionType.CALLED_BY_GROUP:
-            return "CalledByGroup"
-        else:
-            return self.name.title()
