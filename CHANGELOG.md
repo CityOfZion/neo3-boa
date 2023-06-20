@@ -5,6 +5,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+
+### Changed
+
+
+### Deprecated
+
+
+### Removed
+
+
+### Fixed
+
+
+## [0.14.0] - 2023-06-20
+> This version has breaking changes. Please refer to our [migration guide](/docs/migration-guide-v0.14.0.md) to update your smart contracts.
+
+### Changed
+- Moved `ByteString` class methods `to_int`, `to_str`, `to_bytes` and `to_bool` to the module `boa3.builtin.type.helper`
+
+### Removed
+- Removed `ByteString` type.
+- Removed `to_int` implementation from `str` and `bytes` types.
+- Removed `to_bytes` implementation from `int` and `bytes` types.
+- Removed `to_str` implementation from `bytes` types.
+- Removed `to_bool` implementation from `bytes` type.
+
+### Fixed
+- Fixed debugging information for symbols of imported modules.
+- Fixed incorrect import error caused by root folder path.
+- Fixed generation of static variables that were duplicated.
+- Fixed code generation for method calls on `return` statements in void methods.
+- Fixed compilation failure caused by imports in the file where `NeoMetadata` is defined.
+- Fixed standard validations when using imported symbols.
 
 
 ## [0.13.1] - 2023-05-29
@@ -454,7 +489,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2020-06-13
 
 
-[Unreleased]: https://github.com/CityOfZion/neo3-boa/tree/development
+[Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...staging
+[0.14.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.14.0
 [0.13.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.1
 [0.13.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.0
 [0.12.3]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.12.3
