@@ -297,7 +297,7 @@ class CodeGenerator:
         module_global_ids = []
         result_global_vars = []
         for var_id, var in self.symbol_table.items():
-            if isinstance(var, Variable) and var.is_reassigned == modified_variable:
+            if isinstance(var, Variable) and var.is_reassigned == modified_variable and var not in result_global_vars:
                 module_global_variables.append((var_id, var))
                 module_global_ids.append(var_id)
                 result_global_vars.append(var)
@@ -399,41 +399,60 @@ class CodeGenerator:
         if isinstance(self.additional_symbols, dict):
             cur_symbol_table.update(self.additional_symbols)
 
+        found_id = None
+        found_symbol = None
         if len(self._scope_stack) > 0:
             for symbol_scope in self._scope_stack:
                 if identifier in symbol_scope:
-                    return identifier, symbol_scope[identifier]
+                    found_id, found_symbol = identifier, symbol_scope[identifier]
+                    break
 
-        if scope is not None and hasattr(scope, 'symbols') and isinstance(scope.symbols, dict):
-            if identifier in scope.symbols and isinstance(scope.symbols[identifier], ISymbol):
-                return identifier, scope.symbols[identifier]
-        else:
-            if self._current_method is not None and identifier in self._current_method.symbols:
-                return identifier, self._current_method.symbols[identifier]
-            elif identifier in cur_symbol_table:
-                return identifier, cur_symbol_table[identifier]
+        if found_id is None:
+            if scope is not None and hasattr(scope, 'symbols') and isinstance(scope.symbols, dict):
+                if identifier in scope.symbols and isinstance(scope.symbols[identifier], ISymbol):
+                    found_id, found_symbol = identifier, scope.symbols[identifier]
+            else:
+                if self._current_method is not None and identifier in self._current_method.symbols:
+                    found_id, found_symbol = identifier, self._current_method.symbols[identifier]
+                elif identifier in cur_symbol_table:
+                    found_id, found_symbol = identifier, cur_symbol_table[identifier]
+                else:
+                    # the symbol may be a built-in. If not, returns None
+                    symbol = Builtin.get_symbol(identifier)
+                    if symbol is None:
+                        symbol = Interop.get_symbol(identifier)
 
-            # the symbol may be a built in. If not, returns None
-            symbol = Builtin.get_symbol(identifier)
-            if symbol is not None:
-                return identifier, symbol
+                    if symbol is not None:
+                        found_id, found_symbol = identifier, symbol
 
-            if not isinstance(identifier, str):
-                return identifier, symbol
-            split = identifier.split(constants.ATTRIBUTE_NAME_SEPARATOR)
-            if len(split) > 1:
-                attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
-                another_attr_id, attr = self.get_symbol(attribute, is_internal=is_internal)
-                if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
-                    return symbol_id, attr.symbols[symbol_id]
-                elif isinstance(attr, Package) and symbol_id in attr.inner_packages:
-                    return symbol_id, attr.inner_packages[symbol_id]
+                    elif not isinstance(identifier, str):
+                        found_id, found_symbol = identifier, symbol
 
-            if is_internal:
-                from boa3.internal.model import imports
-                found_symbol = imports.builtin.get_internal_symbol(identifier)
-                if isinstance(found_symbol, ISymbol):
-                    return identifier, found_symbol
+                    else:
+                        split = identifier.split(constants.ATTRIBUTE_NAME_SEPARATOR)
+                        if len(split) > 1:
+                            attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
+                            another_attr_id, attr = self.get_symbol(attribute, is_internal=is_internal)
+                            if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
+                                found_id, found_symbol = symbol_id, attr.symbols[symbol_id]
+                            elif isinstance(attr, Package) and symbol_id in attr.inner_packages:
+                                found_id, found_symbol = symbol_id, attr.inner_packages[symbol_id]
+
+                        if found_id is None and is_internal:
+                            from boa3.internal.model import imports
+                            found_symbol = imports.builtin.get_internal_symbol(identifier)
+                            if isinstance(found_symbol, ISymbol):
+                                found_id = identifier
+
+        if found_id is not None:
+            if isinstance(found_symbol, Variable) and not found_symbol.is_reassigned and found_id not in self._statics:
+                # verifies if it's a static variable with a unique name
+                for static_id, static_var in self._static_vars:
+                    if found_symbol == static_var:
+                        found_id = static_id
+                        break
+
+            return found_id, found_symbol
         return identifier, Type.none
 
     def initialize_static_fields(self) -> bool:

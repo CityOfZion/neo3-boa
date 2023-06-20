@@ -8,11 +8,10 @@ class MemoryCompareMethod(StdLibMethod):
 
     def __init__(self):
         from boa3.internal.model.type.type import Type
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 
         identifier = 'memory_compare'
         syscall = 'memoryCompare'
-        byte_string_type = ByteStringType.build()
+        byte_string_type = Type.union.build([Type.bytes, Type.str])
 
         args: Dict[str, Variable] = {
             'mem1': Variable(byte_string_type),

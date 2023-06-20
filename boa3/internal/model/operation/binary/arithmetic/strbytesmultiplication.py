@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
@@ -16,7 +15,7 @@ class StrBytesMultiplication(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str, Type.bytes, Builtin.ByteString]
+    _valid_types: List[IType] = [Type.str, Type.bytes]
 
     def __init__(self, left: IType = Type.str, right: IType = Type.int):
         self.operator: Operator = Operator.Mult

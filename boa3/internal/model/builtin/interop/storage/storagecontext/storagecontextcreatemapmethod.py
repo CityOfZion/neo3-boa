@@ -10,10 +10,10 @@ class StorageContextCreateMapMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import _StorageContext
         from boa3.internal.model.builtin.interop.storage.storagemap.storagemaptype import _StorageMap
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
+        from boa3.internal.model.type.type import Type
 
         identifier = 'create_map'
-        byte_string_type = ByteStringType.build()
+        byte_string_type = Type.bytes
 
         args: Dict[str, Variable] = {'self': Variable(_StorageContext),
                                      'prefix': Variable(byte_string_type)}

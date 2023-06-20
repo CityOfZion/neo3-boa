@@ -151,10 +151,8 @@
 - <a href="/boa3_test/test_sc/bytes_test/BytesGetValue.py">BytesGetValue.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytesGetValueNegativeIndex.py">BytesGetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/bytes_test/BytesLiteral.py">BytesLiteral.py</a>, 
-- <a href="/boa3_test/test_sc/bytes_test/BytesToInt.py">BytesToInt.py</a>, 
-- <a href="/boa3_test/test_sc/bytes_test/BytesToIntWithBuiltin.py">BytesToIntWithBuiltin.py</a>, 
-- <a href="/boa3_test/test_sc/bytes_test/BytesToStr.py">BytesToStr.py</a>, 
-- <a href="/boa3_test/test_sc/bytes_test/BytesToStrWithBuiltin.py">BytesToStrWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/bytes_test/BytesToInt.py">BytesToInt.py</a>,  
+- <a href="/boa3_test/test_sc/bytes_test/BytesToStr.py">BytesToStr.py</a>
 
 ### Dict type
 
@@ -543,7 +541,7 @@
 
 #### Import
 - <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImports.py">GenerationWithUserModuleImports.py</a>,
-- <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleImportsDupNames.py">GenerationWithUserModuleImportsDupNames.py</a>,
+- <a href="/boa3_test/test_sc/generation_test/GenerationWithUserModuleNameImports.py">GenerationWithUserModuleNameImports.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedSymbols.py">ImportUserModuleWithNotImportedSymbols.py</a>,
 - <a href="/boa3_test/test_sc/import_test/ImportUserModuleWithNotImportedVariables.py">ImportUserModuleWithNotImportedVariables.py</a>
 

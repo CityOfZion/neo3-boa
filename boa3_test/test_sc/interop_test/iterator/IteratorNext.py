@@ -3,10 +3,10 @@ from boa3.builtin.interop import storage
 
 
 @public
-def has_next(prefix: str) -> bool:
+def has_next(prefix: bytes) -> bool:
     return storage.find(prefix).next()
 
 
 @public
-def store_data(key: str, value: int):
+def store_data(key: bytes, value: int):
     storage.put(key, value)

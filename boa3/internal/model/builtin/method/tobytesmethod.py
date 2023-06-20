@@ -5,7 +5,6 @@ from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.type.itype import IType
-from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 from boa3.internal.model.type.primitive.bytestype import BytesType
 from boa3.internal.model.type.primitive.inttype import IntType
 from boa3.internal.model.type.primitive.strtype import StrType
@@ -17,9 +16,6 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 class ToBytesMethod(IBuiltinMethod, ABC):
     def __init__(self, self_type: IType):
         identifier = 'to_bytes'
-        if isinstance(self_type, IdentifiedSymbol):
-            identifier = '-{0}_{1}'.format(self_type.identifier, identifier)
-
         args: Dict[str, Variable] = {'self': Variable(self_type)}
         from boa3.internal.model.type.type import Type
         super().__init__(identifier, args, return_type=Type.bytes)
@@ -34,11 +30,25 @@ class ToBytesMethod(IBuiltinMethod, ABC):
         return isinstance(params[0], IExpression) and isinstance(params[0].type, BytesType)
 
     @property
+    def identifier(self) -> str:
+        if isinstance(self._arg_self.type, IdentifiedSymbol):
+            return '-{0}_{1}'.format(self._arg_self.type.identifier, self._identifier)
+        return self._identifier
+
+    @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.internal.model.type.type import Type
         return [
             (Opcode.CONVERT, Type.bytes.stack_item)
         ]
+
+    def build(self, value: Any) -> IBuiltinMethod:
+        if isinstance(value, IntType):
+            return IntToBytesMethod(value)
+        elif isinstance(value, StrType):
+            return StrToBytesMethod(value)
+        # if it is not a valid type, show mismatched type with int
+        return IntToBytesMethod()
 
     def push_self_first(self) -> bool:
         return self.has_self_argument
@@ -55,14 +65,6 @@ class ToBytesMethod(IBuiltinMethod, ABC):
 class _ConvertToBytesMethod(ToBytesMethod):
     def __init__(self):
         super().__init__(None)
-
-    def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, IntType):
-            return IntToBytesMethod(value)
-        elif isinstance(value, (StrType, ByteStringType)):
-            return StrToBytesMethod(value)
-        # if it is not a valid type, show mismatched type with int
-        return IntToBytesMethod()
 
 
 ToBytes = _ConvertToBytesMethod()
@@ -119,7 +121,7 @@ class IntToBytesMethod(ToBytesMethod):
 
 class StrToBytesMethod(ToBytesMethod):
     def __init__(self, self_type: IType = None):
-        if not isinstance(self_type, (StrType, ByteStringType)):
+        if not isinstance(self_type, StrType):
             from boa3.internal.model.type.type import Type
             self_type = Type.str
         super().__init__(self_type)

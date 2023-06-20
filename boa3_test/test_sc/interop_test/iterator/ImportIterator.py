@@ -5,4 +5,4 @@ from boa3.builtin.interop.storage import find
 
 @public
 def return_iterator() -> iterator.Iterator:
-    return find('random_prefix')
+    return find(b'random_prefix')

@@ -1,2 +1,5 @@
+from boa3.builtin.contract import to_script_hash
+
+
 def Main() -> bytes:
-    return (123).to_script_hash(123)
+    return to_script_hash(123, 123)

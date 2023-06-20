@@ -119,19 +119,19 @@ class TestContractInterop(BoaTest):
 
         from boa3.internal.neo3.contracts import CallFlags
 
-        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', [b'num'], CallFlags.READ_ONLY))
         expected_results.append(0)
 
-        invokes.append(runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.STATES))
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'put_value', [b'num', 10], CallFlags.STATES))
         expected_results.append(None)
 
-        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', [b'num'], CallFlags.READ_ONLY))
         expected_results.append(10)
 
-        invokes.append(runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 99], CallFlags.ALL))
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'put_value', [b'num', 99], CallFlags.ALL))
         expected_results.append(None)
 
-        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.READ_ONLY))
+        invokes.append(runner.call_contract(path, 'Main', call_hash, 'get_value', [b'num'], CallFlags.READ_ONLY))
         expected_results.append(99)
 
         invokes.append(runner.call_contract(path, 'Main', call_hash, 'notify_user', [], CallFlags.ALL))
@@ -153,13 +153,13 @@ class TestContractInterop(BoaTest):
         self.assertEqual(1, len(notify))
         self.assertEqual('Notify was called', notify[0].arguments[0])
 
-        runner.call_contract(path, 'Main', call_hash, 'get_value', ['num'], CallFlags.NONE)
+        runner.call_contract(path, 'Main', call_hash, 'get_value', [b'num'], CallFlags.NONE)
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')
 
-        runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.READ_ONLY)
-        runner.call_contract(path, 'Main', call_hash, 'put_value', ['num', 10], CallFlags.NONE)
+        runner.call_contract(path, 'Main', call_hash, 'put_value', [b'num', 10], CallFlags.READ_ONLY)
+        runner.call_contract(path, 'Main', call_hash, 'put_value', [b'num', 10], CallFlags.NONE)
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'^{self.CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX}')

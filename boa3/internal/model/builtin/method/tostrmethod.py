@@ -5,21 +5,20 @@ from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.type.itype import IType
-from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
 from boa3.internal.model.type.primitive.bytestype import BytesType
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
-class ToBoolMethod(IBuiltinMethod, ABC):
+class ToStrMethod(IBuiltinMethod, ABC):
     def __init__(self, self_type: IType):
-        identifier = 'to_bool'
+        identifier = 'to_str'
         if isinstance(self_type, IdentifiedSymbol):
             identifier = '-{0}_{1}'.format(self_type.identifier, identifier)
 
         args: Dict[str, Variable] = {'self': Variable(self_type)}
         from boa3.internal.model.type.type import Type
-        super().__init__(identifier, args, return_type=Type.bool)
+        super().__init__(identifier, args, return_type=Type.str)
 
     @property
     def _arg_self(self) -> Variable:
@@ -34,7 +33,7 @@ class ToBoolMethod(IBuiltinMethod, ABC):
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
         from boa3.internal.model.type.type import Type
         return [
-            (Opcode.CONVERT, Type.bool.stack_item)
+            (Opcode.CONVERT, Type.str.stack_item)
         ]
 
     def push_self_first(self) -> bool:
@@ -49,23 +48,23 @@ class ToBoolMethod(IBuiltinMethod, ABC):
         return None
 
 
-class _ConvertToBoolMethod(ToBoolMethod):
+class _ConvertToStrMethod(ToStrMethod):
     def __init__(self):
         super().__init__(None)
 
     def build(self, value: Any) -> IBuiltinMethod:
-        if isinstance(value, (BytesType, ByteStringType)):
-            return BytesToBoolMethod(value)
+        if isinstance(value, BytesType):
+            return BytesToStrMethod(value)
         # if it is not a valid type, show mismatched type with bytes
-        return BytesToBoolMethod()
+        return BytesToStrMethod()
 
 
-ToBool = _ConvertToBoolMethod()
+ToStr = _ConvertToStrMethod()
 
 
-class BytesToBoolMethod(ToBoolMethod):
+class BytesToStrMethod(ToStrMethod):
     def __init__(self, self_type: IType = None):
-        if not isinstance(self_type, (BytesType, ByteStringType)):
+        if not isinstance(self_type, BytesType):
             from boa3.internal.model.type.type import Type
             self_type = Type.bytes
         super().__init__(self_type)
@@ -74,5 +73,5 @@ class BytesToBoolMethod(ToBoolMethod):
         if type(value) == type(self.args['self'].type):
             return self
         if isinstance(value, BytesType):
-            return BytesToBoolMethod(value)
+            return BytesToStrMethod(value)
         return super().build(value)

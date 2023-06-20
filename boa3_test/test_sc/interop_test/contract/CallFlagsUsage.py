@@ -4,6 +4,7 @@ from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import NEO, call_contract
 from boa3.builtin.interop.runtime import executing_script_hash, notify
 from boa3.builtin.interop.storage import get, put
+from boa3.builtin.type.helper import to_int
 
 
 @public
@@ -17,10 +18,10 @@ def notify_user():
 
 
 @public
-def put_value(key: str, value: int):
+def put_value(key: bytes, value: int):
     put(key, value)
 
 
 @public
-def get_value(key: str) -> int:
-    return get(key).to_int()
+def get_value(key: bytes) -> int:
+    return to_int(get(key))

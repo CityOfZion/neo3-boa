@@ -1,6 +1,15 @@
+__all__ = [
+    'CreateNewEvent',
+    'public',
+    'metadata',
+    'contract',
+    'display_name',
+    'NeoMetadata',
+]
+
 from typing import List, Dict, Any, Union, Optional, Tuple
 
-from boa3.builtin.type import ByteString, Event
+from boa3.builtin.type import Event
 
 
 def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '') -> Event:
@@ -40,7 +49,7 @@ def metadata(*args):
     pass
 
 
-def contract(script_hash: ByteString):
+def contract(script_hash: Union[str, bytes]):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
 

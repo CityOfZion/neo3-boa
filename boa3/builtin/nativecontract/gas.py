@@ -1,3 +1,8 @@
+__all__ = [
+    'GAS',
+]
+
+
 from typing import Any
 
 from boa3.builtin.type import UInt160

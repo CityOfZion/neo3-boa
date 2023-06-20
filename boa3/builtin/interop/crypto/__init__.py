@@ -1,7 +1,20 @@
+__all__ = [
+    'NamedCurve',
+    'sha256',
+    'ripemd160',
+    'hash160',
+    'hash256',
+    'check_sig',
+    'check_multisig',
+    'verify_with_ecdsa',
+    'murmur32',
+]
+
+
 from typing import Any, List
 
 from boa3.builtin.interop.crypto.namedcurve import NamedCurve
-from boa3.builtin.type import ByteString, ECPoint
+from boa3.builtin.type import ECPoint
 
 
 def sha256(key: Any) -> bytes:
@@ -80,12 +93,12 @@ def check_multisig(pubkeys: List[ECPoint], signatures: List[bytes]) -> bool:
     pass
 
 
-def verify_with_ecdsa(message: Any, pubkey: ECPoint, signature: ByteString, curve: NamedCurve) -> bool:
+def verify_with_ecdsa(message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurve) -> bool:
     """
-    Using the elliptic curve, it checks if the signature of the any item was originally produced by the public key.
+    Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
 
     :param message: the encrypted message
-    :type message: Any
+    :type message: bytes
     :param pubkey: the public key that might have created the item
     :type pubkey: ECPoint
     :param signature: the signature of the item
@@ -98,15 +111,15 @@ def verify_with_ecdsa(message: Any, pubkey: ECPoint, signature: ByteString, curv
     pass
 
 
-def murmur32(data: ByteString, seed: int) -> ByteString:
+def murmur32(data: bytes, seed: int) -> bytes:
     """
     Computes the hash value for the specified byte array using the murmur32 algorithm.
 
     :param data: the input to compute the hash code for
-    :type data: ByteString
+    :type data: bytes
     :param seed: the seed of the murmur32 hash function
     :type seed: int
     :return: the hash value
-    :rtype: ByteString
+    :rtype: bytes
     """
     pass

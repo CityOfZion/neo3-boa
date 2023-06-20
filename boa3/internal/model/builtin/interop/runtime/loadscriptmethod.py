@@ -11,7 +11,6 @@ class LoadScriptMethod(InteropMethod):
     def __init__(self):
         from boa3.internal.model.builtin.interop.contract.callflagstype import CallFlagsType
         from boa3.internal.model.type.type import Type
-        from boa3.internal.model.type.primitive.bytestringtype import ByteStringType
         from boa3.internal.neo3.contracts import CallFlags
 
         identifier = 'load_script'
@@ -19,7 +18,7 @@ class LoadScriptMethod(InteropMethod):
         call_flags: CallFlagsType = CallFlagsType.build()
 
         args: Dict[str, Variable] = {
-            'script': Variable(ByteStringType.build()),
+            'script': Variable(Type.bytes),
             'args': Variable(Type.sequence),
             'call_flags': Variable(call_flags)
         }

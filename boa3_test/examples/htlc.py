@@ -6,7 +6,7 @@ from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
 from boa3.builtin.interop.crypto import hash160
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 
 # -------------------------------------------
@@ -108,7 +108,7 @@ def atomic_swap(person_a_address: UInt160, person_a_token: UInt160, person_a_amo
     # the parameter amount must be greater than 0. If not, this method should throw an exception.
     assert person_a_amount > 0 and person_b_amount > 0
 
-    if storage.get(NOT_INITIALIZED).to_bool() and verify():
+    if type_helper.to_bool(storage.get(NOT_INITIALIZED)) and verify():
         storage.put(ADDRESS_PREFIX + PERSON_A, person_a_address)
         storage.put(TOKEN_PREFIX + PERSON_A, person_a_token)
         storage.put(AMOUNT_PREFIX + PERSON_A, person_a_amount)
@@ -145,13 +145,13 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     if from_address is None and runtime.calling_script_hash == GAS_SCRIPT:
         return
 
-    if not storage.get(NOT_INITIALIZED).to_bool():
+    if not type_helper.to_bool(storage.get(NOT_INITIALIZED)):
         # Used to check if the one who's transferring to this contract is the PERSON_A
         address = storage.get(ADDRESS_PREFIX + PERSON_A)
-        # Used to check if PERSON_A already transfer to this smart contract
-        funded_crypto = storage.get(FUNDED_PREFIX + PERSON_A).to_int()
+        # Used to check if PERSON_A has already transferred to this smart contract
+        funded_crypto = type_helper.to_int(storage.get(FUNDED_PREFIX + PERSON_A))
         # Used to check if PERSON_A is transferring the correct amount
-        amount_crypto = storage.get(AMOUNT_PREFIX + PERSON_A).to_int()
+        amount_crypto = type_helper.to_int(storage.get(AMOUNT_PREFIX + PERSON_A))
         # Used to check if PERSON_A is transferring the correct token
         token_crypto = storage.get(TOKEN_PREFIX + PERSON_A)
         if (from_address == address and
@@ -164,9 +164,9 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
             # Used to check if the one who's transferring to this contract is the OTHER_PERSON
             address = storage.get(ADDRESS_PREFIX + PERSON_B)
             # Used to check if PERSON_B already transfer to this smart contract
-            funded_crypto = storage.get(FUNDED_PREFIX + PERSON_B).to_int()
+            funded_crypto = type_helper.to_int(storage.get(FUNDED_PREFIX + PERSON_B))
             # Used to check if PERSON_B is transferring the correct amount
-            amount_crypto = storage.get(AMOUNT_PREFIX + PERSON_B).to_int()
+            amount_crypto = type_helper.to_int(storage.get(AMOUNT_PREFIX + PERSON_B))
             # Used to check if PERSON_B is transferring the correct token
             token_crypto = storage.get(TOKEN_PREFIX + PERSON_B)
             if (from_address == address and
@@ -191,17 +191,19 @@ def withdraw(secret: str) -> bool:
     :rtype: bool
     """
     # Checking if PERSON_A and PERSON_B transferred to this smart contract
-    funded_person_a = storage.get(FUNDED_PREFIX + PERSON_A).to_int()
-    funded_person_b = storage.get(FUNDED_PREFIX + PERSON_B).to_int()
+    funded_person_a = type_helper.to_int(storage.get(FUNDED_PREFIX + PERSON_A))
+    funded_person_b = type_helper.to_int(storage.get(FUNDED_PREFIX + PERSON_B))
     if verify() and not refund() and hash160(secret) == storage.get(SECRET_HASH) and funded_person_a != 0 and funded_person_b != 0:
         storage.put(FUNDED_PREFIX + PERSON_A, 0)
         storage.put(FUNDED_PREFIX + PERSON_B, 0)
         storage.put(NOT_INITIALIZED, True)
         storage.put(START_TIME, 0)
         call_contract(UInt160(storage.get(TOKEN_PREFIX + PERSON_B)), 'transfer',
-                      [runtime.executing_script_hash, storage.get(ADDRESS_PREFIX + PERSON_A), storage.get(AMOUNT_PREFIX + PERSON_B), None])
+                      [runtime.executing_script_hash, storage.get(ADDRESS_PREFIX + PERSON_A),
+                       type_helper.to_int(storage.get(AMOUNT_PREFIX + PERSON_B)), None])
         call_contract(UInt160(storage.get(TOKEN_PREFIX + PERSON_A)), 'transfer',
-                      [runtime.executing_script_hash, storage.get(ADDRESS_PREFIX + PERSON_B), storage.get(AMOUNT_PREFIX + PERSON_A), None])
+                      [runtime.executing_script_hash, storage.get(ADDRESS_PREFIX + PERSON_B),
+                       type_helper.to_int(storage.get(AMOUNT_PREFIX + PERSON_A)), None])
         return True
 
     return False
@@ -215,18 +217,20 @@ def refund() -> bool:
     :return: whether enough time has passed and the cryptocurrencies were refunded
     :rtype: bool
     """
-    if runtime.time > storage.get(START_TIME).to_int() + LOCK_TIME:
+    if runtime.time > type_helper.to_int(storage.get(START_TIME)) + LOCK_TIME:
         # Checking if PERSON_A transferred to this smart contract
-        funded_crypto = storage.get(FUNDED_PREFIX + PERSON_A).to_int()
+        funded_crypto = type_helper.to_int(storage.get(FUNDED_PREFIX + PERSON_A))
         if funded_crypto != 0:
             call_contract(UInt160(storage.get(TOKEN_PREFIX + PERSON_A)), 'transfer',
-                          [runtime.executing_script_hash, UInt160(storage.get(ADDRESS_PREFIX + PERSON_A)), storage.get(AMOUNT_PREFIX + PERSON_A).to_int(), None])
+                          [runtime.executing_script_hash, UInt160(storage.get(ADDRESS_PREFIX + PERSON_A)),
+                           type_helper.to_int(storage.get(AMOUNT_PREFIX + PERSON_A)), None])
 
         # Checking if PERSON_B transferred to this smart contract
-        funded_crypto = storage.get(FUNDED_PREFIX + PERSON_B).to_int()
+        funded_crypto = type_helper.to_int(storage.get(FUNDED_PREFIX + PERSON_B))
         if funded_crypto != 0:
             call_contract(UInt160(storage.get(TOKEN_PREFIX + PERSON_B)), 'transfer',
-                          [runtime.executing_script_hash, storage.get(ADDRESS_PREFIX + PERSON_B), storage.get(AMOUNT_PREFIX + PERSON_B).to_int(), None])
+                          [runtime.executing_script_hash, storage.get(ADDRESS_PREFIX + PERSON_B),
+                           type_helper.to_int(storage.get(AMOUNT_PREFIX + PERSON_B)), None])
         storage.put(FUNDED_PREFIX + PERSON_A, 0)
         storage.put(FUNDED_PREFIX + PERSON_B, 0)
         storage.put(NOT_INITIALIZED, True)

@@ -2,7 +2,6 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.builtin.interop.interop import Interop
-from boa3.internal.model.type.type import Type
 from boa3.internal.neo.core.types.InteropInterface import InteropInterface
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -27,12 +26,10 @@ class TestStorageInterop(BoaTest):
             + Opcode.DUP
             + Opcode.ISNULL
             + Opcode.JMPIFNOT
-            + Integer(7).to_byte_array(signed=True, min_length=1)
+            + Integer(5).to_byte_array(signed=True, min_length=1)
             + Opcode.DROP
             + Opcode.PUSHDATA1
             + Integer(0).to_byte_array(signed=False, min_length=1)
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
             + Opcode.RET
         )
 
@@ -41,66 +38,8 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
     def test_storage_get_str_key(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.StorageGetContext.interop_method_hash
-            + Opcode.SYSCALL
-            + Interop.StorageGet.interop_method_hash
-            + Opcode.DUP
-            + Opcode.ISNULL
-            + Opcode.JMPIFNOT
-            + Integer(7).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.PUSHDATA1
-            + Integer(0).to_byte_array(signed=False, min_length=1)
-            + Opcode.CONVERT
-            + Type.bytes.stack_item
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('StorageGetStrKey.py')
-        output = self.compile(path)
-        self.assertStartsWith(output, expected_output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        not_existing_key = 'unknown_key'
-        invokes.append(runner.call_contract(path, 'Main', not_existing_key,
-                                            expected_result_type=bytes))
-        expected_results.append(b'')
-
-        storage_key_1 = 'example'
-        storage_key_2 = 'test'
-        invokes.append(runner.call_contract(path, 'Main', storage_key_1,
-                                            expected_result_type=bytes))
-        expected_results.append(Integer(23).to_byte_array())
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2,
-                                            expected_result_type=bytes))
-        expected_results.append(Integer(42).to_byte_array())
-
-        storage_contract = invokes[0].invoke.contract
-        runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
-
-        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
-        self.assertEqual(expected_results[1], storage_result_1.as_bytes())
-
-        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
-        self.assertEqual(expected_results[2], storage_result_2.as_bytes())
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_get_mismatched_type(self):
         path = self.get_contract_path('StorageGetMismatchedType.py')
@@ -250,147 +189,16 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(stored_value, storage_result_2.as_str())
 
     def test_storage_put_str_key_bytes_value(self):
-        path, _ = self.get_deploy_file_paths('StoragePutStrKeyBytesValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        storage_key_1 = 'test1'
-        storage_key_2 = 'test2'
-        stored_value = b'\x01\x02\x03'
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
-        expected_results.append(None)
-
-        storage_contract = invokes[0].invoke.contract
-        runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
-        self.assertEqual(stored_value, storage_result_1.as_bytes())
-
-        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
-        self.assertEqual(stored_value, storage_result_2.as_bytes())
+        path = self.get_contract_path('StoragePutStrKeyBytesValue.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_put_str_key_int_value(self):
-        value = Integer(123).to_byte_array()
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01'
-            + b'\x01'
-            + Opcode.PUSHINT8 + value
-            + Opcode.STLOC0
-            + Opcode.PUSHINT8 + value
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.StorageGetContext.interop_method_hash
-            + Opcode.SYSCALL
-            + Interop.StoragePut.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('StoragePutStrKeyIntValue.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        storage_key_1 = 'test1'
-        storage_key_2 = 'test2'
-        stored_value = 123
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
-        expected_results.append(None)
-
-        storage_contract = invokes[0].invoke.contract
-        runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
-        self.assertEqual(stored_value, storage_result_1.as_int())
-
-        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
-        self.assertEqual(stored_value, storage_result_2.as_int())
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_put_str_key_str_value(self):
-        value = String('123').to_bytes()
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01'
-            + b'\x01'
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.STLOC0
-            + Opcode.PUSHDATA1
-            + Integer(len(value)).to_byte_array(min_length=1, signed=True)
-            + value
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.StorageGetContext.interop_method_hash
-            + Opcode.SYSCALL
-            + Interop.StoragePut.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('StoragePutStrKeyStrValue.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        storage_key_1 = 'test1'
-        storage_key_2 = 'test2'
-        stored_value = '123'
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_1))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key_2))
-        expected_results.append(None)
-
-        storage_contract = invokes[0].invoke.contract
-        runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        storage_result_1 = runner.storages.get(storage_contract, storage_key_1)
-        self.assertEqual(stored_value, storage_result_1.as_str())
-
-        storage_result_2 = runner.storages.get(storage_contract, storage_key_2)
-        self.assertEqual(stored_value, storage_result_2.as_str())
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_put_mismatched_type_key(self):
         path = self.get_contract_path('StoragePutMismatchedTypeKey.py')
@@ -452,55 +260,8 @@ class TestStorageInterop(BoaTest):
         self.assertIsNone(runner.storages.get(storage_contract, storage_key))
 
     def test_storage_delete_str_key(self):
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0
-            + Opcode.SYSCALL
-            + Interop.StorageGetContext.interop_method_hash
-            + Opcode.SYSCALL
-            + Interop.StorageDelete.interop_method_hash
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('StorageDeleteStrKey.py')
-        output = self.compile(path)
-        self.assertStartsWith(output, expected_output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        not_existing_key = 'unknown_key'
-        storage_key = 'example'
-
-        invokes.append(runner.call_contract(path, 'has_key', not_existing_key))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'has_key', storage_key))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'Main', not_existing_key))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', storage_key))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'has_key', storage_key))
-        expected_results.append(False)
-
-        storage_contract = invokes[0].invoke.contract
-        runner.execute(get_storage_from=storage_contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        self.assertIsNone(runner.storages.get(storage_contract, not_existing_key))
-        self.assertIsNone(runner.storages.get(storage_contract, storage_key))
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_delete_mismatched_type(self):
         path = self.get_contract_path('StorageDeleteMismatchedType.py')
@@ -537,34 +298,8 @@ class TestStorageInterop(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_storage_find_str_prefix(self):
-        path, _ = self.get_deploy_file_paths('StorageFindStrPrefix.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
-        expected_results.append([])
-
-        runner.execute()  # getting result of multiple iterators is failing
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        storage = {'example_0': '0',
-                   'example_1': '1',
-                   'example_2': '3'}
-        expected_result = [[key, value] for key, value in storage.items()]
-
-        for (key, value) in expected_result:
-            runner.call_contract(path, 'put_on_storage', key, value)
-
-        invokes.append(runner.call_contract(path, 'find_by_prefix', 'example'))
-        expected_results.append(expected_result)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        path = self.get_contract_path('StorageFindStrPrefix.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_storage_find_mismatched_type(self):
         path = self.get_contract_path('StorageFindMismatchedType.py')
@@ -811,7 +546,7 @@ class TestStorageInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        storage_key = 'something'
+        storage_key = b'something'
         invokes.append(runner.call_contract(path, 'main', 'sget', storage_key, 'blah',
                                             expected_result_type=bytes))
         expected_results.append(b'')
@@ -882,7 +617,7 @@ class TestStorageInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        key = 'example_key'
+        key = b'example_key'
         value = 42
 
         invokes.append(runner.call_contract(path1, 'put_value', key, value))
@@ -923,7 +658,7 @@ class TestStorageInterop(BoaTest):
         invokes.append(runner.call_contract(path, 'insert_to_map', storage_key, stored_value))
         expected_results.append(None)
 
-        invokes.append(runner.call_contract(path, 'get_from_map', 'test1',
+        invokes.append(runner.call_contract(path, 'get_from_map', b'test1',
                                             expected_result_type=bytes))
         expected_results.append(stored_value)
 
@@ -934,10 +669,10 @@ class TestStorageInterop(BoaTest):
         storage_result = runner.storages.get(storage_contract, map_key + storage_key)
         self.assertEqual(stored_value, storage_result.as_bytes())
 
-        invokes.append(runner.call_contract(path, 'delete_from_map', 'test1'))
+        invokes.append(runner.call_contract(path, 'delete_from_map', b'test1'))
         expected_results.append(None)
 
-        invokes.append(runner.call_contract(path, 'get_from_map', 'test1',
+        invokes.append(runner.call_contract(path, 'get_from_map', b'test1',
                                             expected_result_type=bytes))
         expected_results.append(b'')
 
@@ -954,8 +689,9 @@ class TestStorageInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        prefix = 'unit'
-        key = f'{prefix}_test'
+        prefix = b'unit'
+        key = prefix + b'_test'
+        key_str = String.from_bytes(key)
         value = 1234
 
         invokes.append(runner.call_contract(path, 'get_value', key))
@@ -974,7 +710,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(value)
 
         invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
-        expected_results.append([[key, Integer(value).to_byte_array()]])
+        expected_results.append([[key_str, Integer(value).to_byte_array()]])
 
         runner.execute()  # getting result of multiple iterators is failing
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -1004,8 +740,9 @@ class TestStorageInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        prefix = 'unit'
-        key = f'{prefix}_test'
+        prefix = b'unit'
+        key = prefix + b'_test'
+        key_str = String.from_bytes(key)
         value = 1234
 
         invokes.append(runner.call_contract(path, 'get_value', key))
@@ -1024,7 +761,7 @@ class TestStorageInterop(BoaTest):
         expected_results.append(value)
 
         invokes.append(runner.call_contract(path, 'find_by_prefix', prefix))
-        expected_results.append([[key, Integer(value).to_byte_array()]])
+        expected_results.append([[key_str, Integer(value).to_byte_array()]])
 
         runner.execute()  # getting result of multiple iterators is failing
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -1054,7 +791,7 @@ class TestStorageInterop(BoaTest):
         invokes = []
         expected_results = []
 
-        key = 'key'
+        key = b'key'
         value_old = 'old value'
         value_new = 'new value'
 

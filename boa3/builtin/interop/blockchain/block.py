@@ -1,3 +1,7 @@
+__all__ = [
+    'Block'
+]
+
 from boa3.builtin.type import UInt160, UInt256
 
 

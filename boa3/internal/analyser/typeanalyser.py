@@ -1146,7 +1146,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_method_id = constants.INIT_METHOD_ID
 
         if not isinstance(callable_target, Callable):
-            # the symbol doesn't exists or is not a function
+            # the symbol doesn't exist or is not a function
             # if it is None, the error was already logged
             if callable_id is not None:
                 if callable_method_id is not None:
@@ -1615,6 +1615,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = self.get_symbol(value)
             if symbol is None:
                 return '{0}.{1}'.format(value, attribute.attr)
+            value_type = self.get_type(symbol)
+        else:
+            value_type = self.get_type(value)
+
         if isinstance(value, ISymbol):
             symbol = value
 
@@ -1687,6 +1691,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             attr_value = symbol if not isinstance(symbol, PythonClass) else attribute.value
         else:
             attr_value = attribute.value
+            if not isinstance(symbol, Import):
+                if hasattr(attr_type, 'symbols'):
+                    is_valid_symbol_in_attribute = attribute.attr in attr_type.symbols
+                else:
+                    is_valid_symbol_in_attribute = attr_symbol in self.symbols.values()
+                attr_id = value_type.identifier
+            else:
+                is_valid_symbol_in_attribute = attribute.attr in symbol.symbols
+                attr_id = attr_type
+
+            if not is_internal and not is_valid_symbol_in_attribute:
+                self._log_error(
+                    CompilerError.UnresolvedReference(
+                        attribute.lineno, attribute.col_offset,
+                        symbol_id='{0}.{1}'.format(attr_id, attribute.attr)
+                    ))
 
         if isinstance(attr_symbol, Property):
             if isinstance(attribute.ctx, ast.Load):

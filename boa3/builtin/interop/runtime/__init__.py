@@ -1,9 +1,33 @@
+__all__ = [
+    'Notification',
+    'TriggerType',
+    'check_witness',
+    'notify',
+    'log',
+    'get_trigger',
+    'get_notifications',
+    'get_network',
+    'burn_gas',
+    'get_random',
+    'load_script',
+    'address_version',
+    'executing_script_hash',
+    'calling_script_hash',
+    'time',
+    'gas_left',
+    'platform',
+    'invocation_counter',
+    'entry_script_hash',
+    'script_container',
+]
+
+
 from typing import Any, List, Union, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
-from boa3.builtin.type import ECPoint, UInt160, ByteString
+from boa3.builtin.type import ECPoint, UInt160
 
 
 def check_witness(hash_or_pubkey: Union[UInt160, ECPoint]) -> bool:
@@ -95,7 +119,7 @@ def get_random() -> int:
     pass
 
 
-def load_script(script: ByteString, args: Sequence = (), flags: CallFlags = CallFlags.NONE) -> Any:
+def load_script(script: bytes, args: Sequence = (), flags: CallFlags = CallFlags.NONE) -> Any:
     """
     Loads a script at runtime.
     """

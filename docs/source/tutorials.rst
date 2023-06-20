@@ -22,7 +22,7 @@ All of the examples presented here can be found in the `examples folder of the N
 
     @public
     def Main():
-        storage.put('hello', 'world')
+        storage.put(b'hello', b'world')
 
 
     @metadata

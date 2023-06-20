@@ -186,7 +186,7 @@ workflows:
               only: /.*/
             branches:
               only:
-                - development
+                - staging
                 - master
       - publish-docs:
           context: aws
@@ -197,5 +197,5 @@ workflows:
               only: /.*/
             branches:
               only:
-                - development
+                - staging
                 - master

@@ -1,6 +1,5 @@
 from typing import List
 
-from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.native import *
 from boa3.internal.model.builtin.native.oracleclass import OracleClass
@@ -24,8 +23,7 @@ class NativeContract:
 
     ContractManagementModule = Package(identifier=ContractManagement.identifier.lower(),
                                        types=[ContractManagement,
-                                              Interop.ContractType,
-                                              Builtin.UInt160])
+                                              Interop.ContractType])
 
     CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
                               types=[CryptoLib,
@@ -36,9 +34,7 @@ class NativeContract:
                         )
 
     LedgerModule = Package(identifier=Ledger.identifier.lower(),
-                           types=[Ledger,
-                                  Interop.BlockType,
-                                  Interop.TransactionType]
+                           types=[Ledger]
                            )
 
     NeoModule = Package(identifier=NEO.identifier.lower(),

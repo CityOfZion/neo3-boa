@@ -43,6 +43,7 @@ class Method(Callable):
 
         self._debug_map: List[DebugInstruction] = []
         self.origin_class: Optional[ClassType] = None
+        self.file_origin: Optional[str] = None
 
     @property
     def shadowing_name(self) -> str:

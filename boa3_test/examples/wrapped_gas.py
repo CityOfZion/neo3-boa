@@ -6,7 +6,7 @@ from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.nativecontract.gas import GAS as GAS_TOKEN
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 
 # -------------------------------------------
@@ -36,7 +36,7 @@ def manifest_metadata() -> NeoMetadata:
 
 # Script hash of the contract owner
 OWNER = UInt160()
-SUPPLY_KEY = 'totalSupply'
+SUPPLY_KEY = b'totalSupply'
 
 # Symbol of the Token
 TOKEN_SYMBOL = 'zGAS'
@@ -108,7 +108,7 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return storage.get(SUPPLY_KEY).to_int()
+    return type_helper.to_int(storage.get(SUPPLY_KEY))
 
 
 @public(name='balanceOf', safe=True)
@@ -122,7 +122,7 @@ def balance_of(account: UInt160) -> int:
     :type account: bytes
     """
     assert len(account) == 20
-    return storage.get(account).to_int()
+    return type_helper.to_int(storage.get(account))
 
 
 @public
@@ -151,7 +151,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = storage.get(from_address).to_int()
+    from_balance = type_helper.to_int(storage.get(from_address))
     if from_balance < amount:
         return False
 
@@ -169,7 +169,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         else:
             storage.put(from_address, from_balance - amount)
 
-        to_balance = storage.get(to_address).to_int()
+        to_balance = type_helper.to_int(storage.get(to_address))
         storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
@@ -209,7 +209,7 @@ def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, 
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = storage.get(from_address).to_int()
+    from_balance = type_helper.to_int(storage.get(from_address))
     if from_balance < amount:
         return False
 
@@ -237,7 +237,7 @@ def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, 
         else:
             storage.put(from_address, from_balance - amount)
 
-        to_balance = storage.get(to_address).to_int()
+        to_balance = type_helper.to_int(storage.get(to_address))
         storage.put(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
@@ -286,7 +286,7 @@ def allowance(owner: UInt160, spender: UInt160) -> int:
     :param spender: the address that can spend zGAS from the owner's account
     :type spender: UInt160
     """
-    return storage.get(ALLOWANCE_PREFIX + owner + spender).to_int()
+    return type_helper.to_int(storage.get(ALLOWANCE_PREFIX + owner + spender))
 
 
 def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], amount: int, data: Any,

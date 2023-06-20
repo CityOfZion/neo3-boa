@@ -5,7 +5,7 @@ from boa3.builtin.interop.storage import delete, get, get_context, put
 
 
 @public
-def main(operation: str, arg: str, val: str) -> Any:
+def main(operation: str, arg: bytes, val: str) -> Any:
 
     storage_context = get_context()
     print("context")
