@@ -31,7 +31,6 @@ class StorageGetMethod(InteropMethod):
 
     @property
     def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.model.type.type import Type
         from boa3.internal.neo.vm.type.Integer import Integer
 
         opcodes = super()._opcode

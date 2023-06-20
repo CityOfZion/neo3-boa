@@ -434,7 +434,7 @@ class CodeGenerator:
                             attribute, symbol_id = constants.ATTRIBUTE_NAME_SEPARATOR.join(split[:-1]), split[-1]
                             another_attr_id, attr = self.get_symbol(attribute, is_internal=is_internal)
                             if hasattr(attr, 'symbols') and symbol_id in attr.symbols:
-                                found_id, found_symbol =  symbol_id, attr.symbols[symbol_id]
+                                found_id, found_symbol = symbol_id, attr.symbols[symbol_id]
                             elif isinstance(attr, Package) and symbol_id in attr.inner_packages:
                                 found_id, found_symbol = symbol_id, attr.inner_packages[symbol_id]
 
