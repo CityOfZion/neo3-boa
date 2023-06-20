@@ -20,6 +20,19 @@ from typing import Union
 class Event:
     """
     Describes an action that happened in the blockchain.
+    Neo3-boa compiler won't recognize the `__init__` of this class. To create a new Event, use the method `CreateNewEvent`:
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/basics#events>`__ to learn more
+    about Events.
+
+    >>> from boa3.builtin.compile_time import CreateNewEvent
+    ... new_event: Event = CreateNewEvent(  # create a new Event with the CreateNewEvent method
+    ...     [
+    ...        ('name', str),
+    ...        ('amount', int)
+    ...     ],
+    ...     'New Event'
+    ... )
     """
 
     def __call__(self, *args, **kwargs):

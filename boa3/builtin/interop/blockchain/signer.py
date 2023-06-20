@@ -17,6 +17,9 @@ class Signer:
     """
     Represents a signer.
 
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/foundation/Transactions#signers>`__ to learn more
+    about Signers.
+
     :ivar account:
     :vartype account: UInt160
     :ivar scopes:
@@ -41,6 +44,9 @@ class WitnessRule:
     """
     Represents a witness rule.
 
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/foundation/Transactions#witnessrule>`__ to learn
+    more about WitnessRules.
+
     :ivar action:
     :vartype action: WitnessRuleAction
     :ivar condition:
@@ -55,6 +61,9 @@ class WitnessRule:
 class WitnessCondition:
     """
     Represents a witness condition.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/foundation/Transactions#witnesscondition>`__ to
+    learn more about WitnessConditions.
 
     :ivar type:
     :vartype type: WitnessConditionType

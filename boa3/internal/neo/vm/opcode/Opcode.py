@@ -5,6 +5,7 @@ from enum import Enum
 
 class Opcode(bytes, Enum):
     """
+    Opcodes are similar to instructions in assembly language.
     """
 
     # region Constants

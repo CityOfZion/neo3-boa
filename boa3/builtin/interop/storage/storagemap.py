@@ -6,6 +6,9 @@ from typing import Union
 class StorageMap:
     """
     The key-value storage for the specific prefix in the given storage context.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/services/StorageMap>`__
+    to learn more about StorageMap.
     """
 
     def __init__(self, context, prefix: bytes):

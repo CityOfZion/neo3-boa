@@ -5,6 +5,9 @@ class TriggerType(IntFlag):
     """
     Represents the triggers for running smart contracts. Triggers enable the contract to execute different logic under
     different usage scenarios.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/services/TriggerType>`__
+    to learn more about TriggerTypes.
     """
 
     ON_PERSIST = 0x01
@@ -54,6 +57,9 @@ class CallFlags(IntFlag):
     """
     Defines special behaviors allowed when invoking smart contracts, e.g., chain calls, sending notifications and
     modifying states.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/services/CallFlags>`__
+    to learn more about CallFlags.
     """
 
     NONE = 0

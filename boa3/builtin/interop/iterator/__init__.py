@@ -27,6 +27,11 @@ class Iterator:
         """
         Advances the iterator to the next element of the collection.
 
+        >>> from boa3.builtin.interop import storage
+        ... iterator = storage.find(b'prefix')
+        ... iterator.next()
+        True
+
         :return: true if it advanced, false if there isn't a next element
         :rtype: bool
         """
