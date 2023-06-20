@@ -44,8 +44,8 @@ class ListBytesStringMethod(ListMethod):
             code_generator.convert_cast(Type.str, is_internal=True)
 
         #   reorganize stack
-        code_generator.insert_opcode(Opcode.ROT)
-        code_generator.insert_opcode(Opcode.ROT)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
         code_generator.insert_opcode(Opcode.DEC)
 
         #   while condition

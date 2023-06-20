@@ -28,7 +28,7 @@ class PrintClassMethod(PrintMethod):
             code_generator.insert_opcode(Opcode.TUCK, add_to_stack=[Type.any])
             code_generator.convert_literal(variable_name)
             item_address = code_generator.bytecode_size
-            code_generator.insert_opcode(Opcode.ROT)
+            code_generator.swap_reverse_stack_items(3, rotate=True)
             code_generator.convert_set_item(item_address, index_inserted_internally=True)
 
         # print as json

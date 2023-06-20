@@ -41,8 +41,8 @@ class StrBytesMultiplication(BinaryOperation):
         # concatString = ''
         code_generator.convert_literal('')
         # reorganize stack
-        code_generator.insert_opcode(Opcode.ROT)
-        code_generator.insert_opcode(Opcode.ROT)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
 
         # while argInt > 0:
         concat_start = code_generator.convert_begin_while()
