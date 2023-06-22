@@ -5,8 +5,6 @@ from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CountSequenceMethod(CountMethod):
@@ -22,8 +20,6 @@ class CountSequenceMethod(CountMethod):
             'self': Variable(sequence_type),
             'value': Variable(arg_value)
         }
-
-        self._generic_verification_opcodes = None
 
         super().__init__(args)
 
@@ -45,99 +41,71 @@ class CountSequenceMethod(CountMethod):
             return False
         return True
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+        # aux = self.copy()
+        code_generator.convert_copy()
 
-        # region Sequence logic
+        # count = 0
+        code_generator.convert_literal(0)
 
-        repack_array = [  # recreates an array to not change the original one
-            (Opcode.UNPACK, b''),
-            (Opcode.PACK, b''),
-        ]
+        # index = len(sequence) - 1
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.insert_opcode(Opcode.DEC)
 
-        sequence_initialize = [  # initializes variables
-            (Opcode.PUSH0, b''),  # count = 0
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.DEC, b''),  # index = len(sequence) - -1
-        ]
+        # while index >= 0:
+        while_start = code_generator.convert_begin_while()
 
-        sequence_verify_while = [  # verifies if all the elements from the sequence were visited
-            (Opcode.DUP, b''),  # would be equivalent to: while (index >= 0)
-            (Opcode.SIGN, b''),
-            (Opcode.PUSH0, b''),  # if index < 0:
-            jmp_place_holder,  # jump to clean the stack
-        ]
+        jmps_to_inc, jmps_to_condition = self._generic_verification(code_generator)
 
-        sequence_get_element = [  # gets a element from the sequence
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b'')  # element = sequence[index]
-        ]
+        #   element = sequence[index]
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
 
-        sequence_equals = [  # verifies if the element and the given value are the same
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.EQUAL, b''),  # if element != value:
-            jmp_place_holder  # jump to list_tuple_count_index_dec
-        ]
+        #   if element == value:
+        code_generator.duplicate_stack_item(5)
+        is_equal = code_generator.convert_begin_if()
+        code_generator.change_jump(is_equal, Opcode.JMPNE)
 
-        sequence_count_inc = [  # increment count if element == value
-            (Opcode.SWAP, b''),
-            (Opcode.INC, b''),  # count++
-            (Opcode.SWAP, b''),
-        ]
+        for address in jmps_to_inc:
+            code_generator.convert_end_if(address, is_internal=True)
 
-        num_jmp_code = get_bytes_count(sequence_count_inc)
-        jmp_to_dec_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
-        sequence_equals[-1] = jmp_to_dec_statement
+        #       count += 1
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(2)
 
-        list_tuple_count_index_dec = [  # decreases the index
-            (Opcode.DEC, b''),  # index--
-            # return to the while verification
-        ]
+        code_generator.convert_end_if(is_equal)
+        for address in jmps_to_condition:
+            code_generator.convert_end_if(address, is_internal=True)
 
-        in_depth_verification = self.generic_verification(get_bytes_count(sequence_count_inc),
-                                                          get_bytes_count(sequence_get_element + sequence_equals))
+        #   index -= 1
+        code_generator.insert_opcode(Opcode.DEC)
 
-        num_jmp_code = -get_bytes_count(list_tuple_count_index_dec + sequence_count_inc + sequence_equals +
-                                        sequence_get_element + sequence_verify_while + in_depth_verification)
-        jmp_back_to_while_verify_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
-        list_tuple_count_index_dec.append(jmp_back_to_while_verify_statement)
+        # while condition
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.SIGN)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.GtE)
 
-        num_jmp_code = get_bytes_count(sequence_get_element + sequence_equals +
-                                       sequence_count_inc + list_tuple_count_index_dec + in_depth_verification)
-        jmp_to_clean_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPLT, num_jmp_code, True)
-        sequence_verify_while[-1] = jmp_to_clean_statement
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
 
-        sequence_clean_stack = [
-            (Opcode.DROP, b''),
-            (Opcode.REVERSE3, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
+        # clean stack
+        code_generator.remove_stack_top_item()
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
 
-        # endregion
+    def _generic_verification(self, code_generator) -> Tuple[List[int], List[int]]:
+        """
+        Generate the Neo VM opcodes for the method.
 
-        return (
-            repack_array +
-            sequence_initialize +
-            sequence_verify_while +
-            in_depth_verification +
-            sequence_get_element +
-            sequence_equals +
-            sequence_count_inc +
-            list_tuple_count_index_dec +
-            sequence_clean_stack
-        )
-
-    def generic_verification(self, inc_statement_bytes=None,
-                             get_equals_statement_bytes=None) -> List[Tuple[Opcode, bytes]]:
-        if self._generic_verification_opcodes is None:
-            self._generic_verification_opcodes = []
-
-        return self._generic_verification_opcodes
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        return [], []
