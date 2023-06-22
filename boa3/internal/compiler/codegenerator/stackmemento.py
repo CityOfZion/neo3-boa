@@ -15,11 +15,12 @@ class StackMemento:
     def __init__(self):
         self._stacks: List[Tuple[VMCode, NeoStack]] = []
         self._current_stack: NeoStack = NeoStack()
+        self._memento: List[Tuple[VMCode, NeoStack]] = []
 
     @property
     def stack_map(self) -> Dict[int, NeoStack]:
         vm_code_mapping = VMCodeMapping.instance()
-        return {vm_code_mapping.get_start_address(vmcode): stack for vmcode, stack in self._stacks}
+        return {vm_code_mapping.get_start_address(vmcode): stack for vmcode, stack in self._memento}
 
     def get_state(self, code_address: int) -> NeoStack:
         stacks = self.stack_map
@@ -67,6 +68,7 @@ class StackMemento:
             stack.append(value)
 
             self._stacks.append((code, stack))
+            self._memento.append((code, stack))
             self._current_stack = stack
 
     def pop(self, code: VMCode, index: int = -1):
@@ -81,6 +83,7 @@ class StackMemento:
                 stack = NeoStack()
 
             self._stacks.append((code, stack))
+            self._memento.append((code, stack))
             self._current_stack = stack
 
         if len(stack) > 0:
