@@ -1192,7 +1192,7 @@ class CodeGenerator:
 
         if array_or_map_type is Type.str:
             self.convert_literal(1)  # length of substring
-            self.convert_get_substring()
+            self.convert_get_substring(is_internal=index_inserted_internally or index_is_positive or not test_is_negative_index)
         else:
             self.__insert1(OpcodeInfo.PICKITEM)
             self._stack_pop()
@@ -1304,7 +1304,7 @@ class CodeGenerator:
         """
         Gets the ending slice of an array or ByteString
         """
-        # top: start_slice, array
+        # top: array, start_slice
         if len(self._stack) > 1 and isinstance(self._stack[-2], SequenceType):
             if self._stack[-2].stack_item in (StackItemType.ByteString,
                                               StackItemType.Buffer):
