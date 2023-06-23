@@ -292,6 +292,24 @@ class TestMetadata(BoaTest):
         path = self.get_contract_path('MetadataInfoDescriptionMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_metadata_info_supported_standards_bytestring_as_bytes(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsByteStringAsBytes.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_bytestring_as_str(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsByteStringAsStr.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
     def test_metadata_info_trusts(self):
         path = self.get_contract_path('MetadataInfoTrusts.py')
         output, manifest = self.compile_and_save(path)

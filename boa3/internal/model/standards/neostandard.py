@@ -45,7 +45,10 @@ class INeoStandard(abc.ABC):
         method_args = list(symbol.args.values())
         other_args = list(other.args.values())
         for index in range(len(method_args)):
-            if method_args[index].type != other_args[index].type:
-                return False
-
+            if hasattr(symbol, 'literal_implementation') and symbol.literal_implementation:
+                if method_args[index].type != other_args[index].type:
+                    return False
+            else:
+                if not method_args[index].type.is_type_of(other_args[index].type):
+                    return False
         return True
