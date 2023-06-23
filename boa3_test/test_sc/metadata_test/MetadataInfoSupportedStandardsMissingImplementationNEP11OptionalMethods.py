@@ -17,7 +17,7 @@ def standards_manifest() -> NeoMetadata:
 
 # this method has the same name as an NEP-11 optional method, but with a different signature
 @public(safe=True)
-def properties(token_id: str) -> Dict[Any, Any]:
+def properties(token_id: int) -> Dict[Any, Any]:
     pass
 
 
