@@ -1,11 +1,10 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Union
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.collection.mapping.mutable.dicttype import DictType
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -44,99 +43,76 @@ class JoinMethod(IBuiltinMethod):
     def _arg_iterable(self) -> Variable:
         return self.args['iterable']
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
+    def push_self_first(self) -> bool:
+        return self.has_self_argument
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
 
-        # Receives: string, iterable
-        verify_empty_string = [         # verify if string is empty
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),         # iterable_size = len(iterable)
-            (Opcode.PUSH0, b''),        # index = 0
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            jmp_place_holder            # if iterable_size is less than or equals to 0, return empty string
-        ]
+        code_generator.duplicate_stack_top_item()
+        # iterable_size = len(iterable)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        # index = 0
+        code_generator.convert_literal(0)
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
 
-        initialize_string = [           # initializes the return value
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),     # joined = iterable[0]
-            (Opcode.SWAP, b''),
-            (Opcode.INC, b''),          # index++
-            (Opcode.SWAP, b''),
-        ]
+        # if iterable_size >= 0:
+        if_iterable_not_empty = code_generator.convert_begin_if()
+        code_generator.change_jump(if_iterable_not_empty, Opcode.JMPLE)
 
         from boa3.internal.model.type.type import Type
         if Type.dict.is_type_of(self._arg_iterable.type):
-            get_dict_keys = [           # get dictionary keys as an array
-                (Opcode.REVERSE3, b''),
-                (Opcode.KEYS, b''),
-                (Opcode.REVERSE3, b''),
-            ]
-            initialize_string = get_dict_keys + initialize_string
+            code_generator.swap_reverse_stack_items(3)
+            code_generator.convert_builtin_method_call(Builtin.DictKeys)
+            code_generator.swap_reverse_stack_items(3)
 
-        verify_index = [                # verify if all items on the iterable were visited
-            (Opcode.OVER, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            jmp_place_holder            # jump to remove_extra_values if every item was already visited
-        ]
+        #   joined = iterable[0]
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
+        code_generator.swap_reverse_stack_items(2)
+        #   index += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(2)
 
-        concat_strings = [              # concatenate the items inside de interable
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.CAT, b''),          # joined = joined + string
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.CAT, b''),          # joined = joined + iterable[index]
-            (Opcode.SWAP, b''),
-            (Opcode.INC, b''),          # index++
-            (Opcode.SWAP, b''),
-            # jump back to verify_index
-        ]
+        #   while index < iterable_size:
+        while_start = code_generator.convert_begin_while()
 
-        jmp_back_to_verify = OpcodeHelper.get_jump_and_data(Opcode.JMP, -get_bytes_count(verify_index +
-                                                                                         concat_strings))
-        concat_strings.append(jmp_back_to_verify)
+        code_generator.duplicate_stack_item(5)
+        #       joined = joined + string
+        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_get_item(index_inserted_internally=True)
+        #       joined = joined + iterable[index]
+        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.swap_reverse_stack_items(2)
+        #       index += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(2)
 
-        jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(initialize_string +
-                                                                                         verify_index +
-                                                                                         concat_strings), True)
-        verify_empty_string[-1] = jmp_concatenation
+        # # while condition and end
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_operation(BinaryOp.Lt)
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
 
-        add_empty_string = [            # add a empty string at the top of the stack
-            (Opcode.PUSHDATA1, b'\x00')
-        ]
+        #   return joined
+        code_generator.convert_cast(Type.str, is_internal=True)
 
-        jmp_concatenation = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(concat_strings +
-                                                                                         add_empty_string), True)
-        verify_index[-1] = jmp_concatenation
+        # elif iterable_size < 0:
+        else_iterable_is_empty = code_generator.convert_begin_else(if_iterable_not_empty, is_internal=True)
+        #   return ""
+        code_generator.convert_literal("")
+        code_generator.convert_end_if(else_iterable_is_empty)
 
-        remove_extra_values = [         # remove all values from stack except the joined string
-            (Opcode.NIP, b''),
-            (Opcode.NIP, b''),
-            (Opcode.NIP, b''),
-            (Opcode.NIP, b''),
-        ]
-
-        return (
-            verify_empty_string +
-            initialize_string +
-            verify_index +
-            concat_strings +
-            add_empty_string +
-            remove_extra_values
-        )
-
-    def push_self_first(self) -> bool:
-        return self.has_self_argument
+        code_generator.remove_stack_item(2)
+        code_generator.remove_stack_item(2)
+        code_generator.remove_stack_item(2)
+        code_generator.remove_stack_item(2)
 
     @property
     def _args_on_stack(self) -> int:
