@@ -88,8 +88,8 @@ class CountSequenceGenericMethod(CountSequenceMethod):
         jmp_to_clean_stack = code_generator.convert_begin_if()
         code_generator.change_jump(jmp_to_clean_stack, Opcode.JMP)
 
-        code_generator.convert_end_if(is_item_array)
-        code_generator.convert_end_if(is_same_size)
+        code_generator.convert_end_if(is_item_array, is_internal=True)
+        code_generator.convert_end_if(is_same_size, is_internal=True)
         code_generator.remove_stack_top_item()
 
         code_generator.convert_end_if(jmp_to_clean_stack)
