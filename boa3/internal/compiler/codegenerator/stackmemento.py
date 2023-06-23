@@ -15,7 +15,6 @@ class StackMemento:
     def __init__(self):
         self._stacks: List[Tuple[VMCode, NeoStack]] = []
         self._current_stack: NeoStack = NeoStack()
-        self._memento: Dict[int, NeoStack] = {}
 
     @property
     def stack_map(self) -> Dict[int, NeoStack]:
@@ -51,10 +50,6 @@ class StackMemento:
             if (vm_code, stack) in self._stacks:
                 self._stacks.remove((vm_code, stack))
 
-        target_code = VMCodeMapping.instance().get_code(code_address)
-        if target_code is not None and hash(target_code) in self._memento:
-            latest_stack = self._memento[hash(target_code)].copy()
-
         if latest_stack is not None:
             self._current_stack = latest_stack
 
@@ -72,7 +67,6 @@ class StackMemento:
             stack.append(value)
 
             self._stacks.append((code, stack))
-            self._memento[hash(code)] = stack
             self._current_stack = stack
 
     def pop(self, code: VMCode, index: int = -1):
@@ -87,7 +81,6 @@ class StackMemento:
                 stack = NeoStack()
 
             self._stacks.append((code, stack))
-            self._memento[hash(code)] = stack
             self._current_stack = stack
 
         if len(stack) > 0:
