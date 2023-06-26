@@ -10,28 +10,28 @@ class VMState(IntEnum):
     NONE = 0
     """
     Indicates that the execution is in progress or has not yet begun.
-    
+
     :meta hide-value:
     """
 
     HALT = 1
     """
     Indicates that the execution has been completed successfully.
-    
+
     :meta hide-value:
     """
 
     FAULT = 2
     """
     Indicates that the execution has ended, and an exception that cannot be caught is thrown.
-    
+
     :meta hide-value:
     """
 
     BREAK = 4
     """
     Indicates that a breakpoint is currently being hit.
-    
+
     :meta hide-value:
     """
 

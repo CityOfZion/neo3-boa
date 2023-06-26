@@ -6,18 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-
+- Included an environment parameter to compilation that is accessible in the smart contract
+- Added `hash` property to classes with `@contract` decorator
 
 ### Changed
-
+- Changed the cli command to compile from `neo3-boa` to `neo3-boa compile`
+- Support to `int` constructor with `str` argument
 
 ### Deprecated
 
 
 ### Removed
-
+- Removed [TestEngine](https://github.com/CityOfZion/neo3-boa/blob/4e3ad421ed9a85b04d70239b5d4ab3a98f2da06d/boa3_test/tests/test_classes/testengine.py) interface
 
 ### Fixed
+- Fixed type warnings shown by IDEs
+- Fixed Interop type check in event interfaces
+- Fixed compilation to stop with keyboard interruption on cli
 
 
 ## [0.14.0] - 2023-06-20
