@@ -308,6 +308,10 @@ class TestEvent(BoaTest):
         path = self.get_contract_path('MismatchedTypeCallEvent.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    def test_event_with_interop_interface_argument_mismatched_type(self):
+        path = self.get_contract_path('MismatchedTypeCreateEventWithInteropInterface.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_event_with_abort(self):
         path = self.get_contract_path('EventWithAbort.py')
         self.compile_and_save(path)
