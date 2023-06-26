@@ -19,5 +19,5 @@ class IntIntMethod(IntMethod):
         super().__init__(args, [value_default])
 
     def generate_internal_opcodes(self, code_generator):
-        # returns the same int
-        pass
+        # it is the identity function, so there is no need of including another opcode
+        super().generate_internal_opcodes(code_generator)

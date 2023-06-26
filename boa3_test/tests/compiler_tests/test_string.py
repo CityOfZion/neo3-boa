@@ -22,13 +22,6 @@ class TestString(BoaTest):
             + Opcode.LDARG0     # arg[0]
             + Opcode.PUSH0
             + Opcode.PUSH1
-            + Opcode.DUP
-            + Opcode.PUSH0
-            + Opcode.GE
-            + Opcode.JMPIF
-            + Integer(4).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.PUSH0
             + Opcode.SUBSTR
             + Opcode.CONVERT + StackItemType.ByteString
             + Opcode.RET        # return
@@ -73,13 +66,6 @@ class TestString(BoaTest):
             + Opcode.ADD
 
             + Opcode.PUSH1
-            + Opcode.DUP
-            + Opcode.PUSH0
-            + Opcode.GE
-            + Opcode.JMPIF
-            + Integer(4).to_byte_array(signed=True, min_length=1)
-            + Opcode.DROP
-            + Opcode.PUSH0
             + Opcode.SUBSTR
             + Opcode.CONVERT + StackItemType.ByteString
             + Opcode.RET        # return
