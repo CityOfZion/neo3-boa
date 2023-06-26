@@ -1,11 +1,9 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.classmethod.countmethod import CountMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CountStrMethod(CountMethod):
@@ -26,236 +24,143 @@ class CountStrMethod(CountMethod):
 
         super().__init__(args, [start_default, end_default])
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.model.type.type import Type
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+        # if end is None
+        code_generator.swap_reverse_stack_items(4)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_operation(BinaryOp.IsNone, is_internal=True)
 
-        # region verify end
+        verify_end_none = code_generator.convert_begin_if()
 
-        verify_end_null = [     # verifies if end is null
-            (Opcode.REVERSE4, b''),
-            (Opcode.DUP, b''),
-            (Opcode.ISNULL, b''),
-            jmp_place_holder
-        ]
+        #   end = len(self)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-        end_null = [            # if end is null, end = len(self)
-            (Opcode.DROP, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            jmp_place_holder    # skip the other end verifications
-        ]
+        code_generator.convert_end_if(verify_end_none)
 
-        num_jmp_code = get_bytes_count(end_null)
-        jmp_str_end_null_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
-        verify_end_null[-1] = jmp_str_end_null_statement
+        # if end < 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
 
-        verify_end_neg = [      # verifies if end is < 0
-            (Opcode.DUP, b''),
-            (Opcode.PUSH0, b''),
-            jmp_place_holder
-        ]
+        verify_end_neg = code_generator.convert_begin_if()
+        code_generator.change_jump(verify_end_neg, Opcode.JMPGE)
 
-        end_neg = [             # if end is < 0, then get the positive equivalent number
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.ADD, b''),
-            (Opcode.DUP, b''),
-            (Opcode.PUSH0, b''),
-            jmp_place_holder
-        ]
+        #   end += len(self)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
 
-        end_still_neg = [       # if end is still < 0 after adding it to len(self), end = 0
-            (Opcode.DROP, b''),
-            (Opcode.PUSH0, b''),
-        ]
+        #   if end < 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
 
-        num_jmp_code = get_bytes_count(end_still_neg)
-        jmp_end_still_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
-        end_neg[-1] = jmp_end_still_neg_statement
+        verify_end_still_neg = code_generator.convert_begin_if()
+        code_generator.change_jump(verify_end_still_neg, Opcode.JMPGE)
 
-        skip_end_gt_size = [
-            jmp_place_holder    # skip the other end verification
-        ]
+        #       end = 0
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(0)
 
-        num_jmp_code = get_bytes_count(end_still_neg + end_neg + skip_end_gt_size)
-        jmp_end_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
-        verify_end_neg[-1] = jmp_end_neg_statement
+        code_generator.convert_end_if(verify_end_still_neg, is_internal=True)
 
-        verify_end_gt_size = [  # verifies if end >= len(self)
-            (Opcode.DUP, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            jmp_place_holder,
-        ]
+        # else:
+        verify_end_neg = code_generator.convert_begin_else(verify_end_neg, is_internal=True)
 
-        end_gt_size = [         # if end >= len(self), end = len(self)
-            (Opcode.DROP, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-        ]
+        #   if end > len(self)
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-        num_jmp_code = get_bytes_count(end_gt_size)
-        jmp_end_gt_size_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
-        verify_end_gt_size[-1] = jmp_end_gt_size_statement
+        verify_gt_size = code_generator.convert_begin_if()
+        code_generator.change_jump(verify_gt_size, Opcode.JMPLE)
 
-        num_jmp_code = get_bytes_count(end_gt_size + verify_end_gt_size)
-        jmp_whole_end_gt_size_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
-        skip_end_gt_size[-1] = jmp_whole_end_gt_size_statement
+        #       end = len(self)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-        num_jmp_code = get_bytes_count(
-            end_gt_size + verify_end_gt_size + skip_end_gt_size + end_still_neg + end_neg + verify_end_neg
-        )
-        jmp_whole_end_gt_size_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
-        end_null[-1] = jmp_whole_end_gt_size_statement
+        code_generator.convert_end_if(verify_gt_size)
+        code_generator.convert_end_if(verify_end_neg)
 
-        verify_end = (
-            verify_end_null +
-            end_null +
-            verify_end_neg +
-            end_neg +
-            end_still_neg +
-            skip_end_gt_size +
-            verify_end_gt_size +
-            end_gt_size
-        )
+        # if start < 0
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(0)
 
-        # endregion
+        verify_start_neg = code_generator.convert_begin_if()
+        code_generator.change_jump(verify_start_neg, Opcode.JMPGE)
 
-        # region verify start
+        #   start += len(self)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
 
-        verify_start_neg = [    # verifies if start is < 0
-            (Opcode.OVER, b''),
-            (Opcode.PUSH0, b''),
-            jmp_place_holder
-        ]
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        #   if start < 0:
 
-        start_neg = [           # if start is < 0, then get the positive equivalent index
-            (Opcode.SWAP, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.ADD, b''),
-            (Opcode.DUP, b''),
-            (Opcode.PUSH0, b''),
-            jmp_place_holder
-        ]
+        verify_start_still_neg = code_generator.convert_begin_if()
+        code_generator.change_jump(verify_start_still_neg, Opcode.JMPGE)
 
-        start_still_neg = [     # if start is still < 0 after adding it to len(self), start = 0
-            (Opcode.DROP, b''),
-            (Opcode.PUSH0, b''),
-        ]
+        #       start = 0
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(0)
 
-        num_jmp_code = get_bytes_count(start_still_neg)
-        jmp_str_start_still_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
-        start_neg[-1] = jmp_str_start_still_neg_statement
+        code_generator.convert_end_if(verify_start_still_neg)
+        code_generator.swap_reverse_stack_items(2)
 
-        correct_start_position = [  # put start on the correct position
-            (Opcode.SWAP, b'')
-        ]
+        code_generator.convert_end_if(verify_start_neg)
 
-        num_jmp_code = get_bytes_count(correct_start_position + start_still_neg + start_neg)
-        jmp_str_start_neg_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code, True)
-        verify_start_neg[-1] = jmp_str_start_neg_statement
+        # index = count = 0
+        code_generator.convert_literal(0)
 
-        verify_start = (
-            verify_start_neg +
-            start_neg +
-            start_still_neg +
-            correct_start_position
-        )
+        # substr_size = len(substr)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.swap_reverse_stack_items(2)
 
-        # endregion
+        while_start = code_generator.convert_begin_while()
 
-        # region Count logic
+        # while substr_size + index <= end
+        code_generator.duplicate_stack_item(6)
+        code_generator.duplicate_stack_item(5)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_get_substring(is_internal=True)
 
-        initialize = [          # initialize variables
-            (Opcode.PUSH0, b''),  # count = 0
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SIZE, b''),  # substr_size = len(substr)
-            (Opcode.SWAP, b''),
-        ]
+        #   if self[index: index + substr_size] == substr:
+        code_generator.duplicate_stack_item(6)
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        is_substr = code_generator.convert_begin_if()
 
-        verify_while = [        # verifies if substr_size + index >= end
-            (Opcode.OVER, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.ADD, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            jmp_place_holder
-        ]
+        #       count += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.convert_end_if(is_substr, is_internal=True)
 
-        count_substring = [     # verifies if self[index: index+substr_size] == substr
-            (Opcode.PUSH5, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.SUBSTR, b''),
-            (Opcode.CONVERT, Type.str.stack_item),
-            (Opcode.PUSH5, b''),
-            (Opcode.PICK, b''),
-            (Opcode.NUMEQUAL, b''),
-            jmp_place_holder
-        ]
+        code_generator.swap_reverse_stack_items(4)
+        #   index += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(4)
 
-        count_plusplus = [      # if self[index: index+substr_size] == substr
-            (Opcode.INC, b''),  # count++
-        ]
+        # while condition
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_operation(BinaryOp.Add, is_internal=True)
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_operation(BinaryOp.LtE, is_internal=True)
 
-        num_jmp_code = get_bytes_count(count_plusplus)
-        jmp_count_plusplus_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
-        count_substring[-1] = jmp_count_plusplus_statement
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
 
-        go_back_to_while = [    # go back to while verification
-            (Opcode.REVERSE4, b''),
-            (Opcode.INC, b''),  # index ++
-            (Opcode.REVERSE4, b''),
-            # jump back to while
-        ]
-
-        num_jmp_code = -get_bytes_count(go_back_to_while + count_plusplus + count_substring + verify_while)
-        jmp_back_to_while_statement = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
-        go_back_to_while.append(jmp_back_to_while_statement)
-
-        num_jmp_code = get_bytes_count(go_back_to_while + count_plusplus + count_substring)
-        jmp_to_clean_stack_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGT, num_jmp_code, True)
-        verify_while[-1] = jmp_to_clean_stack_statement
-
-        clean_stack = [         # remove auxiliary values
-            (Opcode.REVERSE4, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.REVERSE3, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
-
-        count_logic = (
-            initialize +
-            verify_while +
-            count_substring +
-            count_plusplus +
-            go_back_to_while +
-            clean_stack
-        )
-
-        # endregion
-
-        # count string logic is verify_end + verify_start  + count_logic
-        return (
-            verify_end +
-            verify_start +
-            count_logic
-        )
+        # clean stack
+        code_generator.swap_reverse_stack_items(4)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
