@@ -2,14 +2,6 @@ __all__ = [
     'CallFlags',
     'Contract',
     'ContractManifest',
-    'ContractPermission',
-    'ContractPermissionDescriptor',
-    'ContractGroup',
-    'ContractAbi',
-    'ContractMethodDescriptor',
-    'ContractEventDescriptor',
-    'ContractParameterDefinition',
-    'ContractParameterType',
     'call_contract',
     'create_contract',
     'update_contract',
@@ -27,8 +19,7 @@ from typing import Any, List, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
-from boa3.builtin.interop.contract.contractmanifest import ContractManifest, ContractPermission, ContractPermissionDescriptor, \
-    ContractGroup, ContractAbi, ContractMethodDescriptor, ContractEventDescriptor, ContractParameterDefinition, ContractParameterType
+from boa3.builtin.interop.contract.contractmanifest import ContractManifest
 from boa3.builtin.type import ECPoint, UInt160
 
 
