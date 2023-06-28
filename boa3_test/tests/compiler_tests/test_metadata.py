@@ -597,3 +597,16 @@ class TestMetadata(BoaTest):
     def test_metadata_info_source_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoSourceMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_metadata_importing_external_contract_before_metadata_method(self):
+        path = self.get_contract_path('MetadataImportingExternalContractBeforeMetadataMethod.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('extra', manifest)
+        self.assertIsInstance(manifest['extra'], dict)
+        self.assertIn('Description', manifest['extra'])
+        self.assertEqual(manifest['extra']['Description'], 'Test importing a external contract before declaring the metadata')
+
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertEqual(manifest['permissions'][0]['contract'], '0x1234567890123456789012345678901234567890')

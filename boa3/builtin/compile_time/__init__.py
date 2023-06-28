@@ -149,7 +149,9 @@ def display_name(name: str):
     :param name: Method identifier from the contract manifest.
     :type name: str
     """
-    pass
+    def decorator_wrapper(*args, **kwargs):
+        pass
+    return decorator_wrapper
 
 
 class NeoMetadata:
