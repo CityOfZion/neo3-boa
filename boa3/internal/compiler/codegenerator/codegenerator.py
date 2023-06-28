@@ -1721,6 +1721,8 @@ class CodeGenerator:
                 self.convert_literal(function.origin_class.contract_hash.to_array())
                 self.convert_builtin_method_call(Interop.CallContract)
                 self._stack_pop()  # remove call contract 'any' result from the stack
+                self._stack_append(function.return_type)    # add the return type on the stack even if it is None
+
         else:
             from boa3.internal.neo.vm.CallCode import CallCode
             call_code = CallCode(function)
@@ -1732,8 +1734,8 @@ class CodeGenerator:
             if function.is_init:
                 self._stack_pop()  # pop duplicated result if it's init
 
-        if function.return_type is not Type.none:
-            self._stack_append(function.return_type)
+            if function.return_type is not Type.none:
+                self._stack_append(function.return_type)
 
     def convert_event_call(self, event: Event):
         """
