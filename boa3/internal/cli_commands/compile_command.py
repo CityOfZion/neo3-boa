@@ -57,7 +57,7 @@ class CompileCommand(ICommand):
                 logging.error("Output path file extension is not .nef")
                 sys.exit(1)
 
-            path, _ = os.path.split(os.path.realpath(output_path))
+            path, filename = os.path.split(os.path.realpath(output_path))
 
         try:
             Boa3.compile_and_save(sc_path, output_path=output_path, debug=debug, root_folder=project_path, env=env)
