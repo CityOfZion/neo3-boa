@@ -3,7 +3,7 @@ __all__ = [
 ]
 
 
-from typing import List, Union
+from typing import List, Optional, Union
 
 from boa3.builtin.interop.blockchain import Block, Signer, Transaction, VMState
 from boa3.builtin.type import UInt256, UInt160
@@ -20,7 +20,7 @@ class Ledger:
     hash: UInt160
 
     @classmethod
-    def get_block(cls, index_or_hash: Union[int, UInt256]) -> Block:
+    def get_block(cls, index_or_hash: Union[int, UInt256]) -> Optional[Block]:
         """
         Gets the block with the given index or hash.
 
@@ -55,6 +55,9 @@ class Ledger:
         >>> Ledger.get_block(9999999)      # block doesn't exist
         None
 
+        >>> Ledger.get_block(UInt256(bytes(32)))   # block doesn't exist
+        None
+
         :param index_or_hash: index or hash identifier of the block
         :type index_or_hash: int or UInt256
         :return: the desired block, if exists. None otherwise
@@ -82,7 +85,7 @@ class Ledger:
         pass
 
     @classmethod
-    def get_transaction(cls, hash_: UInt256) -> Transaction:
+    def get_transaction(cls, hash_: UInt256) -> Optional[Transaction]:
         """
         Gets a transaction with the given hash.
 
@@ -108,7 +111,7 @@ class Ledger:
         pass
 
     @classmethod
-    def get_transaction_from_block(cls, block_hash_or_height: Union[UInt256, int], tx_index: int) -> Transaction:
+    def get_transaction_from_block(cls, block_hash_or_height: Union[UInt256, int], tx_index: int) -> Optional[Transaction]:
         """
         Gets a transaction from a block.
 
@@ -135,6 +138,12 @@ class Ledger:
             'valid_until_block': 5761,
             'script': b'\\x0c\\x14\\xa6\\xea\\xb0\\xae\\xaf\\xb4\\x96\\xa1\\x1b\\xb0|\\x88\\x17\\xcar\\xa5J\\x00\\x12\\x04\\x11\\xc0\\x1f\\x0c\\tbalanceOf\\x0c\\x14\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2Ab}[R',
         }
+
+        >>> Ledger.get_transaction_from_block(123456789, 0)     # height does not exist yet
+        None
+
+        >>> Ledger.get_transaction_from_block(UInt256(bytes(32)), 0)     # block hash does not exist
+        None
 
         :param block_hash_or_height: a block identifier
         :type block_hash_or_height: UInt256 or int

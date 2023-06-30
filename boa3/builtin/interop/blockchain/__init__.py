@@ -14,7 +14,7 @@ __all__ = [
     'current_index',
 ]
 
-from typing import List, Union
+from typing import List, Optional, Union
 
 from boa3.builtin.interop.blockchain.block import Block
 from boa3.builtin.interop.blockchain.signer import Signer
@@ -24,7 +24,7 @@ from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
 
 
-def get_contract(hash: UInt160) -> Contract:
+def get_contract(hash: UInt160) -> Optional[Contract]:
     """
     Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will return
     None.
@@ -59,7 +59,7 @@ def get_contract(hash: UInt160) -> Contract:
     pass
 
 
-def get_block(index_or_hash: Union[int, UInt256]) -> Block:
+def get_block(index_or_hash: Union[int, UInt256]) -> Optional[Block]:
     """
     Gets the block with the given index or hash. Will return None if the index or hash is not associated with a Block.
 
@@ -105,7 +105,7 @@ def get_block(index_or_hash: Union[int, UInt256]) -> Block:
     pass
 
 
-def get_transaction(hash_: UInt256) -> Transaction:
+def get_transaction(hash_: UInt256) -> Optional[Transaction]:
     """
     Gets a transaction with the given hash. Will return None if the hash is not associated with a Transaction.
 
@@ -131,7 +131,7 @@ def get_transaction(hash_: UInt256) -> Transaction:
     pass
 
 
-def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_index: int) -> Transaction:
+def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_index: int) -> Optional[Transaction]:
     """
     Gets a transaction from a block. Will return None if the block hash or height is not associated with a Transaction.
 
@@ -158,6 +158,12 @@ def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_ind
         'valid_until_block': 5761,
         'script': b'\\x0c\\x14\\xa6\\xea\\xb0\\xae\\xaf\\xb4\\x96\\xa1\\x1b\\xb0|\\x88\\x17\\xcar\\xa5J\\x00\\x12\\x04\\x11\\xc0\\x1f\\x0c\\tbalanceOf\\x0c\\x14\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2Ab}[R',
     }
+
+    >>> get_transaction_from_block(123456789, 0)     # height does not exist yet
+    None
+
+    >>> get_transaction_from_block(UInt256(bytes(32)), 0)     # block hash does not exist
+    None
 
     :param block_hash_or_height: a block identifier
     :type block_hash_or_height: UInt256 or int

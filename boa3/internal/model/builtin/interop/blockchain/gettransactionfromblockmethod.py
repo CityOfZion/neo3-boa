@@ -16,4 +16,4 @@ class GetTransactionFromBlockMethod(LedgerMethod):
         args: Dict[str, Variable] = {'block_hash_or_height': Variable(Type.union.build([UInt256Type.build(),
                                                                                         Type.int])),
                                      'tx_index': Variable(Type.int)}
-        super().__init__(identifier, syscall, args, return_type=transaction_type)
+        super().__init__(identifier, syscall, args, return_type=Type.optional.build(transaction_type))
