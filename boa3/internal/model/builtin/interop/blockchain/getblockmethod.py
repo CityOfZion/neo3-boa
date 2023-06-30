@@ -15,4 +15,4 @@ class GetBlockMethod(LedgerMethod):
         syscall = 'getBlock'
         args: Dict[str, Variable] = {'index': Variable(Type.union.build([Type.int,
                                                                          UInt256Type.build()]))}
-        super().__init__(identifier, syscall, args, return_type=block_type)
+        super().__init__(identifier, syscall, args, return_type=Type.optional.build(block_type))
