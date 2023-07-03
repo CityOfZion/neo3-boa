@@ -26,13 +26,14 @@ class Analyser:
     """
 
     def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None,
-                 env: str = None, log: bool = False):
+                 env: str = None, log: bool = False, fail_fast: bool = False):
         self.symbol_table: Dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
         self.metadata: NeoMetadata = NeoMetadata()
         self.is_analysed: bool = False
         self._log: bool = log
+        self._fail_fast: bool = fail_fast
         self._env: str = env if env is not None else constants.DEFAULT_CONTRACT_ENVIRONMENT
 
         self.__include_builtins_symbols()
@@ -57,7 +58,7 @@ class Analyser:
                           else path)
 
     @staticmethod
-    def analyse(path: str, log: bool = False,
+    def analyse(path: str, log: bool = False, fail_fast: bool = False,
                 imported_files: Optional[Dict[str, Analyser]] = None,
                 import_stack: Optional[List[str]] = None,
                 root: str = None, env: str = None, compiler_entry: bool = False) -> Analyser:
@@ -66,6 +67,7 @@ class Analyser:
 
         :param path: the path of the Python file
         :param log: if compiler errors should be logged.
+        :param fail_fast: if should stop compilation on first error found.
         :param import_stack: a list that represents the current import stack if it's from an import.
                              If it's not triggered by an import, must be None.
         :param imported_files: a dict that maps the paths of the files that were analysed if it's from an import.
@@ -79,7 +81,7 @@ class Analyser:
         with open(path, 'rb') as source:
             ast_tree = ast.parse(source.read())
 
-        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log)
+        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log, fail_fast)
         CompiledMetadata.set_current_metadata(analyser.metadata)
 
         if compiler_entry:
@@ -156,6 +158,7 @@ class Analyser:
         current_metadata = self.metadata
         module_analyser = ModuleAnalyser(self, self.symbol_table,
                                          log=self._log,
+                                         fail_fast=self._fail_fast,
                                          filename=self.filename,
                                          root_folder=self.root,
                                          analysed_files=imported_files,
