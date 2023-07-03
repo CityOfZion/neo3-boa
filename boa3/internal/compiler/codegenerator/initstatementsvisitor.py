@@ -16,8 +16,8 @@ class InitStatementsVisitor(IAstAnalyser):
 
     """
 
-    def __init__(self, symbols: Dict[str, ISymbol]):
-        super().__init__(ast.parse(""), log=True)
+    def __init__(self, symbols: Dict[str, ISymbol], fail_fast: bool = True):
+        super().__init__(ast.parse(""), log=True, fail_fast=fail_fast)
         self.symbols = symbols.copy()
 
         self._deploy_instructions: List[ast.AST] = []

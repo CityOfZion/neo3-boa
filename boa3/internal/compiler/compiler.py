@@ -21,7 +21,8 @@ class Compiler:
         self._analyser: Analyser = None
         self._entry_smart_contract: str = ''
 
-    def compile(self, path: str, root_folder: str = None, env: str = None, log: bool = True) -> bytes:
+    def compile(self, path: str, root_folder: str = None, env: str = None,
+                log: bool = True, fail_fast: bool = True) -> bytes:
         """
         Load a Python file and tries to compile it
 
@@ -29,11 +30,13 @@ class Compiler:
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         :param env: specific environment id to compile.
+        :param fail_fast: if should stop compilation on first error found.
         :return: the bytecode of the compiled .nef file
         """
-        return self._internal_compile(path, root_folder, env, log).bytecode
+        return self._internal_compile(path, root_folder, env, log, fail_fast).bytecode
 
-    def _internal_compile(self, path: str, root_folder: str = None, env: str = None, log: bool = True) -> CompilerOutput:
+    def _internal_compile(self, path: str, root_folder: str = None, env: str = None,
+                          log: bool = True, fail_fast: bool = True) -> CompilerOutput:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
@@ -48,11 +51,11 @@ class Compiler:
         CompilerBuiltin.reset()
         CompiledMetadata.reset()
 
-        self._analyse(fullpath, root_folder, env, log)
+        self._analyse(fullpath, root_folder, env, log, fail_fast)
         return self._compile()
 
     def compile_and_save(self, path: str, output_path: str, root_folder: str = None, log: bool = True,
-                         debug: bool = False, env: str = None):
+                         debug: bool = False, env: str = None, fail_fast: bool = True):
         """
         Save the compiled file and the metadata files
 
@@ -62,19 +65,23 @@ class Compiler:
         :param log: if compiler errors should be logged.
         :param debug: if nefdbgnfo file should be generated.
         :param env: specific environment id to compile.
+        :param fail_fast: if should stop compilation on first error found.
         """
-        self.result = self._internal_compile(path, root_folder, env, log)
+        self.result = self._internal_compile(path, root_folder, env, log, fail_fast)
         self._save(output_path, debug)
 
-    def _analyse(self, path: str, root_folder: str = None, env: str = None, log: bool = True):
+    def _analyse(self, path: str, root_folder: str = None, env: str = None,
+                 log: bool = True, fail_fast: bool = True):
         """
         Load a Python file and analyses its syntax
 
         :param path: the path of the Python file to compile
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
+        :param fail_fast: if should stop compilation on first error found.
         """
-        self._analyser = Analyser.analyse(path, log=log, root=root_folder, env=env, compiler_entry=True)
+        self._analyser = Analyser.analyse(path, log=log, fail_fast=fail_fast,
+                                          root=root_folder, env=env, compiler_entry=True)
 
     def _compile(self) -> CompilerOutput:
         """

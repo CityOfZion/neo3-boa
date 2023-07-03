@@ -27,7 +27,8 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     :ivar warnings: a list that contains all the warnings found by the compiler. Empty by default.
     """
 
-    def __init__(self, ast_tree: ast.AST, filename: str = None, root_folder: str = None, log: bool = False):
+    def __init__(self, ast_tree: ast.AST, filename: str = None, root_folder: str = None,
+                 log: bool = False, fail_fast: bool = True):
         self.errors: List[CompilerError] = []
         self.warnings: List[CompilerWarning] = []
 
@@ -38,6 +39,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                            else os.path.abspath(os.path.curdir))
         self.root_folder: str = root_folder
         self._log: bool = log
+        self._fail_fast: bool = fail_fast
 
         self._tree: ast.AST = ast_tree
         self.symbols: Dict[str, ISymbol] = {}
@@ -47,6 +49,9 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         return len(self.errors) > 0
 
     def _log_error(self, error: CompilerError):
+        if self._fail_fast and len(self.errors) > 0:
+            raise error
+
         if error.filepath is None:
             error.filepath = self.filename
         if not any(err == error for err in self.errors):
@@ -54,6 +59,9 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             self.errors.append(error)
             if self._log:
                 logging.getLogger(constants.BOA_LOGGING_NAME).error(error)
+
+        if self._fail_fast:
+            raise error
 
     def _log_warning(self, warning: CompilerWarning):
         if warning.filepath is None:
@@ -72,6 +80,13 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                 formatted_message = info_message
 
             logging.getLogger(constants.BOA_LOGGING_NAME).info(formatted_message)
+
+    def analyse_visit(self, node: ast.AST) -> Any:
+        try:
+            return self.visit(node)
+        except CompilerError:
+            # stops the analyser if fail fast is activated
+            pass
 
     def visit(self, node: ast.AST) -> Any:
         try:
