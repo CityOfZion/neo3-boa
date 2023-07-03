@@ -95,14 +95,14 @@ class BoaTest(TestCase):
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output, expected_logged[0].message
 
-    def _get_compiler_log_data(self, expected_logged_exception, path):
+    def _get_compiler_log_data(self, expected_logged_exception, path, fail_fast=False):
         output = None
 
         with _LOGGING_LOCK:
             with self.assertLogs() as log:
                 from boa3.internal.exception.NotLoadedException import NotLoadedException
                 try:
-                    output = self.compile(path)
+                    output = self.compile(path, fail_fast=fail_fast)
                 except NotLoadedException:
                     # when an compiler error is logged this exception is raised.
                     pass
@@ -110,6 +110,38 @@ class BoaTest(TestCase):
             expected_logged = [exception for exception in log.records
                                if isinstance(exception.msg, expected_logged_exception)]
         return output, expected_logged
+
+    def get_all_compile_log_data(self, path: str, *,
+                                 get_errors: bool = True,
+                                 get_warnings: bool = False,
+                                 fail_fast: bool = False) -> Tuple[list, list]:
+        from boa3.internal.exception.CompilerWarning import CompilerWarning
+
+        instance_logs = []
+        if get_errors:
+            instance_logs.append(CompilerError)
+        if get_warnings:
+            instance_logs.append(CompilerWarning)
+
+        errors = []
+        warnings = []
+        _, expected_logged = self._get_compiler_log_data(*instance_logs, path, fail_fast=fail_fast)
+
+        if not get_errors:
+            if not get_warnings:
+                return errors, warnings
+            warnings = [log.msg for log in expected_logged]
+        else:
+            if get_warnings:
+                for log in expected_logged:
+                    if isinstance(log.msg, CompilerError):
+                        errors.append(log.msg)
+                    elif isinstance(log.msg, CompilerWarning):
+                        warnings.append(log.msg)
+            else:
+                errors = [log.msg for log in expected_logged]
+
+        return errors, warnings
 
     def assertStartsWith(self, first: Any, second: Any):
         if not (hasattr(first, 'startswith') and first.startswith(second)):
@@ -209,11 +241,11 @@ class BoaTest(TestCase):
 
         return contract_path, contract_path
 
-    def compile(self, path: str, root_folder: str = None) -> bytes:
+    def compile(self, path: str, root_folder: str = None, fail_fast: bool = False) -> bytes:
         from boa3.boa3 import Boa3
 
         with _COMPILER_LOCK:
-            result = Boa3.compile(path, root_folder=root_folder)
+            result = Boa3.compile(path, root_folder=root_folder, fail_fast=fail_fast)
 
         return result
 
