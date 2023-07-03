@@ -124,7 +124,7 @@ class StandardAnalyser(IAstAnalyser):
                             self._log_error(
                                 CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
                             )
-        except CompilerError:
+        except CompilerError.CompilerError:
             # stops the analyser if fail fast is activated
             pass
 

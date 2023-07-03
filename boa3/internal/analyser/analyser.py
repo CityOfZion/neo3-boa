@@ -118,7 +118,8 @@ class Analyser:
         return self._env
 
     def copy(self) -> Analyser:
-        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root, env=self._env, log=self._log)
+        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root,
+                          env=self._env, log=self._log, fail_fast=self._fail_fast)
 
         copied.metadata = self.metadata
         copied.is_analysed = self.is_analysed
@@ -141,7 +142,7 @@ class Analyser:
 
         :return: a boolean value that represents if the analysis was successful
         """
-        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log)
+        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(type_analyser)
         return not type_analyser.has_errors
 
@@ -177,7 +178,7 @@ class Analyser:
 
         :return: a boolean value that represents if the analysis was successful
         """
-        standards_analyser = StandardAnalyser(self, self.symbol_table, log=self._log)
+        standards_analyser = StandardAnalyser(self, self.symbol_table, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(standards_analyser)
         return not standards_analyser.has_errors
 
@@ -189,13 +190,15 @@ class Analyser:
         """
         Pre executes the instructions of the ast for optimization
         """
-        self.ast_tree = ConstructAnalyser(self, self.ast_tree, self.symbol_table, log=self._log).tree
+        self.ast_tree = ConstructAnalyser(self, self.ast_tree, self.symbol_table,
+                                          log=self._log, fail_fast=self._fail_fast
+                                          ).tree
 
     def __pos_execute(self):
         """
         Tries to optimize the ast after validations
         """
-        optimizer = AstOptimizer(self, log=self._log)
+        optimizer = AstOptimizer(self, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(optimizer)
 
     def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
@@ -237,7 +240,8 @@ class Analyser:
             if file_path not in paths_already_imported:
                 import_analyser = ImportAnalyser(file_path, self.root,
                                                  already_imported_modules=imports,
-                                                 log=False, get_entry=True)
+                                                 log=False, fail_fast=self._fail_fast,
+                                                 get_entry=True)
                 import_symbol = Import(file_path, analyser.ast_tree, import_analyser, {})
                 self.symbol_table[file_path] = import_symbol
 

@@ -36,8 +36,9 @@ class CompileCommand(ICommand):
                                       "as the python file.")
         self.parser.add_argument("-f", "--failfast",
                                  action='store',
-                                 default=True,
-                                 choices=[True, False],
+                                 type=str,  # had parsing issues when setting this to bool
+                                 default=str(True),
+                                 choices=[str(True), str(False)],
                                  help="Stop on first compile error")
 
         self.parser.set_defaults(func=self.execute_command)
@@ -49,7 +50,7 @@ class CompileCommand(ICommand):
         debug: bool = args['debug']
         env: str = args['env']
         output_path: Optional[str] = args['output_path']
-        fail_fast: bool = args['failfast']
+        fail_fast: bool = args['failfast'] == str(True)
 
         if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
             logging.error("Input file is not .py")
