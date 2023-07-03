@@ -187,9 +187,14 @@ class TestBlockchainInterop(BoaTest):
         tx = runner.get_transaction(hash_)
         self.assertIsNotNone(tx)
 
+        nonexistent_tx = runner.call_contract(path, 'main', UInt256(bytes(32)).to_array())
+
         invoke = runner.call_contract(path, 'main', hash_.to_array())
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = nonexistent_tx.result
+        self.assertIsNone(result)
 
         result = invoke.result
         self.assertIsInstance(result, list)
@@ -240,9 +245,14 @@ class TestBlockchainInterop(BoaTest):
         tx = runner.get_transaction(hash_)
         self.assertIsNotNone(tx)
 
+        nonexistent_tx = runner.call_contract(path, 'main', 123456789, 0)
+
         invoke = runner.call_contract(path, 'main', expected_block_index, 0)
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = nonexistent_tx.result
+        self.assertIsNone(result)
 
         result = invoke.result
         self.assertIsInstance(result, list)
@@ -287,9 +297,14 @@ class TestBlockchainInterop(BoaTest):
         tx_index = 0
         expected_tx = txs[tx_index]
 
+        nonexistent_tx = runner.call_contract(path, 'main', UInt256(bytes(32)).to_array(), 0)
+
         invoke = runner.call_contract(path, 'main', block_hash, tx_index)
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        result = nonexistent_tx.result
+        self.assertIsNone(result)
 
         result = invoke.result
         self.assertIsInstance(result, list)

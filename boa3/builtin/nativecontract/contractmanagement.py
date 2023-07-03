@@ -4,7 +4,7 @@ __all__ = [
 ]
 
 
-from typing import Any
+from typing import Any, Optional
 
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160
@@ -33,7 +33,7 @@ class ContractManagement:
         pass
 
     @classmethod
-    def get_contract(cls, script_hash: UInt160) -> Contract:
+    def get_contract(cls, script_hash: UInt160) -> Optional[Contract]:
         """
         Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will
         return None.

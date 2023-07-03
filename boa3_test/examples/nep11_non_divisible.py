@@ -267,9 +267,9 @@ def post_transfer(token_owner: Union[UInt160, None], to: Union[UInt160, None], t
     :type data: Any
     """
     on_transfer(token_owner, to, 1, tokenId)
-    if not isinstance(to, None):
+    if to is not None:
         contract = get_contract(to)
-        if not isinstance(contract, None):
+        if contract is not None:
             call_contract(to, 'onNEP11Payment', [token_owner, 1, tokenId, data])
             pass
 
