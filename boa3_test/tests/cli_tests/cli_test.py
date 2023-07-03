@@ -27,10 +27,14 @@ class BoaCliTest(BoaTest, abc.ABC):
         LOCK.release()
         LOG_LOCK.release()
 
-    def _get_cli_log(self):
+    def get_cli_log(self, get_exit_code: bool = False):
+        if get_exit_code:
+            return self._assert_cli_raises(SystemExit, get_log=True)
         return self._run_cli_log()
 
-    def _get_cli_output(self) -> Tuple[str, str]:
+    def get_cli_output(self, get_exit_code: bool = False):
+        if get_exit_code:
+            return self._assert_cli_raises(SystemExit, get_log=False)
         return self._run_cli()
 
     def _assert_cli_raises(self, exception, get_log=False):
