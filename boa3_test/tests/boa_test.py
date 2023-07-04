@@ -179,9 +179,13 @@ class BoaTest(TestCase):
 
     def get_deploy_file_paths_without_compiling(self, contract_path: str, output_name: str = None) -> Tuple[str, str]:
         if isinstance(output_name, str):
-            file_path = os.path.dirname(contract_path)
-            file_name, _ = os.path.splitext(os.path.basename(output_name))
-            file_path_without_ext = f'{file_path}/{file_name}'
+            output_path, output_file = os.path.split(output_name)
+            if len(output_path) == 0:
+                file_path = os.path.dirname(contract_path)
+                file_name, _ = os.path.splitext(os.path.basename(output_name))
+                file_path_without_ext = f'{file_path}/{file_name}'
+            else:
+                file_path_without_ext, _ = os.path.splitext(output_name)
         else:
             file_path_without_ext, _ = os.path.splitext(contract_path)
 
