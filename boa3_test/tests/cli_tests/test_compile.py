@@ -36,10 +36,14 @@ class TestCliCompile(BoaCliTest):
 
         self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
         self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output))
-        self.assertTrue(os.path.isfile(nef_path))
-        self.assertTrue(os.path.isfile(manifest_path))
-        self.assertFalse(os.path.isfile(debug_info_path))
+        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output),
+                        msg=f'Something went wrong when compiling {sc_nef_name}')
+        self.assertTrue(os.path.isfile(nef_path),
+                        msg=f'{nef_path} not found')
+        self.assertTrue(os.path.isfile(manifest_path),
+                        msg=f'{manifest_path} not found')
+        self.assertFalse(os.path.isfile(debug_info_path),
+                         msg=f'{debug_info_path} exists')
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
                   '-db')
@@ -60,10 +64,14 @@ class TestCliCompile(BoaCliTest):
 
         self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
         self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output))
-        self.assertTrue(os.path.isfile(nef_path))
-        self.assertTrue(os.path.isfile(manifest_path))
-        self.assertTrue(os.path.isfile(debug_info_path))
+        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output),
+                        msg=f'Something went wrong when compiling {sc_nef_name}')
+        self.assertTrue(os.path.isfile(nef_path),
+                        msg=f'{nef_path} not found')
+        self.assertTrue(os.path.isfile(manifest_path),
+                        msg=f'{manifest_path} not found')
+        self.assertTrue(os.path.isfile(debug_info_path),
+                        msg=f'{debug_info_path} not found')
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
                   '-o', get_path_from_boa3_test('test_cli', 'smart_contract.nef', get_unique=True))
@@ -86,16 +94,20 @@ class TestCliCompile(BoaCliTest):
 
         self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
         self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output))
-        self.assertTrue(os.path.isfile(nef_path))
-        self.assertTrue(os.path.isfile(manifest_path))
+        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output),
+                        msg=f'Something went wrong when compiling {sc_nef_name}')
+        self.assertTrue(os.path.isfile(nef_path),
+                        msg=f'{nef_path} not found')
+        self.assertTrue(os.path.isfile(manifest_path),
+                        msg=f'{manifest_path} not found')
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
                   '-e', 'env_changed',
-                  '-o', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.nef', get_unique=True))
+                  '-o', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env_cli.nef', get_unique=True))
     def test_cli_compile_env(self):
         nef_path, _ = self.get_deploy_file_paths(
             get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
+            output_name='Env_cli.nef',
             compile_if_found=False
         )
         nef_generated = nef_path.split(constants.PATH_SEPARATOR)[-1]
@@ -104,7 +116,8 @@ class TestCliCompile(BoaCliTest):
 
         self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
         self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {nef_generated} to ' in log in log for log in logs.output))
+        self.assertTrue(any(f'Wrote {nef_generated} to ' in log in log for log in logs.output),
+                        msg=f'Something went wrong when compiling {nef_generated}')
 
         runner = NeoTestRunner(runner_id=self.method_name())
 
