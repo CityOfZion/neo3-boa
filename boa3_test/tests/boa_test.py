@@ -183,7 +183,7 @@ class BoaTest(TestCase):
             if len(output_path) == 0:
                 file_path = os.path.dirname(contract_path)
                 file_name, _ = os.path.splitext(os.path.basename(output_name))
-                file_path_without_ext = f'{file_path}/{file_name}'
+                file_path_without_ext = constants.PATH_SEPARATOR.join((file_path, file_name))
             else:
                 file_path_without_ext, _ = os.path.splitext(output_name)
         else:
