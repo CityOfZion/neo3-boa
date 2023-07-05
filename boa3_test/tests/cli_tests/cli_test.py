@@ -1,5 +1,6 @@
 from boa3_test.tests.boa_test import (BoaTest,  # needs to be the first import to avoid circular imports
-                                      _COMPILER_LOCK as LOCK
+                                      _COMPILER_LOCK as LOCK,
+                                      _LOGGING_LOCK as LOG_LOCK
                                       )
 
 import abc
@@ -19,10 +20,12 @@ class BoaCliTest(BoaTest, abc.ABC):
     EXIT_CODE_CLI_SYNTAX_ERROR = 2
 
     def setUp(self):
+        LOG_LOCK.acquire()
         LOCK.acquire()
 
     def tearDown(self):
         LOCK.release()
+        LOG_LOCK.release()
 
     def _get_cli_log(self):
         return self._run_cli_log()
