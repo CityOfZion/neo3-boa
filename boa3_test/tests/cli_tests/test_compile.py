@@ -17,7 +17,7 @@ class TestCliCompile(BoaCliTest):
         self.assertEqual(self.EXIT_CODE_SUCCESS, system_exit.exception.code)
         self.assertIn('usage: neo3-boa compile [-h] [-db] '
                       '[--project-path PROJECT_PATH] [-e ENV] '
-                      '[-o NEF_OUTPUT] [-f {True,False}] '
+                      '[-o NEF_OUTPUT] [--no-failfast] '
                       'input',
                       cli_output)
 
@@ -152,8 +152,7 @@ class TestCliCompile(BoaCliTest):
         self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         self.assertTrue(any('Output path file extension is not .nef' in log in log for log in logs.output))
 
-    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportFailInnerNotExistingMethod.py'),
-                  '-f', 'True')
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportFailInnerNotExistingMethod.py'))
     def test_cli_compile_fail_fast_true(self):
         logs = self.get_cli_log()
 
@@ -165,7 +164,7 @@ class TestCliCompile(BoaCliTest):
         self.assertIn('Could not compile', errors_logged[-1])
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportFailInnerNotExistingMethod.py'),
-                  '-f', 'False')
+                  '--no-failfast')
     def test_cli_compile_fail_fast_false(self):
         logs = self.get_cli_log()
 
