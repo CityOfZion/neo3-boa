@@ -34,12 +34,9 @@ class CompileCommand(ICommand):
                                  help="Chooses the name and where the compiled files will be generated, "
                                       "if not specified it will be generated on the same directory with the same name "
                                       "as the python file.")
-        self.parser.add_argument("-f", "--failfast",
-                                 action='store',
-                                 type=str,  # had parsing issues when setting this to bool
-                                 default=str(True),
-                                 choices=[str(True), str(False)],
-                                 help="Stop on first compile error")
+        self.parser.add_argument("--no-failfast",
+                                 action='store_true',
+                                 help="Do not stop on first compile error")
 
         self.parser.set_defaults(func=self.execute_command)
 
@@ -50,7 +47,7 @@ class CompileCommand(ICommand):
         debug: bool = args['debug']
         env: str = args['env']
         output_path: Optional[str] = args['output_path']
-        fail_fast: bool = args['failfast'] == str(True)
+        fail_fast: bool = not args['no_failfast']
 
         if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
             logging.error("Input file is not .py")
