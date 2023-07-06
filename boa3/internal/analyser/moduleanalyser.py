@@ -54,8 +54,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                  filename: str = None, root_folder: str = None,
                  analysed_files: Optional[dict] = None,
                  import_stack: Optional[List[str]] = None,
-                 log: bool = False):
-        super().__init__(analyser.ast_tree, filename, root_folder, log)
+                 log: bool = False,
+                 fail_fast: bool = True):
+        super().__init__(analyser.ast_tree, filename, root_folder, log, fail_fast)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = symbol_table
 
@@ -99,7 +100,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if self.filename:
             self._tree.filename = self.filename
-        self.visit(self._tree)
+        self.analyse_visit(self._tree)
 
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
@@ -526,37 +527,46 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                             }
         already_imported.update(self._analysed_files)
 
-        analyser = ImportAnalyser(import_target=target,
-                                  root_folder=self.root_folder,
-                                  importer_file=self.filename,
-                                  already_imported_modules=already_imported,
-                                  import_stack=self._import_stack.copy(),
-                                  log=self._log)
+        try:
+            analyser = ImportAnalyser(import_target=target,
+                                      root_folder=self.root_folder,
+                                      importer_file=self.filename,
+                                      already_imported_modules=already_imported,
+                                      import_stack=self._import_stack.copy(),
+                                      log=self._log,
+                                      fail_fast=self._fail_fast)
 
-        if analyser.recursive_import:
-            self._log_error(
-                CompilerError.CircularImport(line=origin_node.lineno,
-                                             col=origin_node.col_offset,
-                                             target_import=target,
-                                             target_origin=self.filename)
-            )
+            if analyser.recursive_import:
+                self._log_error(
+                    CompilerError.CircularImport(line=origin_node.lineno,
+                                                 col=origin_node.col_offset,
+                                                 target_import=target,
+                                                 target_origin=self.filename)
+                )
 
-        elif not analyser.can_be_imported:
-            circular_import_error = next((error for error in analyser.errors
-                                          if isinstance(error, CompilerError.CircularImport)),
-                                         None)
+            elif not analyser.can_be_imported:
+                circular_import_error = next((error for error in analyser.errors
+                                              if isinstance(error, CompilerError.CircularImport)),
+                                             None)
 
-            if circular_import_error is not None:
-                # if the problem was a circular import, the error was already logged
-                self.errors.append(circular_import_error)
-            elif hasattr(analyser, 'is_namespace_package') and analyser.is_namespace_package:
-                return analyser
+                if circular_import_error is not None:
+                    # if the problem was a circular import, the error was already logged
+                    self.errors.append(circular_import_error)
+                elif hasattr(analyser, 'is_namespace_package') and analyser.is_namespace_package:
+                    return analyser
+                else:
+                    self._log_unresolved_import(origin_node, target)
+
             else:
-                self._log_unresolved_import(origin_node, target)
+                analyser.update_external_analysed_files(self._analysed_files)
+                return analyser
 
-        else:
-            analyser.update_external_analysed_files(self._analysed_files)
-            return analyser
+        except CompilerError.CompilerError as error_on_import:
+            if self._log:
+                self.errors.append(error_on_import)
+                raise error_on_import
+            else:
+                self._log_error(error_on_import)
 
     def visit_Module(self, module: ast.Module):
         """

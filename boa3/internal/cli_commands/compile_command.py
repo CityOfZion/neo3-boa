@@ -34,6 +34,9 @@ class CompileCommand(ICommand):
                                  help="Chooses the name and where the compiled files will be generated, "
                                       "if not specified it will be generated on the same directory with the same name "
                                       "as the python file.")
+        self.parser.add_argument("--no-failfast",
+                                 action='store_true',
+                                 help="Do not stop on first compile error")
 
         self.parser.set_defaults(func=self.execute_command)
 
@@ -44,6 +47,7 @@ class CompileCommand(ICommand):
         debug: bool = args['debug']
         env: str = args['env']
         output_path: Optional[str] = args['output_path']
+        fail_fast: bool = not args['no_failfast']
 
         if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
             logging.error("Input file is not .py")
@@ -60,7 +64,13 @@ class CompileCommand(ICommand):
             path, filename = os.path.split(os.path.realpath(output_path))
 
         try:
-            Boa3.compile_and_save(sc_path, output_path=output_path, debug=debug, root_folder=project_path, env=env)
+            Boa3.compile_and_save(sc_path,
+                                  output_path=output_path,
+                                  debug=debug,
+                                  root_folder=project_path,
+                                  env=env,
+                                  fail_fast=fail_fast
+                                  )
             logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
         except NotLoadedException as e:
             error_message = e.message

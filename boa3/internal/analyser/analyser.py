@@ -26,13 +26,14 @@ class Analyser:
     """
 
     def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None,
-                 env: str = None, log: bool = False):
+                 env: str = None, log: bool = False, fail_fast: bool = False):
         self.symbol_table: Dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
         self.metadata: NeoMetadata = NeoMetadata()
         self.is_analysed: bool = False
         self._log: bool = log
+        self._fail_fast: bool = fail_fast
         self._env: str = env if env is not None else constants.DEFAULT_CONTRACT_ENVIRONMENT
 
         self.__include_builtins_symbols()
@@ -57,7 +58,7 @@ class Analyser:
                           else path)
 
     @staticmethod
-    def analyse(path: str, log: bool = False,
+    def analyse(path: str, log: bool = False, fail_fast: bool = False,
                 imported_files: Optional[Dict[str, Analyser]] = None,
                 import_stack: Optional[List[str]] = None,
                 root: str = None, env: str = None, compiler_entry: bool = False) -> Analyser:
@@ -66,6 +67,7 @@ class Analyser:
 
         :param path: the path of the Python file
         :param log: if compiler errors should be logged.
+        :param fail_fast: if should stop compilation on first error found.
         :param import_stack: a list that represents the current import stack if it's from an import.
                              If it's not triggered by an import, must be None.
         :param imported_files: a dict that maps the paths of the files that were analysed if it's from an import.
@@ -79,7 +81,7 @@ class Analyser:
         with open(path, 'rb') as source:
             ast_tree = ast.parse(source.read())
 
-        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log)
+        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log, fail_fast)
         CompiledMetadata.set_current_metadata(analyser.metadata)
 
         if compiler_entry:
@@ -116,7 +118,8 @@ class Analyser:
         return self._env
 
     def copy(self) -> Analyser:
-        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root, env=self._env, log=self._log)
+        copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root,
+                          env=self._env, log=self._log, fail_fast=self._fail_fast)
 
         copied.metadata = self.metadata
         copied.is_analysed = self.is_analysed
@@ -139,7 +142,7 @@ class Analyser:
 
         :return: a boolean value that represents if the analysis was successful
         """
-        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log)
+        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(type_analyser)
         return not type_analyser.has_errors
 
@@ -154,6 +157,7 @@ class Analyser:
         current_metadata = self.metadata
         module_analyser = ModuleAnalyser(self, self.symbol_table,
                                          log=self._log,
+                                         fail_fast=self._fail_fast,
                                          filename=self.filename,
                                          root_folder=self.root,
                                          analysed_files=imported_files,
@@ -174,7 +178,7 @@ class Analyser:
 
         :return: a boolean value that represents if the analysis was successful
         """
-        standards_analyser = StandardAnalyser(self, self.symbol_table, log=self._log)
+        standards_analyser = StandardAnalyser(self, self.symbol_table, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(standards_analyser)
         return not standards_analyser.has_errors
 
@@ -186,13 +190,15 @@ class Analyser:
         """
         Pre executes the instructions of the ast for optimization
         """
-        self.ast_tree = ConstructAnalyser(self, self.ast_tree, self.symbol_table, log=self._log).tree
+        self.ast_tree = ConstructAnalyser(self, self.ast_tree, self.symbol_table,
+                                          log=self._log, fail_fast=self._fail_fast
+                                          ).tree
 
     def __pos_execute(self):
         """
         Tries to optimize the ast after validations
         """
-        optimizer = AstOptimizer(self, log=self._log)
+        optimizer = AstOptimizer(self, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(optimizer)
 
     def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
@@ -234,7 +240,8 @@ class Analyser:
             if file_path not in paths_already_imported:
                 import_analyser = ImportAnalyser(file_path, self.root,
                                                  already_imported_modules=imports,
-                                                 log=False, get_entry=True)
+                                                 log=False, fail_fast=self._fail_fast,
+                                                 get_entry=True)
                 import_symbol = Import(file_path, analyser.ast_tree, import_analyser, {})
                 self.symbol_table[file_path] = import_symbol
 

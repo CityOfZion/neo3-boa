@@ -10,10 +10,11 @@ from boa3.internal.model.type.itype import IType
 
 
 class BuiltinFunctionCallAnalyser(IAstAnalyser):
-    def __init__(self, origin: IAstAnalyser, call: ast.Call, method_id: str, builtin_method: IBuiltinMethod, log: bool):
+    def __init__(self, origin: IAstAnalyser, call: ast.Call, method_id: str, builtin_method: IBuiltinMethod,
+                 log: bool, fail_fast: bool = True):
         self._method: IBuiltinMethod = builtin_method
         self.method_id: str = method_id
-        super().__init__(call, root_folder=origin.root_folder, log=log)
+        super().__init__(call, root_folder=origin.root_folder, log=log, fail_fast=fail_fast)
 
         self._origin: IAstAnalyser = origin
 

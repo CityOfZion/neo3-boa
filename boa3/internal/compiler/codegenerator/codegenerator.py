@@ -59,75 +59,83 @@ class CodeGenerator:
         """
         VMCodeMapping.reset()
         analyser.update_symbol_table_with_imports()
-        import ast
-        from boa3.internal.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
         all_imports = CodeGenerator._find_all_imports(analyser)
         generator = CodeGenerator(analyser.symbol_table)
-        deploy_method = (analyser.symbol_table[constants.DEPLOY_METHOD_ID]
-                         if constants.DEPLOY_METHOD_ID in analyser.symbol_table
-                         else None)
-        deploy_origin_module = analyser.ast_tree
 
-        if hasattr(deploy_method, 'origin') and deploy_method.origin in analyser.ast_tree.body:
-            analyser.ast_tree.body.remove(deploy_method.origin)
+        from boa3.internal.exception.CompilerError import CompilerError
 
-        visitor = VisitorCodeGenerator(generator, analyser.filename, analyser.root)
-        visitor._root_module = analyser.ast_tree
-        visitor.visit_and_update_analyser(analyser.ast_tree, analyser)
+        try:
+            import ast
+            from boa3.internal.compiler.codegenerator.codegeneratorvisitor import VisitorCodeGenerator
 
-        analyser.update_symbol_table(generator.symbol_table)
-        generator.symbol_table.clear()
-        generator.symbol_table.update(analyser.symbol_table.copy())
+            deploy_method = (analyser.symbol_table[constants.DEPLOY_METHOD_ID]
+                             if constants.DEPLOY_METHOD_ID in analyser.symbol_table
+                             else None)
+            deploy_origin_module = analyser.ast_tree
 
-        for symbol in all_imports.values():
-            generator.symbol_table.update(symbol.all_symbols)
+            if hasattr(deploy_method, 'origin') and deploy_method.origin in analyser.ast_tree.body:
+                analyser.ast_tree.body.remove(deploy_method.origin)
 
-            if hasattr(deploy_method, 'origin') and deploy_method.origin in symbol.ast.body:
-                symbol.ast.body.remove(deploy_method.origin)
-                deploy_origin_module = symbol.ast
+            visitor = VisitorCodeGenerator(generator, analyser.filename, analyser.root)
+            visitor._root_module = analyser.ast_tree
+            visitor.visit_and_update_analyser(analyser.ast_tree, analyser)
 
-            visitor.set_filename(symbol.origin)
-            visitor.visit_and_update_analyser(symbol.ast, analyser)
-
-            analyser.update_symbol_table(symbol.all_symbols)
+            analyser.update_symbol_table(generator.symbol_table)
             generator.symbol_table.clear()
             generator.symbol_table.update(analyser.symbol_table.copy())
 
-        if len(generator._globals) > 0:
-            from boa3.internal.compiler.codegenerator.initstatementsvisitor import InitStatementsVisitor
-            deploy_stmts, static_stmts = InitStatementsVisitor.separate_global_statements(analyser.symbol_table,
-                                                                                          visitor.global_stmts)
+            for symbol in all_imports.values():
+                generator.symbol_table.update(symbol.all_symbols)
 
-            deploy_method = deploy_method if deploy_method is not None else InnerDeployMethod.instance().copy()
+                if hasattr(deploy_method, 'origin') and deploy_method.origin in symbol.ast.body:
+                    symbol.ast.body.remove(deploy_method.origin)
+                    deploy_origin_module = symbol.ast
 
-            if len(deploy_stmts) > 0:
-                if_update_body = ast.parse(f"if not {list(deploy_method.args)[1]}: pass").body[0]
-                if_update_body.body = deploy_stmts
-                if_update_body.test.op = UnaryOp.Not
-                deploy_method.origin.body.insert(0, if_update_body)
+                visitor.set_filename(symbol.origin)
+                visitor.visit_and_update_analyser(symbol.ast, analyser)
 
-            visitor.global_stmts = static_stmts
+                analyser.update_symbol_table(symbol.all_symbols)
+                generator.symbol_table.clear()
+                generator.symbol_table.update(analyser.symbol_table.copy())
 
-        if hasattr(deploy_method, 'origin'):
-            deploy_ast = ast.parse("")
-            deploy_ast.body = [deploy_method.origin]
+            if len(generator._globals) > 0:
+                from boa3.internal.compiler.codegenerator.initstatementsvisitor import InitStatementsVisitor
+                deploy_stmts, static_stmts = InitStatementsVisitor.separate_global_statements(analyser.symbol_table,
+                                                                                              visitor.global_stmts)
 
-            generator.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
-            analyser.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
-            visitor._tree = deploy_origin_module
-            visitor.visit_and_update_analyser(deploy_ast, analyser)
+                deploy_method = deploy_method if deploy_method is not None else InnerDeployMethod.instance().copy()
 
-            generator.symbol_table.clear()
-            generator.symbol_table.update(analyser.symbol_table.copy())
+                if len(deploy_stmts) > 0:
+                    if_update_body = ast.parse(f"if not {list(deploy_method.args)[1]}: pass").body[0]
+                    if_update_body.body = deploy_stmts
+                    if_update_body.test.op = UnaryOp.Not
+                    deploy_method.origin.body.insert(0, if_update_body)
 
-        visitor.set_filename(analyser.filename)
-        generator.can_init_static_fields = True
-        if len(visitor.global_stmts) > 0:
-            global_ast = ast.parse("")
-            global_ast.body = visitor.global_stmts
-            visitor.visit_and_update_analyser(global_ast, analyser)
-            generator.initialized_static_fields = True
+                visitor.global_stmts = static_stmts
+
+            if hasattr(deploy_method, 'origin'):
+                deploy_ast = ast.parse("")
+                deploy_ast.body = [deploy_method.origin]
+
+                generator.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
+                analyser.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
+                visitor._tree = deploy_origin_module
+                visitor.visit_and_update_analyser(deploy_ast, analyser)
+
+                generator.symbol_table.clear()
+                generator.symbol_table.update(analyser.symbol_table.copy())
+
+            visitor.set_filename(analyser.filename)
+            generator.can_init_static_fields = True
+            if len(visitor.global_stmts) > 0:
+                global_ast = ast.parse("")
+                global_ast.body = visitor.global_stmts
+                visitor.visit_and_update_analyser(global_ast, analyser)
+                generator.initialized_static_fields = True
+
+        except CompilerError:
+            pass
 
         analyser.update_symbol_table(generator.symbol_table)
         compilation_result = generator.output
