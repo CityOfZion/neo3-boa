@@ -11,7 +11,8 @@ class Boa3:
     """
 
     @staticmethod
-    def compile(path: str, root_folder: str = None, env: str = None, fail_fast: bool = True) -> bytes:
+    def compile(path: str, root_folder: str = None, log_level: str = None,
+                env: str = None, fail_fast: bool = True) -> bytes:
         """
         Load a Python file to be compiled but don't write the result into a file
 
@@ -24,7 +25,7 @@ class Boa3:
         if not path.endswith('.py'):
             raise InvalidPathException(path)
 
-        return Compiler().compile(path, root_folder, env, fail_fast=fail_fast)
+        return Compiler().compile(path, root_folder, env, log_level=log_level, fail_fast=fail_fast)
 
     @staticmethod
     def compile_and_save(path: str, output_path: str = None, root_folder: str = None,
