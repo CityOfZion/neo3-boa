@@ -45,6 +45,9 @@ class Compiler:
         filepath, filename = os.path.split(fullpath)
 
         logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+        if log_level:
+            # raise error if log level is invalid
+            logger.setLevel(log_level)
 
         logger.setLevel(logging.INFO)  # just to show initial message
         logger.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
