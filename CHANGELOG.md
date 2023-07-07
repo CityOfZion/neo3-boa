@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Included an environment parameter to compilation that is accessible in the smart contract
 - Added `hash` property to classes with `@contract` decorator
+- New optional argument to stop compilation on first error found
 
 ### Changed
 - Changed the cli command to compile from `neo3-boa` to `neo3-boa compile`
+- Limit logs to ERROR by default 
 - Support to `int` constructor with `str` argument
+- Change NEP-11 validator to accept both `str` and `bytes` as argument types in some methods
 
 ### Deprecated
 
@@ -23,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed type warnings shown by IDEs
 - Fixed Interop type check in event interfaces
 - Fixed compilation to stop with keyboard interruption on cli
+- Fixed compilation error with metadata and imported contract interfaces
+- Fixed incorrect stack when calling `call_contract`
 
 
 ## [0.14.0] - 2023-06-20
