@@ -204,3 +204,11 @@ class TestCliCompile(BoaCliTest):
         # 3. cli message when compilation is successful
         self.assertGreater(len(info_logged), 3)
         self.assertIn(f'Wrote {file_name}.nef', info_logged[-1])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'arithmetic_test', 'Addition.py'),
+                  '--log-level', 'FOO')
+    def test_cli_compile_log_level_invalid(self):
+        logs = self.get_cli_log()
+
+        self.assertEqual(1, len(logs.output))
+        self.assertIn("Unknown level: 'FOO'", logs.output[-1])
