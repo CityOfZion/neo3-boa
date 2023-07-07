@@ -1592,15 +1592,22 @@ class TestBytes(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 99))
+        bytes_ = b'unit test'
+        bytes_sequence = b'i'
+        start = 99
+        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
+        self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
 
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 't', -1))
+        bytes_ = b'unit test'
+        bytes_sequence = b's'
+        start = -1
+        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
+        self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
 
     def test_bytes_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexBytesDefaults.py')

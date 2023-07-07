@@ -60,7 +60,6 @@ class IndexSequenceMethod(IndexMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
-        start_address = code_generator.bytecode_size
 
         # receives: end, start, x, sequence
         code_generator.swap_reverse_stack_items(4)
