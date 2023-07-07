@@ -1338,17 +1338,25 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        runner.call_contract(path, 'main', 'unit test', 'i', 99)
+        string = 'unit test'
+        substring = 'i'
+        start = 99
+        runner.call_contract(path, 'main', string, substring, start)
         runner.execute()
 
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+        self.assertRaises(ValueError, string.index, substring, start)
 
-        runner.call_contract(path, 'main', 'unit test', 't', -1)
+        string = 'unit test'
+        substring = 's'
+        start = -1
+        runner.call_contract(path, 'main', string, substring, start)
         runner.execute()
 
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+        self.assertRaises(ValueError, string.index, substring, start)
 
     def test_string_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexStringDefaults.py')
