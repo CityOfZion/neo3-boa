@@ -1,7 +1,6 @@
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
-from boa3.internal.model.operation.binaryop import BinaryOp
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
