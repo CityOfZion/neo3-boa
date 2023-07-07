@@ -22,7 +22,8 @@ class Compiler:
         self._entry_smart_contract: str = ''
 
     def compile(self, path: str, root_folder: str = None, env: str = None,
-                log: bool = True, fail_fast: bool = True) -> bytes:
+                log: bool = True, log_level: str = None,
+                fail_fast: bool = True) -> bytes:
         """
         Load a Python file and tries to compile it
 
@@ -33,17 +34,26 @@ class Compiler:
         :param fail_fast: if should stop compilation on first error found.
         :return: the bytecode of the compiled .nef file
         """
-        return self._internal_compile(path, root_folder, env, log, fail_fast).bytecode
+        result = self._internal_compile(path, root_folder, env, log, log_level, fail_fast).bytecode
+        self._restore_log_level()
+        return result
 
     def _internal_compile(self, path: str, root_folder: str = None, env: str = None,
-                          log: bool = True, fail_fast: bool = True) -> CompilerOutput:
+                          log: bool = True, log_level: str = None,
+                          fail_fast: bool = True) -> CompilerOutput:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
         logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+        if log_level:
+            # raise error if log level is invalid
+            logger.setLevel(log_level)
 
+        logger.setLevel(logging.INFO)  # just to show initial message
         logger.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
         logger.info(f'Started compiling\t{filename}')
+        self._change_log_level(log_level)
+
         self._entry_smart_contract = os.path.splitext(filename)[0]
 
         from boa3.internal.compiler.compiledmetadata import CompiledMetadata
@@ -54,7 +64,8 @@ class Compiler:
         self._analyse(fullpath, root_folder, env, log, fail_fast)
         return self._compile()
 
-    def compile_and_save(self, path: str, output_path: str, root_folder: str = None, log: bool = True,
+    def compile_and_save(self, path: str, output_path: str, root_folder: str = None,
+                         log: bool = True, log_level: str = None,
                          debug: bool = False, env: str = None, fail_fast: bool = True):
         """
         Save the compiled file and the metadata files
@@ -67,8 +78,24 @@ class Compiler:
         :param env: specific environment id to compile.
         :param fail_fast: if should stop compilation on first error found.
         """
-        self.result = self._internal_compile(path, root_folder, env, log, fail_fast)
+        self.result = self._internal_compile(path, root_folder, env, log, log_level, fail_fast)
         self._save(output_path, debug)
+        self._restore_log_level()
+
+    def _change_log_level(self, log_level: str = None):
+        if not log_level:
+            log_level = logging.ERROR
+
+        logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+        self._previous_logger_level = logger.level
+
+        logger.setLevel(log_level)
+
+    def _restore_log_level(self):
+        if hasattr(self, '_previous_logger_level'):
+            logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+            logger.setLevel(self._previous_logger_level)
+            del self._previous_logger_level
 
     def _analyse(self, path: str, root_folder: str = None, env: str = None,
                  log: bool = True, fail_fast: bool = True):

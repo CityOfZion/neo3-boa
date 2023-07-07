@@ -37,6 +37,9 @@ class CompileCommand(ICommand):
         self.parser.add_argument("--no-failfast",
                                  action='store_true',
                                  help="Do not stop on first compile error")
+        self.parser.add_argument("--log-level",
+                                 type=str,
+                                 help="Log output level")
 
         self.parser.set_defaults(func=self.execute_command)
 
@@ -48,6 +51,7 @@ class CompileCommand(ICommand):
         env: str = args['env']
         output_path: Optional[str] = args['output_path']
         fail_fast: bool = not args['no_failfast']
+        log_level = args['log_level']
 
         if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
             logging.error("Input file is not .py")
@@ -69,7 +73,9 @@ class CompileCommand(ICommand):
                                   debug=debug,
                                   root_folder=project_path,
                                   env=env,
-                                  fail_fast=fail_fast
+                                  fail_fast=fail_fast,
+                                  show_errors=True,
+                                  log_level=log_level
                                   )
             logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
         except NotLoadedException as e:

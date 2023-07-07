@@ -18,6 +18,7 @@ class TestCliCompile(BoaCliTest):
         self.assertIn('usage: neo3-boa compile [-h] [-db] '
                       '[--project-path PROJECT_PATH] [-e ENV] '
                       '[-o NEF_OUTPUT] [--no-failfast] '
+                      '[--log-level LOG_LEVEL] '
                       'input',
                       cli_output)
 
@@ -37,9 +38,10 @@ class TestCliCompile(BoaCliTest):
 
         logs = self.get_cli_log()
 
-        self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
-        self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output),
+        self.assertEqual(3, len(logs.output))
+        self.assertTrue(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in logs.output[0])
+        self.assertTrue('Started compiling' in logs.output[1])
+        self.assertTrue(f'Wrote {sc_nef_name} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {sc_nef_name}')
         self.assertTrue(os.path.isfile(nef_path),
                         msg=f'{nef_path} not found')
@@ -65,9 +67,10 @@ class TestCliCompile(BoaCliTest):
 
         logs = self.get_cli_log()
 
-        self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
-        self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output),
+        self.assertEqual(3, len(logs.output))
+        self.assertTrue(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in logs.output[0])
+        self.assertTrue('Started compiling' in logs.output[1])
+        self.assertTrue(f'Wrote {sc_nef_name} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {sc_nef_name}')
         self.assertTrue(os.path.isfile(nef_path),
                         msg=f'{nef_path} not found')
@@ -95,9 +98,10 @@ class TestCliCompile(BoaCliTest):
 
         logs = self.get_cli_log()
 
-        self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
-        self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {sc_nef_name} to ' in log in log for log in logs.output),
+        self.assertEqual(3, len(logs.output))
+        self.assertTrue(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in logs.output[0])
+        self.assertTrue('Started compiling' in logs.output[1])
+        self.assertTrue(f'Wrote {sc_nef_name} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {sc_nef_name}')
         self.assertTrue(os.path.isfile(nef_path),
                         msg=f'{nef_path} not found')
@@ -117,9 +121,10 @@ class TestCliCompile(BoaCliTest):
 
         logs = self.get_cli_log()
 
-        self.assertTrue(any(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in log for log in logs.output))
-        self.assertTrue(any('Started compiling' in log for log in logs.output))
-        self.assertTrue(any(f'Wrote {nef_generated} to ' in log in log for log in logs.output),
+        self.assertEqual(3, len(logs.output))
+        self.assertTrue(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in logs.output[0])
+        self.assertTrue('Started compiling' in logs.output[1])
+        self.assertTrue(f'Wrote {nef_generated} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {nef_generated}')
 
         runner = NeoTestRunner(runner_id=self.method_name())
@@ -137,12 +142,12 @@ class TestCliCompile(BoaCliTest):
         logs, system_exit = self.get_cli_log(get_exit_code=True)
 
         self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
-        self.assertTrue(any('Input file is not .py' in log in log for log in logs.output))
+        self.assertTrue('Input file is not .py' in logs.output[-1])
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'interop_test', 'storage', 'StoragePutStrKeyStrValue.py'))
     def test_cli_compile_invalid_smart_contract(self):
         logs = self.get_cli_log()
-        self.assertTrue(any('Could not compile' in log in log for log in logs.output))
+        self.assertTrue('Could not compile' in logs.output[-1])
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
                   '-o', 'wrong_output_path')
@@ -150,7 +155,7 @@ class TestCliCompile(BoaCliTest):
         logs, system_exit = self.get_cli_log(get_exit_code=True)
 
         self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
-        self.assertTrue(any('Output path file extension is not .nef' in log in log for log in logs.output))
+        self.assertTrue('Output path file extension is not .nef' in logs.output[-1])
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportFailInnerNotExistingMethod.py'))
     def test_cli_compile_fail_fast_true(self):
@@ -172,3 +177,38 @@ class TestCliCompile(BoaCliTest):
         # the given contract has more than one error, so it should log more than 2 errors with fail fast disabled
         self.assertGreater(len(errors_logged), 2)
         self.assertIn('Could not compile', errors_logged[-1])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'arithmetic_test', 'Addition.py'))
+    def test_cli_compile_log_level_default(self):
+        file_name = 'Addition'
+        logs = self.get_cli_log()
+
+        info_logged = [log for log in logs.output if log.startswith('INFO')]
+        # three info logs are logged regardless of the log level
+        # 1. neo3-boa and python version info
+        # 2. compilation start info
+        # 3. cli message when compilation is successful
+        self.assertEqual(3, len(info_logged))
+        self.assertIn(f'Wrote {file_name}.nef', info_logged[-1])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'arithmetic_test', 'Addition.py'),
+                  '--log-level', 'INFO')
+    def test_cli_compile_log_level_info(self):
+        file_name = 'Addition'
+        logs = self.get_cli_log()
+
+        info_logged = [log for log in logs.output if log.startswith('INFO')]
+        # three info logs are logged regardless of the log level
+        # 1. neo3-boa and python version info
+        # 2. compilation start info
+        # 3. cli message when compilation is successful
+        self.assertGreater(len(info_logged), 3)
+        self.assertIn(f'Wrote {file_name}.nef', info_logged[-1])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'arithmetic_test', 'Addition.py'),
+                  '--log-level', 'FOO')
+    def test_cli_compile_log_level_invalid(self):
+        logs = self.get_cli_log()
+
+        self.assertEqual(1, len(logs.output))
+        self.assertIn("Unknown level: 'FOO'", logs.output[-1])

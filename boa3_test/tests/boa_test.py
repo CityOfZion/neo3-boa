@@ -1,3 +1,4 @@
+import logging
 import os
 import threading
 from typing import Any, Dict, Optional, Tuple, Union
@@ -249,7 +250,9 @@ class BoaTest(TestCase):
         from boa3.boa3 import Boa3
 
         with _COMPILER_LOCK:
-            result = Boa3.compile(path, root_folder=root_folder, fail_fast=fail_fast)
+            result = Boa3.compile(path, root_folder=root_folder, fail_fast=fail_fast,
+                                  log_level=logging.getLevelName(logging.INFO)
+                                  )
 
         return result
 
@@ -281,7 +284,9 @@ class BoaTest(TestCase):
         from boa3.internal.neo.contracts.neffile import NefFile
         with _COMPILER_LOCK:
             Boa3.compile_and_save(path, output_path=nef_output, root_folder=root_folder,
-                                  env=env, show_errors=log, debug=debug)
+                                  env=env, debug=debug,
+                                  show_errors=log, log_level=logging.getLevelName(logging.INFO)
+                                  )
 
         get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False
         change_manifest_name = kwargs['change_manifest_name'] if 'change_manifest_name' in kwargs else False
