@@ -6,18 +6,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+
+### Changed
+
+
+### Deprecated
+
+
+### Removed
+
+
+### Fixed
+
+
+## [1.0.0] - 2023-07-10
+### Added
 - Included an environment parameter to compilation that is accessible in the smart contract
 - Added `hash` property to classes with `@contract` decorator
 - New optional argument to stop compilation on first error found
 
 ### Changed
 - Changed the cli command to compile from `neo3-boa` to `neo3-boa compile`
-- Limit logs to ERROR by default 
+- Limit logs to ERROR by default
 - Support to `int` constructor with `str` argument
 - Change NEP-11 validator to accept both `str` and `bytes` as argument types in some methods
-
-### Deprecated
-
 
 ### Removed
 - Removed [TestEngine](https://github.com/CityOfZion/neo3-boa/blob/4e3ad421ed9a85b04d70239b5d4ab3a98f2da06d/boa3_test/tests/test_classes/testengine.py) interface
@@ -500,6 +513,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...staging
+[1.0.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.0.0
 [0.14.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.14.0
 [0.13.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.1
 [0.13.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.0
