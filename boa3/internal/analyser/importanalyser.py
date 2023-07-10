@@ -18,6 +18,7 @@ class ImportAnalyser(IAstAnalyser):
                  import_stack: List[str] = None,
                  already_imported_modules: dict = None,
                  log: bool = False,
+                 fail_fast: bool = True,
                  get_entry: bool = False):
 
         self.can_be_imported: bool = False
@@ -45,7 +46,7 @@ class ImportAnalyser(IAstAnalyser):
         else:
             root = os.path.dirname(importer_file)
 
-        super().__init__(ast.Module(body=[]), root_folder=root, log=log)
+        super().__init__(ast.Module(body=[]), root_folder=root, log=log, fail_fast=fail_fast)
 
         if self._get_from_entry:
             self.path: str = import_target.replace(os.sep, constants.PATH_SEPARATOR)
@@ -162,14 +163,20 @@ class ImportAnalyser(IAstAnalyser):
                         files = self._import_stack
                         files.append(origin)
                         if self.is_namespace_package:
-                            analyser = Analyser(self.tree, module_origin, self.root_folder, self._log)
+                            analyser = Analyser(self.tree, module_origin, self.root_folder, log=self._log,
+                                                env=self.analyser.env if hasattr(self.analyser, 'env') else None
+                                                )
                             if self._include_inner_packages(analyser):
                                 analyser.is_analysed = True
                                 self._imported_files[self.path] = analyser
                         else:
                             analyser = Analyser.analyse(module_origin, root=self.root_folder,
                                                         imported_files=self._imported_files,
-                                                        import_stack=files, log=self._log)
+                                                        import_stack=files,
+                                                        log=self._log, fail_fast=True)
+
+                            if self._fail_fast and len(analyser.errors) > 0:
+                                raise analyser.errors[0]
                             self._include_inner_packages(analyser)
 
                         if analyser.is_analysed:

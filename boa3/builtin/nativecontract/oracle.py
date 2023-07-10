@@ -13,6 +13,8 @@ class Oracle:
     Neo Oracle Service is an out-of-chain data access service built into Neo N3. It allows users to request the external
     data sources in smart contracts, and Oracle nodes designated by the committee will access the specified data source
     then pass the result in the callback function to continue executing the smart contract logic.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/Advances/Oracles>`__ to learn more about Oracles.
     """
     hash: UInt160
 
@@ -22,6 +24,10 @@ class Oracle:
         Requests an information from outside the blockchain.
 
         This method just requests data from the oracle, it won't return the result.
+
+        >>> Oracle.request('https://dora.coz.io/api/v1/neo3/testnet/asset/0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5',
+        ...                '', 'callback_name', None, 10 * 10 ** 8)
+        None
 
         :param url: External url to retrieve the data
         :type url: str
@@ -55,6 +61,9 @@ class Oracle:
     def get_price(cls) -> int:
         """
         Gets the price for an Oracle request.
+
+        >>> Oracle.get_price()
+        50000000
 
         :return: the price for an Oracle request
         """

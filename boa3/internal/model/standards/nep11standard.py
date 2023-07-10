@@ -32,10 +32,12 @@ class Nep11Standard(INeoStandard):
                            args={'to': type_uint160,
                                  'tokenId': type_token_id,
                                  'data': Type.any},
-                           return_type=Type.bool),
+                           return_type=Type.bool,
+                           literal_implementation=False),
             StandardMethod('ownerOf', safe=True,
                            args={'tokenId': type_token_id},
-                           return_type=type_uint160),
+                           return_type=type_uint160,
+                           literal_implementation=False),
         ]
 
         optionals = [
@@ -46,7 +48,8 @@ class Nep11Standard(INeoStandard):
                            args={
                                'tokenId': type_token_id,
                            },
-                           return_type=Type.dict),
+                           return_type=Type.dict,
+                           literal_implementation=False),
         ]
 
         events = [

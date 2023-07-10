@@ -1644,3 +1644,17 @@ class TestFunction(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_call_external_contract_with_return_none(self):
+        path, _ = self.get_deploy_file_paths('CallExternalContractWithReturnNone.py')
+        no_return_path, _ = self.get_deploy_file_paths('NoReturnFunction.py')
+
+        runner = NeoTestRunner(runner_id=self.method_name())
+        runner.deploy_contract(no_return_path)
+
+        invoke = runner.call_contract(path, 'main')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual(invoke.result, None)

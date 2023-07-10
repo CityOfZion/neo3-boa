@@ -21,25 +21,39 @@ class Compiler:
         self._analyser: Analyser = None
         self._entry_smart_contract: str = ''
 
-    def compile(self, path: str, root_folder: str = None, log: bool = True) -> bytes:
+    def compile(self, path: str, root_folder: str = None, env: str = None,
+                log: bool = True, log_level: str = None,
+                fail_fast: bool = True) -> bytes:
         """
         Load a Python file and tries to compile it
 
         :param path: the path of the Python file to compile
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
+        :param env: specific environment id to compile.
+        :param fail_fast: if should stop compilation on first error found.
         :return: the bytecode of the compiled .nef file
         """
-        return self._internal_compile(path, root_folder, log).bytecode
+        result = self._internal_compile(path, root_folder, env, log, log_level, fail_fast).bytecode
+        self._restore_log_level()
+        return result
 
-    def _internal_compile(self, path: str, root_folder: str = None, log: bool = True) -> CompilerOutput:
+    def _internal_compile(self, path: str, root_folder: str = None, env: str = None,
+                          log: bool = True, log_level: str = None,
+                          fail_fast: bool = True) -> CompilerOutput:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
 
         logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+        if log_level:
+            # raise error if log level is invalid
+            logger.setLevel(log_level)
 
+        logger.setLevel(logging.INFO)  # just to show initial message
         logger.info(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}')
         logger.info(f'Started compiling\t{filename}')
+        self._change_log_level(log_level)
+
         self._entry_smart_contract = os.path.splitext(filename)[0]
 
         from boa3.internal.compiler.compiledmetadata import CompiledMetadata
@@ -47,10 +61,12 @@ class Compiler:
         CompilerBuiltin.reset()
         CompiledMetadata.reset()
 
-        self._analyse(fullpath, root_folder, log)
+        self._analyse(fullpath, root_folder, env, log, fail_fast)
         return self._compile()
 
-    def compile_and_save(self, path: str, output_path: str, root_folder: str = None, log: bool = True, debug: bool = False):
+    def compile_and_save(self, path: str, output_path: str, root_folder: str = None,
+                         log: bool = True, log_level: str = None,
+                         debug: bool = False, env: str = None, fail_fast: bool = True):
         """
         Save the compiled file and the metadata files
 
@@ -59,19 +75,40 @@ class Compiler:
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
         :param debug: if nefdbgnfo file should be generated.
+        :param env: specific environment id to compile.
+        :param fail_fast: if should stop compilation on first error found.
         """
-        self.result = self._internal_compile(path, root_folder, log)
+        self.result = self._internal_compile(path, root_folder, env, log, log_level, fail_fast)
         self._save(output_path, debug)
+        self._restore_log_level()
 
-    def _analyse(self, path: str, root_folder: str = None, log: bool = True):
+    def _change_log_level(self, log_level: str = None):
+        if not log_level:
+            log_level = logging.ERROR
+
+        logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+        self._previous_logger_level = logger.level
+
+        logger.setLevel(log_level)
+
+    def _restore_log_level(self):
+        if hasattr(self, '_previous_logger_level'):
+            logger = logging.getLogger(constants.BOA_LOGGING_NAME)
+            logger.setLevel(self._previous_logger_level)
+            del self._previous_logger_level
+
+    def _analyse(self, path: str, root_folder: str = None, env: str = None,
+                 log: bool = True, fail_fast: bool = True):
         """
         Load a Python file and analyses its syntax
 
         :param path: the path of the Python file to compile
         :param root_folder: the root path of the project
         :param log: if compiler errors should be logged.
+        :param fail_fast: if should stop compilation on first error found.
         """
-        self._analyser = Analyser.analyse(path, log=log, root=root_folder)
+        self._analyser = Analyser.analyse(path, log=log, fail_fast=fail_fast,
+                                          root=root_folder, env=env, compiler_entry=True)
 
     def _compile(self) -> CompilerOutput:
         """
@@ -112,7 +149,15 @@ class Compiler:
                 or is_bytecode_empty):
             raise NotLoadedException(empty_script=is_bytecode_empty)
 
+        if not os.path.isdir(output_path):
+            output_folder = os.path.abspath(os.path.dirname(output_path))
+        else:
+            output_folder = os.path.abspath(output_path)
+
         generator = FileGenerator(self.result, self._analyser, self._entry_smart_contract)
+
+        generator.create_folder(output_folder)
+
         with open(output_path, 'wb+') as nef_file:
             nef_bytes = generator.generate_nef_file()
             nef_file.write(nef_bytes)

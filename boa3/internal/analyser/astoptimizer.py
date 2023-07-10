@@ -29,8 +29,9 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, log: bool = False):
-        super().__init__(analyser.ast_tree, filename=analyser.filename, log=log)
+    def __init__(self, analyser, log: bool = False, fail_fast: bool = True):
+        super().__init__(analyser.ast_tree, filename=analyser.filename, root_folder=analyser.root,
+                         log=log, fail_fast=fail_fast)
         self.modules: Dict[str, Module] = {}
         self.symbols: Dict[str, ISymbol] = analyser.symbol_table
 
@@ -40,7 +41,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
 
         self._current_class: UserClass = None
 
-        self.visit(self._tree)
+        self.analyse_visit(self._tree)
 
     @property
     def tree(self) -> ast.AST:

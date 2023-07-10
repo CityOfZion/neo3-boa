@@ -4,7 +4,7 @@ __all__ = [
 ]
 
 
-from typing import Any
+from typing import Any, Optional
 
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160
@@ -12,7 +12,10 @@ from boa3.builtin.type import UInt160
 
 class ContractManagement:
     """
-    A class used to represent the ContractManagement native contract
+    A class used to represent the ContractManagement native contract.
+
+    Check out `Neo's Documentation <https://developers.neo.org/docs/n3/reference/scapi/framework/native/ContractManagement>`__
+    to learn more about the ContractManagement class.
     """
 
     hash: UInt160
@@ -22,14 +25,38 @@ class ContractManagement:
         """
         Gets the minimum fee of contract deployment.
 
+        >>> ContractManagement.get_minimum_deployment_fee()
+        1000000000
+
         :return: the minimum fee of contract deployment
         """
         pass
 
     @classmethod
-    def get_contract(cls, script_hash: UInt160) -> Contract:
+    def get_contract(cls, script_hash: UInt160) -> Optional[Contract]:
         """
-        Gets a contract with a given hash.
+        Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will
+        return None.
+
+        >>> ContractManagement.get_contract(UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'))    # GAS script hash
+        {
+            'id': -6,
+            'update_counter': 0,
+            'hash': b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2',
+            'nef': b'NEF3neo-core-v3.0\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00#\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@QA\\xc7\\x9e',
+            'manifest': {
+                'name': 'GasToken',
+                'group': [],
+                'supported_standards': ['NEP-17'],
+                'abi': [[['balanceOf', [['account', 20]], 17, 0, True], ['decimals', [], 17, 7, True], ['symbol', [], 19, 14, True], ['totalSupply', [], 17, 21, True], ['transfer', [['from', 20], ['to', 20], ['amount', 17], ['data', 0]], 16, 28, False]], [['Transfer', [['from', 20], ['to', 20], ['amount', 17]]]]],
+                'permissions': [[None, None]],
+                'trusts': [],
+                'extras': 'null'
+            },
+        }
+
+        >>> ContractManagement.get_contract(UInt160(bytes(20)))    # there is no smart contract associated with this script hash
+        None
 
         :param script_hash: a smart contract hash
         :type script_hash: UInt160
@@ -44,6 +71,18 @@ class ContractManagement:
     def has_method(cls, hash: UInt160, method: str, parameter_count: int) -> bool:
         """
         Check if a method exists in a contract.
+
+        >>> ContractManagement.has_method(UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'),
+        ...                               'balanceOf', 1)    # GAS script hash
+        True
+
+        >>> ContractManagement.has_method(UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'),
+        ...                               'balanceOf', 10)    # GAS script hash
+        False
+
+        >>> ContractManagement.has_method(UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2'),
+        ...                               'invalid', 1)    # GAS script hash
+        False
 
         :param hash: The hash of the deployed contract
         :type hash: UInt160
@@ -62,6 +101,24 @@ class ContractManagement:
     def deploy(cls, nef_file: bytes, manifest: bytes, data: Any = None) -> Contract:
         """
         Creates a smart contract given the script and the manifest.
+
+        >>> nef_file_ = get_script(); manifest_ = get_manifest()    # get the script and manifest somehow
+        ... ContractManagement.deploy(nef_file_, manifest_, None)             # smart contract will be deployed
+        {
+            'id': 2,
+            'update_counter': 0,
+            'hash': b'\\x92\\x8f+1q\\x86z_@\\x94\\xf5pE\\xcb\\xb8 \\x0f\\\\`Z',
+            'nef': b'NEF3neo3-boa by COZ-1.0.0\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x07W\\x00\\x02xy\\x9e@\\xf9\\7b\\xbb\\xcc',
+            'manifest': {
+                'name': 'TestContract',
+                'group': [],
+                'supported_standards': [],
+                'abi': [[['test', [['a', 17], ['b', 17]], 17, 0, False]], []],
+                'permissions': [],
+                'trusts': [],
+                'extras': 'null'
+            },
+        }
 
         :param nef_file: the target smart contract's compiled nef
         :type nef_file: bytes
@@ -82,6 +139,10 @@ class ContractManagement:
         """
         Updates the executing smart contract given the script and the manifest.
 
+        >>> nef_file_ = get_script(); manifest_ = get_manifest()    # get the script and manifest somehow
+        ... ContractManagement.update(nef_file_, manifest_, None)             # smart contract will be updated
+        None
+
         :param nef_file: the new smart contract's compiled nef
         :type nef_file: bytes
         :param manifest: the new smart contract's manifest
@@ -98,5 +159,9 @@ class ContractManagement:
     def destroy(cls):
         """
         Destroy the executing smart contract.
+
+        >>> ContractManagement.destroy()
+        None
+
         """
         pass

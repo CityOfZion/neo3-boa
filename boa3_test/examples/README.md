@@ -77,24 +77,4 @@ if __name__ == "main":
 # Testing
 
 There is more than one way to test your smart contract, e.g., deploying your contract at Neo's TestNet, but I'd argue 
-that the quickest way to test would be using the TestEngine. Currently, it's necessary to compile the TestEngine from
-[this](https://github.com/simplitech/neo-devpack-dotnet/tree/test-engine-executable) branch.
-
-```python
-from boa3_test.tests.test_classes.testengine import TestEngine
-
-
-def main():
-    path_engine = '{path-to-test-engine-folder}'
-    path = 'path/to/nep-17/smart/contract.nef'
-    engine = TestEngine(path_engine)
-    
-    result = engine.run(path, 'balanceOf', bytes(range(20)))
-    assert result == 0
-    
-if __name__ == 'main':
-    main()
-
-```
-
-> For more information on the TestEngine, read neo3-boas [documentation](https://dojo.coz.io/neo3/boa/getting-started.html#test-engine).
+that the quickest way to test would be using the NeoTestRunner. Check this [section](../../README.md#neotestrunner) on the project README.

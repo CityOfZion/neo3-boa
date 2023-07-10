@@ -21,10 +21,10 @@ class IntMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
 
         if self._arg_value.type is Type.int:
-            return '-{0}_{1}'.format(self._identifier, Type.str.identifier + Type.bytes.identifier)
+            return '-{0}_{1}'.format(self._identifier, Type.int)
 
-        if self._arg_value.type is Type.str or self._arg_value.type is Type.bytes:
-            return '-{0}_{1}'.format(self._identifier, Type.sequence.identifier)
+        if self._arg_value.type.is_type_of(Type.str) or self._arg_value.type.is_type_of(Type.bytes):
+            return '-{0}_{1}'.format(self._identifier, Type.str)
 
         return self._identifier
 

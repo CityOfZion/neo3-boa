@@ -14,10 +14,11 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
     These methods are used to walk through the Python abstract syntax tree.
     """
 
-    def __init__(self, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol], log: bool = False):
-        super().__init__(ast_tree, log=log)
+    def __init__(self, analyser, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol],
+                 log: bool = False, fail_fast: bool = True):
+        super().__init__(ast_tree, root_folder=analyser.root, log=log, fail_fast=fail_fast)
         self.symbols = symbol_table.copy()
-        self.visit(self._tree)
+        self.analyse_visit(self._tree)
 
     @property
     def tree(self) -> ast.AST:

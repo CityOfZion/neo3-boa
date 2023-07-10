@@ -16,10 +16,11 @@ class StandardAnalyser(IAstAnalyser):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False):
+    def __init__(self, analyser, symbol_table: Dict[str, ISymbol],
+                 log: bool = False, fail_fast: bool = True):
         from boa3.builtin.compile_time import NeoMetadata
 
-        super().__init__(analyser.ast_tree, analyser.filename, log=log)
+        super().__init__(analyser.ast_tree, analyser.filename, analyser.root, log=log, fail_fast=fail_fast)
 
         self.symbols: Dict[str, ISymbol] = symbol_table
 
@@ -65,63 +66,67 @@ class StandardAnalyser(IAstAnalyser):
         return methods
 
     def _validate_standards(self):
-        for standard in self.standards:
-            if standard in supportedstandard.neo_standards:
-                current_standard = supportedstandard.neo_standards[standard]
+        try:
+            for standard in self.standards:
+                if standard in supportedstandard.neo_standards:
+                    current_standard = supportedstandard.neo_standards[standard]
 
-                # validate standard's methods
-                for standard_method in current_standard.methods:
-                    method_id = standard_method.external_name
-                    is_implemented = False
+                    # validate standard's methods
+                    for standard_method in current_standard.methods:
+                        method_id = standard_method.external_name
+                        is_implemented = False
 
-                    found_methods = self.get_methods_by_display_name(method_id)
-                    for method in found_methods:
-                        if isinstance(method, Method) and current_standard.match_definition(standard_method, method):
-                            is_implemented = True
-                            break
+                        found_methods = self.get_methods_by_display_name(method_id)
+                        for method in found_methods:
+                            if isinstance(method, Method) and current_standard.match_definition(standard_method, method):
+                                is_implemented = True
+                                break
 
-                    if not is_implemented:
-                        self._log_error(
-                            CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
-                        )
+                        if not is_implemented:
+                            self._log_error(
+                                CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
+                            )
 
-                # validate standard's events
-                events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
-                # imported events should be included in the validation
-                for import_ in self._analyser.get_imports():
-                    events.extend([event for event in import_.symbol_table.values()
-                                   if isinstance(event, Event) and event not in events])
+                    # validate standard's events
+                    events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
+                    # imported events should be included in the validation
+                    for import_ in self._analyser.get_imports():
+                        events.extend([event for event in import_.symbol_table.values()
+                                       if isinstance(event, Event) and event not in events])
 
-                for standard_event in current_standard.events:
-                    is_implemented = False
-                    for event in events:
-                        if (event.name == standard_event.name
-                                and current_standard.match_definition(standard_event, event)):
-                            is_implemented = True
-                            break
+                    for standard_event in current_standard.events:
+                        is_implemented = False
+                        for event in events:
+                            if (event.name == standard_event.name
+                                    and current_standard.match_definition(standard_event, event)):
+                                is_implemented = True
+                                break
 
-                    if not is_implemented:
-                        self._log_error(
-                            CompilerError.MissingStandardDefinition(standard,
-                                                                    standard_event.name,
-                                                                    standard_event)
-                        )
+                        if not is_implemented:
+                            self._log_error(
+                                CompilerError.MissingStandardDefinition(standard,
+                                                                        standard_event.name,
+                                                                        standard_event)
+                            )
 
-                # validate optional methods
-                for optional_method in current_standard.optionals:
-                    method_id = optional_method.external_name
-                    is_implemented = False
+                    # validate optional methods
+                    for optional_method in current_standard.optionals:
+                        method_id = optional_method.external_name
+                        is_implemented = False
 
-                    found_methods = self.get_methods_by_display_name(method_id)
-                    for method in found_methods:
-                        if isinstance(method, Method) and current_standard.match_definition(optional_method, method):
-                            is_implemented = True
-                            break
+                        found_methods = self.get_methods_by_display_name(method_id)
+                        for method in found_methods:
+                            if isinstance(method, Method) and current_standard.match_definition(optional_method, method):
+                                is_implemented = True
+                                break
 
-                    if found_methods and not is_implemented:
-                        self._log_error(
-                            CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
-                        )
+                        if found_methods and not is_implemented:
+                            self._log_error(
+                                CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
+                            )
+        except CompilerError.CompilerError:
+            # stops the analyser if fail fast is activated
+            pass
 
     def _check_other_implemented_standards(self):
         other_standards = supportedstandard.neo_standards.copy()

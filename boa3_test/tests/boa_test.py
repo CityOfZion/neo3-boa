@@ -1,3 +1,4 @@
+import logging
 import os
 import threading
 from typing import Any, Dict, Optional, Tuple, Union
@@ -95,14 +96,14 @@ class BoaTest(TestCase):
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output, expected_logged[0].message
 
-    def _get_compiler_log_data(self, expected_logged_exception, path):
+    def _get_compiler_log_data(self, expected_logged_exception, path, fail_fast=False):
         output = None
 
         with _LOGGING_LOCK:
             with self.assertLogs() as log:
                 from boa3.internal.exception.NotLoadedException import NotLoadedException
                 try:
-                    output = self.compile(path)
+                    output = self.compile(path, fail_fast=fail_fast)
                 except NotLoadedException:
                     # when an compiler error is logged this exception is raised.
                     pass
@@ -110,6 +111,38 @@ class BoaTest(TestCase):
             expected_logged = [exception for exception in log.records
                                if isinstance(exception.msg, expected_logged_exception)]
         return output, expected_logged
+
+    def get_all_compile_log_data(self, path: str, *,
+                                 get_errors: bool = True,
+                                 get_warnings: bool = False,
+                                 fail_fast: bool = False) -> Tuple[list, list]:
+        from boa3.internal.exception.CompilerWarning import CompilerWarning
+
+        instance_logs = []
+        if get_errors:
+            instance_logs.append(CompilerError)
+        if get_warnings:
+            instance_logs.append(CompilerWarning)
+
+        errors = []
+        warnings = []
+        _, expected_logged = self._get_compiler_log_data(*instance_logs, path, fail_fast=fail_fast)
+
+        if not get_errors:
+            if not get_warnings:
+                return errors, warnings
+            warnings = [log.msg for log in expected_logged]
+        else:
+            if get_warnings:
+                for log in expected_logged:
+                    if isinstance(log.msg, CompilerError):
+                        errors.append(log.msg)
+                    elif isinstance(log.msg, CompilerWarning):
+                        warnings.append(log.msg)
+            else:
+                errors = [log.msg for log in expected_logged]
+
+        return errors, warnings
 
     def assertStartsWith(self, first: Any, second: Any):
         if not (hasattr(first, 'startswith') and first.startswith(second)):
@@ -177,43 +210,71 @@ class BoaTest(TestCase):
             path = os.path.abspath(path).replace(os.path.sep, constants.PATH_SEPARATOR)
         return path
 
-    def get_deploy_file_paths_without_compiling(self, contract_path: str) -> Tuple[str, str]:
-        file_path_without_ext, _ = os.path.splitext(contract_path)
+    def get_deploy_file_paths_without_compiling(self, contract_path: str, output_name: str = None) -> Tuple[str, str]:
+        if isinstance(output_name, str):
+            output_path, output_file = os.path.split(output_name)
+            if len(output_path) == 0:
+                file_path = os.path.dirname(contract_path)
+                file_name, _ = os.path.splitext(os.path.basename(output_name))
+                file_path_without_ext = constants.PATH_SEPARATOR.join((file_path, file_name))
+            else:
+                file_path_without_ext, _ = os.path.splitext(output_name)
+        else:
+            file_path_without_ext, _ = os.path.splitext(contract_path)
+
         if USE_UNIQUE_NAME:
             from boa3_test.test_drive import utils
             file_path_without_ext = utils.create_custom_id(file_path_without_ext, use_time=False)
 
         return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
 
-    def get_deploy_file_paths(self, *args: str, compile_if_found: bool = False) -> Tuple[str, str]:
+    def get_deploy_file_paths(self, *args: str, output_name: str = None,
+                              compile_if_found: bool = False, change_manifest_name: bool = False) -> Tuple[str, str]:
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
-            nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(contract_path)
+            nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(contract_path, output_name)
             if contract_path.endswith('.py'):
                 with _COMPILER_LOCK:
                     if compile_if_found or not (os.path.isfile(nef_path) and os.path.isfile(manifest_path)):
                         # both .nef and .manifest.json are required to execute the smart contract
-                        self.compile_and_save(contract_path, output_path=nef_path, log=False)
+                        self.compile_and_save(contract_path, output_name=nef_path, log=True,
+                                              change_manifest_name=change_manifest_name,
+                                              use_unique_name=False  # already using unique name
+                                              )
 
             return nef_path, manifest_path
 
         return contract_path, contract_path
 
-    def compile(self, path: str, root_folder: str = None) -> bytes:
+    def compile(self, path: str, root_folder: str = None, fail_fast: bool = False) -> bytes:
         from boa3.boa3 import Boa3
 
         with _COMPILER_LOCK:
-            result = Boa3.compile(path, root_folder=root_folder)
+            result = Boa3.compile(path, root_folder=root_folder, fail_fast=fail_fast,
+                                  log_level=logging.getLevelName(logging.INFO)
+                                  )
 
         return result
 
     def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True,
-                         output_path: str = None, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
+                         output_name: str = None, env: str = None, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
 
-        if not isinstance(output_path, str) or not output_path.endswith('.nef'):
-            nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
+        if output_name is not None:
+            output_dir, manifest_name = os.path.split(output_name)  # get name
+            if len(output_dir) == 0:
+                output_dir, _ = os.path.split(path)
+                output_name = f'{output_dir}/{manifest_name}'
+            manifest_name, _ = os.path.splitext(manifest_name)  # remove extension
         else:
-            nef_output = output_path
+            manifest_name = None
+
+        use_unique_name = kwargs['use_unique_name'] if 'use_unique_name' in kwargs else True
+        if not isinstance(output_name, str) or not output_name.endswith('.nef'):
+            nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
+        elif use_unique_name and USE_UNIQUE_NAME:
+            nef_output, _ = self.get_deploy_file_paths_without_compiling(output_name)
+        else:
+            nef_output = output_name
 
         if nef_output.endswith('.py'):
             nef_output = nef_output.replace('.py', '.nef')
@@ -223,9 +284,13 @@ class BoaTest(TestCase):
         from boa3.internal.neo.contracts.neffile import NefFile
         with _COMPILER_LOCK:
             Boa3.compile_and_save(path, output_path=nef_output, root_folder=root_folder,
-                                  show_errors=log, debug=debug)
+                                  env=env, debug=debug,
+                                  show_errors=log, log_level=logging.getLevelName(logging.INFO)
+                                  )
 
         get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False
+        change_manifest_name = kwargs['change_manifest_name'] if 'change_manifest_name' in kwargs else False
+
         with open(nef_output, mode='rb') as nef:
             file = nef.read()
             if get_raw_nef:
@@ -233,9 +298,15 @@ class BoaTest(TestCase):
             else:
                 output = NefFile.deserialize(file).script
 
-        with open(manifest_output) as manifest_output:
+        with open(manifest_output) as manifest_file:
             import json
-            manifest = json.loads(manifest_output.read())
+            manifest = json.loads(manifest_file.read())
+
+        if change_manifest_name and manifest_name is not None:
+            manifest['name'] = manifest_name
+            with _COMPILER_LOCK:
+                with open(manifest_output, mode='w') as manifest_file:
+                    manifest_file.write(json.dumps(manifest, indent=4))
 
         return output, manifest
 

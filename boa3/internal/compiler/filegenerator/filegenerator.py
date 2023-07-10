@@ -243,6 +243,21 @@ class FileGenerator:
 
         return self.__all_imports
 
+    def create_folder(self, output_folder: str):
+        if os.path.isfile(output_folder):
+            output_folder = os.path.abspath(os.path.dirname(output_folder))
+        else:
+            output_folder = os.path.abspath(output_folder)
+
+        folders_to_generate = []
+        while not os.path.exists(output_folder):
+            folders_to_generate.append(output_folder)
+            output_folder = os.path.dirname(output_folder)
+
+        while len(folders_to_generate) > 0:
+            folder = folders_to_generate.pop()
+            os.mkdir(folder)
+
     # region NEF
 
     @property

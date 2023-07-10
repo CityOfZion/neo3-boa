@@ -118,5 +118,14 @@ class Package(IdentifiedSymbol):
             else:
                 self._all_symbols.append(symbol)
 
+    def update_with_analyser(self, analyser):
+        from boa3.internal.analyser.analyser import Analyser
+        if isinstance(analyser, Analyser):
+            for symbol in self._all_symbols:
+                if hasattr(symbol, 'update_with_analyser'):
+                    symbol.update_with_analyser(analyser)
+            for pkg in self._packages:
+                pkg.update_with_analyser(analyser)
+
     def __repr__(self) -> str:
         return self.identifier

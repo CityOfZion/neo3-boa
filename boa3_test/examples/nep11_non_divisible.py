@@ -83,7 +83,7 @@ on_transfer = CreateNewEvent(
         ('from_addr', Union[UInt160, None]),
         ('to_addr', Union[UInt160, None]),
         ('amount', int),
-        ('tokenId', Union[bytes, str])
+        ('tokenId', bytes)
     ],
     'Transfer'
 )
@@ -210,7 +210,7 @@ def tokensOf(owner: UInt160) -> Iterator:
 
 
 @public
-def transfer(to: UInt160, tokenId: Union[bytes, str], data: Any) -> bool:
+def transfer(to: UInt160, tokenId: bytes, data: Any) -> bool:
     """
     Transfers the token with id tokenId to address to
 
@@ -236,21 +236,20 @@ def transfer(to: UInt160, tokenId: Union[bytes, str], data: Any) -> bool:
     """
     expect(validateAddress(to), "Not a valid address")
     expect(not isPaused(), "Contract is currently paused")
-    token_id: bytes = tokenId
-    token_owner = get_owner_of(token_id)
+    token_owner = get_owner_of(tokenId)
 
     if not check_witness(token_owner):
         return False
 
-    if (token_owner != to):
+    if token_owner != to:
         set_balance(token_owner, -1)
-        remove_token_account(token_owner, token_id)
+        remove_token_account(token_owner, tokenId)
 
         set_balance(to, 1)
 
-        set_owner_of(token_id, to)
-        add_token_account(to, token_id)
-    post_transfer(token_owner, to, token_id, data)
+        set_owner_of(tokenId, to)
+        add_token_account(to, tokenId)
+    post_transfer(token_owner, to, tokenId, data)
     return True
 
 
@@ -268,15 +267,15 @@ def post_transfer(token_owner: Union[UInt160, None], to: Union[UInt160, None], t
     :type data: Any
     """
     on_transfer(token_owner, to, 1, tokenId)
-    if not isinstance(to, None):
+    if to is not None:
         contract = get_contract(to)
-        if not isinstance(contract, None):
+        if contract is not None:
             call_contract(to, 'onNEP11Payment', [token_owner, 1, tokenId, data])
             pass
 
 
 @public(safe=True)
-def ownerOf(tokenId: Union[bytes, str]) -> UInt160:
+def ownerOf(tokenId: bytes) -> UInt160:
     """
     Get the owner of the specified token.
 
@@ -287,7 +286,7 @@ def ownerOf(tokenId: Union[bytes, str]) -> UInt160:
     :return: the owner of the specified token.
     :raise AssertionError: raised if `tokenId` is not a valid NFT.
     """
-    owner = get_owner_of(cast(bytes, tokenId))
+    owner = get_owner_of(tokenId)
     debug(['ownerOf: ', owner])
     return owner
 
@@ -305,7 +304,7 @@ def tokens() -> Iterator:
 
 
 @public(safe=True)
-def properties(tokenId: Union[bytes, str]) -> Dict[Any, Any]:
+def properties(tokenId: bytes) -> Dict[Any, Any]:
     """
     Get the properties of a token.
 
@@ -316,7 +315,7 @@ def properties(tokenId: Union[bytes, str]) -> Dict[Any, Any]:
     :return: a serialized NVM object containing the properties for the given NFT.
     :raise AssertionError: raised if `tokenId` is not a valid NFT, or if no metadata available.
     """
-    metaBytes = cast(str, get_meta(cast(bytes, tokenId)))
+    metaBytes = cast(str, get_meta(tokenId))
     expect(len(metaBytes) != 0, 'No metadata available for token')
     metaObject = cast(Dict[str, str], json_deserialize(metaBytes))
 

@@ -39,8 +39,6 @@ Before migrating your code, we recommend following these steps:
 
     If your contracts implement the `NEP-11` standard, be aware that Neo3-Boa verifies if the methods that used to have `ByteString` type now are implemented as `Union[bytes, str]`.
     
-    Using either `bytes` or `str` in  these methods won't pass the compiler validation.
-
 ## Testing and Feedback:
 
 We encourage you to thoroughly test your migrated contracts in the new version and provide feedback on any issues or challenges you encounter. Your feedback will help us improve the migration process and address any inconsistent behaviors.

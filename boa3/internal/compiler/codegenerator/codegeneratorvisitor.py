@@ -39,8 +39,8 @@ class VisitorCodeGenerator(IAstAnalyser):
     :ivar generator:
     """
 
-    def __init__(self, generator: CodeGenerator, filename: str = None):
-        super().__init__(ast.parse(""), filename=filename, log=True)
+    def __init__(self, generator: CodeGenerator, filename: str = None, root: str = None):
+        super().__init__(ast.parse(""), filename=filename, root_folder=root, log=True, fail_fast=True)
 
         self.generator = generator
         self.current_method: Optional[Method] = None
@@ -500,7 +500,10 @@ class VisitorCodeGenerator(IAstAnalyser):
             value_data = self.visit_to_generate(subscript.value)
             slice = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
             self.visit_to_generate(slice)
-            self.generator.convert_get_item()
+
+            index_is_constant_number = isinstance(slice, ast.Num) and isinstance(slice.n, int)
+            self.generator.convert_get_item(index_is_positive=(index_is_constant_number and slice.n >= 0),
+                                            test_is_negative_index=not (index_is_constant_number and slice.n < 0))
 
             value_type = value_data.type
         else:
@@ -528,33 +531,42 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.visit_to_generate(subscript.value)
 
         step_negative = True if not step_omitted and subscript.slice.step.n < 0 else False
-        # if step is negative, then consider the value reversed
+
         if step_negative:
+            # reverse the ByteString or the list
             self.generator.convert_array_negative_stride()
+
+        addresses = []
+
+        for index_number, omitted in [(subscript.slice.lower, lower_omitted), (subscript.slice.upper, upper_omitted)]:
+            if not omitted:
+                addresses.append(VMCodeMapping.instance().bytecode_size)
+                self.visit_to_generate(index_number)
+
+                index_is_constant_number = isinstance(index_number, ast.Num) and isinstance(index_number.n, int)
+                if index_is_constant_number and index_number.n < 0:
+                    self.generator.fix_negative_index(test_is_negative=False)
+                elif not index_is_constant_number:
+                    self.generator.fix_negative_index()
+
+                if step_negative:
+                    self.generator.duplicate_stack_item(len(addresses) + 1)  # duplicates the subscript
+                    self.generator.fix_index_negative_stride()
+
+                self.generator.fix_index_out_of_range(has_another_index_in_stack=len(addresses) == 2)
 
         # if both are explicit
         if not lower_omitted and not upper_omitted:
-            addresses = [VMCodeMapping.instance().bytecode_size]
-            self.visit_to_generate(subscript.slice.lower)
+            self.generator.convert_get_sub_sequence()
 
-            # length of slice
-            addresses.append(VMCodeMapping.instance().bytecode_size)
-            self.visit_to_generate(subscript.slice.upper)
-
-            self.generator.convert_get_sub_array(addresses, step_negative)
         # only one of them is omitted
         elif lower_omitted != upper_omitted:
             # start position is omitted
             if lower_omitted:
-                self.visit_to_generate(subscript.slice.upper)
-                self.generator.convert_get_array_beginning(step_negative)
+                self.generator.convert_get_sequence_beginning()
             # end position is omitted
             else:
-                self.generator.duplicate_stack_top_item()
-                # length of slice
-                self.generator.convert_builtin_method_call(Builtin.Len)
-                self.visit_to_generate(subscript.slice.lower)
-                self.generator.convert_get_array_ending(step_negative)
+                self.generator.convert_get_sequence_ending()
         else:
             self.generator.convert_copy()
 
