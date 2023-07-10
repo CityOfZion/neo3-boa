@@ -1,11 +1,11 @@
 # Testing and Debugging
 
 ## Configuring the Debugger
-Neo3-boa is compatible with the [Neo Debugger](https://github.com/neo-project/neo-debugger).
+Neo3-Boa is compatible with the [Neo Debugger](https://github.com/neo-project/neo-debugger).
 Debugger launch configuration example:
 ```
 {
-    //Launch configuration example for Neo3-boa.
+    //Launch configuration example for Neo3-Boa.
     //Make sure you compile your smart-contract before you try to debug it.
     "version": "0.2.0",
     "configurations": [

@@ -25,7 +25,7 @@ Product Strategy
 
 Pure Python
 ^^^^^^^^^^^
-We want Python developers to feel comfortable when trying neo3-boa for the first time. It should look and behave like regular Python. For this reason we decided to avoid adding new keywords, but use decorators and helper functions instead.
+We want Python developers to feel comfortable when trying Neo3-Boa for the first time. It should look and behave like regular Python. For this reason we decided to avoid adding new keywords, but use decorators and helper functions instead.
 
 Neo Python Framework
 ^^^^^^^^^^^^^^^^^^^^
@@ -52,7 +52,7 @@ Using CLI
 
 ::
 
-  $ neo3-boa path/to/your/file.py
+  $ neo3-boa compile path/to/your/file.py
 
 .. note::  When resolving compilation errors it is recommended to resolve the first reported error and try to compile again. An error can have a cascading effect and throw more errors all caused by the first.
 

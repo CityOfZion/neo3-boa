@@ -45,9 +45,9 @@
 
 ## Overview
 
-Neo3-boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manifest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
+Neo3-Boa is a tool for creating Neo Smart Contracts using Python. It compiles `.py` files to `.nef` and `.manifest.json` formats for usage in the [Neo Virtual Machine](https://github.com/neo-project/neo-vm/) which is used to execute contracts on the [Neo Blockchain](https://github.com/neo-project/neo/).
 
-Neo3-boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
+Neo3-Boa is part of the Neo Python Framework, aimed to allow the full development of dApps using Python alone.
 
 ## Quickstart
 
@@ -72,16 +72,16 @@ $ venv\Scripts\activate.bat
 
 ##### Pip (Recommended)
 
-###### Install Neo3-boa using Pip:
+###### Install Neo3-Boa using Pip:
 
 ```shell
 $ pip install neo3-boa
 ```
 
 ##### Build from Source (Optional)
-If Neo3-boa is not available via pip, you can run it from source.
+If Neo3-Boa is not available via pip, you can run it from source.
 
-###### Clone Neo3-boa:
+###### Clone Neo3-Boa:
 ```shell
 $ git clone https://github.com/CityOfZion/neo3-boa.git
 ```
@@ -103,7 +103,7 @@ For an extensive collection of examples:
 
 ## Neo Python Suite Projects
 
-- **[Neo3-boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts' compiler.
+- **[Neo3-Boa](https://github.com/CityOfZion/neo3-boa)**: Python smart contracts' compiler.
 - [neo3-mamba](https://github.com/CityOfZion/neo-mamba): Python SDK for interacting with Neo.
 
 ## Contributing

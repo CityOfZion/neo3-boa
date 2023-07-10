@@ -7,7 +7,6 @@ from boa3.internal.model.type.anytype import anyType
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CastTypeMethod(IBuiltinMethod):

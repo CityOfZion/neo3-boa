@@ -60,7 +60,7 @@ class HelloStrangerContract:
 ```
 
 ### Calling native contracts
-Neo3-boa already has interfaces for all the [native contracts](https://docs.neo.org/docs/en-us/reference/scapi/framework/native.html) 
+Neo3-Boa already has interfaces for all the [native contracts](https://docs.neo.org/docs/en-us/reference/scapi/framework/native.html) 
 that you can import from `boa3.builtin.nativecontract`
 ```python
 # calling_native_contract.py
@@ -75,7 +75,7 @@ def calling_other_contract() -> str:
 
 ### Automate with CPM
 Instead of manually writing the smart contract interface, you can use [CPM](https://github.com/CityOfZion/cpm/tree/master#readme) 
-to generate it automatically. After installing Neo3-boa, you can install CPM by typing `install_cpm` on CLI (without the 
+to generate it automatically. After installing Neo3-Boa, you can install CPM by typing `install_cpm` on CLI (without the 
 `neo3-boa` prefix). Then, you'll need to create a [cpm.yaml config file](https://github.com/CityOfZion/cpm/blob/master/docs/config.md), 
 put the smart contract information there, and [run cpm](https://github.com/CityOfZion/cpm#example-commands).
 

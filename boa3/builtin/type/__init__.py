@@ -5,7 +5,6 @@ __all__ = [
     'UInt160',
     'UInt256',
     'ECPoint',
-    'ByteString',
     'Address',
     'BlockHash',
     'PublicKey',
@@ -20,7 +19,7 @@ from typing import Union
 class Event:
     """
     Describes an action that happened in the blockchain.
-    Neo3-boa compiler won't recognize the `__init__` of this class. To create a new Event, use the method `CreateNewEvent`:
+    Neo3-Boa compiler won't recognize the `__init__` of this class. To create a new Event, use the method `CreateNewEvent`:
 
     Check out `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/basics#events>`__ to learn more
     about Events.
@@ -76,12 +75,6 @@ class ECPoint(bytes):
         :rtype: bytes
         """
         pass
-
-
-ByteString = Union[str, bytes]
-"""
-An type annotation for values that can be str or bytes. Same as Union[str, bytes]
-"""
 
 
 Address = str

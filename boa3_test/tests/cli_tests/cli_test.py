@@ -6,7 +6,6 @@ from boa3_test.tests.boa_test import (BoaTest,  # needs to be the first import t
 import abc
 import io
 from contextlib import redirect_stdout, redirect_stderr
-from typing import Tuple
 
 from boa3.cli import main
 from boa3_test.tests.cli_tests import utils

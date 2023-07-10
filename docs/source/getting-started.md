@@ -1,17 +1,17 @@
 # Getting Started
 
 Check out our [GitHub README page](https://github.com/CityOfZion/neo3-boa/tree/master#quickstart) to see how you can 
-install Neo3-boa.
+install Neo3-Boa.
 
 ## Writing a smart contract
-It's pretty easy to write a Python3 script with Neo3-boa, since it is compatible with a lot of Python features. However,
+It's pretty easy to write a Python3 script with Neo3-Boa, since it is compatible with a lot of Python features. However,
 there are some key differences that you should be aware of, here's the 4 most prominent ones:
 - there is no floating point arithmetic, only the `int` type is implemented;
 - you need to specify a function's return type and parameter types;
 - if you want to call other smart contracts, you can only call public functions;
 - to interact with the Neo blockchain, you need to use a function, variable, or class inside the `boa3.builtin` package.
 
-### Overview of Neo3-boa features
+### Overview of Neo3-Boa features
 
 | Packages                                                                                                        | Contains:                                                                                                                                 | Important features                                                                                                                                                                                                                                                                                                                                                                               |
 |-----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

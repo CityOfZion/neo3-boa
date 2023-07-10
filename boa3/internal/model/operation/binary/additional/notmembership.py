@@ -6,7 +6,6 @@ from boa3.internal.model.type.collection.icollection import ICollectionType
 from boa3.internal.model.type.collection.mapping.mappingtype import MappingType
 from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.type.type import IType, Type
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CollectionNotMembership(BinaryOperation):

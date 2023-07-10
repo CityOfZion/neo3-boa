@@ -2,14 +2,6 @@ __all__ = [
     'CallFlags',
     'Contract',
     'ContractManifest',
-    'ContractPermission',
-    'ContractPermissionDescriptor',
-    'ContractGroup',
-    'ContractAbi',
-    'ContractMethodDescriptor',
-    'ContractEventDescriptor',
-    'ContractParameterDefinition',
-    'ContractParameterType',
     'call_contract',
     'create_contract',
     'update_contract',
@@ -27,8 +19,7 @@ from typing import Any, List, Sequence
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
-from boa3.builtin.interop.contract.contractmanifest import ContractManifest, ContractPermission, ContractPermissionDescriptor, \
-    ContractGroup, ContractAbi, ContractMethodDescriptor, ContractEventDescriptor, ContractParameterDefinition, ContractParameterType
+from boa3.builtin.interop.contract.contractmanifest import ContractManifest
 from boa3.builtin.type import ECPoint, UInt160
 
 
@@ -37,7 +28,7 @@ def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_f
     Calls a smart contract given the method and the arguments. Since the return is type Any, you'll probably need to
     type cast the return.
 
-    >>> call_contract(NEO, 'balanceOf', (UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2')))
+    >>> call_contract(NEO, 'balanceOf', [UInt160(b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2')])
     100
 
     :param script_hash: the target smart contract's script hash
@@ -68,7 +59,7 @@ def create_contract(nef_file: bytes, manifest: bytes, data: Any = None) -> Contr
         'id': 2,
         'update_counter': 0,
         'hash': b'\\x92\\x8f+1q\\x86z_@\\x94\\xf5pE\\xcb\\xb8 \\x0f\\\\`Z',
-        'nef': b'NEF3neo3-boa by COZ-_unit_tests_\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x07W\\x00\\x02xy\\x9e@\\xf9\\7b\\xbb\\xcc',
+        'nef': b'NEF3neo3-boa by COZ-1.0.0\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x07W\\x00\\x02xy\\x9e@\\xf9\\7b\\xbb\\xcc',
         'manifest': {
             'name': 'TestContract',
             'group': [],
