@@ -1,15 +1,12 @@
 import ast
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.classmethod.indexmethod import IndexMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.primitive.bytestype import BytesType
 from boa3.internal.model.type.primitive.strtype import StrType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
-from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo.vm.type.String import String
 
 
 class IndexBytesStringMethod(IndexMethod):
