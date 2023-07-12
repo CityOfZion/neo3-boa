@@ -1607,6 +1607,7 @@ class TestBytes(BoaTest):
         invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
         self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
 
     def test_bytes_index_defaults(self):
