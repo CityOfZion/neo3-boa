@@ -51,9 +51,16 @@ Install [Neo-Express](https://github.com/neo-project/neo-express#installation) a
 
 ### Testing
 
+Before writing your tests, make sure you have a Neo-Express network for local tests.
+Please refer to [Neo-Express documentation](https://github.com/neo-project/neo-express/blob/master/docs/command-reference.md#neoxp-create)
+for details of how to set your local network. 
+
 Create a Python Script, import the NeoTestRunner class, and define a function to test your smart contract. In this 
-function you'll need to call the method `call_contract()`. Its parameters are the path of the compiled smart contract, 
-the smart contract's method, and the arguments if necessary. Then assert the result of your invoke to see if it's correct.
+function you'll need a NeoTestRunner object, which requires the path of your Neo-Express network configuration file to
+the NeoTestRunner object to set up the test environment.
+
+You'll to call the method `call_contract()`. Its parameters are the path of the compiled smart contract, the smart
+contract's method, and the arguments if necessary. Then assert the result of your invoke to see if it's correct.
 
 Your Python Script should look something like this:
 
@@ -62,24 +69,24 @@ from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
 def test_hello_world_main():
-    neoxp_folder = '{path-to-neo-express-directory}'
+    neoxp_config_file = '{path-to-neo-express-config-file}'
     project_root_folder = '{path-to-project-root-folder}'
     path = f'{project_root_folder}/boa3_test/examples/hello_world.nef'
-    runner = NeoTestRunner(neoxp_folder)
+    runner = NeoTestRunner(neoxp_config_file)
 
     invoke = runner.call_contract(path, 'main')
     runner.execute()
     assert invoke.result is None
 ```
 
-Alternatively you can change the value of `boa3.env.NEO_EXPRESS_INSTANCE_DIRECTORY` to the path of your .neo-express 
+Alternatively you can change the value of `env.NEO_EXPRESS_INSTANCE_DIRECTORY` to the path of your .neo-express 
 data file:
 
 ```python
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3.internal import env
 
-env.NEO_EXPRESS_INSTANCE_DIRECTORY = '{path-to-neo-express-directory}'
+env.NEO_EXPRESS_INSTANCE_DIRECTORY = '{path-to-neo-express-config-file}'
 
 
 def test_hello_world_main():
