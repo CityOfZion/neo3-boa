@@ -1641,3 +1641,90 @@ class TestBytes(BoaTest):
     def test_bytes_index_mismatched_type(self):
         path = self.get_contract_path('IndexBytesMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_bytes_property_slicing(self):
+        path, _ = self.get_deploy_file_paths('BytesPropertySlicing.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        bytes_value = b'unit test'
+        start = 0
+        end = len(bytes_value)
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = 2
+        end = len(bytes_value) - 1
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = len(bytes_value)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_bytes_instance_variable_slicing(self):
+        path, _ = self.get_deploy_file_paths('BytesInstanceVariableSlicing.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        bytes_value = b'unit test'
+        start = 0
+        end = len(bytes_value)
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = 2
+        end = len(bytes_value) - 1
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = len(bytes_value)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_bytes_class_variable_slicing(self):
+        path, _ = self.get_deploy_file_paths('BytesClassVariableSlicing.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        bytes_value = b'unit test'
+        start = 0
+        end = len(bytes_value)
+        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = 2
+        end = len(bytes_value) - 1
+        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = len(bytes_value)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)

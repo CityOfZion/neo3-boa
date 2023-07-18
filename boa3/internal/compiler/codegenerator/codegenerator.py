@@ -1910,6 +1910,11 @@ class CodeGenerator:
                 self.convert_literal(index)
                 self.convert_get_item(index_inserted_internally=True)
 
+                symbol_type = class_type.variables[symbol_id].type
+                if self._stack[-1] != symbol_type:
+                    self._stack_pop()
+                    self._stack_append(symbol_type)
+
             return index
 
     def convert_operation(self, operation: IOperation, is_internal: bool = False):
