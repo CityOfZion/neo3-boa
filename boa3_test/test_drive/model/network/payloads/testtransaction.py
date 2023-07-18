@@ -59,14 +59,9 @@ class TestTransaction:
 
         tx._attributes = []
         if 'attributes' in json:
-            attributes_json = json['attributes']
-
-            for attribute in attributes_json:
-                from boa3_test.test_drive.model.network.payloads.transactionattribute import \
-                    TransactionAttributeType
-                if attribute['type'] == TransactionAttributeType.ORACLE_RESPONSE:
-                    from boa3_test.test_drive.model.network.payloads.oracleresponse import OracleResponse
-                    tx._attributes.append(OracleResponse.from_json(attribute))
+            tx._attributes = [TransactionAttribute.from_json(attr) for attr in json['attributes']]
+        else:
+            tx._attributes = []
 
         if 'signers' in json:
             signers_json = json['signers']

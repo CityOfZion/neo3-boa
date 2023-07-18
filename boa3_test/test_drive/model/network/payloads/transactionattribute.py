@@ -21,6 +21,10 @@ class TransactionAttribute:
 
     @staticmethod
     def from_json(json: Dict[str, Any]) -> TransactionAttribute:
-        tx_attr = TransactionAttribute(json['type'])
+        if json['type'] == TransactionAttributeType.ORACLE_RESPONSE:
+            from boa3_test.test_drive.model.network.payloads.oracleresponse import OracleResponse
+            tx_attr = OracleResponse.from_json(json)
+        else:
+            tx_attr = TransactionAttribute(json['type'])
 
         return tx_attr
