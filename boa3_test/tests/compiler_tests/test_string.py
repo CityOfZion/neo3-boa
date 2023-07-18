@@ -1389,3 +1389,90 @@ class TestString(BoaTest):
     def test_string_index_mismatched_type(self):
         path = self.get_contract_path('IndexStringMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_string_property_slicing(self):
+        path, _ = self.get_deploy_file_paths('StringPropertySlicing.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        string = 'unit test'
+        start = 0
+        end = len(string)
+        invokes.append(runner.call_contract(path, 'main', string, start, end))
+        expected_results.append(string[start:end])
+
+        start = 2
+        end = len(string) - 1
+        invokes.append(runner.call_contract(path, 'main', string, start, end))
+        expected_results.append(string[start:end])
+
+        start = len(string)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', string, start, end))
+        expected_results.append(string[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_string_instance_variable_slicing(self):
+        path, _ = self.get_deploy_file_paths('StringInstanceVariableSlicing.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        string = 'unit test'
+        start = 0
+        end = len(string)
+        invokes.append(runner.call_contract(path, 'main', string, start, end))
+        expected_results.append(string[start:end])
+
+        start = 2
+        end = len(string) - 1
+        invokes.append(runner.call_contract(path, 'main', string, start, end))
+        expected_results.append(string[start:end])
+
+        start = len(string)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', string, start, end))
+        expected_results.append(string[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_string_class_variable_slicing(self):
+        path, _ = self.get_deploy_file_paths('StringClassVariableSlicing.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        string = 'unit test'
+        start = 0
+        end = len(string)
+        invokes.append(runner.call_contract(path, 'main', start, end))
+        expected_results.append(string[start:end])
+
+        start = 2
+        end = len(string) - 1
+        invokes.append(runner.call_contract(path, 'main', start, end))
+        expected_results.append(string[start:end])
+
+        start = len(string)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', start, end))
+        expected_results.append(string[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
