@@ -197,11 +197,17 @@ class NeoTestRunner:
         return block
 
     def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
+        if isinstance(tx_hash, bytes):
+            tx_hash = UInt256(tx_hash)
+
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash,
                                            check_point_file=check_point_path)
 
     def get_transaction_result(self, tx_hash: Union[UInt256, bytes]) -> Optional[TransactionLog]:
+        if isinstance(tx_hash, bytes):
+            tx_hash = UInt256(tx_hash)
+
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash,
                                                check_point_file=check_point_path,
@@ -459,3 +465,14 @@ class NeoTestRunner:
 
     def increase_block(self, block_to_mint: int = None, time_interval_in_secs: int = 0):
         self._batch.mint_block(block_to_mint, time_interval_in_secs)
+
+    def oracle_enable(self, account: Account):
+        self._batch.oracle_enable(account)
+
+    def oracle_response(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+
+        # add to command to batch file and get the tx id
+        self._batch.oracle_response(url, response_path, request_id=request_id)
+        return neoxp_utils.oracle_response(self._neoxp_abs_path, url, response_path, request_id,
+                                           check_point_file=check_point_path)

@@ -12,8 +12,7 @@ class OracleRequestMethod(OracleMethod):
         identifier = 'request'
         syscall = 'request'
         args: Dict[str, Variable] = {'url': Variable(Type.str),
-                                     'request_filter': Variable(Type.union.build([Type.str,
-                                                                                  Type.none])),
+                                     'request_filter': Variable(Type.str),
                                      'callback': Variable(Type.str),
                                      'user_data': Variable(Type.any),
                                      'gas_for_response': Variable(Type.int)}
