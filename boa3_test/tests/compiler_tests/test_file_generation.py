@@ -171,45 +171,6 @@ class TestFileGeneration(BoaTest):
                 self.assertEqual(event_args[event_param['name']].type.abi_type,
                                  event_param['type'])
 
-    def test_generate_manifest_file_with_nep5_transfer_event(self):
-        path = self.get_contract_path('test_sc/event_test', 'EventNep5Transfer.py')
-        nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
-
-        compiler = Compiler()
-        with LOCK:
-            compiler.compile_and_save(path, nef_output)
-
-            events: Dict[str, Event] = {
-                event.name: event
-                for event in self.get_compiler_analyser(compiler).symbol_table.values()
-                if isinstance(event, Event)
-            }
-
-            output, manifest = self.get_output(nef_output)
-
-        self.assertTrue(os.path.exists(expected_manifest_output))
-        self.assertIn('abi', manifest)
-        abi = manifest['abi']
-
-        self.assertIn('methods', abi)
-        self.assertEqual(1, len(abi['methods']))
-
-        self.assertIn('events', abi)
-        self.assertEqual(1, len(abi['events']))
-
-        for abi_event in abi['events']:
-            self.assertIn('name', abi_event)
-            self.assertIn(abi_event['name'], events)
-            self.assertIn('parameters', abi_event)
-
-            event_args = events[abi_event['name']].args
-            for event_param in abi_event['parameters']:
-                self.assertIn('name', event_param)
-                self.assertIn(event_param['name'], event_args)
-                self.assertIn('type', event_param)
-                self.assertEqual(event_args[event_param['name']].type.abi_type,
-                                 event_param['type'])
-
     def test_generate_manifest_file_with_imported_event(self):
         path = self.get_contract_path('GenerationWithImportedEvent.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)

@@ -138,42 +138,6 @@ class TestEvent(BoaTest):
         self.assertEqual(1, len(event_notifications))
         self.assertEqual((10,), event_notifications[0].arguments)
 
-    def test_event_nep5_transfer(self):
-        event_id = 'transfer'
-        event_name = String(event_id).to_bytes(min_length=1)
-        expected_output = (
-            Opcode.INITSLOT     # Main()
-            + b'\x00\x03'
-            + Opcode.LDARG2         # event(from_addr, to_addr, amount)
-            + Opcode.LDARG1
-            + Opcode.LDARG0
-            + Opcode.PUSH3
-            + Opcode.PACK
-            + Opcode.PUSHDATA1
-            + Integer(len(event_name)).to_byte_array(min_length=1)
-            + event_name
-            + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
-            + Opcode.RET       # return
-        )
-
-        path = self.get_contract_path('EventNep5Transfer.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
-
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
-
     def test_event_nep17_transfer(self):
         event_id = 'Transfer'
         event_name = String(event_id).to_bytes(min_length=1)

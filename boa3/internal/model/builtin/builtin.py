@@ -186,7 +186,6 @@ class Builtin:
     TransactionId = TransactionIdType.build()
 
     # boa events
-    Nep5Transfer = Nep5TransferEvent()
     Nep11Transfer = Nep11TransferEvent()
     Nep17Transfer = Nep17TransferEvent()
 
@@ -268,7 +267,6 @@ class Builtin:
                               NeoAccountState,
                               Nep11Transfer,
                               Nep17Transfer,
-                              Nep5Transfer,
                               ScriptHashMethod_
                               ],
         BoaPackage.Interop: Interop.package_symbols,
