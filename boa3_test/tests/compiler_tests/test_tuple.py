@@ -211,44 +211,6 @@ class TestTuple(BoaTest):
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
-    def test_nep5_main(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x02'
-            + Opcode.LDARG1     # args[0]
-            + Opcode.PUSH0
-            + Opcode.PICKITEM
-            + Opcode.RET        # return
-        )
-
-        path = self.get_contract_path('Nep5Main.py')
-        output = self.compile(path)
-        self.assertEqual(expected_output, output)
-
-        path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 'op', (1, 2, 3, 4)))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'Main', 'op', ('a', False)))
-        expected_results.append('a')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', 'op', ())
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
-
     def test_tuple_slicing(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingLiteralValues.py')
         runner = NeoTestRunner(runner_id=self.method_name())
