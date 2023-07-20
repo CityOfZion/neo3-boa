@@ -23,66 +23,26 @@ class PopDictDefaultMethod(PopMethod):
 
         super().__init__(args, return_type=arg_value.value_type)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        from boa3.internal.compiler.codegenerator import get_bytes_count
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.model.type.type import Type
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+        # put the `default` value at the bottom of the stack
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.swap_reverse_stack_items(3)
 
-        put_default_at_bottom = [
-            (Opcode.REVERSE3, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.REVERSE3, b''),
-        ]
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.insert_opcode(Opcode.HASKEY, pop_from_stack=True, add_to_stack=[Type.bool])
+        # if the key is in the dictionary:
+        if_has_key = code_generator.convert_begin_if()
+        #   return the dict[key] and remove pair from dict
+        self.generate_internal_opcodes(code_generator)
+        code_generator.remove_stack_item(2)
 
-        prepare_values = [
-            (Opcode.DUP, b''),
-            (Opcode.SIGN, b''),
-            (Opcode.PUSHM1, b''),
-            (Opcode.JMPNE, Integer(5).to_byte_array(min_length=1, signed=True)),
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.ADD, b''),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-        ]
-
-        verify_has_key = [
-            (Opcode.HASKEY, b''),
-            jmp_place_holder
-        ]
-
-        pick_from_dict = [
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.REVERSE3, b''),
-            (Opcode.SWAP, b''),
-        ]
-
-        pop_from_dict = [
-            (Opcode.REMOVE, b''),
-            (Opcode.NIP, b''),
-            jmp_place_holder
-        ]
-
-        return_default = [
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
-
-        num_jmp_code = get_bytes_count(return_default)
-        pop_from_dict[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
-
-        num_jmp_code = get_bytes_count(pick_from_dict + pop_from_dict)
-        verify_has_key[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
-
-        return (
-            put_default_at_bottom +
-            prepare_values +
-            verify_has_key +
-            pick_from_dict +
-            pop_from_dict +
-            return_default
-        )
+        # else the key is not in the dictionary:
+        else_not_has_key = code_generator.convert_begin_else(if_has_key, is_internal=True)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        # return the default value
+        code_generator.convert_end_if(else_not_has_key, is_internal=True)
