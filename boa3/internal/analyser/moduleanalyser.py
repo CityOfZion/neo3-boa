@@ -1364,24 +1364,50 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.generic_visit(for_node)
 
     def visit_ListComp(self, node: ast.ListComp):
-        return self._visit_comprehension(node)
+        return self._visit_generic_comprehension(node)
 
     def visit_SetComp(self, node: ast.SetComp):
-        return self._visit_comprehension(node)
-
-    def visit_DictComp(self, node: ast.DictComp):
-        return self._visit_comprehension(node)
-
-    def _visit_comprehension(self, node):
-        # TODO: refactor when comprehension is implemented
         self._log_error(
             CompilerError.NotSupportedOperation(
                 node.lineno, node.col_offset,
-                symbol_id='comprehension'
+                symbol_id='set type'
             )
         )
+
+    def visit_DictComp(self, node: ast.DictComp):
+        return self._visit_generic_comprehension(node)
+
+    def _visit_generic_comprehension(self, node):
+        if len(node.generators) > 1:
+            # TODO: refactor if multiple generators is ever supported
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    node.lineno, node.col_offset,
+                    symbol_id='multiple generators'
+                )
+            )
+
         self.generic_visit(node)
         return node
+
+    def visit_comprehension(self, node: ast.comprehension):
+        if node.is_async:
+            # TODO: refactor if async is ever implemented
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    node.lineno, node.col_offset,
+                    symbol_id='async'
+                )
+            )
+
+        if len(node.ifs) > 0:
+            # TODO: refactor when generator condition are implemented
+            self._log_error(
+                CompilerError.NotSupportedOperation(
+                    node.lineno, node.col_offset,
+                    symbol_id='generator condition'
+                )
+            )
 
     def visit_Name(self, name: ast.Name) -> str:
         """

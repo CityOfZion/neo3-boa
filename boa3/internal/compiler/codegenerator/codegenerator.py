@@ -633,6 +633,17 @@ class CodeGenerator:
 
         return test_address
 
+    def convert_generator_loop(self):
+        self.duplicate_stack_top_item()
+        self.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        self.insert_opcode(Opcode.DEC)
+        address = self.convert_begin_while(True)
+
+        self.duplicate_stack_item(2)  # duplicate for sequence
+        self.duplicate_stack_item(2)  # duplicate for index
+        self.convert_get_item()
+        return address
+
     def convert_end_loop(self, start_address: int, test_address: int, is_for: bool, is_internal: bool = False) -> int:
         """
         Converts the end of a loop statement

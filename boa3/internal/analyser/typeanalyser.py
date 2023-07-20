@@ -1870,3 +1870,54 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         return slice_node.lower, slice_node.upper, slice_node.step
+
+    def visit_ListComp(self, node: ast.ListComp):
+        return self._visit_generic_comprehension(node, Type.list)
+
+    def visit_SetComp(self, node: ast.SetComp):
+        return self._visit_generic_comprehension(node, Type.list)
+
+    def visit_DictComp(self, node: ast.DictComp):
+        return self._visit_generic_comprehension(node, Type.dict)
+
+    def visit_comprehension(self, node: ast.comprehension):
+        iterator = self.visit(node.iter)
+        iterator_type: IType = self.get_type(iterator)
+
+        if not isinstance(iterator_type, Collection):
+            self._log_error(
+                CompilerError.MismatchedTypes(
+                    node.lineno, node.col_offset,
+                    actual_type_id=iterator_type.identifier,
+                    expected_type_id=Type.sequence.identifier)
+            )
+
+        else:
+            self.new_local_scope()
+            value_type = iterator_type.item_type
+
+            target_id = self.visit(node.target)
+            if isinstance(target_id, ast.Name):
+                target_id = target_id.id
+
+            # TODO: need to handle generator conditions
+            # for if_ in node.ifs:
+            self._current_scope.include_symbol(target_id, Variable(value_type))
+            return value_type
+
+    def _visit_generic_comprehension(self,
+                                     node: Union[ast.ListComp, ast.SetComp, ast.DictComp],
+                                     comprehension_type: IType):
+        if len(node.generators) > 0:
+            cur_scope = self._current_scope
+
+            self.visit(node.generators[0])
+            elt_type = self.get_type(node.elt)
+            generator_type = comprehension_type.build(elt_type)
+
+            if cur_scope != self._current_scope:
+                self.pop_local_scope()
+        else:
+            generator_type = comprehension_type
+
+        return generator_type

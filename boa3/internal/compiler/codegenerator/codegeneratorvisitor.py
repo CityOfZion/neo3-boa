@@ -1080,6 +1080,46 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return self.build_data(attribute, symbol_id=value_id, symbol=value_symbol)
 
+    def visit_ListComp(self, node: ast.ListComp):
+        return self._visit_generic_comprehension(node, Type.list)
+
+    def visit_SetComp(self, node: ast.SetComp):
+        return self._visit_generic_comprehension(node, Type.list)
+
+    def visit_DictComp(self, node: ast.DictComp):
+        return self._visit_generic_comprehension(node, Type.dict)
+
+    def visit_comprehension(self, node: ast.comprehension):
+        self.visit_to_generate(node.iter)
+        start_address = self.generator.convert_generator_loop()
+
+        if isinstance(node.target, tuple):
+            for target in node.target:
+                var_data = self.visit_to_map(target)
+                self.generator.convert_generator_variable(var_data.symbol_id)
+        else:
+            var_data = self.visit(node.target)
+            self.generator.convert_generator_variable(var_data.symbol_id)
+
+        # TODO: need to handle generator conditions
+        # for if_ in node.ifs:
+
+        return start_address
+
+    def _visit_generic_comprehension(self, comp_node, comprehension_type: IType):
+        if len(comp_node.generators) > 0:
+            start_address = self.visit(comp_node.generators[0])
+
+        self.visit_to_map(comp_node.elt)
+
+        if self.current_method is not None:
+            self.current_method.remove_instruction(comp_node.lineno, comp_node.col_offset)
+
+        condition_address = self.generator.convert_end_for(start_address)
+        self.include_instruction(comp_node, condition_address)
+
+        return self.build_data(comp_node)
+
     def visit_Continue(self, continue_node: ast.Continue) -> GeneratorData:
         """
         :param continue_node: the python ast continue statement node

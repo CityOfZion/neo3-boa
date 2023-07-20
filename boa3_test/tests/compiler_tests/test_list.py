@@ -2107,7 +2107,19 @@ class TestList(BoaTest):
     # region TestComprehension
 
     def test_list_comprehension_str(self):
-        path = self.get_contract_path('ListComprehensionStr.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        path, _ = self.get_deploy_file_paths('ListComprehensionStr.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append([l for l in 'word'])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
