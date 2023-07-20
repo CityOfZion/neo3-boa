@@ -1469,6 +1469,16 @@ class TestList(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+        path, _ = self.get_deploy_file_paths('PopList.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = (runner.call_contract(path, 'pop_test'))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual([1, 2, 3, 4, 5].pop(), invoke.result)
+
     def test_list_pop_without_assignment(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -1506,6 +1516,18 @@ class TestList(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+        path, _ = self.get_deploy_file_paths('PopListWithoutAssignment.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = (runner.call_contract(path, 'pop_test'))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        list_ = [1, 2, 3, 4, 5]
+        list_.pop()
+        self.assertEqual(list_, invoke.result)
+
     def test_list_pop_literal_argument(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -1542,6 +1564,16 @@ class TestList(BoaTest):
         path = self.get_contract_path('PopListLiteralArgument.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        path, _ = self.get_deploy_file_paths('PopListLiteralArgument.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = (runner.call_contract(path, 'pop_test'))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual([1, 2, 3, 4, 5].pop(2), invoke.result)
 
     def test_list_pop_literal_negative_argument(self):
         expected_output = (
@@ -1581,6 +1613,16 @@ class TestList(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+        path, _ = self.get_deploy_file_paths('PopListLiteralNegativeArgument.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invoke = (runner.call_contract(path, 'pop_test'))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual([1, 2, 3, 4, 5].pop(-2), invoke.result)
+
     def test_list_pop_literal_variable_argument(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -1617,6 +1659,49 @@ class TestList(BoaTest):
         path = self.get_contract_path('PopListVariableArgument.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        path, _ = self.get_deploy_file_paths('PopListVariableArgument.py')
+        runner = NeoTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        list_ = [1, 2, 3, 4, 5]
+        index = 0
+        invokes.append(runner.call_contract(path, 'pop_test', index))
+        expected_results.append(list_.pop(index))
+
+        list_ = [1, 2, 3, 4, 5]
+        index = len(list_) - 1
+        invokes.append(runner.call_contract(path, 'pop_test', index))
+        expected_results.append(list_.pop(index))
+
+        list_ = [1, 2, 3, 4, 5]
+        index = -len(list_)
+        invokes.append(runner.call_contract(path, 'pop_test', index))
+        expected_results.append(list_.pop(index))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+        list_ = [1, 2, 3, 4, 5]
+        index = 99999
+        runner.call_contract(path, 'pop_test', index)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+        self.assertRaises(IndexError, list_.pop, index)
+
+        list_ = [1, 2, 3, 4, 5]
+        index = -99999
+        runner.call_contract(path, 'pop_test', index)
+        runner.execute()
+        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+        self.assertRaises(IndexError, list_.pop, index)
 
     def test_list_pop_mismatched_type_argument(self):
         path = self.get_contract_path('PopListMismatchedTypeArgument.py')
