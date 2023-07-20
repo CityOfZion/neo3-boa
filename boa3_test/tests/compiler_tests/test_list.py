@@ -2188,3 +2188,11 @@ class TestList(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     # endregion
+
+    # region TestComprehension
+
+    def test_list_comprehension_str(self):
+        path = self.get_contract_path('ListComprehensionStr.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    # endregion
