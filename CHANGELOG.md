@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Support to Neo features up to Neo 3.6
+  - Added zero knowledge proof methods to `CryptoLib` interface
+  - Support to ASSERTMSG and ABORTMSG opcodes
 
 
 ### Changed
+- Included `msg` optional argument to `abort`
 
 
 ### Deprecated
