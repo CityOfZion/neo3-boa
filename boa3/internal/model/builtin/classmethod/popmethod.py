@@ -57,24 +57,16 @@ class PopMethod(IBuiltinMethod):
             return sequence_or_map.valid_key.is_type_of(value)
         return True
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        return [
-            (Opcode.DUP, b''),
-            (Opcode.SIGN, b''),
-            (Opcode.PUSHM1, b''),
-            (Opcode.JMPNE, Integer(5).to_byte_array(min_length=1, signed=True)),
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.ADD, b''),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.REVERSE3, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.REMOVE, b''),
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        # get the item from the sequence/dict
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
+
+        # remove the item from the sequence/dict
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.insert_opcode(Opcode.REMOVE)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

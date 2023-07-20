@@ -701,6 +701,7 @@ class TestDict(BoaTest):
 
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.MAP_KEY_NOT_FOUND_ERROR_MSG)
+        self.assertRaises(KeyError, dict_.pop, key)
 
     def test_dict_pop_default(self):
         path, _ = self.get_deploy_file_paths('DictPopDefault.py')
