@@ -1377,7 +1377,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._log_error(
             CompilerError.NotSupportedOperation(
                 node.lineno, node.col_offset,
-                symbol_id='comprehension'
+                symbol_id='list comprehension'
             )
         )
         self.generic_visit(node)
