@@ -963,7 +963,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol_id = self.visit(ret.value)
             symbol = self.get_symbol(symbol_id)
             if symbol is None:
-                # the symbol doesn't exists
+                # the symbol doesn't exist
                 self._log_error(
                     CompilerError.UnresolvedReference(ret.value.lineno, ret.value.col_offset, symbol_id)
                 )
@@ -982,7 +982,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(target_type, str) and not isinstance(target, ast.Str):
             symbol = self.get_symbol(target_type)
             if symbol is None:
-                # the symbol doesn't exists
+                # the symbol doesn't exist
                 self._log_error(
                     CompilerError.UnresolvedReference(target.lineno, target.col_offset, target_type)
                 )
@@ -1213,7 +1213,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 func_symbol = func_symbol.constructor_method()
 
         if not isinstance(func_symbol, Callable):
-            # the symbol doesn't exists
+            # the symbol doesn't exist
             self._log_error(
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
             )
@@ -1362,6 +1362,26 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         # continue to walk through the tree
         self.generic_visit(for_node)
+
+    def visit_ListComp(self, node: ast.ListComp):
+        return self._visit_comprehension(node)
+
+    def visit_SetComp(self, node: ast.SetComp):
+        return self._visit_comprehension(node)
+
+    def visit_DictComp(self, node: ast.DictComp):
+        return self._visit_comprehension(node)
+
+    def _visit_comprehension(self, node):
+        # TODO: refactor when comprehension is implemented
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='list comprehension'
+            )
+        )
+        self.generic_visit(node)
+        return node
 
     def visit_Name(self, name: ast.Name) -> str:
         """
