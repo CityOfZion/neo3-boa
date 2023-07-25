@@ -945,6 +945,15 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             if hashed_name in self._symbols:
                 name = hashed_name
+
+        else:
+            if name not in self.generator.symbol_table:
+                symbol = self._symbols[name]
+                for symbol_id, internal_symbol in self.generator.symbol_table.items():
+                    if internal_symbol == symbol:
+                        name = symbol_id
+                        break
+
         return self.build_data(name_node, name)
 
     def visit_Starred(self, starred: ast.Starred) -> GeneratorData:
