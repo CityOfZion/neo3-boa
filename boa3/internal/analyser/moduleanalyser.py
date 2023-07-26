@@ -385,7 +385,20 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             ast.copy_location(module, function)
             namespace = {}
 
+            import sys
+            file_dir = os.path.abspath(os.path.dirname(self.filename))
+            sys_path = sys.path.copy()
+
             try:
+                from boa3.internal import utils
+                if os.path.abspath(self.root_folder) != file_dir:
+                    sc_paths = [os.path.abspath(self.root_folder), file_dir]
+                else:
+                    sc_paths = [file_dir]
+
+                sys.path.clear()  # keep original sys.path object
+                sys.path.extend(sc_paths + utils.list_inner_packages(file_dir) + sys_path)
+
                 # executes the function
                 code = compile(module, filename='<boa3>', mode='exec')
                 exec(code, namespace)
@@ -398,6 +411,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 # ignore if it has generated the metadata function
                 if function.name not in namespace:
                     raise inner_exception
+            finally:
+                sys.path.clear()  # update original sys.path
+                sys.path.extend(sys_path)
 
             obj: Any = namespace[function.name]()
             node: ast.AST = function.body[-1] if len(function.body) > 0 else function
