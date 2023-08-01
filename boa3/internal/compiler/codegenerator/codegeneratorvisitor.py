@@ -780,18 +780,9 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.visit_to_generate(assert_node.test)
 
         if assert_node.msg is not None:
-            self.generator.duplicate_stack_top_item()
-            self.generator.insert_not()
-
-            # if assert is false, log the message
-            start_addr: int = self.generator.convert_begin_if()
-
             self.visit_to_generate(assert_node.msg)
-            self.generator.convert_builtin_method_call(Interop.Log)
 
-            self.generator.convert_end_if(start_addr)
-
-        self.generator.convert_assert()
+        self.generator.convert_assert(has_message=assert_node.msg is not None)
         return self.build_data(assert_node)
 
     def visit_Call(self, call: ast.Call) -> GeneratorData:

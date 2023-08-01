@@ -41,6 +41,7 @@ class BoaTest(TestCase):
     VALUE_CANNOT_BE_NEGATIVE_MSG = 'value can not be negative'
     VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG = 'Value does not fall within the expected range.'
     VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX = r'The value( \S*)? is out of range.$'
+    BAD_SCRIPT_EXCEPTION_MSG = "Neo.VM.BadScriptException: Exception of type 'Neo.VM.BadScriptException' was thrown."
 
     default_folder: str = ''
 
