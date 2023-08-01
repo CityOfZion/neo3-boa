@@ -88,43 +88,19 @@ class TestAssert(BoaTest):
         path, _ = self.get_deploy_file_paths('AssertWithMessage.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        runner.deploy_contract(path)
+        runner.update_contracts()
+        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
 
     def test_assert_with_bytes_message(self):
         path, _ = self.get_deploy_file_paths('AssertWithBytesMessage.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        runner.deploy_contract(path)
+        runner.update_contracts()
+        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
 
     def test_assert_with_int_message(self):
         path = self.get_contract_path('AssertWithIntMessage.py')
@@ -142,43 +118,19 @@ class TestAssert(BoaTest):
         path, _ = self.get_deploy_file_paths('AssertWithStrVarMessage.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        runner.deploy_contract(path)
+        runner.update_contracts()
+        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
 
     def test_assert_with_str_function_message(self):
         path, _ = self.get_deploy_file_paths('AssertWithStrFunctionMessage.py')
         runner = NeoTestRunner(runner_id=self.method_name())
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        runner.deploy_contract(path)
+        runner.update_contracts()
+        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
+        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
 
     def test_assert_int(self):
         expected_output = (

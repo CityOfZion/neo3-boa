@@ -11,7 +11,6 @@ from boa3.internal.compiler.codegenerator.variablegenerationdata import Variable
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.constants import SYS_VERSION_INFO
 from boa3.internal.model.builtin.builtin import Builtin
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.imports.package import Package
@@ -780,18 +779,9 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.visit_to_generate(assert_node.test)
 
         if assert_node.msg is not None:
-            self.generator.duplicate_stack_top_item()
-            self.generator.insert_not()
-
-            # if assert is false, log the message
-            start_addr: int = self.generator.convert_begin_if()
-
             self.visit_to_generate(assert_node.msg)
-            self.generator.convert_builtin_method_call(Interop.Log)
 
-            self.generator.convert_end_if(start_addr)
-
-        self.generator.convert_assert()
+        self.generator.convert_assert(has_message=assert_node.msg is not None)
         return self.build_data(assert_node)
 
     def visit_Call(self, call: ast.Call) -> GeneratorData:

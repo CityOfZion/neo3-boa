@@ -490,3 +490,10 @@ class OpcodeInfo:
     CONVERT = OpcodeInformation(Opcode.CONVERT, 1)
 
     # endregion
+
+    # region Extensions
+
+    # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT. Includes a reason.
+    ASSERTMSG = OpcodeInformation(Opcode.ASSERTMSG)
+
+    # endregion
