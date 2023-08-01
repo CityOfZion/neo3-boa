@@ -1923,10 +1923,17 @@ class CodeGenerator:
             self._stack_pop()
         self._stack_append(operation.result)
 
-    def convert_assert(self):
-        asserted_type = self._stack[-1] if len(self._stack) > 0 else Type.any
+    def convert_assert(self, has_message: bool = False):
+
+        if has_message:
+            asserted_type = self._stack[-2] if len(self._stack) > 1 else Type.any
+        else:
+            asserted_type = self._stack[-1] if len(self._stack) > 0 else Type.any
 
         if not isinstance(asserted_type, PrimitiveType):
+            if has_message:
+                self.swap_reverse_stack_items(2)
+
             len_pos = VMCodeMapping.instance().bytecode_size
             # if the value is an array, a map or a struct, asserts it is not empty
             self.convert_builtin_method_call(Builtin.Len)
@@ -1947,9 +1954,14 @@ class CodeGenerator:
                 self._insert_jump(OpcodeInfo.JMPIFNOT, 2)
 
                 VMCodeMapping.instance().move_to_end(len_pos, len_pos)
+            if has_message:
+                self.swap_reverse_stack_items(2)
 
-        self.__insert1(OpcodeInfo.ASSERT)
-        if len(self._stack) > 0:
+        self.__insert1(OpcodeInfo.ASSERT if not has_message else OpcodeInfo.ASSERTMSG)
+        if len(self._stack) > 0 and not has_message:
+            self._stack_pop()
+        elif len(self._stack) > 1 and has_message:
+            self._stack_pop()
             self._stack_pop()
 
     def convert_new_exception(self, exception_args_len: int = 0):
