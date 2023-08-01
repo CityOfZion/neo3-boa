@@ -396,8 +396,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 else:
                     sc_paths = [file_dir]
 
-                sys.path.clear()  # keep original sys.path object
-                sys.path.extend(sc_paths + utils.list_inner_packages(file_dir) + sys_path)
+                sys.path = sc_paths + utils.list_inner_packages(file_dir) + sys_path
 
                 # executes the function
                 code = compile(module, filename='<boa3>', mode='exec')
@@ -412,8 +411,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if function.name not in namespace:
                     raise inner_exception
             finally:
-                sys.path.clear()  # update original sys.path
-                sys.path.extend(sys_path)
+                sys.path = sys_path
 
             obj: Any = namespace[function.name]()
             node: ast.AST = function.body[-1] if len(function.body) > 0 else function
