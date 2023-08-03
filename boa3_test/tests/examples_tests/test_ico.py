@@ -2,8 +2,8 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal import constants
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestICOTemplate(BoaTest):
@@ -22,7 +22,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_symbol(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -34,7 +34,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_decimals(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -46,7 +46,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_total_balance_of(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         total_supply = 10_000_000 * 10 ** 8
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
@@ -70,7 +70,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_total_supply(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         total_supply = 10_000_000 * 10 ** 8
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
@@ -83,7 +83,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_verify(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -108,7 +108,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_kyc_register(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -150,7 +150,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_kyc_remove(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -192,7 +192,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_approve(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -257,7 +257,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_allowance(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -290,7 +290,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_transfer_from(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -428,7 +428,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_mint(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -472,7 +472,7 @@ class TestICOTemplate(BoaTest):
 
     def test_ico_refund(self):
         path, _ = self.get_deploy_file_paths('ico.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

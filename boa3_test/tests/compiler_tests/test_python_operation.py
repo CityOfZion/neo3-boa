@@ -3,7 +3,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestPythonOperation(BoaTest):
@@ -13,7 +13,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_bytes(self):
         path, _ = self.get_deploy_file_paths('BytesIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -39,7 +39,7 @@ class TestPythonOperation(BoaTest):
 
     def test_int_in_bytes(self):
         path, _ = self.get_deploy_file_paths('BytesMembershipWithInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -58,7 +58,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_dict(self):
         path, _ = self.get_deploy_file_paths('DictIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -87,7 +87,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_list(self):
         path, _ = self.get_deploy_file_paths('ListIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -113,7 +113,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_str(self):
         path, _ = self.get_deploy_file_paths('StringIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -136,7 +136,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_tuple(self):
         path, _ = self.get_deploy_file_paths('TupleIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -162,7 +162,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_dict_builtin_type(self):
         path, _ = self.get_deploy_file_paths('TypedDictBuiltinTypeIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -185,7 +185,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_dict(self):
         path, _ = self.get_deploy_file_paths('TypedDictIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -204,7 +204,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_list_builtin_type(self):
         path, _ = self.get_deploy_file_paths('TypedListBuiltinTypeIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -227,7 +227,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_list(self):
         path, _ = self.get_deploy_file_paths('TypedListIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -246,7 +246,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_tuple_builtin_type(self):
         path, _ = self.get_deploy_file_paths('TypedTupleBuiltinTypeIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -269,7 +269,7 @@ class TestPythonOperation(BoaTest):
 
     def test_in_typed_tuple(self):
         path, _ = self.get_deploy_file_paths('TypedTupleIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -292,7 +292,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_bytes(self):
         path, _ = self.get_deploy_file_paths('BytesNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -311,7 +311,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_dict(self):
         path, _ = self.get_deploy_file_paths('DictNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -336,7 +336,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_list(self):
         path, _ = self.get_deploy_file_paths('ListNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -358,7 +358,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_str(self):
         path, _ = self.get_deploy_file_paths('StringNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -377,7 +377,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_tuple(self):
         path, _ = self.get_deploy_file_paths('TupleNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -399,7 +399,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_dict_builtin_type(self):
         path, _ = self.get_deploy_file_paths('TypedDictBuiltinTypeNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -422,7 +422,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_dict(self):
         path, _ = self.get_deploy_file_paths('TypedDictNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -441,7 +441,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_list_builtin_type(self):
         path, _ = self.get_deploy_file_paths('TypedListBuiltinTypeNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -464,7 +464,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_list(self):
         path, _ = self.get_deploy_file_paths('TypedListNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -483,7 +483,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_tuple_builtin_type(self):
         path, _ = self.get_deploy_file_paths('TypedTupleBuiltinTypeNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -506,7 +506,7 @@ class TestPythonOperation(BoaTest):
 
     def test_not_in_typed_tuple(self):
         path, _ = self.get_deploy_file_paths('TypedTupleNotIn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

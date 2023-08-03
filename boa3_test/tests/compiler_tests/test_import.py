@@ -4,7 +4,7 @@ from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestImport(BoaTest):
@@ -54,7 +54,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -86,7 +86,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -120,7 +120,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -151,7 +151,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -167,7 +167,7 @@ class TestImport(BoaTest):
 
     def test_variable_from_imported_module(self):
         path, _ = self.get_deploy_file_paths('variable_import', 'VariableFromImportedModule.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -186,7 +186,7 @@ class TestImport(BoaTest):
 
     def test_variable_access_from_imported_module(self):
         path, _ = self.get_deploy_file_paths('variable_import', 'VariableAccessFromImportedModule.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -260,7 +260,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -300,7 +300,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -337,7 +337,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -355,7 +355,7 @@ class TestImport(BoaTest):
         path = self.get_contract_path('FromImportUserModuleFromRootAndFileDir.py')
         self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner()
+        runner = BoaTestRunner()
 
         invokes = []
         expected_results = []
@@ -378,7 +378,7 @@ class TestImport(BoaTest):
 
     def test_import_interop_with_alias(self):
         path, _ = self.get_deploy_file_paths('ImportInteropWithAlias.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -402,7 +402,7 @@ class TestImport(BoaTest):
 
     def test_import_user_module_with_not_imported_symbols(self):
         path, _ = self.get_deploy_file_paths('ImportUserModuleWithNotImportedSymbols.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -465,7 +465,7 @@ class TestImport(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -498,7 +498,7 @@ class TestImport(BoaTest):
 
     def test_incorrect_circular_import(self):
         path, _ = self.get_deploy_file_paths('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -514,7 +514,7 @@ class TestImport(BoaTest):
 
     def test_import_module_with_init(self):
         path, _ = self.get_deploy_file_paths('ImportModuleWithInit.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -533,7 +533,7 @@ class TestImport(BoaTest):
 
     def test_import_module_without_init(self):
         path, _ = self.get_deploy_file_paths('ImportModuleWithoutInit.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -553,7 +553,7 @@ class TestImport(BoaTest):
     def test_import_user_class_inner_files(self):
         inner_path, _ = self.get_deploy_file_paths('class_import', 'ImportUserClass.py')
         path, _ = self.get_deploy_file_paths('ImportUserClassInnerFiles.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

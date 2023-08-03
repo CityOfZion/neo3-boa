@@ -6,8 +6,8 @@ from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.core.types import UInt160
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestMetadata(BoaTest):
@@ -177,7 +177,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -203,7 +203,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -326,7 +326,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -364,7 +364,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -408,7 +408,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -460,7 +460,7 @@ class TestMetadata(BoaTest):
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
 
         path, _ = self.get_deploy_file_paths_without_compiling(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
 
@@ -495,7 +495,7 @@ class TestMetadata(BoaTest):
         self.assertIn(expected_permission, manifest['permissions'])
 
         path, _ = self.get_deploy_file_paths_without_compiling(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.call_contract(path, 'main')
 
@@ -539,7 +539,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract_call = runner.call_contract(path, 'main')
         runner.execute()

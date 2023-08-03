@@ -1,11 +1,11 @@
-from boa3_test.tests.cli_tests.cli_test import BoaCliTest  # needs to be the first import to avoid circular imports
-
 import os.path
+
+from boa3_test.tests.cli_tests.cli_test import BoaCliTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.cli_tests.utils import neo3_boa_cli, get_path_from_boa3_test
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestCliCompile(BoaCliTest):
@@ -127,7 +127,7 @@ class TestCliCompile(BoaCliTest):
         self.assertTrue(f'Wrote {nef_generated} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {nef_generated}')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.deploy_contract(nef_path)
         invoke = runner.call_contract(nef_path, 'main')

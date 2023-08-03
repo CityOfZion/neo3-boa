@@ -6,8 +6,8 @@ from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestContractManagementContract(BoaTest):
@@ -15,7 +15,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -31,7 +31,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_get_minimum_deployment_fee(self):
         path, _ = self.get_deploy_file_paths('GetMinimumDeploymentFee.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -52,7 +52,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_get_contract(self):
         path, _ = self.get_deploy_file_paths('GetContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -84,7 +84,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_has_method(self):
         path, _ = self.get_deploy_file_paths('HasMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -116,7 +116,7 @@ class TestContractManagementContract(BoaTest):
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, None)
 
         runner.execute()
@@ -136,7 +136,7 @@ class TestContractManagementContract(BoaTest):
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         runner.file_name = 'test_create_contract'
 
         data = 'some sort of data'
@@ -166,7 +166,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_update_contract(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -195,7 +195,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_update_contract_data_deploy(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -234,7 +234,7 @@ class TestContractManagementContract(BoaTest):
 
     def test_destroy_contract(self):
         path, _ = self.get_deploy_file_paths('DestroyContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

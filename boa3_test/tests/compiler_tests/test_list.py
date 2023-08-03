@@ -6,7 +6,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestList(BoaTest):
@@ -133,7 +133,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -176,7 +176,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -231,7 +231,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -284,7 +284,7 @@ class TestList(BoaTest):
         self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -311,7 +311,7 @@ class TestList(BoaTest):
         self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -343,7 +343,7 @@ class TestList(BoaTest):
 
     def test_array_boa2_test1(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -359,7 +359,7 @@ class TestList(BoaTest):
 
     def test_boa2_array_test(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -387,7 +387,7 @@ class TestList(BoaTest):
 
     def test_boa2_array_test2(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -403,7 +403,7 @@ class TestList(BoaTest):
 
     def test_boa2_array_test3(self):
         path, _ = self.get_deploy_file_paths('ArrayBoa2Test3.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -435,7 +435,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -457,7 +457,7 @@ class TestList(BoaTest):
 
     def test_boa2_demo1(self):
         path, _ = self.get_deploy_file_paths('Demo1Boa2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -478,7 +478,7 @@ class TestList(BoaTest):
 
     def test_list_slicing(self):
         path, _ = self.get_deploy_file_paths('ListSlicingLiteralValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -494,7 +494,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_start_larger_than_ending(self):
         path, _ = self.get_deploy_file_paths('ListSlicingStartLargerThanEnding.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -510,7 +510,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_with_variables(self):
         path, _ = self.get_deploy_file_paths('ListSlicingVariableValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -526,7 +526,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_negative_start(self):
         path, _ = self.get_deploy_file_paths('ListSlicingNegativeStart.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -542,7 +542,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_negative_end(self):
         path, _ = self.get_deploy_file_paths('ListSlicingNegativeEnd.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -558,7 +558,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_start_omitted(self):
         path, _ = self.get_deploy_file_paths('ListSlicingStartOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -574,7 +574,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_omitted(self):
         path, _ = self.get_deploy_file_paths('ListSlicingOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -590,7 +590,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_end_omitted(self):
         path, _ = self.get_deploy_file_paths('ListSlicingEndOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -810,7 +810,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_with_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -880,7 +880,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -943,7 +943,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_omitted_with_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingOmittedWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1001,7 +1001,7 @@ class TestList(BoaTest):
 
     def test_list_slicing_omitted_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('ListSlicingOmittedWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1095,7 +1095,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1147,7 +1147,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1199,7 +1199,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1219,7 +1219,7 @@ class TestList(BoaTest):
 
     def test_boa2_list_append_test(self):
         path, _ = self.get_deploy_file_paths('AppendBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1235,7 +1235,7 @@ class TestList(BoaTest):
 
     def test_list_append_in_class_variable(self):
         path, _ = self.get_deploy_file_paths('AppendInClassVariable.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1312,7 +1312,7 @@ class TestList(BoaTest):
 
     def test_boa2_list_reverse_test(self):
         path, _ = self.get_deploy_file_paths('ReverseBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1332,7 +1332,7 @@ class TestList(BoaTest):
 
     def test_list_extend_tuple_value(self):
         path, _ = self.get_deploy_file_paths('ExtendTupleValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1348,7 +1348,7 @@ class TestList(BoaTest):
 
     def test_list_extend_any_value(self):
         path, _ = self.get_deploy_file_paths('ExtendAnyValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1372,7 +1372,7 @@ class TestList(BoaTest):
 
     def test_list_extend_with_builtin(self):
         path, _ = self.get_deploy_file_paths('ExtendWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1432,7 +1432,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths('PopList.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = (runner.call_contract(path, 'pop_test'))
 
@@ -1479,7 +1479,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths('PopListWithoutAssignment.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = (runner.call_contract(path, 'pop_test'))
 
@@ -1528,7 +1528,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths('PopListLiteralArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = (runner.call_contract(path, 'pop_test'))
 
@@ -1576,7 +1576,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths('PopListLiteralNegativeArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = (runner.call_contract(path, 'pop_test'))
 
@@ -1623,7 +1623,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths('PopListVariableArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1707,7 +1707,7 @@ class TestList(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1727,7 +1727,7 @@ class TestList(BoaTest):
 
     def test_boa2_list_remove_test(self):
         path, _ = self.get_deploy_file_paths('RemoveBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1747,7 +1747,7 @@ class TestList(BoaTest):
 
     def test_list_insert_int_value(self):
         path, _ = self.get_deploy_file_paths('InsertIntValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1763,7 +1763,7 @@ class TestList(BoaTest):
 
     def test_list_insert_any_value(self):
         path, _ = self.get_deploy_file_paths('InsertAnyValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1797,7 +1797,7 @@ class TestList(BoaTest):
 
     def test_list_insert_int_negative_index(self):
         path, _ = self.get_deploy_file_paths('InsertIntNegativeIndex.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1813,7 +1813,7 @@ class TestList(BoaTest):
 
     def test_list_insert_int_with_builtin(self):
         path, _ = self.get_deploy_file_paths('InsertIntWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1833,7 +1833,7 @@ class TestList(BoaTest):
 
     def test_list_remove_value(self):
         path, _ = self.get_deploy_file_paths('RemoveValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1858,7 +1858,7 @@ class TestList(BoaTest):
 
     def test_list_remove_int_value(self):
         path, _ = self.get_deploy_file_paths('RemoveIntValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1874,7 +1874,7 @@ class TestList(BoaTest):
 
     def test_list_remove_int_with_builtin(self):
         path, _ = self.get_deploy_file_paths('RemoveIntWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1894,7 +1894,7 @@ class TestList(BoaTest):
 
     def test_list_copy(self):
         path, _ = self.get_deploy_file_paths('Copy.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1931,7 +1931,7 @@ class TestList(BoaTest):
 
     def test_int_list_copy(self):
         path, _ = self.get_deploy_file_paths('CopyInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1948,7 +1948,7 @@ class TestList(BoaTest):
 
     def test_str_list_copy(self):
         path, _ = self.get_deploy_file_paths('CopyStr.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1966,7 +1966,7 @@ class TestList(BoaTest):
 
     def test_bool_list_copy(self):
         path, _ = self.get_deploy_file_paths('CopyBool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1984,7 +1984,7 @@ class TestList(BoaTest):
 
     def test_list_copy_builtin_call(self):
         path, _ = self.get_deploy_file_paths('CopyListBuiltinCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2014,7 +2014,7 @@ class TestList(BoaTest):
 
     def test_list_index(self):
         path, _ = self.get_deploy_file_paths('IndexList.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2074,7 +2074,7 @@ class TestList(BoaTest):
 
     def test_list_index_end_default(self):
         path, _ = self.get_deploy_file_paths('IndexListEndDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2112,7 +2112,7 @@ class TestList(BoaTest):
 
     def test_list_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexListDefaults.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2135,7 +2135,7 @@ class TestList(BoaTest):
 
     def test_list_index_int(self):
         path, _ = self.get_deploy_file_paths('IndexListInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2153,7 +2153,7 @@ class TestList(BoaTest):
 
     def test_list_index_str(self):
         path, _ = self.get_deploy_file_paths('IndexListStr.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -2171,7 +2171,7 @@ class TestList(BoaTest):
 
     def test_list_index_bool(self):
         path, _ = self.get_deploy_file_paths('IndexListBool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

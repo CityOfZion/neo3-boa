@@ -9,9 +9,9 @@ from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.contracts import CallFlags
 from boa3.internal.neo3.core.types import UInt160, UInt256
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestBlockchainInterop(BoaTest):
@@ -19,7 +19,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_block_constructor(self):
         path, _ = self.get_deploy_file_paths('Block.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -44,7 +44,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_get_contract(self):
         path, _ = self.get_deploy_file_paths('GetContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -76,7 +76,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_get_block_by_index(self):
         path, _ = self.get_deploy_file_paths('GetBlockByIndex.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         test_index_0 = 0
         test_index_10 = 10
@@ -106,7 +106,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_get_block_by_hash(self):
         path, _ = self.get_deploy_file_paths('GetBlockByHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         genesis_block = runner.get_genesis_block()
         expected_result_size = len(Interop.BlockType.variables)
@@ -136,7 +136,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_transaction_init(self):
         path, _ = self.get_deploy_file_paths('Transaction.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -175,7 +175,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         sender = neoxp.utils.get_default_account()
         contract_deploy = runner.deploy_contract(path)
@@ -230,7 +230,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         sender = neoxp.utils.get_default_account()
         contract_deploy = runner.deploy_contract(path, account=sender)
@@ -284,7 +284,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.deploy_contract(path)  # to have a block with tx
         runner.update_contracts(export_checkpoint=True)
@@ -339,7 +339,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -383,7 +383,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         expected_block_index = 10
         blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
@@ -431,7 +431,7 @@ class TestBlockchainInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         contract_deploy = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -451,7 +451,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_import_blockchain(self):
         path, _ = self.get_deploy_file_paths('ImportBlockchain.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -484,7 +484,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_import_interop_blockchain(self):
         path, _ = self.get_deploy_file_paths('ImportInteropBlockchain.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -516,7 +516,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_current_hash(self):
         path, _ = self.get_deploy_file_paths('CurrentHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main', expected_result_type=bytes)
         runner.execute()
@@ -527,7 +527,7 @@ class TestBlockchainInterop(BoaTest):
 
     def test_current_index(self):
         path, _ = self.get_deploy_file_paths('CurrentIndex.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
