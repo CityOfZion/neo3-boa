@@ -14,7 +14,7 @@ class BoaTestRunner(NeoTestRunner):
 
     def __init__(self, neoxp_path: str = None, runner_id: str = None):
         if not isinstance(neoxp_path, str):
-            neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
+            neoxp_path = os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express')
 
         super().__init__(neoxp_path, runner_id)
 
