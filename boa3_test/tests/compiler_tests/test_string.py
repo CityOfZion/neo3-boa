@@ -6,7 +6,7 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestString(BoaTest):
@@ -31,7 +31,7 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -75,7 +75,7 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -135,7 +135,7 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -153,7 +153,7 @@ class TestString(BoaTest):
 
     def test_string_get_value_to_variable(self):
         path, _ = self.get_deploy_file_paths('GetValueToVariable.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -181,7 +181,7 @@ class TestString(BoaTest):
 
     def test_string_slicing(self):
         path, _ = self.get_deploy_file_paths('StringSlicingLiteralValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -197,7 +197,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_start_larger_than_ending(self):
         path, _ = self.get_deploy_file_paths('StringSlicingStartLargerThanEnding.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -213,7 +213,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_with_variables(self):
         path, _ = self.get_deploy_file_paths('StringSlicingVariableValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -229,7 +229,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_negative_start(self):
         path, _ = self.get_deploy_file_paths('StringSlicingNegativeStartOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -246,7 +246,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_negative_end_omitted(self):
         path, _ = self.get_deploy_file_paths('StringSlicingNegativeEndOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -262,7 +262,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_start_omitted(self):
         path, _ = self.get_deploy_file_paths('StringSlicingStartOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -299,7 +299,7 @@ class TestString(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -315,7 +315,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_end_omitted(self):
         path, _ = self.get_deploy_file_paths('StringSlicingEndOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -532,7 +532,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_with_stride(self):
         path, _ = self.get_deploy_file_paths('StringSlicingWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -602,7 +602,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('StringSlicingWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -665,7 +665,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_omitted_with_stride(self):
         path, _ = self.get_deploy_file_paths('StringSlicingOmittedWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -723,7 +723,7 @@ class TestString(BoaTest):
 
     def test_string_slicing_omitted_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('StringSlicingOmittedWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -781,7 +781,7 @@ class TestString(BoaTest):
 
     def test_string_simple_concat(self):
         path, _ = self.get_deploy_file_paths('StringSimpleConcat.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -797,7 +797,7 @@ class TestString(BoaTest):
 
     def test_boa2_string_concat_test(self):
         path, _ = self.get_deploy_file_paths('ConcatBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -813,7 +813,7 @@ class TestString(BoaTest):
 
     def test_boa2_string_concat_test2(self):
         path, _ = self.get_deploy_file_paths('ConcatBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -844,7 +844,7 @@ class TestString(BoaTest):
 
     def test_string_with_double_quotes(self):
         path, _ = self.get_deploy_file_paths('StringWithDoubleQuotes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -866,7 +866,7 @@ class TestString(BoaTest):
 
     def test_string_upper(self):
         path, _ = self.get_deploy_file_paths('UpperStringMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -897,7 +897,7 @@ class TestString(BoaTest):
 
     def test_string_lower(self):
         path, _ = self.get_deploy_file_paths('LowerStringMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -928,7 +928,7 @@ class TestString(BoaTest):
 
     def test_string_startswith_method(self):
         path, _ = self.get_deploy_file_paths('StartswithStringMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -997,7 +997,7 @@ class TestString(BoaTest):
 
     def test_string_startswith_method_default_end(self):
         path, _ = self.get_deploy_file_paths('StartswithStringMethodDefaultEnd.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1058,7 +1058,7 @@ class TestString(BoaTest):
 
     def test_string_startswith_method_defaults(self):
         path, _ = self.get_deploy_file_paths('StartswithStringMethodDefaults.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1096,7 +1096,7 @@ class TestString(BoaTest):
 
     def test_string_strip(self):
         path, _ = self.get_deploy_file_paths('StripStringMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1124,7 +1124,7 @@ class TestString(BoaTest):
 
     def test_string_strip_default(self):
         path, _ = self.get_deploy_file_paths('StripStringMethodDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1153,7 +1153,7 @@ class TestString(BoaTest):
 
     def test_isdigit_method(self):
         path, _ = self.get_deploy_file_paths('IsdigitMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1188,7 +1188,7 @@ class TestString(BoaTest):
 
     def test_string_join_with_sequence(self):
         path, _ = self.get_deploy_file_paths('JoinStringMethodWithSequence.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1216,7 +1216,7 @@ class TestString(BoaTest):
 
     def test_string_join_with_dictionary(self):
         path, _ = self.get_deploy_file_paths('JoinStringMethodWithDictionary.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1244,7 +1244,7 @@ class TestString(BoaTest):
 
     def test_string_index(self):
         path, _ = self.get_deploy_file_paths('IndexString.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1303,7 +1303,7 @@ class TestString(BoaTest):
 
     def test_string_index_end_default(self):
         path, _ = self.get_deploy_file_paths('IndexStringEndDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1360,7 +1360,7 @@ class TestString(BoaTest):
 
     def test_string_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexStringDefaults.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1392,7 +1392,7 @@ class TestString(BoaTest):
 
     def test_string_property_slicing(self):
         path, _ = self.get_deploy_file_paths('StringPropertySlicing.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1421,7 +1421,7 @@ class TestString(BoaTest):
 
     def test_string_instance_variable_slicing(self):
         path, _ = self.get_deploy_file_paths('StringInstanceVariableSlicing.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1450,7 +1450,7 @@ class TestString(BoaTest):
 
     def test_string_class_variable_slicing(self):
         path, _ = self.get_deploy_file_paths('StringClassVariableSlicing.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

@@ -1,8 +1,8 @@
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestSimpleNEP17Template(BoaTest):
@@ -26,7 +26,7 @@ class TestSimpleNEP17Template(BoaTest):
 
     def test_simple_nep17_symbol(self):
         path, _ = self.get_deploy_file_paths('simple_nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'symbol')
         runner.execute()
@@ -35,7 +35,7 @@ class TestSimpleNEP17Template(BoaTest):
 
     def test_simple_nep17_decimals(self):
         path, _ = self.get_deploy_file_paths('simple_nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'decimals')
         runner.execute()
@@ -44,7 +44,7 @@ class TestSimpleNEP17Template(BoaTest):
 
     def test_simple_nep17_total_supply(self):
         path, _ = self.get_deploy_file_paths('simple_nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'totalSupply')
         runner.execute()
@@ -53,7 +53,7 @@ class TestSimpleNEP17Template(BoaTest):
 
     def test_simple_nep17_total_balance_of(self):
         path, _ = self.get_deploy_file_paths('simple_nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -83,7 +83,7 @@ class TestSimpleNEP17Template(BoaTest):
         test_account_script_hash = self.OTHER_ACCOUNT.script_hash.to_array()
 
         path, _ = self.get_deploy_file_paths('simple_nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -172,7 +172,7 @@ class TestSimpleNEP17Template(BoaTest):
 
     def test_simple_nep17_on_nep17_payment(self):
         path, _ = self.get_deploy_file_paths('simple_nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.update_contracts(export_checkpoint=True)

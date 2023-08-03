@@ -5,7 +5,7 @@ from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestFunction(BoaTest):
@@ -25,7 +25,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -56,7 +56,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -82,7 +82,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -102,7 +102,7 @@ class TestFunction(BoaTest):
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -118,7 +118,7 @@ class TestFunction(BoaTest):
 
     def test_none_function_return_none(self):
         path, _ = self.get_deploy_file_paths('NoneFunctionReturnNone.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -134,7 +134,7 @@ class TestFunction(BoaTest):
 
     def test_none_function_changing_values_with_return(self):
         path, _ = self.get_deploy_file_paths('NoneFunctionChangingValuesWithReturn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -150,7 +150,7 @@ class TestFunction(BoaTest):
 
     def test_none_function_changing_values_without_return(self):
         path, _ = self.get_deploy_file_paths('NoneFunctionChangingValuesWithoutReturn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -181,7 +181,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -197,7 +197,7 @@ class TestFunction(BoaTest):
 
     def test_no_return_hint_function_with_condition_empty_return_statement(self):
         path, _ = self.get_deploy_file_paths('ConditionEmptyReturnFunction.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -216,7 +216,7 @@ class TestFunction(BoaTest):
 
     def test_empty_return_with_optional_return_type(self):
         path, _ = self.get_deploy_file_paths('EmptyReturnWithOptionalReturnType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -247,7 +247,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -288,7 +288,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -331,7 +331,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -366,7 +366,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -405,7 +405,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -447,7 +447,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -493,7 +493,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -539,7 +539,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -583,7 +583,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -639,7 +639,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -682,7 +682,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -717,7 +717,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -737,7 +737,7 @@ class TestFunction(BoaTest):
 
     def test_return_inside_if(self):
         path, _ = self.get_deploy_file_paths('ReturnIf.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -771,7 +771,7 @@ class TestFunction(BoaTest):
 
     def test_return_inside_multiple_inner_if(self):
         path, _ = self.get_deploy_file_paths('ReturnMultipleInnerIf.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -812,7 +812,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -878,7 +878,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -945,7 +945,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -999,7 +999,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1050,7 +1050,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1079,7 +1079,7 @@ class TestFunction(BoaTest):
 
     def test_multiple_function_large_call(self):
         path, _ = self.get_deploy_file_paths('MultipleFunctionLargeCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1163,7 +1163,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1217,7 +1217,7 @@ class TestFunction(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1238,7 +1238,7 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_kwarg(self):
         path, _ = self.get_deploy_file_paths('CallFunctionWithKwarg.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1254,7 +1254,7 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_kwargs(self):
         path, _ = self.get_deploy_file_paths('CallFunctionWithKwargs.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1279,7 +1279,7 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_kwargs_with_default_values(self):
         path, _ = self.get_deploy_file_paths('CallFunctionWithKwargsWithDefaultValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1336,7 +1336,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_fibonacci_test(self):
         path, _ = self.get_deploy_file_paths('FibonacciBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1364,7 +1364,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_method_test(self):
         path, _ = self.get_deploy_file_paths('MethodBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1383,7 +1383,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_method_test2(self):
         path, _ = self.get_deploy_file_paths('MethodBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1399,7 +1399,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_method_test3(self):
         path, _ = self.get_deploy_file_paths('MethodBoa2Test3.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1415,7 +1415,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_method_test4(self):
         path, _ = self.get_deploy_file_paths('MethodBoa2Test4.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1431,7 +1431,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_method_test5(self):
         path, _ = self.get_deploy_file_paths('MethodBoa2Test5.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1447,7 +1447,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_module_method_test1(self):
         path, _ = self.get_deploy_file_paths('ModuleMethodBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1463,7 +1463,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_module_method_test2(self):
         path, _ = self.get_deploy_file_paths('ModuleMethodBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1479,7 +1479,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_module_variable_test(self):
         path, _ = self.get_deploy_file_paths('ModuleVariableBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1495,7 +1495,7 @@ class TestFunction(BoaTest):
 
     def test_boa2_module_variable_test1(self):
         path, _ = self.get_deploy_file_paths('ModuleVariableBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1511,7 +1511,7 @@ class TestFunction(BoaTest):
 
     def test_call_void_function_with_stared_argument(self):
         path, _ = self.get_deploy_file_paths('CallVoidFunctionWithStarredArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1527,7 +1527,7 @@ class TestFunction(BoaTest):
 
     def test_call_return_function_with_stared_argument(self):
         path, _ = self.get_deploy_file_paths('CallReturnFunctionWithStarredArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1543,7 +1543,7 @@ class TestFunction(BoaTest):
 
     def test_return_starred_argument(self):
         path, _ = self.get_deploy_file_paths('ReturnStarredArgumentCount.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1568,7 +1568,7 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_same_name_in_different_scopes(self):
         path, _ = self.get_deploy_file_paths('CallFunctionsWithSameNameInDifferentScopes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1592,7 +1592,7 @@ class TestFunction(BoaTest):
 
     def test_function_as_arg(self):
         path, _ = self.get_deploy_file_paths('FunctionAsArg.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1608,7 +1608,7 @@ class TestFunction(BoaTest):
 
     def test_function_with_arg_as_arg(self):
         path, _ = self.get_deploy_file_paths('FunctionWithArgAsArg.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1626,7 +1626,7 @@ class TestFunction(BoaTest):
 
     def test_function_with_args_as_arg(self):
         path, _ = self.get_deploy_file_paths('FunctionWithArgsAsArg.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1648,7 +1648,7 @@ class TestFunction(BoaTest):
         path, _ = self.get_deploy_file_paths('CallExternalContractWithReturnNone.py')
         no_return_path, _ = self.get_deploy_file_paths('NoReturnFunction.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         runner.deploy_contract(no_return_path)
 
         invoke = runner.call_contract(path, 'main')

@@ -830,8 +830,8 @@ class TestFileGeneration(BoaTest):
         path, _ = self.get_deploy_file_paths('test_sc/function_test', 'RecursiveFunction.py')
 
         from boa3.internal.neo3.vm import VMState
-        from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-        runner = NeoTestRunner(runner_id=self.method_name())
+        from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         expected = self.fact(57)
         invoke = runner.call_contract(path, 'main')

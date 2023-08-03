@@ -2,7 +2,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestContractInterface(BoaTest):
@@ -47,7 +47,7 @@ class TestContractInterface(BoaTest):
     def test_contract_interface_nep17(self):
         path, _ = self.get_deploy_file_paths('Nep17Interface.py')
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -91,7 +91,7 @@ class TestContractInterface(BoaTest):
     def test_contract_interface_nep17_with_display_name(self):
         path, _ = self.get_deploy_file_paths('Nep17InterfaceWithDisplayName.py')
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -116,7 +116,7 @@ class TestContractInterface(BoaTest):
         from boa3.internal.neo3.core.types import UInt160
 
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         nep17_contract = runner.deploy_contract(nep17_path)
         runner.update_contracts(export_checkpoint=True)
 
@@ -174,7 +174,7 @@ class TestContractInterface(BoaTest):
         from boa3.internal.neo.vm.type.String import String
 
         nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         nep17_contract = runner.deploy_contract(nep17_path)
         runner.update_contracts(export_checkpoint=True)
 
@@ -242,7 +242,7 @@ class TestContractInterface(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('ContractInterfaceGetHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -270,7 +270,7 @@ class TestContractInterface(BoaTest):
                       manifest['permissions'])
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

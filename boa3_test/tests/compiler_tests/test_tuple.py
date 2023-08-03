@@ -5,7 +5,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestTuple(BoaTest):
@@ -129,7 +129,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -185,7 +185,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -213,7 +213,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingLiteralValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -229,7 +229,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_start_larger_than_ending(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingStartLargerThanEnding.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -245,7 +245,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_with_variables(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingVariableValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -261,7 +261,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_negative_start(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingNegativeStart.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -277,7 +277,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_negative_end(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingNegativeEnd.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -293,7 +293,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_start_omitted(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingStartOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -331,7 +331,7 @@ class TestTuple(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -347,7 +347,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_end_omitted(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingEndOmitted.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -363,7 +363,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_with_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -436,7 +436,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -509,7 +509,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_omitted_with_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -576,7 +576,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_slicing_omitted_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -643,7 +643,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_index(self):
         path, _ = self.get_deploy_file_paths('IndexTuple.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -703,7 +703,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_index_end_default(self):
         path, _ = self.get_deploy_file_paths('IndexTupleEndDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -741,7 +741,7 @@ class TestTuple(BoaTest):
 
     def test_tuple_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexTupleDefaults.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

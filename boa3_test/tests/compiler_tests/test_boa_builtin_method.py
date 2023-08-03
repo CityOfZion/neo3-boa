@@ -3,7 +3,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestBoaBuiltinMethod(BoaTest):
@@ -11,7 +11,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_abort(self):
         path, _ = self.get_deploy_file_paths('Abort.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -39,7 +39,7 @@ class TestBoaBuiltinMethod(BoaTest):
         self.compile_and_save(path, env=custom_env, output_name=custom_name, change_manifest_name=True)
         path_custom_env, _ = self.get_deploy_file_paths(path, output_name=custom_name)
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -58,7 +58,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_deploy_def(self):
         path, _ = self.get_deploy_file_paths('DeployDef.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -84,7 +84,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_sqrt_method(self):
         path, _ = self.get_deploy_file_paths('Sqrt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -133,7 +133,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_sqrt_method_from_math(self):
         path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -153,7 +153,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_decimal_floor_method(self):
         path, _ = self.get_deploy_file_paths('DecimalFloor.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -200,7 +200,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_decimal_ceil_method(self):
         path, _ = self.get_deploy_file_paths('DecimalCeiling.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

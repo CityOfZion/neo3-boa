@@ -4,7 +4,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestUnion(BoaTest):
@@ -33,7 +33,7 @@ class TestUnion(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -75,7 +75,7 @@ class TestUnion(BoaTest):
 
     def test_union_variable_argument(self):
         path, _ = self.get_deploy_file_paths('UnionVariableArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -94,7 +94,7 @@ class TestUnion(BoaTest):
 
     def test_union_isinstance_validation(self):
         path, _ = self.get_deploy_file_paths('UnionIsInstanceValidation.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -113,7 +113,7 @@ class TestUnion(BoaTest):
 
     def test_union_int_none(self):
         path, _ = self.get_deploy_file_paths('UnionIntNone.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
