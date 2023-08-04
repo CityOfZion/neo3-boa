@@ -104,16 +104,17 @@ def contract(script_hash: Union[str, bytes]):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
 
-    If you want to use the script hash as a UInt160, you can create a `hash: UInt160` class attribute without
-    attributing a value to it.
+    If you want to use the script hash in your code, you can use the `hash` class attribute that automatically maps the
+    script hash parameter onto it. You don't need to declare it in your class, but your IDE might send a warning about
+    the attribute if you don't.
 
     Check out `Our Documentation <https://dojo.coz.io/neo3/boa/calling-smart-contracts.html#with-interface>`__ to learn
     more about this decorator.
 
     >>> @contract('0xd2a4cff31913016155e38e474a2c06d08be276cf')
     ... class GASInterface:
-    ...     hash: UInt160      # this class variable will reflect the value you passed to the `contract` decorator
-    ...                        # you should import the type UInt160 from boa3.builtin.type
+    ...     hash: UInt160      # you don't need to declare this class variable, we are only doing it to avoid IDE warnings
+    ...                        # but if you do declare, you need to import the type UInt160 from boa3.builtin.type
     ...     @staticmethod
     ...     def symbol() -> str:
     ...         pass
@@ -122,7 +123,7 @@ def contract(script_hash: Union[str, bytes]):
     ...     return "Symbol is " + GASInterface.symbol()
     ... @public
     ... def return_hash() -> UInt160:
-    ...     return GASInterface.hash
+    ...     return GASInterface.hash    # neo3-boa will understand that this attribute exists even if you don't declare it
 
     :param script_hash: Script hash of the interfaced contract
     :type script_hash: str or bytes
