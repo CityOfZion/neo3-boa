@@ -22,6 +22,7 @@ class BoaTest(TestCase):
     ABORTED_CONTRACT_MSG = 'ABORT is executed'
     ARGUMENT_OUT_OF_RANGE_MSG_PREFIX = 'Specified argument was out of the range of valid values.'
     ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
+    BAD_SCRIPT_EXCEPTION_MSG = "Neo.VM.BadScriptException: Exception of type 'Neo.VM.BadScriptException' was thrown."
     CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX = "Cannot call this SYSCALL with the flag"
     CANT_FIND_METHOD_MSG_PREFIX = "Can't find method"
     CANT_PARSE_VALUE_MSG = "The value could not be parsed."
@@ -41,7 +42,6 @@ class BoaTest(TestCase):
     VALUE_CANNOT_BE_NEGATIVE_MSG = 'value can not be negative'
     VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG = 'Value does not fall within the expected range.'
     VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX = r'The value( \S*)? is out of range.$'
-    BAD_SCRIPT_EXCEPTION_MSG = "Neo.VM.BadScriptException: Exception of type 'Neo.VM.BadScriptException' was thrown."
 
     default_folder: str = ''
 

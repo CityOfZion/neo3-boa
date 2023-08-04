@@ -30,6 +30,26 @@ class TestBoaBuiltinMethod(BoaTest):
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
 
+    def test_abort_with_message(self):
+        path, _ = self.get_deploy_file_paths('AbortWithMessage.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        runner.deploy_contract(path)
+        runner.update_contracts()
+        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
+        # TODO: refactor in #864ea8yf8 - this will fail in any Neo version prior to 3.6
+        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+
+    def test_abort_with_optional_message(self):
+        path, _ = self.get_deploy_file_paths('AbortWithOptionalMessage.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        runner.deploy_contract(path)
+        runner.update_contracts()
+        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
+        # TODO: refactor in #864ea8yf8 - this will fail in any Neo version prior to 3.6
+        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+
     def test_env(self):
         path = self.get_contract_path('Env.py')
         custom_env = 'testnet'

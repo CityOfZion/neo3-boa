@@ -493,6 +493,9 @@ class OpcodeInfo:
 
     # region Extensions
 
+    # Turns the vm state to FAULT immediately, and cannot be caught. Includes a reason.
+    ABORTMSG = OpcodeInformation(Opcode.ABORTMSG)
+
     # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT. Includes a reason.
     ASSERTMSG = OpcodeInformation(Opcode.ASSERTMSG)
 
