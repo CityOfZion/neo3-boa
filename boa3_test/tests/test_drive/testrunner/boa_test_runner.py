@@ -7,18 +7,27 @@ import threading
 from typing import Callable, List, Sequence, Tuple
 
 from boa3.internal import env
+from boa3_test.test_drive.neoxp.model.neoxpconfig import NeoExpressConfig
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.neoxp import utils as neoxp_utils
 
 
 class BoaTestRunner(NeoTestRunner):
+    _DEFAULT_ACCOUNT = neoxp_utils.get_default_account()
 
-    def __init__(self, neoxp_path: str = None, runner_id: str = None):
+    def __init__(self, neoxp_path: str = None, runner_id: str = None, cleanup_files: bool = True):
         if not isinstance(neoxp_path, str):
             neoxp_path = os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express')
 
         super().__init__(neoxp_path, runner_id)
 
-        self._clear_files_when_destroyed = True
+        self._clear_files_when_destroyed = cleanup_files
+
+    def _set_up_neoxp_config(self) -> NeoExpressConfig:
+        default_config = neoxp_utils._NEOXP_CONFIG
+        if self._neoxp_abs_path == os.path.abspath(default_config.config_path):
+            return default_config
+        return super()._set_up_neoxp_config()
 
     def _set_up_generate_file_names(self, file_name: str):
         from boa3_test.test_drive import utils

@@ -44,7 +44,7 @@ class TestTransaction:
         }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TestTransaction:
+    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestTransaction:
         import base64
 
         if 'hash' in json and isinstance(json['hash'], str):

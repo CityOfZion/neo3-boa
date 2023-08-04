@@ -18,64 +18,54 @@ from boa3_test.test_drive.testrunner.blockchain.contract import TestRunnerContra
 from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTransaction as Transaction
 from boa3_test.test_drive.testrunner.blockchain.transactionlog import TestRunnerTransactionLog as TransactionLog
 
-_NEOXP_CONFIG = NeoExpressConfig(f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}/default.neo-express')
 _NEOXP_CONFIG_LOCK = threading.Lock()
 _NEOXP_FILE_LOCK = FileLock(f'{env.TEST_RUNNER_DIRECTORY}/test-runner.lock')
 logging.getLogger("filelock").setLevel(logging.INFO)
 
 
-def get_account_by_name(account_name) -> Account:
-    return next((account for account in _NEOXP_CONFIG.accounts if account.name == account_name),
+def get_config_data(neoxp_path: str) -> NeoExpressConfig:
+    return NeoExpressConfig(neoxp_path)
+
+
+def get_account_by_name(neoxp_config: NeoExpressConfig, account_name) -> Account:
+    return next((account for account in neoxp_config.accounts if account.name == account_name),
                 None)
 
 
-def get_account_by_address(account_address: str) -> Account:
-    return next((account for account in _NEOXP_CONFIG.accounts if account.address == account_address),
+def get_account_by_address(neoxp_config: NeoExpressConfig, account_address: str) -> Account:
+    return next((account for account in neoxp_config.accounts if account.address == account_address),
                 None)
 
 
-def get_account_by_identifier(account_identifier: str) -> Account:
-    return next((account for account in _NEOXP_CONFIG.accounts if (account.address == account_identifier
-                                                                   or account.name == account_identifier)),
+def get_account_by_identifier(neoxp_config: NeoExpressConfig, account_identifier: str) -> Account:
+    return next((account for account in neoxp_config.accounts if (account.address == account_identifier
+                                                                  or account.name == account_identifier)),
                 None)
 
 
-def get_default_account() -> Account:
-    return _NEOXP_CONFIG.default_account
+def get_default_account(neoxp_config: NeoExpressConfig) -> Account:
+    return neoxp_config.default_account
 
 
-def get_address_version() -> int:
-    return _NEOXP_CONFIG.version
+def get_genesis_block(neoxp_config: NeoExpressConfig) -> Block:
+    return neoxp_config.genesis_block
 
 
-def get_magic() -> int:
-    return _NEOXP_CONFIG.magic
-
-
-def get_genesis_block() -> Block:
-    return _NEOXP_CONFIG.genesis_block
-
-
-def _set_genesis_block(found_block: Block):
-    if _NEOXP_CONFIG.genesis_block is None:  # avoid overwrite
-        _NEOXP_CONFIG._genesis_block = found_block
-
-
-def get_account_from_script_hash_or_id(script_hash_or_address: Union[bytes, str]) -> Account:
+def get_account_from_script_hash_or_id(neoxp_config: NeoExpressConfig, script_hash_or_address: Union[bytes, str]) -> Account:
     if isinstance(script_hash_or_address, bytes):
         script_hash = script_hash_or_address
-        address = wallet_utils.address_from_script_hash(script_hash, get_address_version())
-        account = get_account_by_address(address)
+        address = wallet_utils.address_from_script_hash(script_hash, neoxp_config.version)
+        account = get_account_by_address(neoxp_config, address)
     elif isinstance(script_hash_or_address, str):
-        account = get_account_by_identifier(script_hash_or_address)
-        script_hash = wallet_utils.address_to_script_hash(script_hash_or_address, get_address_version())
+        account = get_account_by_identifier(neoxp_config, script_hash_or_address)
+        script_hash = wallet_utils.address_to_script_hash(script_hash_or_address, neoxp_config.version)
     else:
         raise TypeError(f"Invalid data type {type(script_hash_or_address)}. Expecting str or bytes")
 
     if not isinstance(account, Account):
         from boa3.internal.neo3.core.types import UInt160
         from boa3_test.test_drive.neoxp.model.neoxpaccount import NeoExpressAccount
-        account = NeoExpressAccount(UInt160(script_hash), get_address_version())
+        account = NeoExpressAccount(UInt160(script_hash), neoxp_config.version)
 
     return account
 
@@ -139,7 +129,7 @@ def get_transaction(neoxp_path: str, tx_hash: UInt256, check_point_file: str = N
     try:
         import json
         result_json = json.loads(raw_result)
-        tx = Transaction.from_json(result_json['transaction'])
+        tx = Transaction.from_json(result_json['transaction'], neoxp_config=get_config_data(neoxp_path))
     except:
         tx = None
 
@@ -188,7 +178,7 @@ def get_block(neoxp_path: str, block_hash_or_index: Union[UInt256, int] = None,
     try:
         import json
         result_json = json.loads(stdout)
-        block = Block.from_json(result_json)
+        block = Block.from_json(result_json, neoxp_config=get_config_data(neoxp_path))
     except:
         block = None
 

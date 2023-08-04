@@ -74,10 +74,17 @@ class TestRunnerBlock(TestBlock):
         return json_block
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TestRunnerBlock:
+    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestRunnerBlock:
         from boa3.internal.neo import from_hex_str
 
         block: TestRunnerBlock = super().from_json(json)
+
+        if 'neoxp_config' in kwargs:
+            neoxp_config = kwargs['neoxp_config']
+        elif len(args) > 0:
+            neoxp_config = args[0]
+        else:
+            neoxp_config = None
 
         block._size = int(json['size'])
         block._version = int(json['version'])
@@ -86,8 +93,12 @@ class TestRunnerBlock(TestBlock):
         block._timestamp = int(json['time'])
         block._nonce = int(json['nonce'], base=16)
         block._primary_index = int(json['primary'])
-        block._next_consensus = utils.get_account_from_script_hash_or_id(json['nextconsensus'])
+        next_consensus = json['nextconsensus']
+        block._next_consensus = (utils.get_account_from_script_hash_or_id(neoxp_config, next_consensus)
+                                 if neoxp_config is not None
+                                 else next_consensus
+                                 )
         block._witnesses = [Witness.from_json(js) for js in json['witnesses']]
-        block._transactions = [TestRunnerTransaction.from_json(js) for js in json['tx']]
+        block._transactions = [TestRunnerTransaction.from_json(js, *args, **kwargs) for js in json['tx']]
 
         return block
