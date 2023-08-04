@@ -7,7 +7,7 @@ __all__ = [
     'to_script_hash',
 ]
 
-from typing import Union, Any
+from typing import Any, Optional, Union
 
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.type import ECPoint, UInt160, Event
@@ -76,12 +76,15 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 """
 
 
-def abort():
+def abort(msg: Optional[str] = None):
     """
     Aborts the execution of a smart contract. Using this will cancel the changes made on the blockchain by the
     transaction.
 
     >>> abort()     # abort doesn't return anything by itself, but the execution will stop and the VMState will be FAULT
+    VMState.FAULT
+
+    >>> abort('abort message')
     VMState.FAULT
 
     """
