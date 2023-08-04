@@ -5,7 +5,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestDict(BoaTest):
@@ -241,7 +241,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -287,7 +287,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -348,7 +348,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -403,7 +403,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -458,7 +458,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -513,7 +513,7 @@ class TestDict(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -529,7 +529,7 @@ class TestDict(BoaTest):
 
     def test_dict_boa2_test2(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -545,7 +545,7 @@ class TestDict(BoaTest):
 
     def test_dict_any_key_and_value(self):
         path, _ = self.get_deploy_file_paths('DictAnyKeyAndValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -561,7 +561,7 @@ class TestDict(BoaTest):
 
     def test_boa2_dict_test1(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -576,7 +576,7 @@ class TestDict(BoaTest):
 
     def test_boa2_dict_test3(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test3.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
 
@@ -589,7 +589,7 @@ class TestDict(BoaTest):
 
     def test_boa2_dict_test4(self):
         path, _ = self.get_deploy_file_paths('DictBoa2Test4.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -606,7 +606,7 @@ class TestDict(BoaTest):
     def test_boa2_dict_test5_should_not_compile(self):
         # this doesn't compile in boa2, but should compile here
         path, _ = self.get_deploy_file_paths('DictBoa2Test5ShouldNotCompile.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -623,7 +623,7 @@ class TestDict(BoaTest):
     def test_boa2_dict_test6_should_not_compile(self):
         # this doesn't compile in boa2, but should compile here
         path, _ = self.get_deploy_file_paths('DictBoa2Test6ShouldNotCompile.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -639,7 +639,7 @@ class TestDict(BoaTest):
 
     def test_boa2_dict_test_keys(self):
         path, _ = self.get_deploy_file_paths('DictBoa2TestKeys.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -655,7 +655,7 @@ class TestDict(BoaTest):
 
     def test_boa2_dict_test_values(self):
         path, _ = self.get_deploy_file_paths('DictBoa2TestValues.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -671,7 +671,7 @@ class TestDict(BoaTest):
 
     def test_dict_pop(self):
         path, _ = self.get_deploy_file_paths('DictPop.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -705,7 +705,7 @@ class TestDict(BoaTest):
 
     def test_dict_pop_default(self):
         path, _ = self.get_deploy_file_paths('DictPopDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -746,7 +746,7 @@ class TestDict(BoaTest):
 
     def test_dict_copy(self):
         path, _ = self.get_deploy_file_paths('DictCopy.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -765,7 +765,7 @@ class TestDict(BoaTest):
 
     def test_dict_copy_builtin_call(self):
         path, _ = self.get_deploy_file_paths('CopyDictBuiltinCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

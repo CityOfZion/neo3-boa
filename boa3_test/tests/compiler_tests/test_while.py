@@ -6,7 +6,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestWhile(BoaTest):
@@ -40,7 +40,7 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -92,7 +92,7 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -121,7 +121,7 @@ class TestWhile(BoaTest):
 
     def test_nested_while(self):
         path, _ = self.get_deploy_file_paths('NestedWhile.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -167,7 +167,7 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -217,7 +217,7 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -271,7 +271,7 @@ class TestWhile(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -291,7 +291,7 @@ class TestWhile(BoaTest):
 
     def test_while_continue(self):
         path, _ = self.get_deploy_file_paths('WhileContinue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -307,7 +307,7 @@ class TestWhile(BoaTest):
 
     def test_while_break(self):
         path, _ = self.get_deploy_file_paths('WhileBreak.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -323,7 +323,7 @@ class TestWhile(BoaTest):
 
     def test_boa2_while_test(self):
         path, _ = self.get_deploy_file_paths('WhileBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -339,7 +339,7 @@ class TestWhile(BoaTest):
 
     def test_boa2_while_test1(self):
         path, _ = self.get_deploy_file_paths('WhileBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -355,7 +355,7 @@ class TestWhile(BoaTest):
 
     def test_boa2_while_test2(self):
         path, _ = self.get_deploy_file_paths('WhileBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -371,7 +371,7 @@ class TestWhile(BoaTest):
 
     def test_while_interop_condition(self):
         path, _ = self.get_deploy_file_paths('WhileWithInteropCondition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

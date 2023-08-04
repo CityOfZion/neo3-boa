@@ -1,10 +1,13 @@
+__all__ = [
+    'NeoTestRunner'
+]
+
 import json
 import os.path
 import subprocess
-import threading
-from typing import Any, List, Tuple, Dict, Optional, Union, Type
+from typing import Any, Callable, List, Dict, Optional, Sequence, Tuple, Type, Union
 
-from boa3.internal import env, constants
+from boa3.internal import constants
 from boa3.internal.neo import utils as neo_utils
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt256
@@ -37,7 +40,7 @@ class NeoTestRunner:
 
     _DEFAULT_ACCOUNT = neoxp_utils.get_default_account()
 
-    def __init__(self, neoxp_path: str = None, runner_id: str = None):
+    def __init__(self, neoxp_path: str, runner_id: str = None):
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
@@ -50,8 +53,6 @@ class NeoTestRunner:
         self._logs: List[Log] = []
         self._storages: StorageCollection = StorageCollection()
 
-        if not isinstance(neoxp_path, str):
-            neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
 
         if isinstance(runner_id, str):
@@ -60,7 +61,6 @@ class NeoTestRunner:
         else:
             self._file_name = self._FOLDER_NAME
 
-        self._clear_files_when_destroyed = True
         self._first_execution = True
 
         self._batch = NeoExpressBatch()
@@ -76,12 +76,13 @@ class NeoTestRunner:
     @file_name.setter
     def file_name(self, value: str):
         if isinstance(value, str) and not value.isspace():
-            from boa3_test.test_drive import utils
-            runner_specific_id = utils.create_custom_id(value)
             self._file_name = value
-            self._INVOKE_FILE = f'{runner_specific_id}.neo-invoke.json'
-            self._BATCH_FILE = f'{runner_specific_id}.batch'
-            self._CHECKPOINT_FILE = f'{runner_specific_id}.neoxp-checkpoint'
+            self._set_up_generate_file_names(value)
+
+    def _set_up_generate_file_names(self, file_name: str):
+        self._INVOKE_FILE = f'{file_name}.neo-invoke.json'
+        self._BATCH_FILE = f'{file_name}.batch'
+        self._CHECKPOINT_FILE = f'{file_name}.neoxp-checkpoint'
 
     @property
     def vm_state(self) -> VMState:
@@ -333,22 +334,6 @@ class NeoTestRunner:
         else:
             return self._last_execution_results
 
-    def __del__(self):
-        self.reset()
-        if self._clear_files_when_destroyed:
-            paths_to_delete = [
-                self.get_full_path(self._CHECKPOINT_FILE),
-                self.get_full_path(self._BATCH_FILE),
-                self.get_full_path(self._INVOKE_FILE)
-            ]
-            for path in paths_to_delete:
-                try:
-                    if os.path.exists(path):
-                        os.remove(path)
-                except BaseException as e:
-                    print(e)
-                    continue
-
     def reset_state(self):
         self._vm_state = VMState.NONE
         self._gas_consumed = 0
@@ -432,11 +417,16 @@ class NeoTestRunner:
     def _generate_files(self):
         self._generate_root_folder()
 
-        checkpoint_thread = threading.Thread(target=self._create_checkpoint_from_batch)
-        checkpoint_thread.start()
+        methods_to_call = [
+            (self._create_checkpoint_from_batch, ()),
+            (self._generate_invoke_file, ()),
+        ]
 
-        self._generate_invoke_file()
-        checkpoint_thread.join()
+        self._internal_generate_files(methods_to_call)
+
+    def _internal_generate_files(self, methods_to_call: List[Tuple[Callable, Sequence]]):
+        for method, args in methods_to_call:
+            method(*args)
 
     def _create_checkpoint_from_batch(self):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)

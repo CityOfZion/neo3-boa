@@ -9,7 +9,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts.namedcurve import NamedCurve
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestCryptoLibClass(BoaTest):
@@ -31,7 +31,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -47,7 +47,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_str(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -68,7 +68,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_int(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -85,7 +85,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_bool(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -102,7 +102,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_bytes(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -127,7 +127,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_str(self):
         path, _ = self.get_deploy_file_paths('Sha256Str.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -148,7 +148,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_int(self):
         path, _ = self.get_deploy_file_paths('Sha256Int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -165,7 +165,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_bool(self):
         path, _ = self.get_deploy_file_paths('Sha256Bool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -182,7 +182,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_bytes(self):
         path, _ = self.get_deploy_file_paths('Sha256Bytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

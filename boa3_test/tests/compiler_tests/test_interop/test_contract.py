@@ -9,8 +9,8 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestContractInterop(BoaTest):
@@ -19,7 +19,7 @@ class TestContractInterop(BoaTest):
     def test_call_contract(self):
         path, _ = self.get_deploy_file_paths('CallScriptHash.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -52,7 +52,7 @@ class TestContractInterop(BoaTest):
     def test_call_contract_with_cast(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithCast.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -79,7 +79,7 @@ class TestContractInterop(BoaTest):
     def test_call_contract_without_args(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithoutArgs.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/list_test', 'IntList.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -108,7 +108,7 @@ class TestContractInterop(BoaTest):
     def test_call_contract_with_flags(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithFlags.py')
         call_contract_path, _ = self.get_deploy_file_paths('CallFlagsUsage.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -198,7 +198,7 @@ class TestContractInterop(BoaTest):
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         invoke = runner.call_contract(path, 'Main', nef_file, arg_manifest, None)
 
         runner.execute()
@@ -218,7 +218,7 @@ class TestContractInterop(BoaTest):
         nef_file, manifest = self.get_bytes_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         runner.file_name = 'test_create_contract'
 
         data = 'some sort of data'
@@ -248,7 +248,7 @@ class TestContractInterop(BoaTest):
 
     def test_update_contract(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         runner.file_name = 'test_update_contract'
 
         invokes = []
@@ -278,7 +278,7 @@ class TestContractInterop(BoaTest):
 
     def test_update_contract_data_deploy(self):
         path, _ = self.get_deploy_file_paths('UpdateContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -317,7 +317,7 @@ class TestContractInterop(BoaTest):
 
     def test_destroy_contract(self):
         path, _ = self.get_deploy_file_paths('DestroyContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -358,7 +358,7 @@ class TestContractInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -400,7 +400,7 @@ class TestContractInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -430,7 +430,7 @@ class TestContractInterop(BoaTest):
 
     def test_call_flags_type(self):
         path, _ = self.get_deploy_file_paths('CallFlagsType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -461,7 +461,7 @@ class TestContractInterop(BoaTest):
     def test_get_call_flags(self):
         path, _ = self.get_deploy_file_paths('CallScriptHashWithFlags.py')
         call_contract_path, _ = self.get_deploy_file_paths('GetCallFlags.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -504,7 +504,7 @@ class TestContractInterop(BoaTest):
     def test_import_contract(self):
         path, _ = self.get_deploy_file_paths('ImportContract.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -532,7 +532,7 @@ class TestContractInterop(BoaTest):
     def test_import_interop_contract(self):
         path, _ = self.get_deploy_file_paths('ImportInteropContract.py')
         call_contract_path, _ = self.get_deploy_file_paths('test_sc/arithmetic_test', 'Addition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -596,7 +596,7 @@ class TestContractInterop(BoaTest):
 
     def test_get_minimum_deployment_fee(self):
         path, _ = self.get_deploy_file_paths('GetMinimumDeploymentFee.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

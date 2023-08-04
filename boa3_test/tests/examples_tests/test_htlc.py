@@ -7,9 +7,9 @@ from boa3.internal.neo.cryptography import hash160
 from boa3.internal.neo.smart_contract.notification import Notification
 from boa3.internal.neo3.core.types import UInt256
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
 from boa3_test.test_drive.model.network.payloads.testtransaction import TransactionExecution
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestHTLCTemplate(BoaTest):
@@ -21,7 +21,7 @@ class TestHTLCTemplate(BoaTest):
     GAS_TO_DEPLOY = 1000 * 10 ** 8
     REFUND_WAIT_TIME = 24 * 60 * 60     # smart contract constant in seconds
 
-    def _validate_execution_result(self, runner: NeoTestRunner, tx_id: UInt256, expected_result: Any) -> TransactionExecution:
+    def _validate_execution_result(self, runner: BoaTestRunner, tx_id: UInt256, expected_result: Any) -> TransactionExecution:
         # Test Runner isn't returning the runtime.time value correctly when using `call_contract`, so we have to get the
         # data from the transaction directly
         transactions_log = runner.get_transaction_result(tx_id)
@@ -39,7 +39,7 @@ class TestHTLCTemplate(BoaTest):
 
     def test_htlc_atomic_swap(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -56,12 +56,12 @@ class TestHTLCTemplate(BoaTest):
 
         runner.update_contracts(export_checkpoint=True)
 
-        # The `atomic_swap` method uses runtime.time, but NeoTestRunner fails to get it
+        # The `atomic_swap` method uses runtime.time, but BoaTestRunner fails to get it
         self._validate_execution_result(runner, invoke.tx_id, expected_result=True)
 
     def test_htlc_on_nep17_payment(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         transferred_amount_neo = 10 * 10 ** 0
         transferred_amount_gas = 10000 * 10 ** 8
@@ -161,7 +161,7 @@ class TestHTLCTemplate(BoaTest):
 
     def test_htlc_withdraw(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         transferred_amount_neo = 10 * 10 ** 0
         transferred_amount_gas = 10000 * 10 ** 8
@@ -226,7 +226,7 @@ class TestHTLCTemplate(BoaTest):
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
-        # The `withdraw` method uses runtime.time, but NeoTestRunner fails to get it
+        # The `withdraw` method uses runtime.time, but BoaTestRunner fails to get it
         self._validate_execution_result(runner, invoke_withdraw_wrong1.tx_id, expected_result=False)
         self._validate_execution_result(runner, invoke_withdraw_wrong2.tx_id, expected_result=False)
         transaction_withdraw = self._validate_execution_result(runner, invoke_withdraw_right.tx_id, expected_result=True)
@@ -283,7 +283,7 @@ class TestHTLCTemplate(BoaTest):
 
     def test_htlc_refund_zero_transfers(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         transferred_amount_neo = 10 * 10 ** 0
         transferred_amount_gas = 10000 * 10 ** 8
@@ -322,10 +322,10 @@ class TestHTLCTemplate(BoaTest):
 
         runner.update_contracts(export_checkpoint=True)
 
-        # The `refund` method uses runtime.time, but NeoTestRunner fails to get it
+        # The `refund` method uses runtime.time, but BoaTestRunner fails to get it
         self._validate_execution_result(runner, invoke_refund_fail.tx_id, expected_result=False)
 
-        # The `refund` method uses runtime.time, but NeoTestRunner fails to get it
+        # The `refund` method uses runtime.time, but BoaTestRunner fails to get it
         self._validate_execution_result(runner, invoke_refund_success.tx_id, expected_result=True)
 
         transfer_events: List[Notification] = []
@@ -338,7 +338,7 @@ class TestHTLCTemplate(BoaTest):
 
     def test_htlc_refund_one_transfer(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         transferred_amount_neo = 10 * 10 ** 0
         transferred_amount_gas = 10000 * 10 ** 8
@@ -384,7 +384,7 @@ class TestHTLCTemplate(BoaTest):
 
         runner.update_contracts(export_checkpoint=True)
 
-        # The `refund` method uses runtime.time, but NeoTestRunner fails to get it
+        # The `refund` method uses runtime.time, but BoaTestRunner fails to get it
         transaction_refund = self._validate_execution_result(runner, invoke_refund_success.tx_id, expected_result=True)
 
         # person_a transferred cryptocurrency to the contract, so only he will be refunded
@@ -404,7 +404,7 @@ class TestHTLCTemplate(BoaTest):
 
     def test_htlc_refund_two_transfers(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         transferred_amount_neo = 10 * 10 ** 0
         transferred_amount_gas = 10000 * 10 ** 8
@@ -452,7 +452,7 @@ class TestHTLCTemplate(BoaTest):
 
         runner.update_contracts(export_checkpoint=True)
 
-        # The `refund` method uses runtime.time, but NeoTestRunner fails to get it
+        # The `refund` method uses runtime.time, but BoaTestRunner fails to get it
         transaction_refund = self._validate_execution_result(runner, invoke_refund_success.tx_id, expected_result=True)
 
         # person_a and person_b transferred cryptocurrency to the contract, so they both will be refunded

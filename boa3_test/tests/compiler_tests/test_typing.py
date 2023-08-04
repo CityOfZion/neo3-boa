@@ -5,7 +5,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestTyping(BoaTest):
@@ -117,7 +117,7 @@ class TestTyping(BoaTest):
         self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -150,7 +150,7 @@ class TestTyping(BoaTest):
 
     def test_cast_inside_if(self):
         path, _ = self.get_deploy_file_paths('CastInsideIf.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -166,7 +166,7 @@ class TestTyping(BoaTest):
 
     def test_cast_persisted_in_scope(self):
         path, _ = self.get_deploy_file_paths('CastPersistedInScope.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

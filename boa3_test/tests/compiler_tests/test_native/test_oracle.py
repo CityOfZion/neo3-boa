@@ -6,7 +6,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 def _deep_scan(iterable: [dict, list], key: str, list_of_values: list):
@@ -37,7 +37,7 @@ class TestNativeContracts(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -53,7 +53,7 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -100,7 +100,7 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_response(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -110,7 +110,7 @@ class TestNativeContracts(BoaTest):
         user_data = 'Any Data Here'
         gas_for_response = 1 * 10 ** 8
 
-        from boa3_test.test_drive import neoxp
+        from boa3_test.tests.test_drive import neoxp
         OWNER = neoxp.utils.get_account_by_name('owner')
 
         genesis = neoxp.utils.get_account_by_name('genesis')
@@ -164,7 +164,7 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_response_filter(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -174,7 +174,7 @@ class TestNativeContracts(BoaTest):
         user_data = 'Any Data Here'
         gas_for_response = 1 * 10 ** 8
 
-        from boa3_test.test_drive import neoxp
+        from boa3_test.tests.test_drive import neoxp
         OWNER = neoxp.utils.get_account_by_name('owner')
         runner.add_gas(OWNER.address, 1000 * 10 ** 8)
 
@@ -233,7 +233,7 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request_invalid_gas(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         test_url = 'https://unittest.fake.url/api/0/'
         callback = 'callback_method'
@@ -241,7 +241,7 @@ class TestNativeContracts(BoaTest):
         filter = "$.store.*"
         gas_for_response = 9999999     # GAS can not be lower than 0.1 GAS
 
-        from boa3_test.test_drive import neoxp
+        from boa3_test.tests.test_drive import neoxp
         genesis = neoxp.utils.get_account_by_name('genesis')
         runner.oracle_enable(genesis)
 
@@ -253,14 +253,14 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request_invalid_callback(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         test_url = 'https://unittest.fake.url/api/0/'
         user_data = 'Any Data Here'
         filter = "$.store.*"
         gas_for_response = 1 * 10 ** 8
 
-        from boa3_test.test_drive import neoxp
+        from boa3_test.tests.test_drive import neoxp
         genesis = neoxp.utils.get_account_by_name('genesis')
         runner.oracle_enable(genesis)
 
@@ -280,14 +280,14 @@ class TestNativeContracts(BoaTest):
 
     def test_oracle_request_invalid_filter(self):
         path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         test_url = 'https://unittest.fake.url/api/0/'
         callback = 'callback_method'
         user_data = 'Any Data Here'
         gas_for_response = 1 * 10 ** 8
 
-        from boa3_test.test_drive import neoxp
+        from boa3_test.tests.test_drive import neoxp
         genesis = neoxp.utils.get_account_by_name('genesis')
         runner.oracle_enable(genesis)
 
@@ -316,7 +316,7 @@ class TestNativeContracts(BoaTest):
 
     def test_import_interop_oracle(self):
         path, _ = self.get_deploy_file_paths('ImportOracle.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -347,7 +347,7 @@ class TestNativeContracts(BoaTest):
 
     def test_import_interop_oracle_package(self):
         path, _ = self.get_deploy_file_paths('ImportInteropOracle.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -393,7 +393,7 @@ class TestNativeContracts(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()

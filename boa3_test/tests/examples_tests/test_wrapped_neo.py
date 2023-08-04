@@ -2,8 +2,8 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal import constants
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestWrappedTokenTemplate(BoaTest):
@@ -21,7 +21,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_symbol(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'symbol')
         runner.execute()
@@ -31,7 +31,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_decimals(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'decimals')
         runner.execute()
@@ -43,7 +43,7 @@ class TestWrappedTokenTemplate(BoaTest):
         total_supply = 10_000_000
 
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'totalSupply')
         runner.execute()
@@ -55,7 +55,7 @@ class TestWrappedTokenTemplate(BoaTest):
         total_supply = 10_000_000
 
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -90,7 +90,7 @@ class TestWrappedTokenTemplate(BoaTest):
         expected_results = []
 
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         wrapped_neo_contract = runner.deploy_contract(path, account=self.OWNER)
@@ -185,7 +185,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_burn(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         wrapped_neo_contract = runner.deploy_contract(path, account=self.OWNER)
@@ -255,7 +255,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_approve(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -309,7 +309,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_allowance(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -355,7 +355,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_transfer_from(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -507,7 +507,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_on_nep17_payment(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         minted_amount = 10
         test_account_1 = self.OTHER_ACCOUNT_1
@@ -570,7 +570,7 @@ class TestWrappedTokenTemplate(BoaTest):
 
     def test_wrapped_neo_verify(self):
         path, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)

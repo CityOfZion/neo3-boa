@@ -1,5 +1,8 @@
+import os.path
+
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
+from boa3.internal import env
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
@@ -12,7 +15,9 @@ class TestTestRunner(BoaTest):
 
     def test_run(self):
         path, _ = self.get_deploy_file_paths('test_sc/generation_test', 'GenerationWithDecorator.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = NeoTestRunner(os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express'),
+                               runner_id=self.method_name()
+                               )
 
         invoke_result = runner.call_contract(path, 'Sub', 50, 20)
         self.assertEqual(invokeresult.NOT_EXECUTED, invoke_result.result)
