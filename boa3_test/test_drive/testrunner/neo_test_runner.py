@@ -21,6 +21,7 @@ from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils as neoxp_utils
 from boa3_test.test_drive.neoxp.batch import NeoExpressBatch
+from boa3_test.test_drive.neoxp.model.neoxpconfig import NeoExpressConfig
 from boa3_test.test_drive.testrunner import utils
 from boa3_test.test_drive.testrunner.blockchain.block import TestRunnerBlock as Block
 from boa3_test.test_drive.testrunner.blockchain.log import TestRunnerLog as Log
@@ -38,7 +39,7 @@ class NeoTestRunner:
     _BATCH_FILE = f'{_FOLDER_NAME}.batch'
     _CHECKPOINT_FILE = f'{_FOLDER_NAME}.neoxp-checkpoint'
 
-    _DEFAULT_ACCOUNT = neoxp_utils.get_default_account()
+    _DEFAULT_ACCOUNT = None
 
     def __init__(self, neoxp_path: str, runner_id: str = None):
         self._vm_state: VMState = VMState.NONE
@@ -54,6 +55,7 @@ class NeoTestRunner:
         self._storages: StorageCollection = StorageCollection()
 
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
+        self._neoxp_config = self._set_up_neoxp_config()
 
         if isinstance(runner_id, str):
             self._file_name: str = None  # defined in the following line
@@ -63,7 +65,7 @@ class NeoTestRunner:
 
         self._first_execution = True
 
-        self._batch = NeoExpressBatch()
+        self._batch = NeoExpressBatch(self._neoxp_config)
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
         self._invokes_to_batch = 0
@@ -83,6 +85,11 @@ class NeoTestRunner:
         self._INVOKE_FILE = f'{file_name}.neo-invoke.json'
         self._BATCH_FILE = f'{file_name}.batch'
         self._CHECKPOINT_FILE = f'{file_name}.neoxp-checkpoint'
+
+    def _set_up_neoxp_config(self) -> NeoExpressConfig:
+        neoxp_config = neoxp_utils.get_config_data(self._neoxp_abs_path)
+        self._DEFAULT_ACCOUNT = neoxp_config.default_account
+        return neoxp_config
 
     @property
     def vm_state(self) -> VMState:
@@ -165,13 +172,13 @@ class NeoTestRunner:
             self._cli_log = log_to_append
 
     def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
+        address = neoxp_utils.get_account_from_script_hash_or_id(self._neoxp_config, script_hash_or_address)
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     quantity=amount,
                                     asset='NEO')
 
     def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
+        address = neoxp_utils.get_account_from_script_hash_or_id(self._neoxp_config, script_hash_or_address)
         gas_decimals = 8
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     asset='GAS', decimals=gas_decimals,
@@ -184,7 +191,7 @@ class NeoTestRunner:
         return self.get_block(None)
 
     def get_block(self, block_hash_or_index: Union[UInt256, bytes, int]) -> Optional[Block]:
-        genesis = neoxp_utils.get_genesis_block()
+        genesis = neoxp_utils.get_genesis_block(self._neoxp_config)
         if isinstance(genesis, Block) and block_hash_or_index in (genesis.hash, genesis.index):
             # genesis block doesn't change between neo express resets
             return genesis
@@ -194,8 +201,12 @@ class NeoTestRunner:
                                       check_point_file=check_point_path)
 
         if not isinstance(genesis, Block) and isinstance(block, Block) and block.index == 0:
-            neoxp_utils._set_genesis_block(block)  # optimization for consecutive executions
+            self._set_genesis_block(block)  # optimization for consecutive executions
         return block
+
+    def _set_genesis_block(self, genesis):
+        if isinstance(genesis, Block):
+            self._neoxp_config._genesis_block = genesis
 
     def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
         if isinstance(tx_hash, bytes):
