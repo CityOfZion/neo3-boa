@@ -1269,6 +1269,13 @@ class Opcode(bytes, Enum):
 
     # region Extensions
 
+    ABORTMSG = b'\xE0'
+    """
+    Turns the vm state to FAULT immediately, and cannot be caught. Includes a reason.
+
+    :meta hide-value:
+    """
+
     ASSERTMSG = b'\xE1'
     """
     Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT. Includes a reason.
