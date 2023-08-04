@@ -171,19 +171,6 @@ class NeoTestRunner:
             self._last_cli_log = self._cli_log
             self._cli_log = log_to_append
 
-    def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_id(self._neoxp_config, script_hash_or_address)
-        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
-                                    quantity=amount,
-                                    asset='NEO')
-
-    def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_id(self._neoxp_config, script_hash_or_address)
-        gas_decimals = 8
-        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
-                                    asset='GAS', decimals=gas_decimals,
-                                    quantity=(amount / (10 ** gas_decimals)))
-
     def get_genesis_block(self) -> Block:
         return self.get_block(0)
 
@@ -191,18 +178,23 @@ class NeoTestRunner:
         return self.get_block(None)
 
     def get_block(self, block_hash_or_index: Union[UInt256, bytes, int]) -> Optional[Block]:
-        genesis = neoxp_utils.get_genesis_block(self._neoxp_config)
+        genesis = self._get_genesis_block()
         if isinstance(genesis, Block) and block_hash_or_index in (genesis.hash, genesis.index):
             # genesis block doesn't change between neo express resets
             return genesis
 
-        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
-        block = neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
-                                      check_point_file=check_point_path)
-
+        block = self._get_block(block_hash_or_index)
         if not isinstance(genesis, Block) and isinstance(block, Block) and block.index == 0:
             self._set_genesis_block(block)  # optimization for consecutive executions
         return block
+
+    def _get_genesis_block(self) -> Optional[Block]:
+        return neoxp_utils.get_genesis_block(self._neoxp_config)
+
+    def _get_block(self, block_hash_or_index) -> Optional[Block]:
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+        return neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
+                                     check_point_file=check_point_path)
 
     def _set_genesis_block(self, genesis):
         if isinstance(genesis, Block):
@@ -212,6 +204,9 @@ class NeoTestRunner:
         if isinstance(tx_hash, bytes):
             tx_hash = UInt256(tx_hash)
 
+        return self._get_tx(tx_hash)
+
+    def _get_tx(self, tx_hash: UInt256):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash,
                                            check_point_file=check_point_path)
@@ -220,10 +215,13 @@ class NeoTestRunner:
         if isinstance(tx_hash, bytes):
             tx_hash = UInt256(tx_hash)
 
+        return self._get_tx_log(tx_hash, contract_collection=self._contracts)
+
+    def _get_tx_log(self, tx_hash: UInt256, contract_collection: ContractCollection):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash,
                                                check_point_file=check_point_path,
-                                               contract_collection=self._contracts)
+                                               contract_collection=contract_collection)
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
@@ -471,9 +469,11 @@ class NeoTestRunner:
         self._batch.oracle_enable(account)
 
     def oracle_response(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
-        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
-
         # add to command to batch file and get the tx id
         self._batch.oracle_response(url, response_path, request_id=request_id)
+        return self._get_oracle_resp(url, response_path, request_id)
+
+    def _get_oracle_resp(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.oracle_response(self._neoxp_abs_path, url, response_path, request_id,
                                            check_point_file=check_point_path)
