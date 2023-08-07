@@ -67,7 +67,7 @@ class ECPointMethod(IBuiltinMethod):
         else_address = code_generator.convert_begin_else(is_arg_null, True, is_internal=True)
         code_generator.change_jump(else_address, Opcode.JMPIF)
         #   raise exception
-        code_generator.convert_raise_exception()
+        code_generator.convert_raise_exception(is_internal=True)
         code_generator.convert_end_if(else_address, is_internal=True)
 
     @property
