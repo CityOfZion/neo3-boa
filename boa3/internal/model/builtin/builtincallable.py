@@ -19,18 +19,6 @@ class IBuiltinCallable(Callable, IBuiltinSymbol, ABC):
         self._generated_opcode = None
         self.defined_by_entry = False  # every builtin symbol must have this variable set as False
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        """
-        Gets the opcode for the method.
-
-        :return: the opcode and its data if exists. None otherwise.
-        """
-        # don't need to recalculate for every time this property is called
-        if self._generated_opcode is None:
-            self._generated_opcode = self._opcode
-        return self._generated_opcode
-
     def generate_opcodes(self, code_generator):
         """
         Generate the Neo VM opcodes for the method.
