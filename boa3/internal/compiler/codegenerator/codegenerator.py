@@ -1973,10 +1973,12 @@ class CodeGenerator:
                 self.swap_reverse_stack_items(2)
 
         self.__insert1(OpcodeInfo.ASSERT if not has_message else OpcodeInfo.ASSERTMSG)
-        if len(self._stack) > 0 and not has_message:
+        if has_message and len(self._stack) > 1:
+            # pop message
             self._stack_pop()
-        elif len(self._stack) > 1 and has_message:
-            self._stack_pop()
+
+        if len(self._stack) > 0:
+            # pop assert test
             self._stack_pop()
 
     def convert_new_exception(self, exception_args_len: int = 0):
