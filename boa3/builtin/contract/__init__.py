@@ -1,8 +1,9 @@
 __all__ = [
     'Nep11TransferEvent',
     'Nep17TransferEvent',
-    'abort',
     'NeoAccountState',
+    'abort',
+    'to_hex_str',
     'to_script_hash',
 ]
 
@@ -120,5 +121,24 @@ def to_script_hash(data_bytes: Any) -> bytes:
     :type data_bytes: Any
     :return: the script hash of the data
     :rtype: bytes
+    """
+    pass
+
+
+def to_hex_str(data: bytes) -> str:
+    """
+    Converts bytes into its string hex representation.
+
+    >>> to_hex_str(ECPoint(bytes(range(33))))
+    '201f1e1d1c1b1a191817161514131211100f0e0d0c0b0a09080706050403020100'
+
+    >>> to_hex_str(b'1234567891')
+    '31393837363534333231'
+
+    :param data: data to represent as hex.
+    :type data: bytearray or bytes
+
+    :return: the hex representation of the data
+    :rtype: str
     """
     pass

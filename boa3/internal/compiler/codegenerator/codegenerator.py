@@ -1211,7 +1211,7 @@ class CodeGenerator:
                 new_stack_item = Type.any
             self._stack_append(new_stack_item)
 
-    def convert_get_substring(self, *, is_internal: bool = False):
+    def convert_get_substring(self, *, is_internal: bool = False, fix_result_type: bool = True):
         """
         Converts the end of get a substring
 
@@ -1236,7 +1236,8 @@ class CodeGenerator:
         if not is_internal:
             self._update_jump(jmp_address, self.last_code_start_address)
         self._stack_append(BufferType)  # substr returns a buffer instead of a bytestring
-        self.convert_cast(original)
+        if fix_result_type:
+            self.convert_cast(original)
 
     def convert_get_array_slice(self, array: SequenceType):
         """
