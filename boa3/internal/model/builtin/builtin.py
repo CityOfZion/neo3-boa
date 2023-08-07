@@ -58,6 +58,7 @@ class Builtin:
     ScriptHashMethod_ = ScriptHashMethod()
     StrSplit = StrSplitMethod()
     Sum = SumMethod()
+    ToHexStr = ToHexStrMethod()
 
     # python builtin class constructor
     Bool = BoolMethod()
@@ -267,7 +268,8 @@ class Builtin:
                               NeoAccountState,
                               Nep11Transfer,
                               Nep17Transfer,
-                              ScriptHashMethod_
+                              ScriptHashMethod_,
+                              ToHexStr,
                               ],
         BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: _builtin_type_package_symbols,
