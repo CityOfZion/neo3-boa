@@ -35,7 +35,7 @@ class TestBlock:
         return json_block
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TestBlock:
+    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestBlock:
         block = object.__new__(cls)
 
         if 'index' in json:

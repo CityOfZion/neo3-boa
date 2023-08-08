@@ -66,14 +66,24 @@ class TestRunnerTransaction(TestTransaction):
         return self._witnesses.copy()
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TestRunnerTransaction:
+    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestRunnerTransaction:
         tx: TestRunnerTransaction = super().from_json(json)
+
+        if 'neoxp_config' in kwargs:
+            neoxp_config = kwargs['neoxp_config']
+        elif len(args) > 0:
+            neoxp_config = args[0]
+        else:
+            neoxp_config = None
 
         tx._size = json['size']
         tx._version = json['version']
         tx._nonce = json['nonce']
         sender_account = json['sender']
-        tx._sender = utils.get_account_from_script_hash_or_id(sender_account)
+        tx._sender = (utils.get_account_from_script_hash_or_id(neoxp_config, sender_account)
+                      if neoxp_config is not None
+                      else sender_account
+                      )
         tx._system_fee = int(json['sysfee'])
         tx._network_fee = int(json['netfee'])
         tx._valid_until_block = json['validuntilblock']
