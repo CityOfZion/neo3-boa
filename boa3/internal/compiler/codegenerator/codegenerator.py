@@ -1981,6 +1981,20 @@ class CodeGenerator:
             # pop assert test
             self._stack_pop()
 
+    def convert_abort(self, has_message: bool = False, *, is_internal: bool = False):
+        if not is_internal:
+            abort_msg_type = self._stack[-1] if len(self._stack) > 0 else Type.none
+            if has_message and Type.none.is_type_of(abort_msg_type):
+                # do not use ABORTMSG if we can detect the msg is None
+                has_message = not has_message
+                self._stack_pop()
+
+        if not has_message:
+            self.__insert1(OpcodeInfo.ABORT)
+        else:
+            self.__insert1(OpcodeInfo.ABORTMSG)
+            self._stack_pop()
+
     def convert_new_exception(self, exception_args_len: int = 0):
         if exception_args_len == 0 or len(self._stack) == 0:
             self.convert_literal(Builtin.Exception.default_message)
