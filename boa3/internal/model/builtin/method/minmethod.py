@@ -27,6 +27,8 @@ class MinMethod(IBuiltinMethod):
         vararg = ('values', Variable(arg_value))
         super().__init__(identifier, args, return_type=arg_value, vararg=vararg)
 
+        self.internal_call_args = len(args)
+
     def _is_valid_type(self, arg_type: Optional[IType]) -> bool:
         return (isinstance(arg_type, IType) and
                 any(allowed_type.is_type_of(arg_type) for allowed_type in self._allowed_types))

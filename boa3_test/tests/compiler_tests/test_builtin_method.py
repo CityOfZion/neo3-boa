@@ -606,6 +606,75 @@ class TestBuiltinMethod(BoaTest):
 
     # endregion
 
+    # region to_hex_str test
+
+    def test_to_hex_str(self):
+        path, _ = self.get_deploy_file_paths('HexStr.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        from boa3.internal.neo import to_hex_str
+        expected_result = to_hex_str(b'abcdefghijklmnopqrstuvwxyz0123456789')
+        expected_result = expected_result.replace('0x', '', 1)
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(expected_result)
+
+        expected_result = to_hex_str(b'123')
+        expected_result = expected_result.replace('0x', '', 1)
+        invokes.append(runner.call_contract(path, 'Main2'))
+        expected_results.append(expected_result)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_hex_str_variable(self):
+        path, _ = self.get_deploy_file_paths('HexStrVariable.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        value = b''
+        invokes.append(runner.call_contract(path, 'Main', value))
+        expected_results.append('')
+
+        from boa3.internal.neo import to_hex_str
+        from base58 import b58encode
+        value = b58encode(Integer(123).to_byte_array())
+        if isinstance(value, int):
+            value = Integer(value).to_byte_array()
+
+        hex_str = to_hex_str(value)
+        hex_str = hex_str.replace('0x', '', 1)
+
+        invokes.append(runner.call_contract(path, 'Main', value))
+        expected_results.append(hex_str)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_hex_str_too_many_parameters(self):
+        path = self.get_contract_path('HexStrTooManyParameters.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_hex_str_too_few_parameters(self):
+        path = self.get_contract_path('HexStrTooFewParameters.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+
+    def test_hex_str_mismatched_types(self):
+        path = self.get_contract_path('HexStrMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    # endregion
+
     # region to_bytes test
 
     def test_int_to_bytes(self):
