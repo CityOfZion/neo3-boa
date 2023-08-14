@@ -135,12 +135,15 @@ class NeoExpressBatch:
     def execute(self, neoxp_path: str, batch_file_path: str, reset: bool = False, check_point_file: str = None) -> str:
         with _NEOXP_BATCH_LOCK:
             self.write(batch_file_path)
-            log = utils.run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
+            log = self._run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
 
         self._transaction_logs.clear()
         self._update_logs(log)
         self._remove_commands_until_checkpoint(check_point_file)
         return log
+
+    def _run_batch(self, neoxp_path: str, batch_file_path: str, reset: bool = False, check_point_file: str = None):
+        return utils.run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
 
     def _update_logs(self, log: str):
         import re
