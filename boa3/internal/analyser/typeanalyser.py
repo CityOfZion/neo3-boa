@@ -1821,6 +1821,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 dictionary[key] = value
         return dictionary
 
+    def visit_Set(self, node: ast.Set) -> Set[Any]:
+        """
+        Visitor of literal set node. Currently, is not supported
+        """
+
+        self._log_error(
+            CompilerError.InvalidType(node.lineno, node.col_offset, 'Set')
+        )
+
+        return self.generic_visit(node)
+
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """
         Visitor of constant names node
