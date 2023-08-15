@@ -869,3 +869,7 @@ class TestClass(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_del_class(self):
+        path = self.get_contract_path('DelClass.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

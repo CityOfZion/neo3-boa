@@ -2196,3 +2196,11 @@ class TestList(BoaTest):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     # endregion
+
+    # region TestDel
+
+    def test_del_list_item(self):
+        path = self.get_contract_path('DelItem.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    # endregion

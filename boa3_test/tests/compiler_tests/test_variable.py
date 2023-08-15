@@ -954,3 +954,7 @@ class TestVariable(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_del_variable(self):
+        path = self.get_contract_path('DelVariable.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
