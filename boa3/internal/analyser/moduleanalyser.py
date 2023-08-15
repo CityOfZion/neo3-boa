@@ -1513,4 +1513,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return None
         return dictionary
 
+    def visit_Delete(self, node: ast.Delete) -> Any:
+        """
+        Visitor of delete statement node. Currently, it's not supported
+        """
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='del keyword'
+            )
+        )
+        self.generic_visit(node)
+        return node
+
     # endregion

@@ -790,3 +790,7 @@ class TestDict(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_del_dict_pair(self):
+        path = self.get_contract_path('DelPair.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
