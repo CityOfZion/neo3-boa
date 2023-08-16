@@ -1048,6 +1048,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
 
+        elif isinstance(assign.targets[0], ast.Subscript) and isinstance(assign.targets[0].slice, ast.Slice):
+            self._log_error(
+                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Assigning a value into a slice')
+            )
+
         else:
             var_type = self.visit_type(assign.value)
 
