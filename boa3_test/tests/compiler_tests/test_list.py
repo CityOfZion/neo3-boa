@@ -279,6 +279,10 @@ class TestList(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_list_set_into_list_slice(self):
+        path = self.get_contract_path('SetListIntoListSlice.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
     def test_list_set_value(self):
         path = self.get_contract_path('SetValue.py')
         self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
