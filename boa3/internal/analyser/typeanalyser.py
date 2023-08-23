@@ -372,6 +372,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             value = self.visit(value)
             if isinstance(value, ast.Name):
                 symbol: ISymbol = self.get_symbol(value.id)
+
+                # TODO: change when assign functions to variable is implemented
+                if isinstance(symbol, Method):
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(
+                            node.lineno, node.col_offset,
+                            'Assigning a function to a variable'
+                        ))
+                    return False
+
                 if isinstance(symbol, IExpression):
                     value_type = symbol.type
                 elif isinstance(symbol, IType):
