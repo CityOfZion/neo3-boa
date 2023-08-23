@@ -1287,7 +1287,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 and callable_id in attribute_symbol.instance_methods:
             callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
             self._log_error(
-                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, callable_complete_id)
+                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset,
+                                                    "Calling instance method from class: " + callable_complete_id)
             )
         elif is_from_type_name and callable_id not in attribute_type.class_symbols:
             # the current symbol doesn't exist in the class scope
