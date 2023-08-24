@@ -16,13 +16,11 @@ class Nep17:
         pass
 
     @staticmethod
-    @display_name('totalSupply')
-    def total_supply() -> int:
+    def totalSupply() -> int:
         pass
 
     @staticmethod
-    @display_name('balanceOf')
-    def balance_of(account: UInt160) -> int:
+    def balanceOf(account: UInt160) -> int:
         pass
 
     @staticmethod
@@ -42,12 +40,12 @@ def nep17_decimals() -> int:
 
 @public
 def nep17_total_supply() -> int:
-    return Nep17.total_supply()
+    return Nep17.totalSupply()
 
 
 @public
 def nep17_balance_of(account: UInt160) -> int:
-    return Nep17.balance_of(account)
+    return Nep17.balanceOf(account)
 
 
 @public
