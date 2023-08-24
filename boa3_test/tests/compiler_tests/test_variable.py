@@ -958,3 +958,7 @@ class TestVariable(BoaTest):
     def test_del_variable(self):
         path = self.get_contract_path('DelVariable.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_assign_function(self):
+        path = self.get_contract_path('AssignFunction.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
