@@ -2,12 +2,11 @@ from boa3.builtin.compile_time import NeoMetadata, metadata, public
 
 
 @public
-def Main() -> int:
+def main() -> int:
     return 5
 
 
 @metadata
-def name_manifest() -> NeoMetadata:
+def permissions_manifest() -> NeoMetadata:
     meta = NeoMetadata()
-
     return meta

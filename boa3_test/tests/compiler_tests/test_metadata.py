@@ -386,7 +386,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['trusts']), 0)
 
     def test_metadata_info_trusts_default(self):
-        path = self.get_contract_path('MetadataInfoTrustsDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('trusts', manifest)
@@ -443,7 +443,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['permissions']), 0)
 
     def test_metadata_info_permissions_default(self):
-        path = self.get_contract_path('MetadataInfoPermissionsDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('permissions', manifest)
@@ -513,13 +513,13 @@ class TestMetadata(BoaTest):
         self.assertEqual((manifest['name']), "SmartContractCustomName")
 
     def test_metadata_info_name_default(self):
-        path = self.get_contract_path('MetadataInfoNameDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('name', manifest)
         self.assertIsInstance(manifest['name'], str)
         self.assertGreater(len(manifest['name']), 0)
-        self.assertEqual((manifest['name']), "MetadataInfoNameDefault")
+        self.assertEqual((manifest['name']), "MetadataInfoDefault")
 
     def test_metadata_info_name_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoNameMismatchedType.py')
@@ -565,7 +565,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(manifest_struct_groups, result_groups)
 
     def test_metadata_info_groups_default(self):
-        path = self.get_contract_path('MetadataInfoGroupsDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('groups', manifest)
@@ -584,7 +584,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(generated_source, 'https://github.com/CityOfZion/neo3-boa')
 
     def test_metadata_info_source_default(self):
-        path = self.get_contract_path('MetadataInfoSourceDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         self.compile_and_save(path)
 
         nef_path, _ = self.get_deploy_file_paths_without_compiling(path)
