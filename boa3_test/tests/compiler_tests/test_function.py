@@ -1665,3 +1665,11 @@ class TestFunction(BoaTest):
     def test_lambda_function(self):
         path = self.get_contract_path('LambdaFunction.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_function_custom_decorator_with_global_function(self):
+        path = self.get_contract_path('CustomDecoratorWithGlobalFunction.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_function_builtin_function_decorators_with_class(self):
+        path = self.get_contract_path('BuiltinContractDecoratorWithFunction.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
