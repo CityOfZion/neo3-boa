@@ -737,8 +737,25 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         valid_decorators: List[IDecorator] = []
         for decorator in fun_decorators:
             if isinstance(decorator, IDecorator):
+                if not decorator.is_function_decorator:
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(
+                            function.lineno, function.col_offset,
+                            symbol_id=f'"{decorator.identifier}" decorator with function'
+                        )
+                    )
+
                 decorator.update_args(function.args, self._current_scope)
                 valid_decorators.append(decorator)
+
+            # TODO: remove when user-created decorators are implemented
+            elif isinstance(decorator, Method):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(
+                        function.lineno, function.col_offset,
+                        symbol_id='user-created decorators'
+                    )
+                )
 
         is_static_method = (isinstance(self._current_scope, ClassType)
                             and Builtin.StaticMethodDecorator in valid_decorators)
