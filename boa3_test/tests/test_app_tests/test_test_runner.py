@@ -117,3 +117,29 @@ class TestTestRunner(BoaTest):
             b'b': False
         })
         self.assertEqual(expected_result, result)
+
+    def test_deploy_contract_wrong_file(self):
+        path = self.get_contract_path('test_sc/generation_test', 'GenerationWithDecorator.py')
+        runner = NeoTestRunner(os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express'),
+                               runner_id=self.method_name()
+                               )
+
+        # path ends with .py, instead of .nef
+        with self.assertRaises(ValueError) as error:
+            runner.deploy_contract(path)
+        self.assertEqual('Requires a .nef file to deploy a contract', str(error.exception))
+
+        path.replace('.py', '')
+        with self.assertRaises(ValueError) as error:
+            runner.deploy_contract(path)
+        self.assertEqual('Requires a .nef file to deploy a contract', str(error.exception))
+
+    def test_deploy_contract_file_does_not_exist(self):
+        path = os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'file_does_not_exist.nef')
+        runner = NeoTestRunner(os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express'),
+                               runner_id=self.method_name()
+                               )
+
+        with self.assertRaises(FileNotFoundError) as error:
+            runner.deploy_contract(path)
+        self.assertEqual(f'Could not find file at: {path}', str(error.exception))
