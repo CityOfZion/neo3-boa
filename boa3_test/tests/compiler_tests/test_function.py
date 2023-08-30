@@ -1657,3 +1657,7 @@ class TestFunction(BoaTest):
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         self.assertEqual(invoke.result, None)
+
+    def test_inner_function(self):
+        path = self.get_contract_path('InnerFunction.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

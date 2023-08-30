@@ -191,6 +191,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             method = method.getter
 
         if isinstance(method, Method):
+            if self._current_method is not None:
+                self._log_error(
+                    CompilerError.NotSupportedOperation(line=function.lineno, col=function.col_offset,
+                                                        symbol_id="Inner function")
+                )
             self._current_method = method
             self.new_local_scope({var_id: var for var_id, var in method.symbols.items()
                                   if isinstance(var, Variable) and var.type is not UndefinedType})
