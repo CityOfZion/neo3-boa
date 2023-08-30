@@ -226,6 +226,8 @@ class NeoTestRunner:
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
             raise ValueError('Requires a .nef file to deploy a contract')
+        elif not os.path.exists(nef_path):
+            raise FileNotFoundError(f'Could not find file at: {nef_path}')
 
         if nef_path not in self._contracts:
             contract = self._batch.deploy_contract(nef_path, account)
