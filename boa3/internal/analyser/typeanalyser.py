@@ -1412,9 +1412,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 unexpected_arg = already_called_arg
             else:
                 unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
-            self._log_error(
-                CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
-            )
+
+            from boa3.internal.model.builtin.method import SuperMethod
+            if isinstance(callable_target, SuperMethod):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(unexpected_arg.lineno, unexpected_arg.col_offset, 'super with arguments')
+                )
+            else:
+                self._log_error(
+                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+                )
             return False
         elif len_call_args + len_call_keywords < callable_required_args or not all_required_arg_have_values:
             missed_arg = list(callable_target.args)[len(call.args) + ignore_first_argument]

@@ -2204,7 +2204,7 @@ class TestBuiltinMethod(BoaTest):
     def test_super_with_args(self):
         # TODO: Change when super with args is implemented
         path = self.get_contract_path('SuperWithArgs.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_super_call_method(self):
         path, _ = self.get_deploy_file_paths('SuperCallMethod.py')
