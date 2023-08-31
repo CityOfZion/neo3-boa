@@ -877,3 +877,19 @@ class TestClass(BoaTest):
     def test_del_class(self):
         path = self.get_contract_path('DelClass.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_class_property_and_parameter_with_same_name(self):
+        path, _ = self.get_deploy_file_paths('ClassPropertyAndParameterWithSameName.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'unit test'))
+        expected_results.append('unit test')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

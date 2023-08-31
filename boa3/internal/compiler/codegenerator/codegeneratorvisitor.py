@@ -134,7 +134,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 else:
                     # TODO: validate function calls
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
-                    class_type = result.type
+                    class_type = result.type if isinstance(node, ast.Attribute) else None
 
                     if (self.is_implemented_class_type(result.type)
                             and len(result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)) > 1):
@@ -146,7 +146,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     elif isinstance(result.index, Package):
                         class_type = None
 
-                    self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type if self.current_method is None else None)
+                    self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type)
 
                 result.already_generated = True
 
@@ -865,11 +865,14 @@ class VisitorCodeGenerator(IAstAnalyser):
                 VMCodeMapping.instance().bytecode_size
             )
             self.visit_to_generate(arg)
+
+        class_type = None
         if has_cls_or_self_argument:
             num_args = len(args_addresses)
             if self.generator.stack_size > num_args:
                 value = self.generator._stack_pop(-num_args - 1)
                 self.generator._stack_append(value)
+                class_type = value if isinstance(value, UserClass) else None
             end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
             if not symbol.is_init:
                 args_addresses.append(end_address)
@@ -882,7 +885,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         elif isinstance(symbol, IBuiltinMethod):
             self.generator.convert_builtin_method_call(symbol, args_addresses)
         else:
-            self.generator.convert_load_symbol(function_id, args_addresses)
+            self.generator.convert_load_symbol(function_id, args_addresses,
+                                               class_type=class_type)
 
         return self.build_data(call, symbol=symbol, symbol_id=function_id,
                                result_type=symbol.type if isinstance(symbol, IExpression) else symbol,
@@ -1077,6 +1081,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 return self.build_data(attribute,
                                        symbol_id=symbol_id, symbol=symbol,
                                        result_type=result_type, index=symbol_index,
+                                       origin_object_type=value_type,
                                        already_generated=generated)
 
         if value_data is not None and value_symbol is None:
