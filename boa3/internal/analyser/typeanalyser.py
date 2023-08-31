@@ -1144,6 +1144,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id: str = call.func.id
             is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
             callable_target = self.get_symbol(callable_id, is_internal)
+        elif isinstance(call.func, ast.Lambda):
+            self._log_error(
+                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, 'lambda function')
+            )
         else:
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
