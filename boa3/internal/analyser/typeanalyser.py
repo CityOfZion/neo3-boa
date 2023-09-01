@@ -1896,3 +1896,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         return slice_node.lower, slice_node.upper, slice_node.step
+
+    def visit_JoinedStr(self, fstring_node: ast.JoinedStr) -> str:
+        """
+        Visitor of an f-string node
+
+        :param fstring_node:
+        :return: the object with the index value information
+        """
+        self._log_error(
+            CompilerError.NotSupportedOperation(fstring_node.lineno, fstring_node.col_offset, 'f-string')
+        )
+
+        return self.generic_visit(fstring_node)
