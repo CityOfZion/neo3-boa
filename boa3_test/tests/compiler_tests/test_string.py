@@ -1476,3 +1476,7 @@ class TestString(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_formatted_string_literal(self):
+        path = self.get_contract_path('FormattedStringLiteral.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
