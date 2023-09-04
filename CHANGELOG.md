@@ -6,10 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-
+- `to_hex_str` method to convert `bytes` into printable strings
 
 ### Changed
-
+- Validate if given `.nef` files exists before running TestRunner
 
 ### Deprecated
 
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
-
+- Removed incorrect requirement of `filelock` to use NeoTestRunner class
 
 ## [1.0.0] - 2023-07-10
 ### Added
