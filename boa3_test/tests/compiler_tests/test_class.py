@@ -473,6 +473,10 @@ class TestClass(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    def test_user_class_with_instance_method_from_class(self):
+        path = self.get_contract_path('UserClassWithInstanceMethodFromClass.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
     def test_user_class_with_instance_variable_from_class(self):
         path = self.get_contract_path('UserClassWithInstanceVariableFromClass.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
