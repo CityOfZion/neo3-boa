@@ -1494,9 +1494,6 @@ class CodeGenerator:
         :param symbol_id: the symbol identifier
         :param params_addresses: a list with each function arguments' first addresses
         """
-        if class_type is None and len(self._stack) > 0 and isinstance(self._stack[-1], UserClass):
-            class_type = self._stack[-1]
-
         another_symbol_id, symbol = self.get_symbol(symbol_id, is_internal=is_internal)
 
         if class_type is not None and symbol_id in class_type.symbols:
