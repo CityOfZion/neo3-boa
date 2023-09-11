@@ -700,9 +700,7 @@ class TestVariable(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_global_variable_same_id_different_scopes(self):
-        path = self.get_contract_path('GetGlobalSameIdFromImport.py')
-        self.compile_and_save(path, debug=True)
-        path, _ = self.get_deploy_file_paths(path)
+        path, _ = self.get_deploy_file_paths('GetGlobalSameIdFromImport.py')
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
