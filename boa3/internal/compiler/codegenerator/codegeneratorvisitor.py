@@ -235,6 +235,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                             global_stmts.remove(cls_fun)
 
                         class_non_static_stmts.append(cls_fun)
+                    self.symbols = last_symbols  # don't use inner scopes to evaluate the other globals
 
             # to generate the 'initialize' method for Neo
             self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")

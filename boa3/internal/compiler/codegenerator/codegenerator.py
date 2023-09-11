@@ -341,15 +341,6 @@ class CodeGenerator:
             result_global_vars = result_global_vars + [classes for (class_id, classes) in class_with_class_variables]
             result = module_global_ids + class_with_variables_ids
 
-        original_ids = []
-        for value in result:
-            split = value.split(constants.VARIABLE_NAME_SEPARATOR)
-            if len(split) > 1:
-                new_index = split[-1]
-            else:
-                new_index = value
-            original_ids.append(new_index)
-
         if vars_map != result_map:
             if vars_map is None:
                 # save to keep the same order in future accesses
@@ -360,17 +351,39 @@ class CodeGenerator:
 
             else:
                 # reorder to keep the same order as the first access
-                pre_reordered_ids = [var_id for (var_id, var) in vars_map]
-                for index, (value, var) in enumerate(vars_map):
-                    if value not in result:
-                        if var in result_global_vars:
-                            var_index = result_global_vars.index(var)
-                            new_value = result_map[var_index]
+                if len(result_map) > len(vars_map):
+                    additional_items = []
+                    vars_list = [var for var_id, var in vars_map]
+                    for index, var in enumerate(result_global_vars):
+                        if var in vars_list:
+                            var_index = vars_list.index(var)
+                            vars_map[var_index] = result_map[index]
                         else:
-                            var_index = original_ids.index(value)
-                            new_value = result_map[var_index]
+                            additional_items.append(result_map[index])
+                    vars_map.extend(additional_items)
 
-                        vars_map[index] = new_value
+                    pre_reordered_ids = [var_id for (var_id, var) in vars_map]
+                else:
+                    original_ids = []
+                    for value in result:
+                        split = value.split(constants.VARIABLE_NAME_SEPARATOR)
+                        if len(split) > 1:
+                            new_index = split[-1]
+                        else:
+                            new_index = value
+                        original_ids.append(new_index)
+
+                    pre_reordered_ids = [var_id for (var_id, var) in vars_map]
+                    for index, (value, var) in enumerate(vars_map):
+                        if value not in result:
+                            if var in result_global_vars:
+                                var_index = result_global_vars.index(var)
+                                new_value = result_map[var_index]
+                            else:
+                                var_index = original_ids.index(value)
+                                new_value = result_map[var_index]
+
+                            vars_map[index] = new_value
 
                 # add new symbols at the end always
                 reordered_ids = [var_id for (var_id, var) in vars_map]
