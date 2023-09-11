@@ -69,61 +69,85 @@ class StandardAnalyser(IAstAnalyser):
         try:
             for standard in self.standards:
                 if standard in supportedstandard.neo_standards:
-                    current_standard = supportedstandard.neo_standards[standard]
+                    standard_is_correct = False
+                    errors = []
 
-                    # validate standard's methods
-                    for standard_method in current_standard.methods:
-                        method_id = standard_method.external_name
-                        is_implemented = False
+                    for current_standard in supportedstandard.neo_standards[standard]:
+                        check_next_standard = False
 
-                        found_methods = self.get_methods_by_display_name(method_id)
-                        for method in found_methods:
-                            if isinstance(method, Method) and current_standard.match_definition(standard_method, method):
-                                is_implemented = True
+                        # validate standard's methods
+                        for standard_method in current_standard.methods:
+                            method_id = standard_method.external_name
+                            is_implemented = False
+
+                            found_methods = self.get_methods_by_display_name(method_id)
+                            for method in found_methods:
+                                if isinstance(method, Method) and current_standard.match_definition(standard_method, method):
+                                    is_implemented = True
+                                    break
+
+                            if not is_implemented:
+                                errors.append(CompilerError.MissingStandardDefinition(standard, method_id, standard_method))
+                                check_next_standard = True
                                 break
 
-                        if not is_implemented:
-                            self._log_error(
-                                CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
-                            )
+                        if check_next_standard:
+                            continue
 
-                    # validate standard's events
-                    events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
-                    # imported events should be included in the validation
-                    for import_ in self._analyser.get_imports():
-                        events.extend([event for event in import_.symbol_table.values()
-                                       if isinstance(event, Event) and event not in events])
+                        # validate standard's events
+                        events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
+                        # imported events should be included in the validation
+                        for import_ in self._analyser.get_imports():
+                            events.extend([event for event in import_.symbol_table.values()
+                                           if isinstance(event, Event) and event not in events])
 
-                    for standard_event in current_standard.events:
-                        is_implemented = False
-                        for event in events:
-                            if (event.name == standard_event.name
-                                    and current_standard.match_definition(standard_event, event)):
-                                is_implemented = True
+                        for standard_event in current_standard.events:
+                            is_implemented = False
+                            for event in events:
+                                if (event.name == standard_event.name
+                                        and current_standard.match_definition(standard_event, event)):
+                                    is_implemented = True
+                                    break
+
+                            if not is_implemented:
+                                errors.append(
+                                    CompilerError.MissingStandardDefinition(standard,
+                                                                            standard_event.name,
+                                                                            standard_event)
+                                )
+                                check_next_standard = True
                                 break
 
-                        if not is_implemented:
-                            self._log_error(
-                                CompilerError.MissingStandardDefinition(standard,
-                                                                        standard_event.name,
-                                                                        standard_event)
-                            )
+                        if check_next_standard:
+                            continue
 
-                    # validate optional methods
-                    for optional_method in current_standard.optionals:
-                        method_id = optional_method.external_name
-                        is_implemented = False
+                        # validate optional methods
+                        for optional_method in current_standard.optionals:
+                            method_id = optional_method.external_name
+                            is_implemented = False
 
-                        found_methods = self.get_methods_by_display_name(method_id)
-                        for method in found_methods:
-                            if isinstance(method, Method) and current_standard.match_definition(optional_method, method):
-                                is_implemented = True
+                            found_methods = self.get_methods_by_display_name(method_id)
+                            for method in found_methods:
+                                if isinstance(method, Method) and current_standard.match_definition(optional_method, method):
+                                    is_implemented = True
+                                    break
+
+                            if found_methods and not is_implemented:
+                                errors.append(
+                                    CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
+                                )
+                                check_next_standard = True
                                 break
 
-                        if found_methods and not is_implemented:
-                            self._log_error(
-                                CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
-                            )
+                        if check_next_standard:
+                            continue
+
+                        standard_is_correct = True
+
+                    if not standard_is_correct:
+                        for error in errors:
+                            self._log_error(error)
+
         except CompilerError.CompilerError:
             # stops the analyser if fail fast is activated
             pass
@@ -142,39 +166,40 @@ class StandardAnalyser(IAstAnalyser):
 
         # verify if the methods and events that were implemented corresponds to a standard
         for standard in other_standards:
+            for current_standard in other_standards[standard]:
+                # verify the methods
+                methods_implemented = True
+                standard_methods = current_standard.methods
+                index = 0
 
-            # verify the methods
-            methods_implemented = True
-            standard_methods = other_standards[standard].methods
-            index = 0
+                while methods_implemented and index < len(standard_methods):
+                    standard_method = standard_methods[index]
+                    method_id = standard_method.external_name
+                    found_methods = self.get_methods_by_display_name(method_id)
 
-            while methods_implemented and index < len(standard_methods):
-                standard_method = standard_methods[index]
-                method_id = standard_method.external_name
-                found_methods = self.get_methods_by_display_name(method_id)
+                    methods_implemented = any(
+                        current_standard.match_definition(standard_method, method) for method in found_methods
+                    )
+                    index += 1
 
-                methods_implemented = any(
-                    other_standards[standard].match_definition(standard_method, method) for method in found_methods
-                )
-                index += 1
+                if not methods_implemented:
+                    continue    # if even one of the methods was not implemented, then check the next standard
 
-            if not methods_implemented:
-                continue    # if even one of the methods was not implemented, then check the next standard
+                # verify the events
+                events_implemented = True
+                standard_events = current_standard.events
+                index = 0
 
-            # verify the events
-            events_implemented = True
-            standard_events = other_standards[standard].events
-            index = 0
+                while events_implemented and index < len(standard_events):
+                    standard_event = standard_events[index]
+                    events_implemented = any(
+                        (event.name == standard_event.name and
+                         current_standard.match_definition(standard_event, event)) for event in events
+                    )
+                    index += 1
 
-            while events_implemented and index < len(standard_events):
-                standard_event = standard_events[index]
-                events_implemented = any(
-                    (event.name == standard_event.name and
-                     other_standards[standard].match_definition(standard_event, event)) for event in events
-                )
-                index += 1
+                if not events_implemented:
+                    continue    # if even one of the events was not implemented, then check the next standard
 
-            if not events_implemented:
-                continue    # if even one of the events was not implemented, then check the next standard
-
-            self.standards.append(standard)
+                self.standards.append(standard)
+                break
