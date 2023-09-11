@@ -699,6 +699,25 @@ class TestVariable(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    def test_global_variable_same_id_different_scopes(self):
+        path, _ = self.get_deploy_file_paths('GetGlobalSameIdFromImport.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'value_from_script'))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'value_from_import'))
+        expected_results.append([1, 2, 3, 4])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
     def test_get_global_variable_value_written_after(self):
         expected_output = (
             Opcode.LDSFLD + b'\x07'
