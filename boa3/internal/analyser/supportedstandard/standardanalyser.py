@@ -69,11 +69,13 @@ class StandardAnalyser(IAstAnalyser):
         try:
             for standard in self.standards:
                 if standard in supportedstandard.neo_standards:
-                    standard_is_correct = False
-                    errors = []
+                    standard_was_found = False
+                    standard_errors = {}
 
-                    for current_standard in supportedstandard.neo_standards[standard]:
-                        check_next_standard = False
+                    standard_index = 0
+                    while standard_index < len(supportedstandard.neo_standards[standard]) and not standard_was_found:
+                        current_standard = supportedstandard.neo_standards[standard][standard_index]
+                        current_standard_errors = []
 
                         # validate standard's methods
                         for standard_method in current_standard.methods:
@@ -87,12 +89,9 @@ class StandardAnalyser(IAstAnalyser):
                                     break
 
                             if not is_implemented:
-                                errors.append(CompilerError.MissingStandardDefinition(standard, method_id, standard_method))
-                                check_next_standard = True
-                                break
-
-                        if check_next_standard:
-                            continue
+                                current_standard_errors.append(
+                                    CompilerError.MissingStandardDefinition(standard, method_id, standard_method)
+                                )
 
                         # validate standard's events
                         events = [symbol for symbol in self.symbols.values() if isinstance(symbol, Event)]
@@ -110,16 +109,11 @@ class StandardAnalyser(IAstAnalyser):
                                     break
 
                             if not is_implemented:
-                                errors.append(
+                                current_standard_errors.append(
                                     CompilerError.MissingStandardDefinition(standard,
                                                                             standard_event.name,
                                                                             standard_event)
                                 )
-                                check_next_standard = True
-                                break
-
-                        if check_next_standard:
-                            continue
 
                         # validate optional methods
                         for optional_method in current_standard.optionals:
@@ -133,19 +127,16 @@ class StandardAnalyser(IAstAnalyser):
                                     break
 
                             if found_methods and not is_implemented:
-                                errors.append(
+                                current_standard_errors.append(
                                     CompilerError.MissingStandardDefinition(standard, method_id, optional_method)
                                 )
-                                check_next_standard = True
-                                break
 
-                        if check_next_standard:
-                            continue
+                        standard_errors[standard_index] = current_standard_errors
+                        standard_was_found = len(current_standard_errors) == 0
+                        standard_index += 1
 
-                        standard_is_correct = True
-
-                    if not standard_is_correct:
-                        for error in errors:
+                    if not standard_was_found:
+                        for error in standard_errors[0]:
                             self._log_error(error)
 
         except CompilerError.CompilerError:
