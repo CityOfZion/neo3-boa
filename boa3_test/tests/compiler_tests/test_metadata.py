@@ -280,12 +280,56 @@ class TestMetadata(BoaTest):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
 
+    def test_metadata_info_supported_standards_nep11_divisible(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11Divisible.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_nep11_divisible_optional_methods(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11DivisibleOptionalMethods.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_nep11_non_divisible(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11NonDivisible.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_nep11_non_divisible_optional_methods(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11NonDivisibleOptionalMethods.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
     def test_metadata_info_supported_standards_missing_implementations_nep11(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP11.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
 
+    def test_metadata_info_supported_standards_missing_implementations_nep11_divisible(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP11Divisible.py')
+        self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
+
     def test_metadata_info_supported_standards_missing_implementations_nep11_optional_method(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP11OptionalMethods.py')
+        self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
+
+    def test_metadata_info_supported_standards_missing_event_nep11(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsMissingEventNEP11.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
 
     def test_metadata_info_supported_standards_mismatched_type(self):

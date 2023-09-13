@@ -6,7 +6,7 @@ from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.internal.model.type.type import Type
 
 
-class Nep11Standard(INeoStandard):
+class Nep11DivisibleStandard(INeoStandard):
     def __init__(self):
         type_uint160 = UInt160Type.build()
         type_iterator = IteratorType.build()
@@ -34,9 +34,23 @@ class Nep11Standard(INeoStandard):
                                  'data': Type.any},
                            return_type=Type.bool,
                            literal_implementation=False),
+            # exclusive divisible methods below
+            StandardMethod('transfer',
+                           args={'from': type_uint160,
+                                 'to': type_uint160,
+                                 'amount': Type.int,
+                                 'tokenId': type_token_id,
+                                 'data': Type.any},
+                           return_type=Type.bool,
+                           literal_implementation=False),
             StandardMethod('ownerOf', safe=True,
                            args={'tokenId': type_token_id},
-                           return_type=type_uint160,
+                           return_type=type_iterator,
+                           literal_implementation=False),
+            StandardMethod('balanceOf', safe=True,
+                           args={'owner': type_uint160,
+                                 'tokenId': type_token_id},
+                           return_type=Type.int,
                            literal_implementation=False),
         ]
 
