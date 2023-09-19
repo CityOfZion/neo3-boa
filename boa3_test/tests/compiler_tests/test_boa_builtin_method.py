@@ -2,6 +2,10 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
@@ -31,24 +35,54 @@ class TestBoaBuiltinMethod(BoaTest):
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
 
     def test_abort_with_message(self):
-        path, _ = self.get_deploy_file_paths('AbortWithMessage.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        assert_msg = String('abort was called').to_bytes()
+        number_123 = Integer(123).to_byte_array(signed=True, min_length=1)
 
-        runner.deploy_contract(path)
-        runner.update_contracts()
-        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
-        # TODO: refactor in #864ea8yf8 - this will fail in any Neo version prior to 3.6
-        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # if check:
+            + Opcode.PUSH5
+            + Opcode.PUSHDATA1
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg
+            + Opcode.ABORTMSG   # abort('abort was called')
+            + Opcode.PUSHINT8
+            + number_123        # return 123
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AbortWithMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_abort_with_optional_message(self):
-        path, _ = self.get_deploy_file_paths('AbortWithOptionalMessage.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        number_123 = Integer(123).to_byte_array(signed=True, min_length=1)
 
-        runner.deploy_contract(path)
-        runner.update_contracts()
-        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
-        # TODO: refactor in #864ea8yf8 - this will fail in any Neo version prior to 3.6
-        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # if check:
+            + Integer(11).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDARG1
+            + Opcode.DUP
+            + Opcode.ISTYPE + StackItemType.ByteString
+            + Opcode.JMPIF
+            + Integer(3).to_byte_array(signed=True, min_length=1)
+            + Opcode.ABORT
+            + Opcode.ABORTMSG   # abort('abort was called')
+            + Opcode.DROP
+            + Opcode.PUSHINT8
+            + number_123        # return 123
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AbortWithOptionalMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_env(self):
         path = self.get_contract_path('Env.py')

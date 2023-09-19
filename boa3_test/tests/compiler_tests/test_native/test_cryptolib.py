@@ -309,3 +309,92 @@ class TestCryptoLibClass(BoaTest):
         path = self.get_contract_path('Murmur32.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_bls12_381_add(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Add.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_deserialize(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Deserialize.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_equal(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Equal.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_mul(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.PUSHT
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Mul.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_pairing(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Pairing.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_serialize(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Serialize.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)

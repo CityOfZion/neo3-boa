@@ -12,7 +12,7 @@ class Bls12381EqualMethod(CryptoLibMethod):
         identifier = 'bls12_381_equal'
         native_identifier = 'bls12381Equal'
         args: Dict[str, Variable] = {
-            'x': Variable(Type.bytes),
-            'y': Variable(Type.bytes),
+            'x': Variable(Type.any),
+            'y': Variable(Type.any),
         }
         super().__init__(identifier, native_identifier, args, return_type=Type.bool)

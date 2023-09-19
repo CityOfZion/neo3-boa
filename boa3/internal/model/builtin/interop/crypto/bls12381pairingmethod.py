@@ -12,7 +12,7 @@ class Bls12381PairingMethod(CryptoLibMethod):
         identifier = 'bls12_381_pairing'
         native_identifier = 'bls12381Pairing'
         args: Dict[str, Variable] = {
-            'g1': Variable(Type.bytes),
-            'g2': Variable(Type.bytes),
+            'g1': Variable(Type.any),
+            'g2': Variable(Type.any),
         }
-        super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
+        super().__init__(identifier, native_identifier, args, return_type=Type.any)

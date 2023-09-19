@@ -165,7 +165,7 @@ def murmur32(data: bytes, seed: int) -> bytes:
     pass
 
 
-def bls12_381_add(x: bytes, y: bytes) -> bytes:
+def bls12_381_add(x: Any, y: Any) -> Any:
     """
     Add operation of two bls12381 points.
 
@@ -179,7 +179,7 @@ def bls12_381_add(x: bytes, y: bytes) -> bytes:
     pass
 
 
-def bls12_381_deserialize(data: bytes) -> bytes:
+def bls12_381_deserialize(data: bytes) -> Any:
     """
     Deserialize a bls12381 point.
 
@@ -191,7 +191,7 @@ def bls12_381_deserialize(data: bytes) -> bytes:
     pass
 
 
-def bls12_381_equal(x: bytes, y: bytes) -> bool:
+def bls12_381_equal(x: Any, y: Any) -> bool:
     """
     Determines whether the specified points are equal.
 
@@ -205,7 +205,7 @@ def bls12_381_equal(x: bytes, y: bytes) -> bool:
     pass
 
 
-def bls12_381_mul(x: bytes, mul: int, neg: bool) -> bytes:
+def bls12_381_mul(x: Any, mul: bytes, neg: bool) -> Any:
     """
     Mul operation of gt point and multiplier.
 
@@ -221,7 +221,7 @@ def bls12_381_mul(x: bytes, mul: int, neg: bool) -> bytes:
     pass
 
 
-def bls12_381_pairing(g1: bytes, g2: bytes) -> bytes:
+def bls12_381_pairing(g1: Any, g2: Any) -> Any:
     """
     Pairing operation of g1 and g2.
 
@@ -235,7 +235,7 @@ def bls12_381_pairing(g1: bytes, g2: bytes) -> bytes:
     pass
 
 
-def bls12_381_serialize(g: bytes) -> bytes:
+def bls12_381_serialize(g: Any) -> bytes:
     """
     Serialize a bls12381 point.
 
