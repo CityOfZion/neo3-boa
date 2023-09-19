@@ -1,9 +1,9 @@
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import bls12_381_pairing
+from boa3.builtin.nativecontract.cryptolib import CryptoLib
 
 
 @public
 def main(g1: Any, g2: Any) -> Any:
-    return bls12_381_pairing(g1, g2)
+    return CryptoLib.bls12_381_add(g1, g2)

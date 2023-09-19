@@ -1,3 +1,4 @@
+from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
@@ -85,22 +86,46 @@ class TestAssert(BoaTest):
         self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
     def test_assert_with_message(self):
-        path, _ = self.get_deploy_file_paths('AssertWithMessage.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        assert_msg = String('a must be greater than zero').to_bytes()
 
-        runner.deploy_contract(path)
-        runner.update_contracts()
-        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH0
+            + Opcode.GT
+            + Opcode.PUSHDATA1  # assert a > 0, 'a must be greater than zero'
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg
+            + Opcode.ASSERTMSG
+            + Opcode.LDARG0     # return a
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AssertWithMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_assert_with_bytes_message(self):
-        path, _ = self.get_deploy_file_paths('AssertWithBytesMessage.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        assert_msg = String('a must be greater than zero').to_bytes()
 
-        runner.deploy_contract(path)
-        runner.update_contracts()
-        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH0
+            + Opcode.GT
+            + Opcode.PUSHDATA1  # assert a > 0, b'a must be greater than zero'
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg
+            + Opcode.ASSERTMSG
+            + Opcode.LDARG0     # return a
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AssertWithBytesMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_assert_with_int_message(self):
         path = self.get_contract_path('AssertWithIntMessage.py')
@@ -115,22 +140,52 @@ class TestAssert(BoaTest):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_assert_with_str_var_message(self):
-        path, _ = self.get_deploy_file_paths('AssertWithStrVarMessage.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        assert_msg = String('a must be greater than zero').to_bytes()
 
-        runner.deploy_contract(path)
-        runner.update_contracts()
-        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x01'
+            + Opcode.PUSHDATA1
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg
+            + Opcode.STLOC0
+            + Opcode.LDARG0
+            + Opcode.PUSH0
+            + Opcode.GT
+            + Opcode.PUSHDATA1
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg  # assert a > 0, 'a must be greater than zero'
+            + Opcode.ASSERTMSG
+            + Opcode.LDARG0     # return a
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AssertWithStrVarMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_assert_with_str_function_message(self):
-        path, _ = self.get_deploy_file_paths('AssertWithStrFunctionMessage.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        assert_msg = String('a must be greater than zero').to_bytes()
 
-        runner.deploy_contract(path)
-        runner.update_contracts()
-        self.assertEqual(VMState.NONE, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.cli_log, self.BAD_SCRIPT_EXCEPTION_MSG)
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.PUSH0
+            + Opcode.GT
+            + Opcode.CALL
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.ASSERTMSG
+            + Opcode.LDARG0     # return a
+            + Opcode.RET
+            + Opcode.PUSHDATA1
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg  # assert a > 0, 'a must be greater than zero'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AssertWithStrFunctionMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
 
     def test_assert_int(self):
         expected_output = (

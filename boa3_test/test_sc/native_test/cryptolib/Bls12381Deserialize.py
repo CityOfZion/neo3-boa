@@ -1,9 +1,9 @@
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import bls12_381_deserialize
+from boa3.builtin.nativecontract.cryptolib import CryptoLib
 
 
 @public
 def main(data: bytes) -> Any:
-    return bls12_381_deserialize(data)
+    return CryptoLib.bls12_381_deserialize(data)

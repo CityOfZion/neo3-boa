@@ -12,7 +12,7 @@ class Bls12381AddMethod(CryptoLibMethod):
         identifier = 'bls12_381_add'
         native_identifier = 'bls12381Add'
         args: Dict[str, Variable] = {
-            'x': Variable(Type.bytes),
-            'y': Variable(Type.bytes),
+            'x': Variable(Type.any),
+            'y': Variable(Type.any),
         }
-        super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
+        super().__init__(identifier, native_identifier, args, return_type=Type.any)
