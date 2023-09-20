@@ -12,8 +12,8 @@ class Bls12381MulMethod(CryptoLibMethod):
         identifier = 'bls12_381_mul'
         native_identifier = 'bls12381Mul'
         args: Dict[str, Variable] = {
-            'x': Variable(Type.bytes),
-            'mul': Variable(Type.int),
+            'x': Variable(Type.any),
+            'mul': Variable(Type.bytes),
             'neg': Variable(Type.bool),
         }
-        super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
+        super().__init__(identifier, native_identifier, args, return_type=Type.any)

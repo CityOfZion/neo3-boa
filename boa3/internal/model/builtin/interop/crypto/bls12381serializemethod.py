@@ -12,6 +12,6 @@ class Bls12381SerializeMethod(CryptoLibMethod):
         identifier = 'bls12_381_serialize'
         native_identifier = 'bls12381Serialize'
         args: Dict[str, Variable] = {
-            'g': Variable(Type.bytes),
+            'g': Variable(Type.any),
         }
         super().__init__(identifier, native_identifier, args, return_type=Type.bytes)

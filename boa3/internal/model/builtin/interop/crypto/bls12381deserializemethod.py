@@ -14,4 +14,4 @@ class Bls12381DeserializeMethod(CryptoLibMethod):
         args: Dict[str, Variable] = {
             'data': Variable(Type.bytes),
         }
-        super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
+        super().__init__(identifier, native_identifier, args, return_type=Type.any)
