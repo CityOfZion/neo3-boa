@@ -137,6 +137,8 @@ class Interop:
 
     # Iterator Interops
     IteratorCreate = IteratorMethod(Iterator)
+    IteratorNext = IteratorNextMethod()
+    IteratorValue = IteratorValueMethod(Iterator)
 
     # Json Interops
     JsonDeserialize = JsonDeserializeMethod()

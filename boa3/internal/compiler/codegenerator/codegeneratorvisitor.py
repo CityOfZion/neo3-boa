@@ -11,7 +11,6 @@ from boa3.internal.compiler.codegenerator.variablegenerationdata import Variable
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.constants import SYS_VERSION_INFO
 from boa3.internal.model.builtin.builtin import Builtin
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.imports.package import Package

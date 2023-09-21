@@ -614,12 +614,21 @@ class CodeGenerator:
 
         :return: the address of the for first opcode
         """
-        self.convert_literal(0)
+        is_neo_iterator = len(self._stack) > 0 and Interop.Iterator.is_type_of(self._stack[-1])
+        if is_neo_iterator:
+            self.duplicate_stack_top_item()
+        else:
+            self.convert_literal(0)
+
         address = self.convert_begin_while(True)
 
-        self.duplicate_stack_item(2)  # duplicate for sequence
-        self.duplicate_stack_item(2)  # duplicate for index
-        self.convert_get_item()
+        if is_neo_iterator:
+            self.duplicate_stack_top_item()
+            self.convert_builtin_method_call(Interop.IteratorValue)
+        else:
+            self.duplicate_stack_item(2)  # duplicate for sequence
+            self.duplicate_stack_item(2)  # duplicate for index
+            self.convert_get_item()
         return address
 
     def convert_end_for(self, start_address: int, is_internal: bool = False) -> int:
@@ -630,17 +639,24 @@ class CodeGenerator:
         :param is_internal: whether it was called when generating other implemented symbols
         :return: the address of the loop condition
         """
-        self.__insert1(OpcodeInfo.INC)      # index += 1
-        if len(self._stack) < 1 or self._stack[-1] is not Type.int:
-            self._stack_append(Type.int)
+        is_neo_iterator = len(self._stack) > 0 and Interop.Iterator.is_type_of(self._stack[-1])
+        if not is_neo_iterator:
+            self.__insert1(OpcodeInfo.INC)      # index += 1
+            if len(self._stack) < 1 or self._stack[-1] is not Type.int:
+                self._stack_append(Type.int)
+
         for_increment = self.last_code_start_address
         test_address = VMCodeMapping.instance().bytecode_size
         self._update_continue_jumps(start_address, for_increment)
 
-        self.duplicate_stack_top_item()     # dup index and sequence
-        self.duplicate_stack_item(3)
-        self.convert_builtin_method_call(Builtin.Len)
-        self.convert_operation(BinaryOp.Lt)  # continue loop condition: index < len(sequence)
+        if is_neo_iterator:
+            self.duplicate_stack_top_item()
+            self.convert_builtin_method_call(Interop.IteratorNext)
+        else:
+            self.duplicate_stack_top_item()     # dup index and sequence
+            self.duplicate_stack_item(3)
+            self.convert_builtin_method_call(Builtin.Len)
+            self.convert_operation(BinaryOp.Lt)  # continue loop condition: index < len(sequence)
 
         self.convert_end_loop(start_address, test_address, True, is_internal=is_internal)
 
