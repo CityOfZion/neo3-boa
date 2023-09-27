@@ -3,6 +3,8 @@ import shutil
 import subprocess
 import sys
 
+__version__ = '1.0.1'
+
 docs_dir = os.path.abspath(f'{__file__}/..')
 latex_build_dir = os.sep.join([docs_dir, 'build', 'latex'])
 if os.path.isdir(latex_build_dir):
@@ -33,19 +35,7 @@ output_pdf = os.sep.join([latex_build_dir, 'neo3-boa.pdf'])
 if not os.path.isfile(output_pdf):
     raise ValueError
 
-
-project_root = os.path.abspath(f'{docs_dir}/..')
-is_in_path = project_root in sys.path
-if is_in_path:
-    import boa3
-    current_version = boa3.__version__
-else:
-    sys.path.append(project_root)
-    import boa3
-    current_version = boa3.__version__
-    sys.path.pop()
-
-expected_output_file = os.sep.join([docs_dir, 'versions', f'neo3-boa_{current_version}_documentation.pdf'])
+expected_output_file = os.sep.join([docs_dir, 'versions', f'neo3-boa_{__version__}_documentation.pdf'])
 shutil.copy(output_pdf, expected_output_file)
 
 common_path = os.path.commonpath([os.path.abspath('.'), expected_output_file])
