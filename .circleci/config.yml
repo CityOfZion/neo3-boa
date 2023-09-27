@@ -112,6 +112,7 @@ jobs:
         - run:
             name: Install Dependencies
             command: |
+              apt-get install latexmk
               pip install -r requirements_dev.txt
 
         - run:
