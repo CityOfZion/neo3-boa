@@ -13,6 +13,9 @@ executors:
   python310-executor:
     docker:
       - image: cimg/python:3.10.7
+  python311-executor:
+    docker:
+      - image: cimg/python:3.11.5
 
 orbs:
   python: circleci/python@0.2.1
@@ -62,6 +65,10 @@ jobs:
   unit-test-310:
     <<: *unit-test
     executor: python310-executor
+
+  unit-test-311:
+    <<: *unit-test
+    executor: python311-executor
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
@@ -146,6 +153,10 @@ workflows:
          filters:
            tags:
              only: /.*/
+      - unit-test-311:
+         filters:
+           tags:
+             only: /.*/
       - build_deploy_test:
          context: pypi_test
          requires:
@@ -153,6 +164,7 @@ workflows:
            - unit-test-38
            - unit-test-39
            - unit-test-310
+           - unit-test-311
          filters:
            tags:
              only: /^v.*/
