@@ -152,10 +152,11 @@ htmlhelp_basename = 'neo3-boadoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
+# latex_engine = 'lualatex'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
-    # 'papersize': 'letterpaper',
+    'papersize': 'letterpaper',
 
     # The font size ('10pt', '11pt' or '12pt').
     #
@@ -163,20 +164,25 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
+    # 'preamble': r'\usepackage{fontspec}',
+    'preamble': r'''
+\renewcommand{\hyperref}[2][]{#2}
+''',
 
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
+
+    'extraclassoptions': 'openany'
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-# latex_documents = [
-#     (master_doc, 'neo3-boa.tex', 'neo3-boa Documentation',
-#      'CoZ', 'manual'),
-# ]
+latex_documents = [
+    (master_doc, 'neo3-boa.tex', 'neo3-boa Documentation',
+     'CoZ', 'manual', True),
+]
 
 
 # -- Options for manual page output ---------------------------------------
