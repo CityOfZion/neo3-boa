@@ -44,21 +44,17 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
                     break
 
             if to_script_hash is not None:
-                from boa3.internal.constants import SYS_VERSION_INFO
                 from boa3.internal.model.type.type import Type
                 types = {
                     Type.int.identifier: int,
                     Type.str.identifier: str,
                     Type.bytes.identifier: bytes
                 }
-                literal: tuple = ((ast.Constant,)
-                                  if SYS_VERSION_INFO >= (3, 8)
-                                  else (ast.Num, ast.Str, ast.Bytes))
 
                 if len(call.args) != 1:
                     return call
 
-                if isinstance(call.args[0], literal):
+                if isinstance(call.args[0], ast.Constant):
                     value = ast.literal_eval(call.args[0])
                     if not isinstance(value, tuple(types.values())):
                         return call

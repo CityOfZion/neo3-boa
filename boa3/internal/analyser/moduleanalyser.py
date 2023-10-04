@@ -856,15 +856,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._scope_stack.append(SymbolScope())
 
         # don't evaluate constant expression - for example: string for documentation
-        from boa3.internal.constants import SYS_VERSION_INFO
-        if SYS_VERSION_INFO >= (3, 8):
-            function.body = [stmt for stmt in function.body
-                             if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
-        else:
-            function.body = [stmt for stmt in function.body
-                             if not (isinstance(stmt, ast.Expr) and
-                                     (hasattr(stmt.value, 'n') or hasattr(stmt.value, 's'))
-                                     )]
+        function.body = [stmt for stmt in function.body
+                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
 
         if isinstance(self._current_class, ClassType):
             method.origin_class = self._current_class
