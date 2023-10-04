@@ -9,7 +9,6 @@ from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
-from boa3.internal.constants import SYS_VERSION_INFO
 from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -1012,8 +1011,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self._remove_inserted_opcodes_since(last_address, last_stack)
 
         # the verification above only verify variables, this one will should work with literals and constants
-        if isinstance(value, (ast.Constant if SYS_VERSION_INFO >= (3, 8) else (ast.Num, ast.Str, ast.Bytes))) \
-                and len(attr.args) > 0 and isinstance(attr, IBuiltinMethod) and attr.has_self_argument:
+        if isinstance(value, ast.Constant) and len(attr.args) > 0 and isinstance(attr, IBuiltinMethod) and attr.has_self_argument:
             attr = attr.build(value_data.type)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
