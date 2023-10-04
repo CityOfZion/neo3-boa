@@ -1,15 +1,6 @@
 version: 2.1
 
 executors:
-  python37-executor:
-    docker:
-      - image: cimg/python:3.7.14
-  python38-executor:
-    docker:
-      - image: cimg/python:3.8.14
-  python39-executor:
-    docker:
-      - image: cimg/python:3.9.14
   python310-executor:
     docker:
       - image: cimg/python:3.10.7
@@ -18,9 +9,9 @@ orbs:
   python: circleci/python@0.2.1
 
 jobs:
-  unit-test-37: &unit-test
+  unit-test-310: &unit-test
     working_directory: ~/neo3-boa
-    executor: python37-executor
+    executor: python310-executor
     steps:
       - checkout
       - python/load-cache
@@ -51,21 +42,9 @@ jobs:
             pip install coveralls
             coveralls --service=circleci
 
-  unit-test-38:
-    <<: *unit-test
-    executor: python38-executor
-
-  unit-test-39:
-    <<: *unit-test
-    executor: python39-executor
-
-  unit-test-310:
-    <<: *unit-test
-    executor: python310-executor
-
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
-    executor: python38-executor
+    executor: python310-executor
     steps:
       - checkout
 
@@ -103,7 +82,7 @@ jobs:
     <<: *build_deploy
 
   publish-docs:
-      executor: python38-executor
+      executor: python310-executor
       working_directory: ~/neo3-boa
       steps:
         - checkout
@@ -131,18 +110,6 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - unit-test-37:
-         filters:
-           tags:
-             only: /.*/
-      - unit-test-38:
-         filters:
-           tags:
-             only: /.*/
-      - unit-test-39:
-         filters:
-           tags:
-             only: /.*/
       - unit-test-310:
          filters:
            tags:
@@ -150,9 +117,6 @@ workflows:
       - build_deploy_test:
          context: pypi_test
          requires:
-           - unit-test-37
-           - unit-test-38
-           - unit-test-39
            - unit-test-310
          filters:
            tags:
