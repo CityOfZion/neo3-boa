@@ -19,10 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Removed
+- Dropped support to Python versions prior to 3.10
 
 
 ### Fixed
 - Removed incorrect requirement of `filelock` to use NeoTestRunner class
+- Fixed imported variable value generation when it has the same identifier of a local variable
+- Fixed NEP-11 validator to handle divisible NFT standard
+
 
 ## [1.0.0] - 2023-07-10
 ### Added
