@@ -3,7 +3,7 @@ version: 2.1
 executors:
   python310-executor:
     docker:
-      - image: cimg/python:3.10.7
+      - image: cimg/python:3.10.13
 
 orbs:
   python: circleci/python@0.2.1
@@ -21,9 +21,14 @@ jobs:
           command: |
             pip install -r requirements_dev.txt
             sudo apt update
+
             sudo apt-get install -y apt-transport-https
             wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
             sudo dpkg -i packages-microsoft-prod.deb
+            sudo apt update
+
+            sudo apt remove dotnet* aspnetcore* netstandard*
+            sudo rm /etc/apt/sources.list.d/microsoft-prod.list
             sudo apt update && \
               sudo apt-get install -y dotnet-sdk-6.0
 
