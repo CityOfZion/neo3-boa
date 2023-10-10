@@ -1,6 +1,7 @@
 import ast
 
-from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
+from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
+from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
 
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
@@ -11,7 +12,7 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 
 
-class TestConstant(BoaTest):
+class TestConstant(boa_test.BoaTest):
     def build_code_generator(self) -> CodeGenerator:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 
@@ -435,6 +436,7 @@ class TestConstant(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    @boa_test.skipIfHashFails
     def test_integer_script_hash(self):
         from boa3.internal.neo import cryptography, to_script_hash
 
@@ -454,6 +456,7 @@ class TestConstant(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    @boa_test.skipIfHashFails
     def test_bytes_script_hash(self):
         from boa3.internal.neo import cryptography, to_script_hash
 
@@ -463,6 +466,7 @@ class TestConstant(BoaTest):
 
         self.assertEqual(expected_output, output)
 
+    @boa_test.skipIfHashFails
     def test_address_script_hash(self):
         from base58 import b58decode
         from boa3.internal.neo import cryptography, to_script_hash

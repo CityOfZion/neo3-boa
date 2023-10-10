@@ -1,4 +1,6 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+import unittest
+
+from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -6,7 +8,7 @@ from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestNeoTypes(BoaTest):
+class TestNeoTypes(boa_test.BoaTest):
     default_folder: str = 'test_sc/neo_type_test'
 
     # region UInt160
@@ -315,6 +317,7 @@ class TestNeoTypes(BoaTest):
 
     # region ECPoint
 
+    @boa_test.skipIfHashFails
     def test_ecpoint_call_bytes(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointCallBytes.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -416,6 +419,7 @@ class TestNeoTypes(BoaTest):
         path = self.get_contract_path('ecpoint', 'ECPointCallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    @boa_test.skipIfHashFails
     def test_ecpoint_script_hash(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHash.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -436,6 +440,7 @@ class TestNeoTypes(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ecpoint_script_hash_from_builtin(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHashBuiltinCall.py')
         runner = BoaTestRunner(runner_id=self.method_name())
