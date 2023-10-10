@@ -13,7 +13,7 @@ class AsyncTestSuite(unittest.TestSuite):
         for index, test in enumerate(self):
             async_method.append(self.startRunCase(index, test, result))
         if async_method:
-            loop.run_until_complete(asyncio.wait(async_method))
+            loop.run_until_complete(asyncio.gather(*async_method))
         loop.close()
         if top_level:
             self._tearDownPreviousClass(None, result)
