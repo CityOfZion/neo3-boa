@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.neo.cryptography import hash160
@@ -12,7 +12,7 @@ from boa3_test.tests.test_drive import neoxp
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestHTLCTemplate(BoaTest):
+class TestHTLCTemplate(boa_test.BoaTest):
     default_folder: str = 'examples'
 
     OWNER = neoxp.utils.get_account_by_name('owner')
@@ -37,6 +37,7 @@ class TestHTLCTemplate(BoaTest):
         path = self.get_contract_path('htlc.py')
         self.compile(path)
 
+    @boa_test.skipIfHashFails
     def test_htlc_atomic_swap(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -59,6 +60,7 @@ class TestHTLCTemplate(BoaTest):
         # The `atomic_swap` method uses runtime.time, but BoaTestRunner fails to get it
         self._validate_execution_result(runner, invoke.tx_id, expected_result=True)
 
+    @boa_test.skipIfHashFails
     def test_htlc_on_nep17_payment(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -159,6 +161,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
 
+    @boa_test.skipIfHashFails
     def test_htlc_withdraw(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -281,6 +284,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(balance_gas_person_b_before.result - transferred_amount_gas - gas_consumed_person_b, balance_gas_person_b_after.result)
         self.assertEqual(balance_gas_htlc_before.result + gas_minted_htlc, balance_gas_htlc_after.result)
 
+    @boa_test.skipIfHashFails
     def test_htlc_refund_zero_transfers(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -336,6 +340,7 @@ class TestHTLCTemplate(BoaTest):
                 transfer_events.append(k)
         self.assertEqual(0, len(transfer_events))
 
+    @boa_test.skipIfHashFails
     def test_htlc_refund_one_transfer(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -402,6 +407,7 @@ class TestHTLCTemplate(BoaTest):
         self.assertEqual(person_a_script_hash, receiver)
         self.assertEqual(transferred_amount_neo, amount)
 
+    @boa_test.skipIfHashFails
     def test_htlc_refund_two_transfers(self):
         path, _ = self.get_deploy_file_paths('htlc.py')
         runner = BoaTestRunner(runner_id=self.method_name())

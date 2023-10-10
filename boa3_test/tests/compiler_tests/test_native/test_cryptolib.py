@@ -1,6 +1,6 @@
 import hashlib
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
@@ -12,7 +12,7 @@ from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestCryptoLibClass(BoaTest):
+class TestCryptoLibClass(boa_test.BoaTest):
     default_folder: str = 'test_sc/native_test/cryptolib'
     ecpoint_init = (
         Opcode.DUP
@@ -45,6 +45,7 @@ class TestCryptoLibClass(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_str(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -66,6 +67,7 @@ class TestCryptoLibClass(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_int(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -83,6 +85,7 @@ class TestCryptoLibClass(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_bool(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -100,6 +103,7 @@ class TestCryptoLibClass(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_bytes(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
         runner = BoaTestRunner(runner_id=self.method_name())
