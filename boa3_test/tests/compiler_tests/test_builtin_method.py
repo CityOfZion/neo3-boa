@@ -1,4 +1,4 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.type.type import Type
@@ -9,7 +9,7 @@ from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestBuiltinMethod(BoaTest):
+class TestBuiltinMethod(boa_test.BoaTest):
     default_folder: str = 'test_sc/built_in_methods_test'
 
     # region len test
@@ -504,6 +504,7 @@ class TestBuiltinMethod(BoaTest):
 
     # region to_script_hash test
 
+    @boa_test.skipIfHashFails
     def test_script_hash_int(self):
         path, _ = self.get_deploy_file_paths('ScriptHashInt.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -527,6 +528,7 @@ class TestBuiltinMethod(BoaTest):
         path = self.get_contract_path('ScriptHashIntBuiltinCall.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
+    @boa_test.skipIfHashFails
     def test_script_hash_str(self):
         path, _ = self.get_deploy_file_paths('ScriptHashStr.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -555,6 +557,7 @@ class TestBuiltinMethod(BoaTest):
         path = self.get_contract_path('ScriptHashStrBuiltinCall.py')
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
+    @boa_test.skipIfHashFails
     def test_script_hash_variable(self):
         path, _ = self.get_deploy_file_paths('ScriptHashVariable.py')
         runner = BoaTestRunner(runner_id=self.method_name())

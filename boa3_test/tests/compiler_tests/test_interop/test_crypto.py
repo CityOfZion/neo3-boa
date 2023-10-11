@@ -1,6 +1,6 @@
 import hashlib
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.builtin.interop.interop import Interop
@@ -14,7 +14,7 @@ from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestCryptoInterop(BoaTest):
+class TestCryptoInterop(boa_test.BoaTest):
     default_folder: str = 'test_sc/interop_test/crypto'
     ecpoint_init = (
         Opcode.DUP
@@ -31,6 +31,7 @@ class TestCryptoInterop(BoaTest):
         + Opcode.THROW
     )
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_str(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -52,6 +53,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_int(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -69,6 +71,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_bool(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -86,6 +89,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_ripemd160_bytes(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -111,6 +115,7 @@ class TestCryptoInterop(BoaTest):
         path = self.get_contract_path('Ripemd160TooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
+    @boa_test.skipIfHashFails
     def test_hash160_str(self):
         path, _ = self.get_deploy_file_paths('Hash160Str.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -128,6 +133,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_hash160_int(self):
         path, _ = self.get_deploy_file_paths('Hash160Int.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -145,6 +151,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_hash160_bool(self):
         path, _ = self.get_deploy_file_paths('Hash160Bool.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -162,6 +169,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_hash160_bytes(self):
         path, _ = self.get_deploy_file_paths('Hash160Bytes.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -495,6 +503,7 @@ class TestCryptoInterop(BoaTest):
         path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
+    @boa_test.skipIfHashFails
     def test_import_crypto(self):
         path, _ = self.get_deploy_file_paths('ImportCrypto.py')
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -512,6 +521,7 @@ class TestCryptoInterop(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    @boa_test.skipIfHashFails
     def test_import_interop_crypto(self):
         path, _ = self.get_deploy_file_paths('ImportInteropCrypto.py')
         runner = BoaTestRunner(runner_id=self.method_name())
