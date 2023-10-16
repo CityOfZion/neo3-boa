@@ -22,6 +22,7 @@ class BoaTest(TestCase):
     ABORTED_CONTRACT_MSG = 'ABORT is executed'
     ARGUMENT_OUT_OF_RANGE_MSG_PREFIX = 'Specified argument was out of the range of valid values.'
     ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
+    BAD_SCRIPT_EXCEPTION_MSG = "Neo.VM.BadScriptException: Exception of type 'Neo.VM.BadScriptException' was thrown."
     CANT_CALL_SYSCALL_WITH_FLAG_MSG_PREFIX = "Cannot call this SYSCALL with the flag"
     CANT_FIND_METHOD_MSG_PREFIX = "Can't find method"
     CANT_PARSE_VALUE_MSG = "The value could not be parsed."

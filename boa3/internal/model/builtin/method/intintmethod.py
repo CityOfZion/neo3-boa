@@ -1,9 +1,8 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.method.intmethod import IntMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class IntIntMethod(IntMethod):
@@ -19,7 +18,6 @@ class IntIntMethod(IntMethod):
 
         super().__init__(args, [value_default])
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        # returns the same int
-        return []
+    def generate_internal_opcodes(self, code_generator):
+        # it is the identity function, so there is no need of including another opcode
+        super().generate_internal_opcodes(code_generator)

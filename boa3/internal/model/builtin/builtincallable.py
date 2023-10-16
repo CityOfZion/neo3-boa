@@ -19,17 +19,21 @@ class IBuiltinCallable(Callable, IBuiltinSymbol, ABC):
         self._generated_opcode = None
         self.defined_by_entry = False  # every builtin symbol must have this variable set as False
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_opcodes(self, code_generator):
         """
-        Gets the opcode for the method.
+        Generate the Neo VM opcodes for the method.
 
-        :return: the opcode and its data if exists. None otherwise.
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
         """
-        # don't need to recalculate for every time this property is called
-        if self._generated_opcode is None:
-            self._generated_opcode = self._opcode
-        return self._generated_opcode
+        self.generate_internal_opcodes(code_generator)
+
+    def generate_internal_opcodes(self, code_generator):
+        """
+        Generate the Neo VM opcodes for the method.
+
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        pass
 
     def reset(self):
         # reset the opcodes to ensure the correct output when calling consecutive compilations

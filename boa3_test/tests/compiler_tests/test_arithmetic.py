@@ -1,14 +1,13 @@
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
-from boa3.internal.model.operation.binaryop import BinaryOp
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestArithmetic(BoaTest):
@@ -18,7 +17,7 @@ class TestArithmetic(BoaTest):
 
     def test_boa2_add_test(self):
         path, _ = self.get_deploy_file_paths('AddBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -36,14 +35,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(-110)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_add_test1(self):
         path, _ = self.get_deploy_file_paths('AddBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -58,14 +57,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(-2)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_add_test2(self):
         path, _ = self.get_deploy_file_paths('AddBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -74,14 +73,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_add_test3(self):
         path, _ = self.get_deploy_file_paths('AddBoa2Test3.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -90,14 +89,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(-9)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_add_test4(self):
         path, _ = self.get_deploy_file_paths('AddBoa2Test4.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -106,14 +105,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(-9)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_boa2_add_test_void(self):
         path, _ = self.get_deploy_file_paths('AddBoa2TestVoid.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -122,7 +121,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(None)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -143,7 +142,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -156,7 +155,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-18)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -179,7 +178,7 @@ class TestArithmetic(BoaTest):
 
     def test_addition_builtin_type(self):
         path, _ = self.get_deploy_file_paths('AdditionBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -188,7 +187,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.VALUES_ONLY + FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -204,7 +203,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -213,7 +212,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(3)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -234,7 +233,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -247,7 +246,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -270,7 +269,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -283,7 +282,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-14)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -312,7 +311,7 @@ class TestArithmetic(BoaTest):
         path_1, _ = self.get_deploy_file_paths(path_1)
         path_2, _ = self.get_deploy_file_paths(path_2)
         path_3, _ = self.get_deploy_file_paths(path_3)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -332,7 +331,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-36)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -353,7 +352,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -366,7 +365,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -378,7 +377,7 @@ class TestArithmetic(BoaTest):
     def test_concat_bytes_variables_and_constants(self):
         path, _ = self.get_deploy_file_paths('ConcatBytesVariablesAndConstants.py')
         address_version = Integer(neoxp.utils.get_address_version()).to_byte_array()
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -396,7 +395,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'value1__value2__value3__' + address_version + b'some_bytes_after')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -419,7 +418,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -430,7 +429,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unittest')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -456,7 +455,7 @@ class TestArithmetic(BoaTest):
     def test_concat_string_variables_and_constants(self):
         path, _ = self.get_deploy_file_paths('ConcatStringVariablesAndConstants.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -465,7 +464,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('[1,2]')
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -484,7 +483,7 @@ class TestArithmetic(BoaTest):
 
     def test_division_builtin_type(self):
         path, _ = self.get_deploy_file_paths('DivisionBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -493,7 +492,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES // FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -514,7 +513,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -527,7 +526,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-33)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -554,7 +553,7 @@ class TestArithmetic(BoaTest):
 
     def test_list_addition(self):
         path, _ = self.get_deploy_file_paths('ListAddition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -569,7 +568,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(['unit', ' '] + ['test', '.'])
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -613,7 +612,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -622,7 +621,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(10 + 30 * 50 + 40 // 20)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -650,7 +649,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -659,7 +658,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(10 + 30 * (50 + 40) // 20)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -670,7 +669,7 @@ class TestArithmetic(BoaTest):
 
     def test_modulo_operation(self):
         path, _ = self.get_deploy_file_paths('Modulo.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -700,14 +699,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(expected_output)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_modulo_augmented_assignment(self):
         path, _ = self.get_deploy_file_paths('ModuloAugmentedAssignment.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -737,14 +736,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(expected_output)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_modulo_builtin_type(self):
         path, _ = self.get_deploy_file_paths('ModuloBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -753,7 +752,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES % FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -778,7 +777,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -793,7 +792,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -816,7 +815,7 @@ class TestArithmetic(BoaTest):
 
     def test_multiplication_builtin_type(self):
         path, _ = self.get_deploy_file_paths('MultiplicationBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -825,7 +824,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES * FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -849,7 +848,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -864,7 +863,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -891,7 +890,7 @@ class TestArithmetic(BoaTest):
 
     def test_power_builtin_type(self):
         path, _ = self.get_deploy_file_paths('PowerBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -900,7 +899,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES ** FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -924,7 +923,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -937,14 +936,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_negative_builtin_type(self):
         path, _ = self.get_deploy_file_paths('NegativeBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -953,7 +952,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -972,7 +971,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -985,14 +984,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(0)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_positive_builtin_type(self):
         path, _ = self.get_deploy_file_paths('PositiveBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1001,7 +1000,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(+FindOptions.DESERIALIZE_VALUES)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1009,6 +1008,23 @@ class TestArithmetic(BoaTest):
     # endregion
 
     # region StrBytesMultiplication
+    byte_str_mult = (
+        Opcode.PUSHDATA1 + Integer(0).to_byte_array(min_length=1)
+        + Opcode.ROT
+        + Opcode.ROT
+        + Opcode.JMP + Integer(7).to_byte_array()
+        + Opcode.REVERSE3
+        + Opcode.OVER
+        + Opcode.CAT
+        + Opcode.REVERSE3
+        + Opcode.DEC
+        + Opcode.DUP
+        + Opcode.PUSH0
+        + Opcode.GT
+        + Opcode.JMPIF + Integer(-8).to_byte_array()
+        + Opcode.DROP
+        + Opcode.DROP
+    )
 
     def test_bytes_multiplication_operation(self):
         expected_output = (
@@ -1017,7 +1033,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.build(Type.bytes).bytecode
+            + self.byte_str_mult
             + Opcode.RET
         )
 
@@ -1026,7 +1042,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1039,7 +1055,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1051,7 +1067,7 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.build(Type.bytes).bytecode
+            + self.byte_str_mult
             + Opcode.STARG0
             + Opcode.LDARG0
             + Opcode.RET
@@ -1062,7 +1078,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1072,14 +1088,14 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_bytes_multiplication_builtin_type(self):
         path, _ = self.get_deploy_file_paths('BytesMultiplicationBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1089,7 +1105,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(b'unit test' * FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1101,7 +1117,8 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.bytecode
+            + self.byte_str_mult
+            + Opcode.CONVERT + Type.str.stack_item
             + Opcode.RET
         )
 
@@ -1110,7 +1127,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1121,7 +1138,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1133,7 +1150,8 @@ class TestArithmetic(BoaTest):
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + BinaryOp.StrBytesMul.bytecode
+            + self.byte_str_mult
+            + Opcode.CONVERT + Type.str.stack_item
             + Opcode.STARG0
             + Opcode.LDARG0
             + Opcode.RET
@@ -1144,7 +1162,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1153,14 +1171,14 @@ class TestArithmetic(BoaTest):
         expected_results.append('unit' * 50)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_str_multiplication_builtin_type(self):
         path, _ = self.get_deploy_file_paths('StringMultiplicationBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1169,7 +1187,7 @@ class TestArithmetic(BoaTest):
         expected_results.append('unit test' * FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1194,7 +1212,7 @@ class TestArithmetic(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1207,7 +1225,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(-66)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
@@ -1230,7 +1248,7 @@ class TestArithmetic(BoaTest):
 
     def test_subtraction_builtin_type(self):
         path, _ = self.get_deploy_file_paths('SubtractionBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1239,7 +1257,7 @@ class TestArithmetic(BoaTest):
         expected_results.append(FindOptions.DESERIALIZE_VALUES - FindOptions.VALUES_ONLY)
 
         runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)

@@ -4,7 +4,7 @@ from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestFor(BoaTest):
@@ -63,7 +63,7 @@ class TestFor(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -79,13 +79,77 @@ class TestFor(BoaTest):
 
     def test_for_string_condition(self):
         path, _ = self.get_deploy_file_paths('StringCondition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
 
         invokes.append(runner.call_contract(path, 'Main'))
         expected_results.append('5')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_for_iterator_condition(self):
+        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
+
+        call_method_address = Integer(39).to_byte_array(min_length=1, signed=True)
+        jmpif_address = Integer(20).to_byte_array(min_length=1, signed=True)
+        jmp_address = Integer(-24).to_byte_array(min_length=1, signed=True)
+
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x03'
+            + b'\x00'
+            + Opcode.CALL       # value = get_iterator()
+            + call_method_address
+            + Opcode.STLOC0
+            + Opcode.PUSH0      # a = 0
+            + Opcode.STLOC1
+            + Opcode.LDLOC0
+            + Opcode.DUP        # don't iterate with indexes when using iterator
+            + Opcode.JMP        # begin for
+            + jmpif_address
+            + Opcode.DUP           # x = iterator.value
+            + Opcode.SYSCALL
+            + Interop.IteratorValue.interop_method_hash
+            + Opcode.DUP
+            + Opcode.ISTYPE + StackItemType.Struct
+            + Opcode.JMPIFNOT
+            + Integer(4).to_byte_array(min_length=1, signed=True)
+            + Opcode.CONVERT + StackItemType.Array
+            + Opcode.STLOC2
+            + Opcode.LDLOC1         # a = a + x
+            + Opcode.LDLOC2
+            + Opcode.ADD
+            + Opcode.STLOC1
+            + Opcode.DUP        # iterator.next
+            + Opcode.SYSCALL
+            + Interop.IteratorNext.interop_method_hash
+            + Opcode.JMPIF      # end for
+            + jmp_address
+            + Opcode.DROP
+            + Opcode.DROP
+            + Opcode.LDLOC1     # return a
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('IteratorCondition.py')
+        output = self.compile(path)
+        self.assertStartsWith(output, expected_output)
+
+        path, _ = self.get_deploy_file_paths(path)
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'Main'))
+        expected_results.append(6)
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -188,7 +252,7 @@ class TestFor(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -261,7 +325,7 @@ class TestFor(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -277,7 +341,7 @@ class TestFor(BoaTest):
 
     def test_for_continue(self):
         path, _ = self.get_deploy_file_paths('ForContinue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -293,7 +357,7 @@ class TestFor(BoaTest):
 
     def test_for_break(self):
         path, _ = self.get_deploy_file_paths('ForBreak.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -309,7 +373,7 @@ class TestFor(BoaTest):
 
     def test_for_break_else(self):
         path, _ = self.get_deploy_file_paths('ForBreakElse.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -329,7 +393,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -345,7 +409,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test2(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -361,7 +425,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test3(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test3.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -381,7 +445,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test5(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test5.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -397,7 +461,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test6(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test6.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -413,7 +477,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test7(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test7.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -429,7 +493,7 @@ class TestFor(BoaTest):
 
     def test_boa2_iteration_test8(self):
         path, _ = self.get_deploy_file_paths('IterBoa2Test8.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -449,7 +513,7 @@ class TestFor(BoaTest):
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -467,7 +531,7 @@ class TestFor(BoaTest):
         path, _ = self.get_deploy_file_paths('ForWithContractInterface.py')
         path_contract_called, _ = self.get_deploy_file_paths('ForWithContractInterfaceCalled.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

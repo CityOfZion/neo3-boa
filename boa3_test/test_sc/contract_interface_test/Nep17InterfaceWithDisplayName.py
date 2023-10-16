@@ -1,10 +1,10 @@
 from typing import Any
 
-from boa3.builtin.compile_time import contract, display_name, public
+from boa3.builtin.compile_time import contract, public
 from boa3.builtin.type import UInt160
 
 
-@contract('0x2b061955be33023e641bbd495c6887f6c0ba867f')
+@contract('0x075cf6f73e3606fd3cb1f7a026a93ce361cfe157')
 class Nep17:
 
     @staticmethod
@@ -16,13 +16,11 @@ class Nep17:
         pass
 
     @staticmethod
-    @display_name('totalSupply')
-    def total_supply() -> int:
+    def totalSupply() -> int:
         pass
 
     @staticmethod
-    @display_name('balanceOf')
-    def balance_of(account: UInt160) -> int:
+    def balanceOf(account: UInt160) -> int:
         pass
 
     @staticmethod
@@ -42,12 +40,12 @@ def nep17_decimals() -> int:
 
 @public
 def nep17_total_supply() -> int:
-    return Nep17.total_supply()
+    return Nep17.totalSupply()
 
 
 @public
 def nep17_balance_of(account: UInt160) -> int:
-    return Nep17.balance_of(account)
+    return Nep17.balanceOf(account)
 
 
 @public

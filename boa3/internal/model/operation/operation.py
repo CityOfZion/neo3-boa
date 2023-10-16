@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class IOperation(ISymbol, ABC):
@@ -21,14 +20,21 @@ class IOperation(ISymbol, ABC):
         self.operator: Operator = operator
         self.result: IType = result_type
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_opcodes(self, code_generator):
         """
-        Gets the operation sequence of opcodes with in Neo Vm
+        Generate the Neo VM opcodes for the method.
 
-        :return: the opcode if exists. Empty list otherwise.
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
         """
-        return []
+        self.generate_internal_opcodes(code_generator)
+
+    def generate_internal_opcodes(self, code_generator):
+        """
+        Generate the Neo VM opcodes for the method.
+
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        pass
 
     @property
     def shadowing_name(self) -> str:
@@ -38,18 +44,6 @@ class IOperation(ISymbol, ABC):
         :return: the resulting type when the expression is evaluated
         """
         return self.operator.value
-
-    @property
-    def bytecode(self) -> bytes:
-        """
-        Gets the operation bytecode
-
-        :return: the bytecode if exists. Empty bytes otherwise.
-        """
-        str_mult_bytes = bytearray()
-        for opcode, data in self.opcode:
-            str_mult_bytes += opcode + data
-        return bytes(str_mult_bytes)
 
     @property
     @abstractmethod

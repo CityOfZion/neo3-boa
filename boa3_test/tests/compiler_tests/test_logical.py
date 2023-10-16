@@ -4,7 +4,7 @@ from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestLogical(BoaTest):
@@ -28,7 +28,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -71,7 +71,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -111,7 +111,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -149,7 +149,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -189,7 +189,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -209,7 +209,7 @@ class TestLogical(BoaTest):
 
     def test_logic_left_shift_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicLeftShiftBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -247,7 +247,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -281,7 +281,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -301,7 +301,7 @@ class TestLogical(BoaTest):
 
     def test_logic_and_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicAndBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -338,7 +338,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -356,7 +356,7 @@ class TestLogical(BoaTest):
 
     def test_logic_not_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicNotBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -385,7 +385,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -427,7 +427,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -461,7 +461,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -481,7 +481,7 @@ class TestLogical(BoaTest):
 
     def test_logic_or_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicOrBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -536,7 +536,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -570,7 +570,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -590,7 +590,7 @@ class TestLogical(BoaTest):
 
     def test_logic_xor_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicXorBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -614,7 +614,7 @@ class TestLogical(BoaTest):
 
     def test_logic_augmented_assignment(self):
         path, _ = self.get_deploy_file_paths('AugmentedAssignmentOperators.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -652,7 +652,7 @@ class TestLogical(BoaTest):
 
     def test_boa2_logic_test(self):
         path, _ = self.get_deploy_file_paths('BinOpBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -721,7 +721,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -743,7 +743,7 @@ class TestLogical(BoaTest):
 
     def test_logic_operation_with_return_and_stack_filled(self):
         path, _ = self.get_deploy_file_paths('LogicOperationWithReturnAndStackFilled.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -777,7 +777,7 @@ class TestLogical(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -797,7 +797,7 @@ class TestLogical(BoaTest):
 
     def test_logic_right_shift_builtin_type(self):
         path, _ = self.get_deploy_file_paths('LogicRightShiftBuiltinType.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

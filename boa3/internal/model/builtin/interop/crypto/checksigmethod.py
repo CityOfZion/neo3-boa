@@ -23,8 +23,7 @@ class CheckSigMethod(InteropMethod):
     @classmethod
     def get_raw_bytes(cls) -> bytes:
         if len(cls._RAW_BYTES) == 0:
-            from boa3.internal.compiler.codegenerator import get_bytes
             check_sig = CheckSigMethod()
-            cls._RAW_BYTES = get_bytes(check_sig.opcode)
+            cls._RAW_BYTES = check_sig._raw_bytecode()
 
         return cls._RAW_BYTES

@@ -5,7 +5,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestBytes(BoaTest):
@@ -46,7 +46,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -81,7 +81,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -111,7 +111,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_int(self):
         path, _ = self.get_deploy_file_paths('BytesToInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -131,7 +131,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_bool(self):
         path, _ = self.get_deploy_file_paths('BytesToBool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -157,7 +157,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_to_str(self):
         path, _ = self.get_deploy_file_paths('BytesToStr.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -197,7 +197,7 @@ class TestBytes(BoaTest):
 
     def test_assign_with_slice(self):
         path, _ = self.get_deploy_file_paths('AssignSlice.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -222,7 +222,7 @@ class TestBytes(BoaTest):
 
     def test_slice_with_cast(self):
         path, _ = self.get_deploy_file_paths('SliceWithCast.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -251,7 +251,7 @@ class TestBytes(BoaTest):
 
     def test_slice_with_stride(self):
         path, _ = self.get_deploy_file_paths('SliceWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -324,7 +324,7 @@ class TestBytes(BoaTest):
 
     def test_slice_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('SliceWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -397,7 +397,7 @@ class TestBytes(BoaTest):
 
     def test_slice_omitted_with_stride(self):
         path, _ = self.get_deploy_file_paths('SliceOmittedWithStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -464,7 +464,7 @@ class TestBytes(BoaTest):
 
     def test_slice_omitted_with_negative_stride(self):
         path, _ = self.get_deploy_file_paths('SliceOmittedWithNegativeStride.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -545,7 +545,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -580,7 +580,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -625,7 +625,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -672,7 +672,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -719,7 +719,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -789,7 +789,7 @@ class TestBytes(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -827,7 +827,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_string(self):
         path, _ = self.get_deploy_file_paths('BytearrayFromString.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -853,7 +853,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_append(self):
         path, _ = self.get_deploy_file_paths('BytearrayAppend.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -870,7 +870,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_append_with_builtin(self):
         path, _ = self.get_deploy_file_paths('BytearrayAppendWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -887,7 +887,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_append_mutable_sequence_with_builtin(self):
         path, _ = self.get_deploy_file_paths('BytearrayAppendWithMutableSequence.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -904,7 +904,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_clear(self):
         path, _ = self.get_deploy_file_paths('BytearrayClear.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -921,7 +921,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_reverse(self):
         path, _ = self.get_deploy_file_paths('BytearrayReverse.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -938,7 +938,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_extend(self):
         path, _ = self.get_deploy_file_paths('BytearrayExtend.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -955,7 +955,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_extend_with_builtin(self):
         path, _ = self.get_deploy_file_paths('BytearrayExtendWithBuiltin.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -972,7 +972,7 @@ class TestBytes(BoaTest):
 
     def test_byte_array_to_int(self):
         path, _ = self.get_deploy_file_paths('BytearrayToInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -996,7 +996,7 @@ class TestBytes(BoaTest):
 
     def test_boa2_byte_array_test(self):
         path, _ = self.get_deploy_file_paths('BytearrayBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1017,7 +1017,7 @@ class TestBytes(BoaTest):
 
     def test_boa2_byte_array_test3(self):
         path, _ = self.get_deploy_file_paths('BytearrayBoa2Test3.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1033,7 +1033,7 @@ class TestBytes(BoaTest):
 
     def test_boa2_slice_test(self):
         path, _ = self.get_deploy_file_paths('SliceBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1050,7 +1050,7 @@ class TestBytes(BoaTest):
 
     def test_boa2_slice_test2(self):
         path, _ = self.get_deploy_file_paths('SliceBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1067,7 +1067,7 @@ class TestBytes(BoaTest):
 
     def test_uint160_bytes(self):
         path, _ = self.get_deploy_file_paths('UInt160Bytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1084,7 +1084,7 @@ class TestBytes(BoaTest):
 
     def test_uint160_int(self):
         path, _ = self.get_deploy_file_paths('UInt160Int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1101,7 +1101,7 @@ class TestBytes(BoaTest):
 
     def test_uint256_bytes(self):
         path, _ = self.get_deploy_file_paths('UInt256Bytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1118,7 +1118,7 @@ class TestBytes(BoaTest):
 
     def test_uint256_int(self):
         path, _ = self.get_deploy_file_paths('UInt256Int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1135,7 +1135,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_upper(self):
         path, _ = self.get_deploy_file_paths('UpperBytesMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1160,7 +1160,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_lower(self):
         path, _ = self.get_deploy_file_paths('LowerBytesMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1185,7 +1185,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_startswith_method(self):
         path, _ = self.get_deploy_file_paths('StartswithBytesMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1247,7 +1247,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_startswith_method_default_end(self):
         path, _ = self.get_deploy_file_paths('StartswithBytesMethodDefaultEnd.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1308,7 +1308,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_startswith_method_defaults(self):
         path, _ = self.get_deploy_file_paths('StartswithBytesMethodDefaults.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1346,7 +1346,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_strip(self):
         path, _ = self.get_deploy_file_paths('StripBytesMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1377,7 +1377,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_strip_default(self):
         path, _ = self.get_deploy_file_paths('StripBytesMethodDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1410,7 +1410,7 @@ class TestBytes(BoaTest):
 
     def test_isdigit_method(self):
         path, _ = self.get_deploy_file_paths('IsdigitMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1439,7 +1439,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_join_with_sequence(self):
         path, _ = self.get_deploy_file_paths('JoinBytesMethodWithSequence.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1470,7 +1470,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_join_with_dictionary(self):
         path, _ = self.get_deploy_file_paths('JoinBytesMethodWithDictionary.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1501,7 +1501,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_index(self):
         path, _ = self.get_deploy_file_paths('IndexBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1557,7 +1557,7 @@ class TestBytes(BoaTest):
 
     def test_bytes_index_end_default(self):
         path, _ = self.get_deploy_file_paths('IndexBytesEndDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1592,19 +1592,27 @@ class TestBytes(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 99))
+        bytes_ = b'unit test'
+        bytes_sequence = b'i'
+        start = 99
+        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
+        self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
 
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 't', -1))
+        bytes_ = b'unit test'
+        bytes_sequence = b's'
+        start = -1
+        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
+        self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
 
     def test_bytes_index_defaults(self):
         path, _ = self.get_deploy_file_paths('IndexBytesDefaults.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1633,3 +1641,90 @@ class TestBytes(BoaTest):
     def test_bytes_index_mismatched_type(self):
         path = self.get_contract_path('IndexBytesMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_bytes_property_slicing(self):
+        path, _ = self.get_deploy_file_paths('BytesPropertySlicing.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        bytes_value = b'unit test'
+        start = 0
+        end = len(bytes_value)
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = 2
+        end = len(bytes_value) - 1
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = len(bytes_value)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_bytes_instance_variable_slicing(self):
+        path, _ = self.get_deploy_file_paths('BytesInstanceVariableSlicing.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        bytes_value = b'unit test'
+        start = 0
+        end = len(bytes_value)
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = 2
+        end = len(bytes_value) - 1
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = len(bytes_value)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_bytes_class_variable_slicing(self):
+        path, _ = self.get_deploy_file_paths('BytesClassVariableSlicing.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        bytes_value = b'unit test'
+        start = 0
+        end = len(bytes_value)
+        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = 2
+        end = len(bytes_value) - 1
+        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        start = len(bytes_value)
+        end = 0
+        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
+        expected_results.append(bytes_value[start:end])
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)

@@ -3,8 +3,6 @@ from typing import List, Optional, Tuple
 from boa3.internal.model.builtin.classmethod.countsequencemethod import CountSequenceMethod
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode import OpcodeHelper
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CountSequenceGenericMethod(CountSequenceMethod):
@@ -12,138 +10,91 @@ class CountSequenceGenericMethod(CountSequenceMethod):
     def __init__(self, sequence_type: Optional[SequenceType] = None, arg_value: Optional[IType] = None):
         super().__init__(sequence_type, arg_value)
 
-    def generic_verification(self, inc_statement_bytes=None,
-                             get_equals_statement_bytes=None) -> List[Tuple[Opcode, bytes]]:
+    def _generic_verification(self, code_generator) -> Tuple[List[int], List[int]]:
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.type.type import Type
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
-        if self._generic_verification_opcodes is None:
-            jmp_place_holder = (Opcode.JMP, b'\x01')
+        jmps_to_inc, jmps_to_condition = super()._generic_verification(code_generator)
 
-            from boa3.internal.compiler.codegenerator import get_bytes_count
-            from boa3.internal.model.type.type import Type
+        # if value is Array
+        code_generator.duplicate_stack_item(4)
+        code_generator.insert_type_check(Type.sequence.stack_item)
+        is_value_array = code_generator.convert_begin_if()
 
-            sequence_verify_value_is_sequence = [  # verifies if value is a Sequence
-                (Opcode.PUSH3, b''),
-                (Opcode.PICK, b''),
-                (Opcode.ISTYPE, Type.sequence.stack_item),
-                jmp_place_holder,  # JMP to sequence_get_element if not
-            ]
+        #   item = sequence[index]
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
 
-            sequence_verify_item_is_sequence = [  # verifies if the sequence[index] is a Sequence
-                (Opcode.PUSH2, b''),
-                (Opcode.PICK, b''),
-                (Opcode.OVER, b''),
-                (Opcode.PICKITEM, b''),
-                (Opcode.ISTYPE, Type.sequence.stack_item),
-                jmp_place_holder,  # jmp to list_tuple_count_index_dec if not
-            ]
+        #   if item is Array
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(Type.sequence.stack_item)
+        is_item_array = code_generator.convert_begin_if()
 
-            sequence_verify_item_value_is_same_size = [  # verify if value and sequence[index] are the same size
-                (Opcode.PUSH3, b''),
-                (Opcode.PICK, b''),
-                (Opcode.PUSH3, b''),
-                (Opcode.PICK, b''),
-                (Opcode.PUSH2, b''),
-                (Opcode.PICK, b''),
-                (Opcode.PICKITEM, b''),
-                (Opcode.OVER, b''),
-                (Opcode.SIZE, b''),
-                (Opcode.OVER, b''),
-                (Opcode.SIZE, b''),
-                jmp_place_holder  # jmp to sequence_compare_sequences_initialize if true
-            ]
+        #       if len(item) == len(value):
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-            sequence_remove_aux_and_verify_next = [  # remove auxiliary values on stack and verify next item
-                (Opcode.DROP, b''),
-                (Opcode.DROP, b''),
-                jmp_place_holder  # jumps to list_tuple_count_index_dec
-            ]
+        is_same_size = code_generator.convert_begin_if()
+        code_generator.change_jump(is_same_size, Opcode.JMPNE)
 
-            sequence_compare_sequences_initialize = [
-                # starts another index for both sequences (value and sequence[índex])
-                (Opcode.DUP, b''),
-                (Opcode.SIZE, b''),
-            ]
+        #           inner_index = len(item)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
 
-            sequence_compare_sequences_start = [  # compare both sequences
-                (Opcode.DEC, b''),
-                (Opcode.OVER, b''),
-                (Opcode.OVER, b''),
-                (Opcode.PICKITEM, b''),
-                (Opcode.PUSH3, b''),
-                (Opcode.PICK, b''),
-                (Opcode.PUSH2, b''),
-                (Opcode.PICK, b''),
-                (Opcode.PICKITEM, b''),
-                jmp_place_holder  # jumps to #sequence_compare_sequences_end_is_not_equal if they have different items
-            ]
+        #           while inner_index > 0
+        while_start = code_generator.convert_begin_while()
 
-            sequence_compare_sequences_verify_end = [  # verify if all items were compared already
-                (Opcode.DUP, b''),
-                (Opcode.PUSH0, b''),
-                # jumps to back to the verification if not
-            ]
+        #               inner_index -= 1
+        code_generator.insert_opcode(Opcode.DEC)
 
-            sequence_compare_sequences_end_is_equal = [  # if they have the same values, then increment count
-                (Opcode.DROP, b''),  # remove auxiliary values on stack
-                (Opcode.DROP, b''),
-                (Opcode.DROP, b''),
-                jmp_place_holder  # jumps to sequence_count_inc
-            ]
+        #               if item[inner_index] != value[inner_index]
+        code_generator.duplicate_stack_item(6)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_item(3)
+        code_generator.convert_get_item(index_inserted_internally=True)
+        code_generator.convert_operation(BinaryOp.NotEq)
 
-            sequence_compare_sequences_end_is_not_equal = [
-                # if they do not have the same values go check the next item
-                (Opcode.DROP, b''),
-                (Opcode.DROP, b''),
-                (Opcode.DROP, b''),
-                jmp_place_holder  # jumps to list_tuple_count_index_dec
-            ]
+        are_values_different = code_generator.convert_begin_if()
+        code_generator.convert_loop_break()
+        #                   break
 
-            num_jmp_code = inc_statement_bytes + get_equals_statement_bytes
-            sequence_compare_sequences_end_is_not_equal[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        code_generator.convert_end_if(are_values_different)
 
-            num_jmp_code = get_bytes_count(sequence_compare_sequences_end_is_not_equal) + get_equals_statement_bytes
-            sequence_compare_sequences_end_is_equal[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
 
-            num_jmp_code = -get_bytes_count(sequence_compare_sequences_verify_end + sequence_compare_sequences_start)
-            sequence_compare_sequences_verify_end.append(OpcodeHelper.get_jump_and_data(Opcode.JMPGT, num_jmp_code))
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
 
-            num_jmp_code = get_bytes_count(sequence_compare_sequences_verify_end +
-                                           sequence_compare_sequences_end_is_equal)
-            sequence_compare_sequences_start[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPNE, num_jmp_code, True)
+        # clean stack
+        code_generator.remove_stack_item(2)
 
-            num_jmp_code = get_bytes_count(
-                sequence_compare_sequences_initialize + sequence_compare_sequences_start +
-                sequence_compare_sequences_verify_end + sequence_compare_sequences_end_is_equal +
-                sequence_compare_sequences_end_is_not_equal) + get_equals_statement_bytes + inc_statement_bytes
-            sequence_remove_aux_and_verify_next[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code, True)
+        #           if inner_index == 0:
+        code_generator.convert_literal(0)
+        is_equal = code_generator.convert_begin_if()
+        code_generator.change_jump(is_equal, Opcode.JMPEQ)
 
-            num_jmp_code = get_bytes_count(sequence_remove_aux_and_verify_next)
-            sequence_verify_item_value_is_same_size[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPEQ, num_jmp_code, True)
+        jmps_to_inc.append(is_equal)
+        #               count += 1
 
-            num_jmp_code = get_bytes_count(
-                sequence_verify_item_value_is_same_size + sequence_remove_aux_and_verify_next +
-                sequence_compare_sequences_initialize + sequence_compare_sequences_start +
-                sequence_compare_sequences_verify_end + sequence_compare_sequences_end_is_equal +
-                sequence_compare_sequences_end_is_not_equal) + get_equals_statement_bytes + inc_statement_bytes
-            sequence_verify_item_is_sequence[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+        jmp_to_clean_stack = code_generator.convert_begin_if()
+        code_generator.change_jump(jmp_to_clean_stack, Opcode.JMP)
 
-            num_jmp_code = get_bytes_count(sequence_verify_item_is_sequence + sequence_verify_item_value_is_same_size +
-                                           sequence_remove_aux_and_verify_next + sequence_compare_sequences_initialize +
-                                           sequence_compare_sequences_start + sequence_compare_sequences_verify_end +
-                                           sequence_compare_sequences_end_is_equal +
-                                           sequence_compare_sequences_end_is_not_equal)
-            sequence_verify_value_is_sequence[-1] = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT, num_jmp_code, True)
+        code_generator.convert_end_if(is_same_size, is_internal=True)
+        code_generator.convert_end_if(is_item_array)
+        code_generator.remove_stack_top_item()
 
-            self._generic_verification_opcodes = (
-                sequence_verify_value_is_sequence +
-                sequence_verify_item_is_sequence +
-                sequence_verify_item_value_is_same_size +
-                sequence_remove_aux_and_verify_next +
-                sequence_compare_sequences_initialize +
-                sequence_compare_sequences_start +
-                sequence_compare_sequences_verify_end +
-                sequence_compare_sequences_end_is_equal +
-                sequence_compare_sequences_end_is_not_equal
-            )
+        code_generator.convert_end_if(jmp_to_clean_stack)
 
-        return super().generic_verification()
+        is_value_array = code_generator.convert_begin_else(is_value_array, is_internal=True)
+        jmps_to_condition.append(is_value_array)
+
+        return jmps_to_inc, jmps_to_condition

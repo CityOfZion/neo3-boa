@@ -2,8 +2,12 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestBoaBuiltinMethod(BoaTest):
@@ -11,7 +15,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_abort(self):
         path, _ = self.get_deploy_file_paths('Abort.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -30,6 +34,56 @@ class TestBoaBuiltinMethod(BoaTest):
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
 
+    def test_abort_with_message(self):
+        assert_msg = String('abort was called').to_bytes()
+        number_123 = Integer(123).to_byte_array(signed=True, min_length=1)
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # if check:
+            + Opcode.PUSH5
+            + Opcode.PUSHDATA1
+            + Integer(len(assert_msg)).to_byte_array() + assert_msg
+            + Opcode.ABORTMSG   # abort('abort was called')
+            + Opcode.PUSHINT8
+            + number_123        # return 123
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AbortWithMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_abort_with_optional_message(self):
+        number_123 = Integer(123).to_byte_array(signed=True, min_length=1)
+
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG0
+            + Opcode.JMPIFNOT   # if check:
+            + Integer(11).to_byte_array(signed=True, min_length=1)
+            + Opcode.LDARG1
+            + Opcode.DUP
+            + Opcode.ISTYPE + StackItemType.ByteString
+            + Opcode.JMPIF
+            + Integer(3).to_byte_array(signed=True, min_length=1)
+            + Opcode.ABORT
+            + Opcode.ABORTMSG   # abort('abort was called')
+            + Opcode.DROP
+            + Opcode.PUSHINT8
+            + number_123        # return 123
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('AbortWithOptionalMessage.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
     def test_env(self):
         path = self.get_contract_path('Env.py')
         custom_env = 'testnet'
@@ -39,7 +93,7 @@ class TestBoaBuiltinMethod(BoaTest):
         self.compile_and_save(path, env=custom_env, output_name=custom_name, change_manifest_name=True)
         path_custom_env, _ = self.get_deploy_file_paths(path, output_name=custom_name)
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -58,7 +112,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_deploy_def(self):
         path, _ = self.get_deploy_file_paths('DeployDef.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -84,7 +138,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_sqrt_method(self):
         path, _ = self.get_deploy_file_paths('Sqrt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -133,7 +187,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_sqrt_method_from_math(self):
         path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -153,7 +207,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_decimal_floor_method(self):
         path, _ = self.get_deploy_file_paths('DecimalFloor.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -200,7 +254,7 @@ class TestBoaBuiltinMethod(BoaTest):
 
     def test_decimal_ceil_method(self):
         path, _ = self.get_deploy_file_paths('DecimalCeiling.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

@@ -36,3 +36,11 @@ class Iterator:
         :rtype: bool
         """
         pass
+
+    def __next__(self):
+        if self.next():
+            return self.value
+        raise StopIteration
+
+    def __iter__(self):
+        return self

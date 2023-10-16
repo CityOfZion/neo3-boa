@@ -1,9 +1,8 @@
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -45,75 +44,47 @@ class StrSplitMethod(StdLibMethod):
             indexes.append(str_index)
         return indexes
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.model.type.type import Type
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+        code_generator.duplicate_stack_item(3)
+        code_generator.swap_reverse_stack_items(2)
+        super().generate_internal_opcodes(code_generator)
 
-        preserver_args_from_array = [   # copies split and maxsplit args on the stack
-            OpcodeHelper.get_push_and_data(2),
-            (Opcode.PICK, b''),
-            (Opcode.SWAP, b''),
-        ]
+        # if maxsplit > 0
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(0)
+        is_valid_split_count = code_generator.convert_begin_if()
+        code_generator.change_jump(is_valid_split_count, Opcode.JMPLT)
 
-        neo_strsplit_method = super()._opcode
+        #   while len(array) < maxsplit + 1:
+        while_start = code_generator.convert_begin_while()
+        code_generator.duplicate_stack_top_item()
 
-        verify_maxsplit = [     # verifies if there is a maxsplit
-            (Opcode.OVER, b''),
-            (Opcode.PUSHM1, b''),
-            jmp_place_holder    # if maxsplit <= -1 skip concatenation and clean the stack
-        ]
+        #       concat values
+        code_generator.duplicate_stack_item(4)
+        code_generator.duplicate_stack_item(2)
+        code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
+        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.duplicate_stack_item(2)
+        code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
 
-        while_verify = [        # verifies if len(array) <= maxsplit + 1, if it is jump out of while
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.INC, b''),
-            jmp_place_holder    # go clean the stack
-        ]
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.duplicate_stack_item(3)
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
 
-        concatenate_array = [
-            (Opcode.DUP, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.POPITEM, b''),
-            (Opcode.CAT, b''),
-            (Opcode.OVER, b''),
-            (Opcode.POPITEM, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.CAT, b''),
-            (Opcode.CONVERT, Type.str.stack_item),
-            (Opcode.APPEND, b''),
-            # go to while_verify
-        ]
+        code_generator.convert_end_while(while_start, while_condition, is_internal=True)
 
-        num_jmp_code = -get_bytes_count(while_verify + concatenate_array)
-        jmp_back_to_while = OpcodeHelper.get_jump_and_data(Opcode.JMP, num_jmp_code)
-        concatenate_array.append(jmp_back_to_while)
+        code_generator.convert_end_if(is_valid_split_count, is_internal=True)
+        # clean stack
 
-        num_jmp_code = get_bytes_count(while_verify + concatenate_array)
-        jmp_to_clean_from_verify_maxsplit = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
-        verify_maxsplit[-1] = jmp_to_clean_from_verify_maxsplit
-
-        num_jmp_code = get_bytes_count(concatenate_array)
-        jmp_to_clean_from_while_verify = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, num_jmp_code, True)
-        while_verify[-1] = jmp_to_clean_from_while_verify
-
-        clean_stack = [
-            (Opcode.REVERSE3, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
-
-        return (
-            preserver_args_from_array +
-            neo_strsplit_method +
-            verify_maxsplit +
-            while_verify +
-            concatenate_array +
-            clean_stack
-        )
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()

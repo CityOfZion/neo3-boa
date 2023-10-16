@@ -47,6 +47,19 @@ class UInt160Type(BytesType):
         from boa3.internal.model.type.classes.pythonclass import PythonClass
         return super(PythonClass, self).is_instance_opcodes()
 
+    def generate_is_instance_type_check(self, code_generator):
+        from boa3.internal.model.type.classes.pythonclass import PythonClass
+        return super(PythonClass, self).generate_is_instance_type_check(code_generator)
+
+    def _generate_specific_class_type_check(self, code_generator) -> List[int]:
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(constants.SIZE_OF_INT160)
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        return []
+
     def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
         push_int_opcode, size_data = OpcodeHelper.get_push_and_data(constants.SIZE_OF_INT160)
 

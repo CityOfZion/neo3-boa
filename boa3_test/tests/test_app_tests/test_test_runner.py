@@ -1,5 +1,8 @@
+import os.path
+
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
+from boa3.internal import env
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
@@ -12,7 +15,9 @@ class TestTestRunner(BoaTest):
 
     def test_run(self):
         path, _ = self.get_deploy_file_paths('test_sc/generation_test', 'GenerationWithDecorator.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = NeoTestRunner(os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express'),
+                               runner_id=self.method_name()
+                               )
 
         invoke_result = runner.call_contract(path, 'Sub', 50, 20)
         self.assertEqual(invokeresult.NOT_EXECUTED, invoke_result.result)
@@ -112,3 +117,29 @@ class TestTestRunner(BoaTest):
             b'b': False
         })
         self.assertEqual(expected_result, result)
+
+    def test_deploy_contract_wrong_file(self):
+        path = self.get_contract_path('test_sc/generation_test', 'GenerationWithDecorator.py')
+        runner = NeoTestRunner(os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express'),
+                               runner_id=self.method_name()
+                               )
+
+        # path ends with .py, instead of .nef
+        with self.assertRaises(ValueError) as error:
+            runner.deploy_contract(path)
+        self.assertEqual('Requires a .nef file to deploy a contract', str(error.exception))
+
+        path.replace('.py', '')
+        with self.assertRaises(ValueError) as error:
+            runner.deploy_contract(path)
+        self.assertEqual('Requires a .nef file to deploy a contract', str(error.exception))
+
+    def test_deploy_contract_file_does_not_exist(self):
+        path = os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'file_does_not_exist.nef')
+        runner = NeoTestRunner(os.path.join(env.NEO_EXPRESS_INSTANCE_DIRECTORY, 'default.neo-express'),
+                               runner_id=self.method_name()
+                               )
+
+        with self.assertRaises(FileNotFoundError) as error:
+            runner.deploy_contract(path)
+        self.assertEqual(f'Could not find file at: {path}', str(error.exception))

@@ -106,5 +106,10 @@ class VMCode:
         if OpcodeHelper.has_target(self.opcode):
             self._target = target_code
 
+    def set_opcode(self, opcode):
+        if (isinstance(opcode, OpcodeInformation) and
+                OpcodeHelper.has_target(opcode.opcode) == OpcodeHelper.has_target(self.opcode)):
+            self._info = opcode
+
     def __str__(self) -> str:
         return self.opcode.name + ' ' + self.data.hex()

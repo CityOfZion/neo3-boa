@@ -3,8 +3,8 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestNeoClass(BoaTest):
@@ -13,7 +13,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -29,7 +29,7 @@ class TestNeoClass(BoaTest):
 
     def test_symbol(self):
         path, _ = self.get_deploy_file_paths('Symbol.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -49,7 +49,7 @@ class TestNeoClass(BoaTest):
 
     def test_decimals(self):
         path, _ = self.get_deploy_file_paths('Decimals.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -69,7 +69,7 @@ class TestNeoClass(BoaTest):
 
     def test_total_supply(self):
         path, _ = self.get_deploy_file_paths('TotalSupply.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -91,7 +91,7 @@ class TestNeoClass(BoaTest):
         path, _ = self.get_deploy_file_paths('BalanceOf.py')
         test_account_1 = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
         test_account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -115,7 +115,7 @@ class TestNeoClass(BoaTest):
 
     def test_transfer(self):
         path, _ = self.get_deploy_file_paths('Transfer.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -153,7 +153,7 @@ class TestNeoClass(BoaTest):
 
     def test_transfer_data_default(self):
         path, _ = self.get_deploy_file_paths('TransferDataDefault.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -192,7 +192,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_gas_per_block(self):
         path, _ = self.get_deploy_file_paths('GetGasPerBlock.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -208,7 +208,7 @@ class TestNeoClass(BoaTest):
 
     def test_unclaimed_gas(self):
         path, _ = self.get_deploy_file_paths('UnclaimedGas.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         contract_call = runner.call_contract(path, 'main', bytes(20), 0)
         runner.execute()
@@ -217,7 +217,7 @@ class TestNeoClass(BoaTest):
 
     def test_register_candidate(self):
         path, _ = self.get_deploy_file_paths('RegisterCandidate.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -264,7 +264,7 @@ class TestNeoClass(BoaTest):
 
     def test_unregister_candidate(self):
         path, _ = self.get_deploy_file_paths('UnregisterCandidate.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -299,7 +299,7 @@ class TestNeoClass(BoaTest):
         path, _ = self.get_deploy_file_paths('Vote.py')
         path_get, _ = self.get_deploy_file_paths('GetCandidates.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         runner.deploy_contract(path_get)
 
         invokes = []
@@ -401,7 +401,7 @@ class TestNeoClass(BoaTest):
         self.compile_and_save(path)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         # no candidate was registered
         invoke = runner.call_contract(path, 'main')
@@ -433,7 +433,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_candidates(self):
         path, _ = self.get_deploy_file_paths('GetCandidates.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -476,7 +476,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_candidate_vote(self):
         path, _ = self.get_deploy_file_paths('GetCandidateVote.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -525,7 +525,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_committee(self):
         path, _ = self.get_deploy_file_paths('GetCommittee.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         default_committee = neoxp.utils.get_account_by_name('node1')
         default_council = [
@@ -546,7 +546,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_next_block_validators(self):
         path, _ = self.get_deploy_file_paths('GetNextBlockValidators.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         default_committee = neoxp.utils.get_account_by_name('node1')
         consensus_nodes = [
@@ -567,7 +567,7 @@ class TestNeoClass(BoaTest):
 
     def test_get_account_state(self):
         path, _ = self.get_deploy_file_paths('GetAccountState.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

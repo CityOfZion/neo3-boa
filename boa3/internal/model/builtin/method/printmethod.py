@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -21,8 +21,6 @@ class PrintMethod(IBuiltinMethod):
         vararg = ('values', Variable(arg_value))
         super().__init__(identifier, args, return_type=Type.none, vararg=vararg)
 
-        self._print_value_opcodes = None
-
     @property
     def _arg_values(self) -> Variable:
         return self._vararg[1]
@@ -41,52 +39,53 @@ class PrintMethod(IBuiltinMethod):
             return False
         return isinstance(params[0].type, SequenceType)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.builtin.interop.interop import Interop
-        from boa3.internal.neo.vm.type.Integer import Integer
+        from boa3.internal.model.operation.binaryop import BinaryOp
 
-        check_if_arg_is_empty = [
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.PUSH0, b''),
-        ]
-        copy_list_and_reverse = [
-            (Opcode.UNPACK, b''),  # copy - it must not change the original
-            (Opcode.PACK, b''),
-            (Opcode.DUP, b''),
-            (Opcode.REVERSEITEMS, b'')
-        ]
+        values_to_print = (self._arg_values.type.value_type
+                           if hasattr(self._arg_values.type, 'value_type')
+                           else self._arg_values.type)
+        # if len(arg) > 0:
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
 
-        complete_loop = (
-            [
-                (Opcode.DUP, b''),
-                (Opcode.POPITEM, b''),
-            ] + self.print_value_opcodes
-            + Interop.Log.opcode
-            + check_if_arg_is_empty
-        )
-        complete_loop.append((Opcode.JMPNE, Integer(-get_bytes_count(complete_loop)).to_byte_array(signed=True)))
+        if_not_empty = code_generator.convert_begin_if()
 
-        return (check_if_arg_is_empty +
-                [
-                    (Opcode.JMPEQ, Integer(get_bytes_count(copy_list_and_reverse)
-                                           + 1  # the size of the JMPEQ arg
-                                           + get_bytes_count(complete_loop)).to_byte_array(signed=True)),
-                ] +
-                copy_list_and_reverse +
-                complete_loop +
-                [
-                    (Opcode.DROP, b'')
-                ])
+        #   aux_list = arg.copy().reverse()
+        code_generator.convert_copy()
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.SequenceReverse, is_internal=True)
 
-    @property
-    def print_value_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        if self._print_value_opcodes is None:
-            self._print_value_opcodes = []
+        #   while len(aux_list) > 0
+        start_loop = code_generator.convert_begin_while()
+        #       _internal_print(aux_list.pop())
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.POPITEM, add_to_stack=[values_to_print], pop_from_stack=True)
+        self._generate_print_opcodes(code_generator)
+        code_generator.convert_builtin_method_call(Interop.Log, is_internal=True)
 
-        return self._print_value_opcodes
+        start_loop_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+
+        code_generator.convert_end_while(start_loop, start_loop_condition, is_internal=True)
+
+        code_generator.convert_end_if(if_not_empty, is_internal=True)
+
+        # clear stack
+        code_generator.remove_stack_top_item()
+
+    def _generate_print_opcodes(self, code_generator):
+        """
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        pass
 
     @property
     def _args_on_stack(self) -> int:

@@ -2,7 +2,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestOptional(BoaTest):
@@ -10,7 +10,7 @@ class TestOptional(BoaTest):
 
     def test_optional_return(self):
         path, _ = self.get_deploy_file_paths('OptionalReturn.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -57,7 +57,7 @@ class TestOptional(BoaTest):
 
     def test_optional_variable_argument(self):
         path, _ = self.get_deploy_file_paths('OptionalVariableArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -84,7 +84,7 @@ class TestOptional(BoaTest):
 
     def test_optional_isinstance_validation(self):
         path, _ = self.get_deploy_file_paths('OptionalIsInstanceValidation.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -123,7 +123,7 @@ class TestOptional(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

@@ -1,46 +1,16 @@
 __all__ = [
-    'Nep5TransferEvent',
     'Nep11TransferEvent',
     'Nep17TransferEvent',
-    'abort',
     'NeoAccountState',
+    'abort',
+    'to_hex_str',
     'to_script_hash',
 ]
 
-from typing import Union, Any
+from typing import Any, Optional, Union
 
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.type import ECPoint, UInt160, Event
-
-Nep5TransferEvent: Event = CreateNewEvent(
-    [
-        ('from', bytes),
-        ('to', bytes),
-        ('amount', int)
-    ],
-    'transfer'
-)
-"""
-This NEP was replaced by NEP-17. But, you can still check out the `proposal <https://github.com/neo-project/proposals/blob/master/obsolete/nep-5.mediawiki>`__ 
-of this standard.
-
-The NEP-5 transfer event that should be triggered whenever a token is transferred, minted or burned. It needs the 
-addresses of the sender, receiver and the amount transferred.
-
->>> Nep5TransferEvent(b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',  # when calling, it will return None, but the event will be triggered
-...                   b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0', 100)
-{
-    'name': 'transfer',
-    'script hash': b'\\xee\\xc3\\x12\\xfd\\x12\\x95\\x84\\44\\x7f\\xb8\\xed\\x41\\xdc\\x86\\x33\\x95\\x10\\x10\\x9f\\x85',
-    'state': {
-        'from': b'\\xd1\\x17\\x92\\x82\\x12\\xc6\\xbe\\xfa\\x05\\xa0\\x23\\x07\\xa1\\x12\\x55\\x41\\x06\\x55\\x10\\xe6',
-        'to': b'\\x18\\xb7\\x30\\x14\\xdf\\xcb\\xee\\x01\\x30\\x00\\x13\\x9b\\x8d\\xa0\\x13\\xfb\\x96\\xac\\xd1\\xc0',
-        'amount': 100
-    }
-}
-
-:meta hide-value:
-"""
 
 Nep11TransferEvent: Event = CreateNewEvent(
     [
@@ -106,12 +76,15 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 """
 
 
-def abort():
+def abort(msg: Optional[str] = None):
     """
     Aborts the execution of a smart contract. Using this will cancel the changes made on the blockchain by the
     transaction.
 
     >>> abort()     # abort doesn't return anything by itself, but the execution will stop and the VMState will be FAULT
+    VMState.FAULT
+
+    >>> abort('abort message')
     VMState.FAULT
 
     """
@@ -151,5 +124,24 @@ def to_script_hash(data_bytes: Any) -> bytes:
     :type data_bytes: Any
     :return: the script hash of the data
     :rtype: bytes
+    """
+    pass
+
+
+def to_hex_str(data: bytes) -> str:
+    """
+    Converts bytes into its string hex representation.
+
+    >>> to_hex_str(ECPoint(bytes(range(33))))
+    '201f1e1d1c1b1a191817161514131211100f0e0d0c0b0a09080706050403020100'
+
+    >>> to_hex_str(b'1234567891')
+    '31393837363534333231'
+
+    :param data: data to represent as hex.
+    :type data: bytearray or bytes
+
+    :return: the hex representation of the data
+    :rtype: str
     """
     pass

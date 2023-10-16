@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -8,7 +8,6 @@ from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class WitnessRuleType(ClassArrayType):
@@ -80,17 +79,13 @@ class WitnessRuleMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.interop.blockchain.witnessconditiontype import WitnessConditionType
         from boa3.internal.model.builtin.interop.blockchain.witnessruleactiontype import WitnessRuleActionType
 
-        return (WitnessConditionType.build().constructor_method().opcode +  # condition
-                WitnessRuleActionType.build().constructor_method().opcode +  # action
-                [(Opcode.PUSH1, b''),
-                 (Opcode.PACK, b'')
-                 ]
-                )
+        code_generator.convert_builtin_method_call(WitnessConditionType.build().constructor_method(), is_internal=True)  # condition
+        code_generator.convert_builtin_method_call(WitnessRuleActionType.build().constructor_method(), is_internal=True)  # action
+        code_generator.convert_new_array(length=2, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:

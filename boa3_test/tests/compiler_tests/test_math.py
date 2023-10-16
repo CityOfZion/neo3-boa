@@ -2,7 +2,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestMath(BoaTest):
@@ -17,7 +17,7 @@ class TestMath(BoaTest):
 
     def test_pow_method(self):
         path, _ = self.get_deploy_file_paths('Pow.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -57,7 +57,7 @@ class TestMath(BoaTest):
 
     def test_pow_method_from_math(self):
         path, _ = self.get_deploy_file_paths('PowFromMath.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -81,7 +81,7 @@ class TestMath(BoaTest):
 
     def test_sqrt_method(self):
         path, _ = self.get_deploy_file_paths('Sqrt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -130,7 +130,7 @@ class TestMath(BoaTest):
 
     def test_sqrt_method_from_math(self):
         path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

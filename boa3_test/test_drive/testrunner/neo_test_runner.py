@@ -1,10 +1,13 @@
+__all__ = [
+    'NeoTestRunner'
+]
+
 import json
 import os.path
 import subprocess
-import threading
-from typing import Any, List, Tuple, Dict, Optional, Union, Type
+from typing import Any, Callable, List, Dict, Optional, Sequence, Tuple, Type, Union
 
-from boa3.internal import env, constants
+from boa3.internal import constants
 from boa3.internal.neo import utils as neo_utils
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt256
@@ -18,6 +21,7 @@ from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp import utils as neoxp_utils
 from boa3_test.test_drive.neoxp.batch import NeoExpressBatch
+from boa3_test.test_drive.neoxp.model.neoxpconfig import NeoExpressConfig
 from boa3_test.test_drive.testrunner import utils
 from boa3_test.test_drive.testrunner.blockchain.block import TestRunnerBlock as Block
 from boa3_test.test_drive.testrunner.blockchain.log import TestRunnerLog as Log
@@ -35,9 +39,9 @@ class NeoTestRunner:
     _BATCH_FILE = f'{_FOLDER_NAME}.batch'
     _CHECKPOINT_FILE = f'{_FOLDER_NAME}.neoxp-checkpoint'
 
-    _DEFAULT_ACCOUNT = neoxp_utils.get_default_account()
+    _DEFAULT_ACCOUNT = None
 
-    def __init__(self, neoxp_path: str = None, runner_id: str = None):
+    def __init__(self, neoxp_path: str, runner_id: str = None):
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
         self._result_stack: List[Any] = []
@@ -50,9 +54,8 @@ class NeoTestRunner:
         self._logs: List[Log] = []
         self._storages: StorageCollection = StorageCollection()
 
-        if not isinstance(neoxp_path, str):
-            neoxp_path = f'{env.NEO_EXPRESS_INSTANCE_DIRECTORY}{os.path.sep}default.neo-express'
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
+        self._neoxp_config = self._set_up_neoxp_config()
 
         if isinstance(runner_id, str):
             self._file_name: str = None  # defined in the following line
@@ -60,10 +63,9 @@ class NeoTestRunner:
         else:
             self._file_name = self._FOLDER_NAME
 
-        self._clear_files_when_destroyed = True
         self._first_execution = True
 
-        self._batch = NeoExpressBatch()
+        self._batch = NeoExpressBatch(self._neoxp_config)
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
         self._invokes_to_batch = 0
@@ -76,12 +78,18 @@ class NeoTestRunner:
     @file_name.setter
     def file_name(self, value: str):
         if isinstance(value, str) and not value.isspace():
-            from boa3_test.test_drive import utils
-            runner_specific_id = utils.create_custom_id(value)
             self._file_name = value
-            self._INVOKE_FILE = f'{runner_specific_id}.neo-invoke.json'
-            self._BATCH_FILE = f'{runner_specific_id}.batch'
-            self._CHECKPOINT_FILE = f'{runner_specific_id}.neoxp-checkpoint'
+            self._set_up_generate_file_names(value)
+
+    def _set_up_generate_file_names(self, file_name: str):
+        self._INVOKE_FILE = f'{file_name}.neo-invoke.json'
+        self._BATCH_FILE = f'{file_name}.batch'
+        self._CHECKPOINT_FILE = f'{file_name}.neoxp-checkpoint'
+
+    def _set_up_neoxp_config(self) -> NeoExpressConfig:
+        neoxp_config = neoxp_utils.get_config_data(self._neoxp_abs_path)
+        self._DEFAULT_ACCOUNT = neoxp_config.default_account
+        return neoxp_config
 
     @property
     def vm_state(self) -> VMState:
@@ -163,19 +171,6 @@ class NeoTestRunner:
             self._last_cli_log = self._cli_log
             self._cli_log = log_to_append
 
-    def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
-        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
-                                    quantity=amount,
-                                    asset='NEO')
-
-    def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
-        address = neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
-        gas_decimals = 8
-        self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
-                                    asset='GAS', decimals=gas_decimals,
-                                    quantity=(amount / (10 ** gas_decimals)))
-
     def get_genesis_block(self) -> Block:
         return self.get_block(0)
 
@@ -183,33 +178,56 @@ class NeoTestRunner:
         return self.get_block(None)
 
     def get_block(self, block_hash_or_index: Union[UInt256, bytes, int]) -> Optional[Block]:
-        genesis = neoxp_utils.get_genesis_block()
+        genesis = self._get_genesis_block()
         if isinstance(genesis, Block) and block_hash_or_index in (genesis.hash, genesis.index):
             # genesis block doesn't change between neo express resets
             return genesis
 
-        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
-        block = neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
-                                      check_point_file=check_point_path)
-
+        block = self._get_block(block_hash_or_index)
         if not isinstance(genesis, Block) and isinstance(block, Block) and block.index == 0:
-            neoxp_utils._set_genesis_block(block)  # optimization for consecutive executions
+            self._set_genesis_block(block)  # optimization for consecutive executions
         return block
 
+    def _get_genesis_block(self) -> Optional[Block]:
+        return neoxp_utils.get_genesis_block(self._neoxp_config)
+
+    def _get_block(self, block_hash_or_index) -> Optional[Block]:
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+        return neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
+                                     check_point_file=check_point_path)
+
+    def _set_genesis_block(self, genesis):
+        if isinstance(genesis, Block):
+            self._neoxp_config._genesis_block = genesis
+
     def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
+        if isinstance(tx_hash, bytes):
+            tx_hash = UInt256(tx_hash)
+
+        return self._get_tx(tx_hash)
+
+    def _get_tx(self, tx_hash: UInt256):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash,
                                            check_point_file=check_point_path)
 
     def get_transaction_result(self, tx_hash: Union[UInt256, bytes]) -> Optional[TransactionLog]:
+        if isinstance(tx_hash, bytes):
+            tx_hash = UInt256(tx_hash)
+
+        return self._get_tx_log(tx_hash, contract_collection=self._contracts)
+
+    def _get_tx_log(self, tx_hash: UInt256, contract_collection: ContractCollection):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_transaction_log(self._neoxp_abs_path, tx_hash,
                                                check_point_file=check_point_path,
-                                               contract_collection=self._contracts)
+                                               contract_collection=contract_collection)
 
     def deploy_contract(self, nef_path: str, account: Account = None) -> TestContract:
         if not isinstance(nef_path, str) or not nef_path.endswith('.nef'):
             raise ValueError('Requires a .nef file to deploy a contract')
+        elif not os.path.exists(nef_path):
+            raise FileNotFoundError(f'Could not find file at: {nef_path}')
 
         if nef_path not in self._contracts:
             contract = self._batch.deploy_contract(nef_path, account)
@@ -327,22 +345,6 @@ class NeoTestRunner:
         else:
             return self._last_execution_results
 
-    def __del__(self):
-        self.reset()
-        if self._clear_files_when_destroyed:
-            paths_to_delete = [
-                self.get_full_path(self._CHECKPOINT_FILE),
-                self.get_full_path(self._BATCH_FILE),
-                self.get_full_path(self._INVOKE_FILE)
-            ]
-            for path in paths_to_delete:
-                try:
-                    if os.path.exists(path):
-                        os.remove(path)
-                except BaseException as e:
-                    print(e)
-                    continue
-
     def reset_state(self):
         self._vm_state = VMState.NONE
         self._gas_consumed = 0
@@ -426,11 +428,16 @@ class NeoTestRunner:
     def _generate_files(self):
         self._generate_root_folder()
 
-        checkpoint_thread = threading.Thread(target=self._create_checkpoint_from_batch)
-        checkpoint_thread.start()
+        methods_to_call = [
+            (self._create_checkpoint_from_batch, ()),
+            (self._generate_invoke_file, ()),
+        ]
 
-        self._generate_invoke_file()
-        checkpoint_thread.join()
+        self._internal_generate_files(methods_to_call)
+
+    def _internal_generate_files(self, methods_to_call: List[Tuple[Callable, Sequence]]):
+        for method, args in methods_to_call:
+            method(*args)
 
     def _create_checkpoint_from_batch(self):
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
@@ -459,3 +466,16 @@ class NeoTestRunner:
 
     def increase_block(self, block_to_mint: int = None, time_interval_in_secs: int = 0):
         self._batch.mint_block(block_to_mint, time_interval_in_secs)
+
+    def oracle_enable(self, account: Account):
+        self._batch.oracle_enable(account)
+
+    def oracle_response(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+        # add to command to batch file and get the tx id
+        self._batch.oracle_response(url, response_path, request_id=request_id)
+        return self._get_oracle_resp(url, response_path, request_id)
+
+    def _get_oracle_resp(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+        check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
+        return neoxp_utils.oracle_response(self._neoxp_abs_path, url, response_path, request_id,
+                                           check_point_file=check_point_path)

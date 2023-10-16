@@ -1,10 +1,9 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -39,183 +38,169 @@ class StripMethod(IBuiltinMethod):
     def _arg_self(self) -> Variable:
         return self.args['self']
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.compiler.codegenerator import get_bytes_count
-        from boa3.internal.neo.vm.type.StackItem import StackItemType
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
 
-        jmp_place_holder = (Opcode.JMP, b'\x01')
+        # Initialize first main loop to check the leading characters
+        code_generator.duplicate_stack_item(2)
+        # string_size = len(string)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.duplicate_stack_item(2)
+        # chars_size = len(chars)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        # index = 0
+        code_generator.convert_literal(0)
+        # stop_loop = False
+        code_generator.convert_literal(False)
 
-        # receive: string, chars
+        # while index < string_size and not stop_loop:
+        while_checking_all_leading_chars = code_generator.convert_begin_while()
+        code_generator.duplicate_stack_item(5)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(1)
+        #   char = string[index]
+        code_generator.convert_get_substring(is_internal=True)
+        #   index_chars = 0
+        code_generator.convert_literal(0)
 
-        initializing_first_loop = [          # initializes the variables for the first loop
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),              # string_size = len(string)
-            (Opcode.OVER, b''),
-            (Opcode.SIZE, b''),
-            (Opcode.PUSH0, b''),             # index = 0
-        ]
+        #   while index < string_size:
+        while_checking_leading_char = code_generator.convert_begin_while()
+        code_generator.duplicate_stack_item(6)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(1)
+        code_generator.convert_get_substring(is_internal=True)
+        code_generator.duplicate_stack_item(3)
+        #       equal = char == chars[index_chars]
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        code_generator.swap_reverse_stack_items(2)
+        #       index_chars += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(2)
+        #       if equal:
+        if_leading_char_is_ws = code_generator.convert_begin_if()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        #           index += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.convert_literal(False)
+        #           stop_loop = False
+        #           break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_leading_char_is_ws)
 
-        verify_leading_chars = [             # verifies if all leading characters are in chars
-            (Opcode.DUP, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            jmp_place_holder,                # if index >= string_size, jump to initialize_second_loop
-        ]
+        while_condition_leading_chars = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        code_generator.duplicate_stack_top_item()
+        #       if index >= string_size:
+        if_leading_char_is_not_ws = code_generator.convert_begin_if()
+        code_generator.change_jump(if_leading_char_is_not_ws, Opcode.JMPIF)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        #           stop_loop = True
+        code_generator.convert_literal(True)
+        #           break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_leading_char_is_not_ws)
+        code_generator.convert_end_while(while_checking_leading_char, while_condition_leading_chars, is_internal=True)
 
-        get_leading_char_at_index = [        # gets the character at the current index and create another index variable
-            (Opcode.PUSH4, b''),             # to go through the chars
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PUSH1, b''),
-            (Opcode.SUBSTR, b''),            # char = string[index]
-            (Opcode.CONVERT, StackItemType.ByteString),
-            (Opcode.PUSH0, b''),             # index_chars = 0
-        ]
+        while_condition_all_leading_chars = code_generator.bytecode_size
+        #   if stop_loop:
+        if_stop_while = code_generator.convert_begin_if()
+        #       break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_stop_while, is_internal=True)
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        code_generator.convert_end_while(while_checking_all_leading_chars, while_condition_all_leading_chars, is_internal=True)
 
-        verify_if_index_gt_len_chars = [     # verify if already compared all chars with char
-            (Opcode.DUP, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            jmp_place_holder,                # if index >= string_size, jump to remove_extras
-        ]
+        # Initialize second main loop to check the leading characters
+        # n_leading = index
+        code_generator.swap_reverse_stack_items(3)
+        # index = string_size - 1
+        code_generator.insert_opcode(Opcode.DEC)
+        # stop_loop = False
+        code_generator.convert_literal(False)
 
-        verify_if_char_in_chars = [  # compares char with chars[index_chars]
-            (Opcode.PUSH5, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PUSH1, b''),
-            (Opcode.SUBSTR, b''),
-            (Opcode.CONVERT, StackItemType.ByteString),
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.NUMEQUAL, b''),          # equal = char == chars[index_chars]
-            (Opcode.SWAP, b''),
-            (Opcode.INC, b''),               # index_chars++
-            (Opcode.SWAP, b''),
-            # jump back to verify_if_index_gt_len_chars if not equal
-        ]
+        # while index > string_size and not stop_loop
+        while_checking_all_trailing_chars = code_generator.convert_begin_while()
+        code_generator.duplicate_stack_item(5)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(1)
+        #   char = string[index]
+        code_generator.convert_get_substring(is_internal=True)
+        #   index_chars = 0
+        code_generator.convert_literal(0)
 
-        jmp_back_to_verify_index = OpcodeHelper.get_jump_and_data(Opcode.JMPIFNOT,
-                                                                  -get_bytes_count(verify_if_char_in_chars +
-                                                                                   verify_if_index_gt_len_chars))
-        verify_if_char_in_chars.append(jmp_back_to_verify_index)
+        #   while index < string_size:
+        while_checking_trailing_char = code_generator.convert_begin_while()
+        code_generator.duplicate_stack_item(6)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(1)
+        code_generator.convert_get_substring(is_internal=True)
+        code_generator.duplicate_stack_item(3)
+        #       equal = char == chars[index_chars]
+        code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
+        code_generator.swap_reverse_stack_items(2)
+        #       index_chars += 1
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(2)
+        #       if equal:
+        if_trailing_char_is_ws = code_generator.convert_begin_if()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        #           index -= 1
+        code_generator.insert_opcode(Opcode.DEC)
+        code_generator.convert_literal(False)
+        #           stop_loop = False
+        #           break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_trailing_char_is_ws)
 
-        leading_char_found = [               # char is in chars, so go back to verify_leading_chars
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.INC, b''),               # index++
-            # jump back to verify_leading_chars
-        ]
+        while_condition_trailing_chars = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(5)
+        code_generator.convert_operation(BinaryOp.Lt, is_internal=True)
+        code_generator.duplicate_stack_top_item()
+        #       if index >= string_size:
+        if_trailing_char_is_not_ws = code_generator.convert_begin_if()
+        code_generator.change_jump(if_trailing_char_is_not_ws, Opcode.JMPIF)
+        # remove_extras
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        #           stop_loop = True
+        code_generator.convert_literal(True)
+        #           break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_trailing_char_is_not_ws)
+        code_generator.convert_end_while(while_checking_trailing_char, while_condition_trailing_chars, is_internal=True)
 
-        jmp_back_to_verify_leading_chars = OpcodeHelper.get_jump_and_data(Opcode.JMP,
-                                                                          -get_bytes_count(verify_leading_chars +
-                                                                                           get_leading_char_at_index +
-                                                                                           verify_if_index_gt_len_chars +
-                                                                                           verify_if_char_in_chars +
-                                                                                           leading_char_found))
+        while_condition_all_trailing_chars = code_generator.bytecode_size
+        #   if stop_loop:
+        if_stop_while = code_generator.convert_begin_if()
+        #       break
+        code_generator.convert_loop_break()
+        code_generator.convert_end_if(if_stop_while, is_internal=True)
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_operation(BinaryOp.Gt, is_internal=True)
+        code_generator.convert_end_while(while_checking_all_trailing_chars, while_condition_all_trailing_chars, is_internal=True)
 
-        leading_char_found.append(jmp_back_to_verify_leading_chars)
-
-        jmp_to_leading_chars = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(verify_if_char_in_chars +
-                                                                                            leading_char_found), True)
-        verify_if_index_gt_len_chars[-1] = jmp_to_leading_chars
-
-        remove_extras = [                   # remove opcodes that won't be used anymore
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
-
-        jmp_to_leading_chars = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(get_leading_char_at_index +
-                                                                                            verify_if_index_gt_len_chars +
-                                                                                            verify_if_char_in_chars +
-                                                                                            leading_char_found +
-                                                                                            remove_extras), True)
-        verify_leading_chars[-1] = jmp_to_leading_chars
-
-        get_number_of_leading_chars = (
-            initializing_first_loop +
-            verify_leading_chars +
-            get_leading_char_at_index +
-            verify_if_index_gt_len_chars +
-            verify_if_char_in_chars +
-            leading_char_found +
-            remove_extras
-        )
-
-        initialize_second_loop = [          # initializes the variables for the second loop
-            (Opcode.REVERSE3, b''),         # n_leading = index
-            (Opcode.DEC, b''),              # index = string_size - 1
-        ]
-
-        verify_trailing_chars = [           # verifies if leading and trailing characters are the same
-            (Opcode.DUP, b''),
-            (Opcode.PUSH3, b''),
-            (Opcode.PICK, b''),
-            jmp_place_holder,               # if index <= n_leading, go strip the string
-        ]
-
-        get_trailing_char_at_index = [      # gets the character at the current index and create another index variable
-            (Opcode.PUSH4, b''),            # to go through the chars
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PUSH1, b''),
-            (Opcode.SUBSTR, b''),           # char = string[index]
-            (Opcode.CONVERT, StackItemType.ByteString),
-            (Opcode.PUSH0, b''),            # index_chars = 0
-        ]
-
-        get_trailing_char_at_index.extend(verify_if_index_gt_len_chars)
-        get_trailing_char_at_index.extend(verify_if_char_in_chars)
-
-        trailing_char_found = [             # char is in chars, so go back to get_trailing_char_at_index
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DEC, b''),              # index--
-            # jump back to get_trailing_char_at_index
-        ]
-
-        jmp_back_to_verify_trailing_chars = OpcodeHelper.get_jump_and_data(Opcode.JMP,
-                                                                           -get_bytes_count(get_trailing_char_at_index +
-                                                                                            trailing_char_found))
-
-        trailing_char_found.append(jmp_back_to_verify_trailing_chars)
-
-        remove_extras = [                   # remove opcodes that won't be used anymore
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-        ]
-
-        jmp_to_strip_string = OpcodeHelper.get_jump_and_data(Opcode.JMPLE, get_bytes_count(get_trailing_char_at_index +
-                                                                                           trailing_char_found +
-                                                                                           remove_extras), True)
-        verify_trailing_chars[-1] = jmp_to_strip_string
-
-        get_number_of_trailing_chars = (
-            initialize_second_loop +
-            verify_trailing_chars +
-            get_trailing_char_at_index +
-            trailing_char_found +
-            remove_extras
-        )
-
-        strip_string = [                    # strips the string using chars
-            (Opcode.NIP, b''),
-            (Opcode.OVER, b''),
-            (Opcode.SUB, b''),
-            (Opcode.INC, b''),
-            (Opcode.REVERSE3, b''),
-            (Opcode.DROP, b''),
-            (Opcode.SWAP, b''),
-            (Opcode.SUBSTR, b''),           # string.strip(chars)
-            (Opcode.CONVERT, StackItemType.ByteString),
-        ]
-
-        return (
-            get_number_of_leading_chars +
-            get_number_of_trailing_chars +
-            strip_string
-        )
+        # Strips the string using the indexes found
+        code_generator.remove_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Sub, is_internal=True)
+        code_generator.insert_opcode(Opcode.INC)
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.swap_reverse_stack_items(2)
+        # string[n_leading:index]
+        code_generator.convert_get_substring(is_internal=True)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

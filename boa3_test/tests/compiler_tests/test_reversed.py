@@ -3,7 +3,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestReversed(BoaTest):
@@ -11,7 +11,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_list_bool(self):
         path, _ = self.get_deploy_file_paths('ReversedListBool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -30,7 +30,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_list_bytes(self):
         path, _ = self.get_deploy_file_paths('ReversedListBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -49,7 +49,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_list_int(self):
         path, _ = self.get_deploy_file_paths('ReversedListInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -68,7 +68,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_list_str(self):
         path, _ = self.get_deploy_file_paths('ReversedListStr.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -87,7 +87,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_list(self):
         path, _ = self.get_deploy_file_paths('ReversedList.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -106,7 +106,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_string(self):
         path, _ = self.get_deploy_file_paths('ReversedString.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -125,7 +125,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_bytes(self):
         path, _ = self.get_deploy_file_paths('ReversedBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -144,7 +144,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_range(self):
         path, _ = self.get_deploy_file_paths('ReversedRange.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -162,7 +162,7 @@ class TestReversed(BoaTest):
 
     def test_reversed_tuple(self):
         path, _ = self.get_deploy_file_paths('ReversedTuple.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

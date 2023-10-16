@@ -4,8 +4,8 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestNEP11Template(BoaTest):
@@ -36,7 +36,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_symbol(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -49,7 +49,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_decimals(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -62,7 +62,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_balance_of(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -105,7 +105,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_tokens_of(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -160,7 +160,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_total_supply(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         # smart contract deploys with zero tokens minted
         total_supply = 0
@@ -176,7 +176,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_transfer(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -230,7 +230,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_onNEP11Payment(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -256,7 +256,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_deploy(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         contract = runner.deploy_contract(path, account=self.OWNER)
@@ -279,7 +279,7 @@ class TestNEP11Template(BoaTest):
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -294,7 +294,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_destroy(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
         runner.deploy_contract(path, account=self.OWNER)
@@ -316,7 +316,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_verify(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -354,7 +354,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_authorize(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
         runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
@@ -384,7 +384,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_pause(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -436,7 +436,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_mint(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -485,7 +485,7 @@ class TestNEP11Template(BoaTest):
 
     def test_nep11_burn(self):
         path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

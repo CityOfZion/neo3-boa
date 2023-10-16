@@ -31,8 +31,6 @@ class NeoExpressCommand:
             command.extend(o)
 
         for arg in self._args:
-            if ' ' in arg:
-                arg = f'"{arg}"'
             command.append(arg)
 
         return ' '.join(command)

@@ -1,10 +1,9 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class InsertMethod(IBuiltinMethod):
@@ -45,50 +44,62 @@ class InsertMethod(IBuiltinMethod):
     def validate_negative_arguments(self) -> List[int]:
         return [list(self.args).index('__index')]
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
-        return [
-            # insert(pos, index)
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),     # array
-            (Opcode.DUP, b''),
-            (Opcode.SIZE, b''),     # array[-1]
-            (Opcode.DEC, b''),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),
-            (Opcode.PUSH2, b''),    # array.append(array[-1])
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.APPEND, b''),   # for x in range(index + 1, len(array) - 1)
-            (Opcode.SWAP, b''),     # x = len(array)
-            (Opcode.JMP, Integer(16).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DEC, b''),      # x =- 1
-            (Opcode.PUSH2, b''),
-            (Opcode.PICK, b''),
-            (Opcode.OVER, b''),
-            (Opcode.PICKITEM, b''),     # aux = array[x]
-            (Opcode.REVERSE3, b''),
-            (Opcode.DROP, b''),
-            (Opcode.OVER, b''),
-            (Opcode.OVER, b''),
-            (Opcode.INC, b''),
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.REVERSE3, b''),
-            (Opcode.SETITEM, b''),      # array[x] = value
-            (Opcode.DUP, b''),          # value = aux
-            (Opcode.PUSH4, b''),
-            (Opcode.PICK, b''),
-            (Opcode.GT, b''),
-            (Opcode.JMPIF, Integer(-18).to_byte_array(signed=True, min_length=1)),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.SWAP, b''),     # array[index] = y
-            (Opcode.SETITEM, b''),
-        ]
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
+
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.insert_opcode(Opcode.DEC)
+
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
+
+        # array.append(value)
+        code_generator.duplicate_stack_item(3)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
+
+        # x = len(array) - 1
+
+        # while x > index:
+        while_begin = code_generator.convert_begin_while()
+
+        #   array[x] = array[x - 1]
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.DEC)
+
+        code_generator.duplicate_stack_item(3)
+        code_generator.duplicate_stack_top_item()
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.convert_get_item(index_inserted_internally=True)
+
+        code_generator.duplicate_stack_item(3)
+        value_address = code_generator.bytecode_size
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_set_item(value_address, index_inserted_internally=True)
+
+        #   x =- 1
+        code_generator.insert_opcode(Opcode.DEC)
+
+        while_condition = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+        code_generator.convert_operation(BinaryOp.Gt)
+
+        code_generator.convert_end_while(while_begin, while_condition, is_internal=True)
+
+        # clean stack from loop variables
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+
+        # array[index] = object
+        value_address = code_generator.bytecode_size
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_set_item(value_address, index_inserted_internally=True)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument

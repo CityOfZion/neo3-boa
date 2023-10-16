@@ -23,3 +23,7 @@ class PopSequenceMethod(PopMethod):
         index_default.n = -1
 
         super().__init__(args, defaults=[index_default], return_type=arg_value.value_type)
+
+    def generate_opcodes(self, code_generator):
+        code_generator.fix_negative_index()
+        self.generate_internal_opcodes(code_generator)

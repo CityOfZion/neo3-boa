@@ -58,6 +58,7 @@ class Builtin:
     ScriptHashMethod_ = ScriptHashMethod()
     StrSplit = StrSplitMethod()
     Sum = SumMethod()
+    ToHexStr = ToHexStrMethod()
 
     # python builtin class constructor
     Bool = BoolMethod()
@@ -186,7 +187,6 @@ class Builtin:
     TransactionId = TransactionIdType.build()
 
     # boa events
-    Nep5Transfer = Nep5TransferEvent()
     Nep11Transfer = Nep11TransferEvent()
     Nep17Transfer = Nep17TransferEvent()
 
@@ -268,8 +268,8 @@ class Builtin:
                               NeoAccountState,
                               Nep11Transfer,
                               Nep17Transfer,
-                              Nep5Transfer,
-                              ScriptHashMethod_
+                              ScriptHashMethod_,
+                              ToHexStr,
                               ],
         BoaPackage.Interop: Interop.package_symbols,
         BoaPackage.Type: _builtin_type_package_symbols,

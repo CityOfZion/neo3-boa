@@ -44,6 +44,7 @@ same methods you want call.
 ```python
 # calling_with_interface.py
 from boa3.builtin.compile_time import public, contract
+from boa3.builtin.type import UInt160
 
 @public
 def calling_other_contract() -> str:
@@ -53,6 +54,8 @@ def calling_other_contract() -> str:
 
 @contract('0x000102030405060708090A0B0C0D0E0F10111213')
 class HelloStrangerContract:
+    hash: UInt160   # this class variable will reflect the value you passed to the `contract` decorator
+    
     @staticmethod
     def hello_stranger(name: str) -> str:
         pass
@@ -65,7 +68,7 @@ that you can import from `boa3.builtin.nativecontract`
 ```python
 # calling_native_contract.py
 from boa3.builtin.compile_time import public
-from boa3.builtin.nativecontract import NEO
+from boa3.builtin.nativecontract.neo import NEO
 
 @public
 def calling_other_contract() -> str:
@@ -90,6 +93,7 @@ from typing import cast, Any
 
 @contract('0x4380f2c1de98bb267d3ea821897ec571a04fe3e0')
 class Dice:
+    hash: UInt160
 
     @staticmethod
     def rand_between(start: int, end: int) -> int: 

@@ -4,7 +4,7 @@ from boa3.internal.exception import CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestIf(BoaTest):
@@ -31,7 +31,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -66,7 +66,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -124,7 +124,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -169,7 +169,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -218,7 +218,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -269,7 +269,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -338,7 +338,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -384,7 +384,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -427,7 +427,7 @@ class TestIf(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -445,7 +445,7 @@ class TestIf(BoaTest):
 
     def test_inner_if_else(self):
         path, _ = self.get_deploy_file_paths('InnerIfElse.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -476,7 +476,7 @@ class TestIf(BoaTest):
 
     def test_if_is_instance_condition(self):
         path, _ = self.get_deploy_file_paths('IfIsInstanceCondition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -501,7 +501,7 @@ class TestIf(BoaTest):
 
     def test_if_else_is_instance_condition(self):
         path, _ = self.get_deploy_file_paths('IfElseIsInstanceCondition.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -526,7 +526,7 @@ class TestIf(BoaTest):
 
     def test_if_else_is_instance_condition_with_union_variable(self):
         path, _ = self.get_deploy_file_paths('IfElseIsInstanceConditionWithUnionVariable.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -555,7 +555,7 @@ class TestIf(BoaTest):
 
     def test_if_else_multiple_is_instance_condition_with_union_variable(self):
         path, _ = self.get_deploy_file_paths('IfElseMultipleIsInstanceConditionWithUnionVariable.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -583,7 +583,7 @@ class TestIf(BoaTest):
 
     def test_variable_in_if_scopes(self):
         path, _ = self.get_deploy_file_paths('VariablesInIfScopes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -620,7 +620,7 @@ class TestIf(BoaTest):
 
     def test_boa2_compare_test0int(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test0int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -642,7 +642,7 @@ class TestIf(BoaTest):
 
     def test_boa2_compare_test0str(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test0str.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -661,7 +661,7 @@ class TestIf(BoaTest):
 
     def test_boa2_compare_test1(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test1.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -692,7 +692,7 @@ class TestIf(BoaTest):
 
     def test_boa2_compare_test2(self):
         path, _ = self.get_deploy_file_paths('CompareBoa2Test2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -711,7 +711,7 @@ class TestIf(BoaTest):
 
     def test_boa2_op_call_test(self):
         path, _ = self.get_deploy_file_paths('OpCallBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -750,7 +750,7 @@ class TestIf(BoaTest):
 
     def test_boa2_test_many_elif(self):
         path, _ = self.get_deploy_file_paths('TestManyElifBoa2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -775,7 +775,7 @@ class TestIf(BoaTest):
 
     def test_if_with_inner_while(self):
         path, _ = self.get_deploy_file_paths('IfWithInnerWhile.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -794,7 +794,7 @@ class TestIf(BoaTest):
 
     def test_if_with_inner_for(self):
         path, _ = self.get_deploy_file_paths('IfWithInnerFor.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -813,7 +813,7 @@ class TestIf(BoaTest):
 
     def test_if_implicit_boolean(self):
         path, _ = self.get_deploy_file_paths('IfImplicitBoolean.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -856,7 +856,7 @@ class TestIf(BoaTest):
 
     def test_if_implicit_boolean_literal(self):
         path, _ = self.get_deploy_file_paths('IfImplicitBooleanLiteral.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -876,7 +876,7 @@ class TestIf(BoaTest):
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -896,7 +896,7 @@ class TestIf(BoaTest):
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -922,7 +922,7 @@ class TestIf(BoaTest):
         self.assertEqual(n_nop, 2)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -938,7 +938,7 @@ class TestIf(BoaTest):
 
     def test_if_is_none(self):
         path, _ = self.get_deploy_file_paths('IfIsNone.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -956,7 +956,7 @@ class TestIf(BoaTest):
 
     def test_if_is_not_none(self):
         path, _ = self.get_deploy_file_paths('IfIsNotNone.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -974,7 +974,7 @@ class TestIf(BoaTest):
 
     def test_if_is_none_type_check(self):
         path, _ = self.get_deploy_file_paths('IfIsNoneTypeCheck.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

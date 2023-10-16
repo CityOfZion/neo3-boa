@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
@@ -35,6 +35,5 @@ class RightShift(BinaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.SHR, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.SHR)

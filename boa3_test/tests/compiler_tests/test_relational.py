@@ -5,7 +5,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestRelational(BoaTest):
@@ -15,7 +15,7 @@ class TestRelational(BoaTest):
 
     def test_builtin_type_greater_than_operation(self):
         path, _ = self.get_deploy_file_paths('BuiltinTypeGreaterThan.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -49,7 +49,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -83,7 +83,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -107,7 +107,7 @@ class TestRelational(BoaTest):
 
     def test_builtin_type_greater_than_or_equal_operation(self):
         path, _ = self.get_deploy_file_paths('BuiltinTypeGreaterThanOrEqual.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -141,7 +141,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -175,7 +175,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -199,7 +199,7 @@ class TestRelational(BoaTest):
 
     def test_boolean_identity_operation(self):
         path, _ = self.get_deploy_file_paths('BoolIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -227,7 +227,7 @@ class TestRelational(BoaTest):
 
     def test_list_identity(self):
         path, _ = self.get_deploy_file_paths('ListIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -250,7 +250,7 @@ class TestRelational(BoaTest):
 
     def test_mixed_identity(self):
         path, _ = self.get_deploy_file_paths('MixedIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -267,7 +267,7 @@ class TestRelational(BoaTest):
 
     def test_none_identity_operation(self):
         path, _ = self.get_deploy_file_paths('NoneIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -295,7 +295,7 @@ class TestRelational(BoaTest):
 
     def test_number_identity_operation(self):
         path, _ = self.get_deploy_file_paths('NumIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -323,7 +323,7 @@ class TestRelational(BoaTest):
 
     def test_string_identity_operation(self):
         path, _ = self.get_deploy_file_paths('StrIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -351,7 +351,7 @@ class TestRelational(BoaTest):
 
     def test_tuple_identity(self):
         path, _ = self.get_deploy_file_paths('TupleIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -378,7 +378,7 @@ class TestRelational(BoaTest):
 
     def test_builtin_type_less_than_operation(self):
         path, _ = self.get_deploy_file_paths('BuiltinTypeLessThan.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -412,7 +412,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -446,7 +446,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -470,7 +470,7 @@ class TestRelational(BoaTest):
 
     def test_builtin_type_less_than_or_equal_operation(self):
         path, _ = self.get_deploy_file_paths('BuiltinTypeLessThanOrEqual.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -504,7 +504,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -538,7 +538,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -576,7 +576,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -596,7 +596,7 @@ class TestRelational(BoaTest):
 
     def test_boa2_equality_test2(self):
         path, _ = self.get_deploy_file_paths('Equality2Boa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -648,7 +648,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -672,7 +672,7 @@ class TestRelational(BoaTest):
 
     def test_boolean_not_identity_operation(self):
         path, _ = self.get_deploy_file_paths('BoolNotIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -700,7 +700,7 @@ class TestRelational(BoaTest):
 
     def test_list_not_identity(self):
         path, _ = self.get_deploy_file_paths('ListNotIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -723,7 +723,7 @@ class TestRelational(BoaTest):
 
     def test_none_not_identity_operation(self):
         path, _ = self.get_deploy_file_paths('NoneNotIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -751,7 +751,7 @@ class TestRelational(BoaTest):
 
     def test_number_not_identity_operation(self):
         path, _ = self.get_deploy_file_paths('NumNotIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -779,7 +779,7 @@ class TestRelational(BoaTest):
 
     def test_string_not_identity_operation(self):
         path, _ = self.get_deploy_file_paths('StrNotIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -807,7 +807,7 @@ class TestRelational(BoaTest):
 
     def test_tuple_not_identity(self):
         path, _ = self.get_deploy_file_paths('TupleNotIdentity.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -848,7 +848,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -866,7 +866,7 @@ class TestRelational(BoaTest):
 
     def test_builtin_equality_operation(self):
         path, _ = self.get_deploy_file_paths('BuiltinTypeEquality.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -900,7 +900,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -936,7 +936,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -972,7 +972,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -990,7 +990,7 @@ class TestRelational(BoaTest):
 
     def test_builtin_inequality_operation(self):
         path, _ = self.get_deploy_file_paths('BuiltinTypeInequality.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1020,7 +1020,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1048,7 +1048,7 @@ class TestRelational(BoaTest):
 
     def test_compare_same_value_argument(self):
         path, _ = self.get_deploy_file_paths('CompareSameValueArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1064,7 +1064,7 @@ class TestRelational(BoaTest):
 
     def test_compare_same_value_hard_coded(self):
         path, _ = self.get_deploy_file_paths('CompareSameValueHardCoded.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1080,7 +1080,7 @@ class TestRelational(BoaTest):
 
     def test_compare_string(self):
         path, _ = self.get_deploy_file_paths('CompareString.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1105,7 +1105,7 @@ class TestRelational(BoaTest):
 
     def test_list_equality_with_slice(self):
         path, _ = self.get_deploy_file_paths('ListEqualityWithSlice.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1143,7 +1143,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -1179,7 +1179,7 @@ class TestRelational(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

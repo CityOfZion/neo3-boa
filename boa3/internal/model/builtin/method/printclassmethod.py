@@ -1,9 +1,6 @@
-from typing import List, Tuple
-
 from boa3.internal.model.builtin.method.printmethod import PrintMethod
 from boa3.internal.model.type.classes.userclass import UserClass
 from boa3.internal.model.type.itype import IType
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -17,27 +14,22 @@ class PrintClassMethod(PrintMethod):
         super().__init__(arg_value)
         self._arg_type = arg_value
 
-    @property
-    def print_value_opcodes(self) -> List[Tuple[Opcode, bytes]]:
-        if self._print_value_opcodes is None:
+    def _generate_print_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.type.type import Type
 
-            class_to_dict = [
-                (Opcode.UNPACK, b''),
-                (Opcode.DROP, b''),
-                (Opcode.NEWMAP, b'')
-            ]
-            for variable_name in self._arg_type.instance_variables:
-                class_to_dict.extend([
-                    (Opcode.TUCK, b''),
-                    OpcodeHelper.get_pushdata_and_data(variable_name),
-                    (Opcode.ROT, b''),
-                    (Opcode.SETITEM, b'')
-                ])
+        # class to dict, then print as json
+        code_generator.insert_opcode(Opcode.UNPACK, add_to_stack=[Type.any, Type.int])
+        code_generator.remove_stack_top_item()
+        code_generator.convert_new_map(Type.dict)
 
-            from boa3.internal.model.builtin.interop.interop import Interop
-            self._print_value_opcodes = (
-                class_to_dict
-                + Interop.JsonSerialize.opcode
-            )
+        # add each value to the dict
+        for variable_name in self._arg_type.instance_variables:
+            code_generator.insert_opcode(Opcode.TUCK, add_to_stack=[Type.any])
+            code_generator.convert_literal(variable_name)
+            item_address = code_generator.bytecode_size
+            code_generator.swap_reverse_stack_items(3, rotate=True)
+            code_generator.convert_set_item(item_address, index_inserted_internally=True)
 
-        return super().print_value_opcodes
+        # print as json
+        code_generator.convert_builtin_method_call(Interop.JsonSerialize, is_internal=True)

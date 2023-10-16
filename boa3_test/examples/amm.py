@@ -333,7 +333,7 @@ def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amou
     :raise AssertionError: raised if the best value of a token is less than the minimum amount desired, if the user
     didn't allow enough money, or if the one calling this function is not the user_address
     """
-    assert runtime.check_witness(user_address), 'failed on check witness'
+    assert runtime.check_witness(user_address)
 
     reserve_token_a = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A))
     reserve_token_b = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))

@@ -4,7 +4,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestJsonInterop(BoaTest):
@@ -12,7 +12,7 @@ class TestJsonInterop(BoaTest):
 
     def test_json_serialize(self):
         path, _ = self.get_deploy_file_paths('JsonSerialize.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -30,7 +30,7 @@ class TestJsonInterop(BoaTest):
 
     def test_json_serialize_int(self):
         path, _ = self.get_deploy_file_paths('JsonSerializeInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -47,7 +47,7 @@ class TestJsonInterop(BoaTest):
 
     def test_json_serialize_bool(self):
         path, _ = self.get_deploy_file_paths('JsonSerializeBool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -64,7 +64,7 @@ class TestJsonInterop(BoaTest):
 
     def test_json_serialize_str(self):
         path, _ = self.get_deploy_file_paths('JsonSerializeStr.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -81,7 +81,7 @@ class TestJsonInterop(BoaTest):
 
     def test_json_serialize_bytes(self):
         path, _ = self.get_deploy_file_paths('JsonSerializeBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -100,7 +100,7 @@ class TestJsonInterop(BoaTest):
 
     def test_json_deserialize(self):
         path, _ = self.get_deploy_file_paths('JsonDeserialize.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -128,7 +128,7 @@ class TestJsonInterop(BoaTest):
 
     def test_import_json(self):
         path, _ = self.get_deploy_file_paths('ImportJson.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -149,7 +149,7 @@ class TestJsonInterop(BoaTest):
 
     def test_import_interop_json(self):
         path, _ = self.get_deploy_file_paths('ImportInteropJson.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

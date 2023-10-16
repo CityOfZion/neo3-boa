@@ -9,9 +9,7 @@ from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
-from boa3.internal.constants import SYS_VERSION_INFO
 from boa3.internal.model.builtin.builtin import Builtin
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.imports.package import Package
@@ -134,7 +132,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 else:
                     # TODO: validate function calls
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
-                    class_type = result.type
+                    class_type = result.type if isinstance(node, ast.Attribute) else None
 
                     if (self.is_implemented_class_type(result.type)
                             and len(result.symbol_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)) > 1):
@@ -146,7 +144,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     elif isinstance(result.index, Package):
                         class_type = None
 
-                    self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type if self.current_method is None else None)
+                    self.generator.convert_load_symbol(result.symbol_id, is_internal=is_internal, class_type=class_type)
 
                 result.already_generated = True
 
@@ -236,6 +234,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                             global_stmts.remove(cls_fun)
 
                         class_non_static_stmts.append(cls_fun)
+                    self.symbols = last_symbols  # don't use inner scopes to evaluate the other globals
 
             # to generate the 'initialize' method for Neo
             self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
@@ -780,18 +779,9 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.visit_to_generate(assert_node.test)
 
         if assert_node.msg is not None:
-            self.generator.duplicate_stack_top_item()
-            self.generator.insert_not()
-
-            # if assert is false, log the message
-            start_addr: int = self.generator.convert_begin_if()
-
             self.visit_to_generate(assert_node.msg)
-            self.generator.convert_builtin_method_call(Interop.Log)
 
-            self.generator.convert_end_if(start_addr)
-
-        self.generator.convert_assert()
+        self.generator.convert_assert(has_message=assert_node.msg is not None)
         return self.build_data(assert_node)
 
     def visit_Call(self, call: ast.Call) -> GeneratorData:
@@ -865,11 +855,14 @@ class VisitorCodeGenerator(IAstAnalyser):
                 VMCodeMapping.instance().bytecode_size
             )
             self.visit_to_generate(arg)
+
+        class_type = None
         if has_cls_or_self_argument:
             num_args = len(args_addresses)
             if self.generator.stack_size > num_args:
                 value = self.generator._stack_pop(-num_args - 1)
                 self.generator._stack_append(value)
+                class_type = value if isinstance(value, UserClass) else None
             end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
             if not symbol.is_init:
                 args_addresses.append(end_address)
@@ -882,7 +875,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         elif isinstance(symbol, IBuiltinMethod):
             self.generator.convert_builtin_method_call(symbol, args_addresses)
         else:
-            self.generator.convert_load_symbol(function_id, args_addresses)
+            self.generator.convert_load_symbol(function_id, args_addresses,
+                                               class_type=class_type)
 
         return self.build_data(call, symbol=symbol, symbol_id=function_id,
                                result_type=symbol.type if isinstance(symbol, IExpression) else symbol,
@@ -1017,8 +1011,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self._remove_inserted_opcodes_since(last_address, last_stack)
 
         # the verification above only verify variables, this one will should work with literals and constants
-        if isinstance(value, (ast.Constant if SYS_VERSION_INFO >= (3, 8) else (ast.Num, ast.Str, ast.Bytes))) \
-                and len(attr.args) > 0 and isinstance(attr, IBuiltinMethod) and attr.has_self_argument:
+        if isinstance(value, ast.Constant) and len(attr.args) > 0 and isinstance(attr, IBuiltinMethod) and attr.has_self_argument:
             attr = attr.build(value_data.type)
 
         if attr is not Type.none and not hasattr(attribute, 'generate_value'):
@@ -1062,10 +1055,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                     symbol_id = attribute.attr if isinstance(generation_result, Variable) else class_attr_id
                     result_type = result
                 else:
+                    current_bytecode_size = self.generator.bytecode_size
                     index = self.generator.convert_class_symbol(result,
                                                                 attribute.attr,
                                                                 isinstance(attribute.ctx, ast.Load))
-                    generated = True
+                    generated = self.generator.bytecode_size > current_bytecode_size
                     symbol = result
                     if not isinstance(result, UserClass):
                         if isinstance(index, int):
@@ -1076,6 +1070,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                 return self.build_data(attribute,
                                        symbol_id=symbol_id, symbol=symbol,
                                        result_type=result_type, index=symbol_index,
+                                       origin_object_type=value_type,
                                        already_generated=generated)
 
         if value_data is not None and value_symbol is None:

@@ -3,7 +3,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestNeoTypes(BoaTest):
@@ -13,7 +13,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_call_bytes(self):
         path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -48,7 +48,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_call_int(self):
         path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -82,7 +82,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_call_without_args(self):
         path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallWithoutArgs.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -99,7 +99,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_return_bytes(self):
         path, _ = self.get_deploy_file_paths('uint160', 'UInt160ReturnBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -134,7 +134,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint160_concat_with_bytes(self):
         path, _ = self.get_deploy_file_paths('uint160', 'UInt160ConcatWithBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -165,7 +165,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_call_bytes(self):
         path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -200,7 +200,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_call_int(self):
         path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallInt.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -234,7 +234,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_call_without_args(self):
         path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallWithoutArgs.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -251,7 +251,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_return_bytes(self):
         path, _ = self.get_deploy_file_paths('uint256', 'UInt256ReturnBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -286,7 +286,7 @@ class TestNeoTypes(BoaTest):
 
     def test_uint256_concat_with_bytes(self):
         path, _ = self.get_deploy_file_paths('uint256', 'UInt256ConcatWithBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -317,7 +317,7 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_call_bytes(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointCallBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -356,7 +356,7 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_return_bytes(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointReturnBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -391,7 +391,7 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_concat_with_bytes(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointConcatWithBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -418,7 +418,7 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_script_hash(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -438,7 +438,7 @@ class TestNeoTypes(BoaTest):
 
     def test_ecpoint_script_hash_from_builtin(self):
         path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHashBuiltinCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -485,7 +485,7 @@ class TestNeoTypes(BoaTest):
     def test_opcode_concat(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithOpcode.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -503,7 +503,7 @@ class TestNeoTypes(BoaTest):
     def test_opcode_concat_with_bytes(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithBytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -537,7 +537,7 @@ class TestNeoTypes(BoaTest):
     def test_opcode_multiplication(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         path, _ = self.get_deploy_file_paths('opcode', 'OpcodeMultiplication.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -564,7 +564,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_contract(self):
         path, _ = self.get_deploy_file_paths('IsInstanceContract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -589,7 +589,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_block(self):
         path, _ = self.get_deploy_file_paths('IsInstanceBlock.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -626,7 +626,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_transaction(self):
         path, _ = self.get_deploy_file_paths('IsInstanceTransaction.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -654,7 +654,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_notification(self):
         path, _ = self.get_deploy_file_paths('IsInstanceNotification.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -678,7 +678,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_storage_context(self):
         path, _ = self.get_deploy_file_paths('IsInstanceStorageContext.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -702,7 +702,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_storage_map(self):
         path, _ = self.get_deploy_file_paths('IsInstanceStorageMap.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -726,7 +726,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_iterator(self):
         path, _ = self.get_deploy_file_paths('IsInstanceIterator.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -750,7 +750,7 @@ class TestNeoTypes(BoaTest):
 
     def test_isinstance_ecpoint(self):
         path, _ = self.get_deploy_file_paths('IsInstanceECPoint.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

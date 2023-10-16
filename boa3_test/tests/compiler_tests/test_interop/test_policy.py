@@ -2,7 +2,7 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestPolicyInterop(BoaTest):
@@ -10,7 +10,7 @@ class TestPolicyInterop(BoaTest):
 
     def test_get_exec_fee_factor(self):
         path, _ = self.get_deploy_file_paths('GetExecFeeFactor.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -23,7 +23,7 @@ class TestPolicyInterop(BoaTest):
 
     def test_get_fee_per_byte(self):
         path, _ = self.get_deploy_file_paths('GetFeePerByte.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -36,7 +36,7 @@ class TestPolicyInterop(BoaTest):
 
     def test_get_storage_price(self):
         path, _ = self.get_deploy_file_paths('GetStoragePrice.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -49,7 +49,7 @@ class TestPolicyInterop(BoaTest):
 
     def test_is_blocked(self):
         path, _ = self.get_deploy_file_paths('IsBlocked.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -83,7 +83,7 @@ class TestPolicyInterop(BoaTest):
 
     def test_import_policy(self):
         path, _ = self.get_deploy_file_paths('ImportPolicy.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -92,7 +92,7 @@ class TestPolicyInterop(BoaTest):
 
     def test_import_interop_policy(self):
         path, _ = self.get_deploy_file_paths('ImportInteropPolicy.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()

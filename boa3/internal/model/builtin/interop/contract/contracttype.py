@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from boa3.internal import constants
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
 from boa3.internal.model.type.classes.classarraytype import ClassArrayType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class ContractType(ClassArrayType):
@@ -85,21 +83,18 @@ class ContractMethod(IBuiltinMethod):
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 0
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.interop.contract.contractmanifest import ContractManifestType
+        from boa3.internal.neo3.core.types import UInt160
 
-        uint160_default = Integer(constants.SIZE_OF_INT160).to_byte_array() + bytes(constants.SIZE_OF_INT160)
+        uint160_default = UInt160.zero().to_array()
 
-        return [
-            (Opcode.NEWMAP, b''),
-            (Opcode.PUSHDATA1, Integer(0).to_byte_array()),
-            (Opcode.PUSHDATA1, uint160_default),
-            (Opcode.PUSH0, b''),
-            (Opcode.PUSH0, b''),
-            (Opcode.PUSH5, b''),
-            (Opcode.PACK, b'')
-        ]
+        code_generator.convert_new_map(ContractManifestType.build())  # manifest
+        code_generator.convert_literal(b'')  # nef
+        code_generator.convert_literal(uint160_default)  # hash
+        code_generator.convert_literal(0)  # update_counter
+        code_generator.convert_literal(0)  # id
+        code_generator.convert_new_array(length=5, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:

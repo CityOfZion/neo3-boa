@@ -11,7 +11,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestVariable(BoaTest):
@@ -261,7 +261,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -293,7 +293,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -325,7 +325,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -464,7 +464,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -497,7 +497,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -526,7 +526,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -546,7 +546,7 @@ class TestVariable(BoaTest):
 
     def test_global_chained_multiple_assignments(self):
         path, _ = self.get_deploy_file_paths('GlobalMultipleAssignments.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -608,7 +608,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -624,7 +624,7 @@ class TestVariable(BoaTest):
 
     def test_list_global_assignment(self):
         path, _ = self.get_deploy_file_paths('ListGlobalAssignment.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -664,7 +664,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -682,7 +682,7 @@ class TestVariable(BoaTest):
 
     def test_global_variable_in_class_method(self):
         path, _ = self.get_deploy_file_paths('GlobalVariableInClassMethod.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -692,6 +692,25 @@ class TestVariable(BoaTest):
 
         invokes.append(runner.call_contract(path, 'use_variable_in_map'))
         expected_results.append({'val1': 1, 'val2': 2, 'bar': 42})
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_global_variable_same_id_different_scopes(self):
+        path, _ = self.get_deploy_file_paths('GetGlobalSameIdFromImport.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'value_from_script'))
+        expected_results.append(42)
+
+        invokes.append(runner.call_contract(path, 'value_from_import'))
+        expected_results.append([1, 2, 3, 4])
 
         runner.execute()
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -737,7 +756,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -771,7 +790,7 @@ class TestVariable(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -789,7 +808,7 @@ class TestVariable(BoaTest):
 
     def test_assign_global_in_function_with_global_keyword(self):
         path, _ = self.get_deploy_file_paths('GlobalAssignmentInFunctionWithArgument.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -821,7 +840,7 @@ class TestVariable(BoaTest):
         self.assertIn(Opcode.NOP, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -837,7 +856,7 @@ class TestVariable(BoaTest):
 
     def test_anonymous_variable(self):
         path, _ = self.get_deploy_file_paths('AnonymousVariable')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -857,7 +876,7 @@ class TestVariable(BoaTest):
 
     def test_variables_in_different_scope_with_same_name(self):
         path, _ = self.get_deploy_file_paths('DifferentScopesWithSameName.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -873,7 +892,7 @@ class TestVariable(BoaTest):
 
     def test_instance_variable_and_variable_with_same_name(self):
         path, _ = self.get_deploy_file_paths('InstanceVariableAndVariableWithSameName.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -889,7 +908,7 @@ class TestVariable(BoaTest):
 
     def test_inner_object_variable_access(self):
         path, _ = self.get_deploy_file_paths('InnerObjectVariableAccess.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -906,7 +925,7 @@ class TestVariable(BoaTest):
 
     def test_variables_with_same_name_class_variable_and_local(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameNameClassVariableAndLocal.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -923,7 +942,7 @@ class TestVariable(BoaTest):
 
     def test_variables_with_same_name_instance_and_local(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameNameInstanceAndLocal.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -940,7 +959,7 @@ class TestVariable(BoaTest):
 
     def test_variables_with_same_name(self):
         path, _ = self.get_deploy_file_paths('VariablesWithSameName.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -954,3 +973,11 @@ class TestVariable(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_del_variable(self):
+        path = self.get_contract_path('DelVariable.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_assign_function(self):
+        path = self.get_contract_path('AssignFunction.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)

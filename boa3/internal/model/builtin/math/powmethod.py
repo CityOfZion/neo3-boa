@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
@@ -24,9 +24,8 @@ class PowMethod(IBuiltinMethod):
         # swap base and exponent  positions
         arguments[0], arguments[1] = arguments[1], arguments[0]
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.POW, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.POW)
 
     @property
     def _args_on_stack(self) -> int:

@@ -737,8 +737,25 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         valid_decorators: List[IDecorator] = []
         for decorator in fun_decorators:
             if isinstance(decorator, IDecorator):
+                if not decorator.is_function_decorator:
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(
+                            function.lineno, function.col_offset,
+                            symbol_id=f'"{decorator.identifier}" decorator with function'
+                        )
+                    )
+
                 decorator.update_args(function.args, self._current_scope)
                 valid_decorators.append(decorator)
+
+            # TODO: remove when user-created decorators are implemented
+            elif isinstance(decorator, Method):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(
+                        function.lineno, function.col_offset,
+                        symbol_id='user-created decorators'
+                    )
+                )
 
         is_static_method = (isinstance(self._current_scope, ClassType)
                             and Builtin.StaticMethodDecorator in valid_decorators)
@@ -839,15 +856,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._scope_stack.append(SymbolScope())
 
         # don't evaluate constant expression - for example: string for documentation
-        from boa3.internal.constants import SYS_VERSION_INFO
-        if SYS_VERSION_INFO >= (3, 8):
-            function.body = [stmt for stmt in function.body
-                             if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
-        else:
-            function.body = [stmt for stmt in function.body
-                             if not (isinstance(stmt, ast.Expr) and
-                                     (hasattr(stmt.value, 'n') or hasattr(stmt.value, 's'))
-                                     )]
+        function.body = [stmt for stmt in function.body
+                         if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant))]
 
         if isinstance(self._current_class, ClassType):
             method.origin_class = self._current_class
@@ -977,7 +987,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol_id = self.visit(ret.value)
             symbol = self.get_symbol(symbol_id)
             if symbol is None:
-                # the symbol doesn't exists
+                # the symbol doesn't exist
                 self._log_error(
                     CompilerError.UnresolvedReference(ret.value.lineno, ret.value.col_offset, symbol_id)
                 )
@@ -996,7 +1006,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(target_type, str) and not isinstance(target, ast.Str):
             symbol = self.get_symbol(target_type)
             if symbol is None:
-                # the symbol doesn't exists
+                # the symbol doesn't exist
                 self._log_error(
                     CompilerError.UnresolvedReference(target.lineno, target.col_offset, target_type)
                 )
@@ -1227,7 +1237,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 func_symbol = func_symbol.constructor_method()
 
         if not isinstance(func_symbol, Callable):
-            # the symbol doesn't exists
+            # the symbol doesn't exist
             self._log_error(
                 CompilerError.UnresolvedReference(call.func.lineno, call.func.col_offset, func_id)
             )
@@ -1377,6 +1387,26 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         # continue to walk through the tree
         self.generic_visit(for_node)
 
+    def visit_ListComp(self, node: ast.ListComp):
+        return self._visit_comprehension(node)
+
+    def visit_SetComp(self, node: ast.SetComp):
+        return self._visit_comprehension(node)
+
+    def visit_DictComp(self, node: ast.DictComp):
+        return self._visit_comprehension(node)
+
+    def _visit_comprehension(self, node):
+        # TODO: refactor when comprehension is implemented
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='list comprehension'
+            )
+        )
+        self.generic_visit(node)
+        return node
+
     def visit_Name(self, name: ast.Name) -> str:
         """
         Visitor of a name node
@@ -1492,5 +1522,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             # if can't define the type of any key or value, let it to be defined in the type checking
             return None
         return dictionary
+
+    def visit_Delete(self, node: ast.Delete) -> Any:
+        """
+        Visitor of delete statement node. Currently, it's not supported
+        """
+        self._log_error(
+            CompilerError.NotSupportedOperation(
+                node.lineno, node.col_offset,
+                symbol_id='del keyword'
+            )
+        )
+        self.generic_visit(node)
+        return node
 
     # endregion

@@ -171,11 +171,11 @@ def refund(address: UInt160, neo_amount: int, gas_amount: int) -> bool:
 
     if neo_amount > 0:
         result = NEO_TOKEN.transfer(runtime.executing_script_hash, address, neo_amount)
-        assert result, 'Neo transfer failed'
+        assert result
 
     if gas_amount > 0:
         result = GAS_TOKEN.transfer(runtime.executing_script_hash, address, gas_amount)
-        assert result, 'Gas transfer failed'
+        assert result
 
     return True
 

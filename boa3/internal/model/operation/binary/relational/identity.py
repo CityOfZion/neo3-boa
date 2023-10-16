@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
@@ -31,6 +29,5 @@ class Identity(BinaryOperation):
         else:
             return Type.none
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
-        return [(Opcode.EQUAL, b'')]
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.insert_opcode(Opcode.EQUAL)

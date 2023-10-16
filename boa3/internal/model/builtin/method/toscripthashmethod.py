@@ -1,12 +1,10 @@
-from typing import Any, Dict, List, Optional, Sized, Tuple
+from typing import Any, Dict, Optional, Sized
 
-from boa3.internal.compiler.codegenerator import get_bytes_count
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.type.type import IType, Type
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -42,62 +40,57 @@ class ScriptHashMethod(IBuiltinMethod):
     def is_supported(self) -> bool:
         return self.args['value'].type is not Type.any
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        from boa3.internal.constants import SIZE_OF_INT160
-        from boa3.internal.model.builtin.interop.crypto import Sha256Method
-        from boa3.internal.model.builtin.interop.crypto import Ripemd160Method
-        from boa3.internal.model.builtin.interop.stdlib.base58decodemethod import Base58DecodeMethod
-        from boa3.internal.model.type.type import Type
-        from boa3.internal.neo.vm.type.Integer import Integer
+    def generate_internal_opcodes(self, code_generator):
+        from boa3.internal import constants
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.neo.vm.type.StackItem import StackItemType
+        from boa3.internal.model.builtin.interop.interop import Interop
 
-        raise_exception_if_size_is_wrong = [
-            (Opcode.JMP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.DROP, b''),
-            (Opcode.THROW, b''),
-        ]
-        raise_exception_if_size_is_wrong[0] = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, get_bytes_count(raise_exception_if_size_is_wrong))
+        # try:
+        try_begin = code_generator.convert_begin_try()
 
-        except_use_hash_160 = Sha256Method().opcode + Ripemd160Method().opcode
-        end_try = [
-            (Opcode.ENDTRY, b'')
-        ]
-        end_try[-1] = OpcodeHelper.get_jump_and_data(Opcode.ENDTRY, get_bytes_count(end_try))
+        #   if not isinstance(self, str):
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_type_check(StackItemType.ByteString)
+        is_str = code_generator.convert_begin_if()
+        code_generator.change_jump(is_str, Opcode.JMPIF)
 
-        try_to_decode_with_base58 = [
-            (Opcode.DUP, b''),
-            (Opcode.ISTYPE, Type.str.stack_item),
-            (Opcode.JMPIF, Integer(4).to_byte_array(min_length=1)),
-            (Opcode.CONVERT, Type.str.stack_item),
-            (Opcode.DUP, b''),
-        ] + Base58DecodeMethod().opcode + [
-            (Opcode.DUP, b''),  # check if size is UInt160 + 1  // first position will be ignored
-            (Opcode.SIZE, b''),
-            OpcodeHelper.get_push_and_data(SIZE_OF_INT160 + 1),
-            (Opcode.SWAP, b''),
-            (Opcode.OVER, b''),
-        ] + raise_exception_if_size_is_wrong + [
-            (Opcode.DEC, b''),
-            OpcodeHelper.get_push_and_data(1),
-            (Opcode.SWAP, b''),
-            (Opcode.SUBSTR, b''),
-            (Opcode.CONVERT, Type.str.stack_item),
-            (Opcode.NIP, b''),
-            OpcodeHelper.get_jump_and_data(Opcode.JMP, get_bytes_count(except_use_hash_160)),
-        ]
+        #       cast(self, str)
+        code_generator.convert_cast(Type.str, is_internal=True)
+        code_generator.convert_end_if(is_str, is_internal=True)
 
-        try_code = OpcodeHelper.get_try_and_data(get_bytes_count(try_to_decode_with_base58), jump_through=True)
-        begin_try = (
-            [
-                try_code
-            ]
-            + try_to_decode_with_base58
-            + except_use_hash_160
-            + end_try
-        )
+        #   result = base58_decode
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Interop.Base58Decode, is_internal=True)
 
-        return begin_try
+        #   if len(result) < SIZE_OF_INT160 + 1
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_literal(constants.SIZE_OF_INT160 + 1)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.duplicate_stack_item(2)
+        is_result_size_valid = code_generator.convert_begin_if()
+        code_generator.change_jump(is_result_size_valid, Opcode.JMPGE)
+
+        #       raise error
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.convert_raise_exception()
+        code_generator.convert_end_if(is_result_size_valid, is_internal=True)
+
+        #   result = result[1:]
+        code_generator.insert_opcode(Opcode.DEC)
+        code_generator.convert_literal(1)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_get_substring(is_internal=True)
+        code_generator.remove_stack_item(2)
+
+        # except:
+        try_end = code_generator.convert_try_except('ValueError')
+        #     result = hash160(self)
+        code_generator.convert_builtin_method_call(Interop.Hash160, is_internal=True)
+
+        code_generator.convert_end_try(try_begin, try_end)
 
     @property
     def _args_on_stack(self) -> int:

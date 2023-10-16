@@ -6,8 +6,9 @@ from boa3.internal.neo.core.types.InteropInterface import InteropInterface
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3.internal.neo3.contracts import FindOptions
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestStorageInterop(BoaTest):
@@ -47,7 +48,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_put_bytes_key_bytes_value(self):
         path, _ = self.get_deploy_file_paths('StoragePutBytesKeyBytesValue.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -100,7 +101,7 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -157,7 +158,7 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -226,7 +227,7 @@ class TestStorageInterop(BoaTest):
         self.assertStartsWith(output, expected_output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -269,7 +270,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_bytes_prefix(self):
         path, _ = self.get_deploy_file_paths('StorageFindBytesPrefix.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -316,7 +317,7 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -341,7 +342,7 @@ class TestStorageInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -357,7 +358,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_get_with_context(self):
         path, _ = self.get_deploy_file_paths('StorageGetWithContext.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -394,7 +395,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_put_with_context(self):
         path, _ = self.get_deploy_file_paths('StoragePutWithContext.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -445,7 +446,7 @@ class TestStorageInterop(BoaTest):
         self.assertStartsWith(output, expected_output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -480,7 +481,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_with_context(self):
         path, _ = self.get_deploy_file_paths('StorageFindWithContext.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -510,7 +511,7 @@ class TestStorageInterop(BoaTest):
 
     def test_storage_find_with_options(self):
         path, _ = self.get_deploy_file_paths('StorageFindWithOptions.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -541,7 +542,7 @@ class TestStorageInterop(BoaTest):
 
     def test_boa2_storage_test(self):
         path, _ = self.get_deploy_file_paths('StorageBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -576,7 +577,7 @@ class TestStorageInterop(BoaTest):
 
     def test_boa2_storage_test2(self):
         path, _ = self.get_deploy_file_paths('StorageBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -612,7 +613,7 @@ class TestStorageInterop(BoaTest):
     def test_storage_between_contracts(self):
         path1, _ = self.get_deploy_file_paths('StorageGetAndPut1.py')
         path2, _ = self.get_deploy_file_paths('StorageGetAndPut2.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -641,7 +642,7 @@ class TestStorageInterop(BoaTest):
 
     def test_create_map(self):
         path, _ = self.get_deploy_file_paths('StorageCreateMap.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -684,7 +685,7 @@ class TestStorageInterop(BoaTest):
 
     def test_import_storage(self):
         path, _ = self.get_deploy_file_paths('ImportStorage.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -735,7 +736,7 @@ class TestStorageInterop(BoaTest):
 
     def test_import_interop_storage(self):
         path, _ = self.get_deploy_file_paths('ImportInteropStorage.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -786,7 +787,7 @@ class TestStorageInterop(BoaTest):
 
     def test_as_read_only(self):
         path, _ = self.get_deploy_file_paths('StorageAsReadOnly.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -822,3 +823,44 @@ class TestStorageInterop(BoaTest):
         runner.execute()
         self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
         self.assertRegex(runner.error, self.VALUE_DOES_NOT_FALL_WITHIN_EXPECTED_RANGE_MSG)
+
+    def test_find_options_values(self):
+        path, _ = self.get_deploy_file_paths('FindOptionsValues.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', FindOptions.KEYS_ONLY))
+        expected_results.append(FindOptions.KEYS_ONLY)
+
+        invokes.append(runner.call_contract(path, 'option_keys_only'))
+        expected_results.append(FindOptions.KEYS_ONLY)
+
+        invokes.append(runner.call_contract(path, 'option_remove_prefix'))
+        expected_results.append(FindOptions.REMOVE_PREFIX)
+
+        invokes.append(runner.call_contract(path, 'option_values_only'))
+        expected_results.append(FindOptions.VALUES_ONLY)
+
+        invokes.append(runner.call_contract(path, 'option_deserialize_values'))
+        expected_results.append(FindOptions.DESERIALIZE_VALUES)
+
+        invokes.append(runner.call_contract(path, 'option_pick_field_0'))
+        expected_results.append(FindOptions.PICK_FIELD_0)
+
+        invokes.append(runner.call_contract(path, 'option_pick_field_1'))
+        expected_results.append(FindOptions.PICK_FIELD_1)
+
+        invokes.append(runner.call_contract(path, 'option_backwards'))
+        expected_results.append(FindOptions.BACKWARDS)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_find_options_mismatched_type(self):
+        path = self.get_contract_path('FindOptionsMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

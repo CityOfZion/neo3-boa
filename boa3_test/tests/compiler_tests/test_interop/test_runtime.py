@@ -8,8 +8,8 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.contracts import TriggerType
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestRuntimeInterop(BoaTest):
@@ -19,7 +19,7 @@ class TestRuntimeInterop(BoaTest):
         path, _ = self.get_deploy_file_paths('CheckWitness.py')
         account = neoxp.utils.get_account_by_name('testAccount1')
         account_hash = account.script_hash.to_array()
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -44,7 +44,7 @@ class TestRuntimeInterop(BoaTest):
         call_contract_path, _ = self.get_deploy_file_paths('CheckWitness.py')
         account = neoxp.utils.get_account_by_name('testAccount1')
         account_hash = account.script_hash.to_array()
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -76,7 +76,7 @@ class TestRuntimeInterop(BoaTest):
         path, _ = self.get_deploy_file_paths('CheckWitnessImportedAs.py')
         account = neoxp.utils.get_account_by_name('testAccount1')
         account_hash = account.script_hash.to_array()
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -124,7 +124,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -162,7 +162,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -200,7 +200,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -238,7 +238,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -281,7 +281,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -318,7 +318,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -356,7 +356,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -382,7 +382,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -411,7 +411,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -440,7 +440,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -466,7 +466,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         contract_call = runner.call_contract(path, 'Main',
                                              expected_result_type=bytes)
@@ -505,7 +505,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         contract = runner.deploy_contract(path)
         invoke = runner.call_contract(path, 'Main')
@@ -530,7 +530,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_executing_script_hash_on_deploy(self):
         path, _ = self.get_deploy_file_paths('ExecutingScriptHashOnDeploy.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -558,7 +558,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke_1 = runner.run_contract(path, 'Main')
         invoke_2 = runner.call_contract(path, 'Main')
@@ -604,7 +604,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'Main')
         runner.execute()
@@ -637,7 +637,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'Main')
         runner.execute()
@@ -660,7 +660,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_notifications(self):
         path, _ = self.get_deploy_file_paths('GetNotifications.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -708,7 +708,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -744,7 +744,7 @@ class TestRuntimeInterop(BoaTest):
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -774,7 +774,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_burn_gas(self):
         path, _ = self.get_deploy_file_paths('BurnGas.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -808,7 +808,7 @@ class TestRuntimeInterop(BoaTest):
     def test_boa2_runtime_test(self):
         path, _ = self.get_deploy_file_paths('RuntimeBoa2Test.py')
         account = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -844,7 +844,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_boa2_trigger_type_test(self):
         path, _ = self.get_deploy_file_paths('TriggerTypeBoa2Test.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -870,7 +870,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_script_container(self):
         path, _ = self.get_deploy_file_paths('ScriptContainer.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -879,7 +879,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_script_container_as_transaction(self):
         path, _ = self.get_deploy_file_paths('ScriptContainerAsTransaction.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -904,7 +904,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_network(self):
         path, _ = self.get_deploy_file_paths('GetNetwork.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -924,7 +924,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_import_runtime(self):
         path, _ = self.get_deploy_file_paths('ImportRuntime.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -933,7 +933,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_import_interop_runtime(self):
         path, _ = self.get_deploy_file_paths('ImportInteropRuntime.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -942,7 +942,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_get_random(self):
         path, _ = self.get_deploy_file_paths('GetRandom.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
         runner.execute()
@@ -955,7 +955,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_address_version(self):
         path, _ = self.get_deploy_file_paths('AddressVersion.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -975,7 +975,7 @@ class TestRuntimeInterop(BoaTest):
 
     def test_load_script(self):
         path, _ = self.get_deploy_file_paths('LoadScriptDynamicCall.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

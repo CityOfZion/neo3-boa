@@ -17,13 +17,14 @@ _NEOXP_BATCH_LOCK = threading.Lock()
 
 
 class NeoExpressBatch:
-    def __init__(self):
+    def __init__(self, neoxp_config):
         self._instructions: List[NeoExpressCommand] = []
         self._transaction_submissions: List[int] = []
         self._transaction_logs: List[str] = []
 
         self._tx_invokes: List[ITransactionObject] = []
         self._tx_invokes_pos: List[int] = []
+        self._neoxp_config = neoxp_config
 
     def is_empty(self) -> bool:
         return len(self._instructions) == 0
@@ -38,7 +39,7 @@ class NeoExpressBatch:
         if hasattr(deployer, 'name') and isinstance(deployer.name, str):
             deployer_id = deployer
         else:
-            deployer_id = utils.get_default_account()  # neo express default account
+            deployer_id = utils.get_default_account(self._neoxp_config)  # neo express default account
 
         tx_pos = len(self._instructions)
         deployed_contract = TestContract(nef_path, nef_path.replace('.nef', '.manifest.json'))
@@ -56,7 +57,7 @@ class NeoExpressBatch:
         if hasattr(invoke.invoker, 'name') and isinstance(invoke.invoker.name, str):
             invoker_id = invoke.invoker
         else:
-            invoker_id = utils.get_default_account()  # neo express default account
+            invoker_id = utils.get_default_account(self._neoxp_config)  # neo express default account
 
         tx_pos = len(self._instructions)
         batch_invoke = NeoBatchInvoke(invoke, tx_pos, expected_result_type=expected_result_type)
@@ -74,7 +75,7 @@ class NeoExpressBatch:
         if hasattr(account, 'name') and isinstance(account.name, str):
             invoker_id = account
         else:
-            invoker_id = utils.get_default_account()  # neo express default account
+            invoker_id = utils.get_default_account(self._neoxp_config)  # neo express default account
 
         if witness_scope != WitnessScope.CalledByEntry:
             # only CalledByEntry and Global are accepted as WitnessScopes in neo express
@@ -134,12 +135,15 @@ class NeoExpressBatch:
     def execute(self, neoxp_path: str, batch_file_path: str, reset: bool = False, check_point_file: str = None) -> str:
         with _NEOXP_BATCH_LOCK:
             self.write(batch_file_path)
-            log = utils.run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
+            log = self._run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
 
         self._transaction_logs.clear()
         self._update_logs(log)
         self._remove_commands_until_checkpoint(check_point_file)
         return log
+
+    def _run_batch(self, neoxp_path: str, batch_file_path: str, reset: bool = False, check_point_file: str = None):
+        return utils.run_batch(neoxp_path, batch_file_path, reset=reset, check_point_file=check_point_file)
 
     def _update_logs(self, log: str):
         import re
@@ -199,3 +203,11 @@ class NeoExpressBatch:
         return next((True for command in self._instructions
                      if isinstance(command, neoxp.neoxp.contract.deploy.ContractDeployCommand)),
                     False)
+
+    def oracle_enable(self, account: Account):
+        self._instructions.append(neoxp.oracle.enable(account)
+                                  )
+
+    def oracle_response(self, url: str, response_path: str, request_id: int = None):
+        self._instructions.append(neoxp.oracle.response(url, response_path,
+                                                        request_id=request_id))

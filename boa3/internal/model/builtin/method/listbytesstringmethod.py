@@ -1,9 +1,8 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.method.listmethod import ListMethod
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
@@ -23,54 +22,41 @@ class ListBytesStringMethod(ListMethod):
 
         super().__init__(args, return_type)
 
-    @property
-    def prepare_for_packing(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_pack_opcodes(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.type.type import Type
 
-        if self._prepare_for_packing is None:
-            from boa3.internal.compiler.codegenerator import get_bytes_count
-            from boa3.internal.neo.vm.type.StackItem import StackItemType
-            from boa3.internal.model.type.type import Type
+        # index = len(value) - 1
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.insert_opcode(Opcode.DEC)
 
-            initialize_values = [
-                (Opcode.DUP, b''),
-                (Opcode.SIZE, b''),
-                (Opcode.DEC, b''),
-            ]
+        # while index >= 0
+        start_address = code_generator.convert_begin_while()
 
-            loop_for_char_or_byte = [
-                (Opcode.OVER, b''),
-                (Opcode.OVER, b''),
-                (Opcode.PICKITEM, b''),
-            ]
+        #   value[index] to stack
+        code_generator.duplicate_stack_item(2)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_get_item(index_inserted_internally=True)
 
-            if self._arg_value.type is Type.str:
-                loop_for_char_or_byte.append((Opcode.CONVERT, StackItemType.ByteString))
+        if self._arg_value.type is Type.str:
+            code_generator.convert_cast(Type.str, is_internal=True)
 
-            loop_for_char_or_byte.extend([(Opcode.ROT, b''),
-                                          (Opcode.ROT, b''),
-                                          (Opcode.DEC, b'')])
+        #   reorganize stack
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.insert_opcode(Opcode.DEC)
 
-            verify_loop_end = [
-                (Opcode.DUP, b''),
-                (Opcode.SIGN, b''),
-                (Opcode.PUSH0, b''),
-                # jumps to the beginning of the loop
-            ]
+        #   while condition
+        condition_address = code_generator.bytecode_size
+        code_generator.duplicate_stack_top_item()
+        code_generator.insert_opcode(Opcode.SIGN)
+        code_generator.convert_literal(0)
+        code_generator.convert_operation(BinaryOp.GtE, is_internal=True)
 
-            remove_extra_values = [
-                (Opcode.DROP, b''),
-                (Opcode.SIZE, b''),
-            ]
+        code_generator.convert_end_while(start_address, condition_address, is_internal=True)
 
-            num_jmp_code = -get_bytes_count(verify_loop_end + loop_for_char_or_byte)
-            jmp_to_dec_statement = OpcodeHelper.get_jump_and_data(Opcode.JMPGE, num_jmp_code)
-            verify_loop_end.append(jmp_to_dec_statement)
-
-            self._prepare_for_packing = (
-                initialize_values +
-                loop_for_char_or_byte +
-                verify_loop_end +
-                remove_extra_values
-            )
-
-        return super().prepare_for_packing
+        # clear stack
+        code_generator.remove_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)

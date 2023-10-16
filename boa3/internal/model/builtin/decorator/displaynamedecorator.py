@@ -92,8 +92,8 @@ class DisplayNameDecorator(IBuiltinDecorator):
 
     @property
     def is_function_decorator(self) -> bool:
-        return False
+        return True
 
     @property
     def is_class_decorator(self) -> bool:
-        return True
+        return False

@@ -5,8 +5,8 @@ from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to 
 from boa3.internal import constants
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive import neoxp
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive import neoxp
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestUpdateContractTemplate(BoaTest):
@@ -24,7 +24,7 @@ class TestUpdateContractTemplate(BoaTest):
 
     def test_update_contract(self):
         path, _ = self.get_deploy_file_paths('update_contract.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []

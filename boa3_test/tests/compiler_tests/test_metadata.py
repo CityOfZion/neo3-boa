@@ -6,8 +6,8 @@ from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.core.types import UInt160
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestMetadata(BoaTest):
@@ -177,7 +177,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -203,7 +203,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -280,12 +280,56 @@ class TestMetadata(BoaTest):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP17.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
 
+    def test_metadata_info_supported_standards_nep11_divisible(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11Divisible.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_nep11_divisible_optional_methods(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11DivisibleOptionalMethods.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_nep11_non_divisible(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11NonDivisible.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
+    def test_metadata_info_supported_standards_nep11_non_divisible_optional_methods(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsNEP11NonDivisibleOptionalMethods.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
+
     def test_metadata_info_supported_standards_missing_implementations_nep11(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP11.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
 
+    def test_metadata_info_supported_standards_missing_implementations_nep11_divisible(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP11Divisible.py')
+        self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
+
     def test_metadata_info_supported_standards_missing_implementations_nep11_optional_method(self):
         path = self.get_contract_path('MetadataInfoSupportedStandardsMissingImplementationNEP11OptionalMethods.py')
+        self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
+
+    def test_metadata_info_supported_standards_missing_event_nep11(self):
+        path = self.get_contract_path('MetadataInfoSupportedStandardsMissingEventNEP11.py')
         self.assertCompilerLogs(CompilerError.MissingStandardDefinition, path)
 
     def test_metadata_info_supported_standards_mismatched_type(self):
@@ -326,7 +370,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -364,7 +408,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -386,7 +430,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['trusts']), 0)
 
     def test_metadata_info_trusts_default(self):
-        path = self.get_contract_path('MetadataInfoTrustsDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('trusts', manifest)
@@ -408,7 +452,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract = runner.deploy_contract(path)
         runner.update_contracts(export_checkpoint=True)
@@ -443,7 +487,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(len(manifest['permissions']), 0)
 
     def test_metadata_info_permissions_default(self):
-        path = self.get_contract_path('MetadataInfoPermissionsDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('permissions', manifest)
@@ -460,7 +504,7 @@ class TestMetadata(BoaTest):
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
 
         path, _ = self.get_deploy_file_paths_without_compiling(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invoke = runner.call_contract(path, 'main')
 
@@ -495,7 +539,7 @@ class TestMetadata(BoaTest):
         self.assertIn(expected_permission, manifest['permissions'])
 
         path, _ = self.get_deploy_file_paths_without_compiling(path)
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         runner.call_contract(path, 'main')
 
@@ -513,13 +557,13 @@ class TestMetadata(BoaTest):
         self.assertEqual((manifest['name']), "SmartContractCustomName")
 
     def test_metadata_info_name_default(self):
-        path = self.get_contract_path('MetadataInfoNameDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('name', manifest)
         self.assertIsInstance(manifest['name'], str)
         self.assertGreater(len(manifest['name']), 0)
-        self.assertEqual((manifest['name']), "MetadataInfoNameDefault")
+        self.assertEqual((manifest['name']), "MetadataInfoDefault")
 
     def test_metadata_info_name_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoNameMismatchedType.py')
@@ -539,7 +583,7 @@ class TestMetadata(BoaTest):
         path, _ = self.get_deploy_file_paths(path)
         get_contract_path, _ = self.get_deploy_file_paths('test_sc/native_test/contractmanagement', 'GetContract.py')
 
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
         # verify using NeoManifestStruct
         contract_call = runner.call_contract(path, 'main')
         runner.execute()
@@ -565,7 +609,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(manifest_struct_groups, result_groups)
 
     def test_metadata_info_groups_default(self):
-        path = self.get_contract_path('MetadataInfoGroupsDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         output, manifest = self.compile_and_save(path)
 
         self.assertIn('groups', manifest)
@@ -584,7 +628,7 @@ class TestMetadata(BoaTest):
         self.assertEqual(generated_source, 'https://github.com/CityOfZion/neo3-boa')
 
     def test_metadata_info_source_default(self):
-        path = self.get_contract_path('MetadataInfoSourceDefault.py')
+        path = self.get_contract_path('MetadataInfoDefault.py')
         self.compile_and_save(path)
 
         nef_path, _ = self.get_deploy_file_paths_without_compiling(path)

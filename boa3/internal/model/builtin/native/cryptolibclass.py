@@ -26,6 +26,12 @@ class CryptoLibClass(INativeContractClass):
                 'sha256': Interop.Sha256,
                 'ripemd160': Interop.Ripemd160,
                 'verify_with_ecdsa': Interop.VerifyWithECDsa,
+                'bls12_381_add': Interop.Bls12381Add,
+                'bls12_381_deserialize': Interop.Bls12381Deserialize,
+                'bls12_381_equal': Interop.Bls12381Equal,
+                'bls12_381_mul': Interop.Bls12381Mul,
+                'bls12_381_pairing': Interop.Bls12381Pairing,
+                'bls12_381_serialize': Interop.Bls12381Serialize,
             }
         return super().class_methods
 

@@ -191,6 +191,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             method = method.getter
 
         if isinstance(method, Method):
+            if self._current_method is not None:
+                self._log_error(
+                    CompilerError.NotSupportedOperation(line=function.lineno, col=function.col_offset,
+                                                        symbol_id="Inner function")
+                )
             self._current_method = method
             self.new_local_scope({var_id: var for var_id, var in method.symbols.items()
                                   if isinstance(var, Variable) and var.type is not UndefinedType})
@@ -372,6 +377,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             value = self.visit(value)
             if isinstance(value, ast.Name):
                 symbol: ISymbol = self.get_symbol(value.id)
+
+                # TODO: change when assign functions to variable is implemented
+                if isinstance(symbol, Method):
+                    self._log_error(
+                        CompilerError.NotSupportedOperation(
+                            node.lineno, node.col_offset,
+                            'Assigning a function to a variable'
+                        ))
+                    return False
+
                 if isinstance(symbol, IExpression):
                     value_type = symbol.type
                 elif isinstance(symbol, IType):
@@ -1129,6 +1144,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             callable_id: str = call.func.id
             is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
             callable_target = self.get_symbol(callable_id, is_internal)
+        elif isinstance(call.func, ast.Lambda):
+            self._log_error(
+                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, 'lambda function')
+            )
         else:
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
@@ -1287,7 +1306,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 and callable_id in attribute_symbol.instance_methods:
             callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
             self._log_error(
-                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, callable_complete_id)
+                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset,
+                                                    "Calling instance method from class: " + callable_complete_id)
             )
         elif is_from_type_name and callable_id not in attribute_type.class_symbols:
             # the current symbol doesn't exist in the class scope
@@ -1397,9 +1417,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 unexpected_arg = already_called_arg
             else:
                 unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
-            self._log_error(
-                CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
-            )
+
+            from boa3.internal.model.builtin.method import SuperMethod
+            if isinstance(callable_target, SuperMethod):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(unexpected_arg.lineno, unexpected_arg.col_offset, 'super with arguments')
+                )
+            else:
+                self._log_error(
+                    CompilerError.UnexpectedArgument(unexpected_arg.lineno, unexpected_arg.col_offset)
+                )
             return False
         elif len_call_args + len_call_keywords < callable_required_args or not all_required_arg_have_values:
             missed_arg = list(callable_target.args)[len(call.args) + ignore_first_argument]
@@ -1821,6 +1848,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 dictionary[key] = value
         return dictionary
 
+    def visit_Set(self, node: ast.Set) -> Set[Any]:
+        """
+        Visitor of literal set node. Currently, is not supported
+        """
+
+        self._log_error(
+            CompilerError.InvalidType(node.lineno, node.col_offset, 'Set')
+        )
+
+        return self.generic_visit(node)
+
     def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
         """
         Visitor of constant names node
@@ -1870,3 +1908,16 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         return slice_node.lower, slice_node.upper, slice_node.step
+
+    def visit_JoinedStr(self, fstring_node: ast.JoinedStr) -> str:
+        """
+        Visitor of an f-string node
+
+        :param fstring_node:
+        :return: the object with the index value information
+        """
+        self._log_error(
+            CompilerError.NotSupportedOperation(fstring_node.lineno, fstring_node.col_offset, 'f-string')
+        )
+
+        return self.generic_visit(fstring_node)

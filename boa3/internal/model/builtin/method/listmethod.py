@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
@@ -10,8 +10,6 @@ class ListMethod(IBuiltinMethod):
 
     def __init__(self, args: Dict[str, Variable] = None, return_type=None, defaults: List[ast.AST] = None):
         identifier = 'list'
-
-        self._prepare_for_packing = None
 
         super().__init__(identifier, args, defaults=defaults, return_type=return_type)
 
@@ -34,20 +32,15 @@ class ListMethod(IBuiltinMethod):
 
         return self._identifier
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
+        self.generate_pack_opcodes(code_generator)
+        code_generator.insert_opcode(Opcode.PACK)
 
-        pack_values = [(Opcode.PACK, b'')]
-
-        return self.prepare_for_packing + pack_values
-
-    @property
-    def prepare_for_packing(self) -> List[Tuple[Opcode, bytes]]:
-
-        if self._prepare_for_packing is None:
-            self._prepare_for_packing = []
-
-        return self._prepare_for_packing
+    def generate_pack_opcodes(self, code_generator):
+        """
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
+        """
+        pass
 
     @property
     def _args_on_stack(self) -> int:

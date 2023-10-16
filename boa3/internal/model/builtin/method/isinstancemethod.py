@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -81,50 +81,34 @@ class IsInstanceMethod(IBuiltinMethod):
 
         return not any(not isinstance(param, (IExpression, IType)) for param in params)
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         if len(self._instances_type) == 0:
-            return [
-                (Opcode.ISNULL, b'')
-            ]
-        else:
-            opcodes = []
-            from boa3.internal.model.type.type import Type
-            from boa3.internal.neo.vm.type.Integer import Integer
-            types = self._instances_type.copy()
+            code_generator.insert_type_check(None)
+            return
 
-            jmps = []
-            for check_instance in types[:-1]:
-                opcodes.append((Opcode.DUP, b''))
-                is_instance_opcodes = check_instance.is_instance_opcodes()
-                opcodes.extend(is_instance_opcodes)
+        ifs = []
+        types = self._instances_type.copy()
+        for type_to_check in types[:-1]:
+            code_generator.duplicate_stack_top_item()
+            type_to_check.generate_is_instance_type_check(code_generator)
 
-                jmps.append(len(opcodes))
-                opcodes.append((Opcode.JMPIF, b''))
+            if_is_instance = code_generator.convert_begin_if()
+            code_generator.change_jump(if_is_instance, Opcode.JMPIF)
 
-            opcodes.extend(types[-1].is_instance_opcodes())
+            ifs.append(if_is_instance)
 
-            last_index = len(opcodes)
-            if len(types) > 1:
-                opcodes.extend([
-                    (Opcode.JMP, Integer(4).to_byte_array(min_length=1, signed=True)),
-                    (Opcode.DROP, b''),
-                ])
-                last_index = len(opcodes)
-                opcodes.append((Opcode.PUSH1, b''))
+        types[-1].generate_is_instance_type_check(code_generator)
+        if len(types) > 1:
+            last_if = code_generator.convert_begin_if()
+            code_generator.change_jump(last_if, Opcode.JMP)
 
-            jmp_to = 0
-            for index in reversed(jmps):
-                for pos in range(index + 1, last_index):
-                    last_op, last_data = opcodes[pos - 1]
-                    op, data = opcodes[pos]
-                    jmp_to += len(last_data) + len(op)
-                jmp_to += 1
+        for begin_if in ifs:
+            code_generator.convert_end_if(begin_if, is_internal=True)
 
-                last_index = index + 1
-                opcodes[index] = opcodes[index][0], Integer(jmp_to).to_byte_array(min_length=1, signed=True)
-
-            return opcodes
+        if len(types) > 1:
+            code_generator.remove_stack_top_item()
+            code_generator.convert_literal(True)
+            code_generator.convert_end_if(last_if, is_internal=True)
 
     @property
     def _args_on_stack(self) -> int:

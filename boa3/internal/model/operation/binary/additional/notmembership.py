@@ -6,7 +6,6 @@ from boa3.internal.model.type.collection.icollection import ICollectionType
 from boa3.internal.model.type.collection.mapping.mappingtype import MappingType
 from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.type.type import IType, Type
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CollectionNotMembership(BinaryOperation):
@@ -61,7 +60,10 @@ class CollectionNotMembership(BinaryOperation):
 
         return left_operand, self.right_type
 
-    @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.operation.binary.additional import CollectionMembership
-        return CollectionMembership().opcode + [(Opcode.NOT, b'')]
+        from boa3.internal.model.operation.unaryop import UnaryOp
+
+        code_generator.convert_operation(CollectionMembership(self.left_type, self.right_type),
+                                         is_internal=True)
+        code_generator.convert_operation(UnaryOp.Not, is_internal=True)

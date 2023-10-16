@@ -38,6 +38,7 @@ if __name__ == '__main__':
         suite = AsyncTestSuite()
         discover_path = f'{env.PROJECT_ROOT_DIRECTORY}/boa3_test/'
         test_discover = unittest.loader.defaultTestLoader.discover(discover_path,
+                                                                   top_level_dir=env.PROJECT_ROOT_DIRECTORY,
                                                                    )
 
         for test in list_of_tests_gen(test_discover):

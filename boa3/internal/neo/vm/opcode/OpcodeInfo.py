@@ -337,9 +337,9 @@ class OpcodeInfo:
     # Returns a section of a string.
     SUBSTR = OpcodeInformation(Opcode.SUBSTR)
     # Keeps only characters left of the specified point in a string.
-    LEFT = OpcodeInformation(Opcode.LEFT)
+    LEFT = OpcodeInformation(Opcode.LEFT, stack_items=2)
     # Keeps only characters right of the specified point in a string.
-    RIGHT = OpcodeInformation(Opcode.RIGHT)
+    RIGHT = OpcodeInformation(Opcode.RIGHT, stack_items=2)
 
     # endregion
 
@@ -417,7 +417,7 @@ class OpcodeInfo:
     # Returns 1 if a is greater than or equal to b, 0 otherwise.
     GE = OpcodeInformation(Opcode.GE)
     # Returns the smaller of a and b.
-    MIN = OpcodeInformation(Opcode.MIN)
+    MIN = OpcodeInformation(Opcode.MIN, stack_items=2)
     # Returns the larger of a and b.
     MAX = OpcodeInformation(Opcode.MAX)
     # Returns 1 if x is within the specified range (left-inclusive), 0 otherwise.
@@ -455,7 +455,7 @@ class OpcodeInfo:
     SIZE = OpcodeInformation(Opcode.SIZE)
     # An input index n (or key) and an array (or map) are removed from the top of the main stack. Puts True on top of
     # main stack if array[n] (or map[n]) exist, and False otherwise.
-    HASKEY = OpcodeInformation(Opcode.HASKEY)
+    HASKEY = OpcodeInformation(Opcode.HASKEY, stack_items=2)
     # A map is taken from top of the main stack. The keys of this map are put on top of the main stack.
     KEYS = OpcodeInformation(Opcode.KEYS)
     # A map is taken from top of the main stack. The values of this map are put on top of the main stack.
@@ -474,9 +474,9 @@ class OpcodeInfo:
     # (or map[n]) is removed.
     REMOVE = OpcodeInformation(Opcode.REMOVE)
     # Remove all the items from the compound-type.
-    CLEARITEMS = OpcodeInformation(Opcode.CLEARITEMS)
+    CLEARITEMS = OpcodeInformation(Opcode.CLEARITEMS, stack_items=1)
     # Remove the last element from an array, and push it onto the stack.
-    POPITEM = OpcodeInformation(Opcode.POPITEM)
+    POPITEM = OpcodeInformation(Opcode.POPITEM, stack_items=1)
 
     # endregion
 
@@ -488,5 +488,15 @@ class OpcodeInfo:
     ISTYPE = OpcodeInformation(Opcode.ISTYPE, 1)
     # Converts the top item to the specified type.
     CONVERT = OpcodeInformation(Opcode.CONVERT, 1)
+
+    # endregion
+
+    # region Extensions
+
+    # Turns the vm state to FAULT immediately, and cannot be caught. Includes a reason.
+    ABORTMSG = OpcodeInformation(Opcode.ABORTMSG)
+
+    # Pop the top value of the stack, if it false, then exit vm execution and set vm state to FAULT. Includes a reason.
+    ASSERTMSG = OpcodeInformation(Opcode.ASSERTMSG)
 
     # endregion

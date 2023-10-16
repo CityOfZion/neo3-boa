@@ -72,9 +72,6 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
 
@@ -103,7 +100,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=reqs,
 
-    python_requires='>=3.7',
+    python_requires='>=3.10',
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -117,9 +114,9 @@ setup(
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
-    # package_data={
-    #    'sample': ['package_data.dat'],
-    # },
+    package_data={
+        'boa3': ['py.typed'],
+    },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:

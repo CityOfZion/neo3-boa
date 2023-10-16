@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict
 
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.symbol import ISymbol
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 
@@ -96,13 +95,13 @@ class IType(IdentifiedSymbol):
         """
         pass
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+    def generate_is_instance_type_check(self, code_generator):
         """
-        Get the list of opcodes to check if an value is of this type
+        Generates the opcodes to check if a value is of this type
 
-        :return: A list of opcodes to check a value type
+        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
         """
-        return [(Opcode.ISTYPE, self.stack_item)]
+        code_generator.insert_type_check(self.stack_item)
 
     @property
     def symbols(self) -> Dict[str, ISymbol]:

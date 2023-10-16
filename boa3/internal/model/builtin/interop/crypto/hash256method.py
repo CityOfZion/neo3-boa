@@ -1,8 +1,7 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class Hash256Method(CryptoLibMethod):
@@ -20,10 +19,8 @@ class Hash256Method(CryptoLibMethod):
             self._pack_arguments = Interop.Sha256.pack_arguments  # this is the first method called
         return self._pack_arguments
 
-    @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
-        # calls the generic implementation to ensure the correct output when calling consecutive compilations
-        default_opcodes = super()._opcode
+    def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.interop.interop import Interop
-        return (Interop.Sha256.opcode
-                + Interop.Sha256.opcode)
+
+        code_generator.convert_builtin_method_call(Interop.Sha256, is_internal=True)
+        code_generator.convert_builtin_method_call(Interop.Sha256, is_internal=True)

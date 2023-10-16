@@ -9,26 +9,29 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts.namedcurve import NamedCurve
 from boa3.internal.neo3.vm import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestCryptoLibClass(BoaTest):
     default_folder: str = 'test_sc/native_test/cryptolib'
     ecpoint_init = (
-        Opcode.CONVERT + Type.bytes.stack_item
-        + Opcode.DUP
+        Opcode.DUP
         + Opcode.ISNULL
-        + Opcode.JMPIF + Integer(8).to_byte_array()
+        + Opcode.NOT
+        + Opcode.JMPIFNOT
+        + Integer(11).to_byte_array(min_length=1)
+        + Opcode.CONVERT + Type.bytes.stack_item
         + Opcode.DUP
         + Opcode.SIZE
         + Opcode.PUSHINT8 + Integer(33).to_byte_array(signed=True)
-        + Opcode.JMPEQ + Integer(3).to_byte_array()
+        + Opcode.NUMEQUAL
+        + Opcode.JMPIF + Integer(3).to_byte_array()
         + Opcode.THROW
     )
 
     def test_get_hash(self):
         path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -44,7 +47,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_str(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Str.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -65,7 +68,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_int(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -82,7 +85,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_bool(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -99,7 +102,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_ripemd160_bytes(self):
         path, _ = self.get_deploy_file_paths('Ripemd160Bytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -124,7 +127,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_str(self):
         path, _ = self.get_deploy_file_paths('Sha256Str.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -145,7 +148,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_int(self):
         path, _ = self.get_deploy_file_paths('Sha256Int.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -162,7 +165,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_bool(self):
         path, _ = self.get_deploy_file_paths('Sha256Bool.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -179,7 +182,7 @@ class TestCryptoLibClass(BoaTest):
 
     def test_sha256_bytes(self):
         path, _ = self.get_deploy_file_paths('Sha256Bytes.py')
-        runner = NeoTestRunner(runner_id=self.method_name())
+        runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
         expected_results = []
@@ -304,5 +307,94 @@ class TestCryptoLibClass(BoaTest):
         )
 
         path = self.get_contract_path('Murmur32.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_add(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Add.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_deserialize(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Deserialize.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_equal(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Equal.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_mul(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.PUSHT
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Mul.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_pairing(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x02'
+            + Opcode.LDARG1
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Pairing.py')
+        output = self.compile(path)
+        self.assertEqual(expected_output, output)
+
+    def test_bls12_381_serialize(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('Bls12381Serialize.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
