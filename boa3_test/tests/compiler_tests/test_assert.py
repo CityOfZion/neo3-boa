@@ -1,10 +1,10 @@
-from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
+from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 

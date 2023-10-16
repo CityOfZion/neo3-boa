@@ -20,6 +20,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 
+## [1.1.0] - 2023-10-16
+### Added
+- Support to Neo features up to Neo 3.6
+  - Added zero knowledge proof methods to `CryptoLib` interface
+  - Support to ASSERTMSG and ABORTMSG opcodes
+- `to_hex_str` method to convert `bytes` into printable strings
+
+### Changed
+- Included `msg` optional argument to `abort`
+- Validate if given `.nef` files exists before running TestRunner
+
+
+### Removed
+- Dropped support to Python versions prior to 3.10
+
+
+### Fixed
+- Removed incorrect requirement of `filelock` to use NeoTestRunner class
+- Fixed imported variable value generation when it has the same identifier of a local variable
+- Fixed NEP-11 validator to handle divisible NFT standard
+
+
 ## [1.0.0] - 2023-07-10
 ### Added
 - Included an environment parameter to compilation that is accessible in the smart contract
@@ -513,6 +535,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...staging
+[1.1.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.1.0
 [1.0.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.0.0
 [0.14.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.14.0
 [0.13.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.1

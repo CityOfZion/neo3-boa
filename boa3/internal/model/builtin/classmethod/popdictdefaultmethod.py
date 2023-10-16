@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 
 from boa3.internal.model.builtin.classmethod.popmethod import PopMethod
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
