@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+
+### Changed
+
+
+### Deprecated
+
+
+### Removed
+
+
+### Fixed
+
+
+## [1.1.0] - 2023-10-16
+### Added
 - Support to Neo features up to Neo 3.6
   - Added zero knowledge proof methods to `CryptoLib` interface
   - Support to ASSERTMSG and ABORTMSG opcodes
@@ -14,8 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Included `msg` optional argument to `abort`
 - Validate if given `.nef` files exists before running TestRunner
-
-### Deprecated
 
 
 ### Removed
@@ -521,6 +535,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...staging
+[1.1.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.1.0
 [1.0.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.0.0
 [0.14.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.14.0
 [0.13.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.13.1
