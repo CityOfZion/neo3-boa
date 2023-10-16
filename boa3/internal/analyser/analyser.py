@@ -88,8 +88,6 @@ class Analyser:
             from boa3.internal.model.imports.builtin import CompilerBuiltin
             CompilerBuiltin.update_with_analyser(analyser)
 
-        analyser.__pre_execute()
-
         # fill symbol table
         if not analyser.__analyse_modules(imported_files, import_stack):
             return analyser

@@ -17,11 +17,3 @@ class InteropInterfaceType(ClassType, ABC):
     @property
     def abi_type(self) -> AbiType:
         return AbiType.InteropInterface
-
-    def generate_is_instance_type_check(self, code_generator):
-        """
-        Generates the opcodes to check if a value is of this type
-
-        :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
-        """
-        super(ClassType, self).generate_is_instance_type_check(code_generator)

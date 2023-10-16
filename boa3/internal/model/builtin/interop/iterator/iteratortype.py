@@ -74,8 +74,8 @@ class IteratorType(InteropInterfaceType, ICollectionType):
         return super(PythonClass, self).is_instance_opcodes()
 
     def generate_is_instance_type_check(self, code_generator):
-        from boa3.internal.model.type.classes.classtype import ClassType
-        return super(ClassType, self).generate_is_instance_type_check(code_generator)
+        from boa3.internal.model.type.classes.pythonclass import PythonClass
+        return super(PythonClass, self).generate_is_instance_type_check(code_generator)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, IteratorType):

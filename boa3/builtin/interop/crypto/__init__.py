@@ -8,6 +8,12 @@ __all__ = [
     'check_multisig',
     'verify_with_ecdsa',
     'murmur32',
+    'bls12_381_add',
+    'bls12_381_deserialize',
+    'bls12_381_equal',
+    'bls12_381_mul',
+    'bls12_381_pairing',
+    'bls12_381_serialize',
 ]
 
 

@@ -1758,10 +1758,23 @@ class CodeGenerator:
         elif previous_stack_size < 0:
             previous_stack_size = 0
 
+        size_before_generating = self.bytecode_size
         if is_internal:
             builtin.generate_internal_opcodes(self)
         else:
             builtin.generate_opcodes(self)
+
+        if size_before_generating == self.bytecode_size:
+            # TODO: remove this when the built in code generation refactoring is finished
+            for opcode, data in builtin.opcode:
+                op_info = OpcodeInfo.get_info(opcode)
+                if opcode is Opcode.CALL and isinstance(data, Method):
+                    # avoid losing current stack state
+                    for _ in data.args:
+                        self._stack_append(Type.any)
+                    self.convert_method_call(data, len(data.args) - 1)
+                else:
+                    self.__insert1(op_info, data)
 
         if isinstance(builtin, IBuiltinMethod):
             if is_internal and hasattr(builtin, 'internal_call_args'):
@@ -2019,13 +2032,11 @@ class CodeGenerator:
         self._stack_pop()
         self._stack_append(Type.exception)
 
-    def convert_raise_exception(self, *, is_internal: bool = False):
-        if not is_internal:
-            if len(self._stack) == 0:
-                self.convert_literal(Builtin.Exception.default_message)
+    def convert_raise_exception(self):
+        if len(self._stack) == 0:
+            self.convert_literal(Builtin.Exception.default_message)
 
-        if len(self._stack) > 0:
-            self._stack_pop()
+        self._stack_pop()
         self.__insert1(OpcodeInfo.THROW)
 
     def insert_opcode(self, opcode: Opcode, data: bytes = None,

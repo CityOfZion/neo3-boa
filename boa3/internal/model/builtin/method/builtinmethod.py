@@ -181,7 +181,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
 
         :return: Return the code of the method body if there is no opcode. None otherwise.
         """
-        return self._body
+        return self._body if len(self.opcode) <= 0 else None
 
     @property
     @abstractmethod
