@@ -1,0 +1,80 @@
+[project]
+name = 'neo3-boa'
+description = 'A Python compiler for the Neo3 Virtual Machine'
+readme = 'README.md'
+requires-python = '>= 3.10.0'
+license = {file = 'LICENSE' }
+keywords = ['compiler', 'NEO', '.nef', 'blockchain', 'smartcontract', 'development', 'dApp']
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development :: Build Tools',
+    'License :: OSI Approved :: Apache Software License',
+    'Programming Language :: Python :: 3.10',
+]
+dynamic = ['version']
+dependencies = [
+    'base58>=1.0.3',
+    'wheel>=0.30.0',
+    'requests==2.31.0',
+]
+
+[project.optional-dependencies]
+dev = [
+    'autopep8>=1.4.4',
+    'base58>=1.0.3',
+    'bump-my-version==0.10.0',
+    'coverage>=6.0.1',
+    'filelock>=3.10.7',
+    'myst-parser==1.0.0',
+    'Sphinx==5.0.0',
+    'sphinx-rtd-theme==1.2.1',
+    'twine>=1.10.0',
+    'wheel>=0.30.0',
+]
+test = [
+    'coverage>=6.0.1',
+]
+
+[project.urls]
+repository = 'https://github.com/CityOfZion/neo3-boa'
+documentation = 'https://dojo.coz.io/neo3/boa/index.html'
+changelog = 'https://github.com/CityOfZion/neo3-boa/blob/master/CHANGELOG.md'
+
+[project.scripts]
+neo3-boa = 'boa3.cli:main'
+install_cpm = 'boa3.cpm:main'
+
+
+[tool.setuptools.packages.find]
+exclude = ['boa3_test.tests.*_tests*']
+include = [
+    'boa3', 'boa3.*',
+    'boa3_test.tests', 'boa3_test.tests.*',
+    'boa3_test.test_drive', 'boa3_test.test_drive.*'
+]
+
+[tool.setuptools.package-data]
+boa3 = ['py.typed']
+
+[tool.setuptools.dynamic]
+version = { attr = 'boa3.__version__' }
+
+
+[tool.bumpversion]
+current_version = '1.1.0'
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = './boa3/__init__.py'
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+
+[tool.coverage.run]
+source = ['boa3']
+omit = ['boa3/builtin/*']
+
+[tool.coverage.report]
+omit = ['boa3_test/*']

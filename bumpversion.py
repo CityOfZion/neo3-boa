@@ -5,16 +5,16 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         raise ValueError('Missing arguments')
 
-    bump2version_args = sys.argv[1:]
+    bumpversion_args = sys.argv[1:]
 
     here = os.path.abspath(os.path.dirname(__file__))
     config_file = os.path.sep.join([here, 'docs', '.bumpversion.cfg'])
 
-    if '-h' in bump2version_args or '--help' in bump2version_args:
-        exit_code = os.system(f'bump2version {" ".join(bump2version_args)}')
+    if '-h' in bumpversion_args or '--help' in bumpversion_args:
+        exit_code = os.system(f'bumpversion bump {" ".join(bumpversion_args)}')
         exit(exit_code)
 
-    exit_code = os.system(f'bump2version {" ".join(bump2version_args)} --config-file {config_file} --allow-dirty')
+    exit_code = os.system(f'bumpversion bump {" ".join(bumpversion_args)} --config-file {config_file} --allow-dirty')
     if exit_code:
         exit(exit_code)
 
@@ -24,4 +24,4 @@ if __name__ == '__main__':
 
     os.system('git checkout boa3')
     os.system('git add .')
-    os.system(f'bump2version {" ".join(bump2version_args)} --allow-dirty')
+    os.system(f'bumpversion bump {" ".join(bumpversion_args)} --allow-dirty')
