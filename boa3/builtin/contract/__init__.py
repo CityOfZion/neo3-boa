@@ -1,6 +1,7 @@
 __all__ = [
     'Nep11TransferEvent',
     'Nep17TransferEvent',
+    'Nep17Contract',
     'NeoAccountState',
     'abort',
     'to_hex_str',
@@ -9,6 +10,7 @@ __all__ = [
 
 from typing import Any, Optional, Union
 
+from boa3.builtin.contract.Nep17Contract import Nep17Contract
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.type import ECPoint, UInt160, Event
 
