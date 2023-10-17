@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.model.builtin.interop.interopinterfacetype import InteropInterfaceType
 from boa3.internal.model.method import Method

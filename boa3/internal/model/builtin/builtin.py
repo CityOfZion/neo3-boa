@@ -192,6 +192,9 @@ class Builtin:
     Nep11Transfer = Nep11TransferEvent()
     Nep17Transfer = Nep17TransferEvent()
 
+    # boa contract interfaces
+    Nep17Contract = Nep17ContractClass()
+
     # boa smart contract methods
     Abort = AbortMethod()
     Env = EnvProperty.build()
@@ -270,6 +273,7 @@ class Builtin:
                               NeoAccountState,
                               Nep11Transfer,
                               Nep17Transfer,
+                              Nep17Contract,
                               ScriptHashMethod_,
                               ToHexStr,
                               ],
