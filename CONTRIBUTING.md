@@ -57,13 +57,14 @@ file, and also have the [.NET 6.0](https://dotnet.microsoft.com/en-us/download/d
 installed.
 
 ```shell
-pip install -e .[dev]
+pip install .[dev,test]
+pip uninstall neo3-boa --yes
 dotnet tool install Neo.Express --version 3.5.20 -g
 dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 ```
 
-> You can compile your smart contracts using your local Neo3-boa project by installing it with pip using the `--editable` 
-> flag, i.e. `pip install -e path/to/local/clone/of/Neo3-boa`.
+> Some tests will fail if you have the neo3-boa package installed. We only need the dependencies, that's why the 
+> neo3-boa package is being uninstalled.
 
 
 ## Writing changes

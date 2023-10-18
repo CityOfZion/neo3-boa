@@ -8,13 +8,12 @@ if __name__ == '__main__':
     bumpversion_args = sys.argv[1:]
 
     here = os.path.abspath(os.path.dirname(__file__))
-    config_file = os.path.sep.join([here, 'docs', '.bumpversion.cfg'])
 
     if '-h' in bumpversion_args or '--help' in bumpversion_args:
         exit_code = os.system(f'bumpversion bump {" ".join(bumpversion_args)}')
         exit(exit_code)
 
-    exit_code = os.system(f'bumpversion bump {" ".join(bumpversion_args)} --config-file {config_file} --allow-dirty')
+    exit_code = os.system(f'bumpversion bump {" ".join(bumpversion_args)} --allow-dirty --no-tag --no-commit')
     if exit_code:
         exit(exit_code)
 
@@ -23,5 +22,6 @@ if __name__ == '__main__':
         exit(exit_code)
 
     os.system('git checkout boa3')
+    os.system('git checkout docs/make-pdf.py')
     os.system('git add .')
     os.system(f'bumpversion bump {" ".join(bumpversion_args)} --allow-dirty')
