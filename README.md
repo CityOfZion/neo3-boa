@@ -22,6 +22,9 @@
   <a href="https://pypi.org/project/neo3-boa/">
     <img src="https://img.shields.io/pypi/v/neo3-boa.svg" alt="PyPI.">
   </a>
+  <a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FCityOfZion%2Fneo3-boa%2Fmaster%2Fpyproject.toml" alt="Python Version.">
+  </a>
   <a href="https://opensource.org/licenses/Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Licence.">
   </a>
