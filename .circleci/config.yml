@@ -4,6 +4,9 @@ executors:
   python310-executor:
     docker:
       - image: cimg/python:3.10.13
+  python311-executor:
+    docker:
+      - image: cimg/python:3.11.6
 
 orbs:
   python: circleci/python@0.2.1
@@ -46,6 +49,10 @@ jobs:
             coverage run boa3_test/tests/run_unit_tests.py
             pip install coveralls
             coveralls --service=circleci
+
+  unit-test-311:
+    <<: *unit-test
+    executor: python311-executor
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
@@ -118,10 +125,15 @@ workflows:
          filters:
            tags:
              only: /.*/
+      - unit-test-311:
+         filters:
+           tags:
+             only: /.*/
       - build_deploy_test:
          context: pypi_test
          requires:
            - unit-test-310
+           - unit-test-311
          filters:
            tags:
              only: /^v.*/
