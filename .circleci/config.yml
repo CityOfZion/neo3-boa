@@ -15,7 +15,7 @@ executors:
       - image: cimg/python:3.10.7
   python311-executor:
     docker:
-      - image: cimg/python:3.11.5
+      - image: cimg/python:3.11.6
 
 orbs:
   python: circleci/python@0.2.1
