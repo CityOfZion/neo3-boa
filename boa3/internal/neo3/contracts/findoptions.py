@@ -1,7 +1,7 @@
-from enum import IntFlag
+from enum import IntEnum
 
 
-class FindOptions(IntFlag):
+class FindOptions(IntEnum):
     """
     Represents the options you can use when trying to find a set of values inside the storage.
 
