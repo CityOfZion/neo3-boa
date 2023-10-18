@@ -20,6 +20,13 @@ jobs:
       - python/load-cache
 
       - run:
+          name: Fix openssl for ripemd160 loading
+          command: |
+            wget https://gist.githubusercontent.com/ixje/9bfde300b660276abc98761f7dc32839/raw/95aea8da07dcead2949ac266fbacc47bbf6a1881/fix-ripemd160-loading.py
+            sudo -E python fix-ripemd160-loading.py
+            python -c "import hashlib;print(hashlib.new('ripemd160'))"
+
+      - run:
           name: Install Dependencies
           command: |
             pip install -r requirements_dev.txt
