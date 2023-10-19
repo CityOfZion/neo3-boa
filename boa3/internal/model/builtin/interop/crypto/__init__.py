@@ -5,6 +5,7 @@ __all__ = [
     'Bls12381MulMethod',
     'Bls12381PairingMethod',
     'Bls12381SerializeMethod',
+    'Bls12381Type',
     'CheckMultisigMethod',
     'CheckSigMethod',
     'Hash160Method',
@@ -22,6 +23,7 @@ from boa3.internal.model.builtin.interop.crypto.bls12381equalmethod import Bls12
 from boa3.internal.model.builtin.interop.crypto.bls12381mulmethod import Bls12381MulMethod
 from boa3.internal.model.builtin.interop.crypto.bls12381pairingmethod import Bls12381PairingMethod
 from boa3.internal.model.builtin.interop.crypto.bls12381serializemethod import Bls12381SerializeMethod
+from boa3.internal.model.builtin.interop.crypto.bls12381type import Bls12381Type
 from boa3.internal.model.builtin.interop.crypto.checkmultisigmethod import CheckMultisigMethod
 from boa3.internal.model.builtin.interop.crypto.checksigmethod import CheckSigMethod
 from boa3.internal.model.builtin.interop.crypto.hash160method import Hash160Method

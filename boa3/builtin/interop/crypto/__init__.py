@@ -1,5 +1,6 @@
 __all__ = [
     'NamedCurve',
+    'IBls12381',
     'sha256',
     'ripemd160',
     'hash160',
@@ -19,6 +20,7 @@ __all__ = [
 
 from typing import Any, List
 
+from boa3.builtin.interop.crypto.ibls12381 import IBls12381
 from boa3.builtin.interop.crypto.namedcurve import NamedCurve
 from boa3.builtin.type import ECPoint
 
@@ -171,33 +173,33 @@ def murmur32(data: bytes, seed: int) -> bytes:
     pass
 
 
-def bls12_381_add(x: Any, y: Any) -> Any:
+def bls12_381_add(x: IBls12381, y: IBls12381) -> IBls12381:
     """
     Add operation of two bls12381 points.
 
     :param x: The first point
-    :type x: bytes
+    :type x: IBls12381
     :param y: The second point
-    :type y: bytes
+    :type y: IBls12381
     :return: the two points sum
-    :rtype: bytes
+    :rtype: IBls12381
     """
     pass
 
 
-def bls12_381_deserialize(data: bytes) -> Any:
+def bls12_381_deserialize(data: bytes) -> IBls12381:
     """
     Deserialize a bls12381 point.
 
     :param data: The point as byte array
     :type data: bytes
     :return: the deserialized point
-    :rtype: bytes
+    :rtype: IBls12381
     """
     pass
 
 
-def bls12_381_equal(x: Any, y: Any) -> bool:
+def bls12_381_equal(x: IBls12381, y: IBls12381) -> bool:
     """
     Determines whether the specified points are equal.
 
@@ -211,42 +213,42 @@ def bls12_381_equal(x: Any, y: Any) -> bool:
     pass
 
 
-def bls12_381_mul(x: Any, mul: bytes, neg: bool) -> Any:
+def bls12_381_mul(x: IBls12381, mul: bytes, neg: bool) -> IBls12381:
     """
     Mul operation of gt point and multiplier.
 
     :param x: The point
-    :type x: bytes
+    :type x: IBls12381
     :param mul: Multiplier, 32 bytes, little-endian
     :type mul: int
     :param neg: negative number
     :type neg: bool
     :return: the two points product
-    :rtype: bytes
+    :rtype: IBls12381
     """
     pass
 
 
-def bls12_381_pairing(g1: Any, g2: Any) -> Any:
+def bls12_381_pairing(g1: IBls12381, g2: IBls12381) -> IBls12381:
     """
     Pairing operation of g1 and g2.
 
     :param g1: The g1 point
-    :type g1: bytes
+    :type g1: IBls12381
     :param g2: The g2 point
-    :type g2: bytes
+    :type g2: IBls12381
     :return: the two points pairing
-    :rtype: bytes
+    :rtype: IBls12381
     """
     pass
 
 
-def bls12_381_serialize(g: Any) -> bytes:
+def bls12_381_serialize(g: IBls12381) -> bytes:
     """
     Serialize a bls12381 point.
 
     :param g: The point to be serialized.
-    :type g: bytes
+    :type g: IBls12381
     :return: the serialized point
     :rtype: bytes
     """
