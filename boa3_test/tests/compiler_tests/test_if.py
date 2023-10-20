@@ -1,4 +1,4 @@
-from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
+from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.exception import CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -7,7 +7,7 @@ from boa3.internal.neo3.vm import VMState
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestIf(boa_test.BoaTest):
+class TestIf(BoaTest):
     default_folder: str = 'test_sc/if_test'
 
     def test_if_constant_condition(self):
@@ -709,7 +709,6 @@ class TestIf(boa_test.BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-    @boa_test.skipIfHashFails
     def test_boa2_op_call_test(self):
         path, _ = self.get_deploy_file_paths('OpCallBoa2Test.py')
         runner = BoaTestRunner(runner_id=self.method_name())

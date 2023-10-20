@@ -1,6 +1,6 @@
 import os.path
 
-from boa3_test.tests.cli_tests import cli_test  # needs to be the first import to avoid circular imports
+from boa3_test.tests.cli_tests.cli_test import BoaCliTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.neo3.vm import VMState
@@ -8,7 +8,7 @@ from boa3_test.tests.cli_tests.utils import neo3_boa_cli, get_path_from_boa3_tes
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestCliCompile(cli_test.BoaCliTest):
+class TestCliCompile(BoaCliTest):
 
     @neo3_boa_cli('compile', '-h')
     def test_cli_compile_help(self):
@@ -50,7 +50,6 @@ class TestCliCompile(cli_test.BoaCliTest):
         self.assertFalse(os.path.isfile(debug_info_path),
                          msg=f'{debug_info_path} exists')
 
-    @cli_test.skipIfHashFails
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
                   '-db')
     def test_cli_compile_debug(self):

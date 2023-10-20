@@ -1,12 +1,10 @@
 from boa3_test.tests.boa_test import (BoaTest,  # needs to be the first import to avoid circular imports
-                                      skipIfHashFails,
                                       _COMPILER_LOCK as LOCK,
                                       _LOGGING_LOCK as LOG_LOCK
                                       )
 
 __all__ = [
     'BoaCliTest',
-    'skipIfHashFails',
 ]
 
 import abc
