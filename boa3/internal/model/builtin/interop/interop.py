@@ -67,6 +67,7 @@ class Interop:
 
     # Interop Types
     BlockType = BlockType.build()
+    Bls12381Type = Bls12381Type.build()
     CallFlagsType = CallFlagsType()
     ContractManifestType = ContractManifestType.build()
     ContractType = ContractType.build()
@@ -289,7 +290,9 @@ class Interop:
                               )
 
     CryptoPackage = Package(identifier=InteropPackage.Crypto,
-                            types=[NamedCurveType],
+                            types=[NamedCurveType,
+                                   Bls12381Type
+                                   ],
                             methods=[Bls12381Add,
                                      Bls12381Deserialize,
                                      Bls12381Equal,
