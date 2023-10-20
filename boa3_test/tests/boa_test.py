@@ -12,7 +12,6 @@ from boa3.internal.model.method import Method
 
 __all__ = [
     'BoaTest',
-    'skipIfHashFails',
     '_COMPILER_LOCK',
     '_LOGGING_LOCK',
     'USE_UNIQUE_NAME',
@@ -22,26 +21,6 @@ _COMPILER_LOCK = threading.RLock()
 _LOGGING_LOCK = threading.Lock()
 
 USE_UNIQUE_NAME = False
-
-
-def skipIfHashFails(func):
-    # some tests are failing on CICD docker because of OpenSSL
-    # skip them for now, but we need to look for a workaround asap
-    def skip_function(*args, **kwargs):
-        import unittest
-        raise unittest.SkipTest('ripemd160 is not working')
-
-    try:
-        import hashlib
-        # ripemd160 is not supported by default on OpenSSL 3.0
-        hashlib.new('ripemd160', b'').digest()
-        is_working = True
-    except BaseException:
-        is_working = False
-
-    if not is_working:
-        return skip_function
-    return func
 
 
 class BoaTest(TestCase):

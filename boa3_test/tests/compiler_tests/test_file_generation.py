@@ -1,8 +1,7 @@
 import os
 from typing import Dict, Tuple
 
-from boa3_test.tests import boa_test  # needs to be the first import to avoid circular imports
-from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
+from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.compiler.compiler import Compiler
@@ -16,7 +15,7 @@ from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.Integer import Integer
 
 
-class TestFileGeneration(boa_test.BoaTest):
+class TestFileGeneration(BoaTest):
     default_folder: str = 'test_sc/generation_test'
 
     def test_generate_files(self):
@@ -27,7 +26,6 @@ class TestFileGeneration(boa_test.BoaTest):
         self.assertTrue(os.path.exists(expected_nef_output))
         self.assertTrue(os.path.exists(expected_manifest_output))
 
-    @boa_test.skipIfHashFails
     def test_generate_files_with_debug_info(self):
         path = self.get_contract_path('GenerationWithDecorator.py')
         expected_nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
@@ -344,7 +342,6 @@ class TestFileGeneration(boa_test.BoaTest):
         path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    @boa_test.skipIfHashFails
     def test_generate_nefdbgnfo_file(self):
         from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithDecorator.py')
@@ -399,7 +396,6 @@ class TestFileGeneration(boa_test.BoaTest):
                 local_type = actual_method.locals[var_id].type
                 self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
 
-    @boa_test.skipIfHashFails
     def test_generate_nefdbgnfo_file_with_event(self):
         path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
         nef_output, _ = self.get_deploy_file_paths(path)
@@ -443,7 +439,6 @@ class TestFileGeneration(boa_test.BoaTest):
                 self.assertIn(param_id, actual_event.args)
                 self.assertEqual(param_type, actual_event.args[param_id].type.abi_type)
 
-    @boa_test.skipIfHashFails
     def test_generate_nefdbgnfo_file_with_static_variables(self):
         path = self.get_contract_path('GenerationWithStaticVariables.py')
         nef_output, _ = self.get_deploy_file_paths(path)
@@ -483,7 +478,6 @@ class TestFileGeneration(boa_test.BoaTest):
             self.assertIn(var_inner_id, variables)
             self.assertEqual(var_type, variables[var_inner_id].type.abi_type)
 
-    @boa_test.skipIfHashFails
     def test_generate_nefdbgnfo_file_with_user_module_import(self):
         from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('GenerationWithUserModuleImports.py')
@@ -539,7 +533,6 @@ class TestFileGeneration(boa_test.BoaTest):
                 local_type = actual_method.locals[var_id].type
                 self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
 
-    @boa_test.skipIfHashFails
     def test_generate_nefdbgnfo_file_with_user_module_name_import(self):
         from boa3.internal.model.type.itype import IType
         path = self.get_contract_path('test_sc/import_test', 'ImportModuleWithoutInit.py')
@@ -676,7 +669,6 @@ class TestFileGeneration(boa_test.BoaTest):
             self.assertIn(method['name'], methods)
             self.assertEqual(method['offset'], methods[method['name']].start_address)
 
-    @boa_test.skipIfHashFails
     def test_generate_debug_info_with_multiple_flows(self):
         path = self.get_contract_path('GenerationWithMultipleFlows.py')
         nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
@@ -726,7 +718,6 @@ class TestFileGeneration(boa_test.BoaTest):
                 self.assertIn(var_id, actual_method.locals)
                 self.assertEqual(actual_method.locals[var_id].type.abi_type, var_type)
 
-    @boa_test.skipIfHashFails
     def test_generate_init_method(self):
         path = self.get_contract_path('test_sc/variable_test', 'GlobalAssignmentWithType.py')
         nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
