@@ -4,7 +4,6 @@ from boa3.internal import constants
 from boa3.internal.neo import to_script_hash
 from boa3.internal.neo.contracts.neffile import NefFile
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3_test.tests import boa_test
 
 
 class TestNefFile(TestCase):
@@ -19,7 +18,6 @@ class TestNefFile(TestCase):
         nef = self.create_test_nef(script)
         self.assertEqual(len(nef._nef.script), 0)
 
-    @boa_test.skipIfHashFails
     def test_script_hash(self):
         script = self.test_script
         nef = self.create_test_nef(script)

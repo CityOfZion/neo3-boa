@@ -4,6 +4,9 @@ executors:
   python310-executor:
     docker:
       - image: cimg/python:3.10.13
+  python311-executor:
+    docker:
+      - image: cimg/python:3.11.6
 
 orbs:
   python: circleci/python@0.2.1
@@ -15,6 +18,13 @@ jobs:
     steps:
       - checkout
       - python/load-cache
+
+      - run:
+          name: Fix openssl for ripemd160 loading
+          command: |
+            wget https://gist.githubusercontent.com/ixje/9bfde300b660276abc98761f7dc32839/raw/95aea8da07dcead2949ac266fbacc47bbf6a1881/fix-ripemd160-loading.py
+            sudo -E python fix-ripemd160-loading.py
+            python -c "import hashlib;print(hashlib.new('ripemd160'))"
 
       - run:
           name: Install Dependencies
@@ -46,6 +56,10 @@ jobs:
             coverage run boa3_test/tests/run_unit_tests.py
             pip install coveralls
             coveralls --service=circleci
+
+  unit-test-311:
+    <<: *unit-test
+    executor: python311-executor
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
@@ -119,10 +133,15 @@ workflows:
          filters:
            tags:
              only: /.*/
+      - unit-test-311:
+         filters:
+           tags:
+             only: /.*/
       - build_deploy_test:
          context: pypi_test
          requires:
            - unit-test-310
+           - unit-test-311
          filters:
            tags:
              only: /^v.*/

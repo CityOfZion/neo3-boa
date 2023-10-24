@@ -61,3 +61,6 @@ class AbiType(str, Enum):
             return generic_abis[0]
         else:
             return AbiType.Any
+
+    def __str__(self):
+        return self.value
