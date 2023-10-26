@@ -1,8 +1,6 @@
 import ast
 from typing import Dict, Optional, List
 
-from boa3.internal.compiler.compiledmetadata import CompiledMetadata
-from boa3.internal.model.builtin.interop.contract import ContractType
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
@@ -11,9 +9,13 @@ from boa3.internal.model.variable import Variable
 class Nep17InterfaceMethod(IBuiltinMethod):
 
     def __init__(self, args: Dict[str, Variable], identifier: str,
-                 native_identifier: str, return_type: IType, defaults: List[ast.AST] = None):
+                 return_type: IType, defaults: List[ast.AST] = None,
+                 native_identifier: str = None):
         super().__init__(identifier, args, return_type=return_type, defaults=defaults)
-        self.native_identifier = native_identifier
+        if native_identifier is None:
+            self.native_identifier = identifier
+        else:
+            self.native_identifier = native_identifier
 
     @property
     def _args_on_stack(self) -> int:

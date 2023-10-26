@@ -23,4 +23,4 @@ class Nep17InterfaceTransferMethod(Nep17InterfaceMethod):
         data_default = ast.parse("{0}".format(Type.any.default_value)
                                  ).body[0].value
 
-        super().__init__(args, 'transfer', 'transfer', return_type=Type.bool, defaults=[data_default])
+        super().__init__(args, 'transfer', return_type=Type.bool, defaults=[data_default])

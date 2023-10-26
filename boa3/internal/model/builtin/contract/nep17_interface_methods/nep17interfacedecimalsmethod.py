@@ -11,4 +11,4 @@ class Nep17InterfaceDecimalsMethod(Nep17InterfaceMethod):
         from boa3.internal.model.type.type import Type
 
         args: Dict[str, Variable] = {'self': Variable(self_type)}
-        super().__init__(args, 'decimals', 'decimals', return_type=Type.int)
+        super().__init__(args, 'decimals', return_type=Type.int)

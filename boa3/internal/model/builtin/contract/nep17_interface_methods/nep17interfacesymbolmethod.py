@@ -11,4 +11,4 @@ class Nep17InterfaceSymbolMethod(Nep17InterfaceMethod):
         from boa3.internal.model.type.type import Type
 
         args: Dict[str, Variable] = {'self': Variable(self_type)}
-        super().__init__(args, 'symbol', 'symbol', return_type=Type.str)
+        super().__init__(args, 'symbol', return_type=Type.str)
