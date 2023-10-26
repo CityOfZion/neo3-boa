@@ -11,4 +11,4 @@ class Nep17InterfaceTotalSupplyMethod(Nep17InterfaceMethod):
         from boa3.internal.model.type.type import Type
 
         args: Dict[str, Variable] = {'self': Variable(self_type)}
-        super().__init__(args, 'total_supply', 'totalSupply', return_type=Type.int)
+        super().__init__(args, 'total_supply', native_identifier='totalSupply', return_type=Type.int)
