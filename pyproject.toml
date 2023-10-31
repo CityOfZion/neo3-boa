@@ -51,6 +51,7 @@ install_cpm = 'boa3.cpm:main'
 exclude = ['boa3_test.tests.*_tests*']
 include = [
     'boa3', 'boa3.*',
+    'boa3_test',
     'boa3_test.tests', 'boa3_test.tests.*',
     'boa3_test.test_drive', 'boa3_test.test_drive.*'
 ]
