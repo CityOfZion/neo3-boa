@@ -57,8 +57,7 @@ file, and also have the [.NET 6.0](https://dotnet.microsoft.com/en-us/download/d
 installed.
 
 ```shell
-pip install .[dev,test]
-pip uninstall neo3-boa --yes
+pip install -e .[dev,test]
 dotnet tool install Neo.Express --version 3.5.20 -g
 dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 ```
