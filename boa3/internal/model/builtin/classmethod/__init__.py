@@ -18,6 +18,7 @@ __all__ = ['AppendMethod',
            'PopDictDefaultMethod',
            'PopSequenceMethod',
            'RemoveMethod',
+           'ReplaceMethod',
            'ReverseMethod',
            'StartsWithMethod',
            'StripMethod',
@@ -45,6 +46,7 @@ from boa3.internal.model.builtin.classmethod.popdictdefaultmethod import PopDict
 from boa3.internal.model.builtin.classmethod.popdictmethod import PopDictMethod
 from boa3.internal.model.builtin.classmethod.popsequencemethod import PopSequenceMethod
 from boa3.internal.model.builtin.classmethod.removemethod import RemoveMethod
+from boa3.internal.model.builtin.classmethod.replacemethod import ReplaceMethod
 from boa3.internal.model.builtin.classmethod.reversemethod import ReverseMethod
 from boa3.internal.model.builtin.classmethod.startswithmethod import StartsWithMethod
 from boa3.internal.model.builtin.classmethod.stripmethod import StripMethod

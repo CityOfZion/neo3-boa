@@ -1480,3 +1480,74 @@ class TestString(BoaTest):
     def test_formatted_string_literal(self):
         path = self.get_contract_path('FormattedStringLiteral.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_string_replace(self):
+        path, _ = self.get_deploy_file_paths('ReplaceStringMethod.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        old = 'a'
+        new = 'o'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        old = 'a'
+        new = 'oo'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = 1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = 2
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = 3
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        invokes.append(runner.call_contract(path, 'main_default_count', string, old, new))
+        expected_results.append(string.replace(old, new))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_string_replace_mismatched_type(self):
+        path = self.get_contract_path('ReplaceStringMethodMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_string_replace_too_many_arguments(self):
+        path = self.get_contract_path('ReplaceStringMethodTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_string_replace_too_few_arguments(self):
+        path = self.get_contract_path('ReplaceStringMethodTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
