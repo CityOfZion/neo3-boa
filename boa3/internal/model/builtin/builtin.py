@@ -86,6 +86,7 @@ class Builtin:
     BytesStringStartswith = StartsWithMethod()
     BytesStringStrip = StripMethod()
     BytesStringUpper = UpperMethod()
+    BytesStringReplace = ReplaceMethod()
     CountSequenceGeneric = CountSequenceGenericMethod()
     CountSequencePrimitive = CountSequencePrimitiveMethod()
     CountStr = CountStrMethod()
@@ -125,6 +126,7 @@ class Builtin:
                                                 BytesStringStartswith,
                                                 BytesStringStrip,
                                                 BytesStringUpper,
+                                                BytesStringReplace,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
