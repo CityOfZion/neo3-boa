@@ -29,7 +29,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            pip install -r requirements_dev.txt
+            pip install -e .[dev,test]
             sudo apt update
 
             sudo apt-get install -y apt-transport-https
@@ -76,7 +76,7 @@ jobs:
       - run:
           name: Install Deps
           command: |
-            pip install -r requirements_dev.txt
+            pip install -e .[dev,test]
 
       - run:
           name: Build .pypirc
@@ -111,7 +111,7 @@ jobs:
             name: Install Dependencies
             command: |
               apt-get install latexmk
-              pip install -r requirements_dev.txt
+              pip install -e .[dev,test]
 
         - run:
             name: install aws cli

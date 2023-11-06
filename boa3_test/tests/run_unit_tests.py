@@ -3,17 +3,15 @@ if __name__ == '__main__':
     import os.path
     import shutil
 
-    try:
-        import boa3
-    except ImportError as e:
+    # The unit test should not be included in the neo3-boa package, so to not have an import problem, we are directly
+    # adding the project root to the sys path, because the boa3_test unit test files are not in the package.
+    project_root = os.path.abspath(f'{os.path.dirname(__file__)}/../..')
+    sys.path.append(project_root)
 
-        project_root = os.path.abspath(f'{os.path.dirname(__file__)}/../..')
-        sys.path.append(project_root)
-    finally:
-        from boa3.internal import env
-        from boa3_test.tests import boa_test
-        from boa3_test.tests.test_suite import *
-        from boa3_test.test_drive import utils
+    from boa3.internal import env
+    from boa3_test.tests import boa_test
+    from boa3_test.tests.test_suite import *
+    from boa3_test.test_drive import utils
 
     neo_express_dir = env.NEO_EXPRESS_INSTANCE_DIRECTORY
     env_test_runner_dir = env.TEST_RUNNER_DIRECTORY
