@@ -85,5 +85,7 @@ class CompileCommand(ICommand):
                 log_error += f': {error_message}'
 
             logging.error(log_error)
+            sys.exit(1)
         except Exception as e:
             logging.exception(e)
+            sys.exit(1)
