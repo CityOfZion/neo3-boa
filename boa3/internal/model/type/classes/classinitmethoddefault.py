@@ -15,7 +15,7 @@ class ClassInitMethod(IdentifiedSymbol, Method):
         }
         base_init = None
         if len(user_class.bases) == 1:
-            # TODO: change when class inheritance with multiple bases is implemented
+            # TODO: change when class inheritance with multiple bases is implemented #2kq1gmc
             # use update to keep the original order
             base_init = user_class.bases[0].constructor_method()
             args.update(base_init.args)

@@ -7,7 +7,7 @@ from boa3.internal.model.type.type import IType, Type
 
 class Division(BinaryOperation):
     """
-    A class used to represent a floating-point division operation
+    A class used to represent a floating-point division operation. Floating division is not supported on Neo.
 
     :ivar operator: the operator of the operation. Inherited from :class:`IOperation`
     :ivar left: the left operand type. Inherited from :class:`BinaryOperation`
@@ -36,5 +36,4 @@ class Division(BinaryOperation):
 
     @property
     def is_supported(self) -> bool:
-        # TODO: change when float division is supported
         return False

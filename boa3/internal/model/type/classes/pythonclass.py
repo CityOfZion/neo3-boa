@@ -39,7 +39,7 @@ class PythonClass(classtype.ClassType, abc.ABC):
         Always call super()._init_class_symbols in the beginning
         Used to avoid circular imports between the init classes
         """
-        # TODO: May be removed when class inheritance is implemented
+        # TODO: May be removed when class inheritance is implemented #2kq1ght
         if not isinstance(self._instance_methods, dict):
             self._instance_methods = {}
         if not isinstance(self._instance_variables, dict):

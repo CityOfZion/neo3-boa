@@ -20,7 +20,7 @@ class ContractManifestType(ClassStructType):
         self._variables: Dict[str, Variable] = {
             'name': Variable(Type.str),
             'groups': Variable(Type.list),
-            '-features': Variable(Type.dict),  # TODO: rename this variable when features are implemented in neo3-boa
+            '-features': Variable(Type.dict),
             'supported_standards': Variable(Type.list.build_collection([Type.str])),
             'abi': Variable(Type.any),
             'permissions': Variable(Type.list),

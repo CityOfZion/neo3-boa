@@ -331,8 +331,6 @@ class CodeGenerator:
                             module_global_ids.append(var_id)
                             result_global_vars.append(var)
 
-                    # TODO: include user class from imported symbols as well
-
         if modified_variable:
             result_map = module_global_variables
             result = module_global_ids
@@ -1583,7 +1581,6 @@ class CodeGenerator:
 
         elif hasattr(var.type, 'get_value'):
             # the variable is a type constant
-            # TODO: change this when implement class conversion
             value = var.type.get_value(var_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)[-1])
             if value is not None:
                 self.convert_literal(value)
@@ -1764,18 +1761,6 @@ class CodeGenerator:
         else:
             builtin.generate_opcodes(self)
 
-        if size_before_generating == self.bytecode_size:
-            # TODO: remove this when the built in code generation refactoring is finished
-            for opcode, data in builtin.opcode:
-                op_info = OpcodeInfo.get_info(opcode)
-                if opcode is Opcode.CALL and isinstance(data, Method):
-                    # avoid losing current stack state
-                    for _ in data.args:
-                        self._stack_append(Type.any)
-                    self.convert_method_call(data, len(data.args) - 1)
-                else:
-                    self.__insert1(op_info, data)
-
         if isinstance(builtin, IBuiltinMethod):
             if is_internal and hasattr(builtin, 'internal_call_args'):
                 expected_stack_after = previous_stack_size - builtin.internal_call_args
@@ -1917,7 +1902,7 @@ class CodeGenerator:
         if symbol_id in self._statics:
             self.convert_load_variable(symbol_id, Variable(class_type))
         else:
-            # TODO: change to create an array with the class variables' default values when they are implemented
+            # TODO: change to create an array with the class variables' default values when they are implemented #2kq1vgn
             self.convert_new_empty_array(len(class_type.class_variables), class_type)
 
         return start_address
@@ -2378,7 +2363,6 @@ class CodeGenerator:
                 self._stack.reverse(-no_items, rotate=rotate)
 
     def convert_init_user_class(self, class_type: ClassType):
-        # TODO: refactor when instance variables are implemented
         if isinstance(class_type, UserClass):
             # create an none-filled array with the size of the instance variables
             no_instance_variables = len(class_type.instance_variables)

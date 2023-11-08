@@ -177,7 +177,6 @@ class ClassType(IType, ABC):
 
     @property
     def is_interface(self) -> bool:
-        # TODO: change when other interfaces identifiers are implemented
         from boa3.internal.model.builtin.decorator import ContractDecorator
         return any(isinstance(decorator, ContractDecorator) for decorator in self.decorators)
 

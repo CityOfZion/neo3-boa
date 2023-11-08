@@ -51,7 +51,7 @@ class LowerMethod(IBuiltinMethod):
         code_generator.swap_reverse_stack_items(3, rotate=True)
 
         #   modifier = 1, since using upper is only supported with ASCII for now
-        code_generator.duplicate_stack_item(2)  # TODO: verify if string[index] < c0 when other values are implemented
+        code_generator.duplicate_stack_item(2)  # TODO: verify if string[index] < c0 when other values are implemented #2kq1ywb
         code_generator.duplicate_stack_item(2)
         code_generator.convert_literal(1)
 

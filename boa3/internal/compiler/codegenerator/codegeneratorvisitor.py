@@ -130,7 +130,6 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if self.is_exception_name(result.symbol_id):
                     self.generator.convert_new_exception()
                 else:
-                    # TODO: validate function calls
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
                     class_type = result.type if isinstance(node, ast.Attribute) else None
 
@@ -692,7 +691,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         for stmt in for_node.body:
             self.visit_to_map(stmt, generate=True)
 
-        # TODO: remove when optimizing for generation
+        # TODO: remove when optimizing for generation #864e6me36
         if self.current_method is not None:
             self.current_method.remove_instruction(for_node.lineno, for_node.col_offset)
 
