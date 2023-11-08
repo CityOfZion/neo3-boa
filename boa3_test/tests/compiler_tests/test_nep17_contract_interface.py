@@ -53,7 +53,7 @@ class TestContractInterface(BoaTest):
         from boa3_test.tests.test_drive import neoxp
         genesis = neoxp.utils.get_account_by_name('genesis')
 
-        # TODO: Methods and contract hash are not being added to the contract permissions yet
+        # TODO: Methods and contract hash are not being added to the contract permissions yet #86a1678cf
         with self.assertRaises(AssertionError):
             invoke_test_transfer = runner.call_contract(path, 'main',
                                                         genesis.script_hash.to_array(), genesis.script_hash.to_array(), -1)

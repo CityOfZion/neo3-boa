@@ -327,7 +327,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
             self.generic_visit(node)
 
         loop_scope: ScopeValue = self.current_scope.new_scope()
-        # TODO: substitute the variables only if they're not reassigned inside the loop
+        # TODO: substitute the variables only if they're not reassigned inside the loop #2kq0wk3
         loop_scope.reset()
 
         self.current_scope = loop_scope
@@ -406,7 +406,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
                 and node.id in self.current_scope
                 and isinstance(self.get_type(self.current_scope[node.id]), PrimitiveType)):
             # only values from int, bool, str and bytes types are going to replace the variable
-            # TODO: check if it's worth to replace other types
+            # TODO: check if it's worth to replace other types #2kq0zhe
             value = self.current_scope[node.id]
             if isinstance(value, str):
                 value = "'{0}'".format(value)
@@ -415,7 +415,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
 
     def visit_Call(self, node: ast.Call) -> ast.AST:
         # check if the call can be evaluated during compile time
-        # TODO: right now only UInt160 and UInt256 constructors are evaluated
+        # TODO: right now only UInt160 and UInt256 constructors are evaluated #2kq12zd
         literal_args = []
         args_are_literal = True
 

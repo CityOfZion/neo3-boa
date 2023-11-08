@@ -33,7 +33,7 @@ class NeoManifestStruct(NeoStruct):
         struct = cls()
         struct.append(json[cls._name_field])
         struct.append(json[cls._groups_field])
-        struct.append({})  # TODO: features aren't implemented yet
+        struct.append({})  # features were not implemented on Neo yet
         struct.append(json[cls._supported_standards_field])
         struct.append(NeoAbiStruct.from_json(json[cls._abi_field]))
         struct.append([NeoPermissionsStruct.from_json(permission) for permission in json[cls._permissions_field]])

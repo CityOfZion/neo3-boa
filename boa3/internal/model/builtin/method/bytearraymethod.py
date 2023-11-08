@@ -76,7 +76,7 @@ class ByteArrayMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        # TODO: change when building bytearray from int iterators are implemented
+        # TODO: change when building bytearray from int iterators are implemented #2tz74k9
         from boa3.internal.model.type.type import Type
         return self._arg_object.type in (Type.bytes, Type.str, Type.int)
 

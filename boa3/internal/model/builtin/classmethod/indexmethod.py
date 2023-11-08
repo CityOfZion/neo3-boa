@@ -29,7 +29,7 @@ class IndexMethod(IBuiltinMethod):
 
     @property
     def is_supported(self) -> bool:
-        # TODO: change when index() with only one argument is implemented for range
+        # TODO: change when index() with only one argument is implemented for range #2kq1y13
         from boa3.internal.model.type.type import Type
         if Type.range.is_type_of(self._arg_self.type):
             return False

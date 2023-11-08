@@ -11,7 +11,6 @@ class NativeAccountState:
         self._vote_to: Any = None
 
     def serialize(self) -> bytes:
-        # TODO: change this when Struct is implemented
         return (StackItemType.Struct
                 + b'\x03'
                 + StackItem.serialize(self.balance)

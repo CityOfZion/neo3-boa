@@ -1310,12 +1310,12 @@ class TestFunction(BoaTest):
 
     def test_call_function_with_kwargs_only(self):
         path = self.get_contract_path('CallFunctionWithKwargsOnly.py')
-        # TODO: change the test when creating a function that only accepts keywords is implemented
+        # TODO: change the test when creating a function that only accepts keywords is implemented #2ewewtz
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_call_function_with_kwargs_self(self):
         path = self.get_contract_path('CallFunctionWithKwargsSelf.py')
-        # TODO: change the test when calling a function using the class is implemented
+        # TODO: change the test when calling a function using the class is implemented #2ewewtz #2ewexau
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_call_function_with_kwargs_wrong_type(self):

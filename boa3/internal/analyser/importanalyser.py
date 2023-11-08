@@ -153,7 +153,7 @@ class ImportAnalyser(IAstAnalyser):
                     self.recursive_import = True
                     return
 
-                # TODO: only user modules and typing lib imports are implemented
+                # TODO: only user modules and typing lib imports are implemented #86a1ct917
                 try:
                     if self.path in self._imported_files:
                         analyser = self._imported_files[self.path]

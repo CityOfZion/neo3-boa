@@ -745,5 +745,5 @@ class TestRange(BoaTest):
 
     def test_range_index(self):
         path = self.get_contract_path('IndexRange.py')
-        # TODO: change when index() with only one argument is implemented for range
+        # TODO: change when index() with only one argument is implemented for range #2kq1y13
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
