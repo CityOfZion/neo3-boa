@@ -146,7 +146,9 @@ class TestCliCompile(BoaCliTest):
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'interop_test', 'storage', 'StoragePutStrKeyStrValue.py'))
     def test_cli_compile_invalid_smart_contract(self):
-        logs = self.get_cli_log()
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
+
+        self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         self.assertTrue('Could not compile' in logs.output[-1])
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
@@ -159,8 +161,9 @@ class TestCliCompile(BoaCliTest):
 
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportFailInnerNotExistingMethod.py'))
     def test_cli_compile_fail_fast_true(self):
-        logs = self.get_cli_log()
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
 
+        self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         errors_logged = [log for log in logs.output if log.startswith('ERROR')]
         # with fail fast, only two errors are logged
         # 1. the actual compiler error
@@ -171,8 +174,9 @@ class TestCliCompile(BoaCliTest):
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportFailInnerNotExistingMethod.py'),
                   '--no-failfast')
     def test_cli_compile_fail_fast_false(self):
-        logs = self.get_cli_log()
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
 
+        self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         errors_logged = [log for log in logs.output if log.startswith('ERROR')]
         # the given contract has more than one error, so it should log more than 2 errors with fail fast disabled
         self.assertGreater(len(errors_logged), 2)
@@ -208,7 +212,8 @@ class TestCliCompile(BoaCliTest):
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'arithmetic_test', 'Addition.py'),
                   '--log-level', 'FOO')
     def test_cli_compile_log_level_invalid(self):
-        logs = self.get_cli_log()
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
 
+        self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         self.assertEqual(1, len(logs.output))
         self.assertIn("Unknown level: 'FOO'", logs.output[-1])
