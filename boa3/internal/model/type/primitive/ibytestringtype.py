@@ -42,6 +42,7 @@ class IByteStringType(SequenceType, PrimitiveType, abc.ABC):
                             Builtin.BytesStringUpper,
                             Builtin.BytesStringStartswith,
                             Builtin.BytesStringStrip,
+                            Builtin.BytesStringReplace,
                             ]
 
         for instance_method in instance_methods:
