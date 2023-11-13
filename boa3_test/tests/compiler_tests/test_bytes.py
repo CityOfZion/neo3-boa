@@ -1728,3 +1728,74 @@ class TestBytes(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_bytes_replace(self):
+        path, _ = self.get_deploy_file_paths('ReplaceBytesMethod.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        string = b'banana'
+        old = b'an'
+        new = b'o'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new, count))
+
+        old = b'a'
+        new = b'o'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new, count))
+
+        old = b'a'
+        new = b'oo'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new, count))
+
+        string = b'banana'
+        old = b'an'
+        new = b'o'
+        count = 1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new, count))
+
+        string = b'banana'
+        old = b'an'
+        new = b'o'
+        count = 2
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new, count))
+
+        string = b'banana'
+        old = b'an'
+        new = b'o'
+        count = 3
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new, count))
+
+        string = b'banana'
+        old = b'an'
+        new = b'o'
+        invokes.append(runner.call_contract(path, 'main_default_count', string, old, new, expected_result_type=bytes))
+        expected_results.append(string.replace(old, new))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_bytes_replace_mismatched_type(self):
+        path = self.get_contract_path('ReplaceBytesMethodMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_bytes_replace_too_many_arguments(self):
+        path = self.get_contract_path('ReplaceBytesMethodTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_bytes_replace_too_few_arguments(self):
+        path = self.get_contract_path('ReplaceBytesMethodTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
